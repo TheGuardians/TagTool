@@ -14,7 +14,7 @@ namespace TagTool.Bitmaps
         {
             var resourceReference = bitmap.Resources[imageIndex];
             var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
-            if (cache.GetType() == typeof(GameCacheHaloOnline))
+            if (cache is GameCacheHaloOnlineBase)
             {
                 if(resourceDefinition != null)
                 {
@@ -58,7 +58,7 @@ namespace TagTool.Bitmaps
 
         public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            if (cache.GetType() == typeof(GameCacheHaloOnline))
+            if (cache is GameCacheHaloOnlineBase)
             {
                 byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
                 DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);

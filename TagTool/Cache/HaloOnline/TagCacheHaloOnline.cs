@@ -25,39 +25,14 @@ namespace TagTool.Cache.HaloOnline
 
     public class TagCacheHaloOnline : TagCache
     {
-        public List<CachedTagHaloOnline> Tags;
+        public List<CachedTagHaloOnline> Tags = new List<CachedTagHaloOnline>();
         public TagCacheHaloOnlineHeader Header;
-        public DirectoryInfo Directory;
-        public FileInfo TagsFile;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
-        public override Stream OpenTagCacheRead() => TagsFile.OpenRead();
-
-        public override Stream OpenTagCacheWrite() => TagsFile.Open(FileMode.Open, FileAccess.Write);
-
-        public override Stream OpenTagCacheReadWrite() => TagsFile.Open(FileMode.Open, FileAccess.ReadWrite);
-
-        public TagCacheHaloOnline(DirectoryInfo directory)
+        public TagCacheHaloOnline(Stream stream, Dictionary<int, string> names = null)
         {
-            Tags = new List<CachedTagHaloOnline>();
-            Directory = directory;
-            var files = Directory.GetFiles("tags.dat");
-
-            if (files.Length == 0)
-                throw new FileNotFoundException(Path.Combine(Directory.FullName, "tags.dat"));
-
-            TagsFile = files[0];
-
-            var tagNames = LoadTagNames();
-
-            using (var stream = OpenTagCacheRead())
-            {
-                if (stream.Length != 0)
-                    Load(new EndianReader(stream, EndianFormat.LittleEndian), tagNames);
-                else
-                    Console.Error.WriteLine("Failed to open tag cache");
-            }
+            Load(new EndianReader(stream), names ?? new Dictionary<int, string>());
         }
 
         private void Load(EndianReader reader, Dictionary<int, string> names)
@@ -443,12 +418,9 @@ namespace TagTool.Cache.HaloOnline
         /// Loads tag file names from the appropriate tag_list.csv file.
         /// </summary>
         /// <param name="path">The path to the tag_list.csv file.</param>
-        public Dictionary<int, string> LoadTagNames(string path = null)
+        public static Dictionary<int, string> LoadTagNames(string path = null)
         {
             var names = new Dictionary<int, string>();
-
-            if (path == null)
-                path = Path.Combine(Directory.FullName, "tag_list.csv");
 
             if (File.Exists(path))
             {
@@ -490,9 +462,9 @@ namespace TagTool.Cache.HaloOnline
         /// Saves tag file names to the appropriate tag_list.csv file.
         /// </summary>
         /// <param name="path">The path to the tag_list.csv file.</param>
-        public void SaveTagNames(string path = null)
+        public void SaveTagNames(string path)
         {
-            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "tag_list.csv"));
+            var csvFile = new FileInfo(path);
 
             if (!csvFile.Directory.Exists)
                 csvFile.Directory.Create();
@@ -503,42 +475,6 @@ namespace TagTool.Cache.HaloOnline
                     if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
                         csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
             }
-        }
-
-        public TagCacheHaloOnline CreateTagCache(DirectoryInfo directory, out FileInfo file)
-        {
-            if (directory == null)
-                directory = Directory;
-
-            if (!directory.Exists)
-                directory.Create();
-
-            file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
-
-            TagCacheHaloOnline cache = null;
-
-            using (var stream = file.Create())
-                cache = CreateTagCache(stream, directory);
-
-            return cache;
-        }
-
-        public TagCacheHaloOnline CreateTagCache(Stream stream, DirectoryInfo directory)
-        {
-            TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
-            {
-                TagTableOffset = 0x20,
-                CreationTime = 0x01D0631BCC791704
-            };
-
-            stream.Position = 0;
-            var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
-            var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
-            serializer.Serialize(dataContext, header);
-            stream.Position = 0;
-
-            return new TagCacheHaloOnline(directory);
         }
 
         // there are no tag IDs in Halo Online

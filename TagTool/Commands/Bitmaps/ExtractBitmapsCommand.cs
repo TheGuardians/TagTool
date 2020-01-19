@@ -39,7 +39,7 @@ namespace TagTool.Commands.Bitmaps
 
             var count = 0;
 
-            using (var tagsStream = Cache.TagCache.OpenTagCacheRead())
+            using (var tagsStream = Cache.OpenCacheRead())
             {
 
                 foreach (var tag in Cache.TagCache.FindAllInGroup("bitm"))

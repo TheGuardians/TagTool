@@ -5,9 +5,9 @@ namespace TagTool.Commands.Tags
 {
     class SaveTagNamesCommand : Command
     {
-        public GameCacheHaloOnline Cache { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public SaveTagNamesCommand(GameCacheHaloOnline cache) :
+        public SaveTagNamesCommand(GameCacheHaloOnlineBase cache) :
             base(true,
 
                 "SaveTagNames",

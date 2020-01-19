@@ -34,7 +34,7 @@ namespace TagTool.Commands
             // Insert what test command you want below
             //
 
-            using(var stream = Cache.TagCache.OpenTagCacheRead())
+            using(var stream = Cache.OpenCacheRead())
             {
                 foreach(var tag in Cache.TagCache.NonNull())
                 {

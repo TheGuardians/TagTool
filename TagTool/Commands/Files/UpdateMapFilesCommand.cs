@@ -125,7 +125,7 @@ namespace TagTool.Commands.Files
             MapFile map = new MapFile();
             var header = new MapFileHeader();
             Scenario scnr;
-            using (var stream = Cache.TagCache.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
                 scnr = Cache.Deserialize<Scenario>(stream, scenarioTag);
             }

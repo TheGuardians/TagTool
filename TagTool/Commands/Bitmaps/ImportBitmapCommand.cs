@@ -80,7 +80,7 @@ namespace TagTool.Commands.Bitmaps
                 Bitmap.Resources[imageIndex] = reference;
                 Bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
 
-                using (var tagsStream = Cache.TagCache.OpenTagCacheReadWrite())
+                using (var tagsStream = Cache.OpenCacheReadWrite())
                     Cache.Serialize(tagsStream, Tag, Bitmap);
 #if !DEBUG
             }

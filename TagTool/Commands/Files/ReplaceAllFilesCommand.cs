@@ -58,7 +58,7 @@ namespace TagTool.Commands.Files
                 directories.RemoveAt(0);
             }
             
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, Tag, Definition);
 
             Console.WriteLine("Imported {0} files.", imported);

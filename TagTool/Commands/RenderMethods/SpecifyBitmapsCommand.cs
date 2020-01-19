@@ -38,7 +38,7 @@ namespace TagTool.Commands.RenderMethods
             {
                 RenderMethodTemplate template = null;
 
-                using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+                using (var cacheStream = Cache.OpenCacheRead())
                     template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.SamplerArguments.Count; i++)
@@ -61,7 +61,7 @@ namespace TagTool.Commands.RenderMethods
                 if (shaderMaps.ContainsKey(import.Name))
                     import.Bitmap = shaderMaps[import.Name];
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("Done!");

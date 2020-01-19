@@ -46,7 +46,7 @@ namespace TagTool.Commands.Files
 
             Definition.Insert(file.Name, folder, File.ReadAllBytes(file.FullName));
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, Tag, Definition);
 
             Console.WriteLine($"Add virtual file \"{folder}\".");

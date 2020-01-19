@@ -8,9 +8,9 @@ namespace TagTool.Commands.Tags
 {
     class ExtractTagCommand : Command
     {
-        private GameCacheHaloOnline Cache { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
 
-        public ExtractTagCommand(GameCacheHaloOnline cache)
+        public ExtractTagCommand(GameCacheHaloOnlineBase cache)
             : base(true,
 
                   "ExtractTag",
@@ -39,7 +39,7 @@ namespace TagTool.Commands.Tags
 
             byte[] data;
 
-            using (var stream = Cache.TagCache.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
                 data = Cache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
 
             using (var outStream = file.Create())

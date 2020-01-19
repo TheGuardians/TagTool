@@ -97,7 +97,7 @@ namespace TagTool.Commands.Modding
 
         private void OpenGlobalTags()
         {
-            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             {
                 Globals = Cache.Deserialize<Globals>(cacheStream, Cache.GetTag($"globals\\globals.matg"));
                 ModGlobals = Cache.Deserialize<ModGlobalsDefinition>(cacheStream, Cache.GetTag($"multiplayer\\mod_globals.modg"));
@@ -106,7 +106,7 @@ namespace TagTool.Commands.Modding
 
         private void SaveTags()
         {
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 Cache.Serialize(stream, Cache.GetTag($"multiplayer\\mod_globals.modg"), ModGlobals);
                 Cache.Serialize(stream, Cache.GetTag($"globals\\globals.matg"), Globals);

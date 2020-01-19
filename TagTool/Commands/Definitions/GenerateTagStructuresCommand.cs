@@ -12,9 +12,9 @@ namespace TagTool.Commands.Definitions
 {
     class GenerateTagStructuresCommand : Command
     {
-        private GameCacheHaloOnline Cache { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
 
-        public GenerateTagStructuresCommand(GameCacheHaloOnline cache) : base(
+        public GenerateTagStructuresCommand(GameCacheHaloOnlineBase cache) : base(
             true,
 
             "GenerateTagStructures",
@@ -60,7 +60,7 @@ namespace TagTool.Commands.Definitions
             Directory.CreateDirectory(outDir);
 
             var count = 0;
-            using (var stream = Cache.TagCache.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
                 foreach (var groupTag in Cache.TagCache.NonNull().Select(t => t.Group.Tag).Distinct())
                 {

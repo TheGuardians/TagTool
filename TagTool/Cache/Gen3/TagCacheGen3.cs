@@ -69,12 +69,6 @@ namespace TagTool.Cache.Gen3
             return new CachedTagGen3(-1, TagGroup.None, null);
         }
 
-        public override Stream OpenTagCacheRead() => GameCache.OpenCacheRead();
-
-        public override Stream OpenTagCacheReadWrite() => GameCache.OpenCacheReadWrite();
-
-        public override Stream OpenTagCacheWrite() => GameCache.OpenCacheWrite();
-
         public TagCacheGen3(GameCacheGen3 cache, EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
         {
             Tags = new List<CachedTagGen3>();

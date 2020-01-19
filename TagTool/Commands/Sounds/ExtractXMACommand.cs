@@ -73,7 +73,7 @@ namespace TagTool.Commands.Sounds
         {
             if (BlamSoundGestalt == null)
             {
-                using(var stream = Cache.TagCache.OpenTagCacheRead())
+                using(var stream = Cache.OpenCacheRead())
                     BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
             }
                 

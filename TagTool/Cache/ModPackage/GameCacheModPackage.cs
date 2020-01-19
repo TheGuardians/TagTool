@@ -204,9 +204,6 @@ namespace TagTool.Cache
         public Stream TagCacheStream;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
-        public override Stream OpenTagCacheRead() => TagCacheStream;
-        public override Stream OpenTagCacheWrite() => TagCacheStream;
-        public override Stream OpenTagCacheReadWrite() => TagCacheStream;
 
 
         public ModPackageTagCache(Stream stream, Dictionary<int, string> tagNames)

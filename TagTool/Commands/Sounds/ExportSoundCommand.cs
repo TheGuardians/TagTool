@@ -69,7 +69,7 @@ namespace TagTool.Commands.Sounds
             var dataReference = resourceDefinition.Data;
             byte[] soundData = dataReference.Data;
             
-            if(Cache.GetType() == typeof(GameCacheHaloOnline))
+            if(Cache is GameCacheHaloOnlineBase)
             {
                 for (int i = 0; i < Definition.PitchRanges.Count; i++)
                 {
@@ -121,7 +121,7 @@ namespace TagTool.Commands.Sounds
             {
                 if (BlamSoundGestalt == null)
                 {
-                    using(var stream = Cache.TagCache.OpenTagCacheRead())
+                    using(var stream = Cache.OpenCacheRead())
                         BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
                 }
                     

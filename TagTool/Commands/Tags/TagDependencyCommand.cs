@@ -11,9 +11,9 @@ namespace TagTool.Commands.Tags
     /// </summary>
     class TagDependencyCommand : Command
     {
-        public GameCacheHaloOnline Cache { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public TagDependencyCommand(GameCacheHaloOnline cache) : base(
+        public TagDependencyCommand(GameCacheHaloOnlineBase cache) : base(
             true,
 
             "TagDependency",
@@ -73,7 +73,7 @@ namespace TagTool.Commands.Tags
             if (dependencies.Count == 0 || dependencies.Any(d => d == null))
                 return false;
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 var data = Cache.TagCacheGenHO.ExtractTag(stream, tag);
 

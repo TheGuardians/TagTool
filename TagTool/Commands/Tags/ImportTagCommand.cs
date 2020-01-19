@@ -8,9 +8,9 @@ namespace TagTool.Commands.Tags
 {
     class ImportTagCommand : Command
     {
-        private GameCacheHaloOnline Cache { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
 
-        public ImportTagCommand(GameCacheHaloOnline cache)
+        public ImportTagCommand(GameCacheHaloOnlineBase cache)
             : base(true,
 
                   "ImportTag",
@@ -44,7 +44,7 @@ namespace TagTool.Commands.Tags
                 inStream.Read(data, 0, data.Length);
             }
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
                 Cache.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)instance, data);
 
             Console.WriteLine($"Imported 0x{data.Length:X} bytes.");

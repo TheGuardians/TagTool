@@ -48,7 +48,7 @@ namespace TagTool.Commands.RenderModels
                     return false;
             }
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             {
                 foreach (var shader in Definition.Materials)
                 {

@@ -77,7 +77,7 @@ namespace TagTool.Commands.PhysicsModels
                 return false;
             }
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
 
                 if (b_duplicate)

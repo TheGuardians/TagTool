@@ -32,9 +32,9 @@ namespace TagTool.Commands.Tags
 
             using (var stream = Cache.OpenCacheReadWrite()) // TODO: implement better way of nulling tags, support gen3
             {
-                if (Cache.GetType() == typeof(GameCacheHaloOnline))
+                if (Cache is GameCacheHaloOnlineBase)
                 {
-                    var cacheHaloOnline = Cache as GameCacheHaloOnline;
+                    var cacheHaloOnline = Cache as GameCacheHaloOnlineBase;
 
                     cacheHaloOnline.TagCacheGenHO.Tags[tag.Index] = null;
                     cacheHaloOnline.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)tag, new byte[] { });

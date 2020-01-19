@@ -47,7 +47,7 @@ namespace TagTool.Commands.RenderMethods
             RenderMethodTemplate template = null;
             var properties = Definition.ShaderProperties[0];
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
                 template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
 
             var argumentIndex = -1;

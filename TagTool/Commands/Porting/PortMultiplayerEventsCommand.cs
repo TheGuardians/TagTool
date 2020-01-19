@@ -7,10 +7,10 @@ namespace TagTool.Commands.Porting
 {
     public class PortMultiplayerEventsCommand : Command
     {
-        private GameCacheHaloOnline HoCache { get; }
+        private GameCacheHaloOnlineBase HoCache { get; }
         private GameCache BlamCache;
 
-        public PortMultiplayerEventsCommand(GameCacheHaloOnline cache, GameCache blamCache) :
+        public PortMultiplayerEventsCommand(GameCacheHaloOnlineBase cache, GameCache blamCache) :
             base(true,
 
                 "PortMultiplayerEvents",
@@ -55,7 +55,7 @@ namespace TagTool.Commands.Porting
 
             MultiplayerGlobals oldMulgDefinition;
 
-            using (var stream = HoCache.TagCache.OpenTagCacheRead())
+            using (var stream = HoCache.OpenCacheRead())
             {
                 if (!HoCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
                 {
@@ -68,7 +68,7 @@ namespace TagTool.Commands.Porting
 
             new PortTagCommand(HoCache, BlamCache).Execute(new List<string> { "replace", "mulg", @"multiplayer\multiplayer_globals" });
 
-            using (var stream = HoCache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = HoCache.OpenCacheReadWrite())
             {
                 if (!HoCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
                 {

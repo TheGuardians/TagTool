@@ -14,7 +14,7 @@ namespace TagTool.Commands.Porting
 {
     class PortMultiplayerScenarioCommand : Command
     {
-        private GameCacheHaloOnline CacheContext { get; }
+        private GameCacheHaloOnlineBase CacheContext { get; }
         private GameCache BlamCache { get; }
         private PortTagCommand PortTag { get; }
 
@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
             Default = Objects | Audio | Ms30 | SpawnPoint
         }
 
-        public PortMultiplayerScenarioCommand(GameCacheHaloOnline cacheContext, GameCache blamCache, PortTagCommand portTag) :
+        public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag) :
             base(true,
 
                 "PortMultiplayerScenario",
@@ -63,7 +63,7 @@ namespace TagTool.Commands.Porting
 
             CachedTag blamScnrTag = BlamCache.TagCache.NonNull().First(x => x.Group.Tag == "scnr");
 
-            using(var blamStream = BlamCache.TagCache.OpenTagCacheRead())
+            using(var blamStream = BlamCache.OpenCacheRead())
             {
                 var blamScnr = BlamCache.Deserialize<Scenario>(blamStream, blamScnrTag);
 
@@ -197,7 +197,7 @@ namespace TagTool.Commands.Porting
             var blamCache = BlamCache;
 
 
-            using (var cacheStream = CacheContext.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = CacheContext.OpenCacheReadWrite())
             {
                 var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
@@ -236,7 +236,7 @@ namespace TagTool.Commands.Porting
 
             CacheContext.StringTable.Save();
 
-            CacheContext.TagCacheGenHO.SaveTagNames();
+            CacheContext.SaveTagNames();
         }
 
         private void ConvertLightmap(Stream cacheStream, Stream blamStream, Dictionary<ResourceLocation, Stream> resourceStreams,

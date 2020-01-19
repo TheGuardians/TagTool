@@ -462,10 +462,10 @@ namespace TagTool.Commands.Porting
             rmt2Instance.Name = template_name;
             CacheContext.Serialize(cacheStream, rmt2Instance, rmt2);
 
-            CacheContext.TagCacheGenHO.SaveTagNames();
+            CacheContext.SaveTagNames();
         }
 
-        public static PixelShaderBlock GeneratePixelShaderBlock(GameCacheHaloOnline cacheContext, ShaderGeneratorResult shader_gen_result)
+        public static PixelShaderBlock GeneratePixelShaderBlock(GameCacheHaloOnlineBase cacheContext, ShaderGeneratorResult shader_gen_result)
         {
             var pixelShaderBlock = new PixelShaderBlock
             {

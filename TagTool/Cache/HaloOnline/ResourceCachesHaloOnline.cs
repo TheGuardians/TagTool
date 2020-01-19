@@ -13,7 +13,7 @@ namespace TagTool.Cache.HaloOnline
     public class ResourceCachesHaloOnline : ResourceCache
     {
         public DirectoryInfo Directory;
-        public GameCacheHaloOnline Cache;
+        public GameCacheHaloOnlineBase Cache;
 
         public Dictionary<ResourceLocation, string> ResourceCacheNames { get; } = new Dictionary<ResourceLocation, string>()
         {
@@ -29,7 +29,7 @@ namespace TagTool.Cache.HaloOnline
 
         private Dictionary<ResourceLocation, LoadedResourceCache> LoadedResourceCaches { get; } = new Dictionary<ResourceLocation, LoadedResourceCache>();
 
-        public ResourceCachesHaloOnline(GameCacheHaloOnline cache)
+        public ResourceCachesHaloOnline(GameCacheHaloOnlineBase cache)
         {
             Cache = cache;
             Directory = Cache.Directory;

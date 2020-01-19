@@ -17,7 +17,7 @@ namespace TagTool.Commands.Modding
 {
     class ApplyModPackageCommand : Command
     {
-        private GameCacheHaloOnline CacheContext { get; }
+        private GameCacheHaloOnlineBase CacheContext { get; }
 
         private Dictionary<int, int> TagMapping;
 
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<StringId, StringId> StringIdMapping;
 
-        public ApplyModPackageCommand(GameCacheHaloOnline cacheContext) :
+        public ApplyModPackageCommand(GameCacheHaloOnlineBase cacheContext) :
             base(false,
 
                 "ApplyModPackage",
@@ -63,7 +63,7 @@ namespace TagTool.Commands.Modding
                 .Select(tags => tags.Last())
                 .ToDictionary(tag => $"{tag.Name}.{tag.Group}", tag => tag);
 
-            CacheStream = CacheContext.TagCache.OpenTagCacheReadWrite();
+            CacheStream = CacheContext.OpenCacheReadWrite();
 
             var modPackage = new ModPackage(new FileInfo(filePath));
 
@@ -136,7 +136,7 @@ namespace TagTool.Commands.Modding
 
             CacheStream.Close();
             CacheStream.Dispose();
-            CacheContext.TagCacheGenHO.SaveTagNames();
+            CacheContext.SaveTagNames();
             CacheContext.StringTable.Save();
 
             return true;

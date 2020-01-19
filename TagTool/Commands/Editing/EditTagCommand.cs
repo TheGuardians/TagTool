@@ -37,7 +37,7 @@ namespace TagTool.Commands.Editing
 
             TagInstance = tag;
 
-            using (var stream = Cache.TagCache.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
                 TagDefinition = Cache.Deserialize(stream, TagInstance);
 
             ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, TagInstance, TagDefinition));

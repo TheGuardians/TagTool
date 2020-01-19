@@ -42,7 +42,7 @@ namespace TagTool.Commands.RenderModels
                 }
             }
 
-            using (var cacheStream = CacheContext.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = CacheContext.OpenCacheReadWrite())
                 CacheContext.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("Done!");

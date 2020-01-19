@@ -10,9 +10,9 @@ namespace TagTool.Commands.Tags
 {
     class ExportTagModCommand : Command
     {
-        public GameCacheHaloOnline Cache { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public ExportTagModCommand(GameCacheHaloOnline cache) :
+        public ExportTagModCommand(GameCacheHaloOnlineBase cache) :
             base(false,
 
                 "ExportTagMod",
@@ -46,7 +46,7 @@ namespace TagTool.Commands.Tags
 
             var scriptFile = new FileInfo(Path.Combine(directory.FullName, $"{name}.cmds"));
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             using (var scriptWriter = new StreamWriter(scriptFile.Exists ? scriptFile.Open(FileMode.Open, FileAccess.ReadWrite) : scriptFile.Create()))
             {
                 var tagIndices = new HashSet<int>();

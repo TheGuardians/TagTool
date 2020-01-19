@@ -50,7 +50,7 @@ namespace TagTool.Commands.Models
                     return false;
             }
 
-            using (var cacheStream = CacheContext.TagCache.OpenTagCacheRead())
+            using (var cacheStream = CacheContext.OpenCacheRead())
             {
                 var renderModel = CacheContext.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
 

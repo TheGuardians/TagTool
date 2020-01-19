@@ -361,10 +361,10 @@ namespace TagTool.Commands.Porting
             ModelAnimationGraph edDef = null;
             ModelAnimationGraph h3Def = null;
 
-            using (var stream = CacheContext.TagCache.OpenTagCacheRead())
+            using (var stream = CacheContext.OpenCacheRead())
                 edDef = CacheContext.Deserialize<ModelAnimationGraph>(stream, edTag);
 
-            using (var stream = BlamCache.TagCache.OpenTagCacheRead())
+            using (var stream = BlamCache.OpenCacheRead())
                 h3Def = BlamCache.Deserialize<ModelAnimationGraph>(stream, h3Tag);
 
             if (edDef.ParentAnimationGraph != null && h3Def.ParentAnimationGraph != null)
@@ -376,8 +376,8 @@ namespace TagTool.Commands.Porting
             MergeAnimationTagReferences(edDef.SoundReferences, h3Def.SoundReferences);
             MergeAnimationTagReferences(edDef.EffectReferences, h3Def.EffectReferences);
 
-            CacheStream = CacheContext.TagCache.OpenTagCacheReadWrite();
-            BlamCacheStream = BlamCache.TagCache.OpenTagCacheRead();
+            CacheStream = CacheContext.OpenCacheReadWrite();
+            BlamCacheStream = BlamCache.OpenCacheRead();
             ResourceStreams = new Dictionary<ResourceLocation, Stream>();
 
             var animationIndices = MergeAnimations(h3Tag, h3Def, edDef.Animations);

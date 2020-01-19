@@ -27,7 +27,7 @@ namespace TagTool.Commands.Tags
 
             var newTag = Cache.TagCache.AllocateTag(originalTag.Group);
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 var originalDefinition = Cache.Deserialize(stream, originalTag);
                 Cache.Serialize(stream, newTag, originalDefinition);

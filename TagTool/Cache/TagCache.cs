@@ -22,10 +22,6 @@ namespace TagTool.Cache
         public abstract CachedTag CreateCachedTag(int index, TagGroup group, string name = null);
         public abstract CachedTag CreateCachedTag();
 
-        public abstract Stream OpenTagCacheRead();
-        public abstract Stream OpenTagCacheReadWrite();
-        public abstract Stream OpenTagCacheWrite();
-
         // Utilities
 
         public bool IsTagIndexValid(int tagIndex)

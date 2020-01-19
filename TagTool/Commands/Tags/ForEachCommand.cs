@@ -143,7 +143,7 @@ namespace TagTool.Commands.Tags
 
             var rootContext = ContextStack.Context;
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 foreach (var instance in tags)
                 {

@@ -9,9 +9,9 @@ namespace TagTool.Commands.Tags
 {
     class CreateTagCommand : Command
     {
-        public GameCacheHaloOnline Cache { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public CreateTagCommand(GameCacheHaloOnline cache)
+        public CreateTagCommand(GameCacheHaloOnlineBase cache)
             : base(true,
 
                   "CreateTag",

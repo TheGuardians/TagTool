@@ -56,7 +56,7 @@ namespace TagTool.Commands.RenderModels
 
             RenderModel edMode = null;
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
                 edMode = Cache.Deserialize<RenderModel>(cacheStream, destinationTag);
 
             // Get a list of the original nodes
@@ -273,7 +273,7 @@ namespace TagTool.Commands.RenderModels
 
             Console.Write("Writing render_model tag data...");
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(cacheStream, destinationTag, renderModel);
 
             Console.WriteLine("done.");

@@ -21,7 +21,7 @@ namespace TagTool.Commands.Porting
 {
     public partial class PortTagCommand : Command
 	{
-		private GameCacheHaloOnline CacheContext { get; }
+		private GameCacheHaloOnlineBase CacheContext { get; }
 		private GameCache BlamCache;
 		private RenderGeometryConverter GeometryConverter { get; }
 
@@ -47,7 +47,7 @@ namespace TagTool.Commands.Porting
 
 		private readonly Dictionary<Tag, CachedTag> DefaultTags = new Dictionary<Tag, CachedTag> { };
 
-		public PortTagCommand(GameCacheHaloOnline cacheContext, GameCache blamCache) :
+		public PortTagCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache) :
 			base(true,
 
 				"PortTag",
@@ -79,11 +79,11 @@ namespace TagTool.Commands.Porting
 
 			var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-			using (var cacheStream = FlagIsSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.TagCache.OpenTagCacheReadWrite())
-            using(var blamCacheStream = BlamCache.TagCache.OpenTagCacheRead())
+			using (var cacheStream = FlagIsSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenCacheReadWrite())
+            using(var blamCacheStream = BlamCache.OpenCacheRead())
 			{
 				if (FlagIsSet(PortingFlags.Memory))
-					using (var cacheFileStream = CacheContext.TagCache.OpenTagCacheRead())
+					using (var cacheFileStream = CacheContext.OpenCacheRead())
 						cacheFileStream.CopyTo(cacheStream);
 
 				var oldFlags = Flags;
@@ -95,7 +95,7 @@ namespace TagTool.Commands.Porting
 				}
 
 				if (FlagIsSet(PortingFlags.Memory))
-					using (var cacheFileStream = CacheContext.TagCache.OpenTagCacheReadWrite())
+					using (var cacheFileStream = CacheContext.OpenCacheReadWrite())
 					{
 						cacheFileStream.Seek(0, SeekOrigin.Begin);
 						cacheFileStream.SetLength(cacheFileStream.Position);
@@ -108,7 +108,7 @@ namespace TagTool.Commands.Porting
             if (initialStringIdCount != CacheContext.StringTable.Count)
                 CacheContext.StringTable.Save();
 
-			CacheContext.TagCacheGenHO.SaveTagNames();
+			CacheContext.SaveTagNames();
 
 			foreach (var entry in resourceStreams)
 			{

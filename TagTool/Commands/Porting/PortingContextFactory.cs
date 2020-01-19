@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
             var context = new CommandContext(contextStack.Context, portingCache.DisplayName + "\\tags");
 
             // only support gen3 to HO porting for now, add more later
-            if(portingCache.GetType() == typeof(GameCacheGen3) && currentCache.GetType() == typeof(GameCacheHaloOnline))
+            if(portingCache.GetType() == typeof(GameCacheGen3) && currentCache is GameCacheHaloOnlineBase)
                 Populate(contextStack, context, currentCache, portingCache);
 
             // add tags command to the new cache
@@ -45,9 +45,8 @@ namespace TagTool.Commands.Porting
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)
         {
-            if(currentCache.GetType() == typeof(GameCacheHaloOnline))
+            if(currentCache is GameCacheHaloOnlineBase hoCache)
             {
-                var hoCache = currentCache as GameCacheHaloOnline;
                 var portTagCommand = new PortTagCommand(hoCache, portingCache);
                 context.AddCommand(portTagCommand);
                 context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portTagCommand));

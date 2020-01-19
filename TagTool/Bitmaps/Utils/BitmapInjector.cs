@@ -12,7 +12,7 @@ namespace TagTool.Bitmaps
         {
             BitmapTextureInteropResource result = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
 
-            if (cache.GetType() == typeof(GameCacheHaloOnline))
+            if (cache is GameCacheHaloOnlineBase)
             {
                 result.Texture.Definition.PrimaryResourceData = new TagData(file.BitmapData);
                 result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header);

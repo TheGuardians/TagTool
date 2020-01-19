@@ -33,7 +33,7 @@ namespace TagTool.Commands.RenderMethods
             {
                 RenderMethodTemplate template = null;
 
-                using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+                using (var cacheStream = Cache.OpenCacheRead())
                     template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.VectorArguments.Count; i++)

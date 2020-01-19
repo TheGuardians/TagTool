@@ -8,6 +8,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.BlamFile;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Cache
 {

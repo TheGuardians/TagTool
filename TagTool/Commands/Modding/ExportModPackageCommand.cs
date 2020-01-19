@@ -12,13 +12,13 @@ namespace TagTool.Commands.Modding
 {
     class ExportModPackageCommand : Command
     {
-        private GameCacheHaloOnline CacheContext { get; }
+        private GameCacheHaloOnlineBase CacheContext { get; }
 
         private ExportOptions Options = ExportOptions.None;
 
         private ModPackage ModPackage = null;
 
-        public ExportModPackageCommand(GameCacheHaloOnline cacheContext) :
+        public ExportModPackageCommand(GameCacheHaloOnlineBase cacheContext) :
             base(false,
 
                 "ExportModPackage",
@@ -281,7 +281,7 @@ namespace TagTool.Commands.Modding
             var modTagNames = ModPackage.TagCacheNames[0];
             var modTagStream = ModPackage.TagCachesStreams[0];
 
-            using (var srcTagStream = CacheContext.TagCache.OpenTagCacheRead())
+            using (var srcTagStream = CacheContext.OpenCacheRead())
             {
                 var resourceIndices = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>
                 {

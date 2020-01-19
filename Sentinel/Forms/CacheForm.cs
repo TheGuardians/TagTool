@@ -317,7 +317,7 @@ namespace Sentinel.Forms
             progressBar.MarqueeAnimationSpeed = 30;
 
             if (definition == null)
-                using (var stream = Cache.TagCache.OpenTagCacheRead())
+                using (var stream = Cache.OpenCacheRead())
                     definition = Cache.Deserialize(stream, tag);
 
             if (tagName.Contains("\\"))
@@ -498,7 +498,7 @@ namespace Sentinel.Forms
 
                     byte[] data;
 
-                    using (var stream = Cache.TagCache.OpenTagCacheRead())
+                    using (var stream = Cache.OpenCacheRead())
                         data = cacheHaloOnline.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)tag);
 
                     using (var stream = File.Open(sfd.FileName, FileMode.Create, FileAccess.Write))
@@ -532,7 +532,7 @@ namespace Sentinel.Forms
 
                     GameCacheHaloOnline cacheHaloOnline = Cache as GameCacheHaloOnline;
 
-                    using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+                    using (var stream = Cache.OpenCacheReadWrite())
                         cacheHaloOnline.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)tag, data);
 
                     MessageBox.Show($"Imported {ofd.FileName} successfully.", "Import Tag", MessageBoxButtons.OK);
@@ -624,7 +624,7 @@ namespace Sentinel.Forms
         {
             GameCacheHaloOnline cacheHaloOnline = Cache as GameCacheHaloOnline;
 
-            cacheHaloOnline.TagCacheGenHO.SaveTagNames();
+            cacheHaloOnline.SaveTagNames();
             MessageBox.Show("Saved tag names successfully.", "Save Tag Names", MessageBoxButtons.OK);
         }
 
@@ -648,7 +648,7 @@ namespace Sentinel.Forms
 
         private string SaveTagChanges(CachedTag tag, object definition)
         {
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, tag, definition);
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";

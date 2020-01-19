@@ -37,7 +37,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Halo Online cache context reference
         /// </summary>
-        private GameCacheHaloOnline CacheContext;
+        private GameCacheHaloOnlineBase CacheContext;
 
         /// <summary>
         /// CacheFile Reference
@@ -69,7 +69,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <param name="cacheStream"></param>
         /// <param name="cacheContext"></param>
         /// <param name="blamCache"></param>
-        public void Init(Stream cacheStream, GameCacheHaloOnline cacheContext, GameCache blamCache)
+        public void Init(Stream cacheStream, GameCacheHaloOnlineBase cacheContext, GameCache blamCache)
         {
             CacheStream = cacheStream;
             CacheContext = cacheContext;
@@ -170,7 +170,7 @@ namespace TagTool.Shaders.ShaderMatching
             RenderMethodTemplate bmRmt2;
             PixelShader bmPixl;
 
-            using(var blamStream = BlamCache.TagCache.OpenTagCacheRead())
+            using(var blamStream = BlamCache.OpenCacheRead())
             {
                 bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamStream, bmRmt2Instance);
                 bmPixl = BlamCache.Deserialize<PixelShader>(blamStream, bmRmt2.PixelShader);

@@ -41,7 +41,7 @@ namespace TagTool.Commands.Strings
             var filter = (args.Count == 2) ? args[1] : null;
             var found = false;
 
-            using (var stream = Cache.TagCache.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
                 foreach (var unicTag in Cache.TagCache.FindAllInGroup("unic"))
                 {

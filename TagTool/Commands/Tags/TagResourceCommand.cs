@@ -11,9 +11,9 @@ namespace TagTool.Commands.Tags
 {
     class TagResourceCommand : Command
     {
-        public GameCacheHaloOnline Cache { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public TagResourceCommand(GameCacheHaloOnline cache) :
+        public TagResourceCommand(GameCacheHaloOnlineBase cache) :
             base(true,
 
                 "TagResource",
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Tags
         {
             var indices = new List<int>();
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             using (var reader = new EndianReader(cacheStream))
             {
                 foreach (var instance in Cache.TagCacheGenHO.Tags)

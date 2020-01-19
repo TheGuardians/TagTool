@@ -167,7 +167,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             Definition.PathfindingResource = Cache.ResourceCache.CreateStructureBspCacheFileResource(pathfindingResource);
 
-            using(var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using(var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, Tag, Definition);
 
             Console.WriteLine("Done!");

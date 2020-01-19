@@ -27,7 +27,7 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, Tag, Value);
 
             Console.WriteLine("Done!");

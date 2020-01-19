@@ -195,6 +195,7 @@
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Cache\CachedTag.cs" />
+    <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
     <Compile Include="Cache\ResourceCache.cs" />
     <Compile Include="Cache\StringTable.cs" />
@@ -318,7 +319,7 @@
     <Compile Include="BlamFile\ContentItemMetadata.cs" />
     <Compile Include="Cache\Gen3\GameCacheGen3.cs" />
     <Compile Include="Cache\GameCache.cs" />
-    <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
+    <Compile Include="Cache\HaloOnline\GameCacheHaloOnlineBase.cs" />
     <Compile Include="BlamFile\MapFile.cs" />
     <Compile Include="BlamFile\MapFileHeader.cs" />
     <Compile Include="BlamFile\MapVariant.cs" />

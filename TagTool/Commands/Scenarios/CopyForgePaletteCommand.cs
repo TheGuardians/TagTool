@@ -65,7 +65,7 @@ namespace TagTool.Commands.Scenarios
 
             Scenario destinationScenario = null;
             
-            using (var cacheStream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
                 destinationScenario = Cache.Deserialize<Scenario>(cacheStream, destinationTag);
 
             Console.WriteLine("done.");
@@ -99,7 +99,7 @@ namespace TagTool.Commands.Scenarios
 
             Console.Write("Serializing destination scenario...");
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(cacheStream, destinationTag, destinationScenario);
 
             Console.WriteLine("done.");
