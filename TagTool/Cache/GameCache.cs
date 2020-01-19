@@ -349,6 +349,7 @@ namespace TagTool.Cache
             else
                 return result;
         }
-    }
 
+        public abstract void SaveStrings();
+    }
 }

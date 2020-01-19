@@ -13,6 +13,7 @@ namespace TagTool.Cache.HaloOnline
     {
         public FileInfo TagsFile { get; set; }
         public FileInfo TagNamesFile { get; set; }
+        public FileInfo StringIdCacheFile { get; set; }
 
         public override TagCache TagCache => TagCacheGenHO;
         public override StringTable StringTable => StringTableHaloOnline;
@@ -29,6 +30,7 @@ namespace TagTool.Cache.HaloOnline
             Directory = directory;
             TagsFile = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
             TagNamesFile = new FileInfo(Path.Combine(directory.FullName, "tag_list.csv"));
+            StringIdCacheFile = new FileInfo(Path.Combine(directory.FullName, "string_ids.dat"));
 
             Endianness = EndianFormat.LittleEndian;
 
@@ -40,16 +42,25 @@ namespace TagTool.Cache.HaloOnline
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
 
+            using (var stream = StringIdCacheFile.OpenRead())
+                StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
+
             DisplayName = Version.ToString();
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
-            StringTableHaloOnline = new StringTableHaloOnline(Version, Directory);
+          
             ResourceCaches = new ResourceCachesHaloOnline(this);
         }
 
         public override void SaveTagNames(string path = null)
         {
             TagCacheGenHO.SaveTagNames(path ?? TagNamesFile.FullName);
+        }
+
+        public override void SaveStrings()
+        {
+            using (var stream = StringIdCacheFile.OpenWrite())
+                StringTableHaloOnline.Save(stream);
         }
     }
 }

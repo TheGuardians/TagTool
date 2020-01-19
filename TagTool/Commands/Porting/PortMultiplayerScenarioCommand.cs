@@ -234,7 +234,7 @@ namespace TagTool.Commands.Porting
             }
 
 
-            CacheContext.StringTable.Save();
+            CacheContext.SaveStrings();
 
             CacheContext.SaveTagNames();
         }

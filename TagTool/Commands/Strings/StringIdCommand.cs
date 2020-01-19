@@ -63,7 +63,7 @@ namespace TagTool.Commands.Strings
 
             var id = Cache.StringTable.AddString(str);
 
-            Cache.StringTable.Save();
+            Cache.SaveStrings();
             
             Console.WriteLine("Added string \"{0}\" as {1}.", str, id);
 

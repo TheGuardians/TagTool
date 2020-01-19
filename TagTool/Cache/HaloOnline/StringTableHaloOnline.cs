@@ -10,20 +10,9 @@ namespace TagTool.Cache.HaloOnline
 {
     public class StringTableHaloOnline : StringTable
     {
-        public FileInfo StringIdCacheFile;
-        public FileStream OpenStringIdCacheRead() => StringIdCacheFile.OpenRead();
-        public FileStream OpenStringIdCacheWrite() => StringIdCacheFile.Open(FileMode.Open, FileAccess.Write);
-        public FileStream OpenStringIdCacheReadWrite() => StringIdCacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
-
-        public StringTableHaloOnline(CacheVersion version, DirectoryInfo directory)
+        public StringTableHaloOnline(CacheVersion version, Stream stream)
         {
             Version = version;
-
-            var files = directory.GetFiles("string_ids.dat");
-            if (files.Length == 0)
-                throw new FileNotFoundException(Path.Combine(directory.FullName, "string_ids.dat"));
-            StringIdCacheFile = files[0];
-
 
             Resolver = null;
 
@@ -34,13 +23,8 @@ namespace TagTool.Cache.HaloOnline
             else
                 Resolver = new StringIdResolverMS23();
 
-            using (var stream = OpenStringIdCacheRead())
-            {
-                if (stream.Length != 0)
-                    Load(stream);
-                else
-                    Clear();
-            }
+            if (stream.Length != 0)
+                Load(stream);
         }
 
         public override StringId AddString(string newString)
@@ -48,14 +32,6 @@ namespace TagTool.Cache.HaloOnline
             var strIndex = Count;
             Add(newString);
             return GetStringId(strIndex);
-        }
-
-        public override void Save()
-        {
-            using (var stream = OpenStringIdCacheReadWrite())
-            {
-                Save(stream);
-            }
         }
 
         public void Save(Stream stream)

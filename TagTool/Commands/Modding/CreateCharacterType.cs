@@ -195,7 +195,7 @@ namespace TagTool.Commands.Modding
             if(stringId == StringId.Invalid && value != Cache.StringTable.GetString(StringId.Invalid))
             {
                 stringId = Cache.StringTable.AddString(value);
-                Cache.StringTable.Save();
+                Cache.SaveStrings();
             }
             return stringId;
         }

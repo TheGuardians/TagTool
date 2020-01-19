@@ -137,7 +137,7 @@ namespace TagTool.Commands.Modding
             CacheStream.Close();
             CacheStream.Dispose();
             CacheContext.SaveTagNames();
-            CacheContext.StringTable.Save();
+            CacheContext.SaveStrings();
 
             return true;
         }

@@ -123,6 +123,11 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagGen3 instance) =>
             Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
+        public override void SaveStrings()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

@@ -271,7 +271,7 @@ namespace TagTool.Commands.RenderModels
 			{
 				Console.Write("Saving string ids...");
 
-			    Cache.StringTable.Save();
+			    Cache.SaveStrings();
 
 				Console.WriteLine("done");
 			}

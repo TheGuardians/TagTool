@@ -85,7 +85,10 @@ namespace TagTool.Cache
 
         public override Stream OpenCacheWrite() => ModPackageFile.Open(FileMode.Open, FileAccess.Write);
 
-        
+        public override void SaveStrings()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ModPackageStringTable : StringTable
@@ -154,11 +157,6 @@ namespace TagTool.Cache
             foreach (var offset in stringOffsets)
                 writer.Write(offset);
             writer.BaseStream.SetLength(dataOffset + currentOffset);
-        }
-
-        public override void Save()
-        {
-            throw new NotImplementedException("Can't save strings without a stream in a mod package!");
         }
 
         private void Load(Stream stream)

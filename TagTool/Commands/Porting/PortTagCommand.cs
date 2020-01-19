@@ -106,7 +106,7 @@ namespace TagTool.Commands.Porting
 			}
 
             if (initialStringIdCount != CacheContext.StringTable.Count)
-                CacheContext.StringTable.Save();
+                CacheContext.SaveStrings();
 
 			CacheContext.SaveTagNames();
 

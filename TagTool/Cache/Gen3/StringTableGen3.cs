@@ -89,11 +89,5 @@ namespace TagTool.Cache.Gen3
         {
             throw new NotImplementedException();
         }
-
-        public override void Save()
-        {
-            throw new NotImplementedException();
-        }
     }
-
 }

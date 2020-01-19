@@ -11,8 +11,6 @@ namespace TagTool.Cache
 
         public abstract StringId AddString(string newString);
 
-        public abstract void Save();
-
         // override if required
         public virtual string GetString(StringId id)
         {
