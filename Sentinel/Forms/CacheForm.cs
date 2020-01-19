@@ -57,9 +57,22 @@ namespace Sentinel.Forms
         {
             InitializeComponent();
 
-            // TODO: add gen3 cache support (resources need work)
-            Text = cacheDirectory.FullName;
-            Cache = GameCache.Open(new FileInfo(Text + "\\tags.dat"));
+            if (cacheDirectory.GetFiles("*.dat").Length == 0) // gen3
+            {
+                var smf = new SelectMapForm(cacheDirectory);
+
+                if (smf.ShowDialog() != DialogResult.OK)
+                    return;
+
+                Text = smf.SelectedFile.FullName;
+                Cache = GameCache.Open(smf.SelectedFile);
+            }
+
+            else // HO
+            {
+                Text = cacheDirectory.FullName + "\\tags.dat";
+                Cache = GameCache.Open(new FileInfo(Text));
+            }
 
             var docFile = new FileInfo(Path.Combine(Application.StartupPath, "BlamCore.xml"));
 
@@ -331,7 +344,7 @@ namespace Sentinel.Forms
             }
             // todo: fixup/clean model rendering code
             // todo: finish bitm editing (save/import dds, add size scaling to image)
-            /*else if (tag.IsInGroup("bitm") || tag.IsInGroup("obje"))
+            else if (tag.IsInGroup("bitm") || tag.IsInGroup("obje"))
             {
                 var splitContainer = new SplitContainer
                 {
@@ -344,25 +357,30 @@ namespace Sentinel.Forms
                 tagEditorPanel.Controls.Add(splitContainer);
                 splitContainer.BringToFront();
 
-                if (tag.IsInGroup("bitm"))
-                    splitContainer.SplitterDistance = Math.Min((short)512, Math.Max((short)16, ((TagTool.Tags.Definitions.Bitmap)definition).Images[0].Height));
+                /*if (tag.IsInGroup("bitm"))
+                    splitContainer.SplitterDistance = 384;//Math.Min((short)512, Math.Max((short)16, ((TagTool.Tags.Definitions.Bitmap)definition).Images[0].Height));
                 else if (tag.IsInGroup("obje"))
-                    splitContainer.SplitterDistance = 384;
+                    splitContainer.SplitterDistance = 384;*/
 
                 if (tag.IsInGroup("bitm"))
                 {
                     var bitmDefinition = (TagTool.Tags.Definitions.Bitmap)definition;
 
-                    var bitmapControl = new BitmapControl(Cache, bitmDefinition)
+                    if (Cache.ResourceCache.GetBitmapTextureInteropResource(bitmDefinition.Resources[0]) != null)
                     {
-                        Dock = DockStyle.Fill
-                    };
+                        splitContainer.SplitterDistance = 384;
 
-                    splitContainer.Panel1.Controls.Add(bitmapControl);
-                    bitmapControl.BringToFront();
+                        var bitmapControl = new BitmapControl(Cache, bitmDefinition)
+                        {
+                            Dock = DockStyle.Fill
+                        };
+
+                        splitContainer.Panel1.Controls.Add(bitmapControl);
+                        bitmapControl.BringToFront();
+                    }
                 }
 
-                else if (tag.IsInGroup("obje"))
+                /*else if (tag.IsInGroup("obje"))
                 {
                     var modelControl = new ObjectControl(Cache, (GameObject)definition)
                     {
@@ -371,7 +389,7 @@ namespace Sentinel.Forms
 
                     splitContainer.Panel1.Controls.Add(modelControl);
                     modelControl.BringToFront();
-                }
+                }*/
 
                 var control = tag.IsInGroup("obje") ?
                     (Control)new StructMultiControl(this, Cache, tag, definition) { Dock = DockStyle.Fill } :
@@ -382,7 +400,7 @@ namespace Sentinel.Forms
 
                 splitContainer.Panel2.Controls.Add(control);
                 splitContainer.Panel2.AutoScroll = true;
-            }*/
+            }
             else
             {
                 if (tag.IsInGroup("snd!"))
