@@ -61,6 +61,7 @@ namespace TagTool.Cache
             {
                 case CacheVersion.HaloPC:
                 case CacheVersion.HaloXbox:
+                    return new GameCacheGen1(map, file);
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
                     throw new Exception("Not implemented!");

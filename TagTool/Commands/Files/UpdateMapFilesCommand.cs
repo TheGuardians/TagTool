@@ -136,7 +136,7 @@ namespace TagTool.Commands.Files
 
             header.HeadTag = new Tag("head");
             header.FootTag = new Tag("foot");
-            header.Version = (int)map.MapVersion;
+            header.Version = map.MapVersion;
             header.Build = CacheVersionDetection.GetBuildName(Cache.Version);
 
             switch (scnr.MapType)

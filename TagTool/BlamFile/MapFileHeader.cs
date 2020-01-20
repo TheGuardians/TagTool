@@ -11,17 +11,17 @@ namespace TagTool.BlamFile
     public sealed class MapFileHeader : TagStructure
     {
         public Tag HeadTag;
-        public int Version;
+        public MapFileVersion Version;
         public int FileLength;
         public int Unknown1;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public int TagIndexOffset;
+        public int TagDataOffset;
         [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public uint TagIndexAddress;
 
         [TagField(MaxVersion = CacheVersion.HaloPC)]
-        public int TagIndexLength;
+        public int TagDataSize;
 
         [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public int TagSectionOffset;

@@ -41,65 +41,14 @@ namespace TagTool.Commands
             //
             // Insert what test command you want below
             //
+            var mapFile = new FileInfo(@"D:\Halo\Maps\HaloPC\a10.map");
+            var mapName = mapFile.Name;
+            Console.WriteLine($"{mapName}...");
 
-            foreach(var mapFile in mapFiles)
-            {
-                var mapName = mapFile.Name;
-                var outFile = mapName + ".csv";
-                outFile = Path.Combine(outDir.FullName, outFile);
-                Console.WriteLine($"{mapName}...");
-                var cache = GameCache.Open(mapFile);
-                /*
-                Console.WriteLine(mapName);
+            var map = new MapFile();
 
-                int fileOffset = map.Header.GetHeaderSize(map.Version);
+            var cache = GameCache.Open(mapFile);
 
-                for(int i = 0; i < (int)CacheFileSectionType.Count; i++)
-                {
-                    var section = map.Header.SectionTable.Sections[i];
-                    Console.WriteLine($"{(CacheFileSectionType)(i)}");
-                    Console.WriteLine($"Virtual Address  {section.VirtualAddress:X}");
-                    Console.WriteLine($"File Offset {fileOffset:X}");
-                    Console.WriteLine($"Section Size  {section.Size:X}");
-                    fileOffset += section.Size;
-                }
-
-                Console.WriteLine($"Tags Base Address {map.Header.TagBaseAddress:X}");
-                Console.WriteLine($"Tag section partitions:");
-                int partitionOverallSize = 0;
-                foreach(var partition in map.Header.Partitions)
-                {
-                    Console.WriteLine($"Size {partition.Size:X}");
-                    Console.WriteLine($"Virtual Address {partition.VirtualAddress:X}"); 
-                    Console.WriteLine($"Tag Section Offset {(partition.VirtualAddress - map.Header.TagBaseAddress):X}");
-                    partitionOverallSize += partition.Size;
-                }
-
-                Console.WriteLine($"Overall partition size {partitionOverallSize:X}");
-
-                /*
-                using(var stream = new FileInfo(outFile).Create())
-                {
-
-                }
-                
-
-                if(partitionOverallSize != map.Header.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size)
-                {
-                    throw new Exception("Tag section weirdness");
-                }
-
-                if (fileOffset != mapFile.Length)
-                {
-                    throw new Exception("File weirdness");
-                }
-
-                if (map.Header.TagBaseAddress != map.Header.Partitions[0].VirtualAddress)
-                    throw new Exception("Tags Address weirdness");
-                */
-
-            }
-            
 
 
 

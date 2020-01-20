@@ -195,6 +195,9 @@
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Cache\CachedTag.cs" />
+    <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
+    <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
+    <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
@@ -864,10 +867,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cache\Gen1\" />
     <Folder Include="Cache\MCC\" />
     <Folder Include="Geometry\Utils\" />
-    <Folder Include="MapFile\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -38,7 +38,7 @@ namespace TagTool.Cache
             CacheFile = file;
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
-            Endianness = EndianFormat.BigEndian;
+            Endianness = BaseMapFile.EndianFormat;
             var interop = mapFile.Header.SectionTable;
 
             DisplayName = mapFile.Header.Name + ".map";
@@ -46,7 +46,7 @@ namespace TagTool.Cache
             Directory = file.Directory;
 
             using(var cacheStream = OpenCacheRead())
-            using(var reader = new EndianReader(cacheStream, BaseMapFile.EndianFormat))
+            using(var reader = new EndianReader(cacheStream, Endianness))
             {
                 StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
                 TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3);

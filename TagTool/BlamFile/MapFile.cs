@@ -20,6 +20,7 @@ namespace TagTool.BlamFile
         Halo3 = 0xB,
         HaloReach = 0xC,
         HaloOnline = 0x12,
+        HaloCustomEdition = 0x261
     }
 
     public class MapFile 
