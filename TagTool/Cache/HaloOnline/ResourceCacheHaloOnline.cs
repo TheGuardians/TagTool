@@ -104,17 +104,6 @@ namespace TagTool.Cache.HaloOnline
             }
         }
 
-        private void WriteHeader(Stream stream)
-        {
-            stream.Position = 0;
-            using (var writer = new EndianWriter(stream, EndianFormat.LittleEndian))
-            {
-                var dataContext = new DataSerializationContext(writer);
-                var serializer = new TagSerializer(Version);
-                serializer.Serialize(dataContext, Header);
-            }
-        }
-
         private void CreateEmptyResourceCache(Stream stream)
         {
             Header = new ResourceCacheHaloOnlineHeader

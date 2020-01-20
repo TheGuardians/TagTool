@@ -32,7 +32,25 @@ namespace TagTool.Cache.HaloOnline
 
         public TagCacheHaloOnline(Stream stream, Dictionary<int, string> names = null)
         {
-            Load(new EndianReader(stream), names ?? new Dictionary<int, string>());
+            if (stream.Length != 0)
+                Load(new EndianReader(stream), names ?? new Dictionary<int, string>());
+            else
+                CreateTagCache(stream);
+        }
+
+        public void CreateTagCache(Stream stream)
+        {
+            TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
+            {
+                TagTableOffset = 0x20,
+                CreationTime = 0x01D0631BCC791704
+            };
+            stream.Position = 0;
+            var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
+            var dataContext = new DataSerializationContext(writer);
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            serializer.Serialize(dataContext, header);
+            stream.Position = 0;
         }
 
         private void Load(EndianReader reader, Dictionary<int, string> names)
