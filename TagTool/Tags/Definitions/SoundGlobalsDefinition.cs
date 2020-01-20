@@ -3,7 +3,8 @@ using TagTool.Cache;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x5C, MinVersion = CacheVersion.HaloReach)]
     public class SoundGlobalsDefinition : TagStructure
 	{
         [TagField(ValidTags = new[] { "sncl" })]
@@ -21,7 +22,17 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "sgp!" })]
         public CachedTag SoundGlobalPropagation;
 
-        [TagField(ValidTags = new[] { "sus!" }, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public FireTeamSound FireTeamSounds;
+
+        [TagField(ValidTags = new[] { "sus!" }, Gen = CacheGeneration.HaloOnline)]
         public CachedTag GfxUiSounds;
+
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
+        public class FireTeamSound : TagStructure
+        {
+            [TagField(ValidTags = new[] { "snd!" })]
+            public CachedTag Sound;
+        }
     }
 }

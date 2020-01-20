@@ -7,7 +7,8 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x1B0, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Size = 0x144, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x144, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x1B0, MinVersion = CacheVersion.HaloReach)]
     public class AiGlobalsDatum : TagStructure
 	{
         public float InfantryOnAiWeaponDamageScale;
@@ -53,12 +54,18 @@ namespace TagTool.Ai
         public float JumpStand;
         public float JumpStorey;
         public float JumpTower;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown5;
+
         public float MaxJumpDownHeightDown;
         public float MaxJumpDownHeightStep;
         public float MaxJumpDownHeightCrouch;
         public float MaxJumpDownHeightStand;
         public float MaxJumpDownHeightStorey;
         public float MaxJumpDownHeightTower;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown6;
+
         public Bounds<float> HoistStep;
         public Bounds<float> HoistCrouch;
         public Bounds<float> HoistStand;
@@ -101,15 +108,27 @@ namespace TagTool.Ai
         public float DangerousClumpDistance;
         public float ConverSearchDuration;
         public float TaskSearchDuration;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown18;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<TagReferenceBlock> Styles;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<TagReferenceBlock> Formations;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<TagReferenceBlock> SquadTemplates;
+
+        // TODO
+        [TagField(Length = 0xC, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Formations_Reach;
+
+        // TODO
+        [TagField(Length = 0xC, MinVersion = CacheVersion.HaloReach)]
+        public byte[] SquadTemplates_Reach;
+
+        // TODO: map out all the blocks for reach here
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown19;
@@ -139,6 +158,10 @@ namespace TagTool.Ai
         public uint Unknown31;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown32;
+
+        // TODO
+        [TagField(Length = 0x74, MinVersion = CacheVersion.HaloReach)]
+        public byte[] ReachValues;
 
         [TagStructure(Size = 0xC)]
         public class GravemindPropertyBlock : TagStructure
