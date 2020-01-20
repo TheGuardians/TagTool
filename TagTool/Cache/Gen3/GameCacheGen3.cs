@@ -6,12 +6,12 @@ using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Cache.Gen3;
 using TagTool.BlamFile;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache
 {
     public class GameCacheGen3 : GameCache
     {
-        public int Magic;
         public MapFile BaseMapFile;
         public FileInfo CacheFile;
         public string NetworkKey;
@@ -27,6 +27,8 @@ namespace TagTool.Cache
         public override Stream OpenCacheReadWrite() => CacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
         public override Stream OpenCacheWrite() => CacheFile.Open(FileMode.Open, FileAccess.Write);
 
+        public uint TagAddressToOffset(uint address) => address - (BaseMapFile.Header.TagBaseAddress - BaseMapFile.Header.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)); 
+
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
 
         public GameCacheGen3(MapFile mapFile, FileInfo file)
@@ -37,39 +39,36 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = EndianFormat.BigEndian;
-            var interop = mapFile.Header.Interop;
+            var interop = mapFile.Header.SectionTable;
 
             DisplayName = mapFile.Header.Name + ".map";
 
             Directory = file.Directory;
 
-            if ( interop != null && interop.ResourceBaseAddress == 0)
-                Magic = (int)(interop.RuntimeBaseAddress - mapFile.Header.MemoryBufferSize);
-            else
-            {
-                mapFile.Header.ApplyMagic(mapFile.Header.StringIDsIndicesOffset - mapFile.Header.GetHeaderSize(mapFile.Version));
-                var resourcePartition = mapFile.Header.Partitions[(int)CacheFilePartitionType.ResourcesTags];
-                var resourceSection = interop.Sections[(int)CacheFileSectionType.ResourceSection];
-                Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.VirtualAddress), 0) - (interop.DebugSectionSize + resourceSection.Size);
-            }
-
-            if (mapFile.Header.TagIndexAddress == 0)
-                return;
-
-            mapFile.Header.TagIndexAddress = (BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.Header.TagIndexAddress - Magic), 0));
-
             using(var cacheStream = OpenCacheRead())
             using(var reader = new EndianReader(cacheStream, BaseMapFile.EndianFormat))
             {
                 StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
-                TagCacheGen3 = new TagCacheGen3(this, reader, BaseMapFile, StringTableGen3, Magic);
-                LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, TagCacheGen3);
+                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3);
                 ResourceCacheGen3 = new ResourceCacheGen3(this);
+
+                if(TagCacheGen3.Tags.Count > 0)
+                {
+                    if (BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
+                        LocaleTables = new List<LocaleTable>();
+                    else
+                    {
+                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.HardcodedTags["matg"]);
+                        LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                    }
+                }
+                
             }
 
             // unused but kept for future uses
             switch (Version)
             {
+                case CacheVersion.Halo3Beta:
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                     NetworkKey = "";
@@ -77,7 +76,6 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     NetworkKey = "SneakerNetReigns";
                     break;
-                
             }
         }
 

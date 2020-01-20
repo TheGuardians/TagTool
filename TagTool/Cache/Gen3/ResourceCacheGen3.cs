@@ -30,12 +30,21 @@ namespace TagTool.Cache.Gen3
 
         public void LoadResourceCache()
         {
-            using (var cacheStream = Cache.OpenCacheRead())
+            // means no resources
+            if (Cache.BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.ResourceSection].Size == 0)
+                return;
+            // means resources but no tags, campaign.map for example. The resource section only contains pages for resources
+            else if(Cache.BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
+                return;
+            // TODO: figure out another way to handle this
+            else
             {
-                ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCache.GetTag("there they are all standing in a row", "zone"));
-                ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCache.GetTag(0xE1760001));
+                using (var cacheStream = Cache.OpenCacheRead())
+                {
+                    ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCacheGen3.HardcodedTags["zone"]);
+                    ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.HardcodedTags["play"]);
+                }
             }
-
             isLoaded = true;
         }
 
@@ -146,7 +155,6 @@ namespace TagTool.Cache.Gen3
                 return null;
             return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
         }
-
 
         public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
         {
@@ -269,7 +277,7 @@ namespace TagTool.Cache.Gen3
             if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1)
                 return null;
 
-            if (ResourceLayoutTable.RawPages[segment.RequiredPageIndex].BlockOffset == -1)
+            if (ResourceLayoutTable.RawPages[segment.RequiredPageIndex].CrcChecksum == -1)
                 return null;
 
             return ReadSegmentData(resource, segment.RequiredPageIndex, segment.RequiredSegmentOffset, segment.RequiredSizeIndex);
@@ -287,7 +295,7 @@ namespace TagTool.Cache.Gen3
             if (segment.OptionalPageIndex == -1 || segment.OptionalSegmentOffset == -1)
                 return null;
 
-            if (ResourceLayoutTable.RawPages[segment.OptionalPageIndex].BlockOffset == -1)
+            if (ResourceLayoutTable.RawPages[segment.OptionalPageIndex].CrcChecksum == -1)
                 return null;
 
             return ReadSegmentData(resource, segment.OptionalPageIndex, segment.OptionalSegmentOffset, segment.OptionalSizeIndex);
@@ -329,7 +337,10 @@ namespace TagTool.Cache.Gen3
             using (var cacheStream = cache.OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, EndianFormat.BigEndian))
             {
-                reader.SeekTo(cache.BaseMapFile.Header.Interop.DebugSectionSize + page.BlockOffset);
+                var sectionTable = cache.BaseMapFile.Header.SectionTable;
+                var blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, page.BlockAddress);
+
+                reader.SeekTo(blockOffset);
                 var compressed = reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
 
                 if (resource.ResourceTypeIndex != -1 && GetResourceTypeName(resource) == "sound_resource_definition")

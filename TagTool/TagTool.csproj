@@ -310,7 +310,6 @@
     <Compile Include="Cache\CacheFile\CacheAddressType.cs" />
     <Compile Include="Cache\HaloOnline\CachedTagData.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
-    <Compile Include="Cache\CacheFile\CacheFileInterop.cs" />
     <Compile Include="Cache\CacheFile\CacheFilePartition.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSection.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSharedType.cs" />

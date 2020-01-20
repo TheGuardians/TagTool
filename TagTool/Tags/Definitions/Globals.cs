@@ -852,10 +852,10 @@ namespace TagTool.Tags.Definitions
             public uint Unknown1;
             public uint Unknown2;
 
-            public uint StringCount;
-            public uint LocaleTableSize;
-            public uint LocaleIndexTableOffset;
-            public uint LocaleDataIndexOffset;
+            public int StringCount;
+            public int LocaleTableSize;
+            public uint LocaleIndexTableAddress;
+            public uint LocaleDataIndexAddress;
 
             [TagField(Length = 20)]
             public byte[] IndexTableHash;

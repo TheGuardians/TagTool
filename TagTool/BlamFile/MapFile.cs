@@ -161,34 +161,7 @@ namespace TagTool.BlamFile
             return CacheVersionDetection.GetFromBuildName(buildDate);
         }
 
-        //
-        // Helper methods
-        //
 
-        public TagTableHeaderGen3 GetTagTableHeader(EndianReader reader, int magic)
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                case CacheVersion.HaloReach:
-                    reader.SeekTo(Header.TagIndexAddress);
-                    return new TagTableHeaderGen3
-                    {
-                        TagGroupCount = reader.ReadInt32(),
-                        TagGroupsOffset = reader.ReadInt32() - magic,
-                        TagCount = reader.ReadInt32(),
-                        TagsOffset = reader.ReadInt32() - magic,
-                        TagInfoHeaderCount = reader.ReadInt32(),
-                        TagInfoHeaderOffset = reader.ReadInt32() - magic,
-                        TagInfoHeaderCount2 = reader.ReadInt32(),
-                        TagInfoHeaderOffset2 = reader.ReadInt32() - magic
-                    };
-
-                default:
-                    throw new NotImplementedException();
-            }
-        }
     }
 
 }

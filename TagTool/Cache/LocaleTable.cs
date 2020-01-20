@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace TagTool.Cache
 {
-    public class CacheLocalizedStringTest
+    public class CacheLocalizedString
     {
         public int StringIndex;
         public string String;
         public int Index;
 
-        public CacheLocalizedStringTest(int index, string locale, int localeIndex)
+        public CacheLocalizedString(int index, string locale, int localeIndex)
         {
             StringIndex = index;
             String = locale;
@@ -17,6 +17,6 @@ namespace TagTool.Cache
         }
     }
 
-    public class LocaleTable : List<CacheLocalizedStringTest> { }
+    public class LocaleTable : List<CacheLocalizedString> { }
 
 }

@@ -17,6 +17,7 @@ namespace TagTool.Cache.Gen3
             switch (Version)
             {
                 case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Beta:    // double check
                     Resolver = new StringIdResolverHalo3();
                     break;
 
@@ -33,57 +34,60 @@ namespace TagTool.Cache.Gen3
                     throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
             }
 
-            reader.SeekTo(baseMapFile.Header.StringIDsIndicesOffset);
-            int[] indices = new int[baseMapFile.Header.StringIDsCount];
+            var sectionTable = baseMapFile.Header.SectionTable;
+
+            // means no strings
+            if (sectionTable.Sections[(int)CacheFileSectionType.StringSection].Size == 0)
+                return;
+
+            var stringIdIndexTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsIndicesAddress);
+            var stringIdBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsBufferAddress);
+
+            //
+            // Read offsets
+            //
+
+            reader.SeekTo(stringIdIndexTableOffset);
+
+            int[] stringOffset = new int[baseMapFile.Header.StringIDsCount];
             for (var i = 0; i < baseMapFile.Header.StringIDsCount; i++)
             {
-                indices[i] = reader.ReadInt32();
+                stringOffset[i] = reader.ReadInt32();
                 Add("");
             }
 
-            reader.SeekTo(baseMapFile.Header.StringIDsBufferOffset);
+            reader.SeekTo(stringIdBufferOffset);
 
             EndianReader newReader;
 
             if (StringKey == "")
-            {
                 newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.StringIDsBufferSize)), reader.Format);
-            }
             else
-            {
-                reader.BaseStream.Position = baseMapFile.Header.StringIDsBufferOffset;
                 newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.StringIDsBufferSize, StringKey), reader.Format);
-            }
 
-            for (var i = 0; i < indices.Length; i++)
+            //
+            // Read strings
+            //
+
+            for (var i = 0; i < stringOffset.Length; i++)
             {
-                if (indices[i] == -1)
+                if (stringOffset[i] == -1)
                 {
                     this[i] = "<null>";
                     continue;
                 }
 
-                newReader.SeekTo(indices[i]);
-
-                int length;
-                if (i == indices.Length - 1)
-                    length = baseMapFile.Header.StringIDsBufferSize - indices[i];
-                else
-                    length = (indices[i + 1] != -1)
-                        ? indices[i + 1] - indices[i]
-                        : indices[i + 2] - indices[i];
-
-                if (length == 1)
-                {
-                    this[i] = "";
-                    continue;
-                }
-
-                this[i] = newReader.ReadString(length);
+                newReader.SeekTo(stringOffset[i]);
+                this[i] = newReader.ReadNullTerminatedString();
             }
             newReader.Close();
             newReader.Dispose();
         }
+
+        /*
+         * To resize the stringId Buffer in Gen3 caches, there are a few values to update. The map file section table needs to be updated
+         * The 2 addresses for the buffer and index table in the map file header.
+         */
 
         public override StringId AddString(string newString)
         {

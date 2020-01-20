@@ -231,8 +231,8 @@ namespace TagTool.Cache
 
                 var localeCount = cache.Reader.ReadInt32();
                 var tableSize = cache.Reader.ReadInt32();
-                var indexOffset = (int)(cache.Reader.ReadInt32() + cache.Header.Interop.UnknownBaseAddress);
-                var tableOffset = (int)(cache.Reader.ReadInt32() + cache.Header.Interop.UnknownBaseAddress);
+                var indexOffset = 0;// (int)(cache.Reader.ReadInt32() + cache.Header.Interop.LocaleSectionAddressToOffset); fixme
+                var tableOffset = 0;// (int)(cache.Reader.ReadInt32() + cache.Header.Interop.LocaleSectionAddressToOffset); fixme later
 
                 cache.Reader.SeekTo(indexOffset);
                 var indices = new int[localeCount];

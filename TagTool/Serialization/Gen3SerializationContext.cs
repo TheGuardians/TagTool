@@ -25,7 +25,7 @@ namespace TagTool.Serialization
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return address - (uint)GameCache.Magic;
+            return GameCache.TagAddressToOffset(address);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)

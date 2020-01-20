@@ -41,11 +41,11 @@ namespace TagTool.Cache
         public int Index;
 
         [TagField(Gen = CacheGeneration.Third)]
-        public int BlockOffset;
+        public uint BlockAddress;
 
         public uint CompressedBlockSize;
         public uint UncompressedBlockSize;
-        public uint CrcChecksum;
+        public int CrcChecksum;
 
         [TagField(Length = 20, Gen = CacheGeneration.Third)]
         public byte[] EntireBufferHash;

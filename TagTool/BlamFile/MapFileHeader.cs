@@ -1,19 +1,15 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.BlamFile
 {
-    [TagStructure(Size = 0x800, MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x800, MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.Halo3Beta)]
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x3390, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
     public sealed class MapFileHeader : TagStructure
     {
-        [TagField(Flags = Runtime)]
-        public int Magic;
-
         public Tag HeadTag;
         public int Version;
         public int FileLength;
@@ -21,13 +17,20 @@ namespace TagTool.BlamFile
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public int TagIndexOffset;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public uint TagIndexAddress;
 
         [TagField(MaxVersion = CacheVersion.HaloPC)]
         public int TagIndexLength;
 
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
+        public int TagSectionOffset;
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
+        public int TagSectionSize;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public int MemoryBufferOffset;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public int MemoryBufferSize;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -95,9 +98,9 @@ namespace TagTool.BlamFile
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public int StringIDsBufferSize;
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
-        public int StringIDsIndicesOffset;
+        public uint StringIDsIndicesAddress;
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
-        public int StringIDsBufferOffset;
+        public uint StringIDsBufferAddress;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public int ExternalDependencies;
@@ -147,11 +150,11 @@ namespace TagTool.BlamFile
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public int TagNamesCount;
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
-        public int TagNamesBufferOffset;
+        public uint TagNamesBufferAddress;
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public int TagNamesBufferSize;
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
-        public int TagNamesIndicesOffset;
+        public uint TagNamesOffsetsTableAddress;
 
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
         public int LanguagePacksOffset = -1;
@@ -202,7 +205,7 @@ namespace TagTool.BlamFile
         public int Unknown21;
 
         [TagField(Gen = CacheGeneration.Third)]
-        public uint BaseAddress;
+        public uint TagBaseAddress;
 
         [TagField(Gen = CacheGeneration.Third)]
         public int XDKVersion;
@@ -238,8 +241,11 @@ namespace TagTool.BlamFile
         [TagField(Length = 64, Gen = CacheGeneration.Third)]
         public int[] RSA;
 
+        /// <summary>
+        /// 
+        /// </summary>
         [TagField(Gen = CacheGeneration.Third)]
-        public CacheFileInterop Interop;
+        public CacheFileSectionTable SectionTable;
 
         [TagField(Length = 4, Gen = CacheGeneration.Third)]
         public int[] GUID;
@@ -321,13 +327,5 @@ namespace TagTool.BlamFile
 
         public int GetHeaderSize(CacheVersion version) => (int)GetTagStructureInfo(typeof(MapFileHeader), version).TotalSize;
 
-        public void ApplyMagic(int magic)
-        {
-            Magic = magic;
-            TagNamesBufferOffset -= Magic;
-            TagNamesIndicesOffset -= Magic;
-            StringIDsIndicesOffset -= Magic;
-            StringIDsBufferOffset -= Magic;
-        }
     }
 }

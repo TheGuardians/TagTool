@@ -167,7 +167,7 @@ namespace TagTool.Cache
         public int[] RSA;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CacheFileInterop Interop;
+        public CacheFileSectionTable Interop;
 
         [TagField(Length = 4, MinVersion = CacheVersion.Halo3Retail)]
         public int[] GUID;
