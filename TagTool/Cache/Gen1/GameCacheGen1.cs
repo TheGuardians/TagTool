@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen1;
+using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 
@@ -19,8 +20,8 @@ namespace TagTool.Cache
         public TagCacheGen1 TagCacheGen1;
 
         public override TagCache TagCache => TagCacheGen1;
-
-        public override StringTable StringTable => throw new NotImplementedException();
+        // Gen1 caches don't have stringids
+        public override StringTable StringTable => null;
         public override ResourceCache ResourceCache => throw new NotImplementedException();
 
 
@@ -76,4 +77,17 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
     }
+
+    public class StringTableGen1 : StringTable
+    {
+        public StringTableGen1()
+        {
+            
+        }
+        public override StringId AddString(string newString)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

@@ -95,8 +95,11 @@ namespace TagTool.Commands.Tags
             {
                 if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
                     continue;
-
-                var groupName = Cache.StringTable.GetString(tag.Group.Name);
+                string groupName;
+                if (Cache.StringTable != null)
+                    groupName = Cache.StringTable.GetString(tag.Group.Name);
+                else
+                    groupName = tag.Group.Tag.ToString();
                 
                 if (named)
                 {

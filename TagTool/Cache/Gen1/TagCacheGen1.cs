@@ -79,10 +79,10 @@ namespace TagTool.Cache.Gen1
                     name = reader.ReadNullTerminatedString();
                     reader.SeekTo(currentPos);
                 }
-                var weird1 = reader.ReadUInt32();
+                var tagDataAddress = reader.ReadUInt32();
                 var weird2 = reader.ReadUInt32();
                 var unused = reader.ReadUInt32();
-                Tags.Add(new CachedTagGen1((int)(tagID & 0xFFFF), tagID, group, name));
+                Tags.Add(new CachedTagGen1((int)(tagID & 0xFFFF), tagID, group, tagDataAddress, name));
             }
         }
 

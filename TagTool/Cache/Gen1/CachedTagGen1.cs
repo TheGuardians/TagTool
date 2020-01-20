@@ -9,11 +9,14 @@ namespace TagTool.Cache.Gen1
 {
     public class CachedTagGen1 : CachedTag
     {
-        public override uint DefinitionOffset => throw new NotImplementedException();
+        public uint Offset;
 
-        public CachedTagGen1(int index, uint ID, TagGroup tagGroup, string name) : base(index, tagGroup, name)
+        public override uint DefinitionOffset => Offset;
+
+        public CachedTagGen1(int index, uint ID, TagGroup tagGroup, uint address, string name) : base(index, tagGroup, name)
         {
             this.ID = ID;
+            Offset = address;
         }
     }
 }
