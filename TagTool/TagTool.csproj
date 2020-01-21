@@ -468,6 +468,7 @@
     <Compile Include="Scripting\HsScriptParameter.cs" />
     <Compile Include="Scripting\HsScriptType.cs" />
     <Compile Include="Scripting\HsType.cs" />
+    <Compile Include="Serialization\Gen1SerializationContext.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Serialization\ResourceDefinitionSerializationContext.cs" />
     <Compile Include="Serialization\Gen3SerializationContext.cs" />
@@ -479,6 +480,7 @@
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
+    <Compile Include="Tags\Definitions\Gen1\Sound.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />

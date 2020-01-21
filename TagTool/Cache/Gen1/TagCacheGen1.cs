@@ -103,9 +103,15 @@ namespace TagTool.Cache.Gen1
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
-        public override CachedTag GetTag(uint ID) => Tags[(int)(ID & 0xFFFF)];
+        public override CachedTag GetTag(uint ID) => GetTag((int)(ID & 0xFFFF));
 
-        public override CachedTag GetTag(int index) => Tags[index];
+        public override CachedTag GetTag(int index)
+        {
+            if (index < 0 || index >= Tags.Count)
+                return null;
+            else
+                return Tags[index];
+        }
 
         public override CachedTag GetTag(string name, Tag groupTag)
         {

@@ -13,6 +13,7 @@ using TagTool.Bitmaps.Utils;
 using TagTool.Bitmaps.DDS;
 using TagTool.Geometry;
 using TagTool.BlamFile;
+using TagTool.Tags.Definitions.Gen1;
 
 namespace TagTool.Commands
 {
@@ -45,11 +46,20 @@ namespace TagTool.Commands
             var mapName = mapFile.Name;
             Console.WriteLine($"{mapName}...");
 
-            var map = new MapFile();
-
             var cache = GameCache.Open(mapFile);
 
 
+            using(var stream = cache.OpenCacheRead())
+            {
+                foreach (var tag in cache.TagCache.TagTable)
+                {
+                    if (tag.Group.Tag == "snd!")
+                    {
+                        var sound = cache.Deserialize<TagTool.Tags.Definitions.Gen1.Sound>(stream, tag);
+                    }
+                }
+            }
+            
 
 
             return true;

@@ -9,6 +9,7 @@ using TagTool.Cache.Gen1;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
@@ -23,7 +24,6 @@ namespace TagTool.Cache
         // Gen1 caches don't have stringids
         public override StringTable StringTable => null;
         public override ResourceCache ResourceCache => throw new NotImplementedException();
-
 
         public GameCacheGen1(MapFile mapFile, FileInfo file)
         {
@@ -44,18 +44,52 @@ namespace TagTool.Cache
             }
         }
 
-        public override object Deserialize(Stream stream, CachedTag instance)
+        #region Serialization
+
+        public override T Deserialize<T>(Stream stream, CachedTag instance) =>
+            Deserialize<T>(new Gen1SerializationContext(stream, this, (CachedTagGen1)instance));
+
+        public override object Deserialize(Stream stream, CachedTag instance) =>
+            Deserialize(new Gen1SerializationContext(stream, this, (CachedTagGen1)instance), TagDefinition.Find(instance.Group.Tag));
+
+        public override void Serialize(Stream stream, CachedTag instance, object definition)
+        {
+            if (typeof(CachedTagGen1) == instance.GetType())
+                Serialize(stream, (CachedTagGen1)instance, definition);
+            else
+                throw new Exception($"Try to serialize a {instance.GetType()} into a Gen 3 Game Cache");
+        }
+
+        //TODO: Implement serialization for gen3
+        public void Serialize(Stream stream, CachedTagGen1 instance, object definition)
         {
             throw new NotImplementedException();
         }
 
-        public override T Deserialize<T>(Stream stream, CachedTag instance)
-        {
-            throw new NotImplementedException();
-        }
+        //
+        // private methods for internal use
+        //
+
+        private T Deserialize<T>(ISerializationContext context) =>
+            Deserializer.Deserialize<T>(context);
+
+        private object Deserialize(ISerializationContext context, Type type) =>
+            Deserializer.Deserialize(context, type);
+
+        //
+        // public methods specific to gen3
+        //
+
+        public T Deserialize<T>(Stream stream, CachedTagGen1 instance) =>
+            Deserialize<T>(new Gen1SerializationContext(stream, this, instance));
+
+        public object Deserialize(Stream stream, CachedTagGen1 instance) =>
+            Deserialize(new Gen1SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+
+        #endregion
+
 
         public override Stream OpenCacheRead() => CacheFile.OpenRead();
-        
 
         public override Stream OpenCacheReadWrite()
         {
@@ -72,10 +106,6 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override void Serialize(Stream stream, CachedTag instance, object definition)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class StringTableGen1 : StringTable

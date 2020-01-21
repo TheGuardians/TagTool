@@ -201,11 +201,14 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(RealPlane2d):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagBlock<>) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
-					return 0x0C;
+                case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.HaloXbox, CacheVersion.HaloPC):
+                case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagBlock<>) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.HaloXbox, CacheVersion.HaloPC):
+                    return 0x0C;
 
 				case TypeCode.Decimal:
 				case TypeCode.Object when type == typeof(CachedTag) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
-				case TypeCode.Object when type == typeof(RealArgbColor):
+                case TypeCode.Object when type == typeof(CachedTag) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.HaloXbox, CacheVersion.HaloPC):
+                case TypeCode.Object when type == typeof(RealArgbColor):
 				case TypeCode.Object when type == typeof(RealQuaternion):
 				case TypeCode.Object when type == typeof(RealPlane3d):
 					return 0x10;
