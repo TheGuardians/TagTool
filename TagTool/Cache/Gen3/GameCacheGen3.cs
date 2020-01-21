@@ -27,6 +27,16 @@ namespace TagTool.Cache
         public override Stream OpenCacheReadWrite() => CacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
         public override Stream OpenCacheWrite() => CacheFile.Open(FileMode.Open, FileAccess.Write);
 
+        /// <summary>
+        /// Alignment of sections in the cache
+        /// </summary>
+        public readonly int SectionAlign = 0x1000;
+
+        /// <summary>
+        /// Alignment of resource pages in the resource section.
+        /// </summary>
+        public readonly int PageAlign = 0x800;
+
         public uint TagAddressToOffset(uint address) => address - (BaseMapFile.Header.TagBaseAddress - BaseMapFile.Header.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)); 
 
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
@@ -121,11 +131,35 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagGen3 instance) =>
             Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
+        #endregion
+
         public override void SaveStrings()
         {
             throw new NotImplementedException();
         }
 
-        #endregion
+        public void ResizeSection(CacheFileSectionType type, int requestedAdditionalSpace)
+        {
+            var sectionTable = BaseMapFile.Header.SectionTable;
+            var section = sectionTable.Sections[(int)type];
+
+            var sectionFileOffset = sectionTable.GetSectionOffset(type);
+            var sectionSize = section.Size;
+            var shiftAmount = (requestedAdditionalSpace + SectionAlign - 1) & ~(SectionAlign - 1);
+            var sectionNewSize = sectionSize + shiftAmount;
+
+
+            //
+            // Need to update all references to the section in the header and the section table. If it's a tag section, need to update the partitions. 
+            // if it's a locale, need to update matg, if it's a resource, need to update play, if it's a string, need to update the string offsets
+            // once all the updating is done, fix sections
+
+            section.Size = sectionNewSize;
+
+            for(int i = (int)type + 1; i < (int)CacheFileSectionType.Count; i++)
+            {
+                sectionTable.SectionAddressToOffsets[i] += shiftAmount;
+            }
+        }
     }
 }

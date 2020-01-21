@@ -14,6 +14,7 @@ using TagTool.Bitmaps.DDS;
 using TagTool.Geometry;
 using TagTool.BlamFile;
 using TagTool.Tags.Definitions.Gen1;
+using TagTool.Strings;
 
 namespace TagTool.Commands
 {
@@ -32,7 +33,8 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Halo3Beta");
+            /*
+            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Halo3");
             var outDir = new DirectoryInfo("CacheTest");
             if (!outDir.Exists)
                 outDir.Create();
@@ -42,28 +44,43 @@ namespace TagTool.Commands
             //
             // Insert what test command you want below
             //
-            var mapFile = new FileInfo(@"D:\Halo\Maps\HaloPC\a10.map");
+
+            var mapFile = new FileInfo(@"D:\Halo\Maps\Halo3\guardian.map");
             var mapName = mapFile.Name;
             Console.WriteLine($"{mapName}...");
 
             var cache = GameCache.Open(mapFile);
+            */
 
-
-            using(var stream = cache.OpenCacheRead())
+            var resolver = Cache.StringTable.Resolver;
+            for(int i = 0; i < Cache.StringTable.Count; i++)
             {
-                foreach (var tag in cache.TagCache.TagTable)
-                {
-                    if (tag.Group.Tag == "snd!")
-                    {
-                        var sound = cache.Deserialize<TagTool.Tags.Definitions.Gen1.Sound>(stream, tag);
-                    }
-                }
+                var stringId = Cache.StringTable.GetStringId(i);
+                var set = resolver.GetSet(stringId);
+                var index = resolver.GetIndex(stringId);
+
+                if (set == 1)
+                    PrintEnum(index, Cache.StringTable[i]);//PrintStringID(set, index, i, Cache.StringTable[i], (StringIDType)set);
             }
-            
+
+
 
 
             return true;
         }
+
+        public void PrintStringID(int set, int index, int tableIndex, string str, StringIDType type)
+        {
+            Console.WriteLine($"{tableIndex:X8}, {set:X2}, {index:X4}, {type.ToString()}, {str}");
+        }
+
+        public void PrintEnum(int index, string str)
+        {
+            Console.WriteLine($"string_id_{str} = 0x{index:X4},");
+        }
     }
+
+
+
 }
 

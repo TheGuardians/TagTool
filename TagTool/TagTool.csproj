@@ -479,6 +479,8 @@
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
+    <Compile Include="Strings\ms23\Strings.cs" />
+    <Compile Include="Strings\StringIDType.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
     <Compile Include="Tags\Definitions\Gen1\Sound.cs" />
