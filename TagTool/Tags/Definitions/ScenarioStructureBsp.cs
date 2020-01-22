@@ -574,7 +574,7 @@ namespace TagTool.Tags.Definitions
                 public class Gen3DecoratorInfo : TagStructure
                 {
                     public sbyte PaletteIndex;
-                    public sbyte VertexBufferIndex;
+                    public byte VertexBufferIndex;
                 }
 
                 [TagStructure(Size = 0x6)]
