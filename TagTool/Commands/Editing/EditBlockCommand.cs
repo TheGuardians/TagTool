@@ -125,7 +125,7 @@ namespace TagTool.Commands.Editing
                 contextName = $"{blockName}[{blockIndex}]";
             }
 
-            var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType());
+            var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType(), Cache.Version);
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(Cache, blockStructure, blockValue));

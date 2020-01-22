@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -17,8 +18,8 @@ namespace TagTool.Tags.Definitions
             public short MaxSoundsPerTag;
             public short MaxSoundsPerObject;
             public int PreemptionTime;
-            public ushort InternalFlags;
-            public ushort Flags;
+            public InternalFlagBits InternalFlags;
+            public ClassFlagBits Flags;
             public short Priority;
             public CacheMissModeValue CacheMissMode;
             public sbyte Unknown;
@@ -97,6 +98,50 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public float Unknown35;
+
+            [Flags]
+            public enum InternalFlagBits : ushort
+            {
+                None,
+                ClassIsValid = 1 << 0,
+                ClassIsSpeech = 1 << 1,
+                ClassIsScripted = 1 << 2,
+                MutesWithObject = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Multilingual = 1 << 7,
+                Bit8 = 1 << 8,
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15
+            }
+
+            [Flags]
+            public enum ClassFlagBits : ushort
+            {
+                None,
+                CanPlayDuringPause = 1 << 0,
+                DryStereoMix = 1 << 1,
+                PlaysThroughObjects = 1 << 2,
+                IsCenterUnspatialized = 1 << 3,
+                MonoLfe = 1 << 4,
+                Deterministic = 1 << 5,
+                UseHugeTransmission = 1 << 6,
+                AlwaysUseSpeakers = 1 << 7,
+                IsAvailableOnMainmenu = 1 << 8,
+                IgnoreStereoHeadroom = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                ClassPlaysOnMainmenu = 1 << 14,
+                Bit15 = 1 << 15,
+            }
 
             public enum CacheMissModeValue : sbyte
             {

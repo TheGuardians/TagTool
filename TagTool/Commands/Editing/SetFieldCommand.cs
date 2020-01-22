@@ -49,7 +49,7 @@ namespace TagTool.Commands.Editing
             var previousOwner = Owner;
             var previousStructure = Structure;
 
-            if (fieldName.Contains(".")) // requires EditBlock command + context
+            if (fieldName.Contains("."))
             {
                 var lastIndex = fieldName.LastIndexOf('.');
                 var blockName = fieldName.Substring(0, lastIndex);

@@ -427,7 +427,11 @@ namespace TagTool.Commands.Porting
                 MaxSoundsPerTag = 4,
                 MaxSoundsPerObject = 1,
                 PreemptionTime = 100,
-                InternalFlags = 881,
+
+                InternalFlags = (SoundClasses.Class.InternalFlagBits.ClassIsValid | SoundClasses.Class.InternalFlagBits.Bit4 | 
+                 SoundClasses.Class.InternalFlagBits.Bit5 | SoundClasses.Class.InternalFlagBits.Bit6 |
+                 SoundClasses.Class.InternalFlagBits.Bit8 | SoundClasses.Class.InternalFlagBits.Bit9),
+
                 Priority = 5,
                 DistanceBoundsMin = 8.0f,
                 DistanceBoundsMax = 120.0f,
@@ -435,7 +439,8 @@ namespace TagTool.Commands.Porting
             };
 
             // hud class, unique to HO. the above values seem to be okay
-            sncl.Classes.Insert(50, sClass);
+            if (sncl.Classes.Count >= 50)
+                sncl.Classes.Insert(50, sClass);
 
             if (version <= CacheVersion.Halo3Retail)
             {
@@ -443,6 +448,10 @@ namespace TagTool.Commands.Porting
                 for (int i = sncl.Classes.Count; i < 65; i++)
                     sncl.Classes.Add(sClass);
             }
+
+            // ms23 requires this flag to play a class on the mainmenu
+            sncl.Classes[32].Flags |= SoundClasses.Class.ClassFlagBits.ClassPlaysOnMainmenu; // Music
+            sncl.Classes[52].Flags |= SoundClasses.Class.ClassFlagBits.ClassPlaysOnMainmenu; // UI
 
             return sncl;
         }
