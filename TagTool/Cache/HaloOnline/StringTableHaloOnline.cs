@@ -23,8 +23,10 @@ namespace TagTool.Cache.HaloOnline
             else
                 Resolver = new StringIdResolverMS23();
 
-            if (stream.Length != 0)
+            if ( stream != null && stream.Length != 0)
                 Load(stream);
+            else
+                CreateFromStrings();
         }
 
         public override StringId AddString(string newString)
@@ -105,6 +107,51 @@ namespace TagTool.Cache.HaloOnline
             }
             Clear();
             AddRange(strings.ToList());
+        }
+
+        /// <summary>
+        /// Creates a string table exactly like the ms23 one up to the last hardcoded stringid in the engine. Do not modify this.
+        /// </summary>
+        private void CreateFromStrings()
+        {
+            Clear();
+            Add("");    // invalid stringid
+
+            foreach(var str in Enum.GetNames(typeof(GUIStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(ContentPromptStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(GameplayPromptStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(NetworkStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(MultiplayerEventStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(EventStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(BlfStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(GlobalStrings)))
+                Add(TrimStringID(str));
+
+            foreach (var str in Enum.GetNames(typeof(TagStrings)))
+            {
+                if (str == "string_id_")  // skip invalid string since we already added it
+                    continue;
+                Add(TrimStringID(str));
+            }
+        }
+
+        private string TrimStringID(string str)
+        {
+            return str.Remove(0, "string_id_".Length);
         }
     }
 }

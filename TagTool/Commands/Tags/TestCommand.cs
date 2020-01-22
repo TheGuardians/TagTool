@@ -14,7 +14,7 @@ using TagTool.Bitmaps.DDS;
 using TagTool.Geometry;
 using TagTool.BlamFile;
 using TagTool.Tags.Definitions.Gen1;
-using TagTool.Strings;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands
 {
@@ -33,8 +33,8 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            /*
-            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Halo3");
+            
+            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Reach");
             var outDir = new DirectoryInfo("CacheTest");
             if (!outDir.Exists)
                 outDir.Create();
@@ -45,23 +45,72 @@ namespace TagTool.Commands
             // Insert what test command you want below
             //
 
-            var mapFile = new FileInfo(@"D:\Halo\Maps\Halo3\guardian.map");
-            var mapName = mapFile.Name;
-            Console.WriteLine($"{mapName}...");
+            var newStringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, null);
 
-            var cache = GameCache.Open(mapFile);
+            for(int i = 0; i < newStringTable.Count; i++)
+            {
+                var cacheString = Cache.StringTable[i];
+                var newString = newStringTable[i];
+                if (newString != cacheString)
+                {
+                    var test = 1;
+                }
+            }
+
+
+            return true;
+            if (Cache.StringTable != null)
+            {
+                using (var fileStream = new FileInfo($"stringids\\ms23.txt").CreateText())
+                {
+                    var resolver = Cache.StringTable.Resolver;
+                    for (int i = 0; i < Cache.StringTable.Count; i++)
+                    {
+                        var stringId = Cache.StringTable.GetStringId(i);
+                        var set = resolver.GetSet(stringId);
+                        var index = resolver.GetIndex(stringId);
+                        fileStream.WriteLine($"{i:X8}, {set:X2}, {index:X4}, {Cache.StringTable[i]}");
+
+                    }
+                }
+            }
+
+            return true;
+            foreach(var mapFile in mapFiles)
+            {
+                var cache = GameCache.Open(mapFile);
+                if(cache.StringTable != null)
+                {
+                    using (var fileStream = new FileInfo($"stringids\\reach\\{mapFile.Name}.txt").CreateText())
+                    {
+                        var resolver = cache.StringTable.Resolver;
+                        for (int i = 0; i < cache.StringTable.Count; i++)
+                        {
+                            var stringId = cache.StringTable.GetStringId(i);
+                            var set = resolver.GetSet(stringId);
+                            var index = resolver.GetIndex(stringId);
+                            fileStream.WriteLine($"{i:X8}, {set:X2}, {index:X4}, {cache.StringTable[i]}");
+
+                        }
+                    }
+                }
+            }
+
+            /*
+            using(var fileStream = new FileInfo("ms23set0.txt").CreateText())
+            {
+                var resolver = Cache.StringTable.Resolver;
+                for (int i = 0; i < Cache.StringTable.Count; i++)
+                {
+                    var stringId = Cache.StringTable.GetStringId(i);
+                    var set = resolver.GetSet(stringId);
+                    var index = resolver.GetIndex(stringId);
+                    fileStream.WriteLine($"{i:X8}, {set:X2}, {index:X4}, {Cache.StringTable[i]}");
+
+                }
+            }
             */
 
-            var resolver = Cache.StringTable.Resolver;
-            for(int i = 0; i < Cache.StringTable.Count; i++)
-            {
-                var stringId = Cache.StringTable.GetStringId(i);
-                var set = resolver.GetSet(stringId);
-                var index = resolver.GetIndex(stringId);
-
-                if (set == 1)
-                    PrintEnum(index, Cache.StringTable[i]);//PrintStringID(set, index, i, Cache.StringTable[i], (StringIDType)set);
-            }
 
 
 
