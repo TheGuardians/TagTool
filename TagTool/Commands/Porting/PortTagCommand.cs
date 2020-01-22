@@ -189,7 +189,7 @@ namespace TagTool.Commands.Porting
 					if (CacheContext.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
                         return shitInstance;
                     if (BlamCache.Version < CacheVersion.HaloOnline106708)
-                        return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
+                        return CacheContext.Deserialize<RasterizerGlobals>(cacheStream, CacheContext.GetTag<RasterizerGlobals>(@"globals\rasterizer_globals")).DefaultShieldImpact;
                     break;
 
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
