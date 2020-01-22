@@ -16,9 +16,9 @@ namespace TagTool.Tags.Definitions
         public List<UnknownBlock> UnknownBlock40;
         public List<CortanaSuckBlock> CortanaSuck;
         public List<PlayerTrainingDatum> PlayerTrainingData;
-        public CachedTagInstance StartMenuEmblems;
-        public CachedTagInstance CampaignMedals;
-        public CachedTagInstance CampaignMedalHudAnimation;
+        public CachedTag StartMenuEmblems;
+        public CachedTag CampaignMedals;
+        public CachedTag CampaignMedalHudAnimation;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ChudDefinition.HudWidget.PlacementDatum.AnchorValue CampaignMedalChudAnchor;
         [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 2, Flags = Padding)]
@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public float CampaignMedalOffsetY;
         public float MetagameScoreboardTopY;
         public float MetagameScoreboardSpacing;
-        public CachedTagInstance UnitDamageGrid;
+        public CachedTag UnitDamageGrid;
         public float MicroTextureTileAmount;
         public float MediumSensorBlipScale;
         public float SmallSensorBlipScale;
@@ -37,10 +37,10 @@ namespace TagTool.Tags.Definitions
         public float SensorBlipGlowAmount;
         public float SensorBlipGlowRadius;
         public float SensorBlipGlowOpacity;
-        public CachedTagInstance MotionSensorBlip;
-        public CachedTagInstance BirthdayPartyEffect;
-        public CachedTagInstance CampaignFloodMask;
-        public CachedTagInstance CampaignFloodMaskTile;
+        public CachedTag MotionSensorBlip;
+        public CachedTag BirthdayPartyEffect;
+        public CachedTag CampaignFloodMask;
+        public CachedTag CampaignFloodMaskTile;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float MotionSensorBlipHeightModifier;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -172,7 +172,7 @@ namespace TagTool.Tags.Definitions
         public float SprintFOXTransitionOutTime = 1.0f;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance ParallaxData = null;
+        public CachedTag ParallaxData = null;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown49;
@@ -297,7 +297,7 @@ namespace TagTool.Tags.Definitions
         };
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance SurvivalHUDUnknown = null;  //chdt tagreference which activates in firefight
+        public CachedTag SurvivalHUDUnknown = null;  //chdt tagreference which activates in firefight
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown72 = 3.0f;
@@ -368,18 +368,18 @@ namespace TagTool.Tags.Definitions
 
             public List<HudAttribute> HudAttributes;
             public List<HudSound> HudSounds;
-            public CachedTagInstance Unknown;
-            public CachedTagInstance FragGrenadeSwapSound;
-            public CachedTagInstance PlasmaGrenadeSwapSound;
-            public CachedTagInstance SpikeGrenadeSwapSound;
-            public CachedTagInstance FirebombGrenadeSwapSound;
-            public CachedTagInstance DamageMicrotexture;
-            public CachedTagInstance DamageNoise;
-            public CachedTagInstance DirectionalArrow;
+            public CachedTag Unknown;
+            public CachedTag FragGrenadeSwapSound;
+            public CachedTag PlasmaGrenadeSwapSound;
+            public CachedTag SpikeGrenadeSwapSound;
+            public CachedTag FirebombGrenadeSwapSound;
+            public CachedTag DamageMicrotexture;
+            public CachedTag DamageNoise;
+            public CachedTag DirectionalArrow;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance GrenadeWaypoint = null;
+            public CachedTag GrenadeWaypoint = null;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance PinkGradient = null;
+            public CachedTag PinkGradient = null;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public float DirectionalArrowDisplayTime;
@@ -394,28 +394,28 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown12;
 
-            public CachedTagInstance ObjectiveWaypoints;
+            public CachedTag ObjectiveWaypoints;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance PlayerWaypoints = null;
-            public CachedTagInstance ScoreboardHud;
-            public CachedTagInstance MetagameScoreboardHud;
+            public CachedTag PlayerWaypoints = null;
+            public CachedTag ScoreboardHud;
+            public CachedTag MetagameScoreboardHud;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance SurvivalHud = null;
+            public CachedTag SurvivalHud = null;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance MetagameScoreboardHud2 = null;
-            public CachedTagInstance TheaterHud;
-            public CachedTagInstance ForgeHud;
-            public CachedTagInstance HudStrings;
-            public CachedTagInstance Medals;
+            public CachedTag MetagameScoreboardHud2 = null;
+            public CachedTag TheaterHud;
+            public CachedTag ForgeHud;
+            public CachedTag HudStrings;
+            public CachedTag Medals;
             public List<MultiplayerMedal> MultiplayerMedals;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance MedalHudAnimation2 = null;
-            public CachedTagInstance MedalHudAnimation;
-            public CachedTagInstance CortanaChannel;
-            public CachedTagInstance Unknown20;
-            public CachedTagInstance Unknown21;
-            public CachedTagInstance JammerResponse;
-            public CachedTagInstance JammerShieldHit;
+            public CachedTag MedalHudAnimation2 = null;
+            public CachedTag MedalHudAnimation;
+            public CachedTag CortanaChannel;
+            public CachedTag Unknown20;
+            public CachedTag Unknown21;
+            public CachedTag JammerResponse;
+            public CachedTag JammerShieldHit;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public RealPoint2d GrenadeSchematicsOffset;
             public float GrenadeScematicsSpacing;
@@ -525,13 +525,13 @@ namespace TagTool.Tags.Definitions
 
                 //these four tagrefs have no function in HO
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance FirstPersonUnknownBitmap = null;
+                public CachedTag FirstPersonUnknownBitmap = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance ThirdPersonUnknownBitmap = null;
+                public CachedTag ThirdPersonUnknownBitmap = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance FirstPersonDamageBorder = null;
+                public CachedTag FirstPersonDamageBorder = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance ThirdPersonDamageBorder = null;
+                public CachedTag ThirdPersonDamageBorder = null;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float StateScale_HO;
@@ -641,7 +641,7 @@ namespace TagTool.Tags.Definitions
             public class HudSound : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public CachedTagInstance SpartanSound;
+                public CachedTag SpartanSound;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public LatchedToValues_H3 LatchedTo_H3;
@@ -656,7 +656,7 @@ namespace TagTool.Tags.Definitions
                 public List<BipedData> Bipeds;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public CachedTagInstance EliteSound;
+                public CachedTag EliteSound;
 
                 [Flags]
                 public enum LatchedToValues : int
@@ -746,7 +746,7 @@ namespace TagTool.Tags.Definitions
                     [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                     public byte[] Unused = new byte[3];
 
-                    public CachedTagInstance Sound;
+                    public CachedTag Sound;
 
                     public enum BipedTypeValue_ODST : sbyte
                     {
@@ -780,8 +780,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x20)]
         public class HudShader : TagStructure
         {
-            public CachedTagInstance VertexShader;
-            public CachedTagInstance PixelShader;
+            public CachedTag VertexShader;
+            public CachedTag PixelShader;
         }
 
         [TagStructure(Size = 0x40)]
@@ -840,7 +840,7 @@ namespace TagTool.Tags.Definitions
                 public float NoiseTranslationScalexmax;
                 public float NoiseTranslationScaleymin;
                 public float NoiseTranslationScaleymax;
-                public CachedTagInstance Message;
+                public CachedTag Message;
                 //Section B
                 public float NoiseaVelocitymin_B;
                 public float NoiseaVelocitymax_B;
@@ -866,7 +866,7 @@ namespace TagTool.Tags.Definitions
                 public float NoiseTranslationScalexmax_B;
                 public float NoiseTranslationScaleymin_B;
                 public float NoiseTranslationScaleymax_B;
-                public CachedTagInstance Message_B;
+                public CachedTag Message_B;
             }
         }
 

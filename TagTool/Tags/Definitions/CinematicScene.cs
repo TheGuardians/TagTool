@@ -33,8 +33,8 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
             public StringId Variant;
-            public CachedTagInstance PuppetAnimation;
-            public CachedTagInstance PuppetObject;
+            public CachedTag PuppetAnimation;
+            public CachedTag PuppetObject;
 
             public short Flags;
             public short Unknown1;
@@ -58,7 +58,7 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown8;
                 public uint Unknown9;
                 public uint Unknown10;
-                public CachedTagInstance Unknown11;
+                public CachedTag Unknown11;
             }
         }
 
@@ -103,7 +103,7 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown;
 
                 [TagField(Flags = Label)]
-                public CachedTagInstance CinematicLight;
+                public CachedTag CinematicLight;
                 public int OwnerPuppetIndex;
                 public StringId Marker;
             }
@@ -134,7 +134,7 @@ namespace TagTool.Tags.Definitions
             public class SoundBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public CachedTagInstance Sound;
+                public CachedTag Sound;
                 public int Frame;
                 public float Unknown1;
                 public StringId Unknown2;
@@ -147,7 +147,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public uint Unknown1;
                 [TagField(Flags = Label)]
-                public CachedTagInstance Sound;
+                public CachedTag Sound;
                 public int Frame;
             }
 
@@ -155,7 +155,7 @@ namespace TagTool.Tags.Definitions
             public class EffectBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public CachedTagInstance Effect;
+                public CachedTag Effect;
                 public int Frame;
                 public StringId Marker;
                 public int OwnerPuppetIndex;
@@ -183,7 +183,7 @@ namespace TagTool.Tags.Definitions
             public class ScreenEffectBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public CachedTagInstance Effect;
+                public CachedTag Effect;
                 public int StartFrame;
                 public int EndFrame;
             }
@@ -192,7 +192,7 @@ namespace TagTool.Tags.Definitions
             public class CortanaEffectBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public CachedTagInstance Effect;
+                public CachedTag Effect;
                 public uint Unknown;
             }
 

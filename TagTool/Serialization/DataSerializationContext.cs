@@ -11,32 +11,28 @@ namespace TagTool.Serialization
     {
         public EndianReader Reader { get; }
         public EndianWriter Writer { get; }
-        public CacheResourceAddressType AddressType { get; }
+        public CacheAddressType AddressType { get; }
 
-        public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheResourceAddressType addressType = CacheResourceAddressType.Memory)
+        public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
         {
             Reader = reader;
             Writer = writer;
             AddressType = addressType;
         }
 
-        public DataSerializationContext(EndianReader reader, CacheResourceAddressType addressType = CacheResourceAddressType.Memory) :
+        public DataSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory) :
             this(reader, null, addressType)
         {
         }
 
-        public DataSerializationContext(EndianWriter writer, CacheResourceAddressType addressType = CacheResourceAddressType.Memory) :
+        public DataSerializationContext(EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory) :
             this(null, writer, addressType)
         {
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            var resourceAddress = new CacheResourceAddress(address);
-
-            if (resourceAddress.Type != AddressType)
-                throw new InvalidOperationException("Cannot dereference a resource address of type " + resourceAddress.Type);
-
+            var resourceAddress = new CacheAddress(address);
             return (uint)resourceAddress.Offset;
         }
 
@@ -63,17 +59,17 @@ namespace TagTool.Serialization
             Writer.Write(data);
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public CachedTag GetTagByIndex(int index)
         {
             return null;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }
@@ -115,7 +111,7 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
+            public void AddTagReference(CachedTag referencedTag, bool isShort)
             {
             }
         }

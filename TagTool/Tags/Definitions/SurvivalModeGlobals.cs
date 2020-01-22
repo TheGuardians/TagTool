@@ -10,9 +10,9 @@ namespace TagTool.Tags.Definitions
     public class SurvivalModeGlobals : TagStructure
 	{
         public uint Unknown;
-        public CachedTagInstance InGameStrings;
-        public CachedTagInstance TimerSound;
-        public CachedTagInstance TimerSoundZero;
+        public CachedTag InGameStrings;
+        public CachedTag TimerSound;
+        public CachedTag TimerSoundZero;
         public List<SurvivalEvent> SurvivalEvents;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -50,18 +50,18 @@ namespace TagTool.Tags.Definitions
             public float SoundDelayAnnouncerOnly;
             public ushort SoundFlags;
             public short Unknown4;
-            public CachedTagInstance EnglishSound;
-            public CachedTagInstance JapaneseSound;
-            public CachedTagInstance GermanSound;
-            public CachedTagInstance FrenchSound;
-            public CachedTagInstance SpanishSound;
-            public CachedTagInstance LatinAmericanSpanishSound;
-            public CachedTagInstance ItalianSound;
-            public CachedTagInstance KoreanSound;
-            public CachedTagInstance ChineseTraditionalSound;
-            public CachedTagInstance ChineseSimplifiedSound;
-            public CachedTagInstance PortugueseSound;
-            public CachedTagInstance PolishSound;
+            public CachedTag EnglishSound;
+            public CachedTag JapaneseSound;
+            public CachedTag GermanSound;
+            public CachedTag FrenchSound;
+            public CachedTag SpanishSound;
+            public CachedTag LatinAmericanSpanishSound;
+            public CachedTag ItalianSound;
+            public CachedTag KoreanSound;
+            public CachedTag ChineseTraditionalSound;
+            public CachedTag ChineseSimplifiedSound;
+            public CachedTag PortugueseSound;
+            public CachedTag PolishSound;
             public uint Unknown5;
             public uint Unknown6;
             public uint Unknown7;

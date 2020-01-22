@@ -10,11 +10,11 @@ namespace TagTool.Commands.Shaders
 {
     public class GenerateRenderMethodTemplate : Command
     {
-        private GameCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private RenderMethodTemplate Definition { get; }
 
-        public GenerateRenderMethodTemplate(GameCacheContext cacheContext, CachedTagInstance tag, RenderMethodTemplate definition) :
+        public GenerateRenderMethodTemplate(GameCache cache, CachedTag tag, RenderMethodTemplate definition) :
             base(true,
 
                 "Generate",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.Shaders
                 "Generate <shader_type> <parameters...>",
                 "Compiles HLSL source file from scratch :D")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -204,7 +204,7 @@ namespace TagTool.Commands.Shaders
                         var split = line.Split(' ');
                         parameters.Add(new ShaderParameter
                         {
-                            ParameterName = (CacheContext as HaloOnlineCacheContext).GetStringId(split[0]),
+                            ParameterName = Cache.StringTable.GetStringId(split[0]),
                             RegisterType = (ShaderParameter.RType)Enum.Parse(typeof(ShaderParameter.RType), split[1][0].ToString()),
                             RegisterIndex = byte.Parse(split[1].Substring(1)),
                             RegisterCount = byte.Parse(split[2])

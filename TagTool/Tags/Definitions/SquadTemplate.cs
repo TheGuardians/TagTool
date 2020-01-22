@@ -41,7 +41,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Padding2;
 
-            public CachedTagInstance Vehicle;
+            public CachedTag Vehicle;
             public StringId VehicleVariant;
 
             public StringId ActivityName;
@@ -68,7 +68,7 @@ namespace TagTool.Tags.Definitions
                 public short MaximumRound;
                 public uint Unknown3;
 
-                public CachedTagInstance Object;
+                public CachedTag Object;
                 public short Probability;
 
                 [TagField(Flags = Padding, Length = 2)]

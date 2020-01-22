@@ -6,14 +6,15 @@ using TagTool.Analysis;
 using TagTool.Cache;
 using TagTool.Layouts;
 using TagTool.Commands.Common;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Definitions
 {
     class GenerateTagStructuresCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
 
-        public GenerateTagStructuresCommand(HaloOnlineCacheContext cacheFile) : base(
+        public GenerateTagStructuresCommand(GameCacheHaloOnlineBase cache) : base(
             true,
 
             "GenerateTagStructures",
@@ -26,7 +27,7 @@ namespace TagTool.Commands.Definitions
             "\n" +
             "Supported types: C#, C++")
         {
-            CacheContext = cacheFile;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -59,22 +60,22 @@ namespace TagTool.Commands.Definitions
             Directory.CreateDirectory(outDir);
 
             var count = 0;
-            using (var stream = CacheContext.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
-                foreach (var groupTag in CacheContext.TagCache.Index.NonNull().Select(t => t.Group.Tag).Distinct())
+                foreach (var groupTag in Cache.TagCache.NonNull().Select(t => t.Group.Tag).Distinct())
                 {
                     TagLayoutGuess layout = null;
-                    CachedTagInstance lastTag = null;
+                    CachedTag lastTag = null;
 
-                    foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
+                    foreach (var tag in Cache.TagCache.FindAllInGroup(groupTag))
                     {
                         Console.Write("Analyzing ");
                         TagPrinter.PrintTagShort(tag);
 
                         lastTag = tag;
 
-                        var analyzer = new TagAnalyzer(CacheContext.TagCache);
-                        var data = CacheContext.TagCache.ExtractTag(stream, tag);
+                        var analyzer = new TagAnalyzer(Cache.TagCacheGenHO);
+                        var data = Cache.TagCacheGenHO.ExtractTag(stream, (CachedTagHaloOnline)tag);
                         var tagLayout = analyzer.Analyze(data);
 
                         if (layout != null)
@@ -87,7 +88,7 @@ namespace TagTool.Commands.Definitions
                     {
                         Console.WriteLine("Writing {0} layout", groupTag);
 
-                        var name = CacheContext.GetString(lastTag.Group.Name);
+                        var name = Cache.StringTable.GetString(lastTag.Group.Name);
                         var tagLayout = LayoutGuessFinalizer.MakeLayout(layout, name, groupTag);
                         var path = Path.Combine(outDir, writer.GetSuggestedFileName(tagLayout));
 

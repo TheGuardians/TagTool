@@ -6,16 +6,17 @@ using TagTool.Tags;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Serialization
 {
     public class Gen3SerializationContext : ISerializationContext
     {
-        public GameCacheContextGen3 GameCache { get; private set; }
+        public GameCacheGen3 GameCache { get; private set; }
         public CachedTagGen3 Tag { get; private set; }
         public Stream Stream;
 
-        public Gen3SerializationContext(Stream stream, GameCacheContextGen3 gameCache, CachedTagGen3 tag)
+        public Gen3SerializationContext(Stream stream, GameCacheGen3 gameCache, CachedTagGen3 tag)
         {
             GameCache = gameCache;
             Tag = tag;
@@ -24,7 +25,7 @@ namespace TagTool.Serialization
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return address - (uint)GameCache.Magic;
+            return GameCache.TagAddressToOffset(address);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
@@ -53,29 +54,29 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public CachedTag GetTagByIndex(int index)
         {
-            var tag = GameCache.TagCache.GetTagByID(index);
+            var tag = GameCache.TagCache.GetTag((uint)index);
 
             var group = (tag != null) ? tag.Group : TagGroup.None;
 
             if (index == -1 || group == TagGroup.None)
                 return null;
 
-            return new CachedTagInstance(index, group, tag.Name);
+            return tag;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }
 
-        public void AddTagReference(CachedTagInstance referencedTag)
+        public void AddTagReference(CachedTag referencedTag)
         {
             throw new NotImplementedException();
         }

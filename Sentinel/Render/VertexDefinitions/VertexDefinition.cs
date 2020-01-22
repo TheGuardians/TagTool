@@ -15,7 +15,7 @@ namespace Sentinel.Render.VertexDefinitions
         public static VertexDefinition Get(TagTool.Geometry.VertexType vertexType) =>
             Activator.CreateInstance(VertexTypes[vertexType]) as VertexDefinition;
 
-        public static VertexDefinition Get(TagTool.Geometry.PrtType prtType) =>
+        public static VertexDefinition Get(TagTool.Geometry.PrtSHType prtType) =>
             Activator.CreateInstance(PrtTypes[prtType]) as VertexDefinition;
 
         public static Dictionary<TagTool.Geometry.VertexType, Type> VertexTypes { get; } = new Dictionary<TagTool.Geometry.VertexType, Type>
@@ -45,12 +45,12 @@ namespace Sentinel.Render.VertexDefinitions
             [TagTool.Geometry.VertexType.DualQuat] = typeof(DualQuatVertexDefinition)
         };
 
-        public static Dictionary<TagTool.Geometry.PrtType, Type> PrtTypes { get; } = new Dictionary<TagTool.Geometry.PrtType, Type>
+        public static Dictionary<TagTool.Geometry.PrtSHType, Type> PrtTypes { get; } = new Dictionary<TagTool.Geometry.PrtSHType, Type>
         {
-            [TagTool.Geometry.PrtType.None] = typeof(StaticShDefinition),
-            [TagTool.Geometry.PrtType.Ambient] = typeof(StaticPrtAmbientDefinition),
-            [TagTool.Geometry.PrtType.Linear] = typeof(StaticPrtLinearDefinition),
-            [TagTool.Geometry.PrtType.Quadratic] = typeof(StaticPrtQuadraticDefinition)
+            [TagTool.Geometry.PrtSHType.None] = typeof(StaticShDefinition),
+            [TagTool.Geometry.PrtSHType.Ambient] = typeof(StaticPrtAmbientDefinition),
+            [TagTool.Geometry.PrtSHType.Linear] = typeof(StaticPrtLinearDefinition),
+            [TagTool.Geometry.PrtSHType.Quadratic] = typeof(StaticPrtQuadraticDefinition)
         };
     }
 }

@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4C)]
         public class TextWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
             public GuiDefinition GuiRenderBlock;
             public StringId DataSourceName;
@@ -32,11 +32,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C)]
         public class BitmapWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
             public GuiDefinition GuiRenderBlock;
-            public CachedTagInstance Bitmap;
-            public CachedTagInstance Unknown2;
+            public CachedTag Bitmap;
+            public CachedTag Unknown2;
             public BlendMethodValue BlendMethod;
             public short Unknown3;
             public short SpriteIndex;
@@ -66,7 +66,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x94)]
         public class ModelWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
             public GuiDefinition GuiRenderBlock;
             public List<UnknownBlock> Unknown3;
@@ -128,7 +128,7 @@ namespace TagTool.Tags.Definitions
                 public Angle Unknown30;
                 public uint Unknown31;
                 public uint Unknown32;
-                public CachedTagInstance Unknown33;
+                public CachedTag Unknown33;
                 public uint Unknown34;
 
                 [TagStructure(Size = 0x14)]

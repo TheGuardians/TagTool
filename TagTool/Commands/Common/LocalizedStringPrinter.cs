@@ -13,12 +13,12 @@ namespace TagTool.Commands.Common
         /// Filters a set of localized strings and prepares them for display.
         /// </summary>
         /// <param name="unic">The string list.</param>
-        /// <param name="stringIds">The string ID cache to use.</param>
+        /// <param name="stringTable">The string ID cache to use.</param>
         /// <param name="strings">The strings to display.</param>
         /// <param name="language">The language to display strings from.</param>
         /// <param name="filter">The filter to match strings and stringIDs against. Can be <c>null</c> to display everything.</param>
         /// <returns>The strings to print.</returns>
-        public static List<DisplayString> PrepareForDisplay(MultilingualUnicodeStringList unic, StringIdCache stringIds, IEnumerable<LocalizedString> strings, GameLanguage language, string filter)
+        public static List<DisplayString> PrepareForDisplay(MultilingualUnicodeStringList unic, StringTable stringTable, IEnumerable<LocalizedString> strings, GameLanguage language, string filter)
         {
             // Filter the input strings
             var display = new List<DisplayString>();
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Common
                 var str = unic.GetString(localizedString, language);
                 if (str == null)
                     continue;
-                var stringId = stringIds.GetString(localizedString.StringID);
+                var stringId = stringTable.GetString(localizedString.StringID);
                 if (filter != null && !str.Contains(filter) && !stringId.Contains(filter))
                     continue;
                 display.Add(new DisplayString

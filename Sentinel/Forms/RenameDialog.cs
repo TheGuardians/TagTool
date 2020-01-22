@@ -19,14 +19,14 @@ namespace Sentinel.Forms
             Value = value;
         }
 
-        public RenameDialog(HaloOnlineCacheContext cacheContext, CachedTagInstance tag)
+        public RenameDialog(GameCache cache, CachedTag tag)
         {
             if (tag == null)
                 throw new NullReferenceException();
 
             InitializeComponent();
 
-            Text = $"Rename {cacheContext.GetString(tag.Group.Name)} tag...";
+            Text = $"Rename {cache.StringTable.GetString(tag.Group.Name)} tag...";
 
             Value = tag.Name != null ?
                 tag.Name :

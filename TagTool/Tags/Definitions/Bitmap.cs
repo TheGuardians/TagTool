@@ -101,12 +101,9 @@ namespace TagTool.Tags.Definitions
         public byte[] XenonProcessedPixelData;
         public List<Image> XenonImages;
 
-        public List<BitmapResource> Resources;
+        public List<TagResourceReference> Resources;
+        public List<TagResourceReference> InterleavedResources;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline106708)]
-        public List<BitmapResource> InterleavedResourcesOld;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<BitmapResource> InterleavedResourcesNew;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public int UnknownB4;
@@ -247,28 +244,11 @@ namespace TagTool.Tags.Definitions
             public int DataOffset;
             public int DataSize;
 
-            public float Unknown20;
-            public sbyte Unknown24;
-            public sbyte Unknown25;
-            public sbyte Unknown26;
-            public sbyte Unknown27;
+            public int Unknown20;
+            public int MipMapOffset;
             public int Unknown28;
             public int Unknown2C;
         }
 
-        [TagStructure(Size = 0x8)]
-        public class BitmapResource : TagStructure
-		{
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public DatumIndex ZoneAssetHandleOld;
-
-            [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public PageableResource Resource;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public DatumIndex ZoneAssetHandleNew;
-
-            public int Unknown4;
-        }
     }
 }

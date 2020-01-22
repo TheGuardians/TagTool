@@ -232,14 +232,14 @@ namespace TagTool.Tags.Definitions
             public List<TagResourceGen2> Resources;
 
             [TagField(Flags = Short)]
-            public CachedTagInstance Original;
+            public CachedTag Original;
 
             public short OwnerTagSectionOffset;
             public byte RuntimeLinked;
             public byte RuntimeLoaded;
 
             [TagField(Flags = Short)]
-            public CachedTagInstance Runtime;
+            public CachedTag Runtime;
         }
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
@@ -389,14 +389,14 @@ namespace TagTool.Tags.Definitions
             public List<TagResourceGen2> Resources;
 
             [TagField(Flags = Short)]
-            public CachedTagInstance Original;
+            public CachedTag Original;
 
             public short OwnerTagSectionOffset;
             public byte RuntimeLinked;
             public byte RuntimeLoaded;
 
             [TagField(Flags = Short)]
-            public CachedTagInstance Runtime;
+            public CachedTag Runtime;
 
             [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
             public class LodInfoBlock : TagStructure

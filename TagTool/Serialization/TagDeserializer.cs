@@ -9,6 +9,7 @@ using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 using BindingFlags = System.Reflection.BindingFlags;
 using System.IO;
+using System.Linq;
 
 namespace TagTool.Serialization
 {
@@ -217,17 +218,20 @@ namespace TagTool.Serialization
                 return new Tag(reader.ReadInt32());
 
             // TagInstance = Tag reference
-            if (valueType == typeof(CachedTagInstance))
+            if (valueType == typeof(CachedTag))
                 return DeserializeTagReference(reader, context, valueInfo);
 
             // ResourceAddress = Resource address
-            if (valueType == typeof(CacheResourceAddress))
-                return new CacheResourceAddress(reader.ReadUInt32());
+            if (valueType == typeof(CacheAddress))
+                return new CacheAddress(reader.ReadUInt32());
 
             // Byte array = Data reference
             // TODO: Allow other types to be in data references, since sometimes they can point to a structure
             if (valueType == typeof(byte[]) && valueInfo.Length == 0)
                 return DeserializeDataReference(reader, context);
+
+            if(valueType == typeof(TagData))
+                return DeserializeTagData(reader, context);
 
             // Color types
             if (valueType == typeof(RealRgbColor))
@@ -287,7 +291,7 @@ namespace TagTool.Serialization
 
             // StringID
             if (valueType == typeof(StringId))
-                return new StringId(reader.ReadUInt32(), Version);
+                return new StringId(reader.ReadUInt32());
 
             // Angle (radians)
             if (valueType == typeof(Angle))
@@ -303,7 +307,14 @@ namespace TagTool.Serialization
 
             // List = Tag block
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
+                return DeserializeTagBlockAsList(reader, context, valueType);
+
+            // actual tag blocks, used in resource definitions
+            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TagBlock<>))
                 return DeserializeTagBlock(reader, context, valueType);
+
+            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
+                return DeserializeD3DStructure(reader, context, valueType);
 
             // Ranges
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
@@ -326,28 +337,17 @@ namespace TagTool.Serialization
         /// <param name="context">The serialization context to use.</param>
         /// <param name="valueType">The type of the value to deserialize.</param>
         /// <returns>The deserialized tag block.</returns>
-        public object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
+        public object DeserializeTagBlockAsList(EndianReader reader, ISerializationContext context, Type valueType)
         {
             var result = Activator.CreateInstance(valueType);
             var elementType = valueType.GenericTypeArguments[0];
-
-            TagStructureAttribute structure;
-
-            try
-            {
-                structure = TagStructure.GetTagStructureInfo(elementType, Version).Structure;
-            }
-            catch
-            {
-                structure = null;
-            }
 
             // Read count and offset
             var startOffset = reader.BaseStream.Position;
             var count = reader.ReadInt32();
             
-            var pointer = new CacheResourceAddress(reader.ReadUInt32());
-            if (count == 0 || pointer.Value == 0)
+            var pointer = new CacheAddress(reader.ReadUInt32());
+            if (count == 0)
             {
                 // Null tag block
                 reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
@@ -374,6 +374,79 @@ namespace TagTool.Serialization
         }
 
         /// <summary>
+        /// Deserializes a tag block
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="context">The serialization context to use.</param>
+        /// <param name="valueType">The type of the value to deserialize.</param>
+        /// <returns>The deserialized tag block.</returns>
+        public virtual object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
+        {
+            var result = Activator.CreateInstance(valueType);
+            var elementType = valueType.GenericTypeArguments[0];
+
+            // Read count and offset
+            var startOffset = reader.BaseStream.Position;
+            var count = reader.ReadInt32();
+
+            var pointer = new CacheAddress(reader.ReadUInt32());
+            if (count == 0)
+            {
+                // Null tag block
+                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+                return result;
+            }
+
+            //
+            // Read each value
+            //
+
+            var methods = valueType.GetMethods();
+            // select the add method from IList<T> and not IList interfaces
+            var addMethod = methods.FirstOrDefault(method => method.Name == "Add" & method.ReturnType == typeof(void));
+
+            reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer.Value);
+
+            for (var i = 0; i < count; i++)
+            {
+                var element = DeserializeValue(reader, context, null, elementType);
+                addMethod.Invoke(result, new[] { element });
+            }
+
+            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Deserializes a value which is pointed to by an address.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="context">The serialization context to use.</param>
+        /// <param name="valueType">The type of the value to deserialize.</param>
+        /// <returns>The deserialized value.</returns>
+        public virtual object DeserializeD3DStructure(EndianReader reader, ISerializationContext context, Type valueType)
+        {
+          
+            var result = Activator.CreateInstance(valueType);
+            var elementType = valueType.GenericTypeArguments[0];
+
+            // Read the pointer
+            var startOffset = reader.BaseStream.Position;
+            var pointer = reader.ReadUInt32();
+
+            // Seek to it and read the object
+
+            reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer);
+
+            var definition = DeserializeValue(reader, context, null, elementType);
+            valueType.GetField("Definition").SetValue(result, definition);
+
+            reader.BaseStream.Position = startOffset + 0xC;
+            return result;
+        }
+
+        /// <summary>
         /// Deserializes a value which is pointed to by an address.
         /// </summary>
         /// <param name="reader">The reader.</param>
@@ -384,9 +457,10 @@ namespace TagTool.Serialization
         {
             // Read the pointer
             var pointer = reader.ReadUInt32();
-            if (pointer == 0)
+            
+            if ( valueType == typeof(PageableResource) && pointer == 0)
                 return null; // Null object
-
+            
             // Seek to it and read the object
             var nextOffset = reader.BaseStream.Position;
             reader.BaseStream.Position = context.AddressToOffset((uint)nextOffset - 4, pointer);
@@ -402,7 +476,7 @@ namespace TagTool.Serialization
         /// <param name="context">The serialization context to use.</param>
         /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
         /// <returns>The deserialized tag reference.</returns>
-        public CachedTagInstance DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
+        public CachedTag DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
         {
             if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
                 reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
@@ -445,6 +519,35 @@ namespace TagTool.Serialization
             reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
             return result;
         }
+
+        public virtual TagData DeserializeTagData(EndianReader reader, ISerializationContext context)
+        {
+            // Read size and pointer
+            var startOffset = reader.BaseStream.Position;
+            var size = reader.ReadInt32();
+            if (Version > CacheVersion.Halo2Vista)
+                reader.BaseStream.Position = startOffset + 0xC;
+            var pointer = reader.ReadUInt32();
+            if (pointer == 0)
+            {
+                // Null data reference
+                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+                return new TagData();
+            }
+
+            // Read the data
+            var result = new byte[size];
+            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
+            reader.Read(result, 0, size);
+            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+
+            var tagData = new TagData();
+
+            tagData.Data = result;
+            
+            return tagData;
+        }
+
 
         /// <summary>
         /// Deserializes an inline array.

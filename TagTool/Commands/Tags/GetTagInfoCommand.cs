@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
     class GetTagInfoCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
 
-        public GetTagInfoCommand(HaloOnlineCacheContext cacheContext)
+        public GetTagInfoCommand(GameCacheHaloOnlineBase cache)
             : base(true,
 
             "GetTagInfo",
@@ -18,7 +19,7 @@ namespace TagTool.Commands.Tags
 
             "Displays detailed information about a tag.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -26,9 +27,9 @@ namespace TagTool.Commands.Tags
             if (args.Count != 1)
                 return false;
 
-            if (!CacheContext.TryGetTag(args[0], out var tag))
+            if (!Cache.TryGetTag(args[0], out var tag))
                 return false;
-
+            var hoTag = (CachedTagHaloOnline)tag;
             Console.WriteLine("Information for tag {0:X8}:", tag.Index);
             Console.Write("- Groups:        {0}", tag.Group.Tag);
             if (tag.Group.ParentTag.Value != -1)
@@ -36,8 +37,8 @@ namespace TagTool.Commands.Tags
             if (tag.Group.GrandparentTag.Value != -1)
                 Console.Write(" -> {0}", tag.Group.GrandparentTag);
             Console.WriteLine();
-            Console.WriteLine("- Header offset: 0x{0:X}", tag.HeaderOffset);
-            Console.WriteLine("- Total size:    0x{0:X}", tag.TotalSize);
+            Console.WriteLine("- Header offset: 0x{0:X}", hoTag.HeaderOffset);
+            Console.WriteLine("- Total size:    0x{0:X}", hoTag.TotalSize);
             Console.WriteLine("- Definition offset (relative to header offset): 0x{0:X}", tag.DefinitionOffset);
             Console.WriteLine();
             Console.WriteLine("Use \"dep list {0:X}\" to list this tag's dependencies.", tag.Index);

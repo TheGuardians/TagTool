@@ -7,15 +7,15 @@ namespace TagTool.Tags.Definitions
     public class MapList : TagStructure
     {
         public List<MapImage> MapImages;
-        public CachedTagInstance DefaultMapImage;
-        public CachedTagInstance DefaultLoadingScreen;
+        public CachedTag DefaultMapImage;
+        public CachedTag DefaultLoadingScreen;
 
         [TagStructure(Size = 0x20)]
         public class MapImage : TagStructure
         {
             public int MapId;
-            public CachedTagInstance Bitmap;
-            public List<CachedTagInstance> LoadingScreenBitmaps;
+            public CachedTag Bitmap;
+            public List<CachedTag> LoadingScreenBitmaps;
         }
     }
 }

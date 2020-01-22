@@ -34,6 +34,6 @@ namespace TagTool.Ai
         public float SuicideRadius;
         public float RuntimeBodyRechargeVelocity;
         public float RuntimeShieldRechargeVelocity;
-        public CachedTagInstance ResurrectWeapon;
+        public CachedTag ResurrectWeapon;
     }
 }

@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ListUnusedTagsCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public ListUnusedTagsCommand(HaloOnlineCacheContext cacheContext)
+        public ListUnusedTagsCommand(GameCacheHaloOnlineBase cache)
             : base(false,
 
                   "ListUnusedTags",
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Tags
 
                   "Lists all unreferenced tags in the current tag cache")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -29,14 +29,14 @@ namespace TagTool.Commands.Tags
 
             var depCounts = new Dictionary<int, int>();
 
-            foreach (var tag in CacheContext.TagCache.Index)
+            foreach (var tag in Cache.TagCacheGenHO.Tags)
             {
                 if (tag == null)
                     continue;
 
                 foreach (var dep in tag.Dependencies)
                 {
-                    var depTag = CacheContext.GetTag(dep);
+                    var depTag = Cache.TagCache.GetTag(dep);
 
                     if (depTag == null)
                         continue;
@@ -48,9 +48,9 @@ namespace TagTool.Commands.Tags
                 }
             }
 
-            for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
+            for (var i = 0; i < Cache.TagCache.Count; i++)
             {
-                var tag = CacheContext.GetTag(i);
+                var tag = Cache.TagCache.GetTag(i);
 
                 if (tag == null || tag.IsInGroup("cfgt") || tag.IsInGroup("scnr"))
                     continue;

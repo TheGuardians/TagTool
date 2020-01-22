@@ -9,7 +9,7 @@ namespace TagTool.Ai
     public class CharacterFiringPatternProperties : TagStructure
 	{
         [TagField(Flags = Label)]
-        public CachedTagInstance Weapon;
+        public CachedTag Weapon;
         public List<CharacterFiringPattern> FiringPatterns;
     }
 }

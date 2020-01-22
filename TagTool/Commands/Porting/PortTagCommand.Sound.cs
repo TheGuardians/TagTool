@@ -24,10 +24,10 @@ namespace TagTool.Commands.Porting
             return filename;
         }
 
-        private Sound ConvertSound(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
+        private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
+                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\towav.exe"))
             {
@@ -73,7 +73,12 @@ namespace TagTool.Commands.Porting
             if (xmaFileSize < 0)
                 return null;
 
-            var xmaData = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, xmaFileSize);
+            var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+
+            if (soundResource == null)
+                return null;
+
+            var xmaData = soundResource.Data.Data;
 
             if (xmaData == null)
                 return null;
@@ -316,80 +321,18 @@ namespace TagTool.Commands.Porting
             // Prepare resource
             //
 
-            sound.Unused = new byte[] { 0, 0, 0, 0 };
             sound.Unknown12 = 0;
 
-            sound.Resource = new PageableResource
-            {
-                Page = new RawPage
-                {
-                    Index = -1,
-                },
-                Resource = new TagResourceGen3
-                {
-                    ResourceType = TagResourceTypeGen3.Sound,
-                    DefinitionData = new byte[20],
-                    DefinitionAddress = new CacheResourceAddress(CacheResourceAddressType.Definition, 536870912),
-                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
-                    Unknown2 = 1
-                }
-            };
-
             var data = soundDataAggregate.ToArray();
-
-            var resourceContext = new ResourceSerializationContext(CacheContext, sound.Resource);
-            CacheContext.Serializer.Serialize(resourceContext,
-                new SoundResourceDefinition
-                {
-                    Data = new TagData(data.Length, new CacheResourceAddress(CacheResourceAddressType.Resource, 0))
-                });
-
-            var definitionFixup = new TagResourceGen3.ResourceFixup()
-            {
-                BlockOffset = 12,
-                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, 1073741824)
-            };
-
-            sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
-
-            sound.Resource.ChangeLocation(ResourceLocation.Audio);
-            var resource = sound.Resource;
-
-            if (resource == null)
-                throw new ArgumentNullException("resource");
-
-            var cache = CacheContext.GetResourceCache(ResourceLocation.Audio);
-
-            if (!resourceStreams.ContainsKey(ResourceLocation.Audio))
-            {
-                resourceStreams[ResourceLocation.Audio] = FlagIsSet(PortingFlags.Memory) ?
-                    new MemoryStream() :
-                    (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Audio);
-
-                if (FlagIsSet(PortingFlags.Memory))
-                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Audio))
-                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Audio]);
-            }
-
-            resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Audio], data, out uint compressedSize);
-            resource.Page.CompressedBlockSize = compressedSize;
-            resource.Page.UncompressedBlockSize = (uint)data.Length;
-            resource.DisableChecksum();
-
-            for (int i = 0; i < 4; i++)
-            {
-                sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
-            }
+            var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(data);
+            var resourceReference = CacheContext.ResourceCache.CreateSoundResource(resourceDefinition);
+            sound.Resource = resourceReference;
 
             return sound;
         }
 
         private SoundLooping ConvertSoundLooping(SoundLooping soundLooping)
         {
-            if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
-
             soundLooping.Unused = null;
 
             soundLooping.SoundClass = ((int)soundLooping.SoundClass < 50) ? soundLooping.SoundClass : (soundLooping.SoundClass + 1);
@@ -418,12 +361,10 @@ namespace TagTool.Commands.Porting
 
         private Dialogue ConvertDialogue(Stream cacheStream, Dialogue dialogue)
         {
-            if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
 
-            CachedTagInstance edAdlg = null;
+            CachedTag edAdlg = null;
             AiDialogueGlobals adlg = null;
-            foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("adlg"))
+            foreach (var tag in CacheContext.TagCache.FindAllInGroup("adlg"))
             {
                 edAdlg = tag;
                 break;
@@ -454,7 +395,7 @@ namespace TagTool.Commands.Porting
                 for (int j = 0; j < dialogue.Vocalizations.Count; j++)
                 {
                     var vocalizationH3 = dialogue.Vocalizations[j];
-                    if (CacheContext.StringIdCache.GetString(vocalization.Name).Equals(CacheContext.StringIdCache.GetString(vocalizationH3.Name)))
+                    if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationH3.Name)))
                     {
                         vocalization.Flags = vocalizationH3.Flags;
                         vocalization.Unknown = vocalizationH3.Unknown;
@@ -486,7 +427,11 @@ namespace TagTool.Commands.Porting
                 MaxSoundsPerTag = 4,
                 MaxSoundsPerObject = 1,
                 PreemptionTime = 100,
-                InternalFlags = 881,
+
+                InternalFlags = (SoundClasses.Class.InternalFlagBits.ClassIsValid | SoundClasses.Class.InternalFlagBits.Bit4 | 
+                 SoundClasses.Class.InternalFlagBits.Bit5 | SoundClasses.Class.InternalFlagBits.Bit6 |
+                 SoundClasses.Class.InternalFlagBits.Bit8 | SoundClasses.Class.InternalFlagBits.Bit9),
+
                 Priority = 5,
                 DistanceBoundsMin = 8.0f,
                 DistanceBoundsMax = 120.0f,
@@ -494,7 +439,8 @@ namespace TagTool.Commands.Porting
             };
 
             // hud class, unique to HO. the above values seem to be okay
-            sncl.Classes.Insert(50, sClass);
+            if (sncl.Classes.Count >= 50)
+                sncl.Classes.Insert(50, sClass);
 
             if (version <= CacheVersion.Halo3Retail)
             {
@@ -503,10 +449,9 @@ namespace TagTool.Commands.Porting
                     sncl.Classes.Add(sClass);
             }
 
-            // todo: add bitflags to sncl definition
-            // these add "bit 14" which allows the class to play on the mainmenu
-            sncl.Classes[52].Flags = 17153; // UI
-            sncl.Classes[32].Flags = 17154; // music
+            // ms23 requires this flag to play a class on the mainmenu
+            sncl.Classes[32].Flags |= SoundClasses.Class.ClassFlagBits.ClassPlaysOnMainmenu; // Music
+            sncl.Classes[52].Flags |= SoundClasses.Class.ClassFlagBits.ClassPlaysOnMainmenu; // UI
 
             return sncl;
         }

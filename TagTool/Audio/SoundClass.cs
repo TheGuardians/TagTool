@@ -7,6 +7,9 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x1)]
     public class SoundClass : TagStructure
 	{
+        [TagField(MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.HaloPC)]
+        public SoundClassHalo Halo;
+
         [TagField(Version = CacheVersion.Halo3Retail)]
         public SoundClassHalo3Retail Halo3Retail;
 
@@ -348,6 +351,64 @@ namespace TagTool.Audio
             UnitFootstepPostpone,
             WeaponReadyThirdPerson,
             UiMusic
+        }
+
+        public enum SoundClassHalo : int
+        {
+            ProjectileImpact,
+            ProjectileDetonation,
+            ProjectileFlyby,
+            ProjectileDetonationLod,
+            WeaponFire,
+            WeaponReady,
+            WeaponReload,
+            WeaponEmpty,
+            WeaponCharge,
+            WeaponOverheat,
+            WeaponIdle,
+            WeaponMelee,
+            WeaponAnimation,
+            ObjectImpacts,
+            ParticleImpacts,
+            WeaponFireLod,
+            Unused1Impact,
+            Unused2Impact,
+            UnitFootsteps,
+            UnitDialog,
+            UnitAnimation,
+            UnitUnused,
+            VehicleCollision,
+            VehicleEngine,
+            VehicleAnimation,
+            VehicleEngineLod,
+            DeviceDoor,
+            DeviceUnused0,
+            DeviceMachinery,
+            DeviceStationary,
+            DeviceUnused1,
+            DeviceUnused2,
+            Music,
+            AmbientNature,
+            AmbientMachinery,
+            AmbientStationary,
+            HugeAss,
+            ObjectLooping,
+            CinematicMusic,
+            UnknownUnused0,
+            UnknownUnused1,
+            UnknownUnused2,
+            UnknownUnused3,
+            UnknownUnused4,
+            MissionUnused0,
+            CortanaMission,
+            CortanaCinematic,
+            MissionDialog,
+            CinematicDialog,
+            ScriptedCinematicFoley,
+            GameEvent,
+            Ui,
+            Test,
+            MultilingualTest
         }
 
         public SoundClass ConvertSoundClass(CacheVersion from)

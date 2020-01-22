@@ -12,11 +12,11 @@ namespace TagTool.Commands.RenderModels
 {
 	class ReplaceRenderGeometryCommand : Command
 	{
-		private HaloOnlineCacheContext CacheContext { get; }
-		private CachedTagInstance Tag { get; }
+		private GameCache Cache { get; }
+		private CachedTag Tag { get; }
 		private RenderModel Definition { get; }
 
-		public ReplaceRenderGeometryCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition) :
+		public ReplaceRenderGeometryCommand(GameCache cache, CachedTag tag, RenderModel definition) :
 			base(false,
 
 				"ReplaceRenderGeometry",
@@ -29,7 +29,7 @@ namespace TagTool.Commands.RenderModels
                 "Your collada file must contain a single mesh for every permutation.\n" +
                 "Name your meshes as {region}:{permutation}. Example: 'hull:base'")
 		{
-			CacheContext = cacheContext;
+			Cache = cache;
 			Tag = tag;
 			Definition = definition;
 		}
@@ -39,13 +39,13 @@ namespace TagTool.Commands.RenderModels
 			if (args.Count != 1)
 				return false;
 
-            if (!CacheContext.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
+            if (!Cache.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
             {
                 Console.WriteLine("WARNING: 'shaders\\invalid.shader' not found!");
                 Console.WriteLine("You will have to assign material shaders manually.");
             }
 
-			var stringIdCount = CacheContext.StringIdCache.Strings.Count;
+			var stringIdCount = Cache.StringTable.Count;
 
 			var sceneFile = new FileInfo(args[0]);
 
@@ -66,13 +66,13 @@ namespace TagTool.Commands.RenderModels
 					PostProcessSteps.Triangulate);
 			}
 
-			var builder = new RenderModelBuilder(CacheContext);
+			var builder = new RenderModelBuilder(Cache);
 			var nodes = new Dictionary<string, sbyte>();
 			var materialIndices = new Dictionary<string, short>();
 
 			foreach (var oldNode in Definition.Nodes)
 			{
-				var name = CacheContext.GetString(oldNode.Name);
+				var name = Cache.StringTable.GetString(oldNode.Name);
 
 				nodes[name] = builder.AddNode(oldNode);
 			}
@@ -81,7 +81,7 @@ namespace TagTool.Commands.RenderModels
 			{
 				builder.BeginRegion(region.Name);
 
-				var regionName = CacheContext.GetString(region.Name);
+				var regionName = Cache.StringTable.GetString(region.Name);
 
 				foreach (var permutation in region.Permutations)
 				{
@@ -91,7 +91,7 @@ namespace TagTool.Commands.RenderModels
 					if (permutation.MeshIndex == -1)
 						continue;
 
-					var permName = CacheContext.GetString(permutation.Name);
+					var permName = Cache.StringTable.GetString(permutation.Name);
 					var meshName = $"{regionName}FBXASC058{permName}Mesh";
 
 					var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
@@ -247,16 +247,11 @@ namespace TagTool.Commands.RenderModels
 			{
 				Console.Write("Building render_geometry...");
 
-				var newDefinition = builder.Build(CacheContext.Serializer, resourceStream);
+				var newDefinition = builder.Build(Cache.Serializer, resourceStream);
 				Definition.Regions = newDefinition.Regions;
 				Definition.Geometry = newDefinition.Geometry;
 				Definition.Nodes = newDefinition.Nodes;
 				Definition.Materials = newDefinition.Materials;
-
-				resourceStream.Position = 0;
-
-				Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-				CacheContext.AddResource(Definition.Geometry.Resource, resourceStream);
 
 				Console.WriteLine("done.");
 			}
@@ -267,17 +262,16 @@ namespace TagTool.Commands.RenderModels
 
 			Console.Write("Writing render_model tag data...");
 
-			using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-				CacheContext.Serialize(cacheStream, Tag, Definition);
+			using (var cacheStream = Cache.OpenCacheReadWrite())
+				Cache.Serialize(cacheStream, Tag, Definition);
 
 			Console.WriteLine("done.");
 
-			if (stringIdCount != CacheContext.StringIdCache.Strings.Count)
+			if (stringIdCount != Cache.StringTable.Count)
 			{
 				Console.Write("Saving string ids...");
 
-				using (var stream = CacheContext.OpenStringIdCacheReadWrite())
-					CacheContext.StringIdCache.Save(stream);
+			    Cache.SaveStrings();
 
 				Console.WriteLine("done");
 			}

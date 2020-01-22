@@ -11,10 +11,10 @@ namespace TagTool.Commands.Scenarios
 {
     class CompileScriptsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private Scenario Definition { get; }
 
-        public CompileScriptsCommand(HaloOnlineCacheContext cacheContext, Scenario definition) :
+        public CompileScriptsCommand(GameCache cache, Scenario definition) :
             base(true,
 
                 "CompileScripts",
@@ -25,7 +25,7 @@ namespace TagTool.Commands.Scenarios
                 "Examples: 'CompileScripts scripts.txt' or 'CompileScripts scripts.hsc'\n" +
                 "The input file must be abide the HaloScriptSyntax.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -39,7 +39,7 @@ namespace TagTool.Commands.Scenarios
             if (!srcTxt.Exists)
                 throw new FileNotFoundException(srcTxt.FullName);
 
-            ScriptCompiler scriptCompiler = new ScriptCompiler(CacheContext, Definition);
+            ScriptCompiler scriptCompiler = new ScriptCompiler(Cache, Definition);
 
             scriptCompiler.CompileFile(srcTxt);
 

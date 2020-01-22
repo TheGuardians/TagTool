@@ -9,9 +9,9 @@ namespace TagTool.Commands.Strings
 {
     class ListAllStringsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ListAllStringsCommand(HaloOnlineCacheContext cacheContext) : base(
+        public ListAllStringsCommand(GameCache cache) : base(
             true,
 
             "ListAllStrings",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Strings
             "english, japanese, german, french, spanish, mexican, italian, korean,\n" +
             "chinese-trad, chinese-simp, portuguese, russian")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
         
         public override object Execute(List<string> args)
@@ -41,12 +41,12 @@ namespace TagTool.Commands.Strings
             var filter = (args.Count == 2) ? args[1] : null;
             var found = false;
 
-            using (var stream = CacheContext.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
-                foreach (var unicTag in CacheContext.TagCache.Index.FindAllInGroup("unic"))
+                foreach (var unicTag in Cache.TagCache.FindAllInGroup("unic"))
                 {
-                    var unic = CacheContext.Deserialize<MultilingualUnicodeStringList>(stream, unicTag);
-                    var strings = LocalizedStringPrinter.PrepareForDisplay(unic, CacheContext.StringIdCache, unic.Strings, language, filter);
+                    var unic = Cache.Deserialize<MultilingualUnicodeStringList>(stream, unicTag);
+                    var strings = LocalizedStringPrinter.PrepareForDisplay(unic, Cache.StringTable, unic.Strings, language, filter);
 
                     if (strings.Count == 0)
                         continue;

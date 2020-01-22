@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Bitmaps;
+using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.IO;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Bitmaps
 {
     class ExtractBitmapCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Bitmap Bitmap { get; }
 
-        public ExtractBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
+        public ExtractBitmapCommand(GameCache cache, CachedTag tag, Bitmap bitmap)
             : base(false,
 
                   "ExtractBitmap",
@@ -23,17 +26,25 @@ namespace TagTool.Commands.Bitmaps
 
                   "Extracts a bitmap to a file.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Bitmap = bitmap;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            string directory;
+
+            if (args.Count == 1)
+            {
+                directory = args[0];
+            }
+            else if (args.Count == 0)
+            {
+                directory = "Bitmaps";
+            }
+            else
                 return false;
-            
-            var directory = args[0];
 
             if (!Directory.Exists(directory))
             {
@@ -49,41 +60,40 @@ namespace TagTool.Commands.Bitmaps
                     return false;
             }
 
-            //var extractor = new BitmapExtractor(CacheContext);
-            var extractor = new BitmapDdsExtractor(CacheContext);
-
-            using (var tagsStream = CacheContext.OpenTagCacheRead())
+            var ddsOutDir = directory;
+            string name;
+            if(Tag.Name != null)
             {
-            #if !DEBUG
-                try
+                var split = Tag.Name.Split('\\');
+                name = split[split.Length - 1];
+            }
+            else
+                name = Tag.Index.ToString("X8");
+            if (Bitmap.Images.Count > 1)
+            {
+                ddsOutDir = Path.Combine(directory, name);
+                Directory.CreateDirectory(ddsOutDir);
+            }
+
+            for (var i = 0; i < Bitmap.Images.Count; i++)
+            {
+                var bitmapName = (Bitmap.Images.Count > 1) ? i.ToString() : name;
+                bitmapName += ".dds";
+                var outPath = Path.Combine(ddsOutDir, bitmapName);
+
+                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
+
+                if(ddsFile == null)
                 {
-            #endif
-                    var bitmap = CacheContext.Deserialize<Bitmap>(tagsStream, Tag);
-                    var ddsOutDir = directory;
-
-                    if (bitmap.Images.Count > 1)
-                    {
-                        ddsOutDir = Path.Combine(directory, Tag.Index.ToString("X8"));
-                        Directory.CreateDirectory(ddsOutDir);
-                    }
-
-                    for (var i = 0; i < bitmap.Images.Count; i++)
-                    {
-                        var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : Tag.Index.ToString("X8")) + ".dds");
-
-                        using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                        {
-                            //extractor.ExtractBitmap(bitmap, i, outStream);
-                            extractor.ExtractDds(bitmap, i, outStream);
-                        }
-                    }
-            #if !DEBUG
+                    Console.WriteLine($"Invalid bitmap data");
+                    return true;
                 }
-                catch (Exception ex)
+
+                using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
+                using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
                 {
-                    Console.WriteLine("ERROR: Failed to extract bitmap: " + ex.Message);
+                    ddsFile.Write(writer);
                 }
-            #endif
             }
 
             Console.WriteLine("Done!");

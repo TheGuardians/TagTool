@@ -11,11 +11,11 @@ namespace TagTool.Commands.Unicode
 {
     class SetStringCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private MultilingualUnicodeStringList Definition { get; }
 
-        public SetStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
+        public SetStringCommand(GameCache cache, CachedTag tag, MultilingualUnicodeStringList unic)
             : base(false,
 
                   "SetString",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Unicode
                   "Remember to put the string value in quotes if it contains spaces.\n" +
                   "If the string does not exist, it will be added.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = unic;
         }
@@ -42,13 +42,13 @@ namespace TagTool.Commands.Unicode
 
             // Look up the stringID that was passed in
             var stringIdStr = args[1];
-            var stringIdIndex = CacheContext.StringIdCache.Strings.IndexOf(stringIdStr);
+            var stringIdIndex = Cache.StringTable.IndexOf(stringIdStr);
             if (stringIdIndex < 0)
             {
                 Console.WriteLine("Unable to find stringID \"{0}\".", stringIdStr);
                 return true;
             }
-            var stringId = CacheContext.GetStringId(stringIdIndex);
+            var stringId = Cache.StringTable.GetStringId(stringIdIndex);
             if (stringId == StringId.Invalid)
             {
                 Console.WriteLine("Failed to resolve the stringID.");

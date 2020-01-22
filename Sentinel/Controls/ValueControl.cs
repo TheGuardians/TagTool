@@ -10,7 +10,7 @@ namespace Sentinel.Controls
 {
     public partial class ValueControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; }
         public object Owner { get; set; } = null;
         public bool Loading { get; set; } = false;
@@ -20,10 +20,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public ValueControl(HaloOnlineCacheContext cacheContext, FieldInfo field) :
+        public ValueControl(GameCache cache, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
             label1.Text = field.Name.ToSpaced();
 
@@ -49,7 +49,7 @@ namespace Sentinel.Controls
 
             if (type == typeof(StringId))
             {
-                textBox1.Text = CacheContext.GetString((StringId)value);
+                textBox1.Text = Cache.StringTable.GetString((StringId)value);
             }
             else if (type == typeof(Angle))
             {
@@ -70,7 +70,7 @@ namespace Sentinel.Controls
 
             if (value == null)
             {
-                if (TryParseValue(CacheContext, Field.FieldType, textBox1.Text, out value))
+                if (TryParseValue(Cache, Field.FieldType, textBox1.Text, out value))
                 {
                     textBox1.ForeColor = SystemColors.WindowText;
                 }
@@ -85,19 +85,24 @@ namespace Sentinel.Controls
                 Field.SetValue(owner, value);
         }
 
-        public static bool TryParseValue(HaloOnlineCacheContext cacheContext, Type type, string value, out object result)
+        public static bool TryParseValue(GameCache cache, Type type, string value, out object result)
         {
             if (type == typeof(Tag))
             {
-                if (!cacheContext.TryParseGroupTag(value, out var tag))
+                if (!cache.TryParseGroupTag(value, out var tag))
                     goto end;
             }
             else if (type == typeof(StringId))
             {
-                if (!cacheContext.TryGetStringId(value, out var stringId))
+                try
+                {
+                    result = cache.StringTable.GetStringId(value);
+                    return true;
+                }
+                catch (Exception)
+                {
                     goto end;
-                result = stringId;
-                return true;
+                }
             }
             else if (type == typeof(sbyte))
             {

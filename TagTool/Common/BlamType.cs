@@ -12,7 +12,7 @@ namespace TagTool.Common
         // from an array of primitives, we can handle them in a much cleaner way.
         // void SetValues(ValueType[] values);
 
-        bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error);
+        bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error);
     }
 
 	public class BlamTypeAttribute : Attribute

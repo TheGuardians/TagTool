@@ -85,7 +85,7 @@ namespace TagTool.Commands.Porting
             for (int hudWidgetIndex = 0; hudWidgetIndex < chudDefinition.HudWidgets.Count; hudWidgetIndex++)
             {
                 //get stringid text for patch targeting
-                var widgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].Name);
+                var widgetname = CacheContext.StringTable.GetString(chudDefinition.HudWidgets[hudWidgetIndex].Name);
 
                 for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].StateData.Count; stateDatumIndex++)
                     chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex]);
@@ -100,7 +100,7 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex]);
 
                     //get stringid text for patch targeting
-                    var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
+                    var bitmapwidgetname = CacheContext.StringTable.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
 
                     //fixup for waypoint light
                     if (bitmapwidgetname.Contains("waypoint_light"))
@@ -201,7 +201,7 @@ namespace TagTool.Commands.Porting
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
                     //get stringid text for patch targeting
-                    var textwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].Name);
+                    var textwidgetname = CacheContext.StringTable.GetString(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].Name);
 
                     //fixup for 'budget' label
                     if (textwidgetname == "budget_meter_name")
@@ -240,7 +240,7 @@ namespace TagTool.Commands.Porting
             return chudDefinition;
         }
 
-        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ChudGlobalsDefinition H3Definition)
+        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ChudGlobalsDefinition H3Definition)
         {
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
@@ -327,14 +327,14 @@ namespace TagTool.Commands.Porting
                         {
                             var spartanBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
                             spartanBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
-                            spartanBiped.Sound = (CachedTagInstance)ConvertData(cacheStream, resourceStreams, H3snd.SpartanSound, null, H3snd.SpartanSound.Name);
+                            spartanBiped.Sound = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, H3snd.SpartanSound, null, H3snd.SpartanSound.Name);
                             H3snd.Bipeds.Add(spartanBiped);
                         }
                         if (H3snd.EliteSound != null)
                         {
                             var eliteBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
                             eliteBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Elite;
-                            eliteBiped.Sound = (CachedTagInstance)ConvertData(cacheStream, resourceStreams, H3snd.EliteSound, null, H3snd.EliteSound.Name);
+                            eliteBiped.Sound = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, H3snd.EliteSound, null, H3snd.EliteSound.Name);
                             H3snd.Bipeds.Add(eliteBiped);
                         }
                     }

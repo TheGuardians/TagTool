@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Geometry;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.ScenarioLightmaps
 {
     class ExtractRenderGeometryCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private ScenarioLightmapBspData Definition { get; }
 
-        public ExtractRenderGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioLightmapBspData definition)
+        public ExtractRenderGeometryCommand(GameCache cache, ScenarioLightmapBspData definition)
             : base(true,
 
                   "ExtractRenderGeometry",
@@ -28,7 +23,7 @@ namespace TagTool.Commands.ScenarioLightmaps
                   "Extracts render geometry from the current scenario_lightmap_bsp_data definition.\n" +
                   "Supported file types: obj")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -53,17 +48,14 @@ namespace TagTool.Commands.ScenarioLightmaps
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry.Resource);
-            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
+            Definition.Geometry.SetResourceBuffers(definition);
 
             using (var resourceStream = new MemoryStream())
             {
                 //
                 // Extract the resource data
                 //
-
-                CacheContext.ExtractResource(Definition.Geometry.Resource, resourceStream);
-
                 var file = new FileInfo(fileName);
 
                 if (!file.Directory.Exists)
@@ -76,8 +68,8 @@ namespace TagTool.Commands.ScenarioLightmaps
                     foreach (var mesh in Definition.Geometry.Meshes)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, mesh, definition);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                        var meshReader = new MeshReader(Cache.Version, mesh);
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
                     }
 
                     objExtractor.Finish();

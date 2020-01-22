@@ -3,8 +3,8 @@ using TagTool.Common;
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x4)]
-    public class TagResourceReference
+    [TagStructure(Size = 0x8)]
+    public class TagResourceReference : TagStructure
     {
         /// <summary>
         /// ID is an index in ResourceGestalt.TagResources
@@ -17,5 +17,7 @@ namespace TagTool.Tags
         /// </summary>
         [TagField(Gen = CacheGeneration.HaloOnline, Flags = TagFieldFlags.Pointer)]
         public PageableResource HaloOnlinePageableResource;
+
+        public int Unused;
     }
 }

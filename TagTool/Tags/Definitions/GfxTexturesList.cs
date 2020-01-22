@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Length = 256)] 
             public string FileName;
-            public CachedTagInstance Bitmap;
+            public CachedTag Bitmap;
         }
     }
 }

@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
 using TagTool.Common;
 using TagTool.IO;
 using System;
@@ -18,7 +19,7 @@ namespace TagTool.Serialization
         private const int DefaultBlockAlign = 4;
 
         private Stream Stream { get; }
-        protected GameCacheContextHaloOnline Context { get; }
+        protected GameCacheHaloOnlineBase Context { get; }
         private CachedTagData Data { get; set; }
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace TagTool.Serialization
         /// <param name="stream">The stream to write to.</param>
         /// <param name="context">The game cache context.</param>
         /// <param name="tag">The tag to overwrite.</param>
-        public HaloOnlineSerializationContext(Stream stream, GameCacheContextHaloOnline context, CachedTagHaloOnline tag)
+        public HaloOnlineSerializationContext(Stream stream, GameCacheHaloOnlineBase context, CachedTagHaloOnline tag)
         {
             Stream = stream;
             Context = context;
@@ -78,14 +79,14 @@ namespace TagTool.Serialization
             return Tag.PointerToOffset(address);
         }
 
-        public virtual CachedTagInstance GetTagByIndex(int index)
+        public virtual CachedTag GetTagByIndex(int index)
         {
-            return null; // Context.TagCacheGenHO.GetTagByIndex(index);
+            return Context.TagCacheGenHO.GetTag(index);
         }
 
-        public virtual CachedTagInstance GetTagByName(TagGroup group, string name)
+        public virtual CachedTag GetTagByName(TagGroup group, string name)
         {
-            return null; // Context.TagCache.GetTagByName(name, group.Tag);
+            return Context.TagCache.GetTag(name, group.Tag);
         }
 
         public IDataBlock CreateBlock()
@@ -93,7 +94,7 @@ namespace TagTool.Serialization
             return new TagDataBlock(this);
         }
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }
@@ -133,8 +134,6 @@ namespace TagTool.Serialization
 
             public object PreSerialize(TagFieldAttribute info, object obj)
             {
-                return null;
-                /*
                 if (obj == null)
                     return null;
 
@@ -148,14 +147,15 @@ namespace TagTool.Serialization
                 if (obj is PageableResource resource)
                     resource.Resource.ParentTag = _context.Tag;
 
-                if (type == typeof(CachedTagInstance))
+                if (type == typeof(CachedTag) || type.BaseType == typeof(CachedTag))
                 {
                     // Object is a tag reference - add it as a dependency
-                    if (obj is CachedTagInstance referencedTag && referencedTag != _context.Tag)
+                    var referencedTag = (CachedTag)obj;
+                    if (referencedTag != _context.Tag)
                         _context.Data.Dependencies.Add(referencedTag.Index);
                 }
 
-                return obj;*/
+                return obj;
             }
 
             public void SuggestAlignment(uint align)
@@ -202,7 +202,7 @@ namespace TagTool.Serialization
             }
 
             // add position of tag index from tag references in definition
-            public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
+            public void AddTagReference(CachedTag referencedTag, bool isShort)
             {
                 if(isShort)
                     _tagReferenceOffsets.Add((uint)Stream.Position);

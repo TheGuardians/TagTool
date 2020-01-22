@@ -15,10 +15,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 {
     class ExtractPathfindingGeometryCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public ExtractPathfindingGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp definition) :
+        public ExtractPathfindingGeometryCommand(GameCache cache, ScenarioStructureBsp definition) :
             base(true,
 
                 "ExtractPathfindingGeometry",
@@ -28,7 +28,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -43,80 +43,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 return true;
             }
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.PathfindingResource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(resourceContext);
-
-            using (var resourceStream = new MemoryStream())
-            using (var reader = new EndianReader(resourceStream))
-            {
-                CacheContext.ExtractResource(Definition.PathfindingResource, resourceStream);
-                var dataContext = new DataSerializationContext(reader);
-
-                foreach (var pathfindingDatum in resourceDefinition.PathfindingData)
-                {
-                    resourceStream.Position = pathfindingDatum.Sectors.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Sectors.Count; i++)
-                        pathfindingDatum.Sectors.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.Links.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Links.Count; i++)
-                        pathfindingDatum.Links.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.References.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.References.Count; i++)
-                        pathfindingDatum.References.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.Bsp2dNodes.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Bsp2dNodes.Count; i++)
-                        pathfindingDatum.Bsp2dNodes.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.PathfindingHints.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
-                        pathfindingDatum.PathfindingHints.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.Vertices.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Vertices.Count; i++)
-                        pathfindingDatum.Vertices.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(dataContext));
-
-                    for (var objRefIdx = 0; objRefIdx < pathfindingDatum.ObjectReferences.Count; objRefIdx++)
-                    {
-                        for (var bspRefIdx = 0; bspRefIdx < pathfindingDatum.ObjectReferences[objRefIdx].Bsps.Count; bspRefIdx++)
-                        {
-                            var bspRef = pathfindingDatum.ObjectReferences[objRefIdx].Bsps[bspRefIdx];
-
-                            resourceStream.Position = bspRef.Bsp2dRefs.Address.Offset;
-
-                            for (var bsp2dRefIdx = 0; bsp2dRefIdx < bspRef.Bsp2dRefs.Count; bsp2dRefIdx++)
-                                bspRef.Bsp2dRefs.Add(
-                                    CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext));
-                        }
-                    }
-
-                    resourceStream.Position = pathfindingDatum.InstancedGeometryReferences.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.InstancedGeometryReferences.Count; i++)
-                        pathfindingDatum.InstancedGeometryReferences.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.Doors.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Doors.Count; i++)
-                        pathfindingDatum.Doors.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
-                }
-            }
+            var resourceDefinition = Cache.ResourceCache.GetStructureBspCacheFileTagResources(Definition.PathfindingResource);
 
             using (var writer = File.CreateText(args[0]))
             {
@@ -124,7 +51,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 {
                     writer.WriteLine("mtllib Blue.mtl");
 
-                    foreach (ScenarioStructureBsp.PathfindingDatum.Vertex vertex in pathfinding.Vertices)
+                    foreach (Pathfinding.Vertex vertex in pathfinding.Vertices)
                     {
                         writer.WriteLine($"v {vertex.Position.X} {vertex.Position.Z} {vertex.Position.Y}");
                     }
@@ -135,7 +62,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     for (var i = 0; i < pathfinding.PathfindingHints.Count; i++)
                     {
                         var hint = pathfinding.PathfindingHints[i];
-                        if (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink)
+                        if (hint.HintType == Pathfinding.PathfindingHint.HintTypeValue.JumpLink)
                         {
                             int v2 = (hint.Data[0] >> 16) + 1;
                             int v1 = (hint.Data[0] & 0xFFFF) + 1;

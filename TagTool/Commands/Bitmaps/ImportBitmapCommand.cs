@@ -6,78 +6,39 @@ using TagTool.Bitmaps;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Tags;
+using TagTool.Bitmaps.DDS;
+using TagTool.IO;
 
 namespace TagTool.Commands.Bitmaps
 {
     class ImportBitmapCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Bitmap Bitmap { get; }
 
-        public ImportBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
+        public ImportBitmapCommand(GameCache cache, CachedTag tag, Bitmap bitmap)
             : base(false,
 
                   "ImportBitmap",
                   "Imports an image from a DDS file.",
 
-                  "ImportBitmap [location = textures] <image index> <dds file>",
+                  "ImportBitmap <image index> <dds file>",
 
                   "The image index must be in hexadecimal.\n" +
                   "No conversion will be done on the data in the DDS file.\n" +
                   "The pixel format must be supported by the game.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Bitmap = bitmap;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2 || args.Count > 3)
+            if (args.Count != 2)
                 return false;
-
-            var location = ResourceLocation.Textures;
-
-            if (args.Count == 3)
-            {
-                switch (args[0])
-                {
-                    case "resources":
-                        location = ResourceLocation.Resources;
-                        break;
-
-                    case "textures":
-                        location = ResourceLocation.Textures;
-                        break;
-
-                    case "textures_b":
-                        location = ResourceLocation.TexturesB;
-                        break;
-
-                    case "audio":
-                        location = ResourceLocation.Audio;
-                        break;
-
-                    case "resources_b":
-                        location = ResourceLocation.ResourcesB;
-                        break;
-
-                    case "render_models":
-                        location = ResourceLocation.RenderModels;
-                        break;
-
-                    case "lightmaps":
-                        location = ResourceLocation.Lightmaps;
-                        break;
-
-                    default:
-                        Console.WriteLine($"Invalid resource location: {args[0]}");
-                        return false;
-                }
-
-                args.RemoveAt(0);
-            }
 
             if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int imageIndex))
                 return false;
@@ -86,7 +47,7 @@ namespace TagTool.Commands.Bitmaps
             {
                 Bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
                 Bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
-                Bitmap.Resources.Add(new Bitmap.BitmapResource());
+                Bitmap.Resources.Add(new TagResourceReference());
             }
 
             if (imageIndex < 0 || imageIndex >= Bitmap.Images.Count)
@@ -98,23 +59,38 @@ namespace TagTool.Commands.Bitmaps
             var imagePath = args[1];
             
             Console.WriteLine("Importing image data...");
-            
+
+#if !DEBUG
             try
             {
+#endif
+            DDSFile file = new DDSFile();
+
                 using (var imageStream = File.OpenRead(imagePath))
+                using(var reader = new EndianReader(imageStream))
                 {
-                    var injector = new BitmapDdsInjector(CacheContext);
-                    injector.InjectDds(CacheContext.Serializer, CacheContext.Deserializer, Bitmap, imageIndex, imageStream, location);
+                    file.Read(reader);
                 }
 
-                using (var tagsStream = CacheContext.OpenTagCacheReadWrite())
-                    CacheContext.Serialize(tagsStream, Tag, Bitmap);
+                var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file);
+                var reference = Cache.ResourceCache.CreateBitmapResource(bitmapTextureInteropDefinition);
+
+                // set the tag data
+
+                Bitmap.Resources[imageIndex] = reference;
+                Bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
+
+                using (var tagsStream = Cache.OpenCacheReadWrite())
+                    Cache.Serialize(tagsStream, Tag, Bitmap);
+#if !DEBUG
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Importing image data failed: " + ex.Message);
                 return true;
             }
+#endif
+
 
             Console.WriteLine("Done!");
 

@@ -9,7 +9,7 @@ namespace Sentinel.Controls
 {
     public partial class ArgbColorControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; }
         public object Owner { get; set; } = null;
         public bool Loading { get; set; } = false;
@@ -19,10 +19,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public ArgbColorControl(HaloOnlineCacheContext cacheContext, FieldInfo field) :
+        public ArgbColorControl(GameCache cache, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
             label1.Text = field.Name.ToSpaced().Replace("_", "");
             new ToolTip().SetToolTip(label1, $"{field.FieldType} {CacheForm.GetDocumentation(field)}");

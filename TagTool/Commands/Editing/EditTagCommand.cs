@@ -7,12 +7,12 @@ namespace TagTool.Commands.Editing
     class EditTagCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public CachedTagInstance TagInstance { get; private set; }
+        public CachedTag TagInstance { get; private set; }
         public object TagDefinition { get; private set; }
 
-        public EditTagCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext) : base(
+        public EditTagCommand(CommandContextStack contextStack, GameCache cache) : base(
             false,
 
             "EditTag",
@@ -25,24 +25,24 @@ namespace TagTool.Commands.Editing
             "which can be used to edit or view the data in the tag.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1 || !CacheContext.TryGetTag(args[0], out var tag))
+            if (args.Count != 1 || !Cache.TryGetCachedTag(args[0], out var tag))
                 return false;
 
             var oldContext = ContextStack.Context;
 
             TagInstance = tag;
 
-            using (var stream = CacheContext.OpenTagCacheRead())
-                TagDefinition = CacheContext.Deserialize(stream, TagInstance);
+            using (var stream = Cache.OpenCacheRead())
+                TagDefinition = Cache.Deserialize(stream, TagInstance);
 
-            ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, TagInstance, TagDefinition));
+            ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, TagInstance, TagDefinition));
 
-            var groupName = CacheContext.GetString(TagInstance.Group.Name);
+            var groupName = Cache.StringTable.GetString(TagInstance.Group.Name);
             var tagName = TagInstance?.Name ?? $"0x{TagInstance.Index:X4}";
 
             Console.WriteLine($"Tag {tagName}.{groupName} has been opened for editing.");

@@ -7,10 +7,10 @@ namespace TagTool.Commands.Scenarios
 {
     class CopyForgePaletteCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private Scenario Definition { get; }
 
-        public CopyForgePaletteCommand(HaloOnlineCacheContext cacheContext, Scenario definition)
+        public CopyForgePaletteCommand(GameCache cache, Scenario definition)
             : base(true,
 
                  "CopyForgePalette",
@@ -20,7 +20,7 @@ namespace TagTool.Commands.Scenarios
 
                  "Copies the forge palette from the current scenario to another scenario.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -55,7 +55,7 @@ namespace TagTool.Commands.Scenarios
                 return false;
             }
 
-            if (!CacheContext.TryGetTag(args[0], out var destinationTag))
+            if (!Cache.TryGetTag(args[0], out var destinationTag))
             {
                 Console.WriteLine($"ERROR: invalid destination scenario index: {args[0]}");
                 return false;
@@ -65,8 +65,8 @@ namespace TagTool.Commands.Scenarios
 
             Scenario destinationScenario = null;
             
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                destinationScenario = CacheContext.Deserialize<Scenario>(cacheStream, destinationTag);
+            using (var cacheStream = Cache.OpenCacheReadWrite())
+                destinationScenario = Cache.Deserialize<Scenario>(cacheStream, destinationTag);
 
             Console.WriteLine("done.");
 
@@ -99,8 +99,8 @@ namespace TagTool.Commands.Scenarios
 
             Console.Write("Serializing destination scenario...");
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(cacheStream, destinationTag, destinationScenario);
+            using (var cacheStream = Cache.OpenCacheReadWrite())
+                Cache.Serialize(cacheStream, destinationTag, destinationScenario);
 
             Console.WriteLine("done.");
 

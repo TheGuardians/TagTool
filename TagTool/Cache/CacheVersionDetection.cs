@@ -6,17 +6,6 @@ namespace TagTool.Cache
     public static class CacheVersionDetection
     {
         /// <summary>
-        /// Detects the engine that a tags.dat was built for.
-        /// </summary>
-        /// <param name="cache">The cache file.</param>
-        /// <param name="closestGuess">On return, the closest guess for the engine's version.</param>
-        /// <returns>The engine version if it is known for sure, otherwise <see cref="CacheVersion.Unknown"/>.</returns>
-        public static CacheVersion DetectFromTagCache(TagCache cache, out CacheVersion closestGuess)
-        {
-            return DetectFromTimestamp(cache.Timestamp, out closestGuess);
-        }
-
-        /// <summary>
         /// Detects the engine that a tags.dat was built for based on its timestamp.
         /// </summary>
         /// <param name="timestamp">The timestamp.</param>
@@ -109,8 +98,8 @@ namespace TagTool.Cache
                     return CacheVersion.HaloOnline700123;
                 case "11860.10.07.24.0147.omaha_relea":
                     return CacheVersion.HaloReach;
-                case "Jun 24 2019 00:36:03":
-                    return CacheVersion.HaloReachMCC824;
+                //case "Jun 24 2019 00:36:03":
+                //    return CacheVersion.HaloReachMCC824;
                 default:
                     return CacheVersion.Unknown;
             }
@@ -279,7 +268,7 @@ namespace TagTool.Cache
         /// <returns></returns>
         public static bool IsInGen(CacheGeneration gen, CacheVersion compare)
         {
-            if (gen == CacheGeneration.Unknown)
+            if (compare == CacheVersion.Unknown)
                 return true;
             else
             {

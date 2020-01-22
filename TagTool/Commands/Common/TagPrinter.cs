@@ -7,12 +7,12 @@ namespace TagTool.Commands.Common
 {
     static class TagPrinter
     {
-        public static void PrintTagShort(CachedTagInstance tag)
+        public static void PrintTagShort(CachedTag tag)
         {
-            Console.WriteLine("{0} {1:X8} [Offset = 0x{2:X}, Size = 0x{3:X}]", tag.Group.Tag, tag.Index, tag.HeaderOffset, tag.TotalSize);
+            Console.WriteLine("{0} {1:X8} [Offset = 0x{2:X}]", tag.Group.Tag, tag.Index, tag.DefinitionOffset);
         }
 
-        public static void PrintTagsShort(IEnumerable<CachedTagInstance> tags)
+        public static void PrintTagsShort(IEnumerable<CachedTag> tags)
         {
             var sorted = tags.ToArray();
             Array.Sort(sorted, CompareTags);
@@ -20,7 +20,7 @@ namespace TagTool.Commands.Common
                 PrintTagShort(tag);
         }
 
-        private static int CompareTags(CachedTagInstance lhs, CachedTagInstance rhs)
+        private static int CompareTags(CachedTag lhs, CachedTag rhs)
         {
             var classCompare = lhs.Group.Tag.CompareTo(rhs.Group.Tag);
             if (classCompare != 0)

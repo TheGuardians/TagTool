@@ -10,12 +10,12 @@ namespace TagTool.Serialization
 {
     public class RuntimeSerializationContext : ISerializationContext
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private ProcessMemoryStream ProcessStream { get; }
 
-        public RuntimeSerializationContext(HaloOnlineCacheContext cacheContext, ProcessMemoryStream processStream)
+        public RuntimeSerializationContext(GameCache cache, ProcessMemoryStream processStream)
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             ProcessStream = processStream;
         }
 
@@ -47,17 +47,17 @@ namespace TagTool.Serialization
             ProcessStream.Write(data, 0, data.Length);
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public CachedTag GetTagByIndex(int index)
         {
-            return (index >= 0 && index < CacheContext.TagCache.Index.Count) ? CacheContext.TagCache.Index[index] : null;
+            return (index >= 0 && index < Cache.TagCache.Count) ? Cache.TagCache.GetTag(index) : null;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }
@@ -99,7 +99,7 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
+            public void AddTagReference(CachedTag referencedTag, bool isShort)
             {
             }
         }

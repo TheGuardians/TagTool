@@ -65,7 +65,7 @@ namespace TagTool.Common
         public override string ToString() =>
             $"{{ Salt: 0x{Salt:X4}, Index: {Index} }}";
 
-        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {
             result = null;
 

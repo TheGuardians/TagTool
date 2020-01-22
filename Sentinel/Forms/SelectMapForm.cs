@@ -24,7 +24,8 @@ namespace Sentinel.Forms
             this()
         {
             foreach (var file in directory?.GetFiles("*.map"))
-                comboBox1.Items.Add(new MapItem { File = file });
+                if (!file.Name.Contains("shared.map") && !file.Name.Contains("campaign.map"))
+                    comboBox1.Items.Add(new MapItem { File = file });
 
             if (comboBox1.Items.Count == 0)
                 comboBox1.Enabled = false;

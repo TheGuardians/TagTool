@@ -15,24 +15,25 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using TagTool.Cache.HaloOnline;
 using TagTool.Tags.Definitions;
 
 namespace Sentinel.Forms
 {
     public partial class CacheForm : Form
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public static XmlDocument Documentation { get; } = new XmlDocument();
 
         public bool LoadingTag { get; private set; } = false;
 
         public Dictionary<int, object> CurrentTags { get; private set; } = new Dictionary<int, object>();
-        public CachedTagInstance CurrentTag { get; private set; } = null;
+        public CachedTag CurrentTag { get; private set; } = null;
 
         public class TagInstanceItem
         {
-            public HaloOnlineCacheContext CacheContext { get; set; }
-            public CachedTagInstance Tag { get; set; }
+            public GameCache Cache { get; set; }
+            public CachedTag Tag { get; set; }
 
             public override string ToString()
             {
@@ -43,7 +44,7 @@ namespace Sentinel.Forms
                     $"[0x{Tag.Index:X4}] {Tag.Name}" :
                     $"0x{Tag.Index:X4}";
 
-                return $"{tagName}.{CacheContext.GetString(Tag.Group.Name)}";
+                return $"{tagName}.{Cache.StringTable.GetString(Tag.Group.Name)}";
             }
         }
 
@@ -55,8 +56,23 @@ namespace Sentinel.Forms
         public CacheForm(DirectoryInfo cacheDirectory)
         {
             InitializeComponent();
-            CacheContext = new HaloOnlineCacheContext(cacheDirectory);
-            Text = cacheDirectory.FullName;
+
+            if (cacheDirectory.GetFiles("*.dat").Length == 0) // gen3
+            {
+                var smf = new SelectMapForm(cacheDirectory);
+
+                if (smf.ShowDialog() != DialogResult.OK)
+                    Close();
+
+                Text = smf.SelectedFile.FullName;
+                Cache = GameCache.Open(smf.SelectedFile);
+            }
+
+            else // HO
+            {
+                Text = cacheDirectory.FullName + "\\tags.dat";
+                Cache = GameCache.Open(new FileInfo(Text));
+            }
 
             var docFile = new FileInfo(Path.Combine(Application.StartupPath, "BlamCore.xml"));
 
@@ -119,7 +135,7 @@ namespace Sentinel.Forms
                 SelectedImageKey = "folder"
             };
 
-            foreach (var instance in CacheContext.TagCache.Index)
+            foreach (var instance in Cache.TagCache.TagTable)
                 if (instance != null)
                     CreateTagTreeNode(instance, ref unnamed);
 
@@ -133,7 +149,7 @@ namespace Sentinel.Forms
             tagTreeView.Enabled = true;
         }
 
-        private string GetTagTreeNodeImageKey(CachedTagInstance tag)
+        private string GetTagTreeNodeImageKey(CachedTag tag)
         {
             if (tag.IsInGroup("cfgt") || tag.IsInGroup("matg") || tag.IsInGroup("mulg") ||
                 tag.IsInGroup("aigl") || tag.IsInGroup("smdt") ||
@@ -150,7 +166,7 @@ namespace Sentinel.Forms
                 return "file";
         }
 
-        private TreeNode CreateTagTreeNode(CachedTagInstance tag, ref TreeNode unnamed)
+        private TreeNode CreateTagTreeNode(CachedTag tag, ref TreeNode unnamed)
         {
             if (tag == null)
                 return null;
@@ -174,7 +190,7 @@ namespace Sentinel.Forms
                 }
             }
 
-            var groupName = CacheContext.GetString(tag.Group.Name);
+            var groupName = Cache.StringTable.GetString(tag.Group.Name);
 
             if (tag.Name == null)
             {
@@ -275,7 +291,7 @@ namespace Sentinel.Forms
             return tagNode;
         }
 
-        public void LoadTagEditor(CachedTagInstance tag)
+        public void LoadTagEditor(CachedTag tag)
         {
             if (tag == null || (CurrentTag != null && CurrentTag.Index == tag.Index))
                 return;
@@ -293,7 +309,7 @@ namespace Sentinel.Forms
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-            var groupName = CacheContext.GetString(tag.Group.Name);
+            var groupName = Cache.StringTable.GetString(tag.Group.Name);
 
             statusLabel.Text = $"Loading {tagName}.{ groupName}...";
 
@@ -301,10 +317,8 @@ namespace Sentinel.Forms
             progressBar.MarqueeAnimationSpeed = 30;
 
             if (definition == null)
-                using (var stream = CacheContext.OpenTagCacheRead())
-                    definition = CacheContext.Deserializer.Deserialize(
-                        new TagSerializationContext(stream, CacheContext, tag),
-                        TagDefinition.Find(tag.Group.Tag));
+                using (var stream = Cache.OpenCacheRead())
+                    definition = Cache.Deserialize(stream, tag);
 
             if (tagName.Contains("\\"))
             {
@@ -319,7 +333,7 @@ namespace Sentinel.Forms
 
             if (tag.IsInGroup("matg") || tag.IsInGroup("mulg") || tag.IsInGroup("scnr") || tag.IsInGroup("sbsp"))
             {
-                var control = new StructMultiControl(this, CacheContext, tag, definition)
+                var control = new StructMultiControl(this, Cache, tag, definition)
                 {
                     Dock = DockStyle.Fill
                 };
@@ -328,6 +342,8 @@ namespace Sentinel.Forms
 
                 tagEditorPanel.Controls.Add(control);
             }
+            // todo: fixup/clean model rendering code
+            // todo: finish bitm editing (save/import dds, add size scaling to image)
             else if (tag.IsInGroup("bitm") || tag.IsInGroup("obje"))
             {
                 var splitContainer = new SplitContainer
@@ -341,37 +357,43 @@ namespace Sentinel.Forms
                 tagEditorPanel.Controls.Add(splitContainer);
                 splitContainer.BringToFront();
 
-                if (tag.IsInGroup("bitm"))
-                    splitContainer.SplitterDistance = Math.Min((short)512, Math.Max((short)16, ((TagTool.Tags.Definitions.Bitmap)definition).Images[0].Height));
+                /*if (tag.IsInGroup("bitm"))
+                    splitContainer.SplitterDistance = 384;//Math.Min((short)512, Math.Max((short)16, ((TagTool.Tags.Definitions.Bitmap)definition).Images[0].Height));
                 else if (tag.IsInGroup("obje"))
-                    splitContainer.SplitterDistance = 384;
+                    splitContainer.SplitterDistance = 384;*/
 
                 if (tag.IsInGroup("bitm"))
                 {
                     var bitmDefinition = (TagTool.Tags.Definitions.Bitmap)definition;
 
-                    var bitmapControl = new BitmapControl(CacheContext, bitmDefinition)
+                    if (Cache.ResourceCache.GetBitmapTextureInteropResource(bitmDefinition.Resources[0]) != null)
                     {
-                        Dock = DockStyle.Fill
-                    };
+                        splitContainer.SplitterDistance = 384;
 
-                    splitContainer.Panel1.Controls.Add(bitmapControl);
-                    bitmapControl.BringToFront();
+                        var bitmapControl = new BitmapControl(Cache, bitmDefinition)
+                        {
+                            Dock = DockStyle.Fill
+                        };
+
+                        splitContainer.Panel1.Controls.Add(bitmapControl);
+                        bitmapControl.BringToFront();
+                    }
                 }
-                else if (tag.IsInGroup("obje"))
+
+                /*else if (tag.IsInGroup("obje"))
                 {
-                    var modelControl = new ObjectControl(CacheContext, (GameObject)definition)
+                    var modelControl = new ObjectControl(Cache, (GameObject)definition)
                     {
                         Dock = DockStyle.Fill
                     };
 
                     splitContainer.Panel1.Controls.Add(modelControl);
                     modelControl.BringToFront();
-                }
+                }*/
 
                 var control = tag.IsInGroup("obje") ?
-                    (Control)new StructMultiControl(this, CacheContext, tag, definition) { Dock = DockStyle.Fill } :
-                    new StructControl(this, CacheContext, definition.GetType(), null);
+                    (Control)new StructMultiControl(this, Cache, tag, definition) { Dock = DockStyle.Fill } :
+                    new StructControl(this, Cache, definition.GetType(), null);
 
                 ((IFieldControl)control).GetFieldValue(null, definition, definition);
                 control.Location = point;
@@ -383,7 +405,7 @@ namespace Sentinel.Forms
             {
                 if (tag.IsInGroup("snd!"))
                 {
-                    var soundControl = new SoundControl(CacheContext, tag, (TagTool.Tags.Definitions.Sound)definition)
+                    var soundControl = new SoundControl(Cache, tag, (Sound)definition)
                     {
                         Dock = DockStyle.Top
                     };
@@ -394,7 +416,7 @@ namespace Sentinel.Forms
                     point.Y = soundControl.Bottom;
                 }
 
-                var control = new StructControl(this, CacheContext, definition.GetType(), null);
+                var control = new StructControl(this, Cache, definition.GetType(), null);
                 control.GetFieldValue(null, definition, definition);
 
                 control.Location = point;
@@ -414,7 +436,7 @@ namespace Sentinel.Forms
             {
                 CurrentTags[tag.Index] = definition;
 
-                var item = new TagInstanceItem { CacheContext = CacheContext, Tag = tag };
+                var item = new TagInstanceItem { Cache = Cache, Tag = tag };
                 currentTagsComboBox.Items.Add(item);
 
                 currentTagsComboBox.SelectedItem = item;
@@ -442,7 +464,7 @@ namespace Sentinel.Forms
 
             switch (nodeTag)
             {
-                case CachedTagInstance tag:
+                case CachedTag tag:
                     tagTreeView.ContextMenuStrip = tagNodeContextMenuStrip;
                     LoadTagEditor(tag);
                     break;
@@ -459,21 +481,25 @@ namespace Sentinel.Forms
 
         private void extractToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (tagTreeView.SelectedNode?.Tag is CachedTagInstance tag)
+            if (tagTreeView.SelectedNode?.Tag is CachedTag tag)
             {
                 using (var sfd = new SaveFileDialog())
                 {
-                    var groupName = CacheContext.GetString(tag.Group.Name);
+                    var groupName = Cache.StringTable.GetString(tag.Group.Name);
 
                     sfd.Filter = $"{groupName} files (*.{groupName})|*.{groupName}";
 
                     if (sfd.ShowDialog() != DialogResult.OK)
                         return;
 
+                    // needs to be updated for gen3 
+
+                    GameCacheHaloOnline cacheHaloOnline = Cache as GameCacheHaloOnline;
+
                     byte[] data;
 
-                    using (var stream = CacheContext.OpenTagCacheRead())
-                        data = CacheContext.TagCache.ExtractTagRaw(stream, tag);
+                    using (var stream = Cache.OpenCacheRead())
+                        data = cacheHaloOnline.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)tag);
 
                     using (var stream = File.Open(sfd.FileName, FileMode.Create, FileAccess.Write))
                         stream.Write(data, 0, data.Length);
@@ -485,11 +511,11 @@ namespace Sentinel.Forms
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (tagTreeView.SelectedNode?.Tag is CachedTagInstance tag)
+            if (tagTreeView.SelectedNode?.Tag is CachedTag tag)
             {
                 using (var ofd = new OpenFileDialog())
                 {
-                    var groupName = CacheContext.GetString(tag.Group.Name);
+                    var groupName = Cache.StringTable.GetString(tag.Group.Name);
 
                     ofd.Filter = $"{groupName} files (*.{groupName})|*.{groupName}";
 
@@ -504,19 +530,21 @@ namespace Sentinel.Forms
                         stream.Read(data, 0, data.Length);
                     }
 
-                    using (var stream = CacheContext.OpenTagCacheReadWrite())
-                        CacheContext.TagCache.SetTagDataRaw(stream, tag, data);
+                    GameCacheHaloOnline cacheHaloOnline = Cache as GameCacheHaloOnline;
+
+                    using (var stream = Cache.OpenCacheReadWrite())
+                        cacheHaloOnline.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)tag, data);
 
                     MessageBox.Show($"Imported {ofd.FileName} successfully.", "Import Tag", MessageBoxButtons.OK);
                 }
             }
         }
 
-        public DialogResult RenameTag(CachedTagInstance tag)
+        public DialogResult RenameTag(CachedTag tag)
         {
             var result = DialogResult.OK;
 
-            using (var rd = new RenameDialog(CacheContext, tag))
+            using (var rd = new RenameDialog(Cache, tag))
             {
                 if ((result = rd.ShowDialog()) != DialogResult.OK)
                     return result;
@@ -534,9 +562,9 @@ namespace Sentinel.Forms
 
         private void renameTag_Click(object sender, EventArgs e)
         {
-            if (tagTreeView.SelectedNode?.Tag is CachedTagInstance tag)
+            if (tagTreeView.SelectedNode?.Tag is CachedTag tag)
             {
-                using (var rd = new RenameDialog(CacheContext, tag))
+                using (var rd = new RenameDialog(Cache, tag))
                 {
                     if (rd.ShowDialog() != DialogResult.OK)
                         return;
@@ -573,7 +601,7 @@ namespace Sentinel.Forms
 
                     var tagNames = new Dictionary<int, string>();
 
-                    foreach (var entry in CacheContext.TagCache.Index)
+                    foreach (var entry in Cache.TagCache.TagTable)
                     {
                         if (entry == null || entry.Name == null || !entry.Name.StartsWith(path))
                             continue;
@@ -585,7 +613,7 @@ namespace Sentinel.Forms
 
                     TreeNode unnamed = tagTreeView.Nodes.Find("<unnamed>", false)[0];
 
-                    foreach (var instance in CacheContext.TagCache.Index)
+                    foreach (var instance in Cache.TagCache.TagTable)
                         if (instance != null && instance.Name == null)
                             CreateTagTreeNode(instance, ref unnamed);
                 }
@@ -594,7 +622,9 @@ namespace Sentinel.Forms
 
         private void saveTagNamesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CacheContext.SaveTagNames();
+            GameCacheHaloOnline cacheHaloOnline = Cache as GameCacheHaloOnline;
+
+            cacheHaloOnline.SaveTagNames();
             MessageBox.Show("Saved tag names successfully.", "Save Tag Names", MessageBoxButtons.OK);
         }
 
@@ -616,13 +646,10 @@ namespace Sentinel.Forms
             LoadTagEditor(((TagInstanceItem)currentTagsComboBox.SelectedItem).Tag);
         }
 
-        private string SaveTagChanges(CachedTagInstance tag, object definition)
+        private string SaveTagChanges(CachedTag tag, object definition)
         {
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var context = new TagSerializationContext(stream, CacheContext, tag);
-                CacheContext.Serializer.Serialize(context, definition);
-            }
+            using (var stream = Cache.OpenCacheReadWrite())
+                Cache.Serialize(stream, tag, definition);
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
@@ -632,7 +659,7 @@ namespace Sentinel.Forms
                 tagName = tagName.Substring(index, tagName.Length - index);
             }
 
-            return $"{tagName}.{ CacheContext.GetString(CurrentTag.Group.Name)}";
+            return $"{tagName}.{ Cache.StringTable.GetString(CurrentTag.Group.Name)}";
         }
 
         private void saveCurrentTagToolStripMenuItem_Click(object sender, EventArgs e)
@@ -650,7 +677,10 @@ namespace Sentinel.Forms
             var message = "Saved changes to the following tags successfully:\n";
 
             foreach (var entry in CurrentTags)
-                message += $"\n{SaveTagChanges(CacheContext.GetTag(entry.Key), entry.Value)}";
+            {
+                Cache.TryGetTag("0x" + entry.Key.ToString("X"), out var tag); // hacky, works for now
+                message += $"\n{SaveTagChanges(tag, entry.Value)}";
+            }
 
             MessageBox.Show(message, "Save Tag Changes", MessageBoxButtons.OK);
         }

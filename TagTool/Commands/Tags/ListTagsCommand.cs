@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ListTagsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ListTagsCommand(HaloOnlineCacheContext cacheContext)
+        public ListTagsCommand(GameCache cache)
             : base(true,
 
                   "ListTags",
@@ -23,12 +23,12 @@ namespace TagTool.Commands.Tags
                   "be printed. If no group tag is specified, all tags in the current\n" +
                   "tag cache file will be listed.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : CacheContext.ParseGroupTag(args[0]);
+            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : Tag.Parse(Cache, args[0]);
 
             if (args.Count > 0 && !args[0].EndsWith(":"))
                 args.RemoveAt(0);
@@ -91,12 +91,15 @@ namespace TagTool.Commands.Tags
                 args.RemoveAt(0);
             }
 
-            foreach (var tag in CacheContext.TagCache.Index)
+            foreach (var tag in Cache.TagCache.TagTable)
             {
                 if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
                     continue;
-
-                var groupName = CacheContext.GetString(tag.Group.Name);
+                string groupName;
+                if (Cache.StringTable != null)
+                    groupName = Cache.StringTable.GetString(tag.Group.Name);
+                else
+                    groupName = tag.Group.Tag.ToString();
                 
                 if (named)
                 {
@@ -108,11 +111,11 @@ namespace TagTool.Commands.Tags
                 }
                 
                 if (unnamed && tag.Name == null)
-                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {groupName} ({tag.Group.Tag})");
+                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.DefinitionOffset:X8}] {groupName} ({tag.Group.Tag})");
                 else if (named && tag.Name != null)
-                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tag.Name}.{groupName}");
+                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.DefinitionOffset:X8}] {tag.Name}.{groupName}");
                 else if (!named && !unnamed)
-                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tag.Name}.{groupName}");
+                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.DefinitionOffset:X8}] {tag.Name}.{groupName}");
             }
 
             return true;

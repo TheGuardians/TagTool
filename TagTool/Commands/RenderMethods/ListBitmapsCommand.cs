@@ -7,11 +7,11 @@ namespace TagTool.Commands.RenderMethods
 {
     class ListBitmapsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private RenderMethod Definition { get; }
 
-        public ListBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
+        public ListBitmapsCommand(GameCache cache, CachedTag tag, RenderMethod definition)
             : base(true,
 
                  "ListBitmaps",
@@ -21,7 +21,7 @@ namespace TagTool.Commands.RenderMethods
 
                  "Lists the bitmaps used by the render_method.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -35,14 +35,14 @@ namespace TagTool.Commands.RenderMethods
             {
                 RenderMethodTemplate template = null;
 
-                using (var cacheStream = CacheContext.OpenTagCacheRead())
-                    template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
+                using (var cacheStream = Cache.OpenCacheRead())
+                    template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.SamplerArguments.Count; i++)
                 {
                     var mapTemplate = template.SamplerArguments[i];
 
-                    Console.WriteLine($"Bitmap {i} ({CacheContext.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4}");
+                    Console.WriteLine($"Bitmap {i} ({Cache.StringTable.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4}");
                 }
             }
 

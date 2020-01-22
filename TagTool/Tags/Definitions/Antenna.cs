@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     public class Antenna : TagStructure
 	{
         public StringId AttachmentMarkerName;
-        public CachedTagInstance Bitmaps;
-        public CachedTagInstance Physics;
+        public CachedTag Bitmaps;
+        public CachedTag Physics;
         public float SpringStrengthCoefficient;
         public float FalloffPixels;
         public float CutoffPixels;

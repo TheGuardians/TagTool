@@ -16,11 +16,11 @@ namespace TagTool.Commands.Porting
 {
     public class PortArmorVariantCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache;
+        private GameCacheContextHaloOnline CacheContext { get; }
+        private GameCache BlamCache;
         private RenderGeometryConverter GeometryConverter { get; }
 
-        public PortArmorVariantCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
+        public PortArmorVariantCommand(GameCacheContextHaloOnline cacheContext, GameCache blamCache) :
             base(true,
 
                 "PortArmorVariant",
@@ -86,7 +86,7 @@ namespace TagTool.Commands.Porting
             var variantName = args[0];
             args.RemoveAt(0);
 
-            CachedTagInstance edModeTag = null;
+            CachedTag edModeTag = null;
             var isScenery = false;
             var regionNames = new List<string>();
 
@@ -170,11 +170,11 @@ namespace TagTool.Commands.Porting
                                 variantMaterials.Add(part.MaterialIndex);
 
                         foreach (var vertexBuffer in mesh.VertexBufferIndices)
-                            if (vertexBuffer != ushort.MaxValue && !variantVertexBuffers.Contains(vertexBuffer))
+                            if (vertexBuffer != -1 && !variantVertexBuffers.Contains(vertexBuffer))
                                 variantVertexBuffers.Add(vertexBuffer);
 
                         foreach (var indexBuffer in mesh.IndexBufferIndices)
-                            if (indexBuffer != ushort.MaxValue && !variantIndexBuffers.Contains(indexBuffer))
+                            if (indexBuffer != -1 && !variantIndexBuffers.Contains(indexBuffer))
                                 variantIndexBuffers.Add(indexBuffer);
 
                         if (!variantMeshes.Contains(i))
@@ -267,7 +267,7 @@ namespace TagTool.Commands.Porting
             // Load Blam resource data
             //
 
-            var resourceData = BlamCache.GetRawFromID(edModeDefinition.Geometry.ZoneAssetHandle);
+            var resourceData = BlamCache.GetRawFromID(edModeDefinition.Geometry.Resource.Gen3ResourceID);
 
             if (resourceData == null)
             {
@@ -281,7 +281,7 @@ namespace TagTool.Commands.Porting
 
             Console.Write("Loading Blam render_geometry resource definition...");
 
-            var definitionEntry = BlamCache.ResourceGestalt.TagResources[edModeDefinition.Geometry.ZoneAssetHandle.Index];
+            var definitionEntry = BlamCache.ResourceGestalt.TagResources[edModeDefinition.Geometry.Resource.Gen3ResourceID.Index];
 
             var resourceDefinition = new RenderGeometryApiResourceDefinition
             {
@@ -292,7 +292,7 @@ namespace TagTool.Commands.Porting
             using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
             {
-                var dataContext = new DataSerializationContext(definitionReader, null, CacheResourceAddressType.Definition);
+                var dataContext = new DataSerializationContext(definitionReader, null, CacheAddressType.Definition);
 
                 definitionReader.SeekTo(definitionEntry.FixupInformationOffset + (definitionEntry.FixupInformationLength - 24));
 
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Porting
                                 Size = definitionReader.ReadInt32(),
                                 Unused4 = definitionReader.ReadInt32(),
                                 Unused8 = definitionReader.ReadInt32(),
-                                Address = new CacheResourceAddress(CacheResourceAddressType.Memory, definitionReader.ReadInt32()),
+                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
                                 Unused10 = definitionReader.ReadInt32()
                             }
                         }
@@ -337,7 +337,7 @@ namespace TagTool.Commands.Porting
                                 Size = definitionReader.ReadInt32(),
                                 Unused4 = definitionReader.ReadInt32(),
                                 Unused8 = definitionReader.ReadInt32(),
-                                Address = new CacheResourceAddress(CacheResourceAddressType.Memory, definitionReader.ReadInt32()),
+                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
                                 Unused10 = definitionReader.ReadInt32()
                             }
                         }
@@ -407,7 +407,7 @@ namespace TagTool.Commands.Porting
 
                 Console.Write("Writing resource data...");
 
-                edModeDefinition.Geometry.Resource = new PageableResource
+                edModeDefinition.Geometry.Resource.HaloOnlinePageableResource = new PageableResource
                 {
                     Page = new RawPage(),
                     Resource = new TagResourceGen3
@@ -421,10 +421,10 @@ namespace TagTool.Commands.Porting
 
                 edResourceStream.Position = 0;
 
-                var resourceContext = new ResourceSerializationContext(CacheContext, edModeDefinition.Geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, edModeDefinition.Geometry.Resource.HaloOnlinePageableResource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
-                edModeDefinition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(edModeDefinition.Geometry.Resource, edResourceStream);
+                edModeDefinition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(edModeDefinition.Geometry.Resource.HaloOnlinePageableResource, edResourceStream);
 
                 Console.WriteLine("done.");
             }
@@ -437,7 +437,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edModeTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("mode")]);
+                        CacheContext.TagCache.Index[i] = edModeTag = new CachedTag(i, TagGroup.Instances[new Tag("mode")]);
                         break;
                     }
                 }
@@ -451,7 +451,7 @@ namespace TagTool.Commands.Porting
             //
 
             Model edHlmtDefinition = null;
-            CachedTagInstance edHlmtTag = null;
+            CachedTag edHlmtTag = null;
 
             if (isScenery)
             {
@@ -545,7 +545,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edHlmtTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("hlmt")]);
+                        CacheContext.TagCache.Index[i] = edHlmtTag = new CachedTag(i, TagGroup.Instances[new Tag("hlmt")]);
                         break;
                     }
                 }
@@ -559,7 +559,7 @@ namespace TagTool.Commands.Porting
             //
 
             Scenery edScenDefinition = null;
-            CachedTagInstance edScenTag = null;
+            CachedTag edScenTag = null;
 
             if (isScenery)
             {
@@ -595,7 +595,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edScenTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("scen")]);
+                        CacheContext.TagCache.Index[i] = edScenTag = new CachedTag(i, TagGroup.Instances[new Tag("scen")]);
                         break;
                     }
                 }
@@ -642,7 +642,7 @@ namespace TagTool.Commands.Porting
 				case string _:
 				case ValueType _:
 					return data;
-				case CachedTagInstance tag:
+				case CachedTag tag:
 					return null;
 				case TagStructure structure:
 					return ConvertStructure(cacheStream, structure, replace);

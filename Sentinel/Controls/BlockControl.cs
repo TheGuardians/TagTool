@@ -13,7 +13,7 @@ namespace Sentinel.Controls
 {
     public partial class BlockControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; } = null;
         public StructControl Struct { get; } = null;
         public object Definition { get; set; } = null;
@@ -24,16 +24,16 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public BlockControl(CacheForm form, HaloOnlineCacheContext cacheContext, Type type, FieldInfo field) :
+        public BlockControl(CacheForm form, GameCache cache, Type type, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
 
             groupBox.Text = field.Name.ToSpaced().Replace("_", "");
             new ToolTip().SetToolTip(groupBox, $"{groupBox.Text} Block {CacheForm.GetDocumentation(field)}");
 
-            Struct = new StructControl(form, CacheContext, type.GenericTypeArguments[0], null);
+            Struct = new StructControl(form, Cache, type.GenericTypeArguments[0], null);
             groupBox.Controls.Add(Struct);
             Struct.Dock = DockStyle.Fill;
             Struct.BringToFront();
@@ -58,7 +58,7 @@ namespace Sentinel.Controls
 
             FieldInfo labelField = null;
 
-            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo((Field?.FieldType ?? value.GetType()).GenericTypeArguments[0], Struct.CacheContext.Version));
+            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo((Field?.FieldType ?? value.GetType()).GenericTypeArguments[0], Struct.Cache.Version));
             foreach (var fieldInfo in enumerator)
             {
                 if (fieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Label))
@@ -77,7 +77,7 @@ namespace Sentinel.Controls
                     if (labelField.FieldType == typeof(string))
                         label = (string)labelField.GetValue(elements[i]);
                     else if (labelField.FieldType == typeof(StringId))
-                        label = CacheContext.GetString((StringId)labelField.GetValue(elements[i]));
+                        label = Cache.StringTable.GetString((StringId)labelField.GetValue(elements[i]));
                     else if (labelField.FieldType.IsEnum)
                         label = labelField.GetValue(elements[i]).ToString().ToSnakeCase();
                     else if (labelField.FieldType == typeof(short))
@@ -94,9 +94,9 @@ namespace Sentinel.Controls
                             }
                         }
                     }
-                    else if (labelField.FieldType == typeof(CachedTagInstance))
+                    else if (labelField.FieldType == typeof(CachedTag))
                     {
-                        var instance = (CachedTagInstance)labelField.GetValue(elements[i]);
+                        var instance = (CachedTag)labelField.GetValue(elements[i]);
 
                         if (instance != null)
                         {
@@ -148,7 +148,7 @@ namespace Sentinel.Controls
 
                 FieldInfo labelField = null;
 
-                var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo((Field?.FieldType ?? value.GetType()).GenericTypeArguments[0], Struct.CacheContext.Version));
+                var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo((Field?.FieldType ?? value.GetType()).GenericTypeArguments[0], Struct.Cache.Version));
                 foreach (var fieldInfo in enumerator)
                 {
                     if (fieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Label))
@@ -167,7 +167,7 @@ namespace Sentinel.Controls
                         if (labelField.FieldType == typeof(string))
                             label = (string)labelField.GetValue(elements[i]);
                         else if (labelField.FieldType == typeof(StringId))
-                            label = CacheContext.GetString((StringId)labelField.GetValue(elements[i]));
+                            label = Cache.StringTable.GetString((StringId)labelField.GetValue(elements[i]));
                         else if (labelField.FieldType.IsEnum)
                             label = labelField.GetValue(elements[i]).ToString().ToSnakeCase();
                         else if (labelField.FieldType == typeof(short))
@@ -184,9 +184,9 @@ namespace Sentinel.Controls
                                 }
                             }
                         }
-                        else if (labelField.FieldType == typeof(CachedTagInstance))
+                        else if (labelField.FieldType == typeof(CachedTag))
                         {
-                            var instance = (CachedTagInstance)labelField.GetValue(elements[i]);
+                            var instance = (CachedTag)labelField.GetValue(elements[i]);
 
                             if (instance != null)
                             {

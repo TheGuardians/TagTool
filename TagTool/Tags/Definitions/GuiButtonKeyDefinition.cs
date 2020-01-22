@@ -10,14 +10,14 @@ namespace TagTool.Tags.Definitions
 	{
         public uint Flags;
         public GuiDefinition GuiRenderBlock;
-        public CachedTagInstance Strings;
+        public CachedTag Strings;
         public List<TextWidget> TextWidgets;
         public List<BitmapWidget> BitmapWidgets;
 
         [TagStructure(Size = 0x4C)]
         public class TextWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
             public GuiDefinition GuiRenderBlock;
             public StringId DataSourceName;
@@ -30,11 +30,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C)]
         public class BitmapWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
             public GuiDefinition GuiRenderBlock;
-            public CachedTagInstance Bitmap;
-            public CachedTagInstance Unknown2;
+            public CachedTag Bitmap;
+            public CachedTag Unknown2;
             public BlendMethodValue BlendMethod;
             public short Unknown3;
             public short SpriteIndex;

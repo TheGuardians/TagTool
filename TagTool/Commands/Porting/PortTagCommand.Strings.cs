@@ -12,7 +12,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private MultilingualUnicodeStringList ConvertMultilingualUnicodeStringList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultilingualUnicodeStringList unic)
+        private MultilingualUnicodeStringList ConvertMultilingualUnicodeStringList(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultilingualUnicodeStringList unic)
         {
             ushort[] stringIndex = new ushort[12];
             ushort[] stringCount = new ushort[12];
@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
             {
                 var pair = table[i];
                 var stringBlock = new LocalizedString {
-                    StringID = ConvertStringId(new StringId((uint)pair.Key, BlamCache.Version)),
+                    StringID = ConvertStringId(new StringId((uint)pair.Key)),
                     StringIDStr = null,
                 };
 
@@ -111,14 +111,12 @@ namespace TagTool.Commands.Porting
             return unic;
         }
 
-        private void MergeMultilingualUnicodeStringList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTagInstance edTag, CacheFile.IndexItem h3Tag)
+        private void MergeMultilingualUnicodeStringList(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag edTag, CachedTag h3Tag)
         {
+            MultilingualUnicodeStringList h3Def = BlamCache.Deserialize<MultilingualUnicodeStringList>(blamCacheStream, h3Tag);
             var edDef = CacheContext.Deserialize<MultilingualUnicodeStringList>(cacheStream, edTag);
 
-            var h3Def = BlamCache.Deserializer.Deserialize<MultilingualUnicodeStringList>(
-                new CacheSerializationContext(ref BlamCache, h3Tag));
-
-            ConvertMultilingualUnicodeStringList(cacheStream, resourceStreams, h3Def);
+            ConvertMultilingualUnicodeStringList(cacheStream, blamCacheStream, resourceStreams, h3Def);
 
             var mergedStringCount = 0;
 

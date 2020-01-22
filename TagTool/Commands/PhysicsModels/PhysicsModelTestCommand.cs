@@ -8,9 +8,9 @@ namespace TagTool.Commands.PhysicsModels
 {
     class PhysicsModelTestCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public PhysicsModelTestCommand(HaloOnlineCacheContext cacheContext)
+        public PhysicsModelTestCommand(GameCache cache)
             : base(false,
                   
                   "PhysicsModelTest",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.PhysicsModels
                   "A tag-index can be specified to override an existing tag, or 'new' can be used to create a new tag.\n" +
             "Tags that are not type- 'phmo' will not be overridden unless the third argument is specified- 'force'. ")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -39,7 +39,7 @@ namespace TagTool.Commands.PhysicsModels
                 return true;
             }
 
-            CachedTagInstance tag = null;
+            CachedTag tag = null;
             bool b_duplicate;
             // optional argument: forces overwriting of tags that are not type: phmo
             bool b_force = (args.Count >= 3 && args[2].ToLower().Equals("force"));
@@ -50,7 +50,7 @@ namespace TagTool.Commands.PhysicsModels
             }
             else
             {
-                if (!CacheContext.TryGetTag(args[1], out tag))
+                if (!Cache.TryGetCachedTag(args[1], out tag))
                     return false;
 
                 b_duplicate = false;
@@ -77,13 +77,13 @@ namespace TagTool.Commands.PhysicsModels
                 return false;
             }
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
 
                 if (b_duplicate)
                 {
                     //duplicate an existing tag, trashcan phmo
-                    tag = CacheContext.TagCache.DuplicateTag(stream, CacheContext.TagCache.Index[0x4436]);
+                    tag = null; // Cache.TagCache.DuplicateTag(stream, Cache.TagCache.GetTagByIndex(0x4436));
                     if (tag == null)
                     {
                         Console.WriteLine("Failed tag duplication.");
@@ -91,7 +91,7 @@ namespace TagTool.Commands.PhysicsModels
                     }
                 }
 
-                CacheContext.Serialize(stream, tag, phmo);
+                Cache.Serialize(stream, tag, phmo);
             }
 
             Console.Write("Successfully imported phmo to: ");

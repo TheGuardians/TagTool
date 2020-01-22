@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public RenderDataBlock ChildRenderData;
         public RenderDataBlock TheaterRenderData;
 
-        public CachedTagInstance Unknown4;
+        public CachedTag Unknown4;
 
         public OutlineDataBlock WeaponOutlineData;
         public OutlineDataBlock AllyOutlineData;
@@ -24,8 +24,8 @@ namespace TagTool.Tags.Definitions
         public OutlineDataBlock ObjectiveOutlineData;
         public OutlineDataBlock SceneryOutlineData;
 
-        public CachedTagInstance VisionModeMask;
-        public CachedTagInstance VisionModeCameraFx;
+        public CachedTag VisionModeMask;
+        public CachedTag VisionModeCameraFx;
 
         [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;

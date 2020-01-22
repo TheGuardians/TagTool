@@ -9,26 +9,26 @@ namespace TagTool.Tags.Definitions
     public class ForgeGlobalsDefinition : TagStructure
     {
         [TagField(ValidTags = new[] { "rm  " })]
-        public CachedTagInstance InvisibleRenderMethod;
+        public CachedTag InvisibleRenderMethod;
 
         [TagField(ValidTags = new[] { "rm  " })]
-        public CachedTagInstance DefaultRenderMethod;
+        public CachedTag DefaultRenderMethod;
 
         public List<ReForgeMaterial> ReForgeMaterials;
         public List<ReForgeMaterialType> ReForgeMaterialTypes;
         public List<TagReferenceBlock> ReForgeObjects;
 
         [TagField(ValidTags = new[] { "obje" })]
-        public CachedTagInstance PrematchCameraObject;
+        public CachedTag PrematchCameraObject;
 
         [TagField(ValidTags = new[] { "obje" })]
-        public CachedTagInstance ModifierObject;
+        public CachedTag ModifierObject;
 
         [TagField(ValidTags = new[] { "obje" })]
-        public CachedTagInstance KillVolumeObject;
+        public CachedTag KillVolumeObject;
 
         [TagField(ValidTags = new[] { "obje" })]
-        public CachedTagInstance GarbageVolumeObject;
+        public CachedTag GarbageVolumeObject;
 
         public List<Description> Descriptions;
         public List<PaletteCategory> PaletteCategories;
@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
             public string Name;
 
             [TagField(ValidTags = new[] { "rm  " })]
-            public CachedTagInstance RenderMethod;
+            public CachedTag RenderMethod;
         }
 
         [TagStructure(Size = 0x24)]
@@ -108,7 +108,7 @@ namespace TagTool.Tags.Definitions
             public ushort MaxAllowed;
 
             [TagField(ValidTags = new[] { "obje" })]
-            public CachedTagInstance Object;
+            public CachedTag Object;
 
             public List<Setter> Setters;
 
@@ -236,7 +236,7 @@ namespace TagTool.Tags.Definitions
             public string Name;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance Effect;
+            public CachedTag Effect;
         }
 
         [Flags]
@@ -256,25 +256,25 @@ namespace TagTool.Tags.Definitions
             public RealEulerAngles3d Orientation;
 
             [TagField(ValidTags = new[] { "scen" })]
-            public CachedTagInstance Object;
+            public CachedTag Object;
 
             [TagField(ValidTags = new[] { "skya" })]
-            public CachedTagInstance Parameters;
+            public CachedTag Parameters;
 
             [TagField(ValidTags = new[] { "wind" })]
-            public CachedTagInstance Wind;
+            public CachedTag Wind;
 
             [TagField(ValidTags = new[] { "cfxs" })]
-            public CachedTagInstance CameraFX;
+            public CachedTag CameraFX;
 
             [TagField(ValidTags = new[] { "sefc" })]
-            public CachedTagInstance ScreenFX;
+            public CachedTag ScreenFX;
 
             [TagField(ValidTags = new[] { "chmt" })]
-            public CachedTagInstance GlobalLighting;
+            public CachedTag GlobalLighting;
 
             [TagField(ValidTags = new[] { "lsnd" })]
-            public CachedTagInstance BackgroundSound;
+            public CachedTag BackgroundSound;
         }
     }
 }

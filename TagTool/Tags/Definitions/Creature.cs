@@ -65,8 +65,8 @@ namespace TagTool.Tags.Definitions
         public Angle AngularAccelerationMaximum;
         public float CrouchVelocityModifier;
         public uint Unknown14;
-        public CachedTagInstance ImpactDamage;
-        public CachedTagInstance ImpactShieldDamage;
+        public CachedTag ImpactDamage;
+        public CachedTag ImpactShieldDamage;
         public List<Unit.MetagameProperty> MetagameProperties;
         public Bounds<float> DestroyAfterDeathTimeBounds;
     }

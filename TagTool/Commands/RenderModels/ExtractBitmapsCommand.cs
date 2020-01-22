@@ -4,16 +4,16 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.IO;
 
 namespace TagTool.Commands.RenderModels
 {
     class ExtractBitmapsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
         private RenderModel Definition { get; }
 
-        public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
+        public ExtractBitmapsCommand(GameCache cacheContext, RenderModel definition)
             : base(true,
                   
                   "ExtractBitmaps",
@@ -23,8 +23,7 @@ namespace TagTool.Commands.RenderModels
 
                   "Extracts all bitmaps used by the render model's shaders to a specific directory.")
         {
-            CacheContext = cacheContext;
-            Tag = tag;
+            Cache = cacheContext;
             Definition = definition;
         }
 
@@ -49,23 +48,21 @@ namespace TagTool.Commands.RenderModels
                     return false;
             }
 
-            using (var cacheStream = CacheContext.TagCacheFile.OpenRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             {
                 foreach (var shader in Definition.Materials)
                 {
-                    var renderMethod = (RenderMethod)CacheContext.Deserialize(cacheStream, shader.RenderMethod);
+                    var renderMethod = (RenderMethod)Cache.Deserialize(cacheStream, shader.RenderMethod);
 
                     foreach (var property in renderMethod.ShaderProperties)
                     {
-                        var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
+                        var template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                         for (var i = 0; i < template.SamplerArguments.Count; i++)
                         {
                             var mapTemplate = template.SamplerArguments[i];
 
-                            var extractor = new BitmapDdsExtractor(CacheContext);
-
-                            var bitmap = CacheContext.Deserialize<Bitmap>(cacheStream, property.ShaderMaps[i].Bitmap);
+                            var bitmap = Cache.Deserialize<Bitmap>(cacheStream, property.ShaderMaps[i].Bitmap);
                             var ddsOutDir = directory;
 
                             if (bitmap.Images.Count > 1)
@@ -76,12 +73,16 @@ namespace TagTool.Commands.RenderModels
 
                             for (var j = 0; j < bitmap.Images.Count; j++)
                             {
-                                var outPath = Path.Combine(ddsOutDir, CacheContext.GetString(mapTemplate.Name) + "_" + property.ShaderMaps[i].Bitmap.Index.ToString("X4")) + ".dds";
+                                var outPath = Path.Combine(ddsOutDir, Cache.StringTable.GetString(mapTemplate.Name) + "_" + property.ShaderMaps[i].Bitmap.Index.ToString("X4")) + ".dds";
 
                                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                                    extractor.ExtractDds(bitmap, j, outStream);
+                                using(var writer = new EndianWriter(outStream))
+                                {
+                                    var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, j);
+                                    ddsFile.Write(writer);
+                                }
 
-                                Console.WriteLine($"Bitmap {i} ({CacheContext.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4} extracted to '{outPath}'");
+                                Console.WriteLine($"Bitmap {i} ({Cache.StringTable.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4} extracted to '{outPath}'");
                             }
                         }
                     }

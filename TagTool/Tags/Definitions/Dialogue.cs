@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x24)]
     public class Dialogue : TagStructure
 	{
-        public CachedTagInstance GlobalDialogueInfo;
+        public CachedTag GlobalDialogueInfo;
         public uint Flags;
         public List<Vocalization> Vocalizations;
         public StringId MissionDialogueDesignator;
@@ -18,7 +18,7 @@ namespace TagTool.Tags.Definitions
             public ushort Flags;
             public short Unknown;
             public StringId Name;
-            public CachedTagInstance Sound;
+            public CachedTag Sound;
         }
     }
 }

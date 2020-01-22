@@ -9,9 +9,7 @@ namespace TagTool.Tags.Definitions
     public class Bink : TagStructure
 	{
         public int FrameCount;
-        [TagField(Flags = Pointer)]
-        public PageableResource Resource;
-        public int UselessPadding;
+        public TagResourceReference ResourceReference;
         public uint Unknown;
         public uint Unknown2;
 

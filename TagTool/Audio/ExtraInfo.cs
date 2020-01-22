@@ -28,7 +28,7 @@ namespace TagTool.Audio
         public List<TagResourceGen2> Resources;
 
         [TagField(Flags = Short, MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance Original;
+        public CachedTag Original;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public short OwnerTagSectionOffset;
@@ -38,7 +38,7 @@ namespace TagTool.Audio
         public byte RuntimeLoaded;
 
         [TagField(Flags = Short, MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance Runtime;
+        public CachedTag Runtime;
 
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]

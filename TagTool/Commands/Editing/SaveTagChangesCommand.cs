@@ -6,29 +6,29 @@ namespace TagTool.Commands.Editing
 {
     class SaveTagChangesCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private object Value { get; }
 
-        public SaveTagChangesCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
+        public SaveTagChangesCommand(GameCache cache, CachedTag tag, object value)
             : base(true,
 
                   "SaveTagChanges",
-                  $"Saves changes made to the current {cacheContext.GetString(tag.Group.Name)} definition.",
+                  $"Saves changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition.",
 
                   "SaveTagChanges",
 
-                  $"Saves changes made to the current {cacheContext.GetString(tag.Group.Name)} definition.")
+                  $"Saves changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Value = value;
         }
 
         public override object Execute(List<string> args)
         {
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(stream, Tag, Value);
+            using (var stream = Cache.OpenCacheReadWrite())
+                Cache.Serialize(stream, Tag, Value);
 
             Console.WriteLine("Done!");
 

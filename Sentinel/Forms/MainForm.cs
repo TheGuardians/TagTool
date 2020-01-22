@@ -55,7 +55,8 @@ namespace Sentinel.Forms
                 MdiParent = this
             };
 
-            cacheForm.Show();
+            if (!cacheForm.IsDisposed)
+                cacheForm.Show();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -104,22 +105,13 @@ namespace Sentinel.Forms
 
                 var directory = new DirectoryInfo(fbd.SelectedPath);
 
-                if (directory.GetFiles("*.dat").Length == 0)
+                var cacheForm = new CacheForm(directory)
                 {
-                    var smf = new SelectMapForm(directory);
+                    MdiParent = this
+                };
 
-                    if (smf.ShowDialog() != DialogResult.OK)
-                        return;
-                }
-                else
-                {
-                    var cacheForm = new CacheForm(directory)
-                    {
-                        MdiParent = this
-                    };
-
+                if (!cacheForm.IsDisposed)
                     cacheForm.Show();
-                }
             }
         }
 

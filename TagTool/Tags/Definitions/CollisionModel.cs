@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using TagTool.BspCollisionGeometry;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Geometry;
 using TagTool.Havok;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -108,7 +108,7 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown14;
 
                     [TagField(Flags = Short)]
-                    public CachedTagInstance Model;
+                    public CachedTag Model;
 
                     public uint Unknown15;
 

@@ -21,8 +21,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3ODST)]
             public class EffectReference : TagStructure
 			{
-                public CachedTagInstance Effect;
-                public CachedTagInstance Sound;
+                public CachedTag Effect;
+                public CachedTag Sound;
                 public StringId MaterialName;
                 public short GlobalMaterialIndex;
                 public SweetenerModeValue SweetenerMode;

@@ -11,7 +11,7 @@ namespace Sentinel.Controls
     public partial class TagReferenceControl : UserControl, IFieldControl
     {
         public CacheForm Form { get; }
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; }
         public object Owner { get; set; } = null;
         public bool Loading { get; set; } = false;
@@ -21,11 +21,11 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public TagReferenceControl(CacheForm form, HaloOnlineCacheContext cacheContext, FieldInfo field) :
+        public TagReferenceControl(CacheForm form, GameCache cache, FieldInfo field) :
             this()
         {
             Form = form;
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
             label1.Text = field.Name.ToSpaced();
 
@@ -46,11 +46,11 @@ namespace Sentinel.Controls
                 return;
             }
 
-            var tag = (CachedTagInstance)value;
+            var tag = (CachedTag)value;
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-            textBox.Text = $"{tagName}.{CacheContext.GetString(tag.Group.Name)}";
+            textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
 
             Loading = false;
         }
@@ -62,7 +62,7 @@ namespace Sentinel.Controls
 
             if (value == null)
             {
-                if (!CacheContext.TryGetTag(textBox.Text, out var tag))
+                if (!Cache.TryGetTag(textBox.Text, out var tag))
                 {
                     textBox.ForeColor = Color.Red;
                     return;
@@ -74,7 +74,7 @@ namespace Sentinel.Controls
 
                 var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-                textBox.Text = $"{tagName}.{CacheContext.GetString(tag.Group.Name)}";
+                textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
             }
 
             Field.SetValue(owner, value);
@@ -82,7 +82,7 @@ namespace Sentinel.Controls
 
         private void browseButton_Click(object sender, EventArgs e)
         {
-            using (var td = new TagDialog(CacheContext))
+            using (var td = new TagDialog(Cache))
             {
                 if (td.ShowDialog() != DialogResult.OK)
                     return;
@@ -91,13 +91,13 @@ namespace Sentinel.Controls
 
                 var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-                textBox.Text = $"{tagName}.{CacheContext.GetString(tag.Group.Name)}";
+                textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
             }
         }
 
         private void openButton_Click(object sender, EventArgs e)
         {
-            if (!CacheContext.TryGetTag(textBox.Text, out var tag))
+            if (!Cache.TryGetTag(textBox.Text, out var tag))
             {
                 textBox.ForeColor = Color.Red;
                 return;
@@ -107,7 +107,7 @@ namespace Sentinel.Controls
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-            textBox.Text = $"{tagName}.{CacheContext.GetString(tag.Group.Name)}";
+            textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
 
             Form.LoadTagEditor(tag);
         }
@@ -123,7 +123,7 @@ namespace Sentinel.Controls
                 return;
 
             SetFieldValue(Owner);
-            var tag = (CachedTagInstance)Field.GetValue(Owner);
+            var tag = (CachedTag)Field.GetValue(Owner);
 
             Form.RenameTag(tag);
 

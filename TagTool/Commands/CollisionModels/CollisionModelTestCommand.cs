@@ -10,9 +10,9 @@ namespace TagTool.Commands.CollisionModels
 {
     class CollisionModelTestCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public CollisionModelTestCommand(HaloOnlineCacheContext cacheContext)
+        public CollisionModelTestCommand(GameCache cache)
             : base(false,
                   
                   "CollisionModelTest",
@@ -26,7 +26,7 @@ namespace TagTool.Commands.CollisionModels
                   "A tag-index can be specified to override an existing tag, or 'new' can be used to create a new tag.\n" +
                   "Tags that are not type- 'coll' will not be overridden unless the third argument is specified- 'force'.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -37,7 +37,7 @@ namespace TagTool.Commands.CollisionModels
                 return false;
             }
 
-            CachedTagInstance tag = null;
+            CachedTag tag = null;
             bool b_duplicate;
 
             // optional argument: forces overwriting of tags that are not type: coll
@@ -49,7 +49,7 @@ namespace TagTool.Commands.CollisionModels
             }
             else
             {
-                if (!CacheContext.TryGetTag(args[1], out tag))
+                if (!Cache.TryGetTag(args[1], out tag))
                     return false;
 
                 b_duplicate = false;
@@ -117,13 +117,13 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
             {
 
                 if (b_duplicate)
                 {
                     //duplicate an existing tag, trashcan phmo
-                    tag = CacheContext.TagCache.DuplicateTag(stream, CacheContext.TagCache.Index[0x4436]);
+                    tag = Cache.TagCache.DuplicateTag(stream, CacheContext.TagCache.Index[0x4436]);
                     if (tag == null)
                     {
                         Console.WriteLine("Failed tag duplication.");
@@ -131,7 +131,7 @@ namespace TagTool.Commands.CollisionModels
                     }
                 }
 
-                CacheContext.Serialize(stream, tag, coll);
+                Cache.Serialize(stream, tag, coll);
             }
 
             Console.WriteLine(n_objects == 1 ? "Added 1 collision." : "Added {0} collisions in one tag.", n_objects);

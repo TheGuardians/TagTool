@@ -8,10 +8,10 @@ namespace TagTool.Commands.Models
 {
     class ListVariantsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private Model Definition { get; }
 
-        public ListVariantsCommand(HaloOnlineCacheContext cacheContext, Model model)
+        public ListVariantsCommand(GameCache cache, Model model)
             : base(true,
                   
                   "ListVariants",
@@ -20,7 +20,7 @@ namespace TagTool.Commands.Models
                   "ListVariants",
                   "Lists available variants of the current model definition which can be used with \"extract-model\".")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = model;
         }
 
@@ -29,7 +29,7 @@ namespace TagTool.Commands.Models
             if (args.Count != 0)
                 return false;
 
-            var variantNames = Definition.Variants.Select(v => CacheContext.GetString(v.Name) ?? v.Name.ToString()).OrderBy(n => n).ToList();
+            var variantNames = Definition.Variants.Select(v => Cache.StringTable.GetString(v.Name) ?? v.Name.ToString()).OrderBy(n => n).ToList();
 
             if (variantNames.Count == 0)
             {

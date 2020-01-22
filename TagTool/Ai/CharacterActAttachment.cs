@@ -10,7 +10,7 @@ namespace TagTool.Ai
 	{
         [TagField(Flags = Label)]
         public StringId ActivityName;
-        public CachedTagInstance Crate;
+        public CachedTag Crate;
         public StringId CrateMarkerName;
         public StringId UnitMarkerName;
     }

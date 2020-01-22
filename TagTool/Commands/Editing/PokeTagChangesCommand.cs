@@ -12,21 +12,21 @@ namespace TagTool.Commands.Editing
 {
     class PokeTagChangesCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private object Value { get; }
 
-        public PokeTagChangesCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
+        public PokeTagChangesCommand(GameCache cache, CachedTag tag, object value)
             : base(true,
 
                   "PokeTagChanges",
-                  $"Pokes changes made to the current {cacheContext.GetString(tag.Group.Name)} definition to a running game's memory.",
+                  $"Pokes changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition to a running game's memory.",
 
                   "PokeTagChanges [process id]",
 
-                  $"Pokes changes made to the current {cacheContext.GetString(tag.Group.Name)} definition to a running game's memory.")
+                  $"Pokes changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition to a running game's memory.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Value = value;
         }
@@ -74,11 +74,11 @@ namespace TagTool.Commands.Editing
             {
                 var address = GetTagAddress(processStream, Tag.Index);
 
-                var runtimeContext = new RuntimeSerializationContext(CacheContext, processStream);
+                var runtimeContext = new RuntimeSerializationContext(Cache, processStream);
                 processStream.Position = address + Tag.DefinitionOffset;
 
-                var definition = CacheContext.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag));
-                CacheContext.Serializer.Serialize(runtimeContext, Value);
+                var definition = Cache.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag));
+                Cache.Serializer.Serialize(runtimeContext, Value);
 
                 if (address != 0)
                     Console.WriteLine("Tag 0x{0:X} is loaded at 0x{1:X8} in process 0x{2:X}.", Tag.Index, address, process.Id);

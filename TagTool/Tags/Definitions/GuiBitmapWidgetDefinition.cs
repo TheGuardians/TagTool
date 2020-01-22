@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions
         public uint Flags;
         public GuiDefinition GuiRenderBlock;
 
-        public CachedTagInstance Bitmap;
-        public CachedTagInstance Unknown2;
+        public CachedTag Bitmap;
+        public CachedTag Unknown2;
         public BlendMethodValue BlendMethod;
         public short Unknown3;
         public short SpriteIndex;

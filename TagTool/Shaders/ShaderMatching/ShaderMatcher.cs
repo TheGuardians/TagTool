@@ -6,6 +6,7 @@ using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Shaders.ShaderMatching
 {
@@ -36,12 +37,12 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Halo Online cache context reference
         /// </summary>
-        private HaloOnlineCacheContext CacheContext;
+        private GameCacheHaloOnlineBase CacheContext;
 
         /// <summary>
         /// CacheFile Reference
         /// </summary>
-        private CacheFile BlamCache;
+        private GameCache BlamCache;
 
         /// <summary>
         /// Cache stream reference
@@ -68,7 +69,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <param name="cacheStream"></param>
         /// <param name="cacheContext"></param>
         /// <param name="blamCache"></param>
-        public void Init(Stream cacheStream, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        public void Init(Stream cacheStream, GameCacheHaloOnlineBase cacheContext, GameCache blamCache)
         {
             CacheStream = cacheStream;
             CacheContext = cacheContext;
@@ -118,7 +119,7 @@ namespace TagTool.Shaders.ShaderMatching
 
             using (var reader = new EndianReader(cacheStream, true))
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in CacheContext.TagCache.TagTable)
                 {
                     if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null || instance.Name.StartsWith("s3d"))
                         continue;
@@ -129,7 +130,9 @@ namespace TagTool.Shaders.ShaderMatching
                     var bitmaps = new List<string>();
                     var arguments = new List<string>();
 
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 0x48);
+                    var hoInstance = (CachedTagHaloOnline)instance;
+                    
+                    reader.SeekTo(hoInstance.HeaderOffset + hoInstance.DefinitionOffset + 0x48);
                     var vectorArgsCount = reader.ReadInt32();
                     var vectorArgsAddress = reader.ReadUInt32();
 
@@ -137,12 +140,12 @@ namespace TagTool.Shaders.ShaderMatching
                     {
                         for (var i = 0; i < vectorArgsCount; i++)
                         {
-                            reader.SeekTo(instance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
-                            arguments.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            reader.SeekTo(hoInstance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
+                            arguments.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 0x6C);
+                    reader.SeekTo(hoInstance.HeaderOffset + hoInstance.DefinitionOffset + 0x6C);
                     var samplerArgsCount = reader.ReadInt32();
                     var samplerArgsAddress = reader.ReadUInt32();
 
@@ -150,8 +153,8 @@ namespace TagTool.Shaders.ShaderMatching
                     {
                         for (var i = 0; i < samplerArgsCount; i++)
                         {
-                            reader.SeekTo(instance.HeaderOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
-                            bitmaps.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            reader.SeekTo(hoInstance.HeaderOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
+                            bitmaps.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
@@ -160,21 +163,26 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
-        private List<ShaderTemplateItem> CollectRmt2Info(Stream cacheStream, CacheFile.IndexItem bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
+        private List<ShaderTemplateItem> CollectRmt2Info(Stream cacheStream, CachedTag bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
         {
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
-            var bmRmt2Context = new CacheSerializationContext(ref BlamCache, bmRmt2Instance);
-            var bmRmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(bmRmt2Context);
-            var bmPixlContext = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.GetItemByID(bmRmt2.PixelShader.Index));
-            var bmPixl = BlamCache.Deserializer.Deserialize<PixelShader>(bmPixlContext);
+            RenderMethodTemplate bmRmt2;
+            PixelShader bmPixl;
+
+            using(var blamStream = BlamCache.OpenCacheRead())
+            {
+                bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamStream, bmRmt2Instance);
+                bmPixl = BlamCache.Deserialize<PixelShader>(blamStream, bmRmt2.PixelShader);
+            }
+            
 
             // loop trough all rmt2 and find the closest
             foreach (var edRmt2_ in Rmt2TagsInfo)
             {
                 var rmt2Type = bmRmt2Instance.Name.Split("\\".ToArray())[1];
 
-                var edRmt2Tag = CacheContext.GetTag(edRmt2_.Key);
+                var edRmt2Tag = (CachedTagHaloOnline)CacheContext.TagCache.GetTag(edRmt2_.Key);
 
                 // Ignore all rmt2 that are not of the same type. 
                 if (edRmt2Tag == null || !(edRmt2Tag.Name?.Contains(rmt2Type) ?? false))
@@ -183,7 +191,7 @@ namespace TagTool.Shaders.ShaderMatching
                 using (var reader = new EndianReader(cacheStream, true))
                 {
                     reader.SeekTo(edRmt2Tag.HeaderOffset + edRmt2Tag.DefinitionOffset + 28);
-                    var edPixl = CacheContext.GetTag(reader.ReadInt32());
+                    var edPixl = (CachedTagHaloOnline)CacheContext.TagCache.GetTag(reader.ReadInt32());
 
                     if (edPixl == null)
                         continue;
@@ -270,7 +278,7 @@ namespace TagTool.Shaders.ShaderMatching
             return rmdfOptions;
         }
 
-        public CachedTagInstance FindEquivalentRmt2(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        public CachedTag FindEquivalentRmt2(Stream cacheStream, CachedTag blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
             var edRmt2Temp = new List<ShaderTemplateItem>();
@@ -283,7 +291,7 @@ namespace TagTool.Shaders.ShaderMatching
             // rmt2 tagnames have a bunch of values, they're tagblock indexes in rmdf methods.ShaderOptions
             foreach (var d in edRmt2BestStats)
             {
-                var dInstance = CacheContext.GetTag(d.rmt2TagIndex);
+                var dInstance = CacheContext.TagCache.GetTag(d.rmt2TagIndex);
 
                 if (dInstance == null || dInstance.Name == null)
                     continue;
@@ -329,7 +337,7 @@ namespace TagTool.Shaders.ShaderMatching
                 }
             }
 
-            return CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
+            return CacheContext.TagCache.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
         }
 
         public RenderMethod.ShaderProperty.Argument DefaultArgumentsValues(string arg)
@@ -676,7 +684,7 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
-        public CachedTagInstance FixRmt2Reference(Stream cacheStream, string blamTagName, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        public CachedTag FixRmt2Reference(Stream cacheStream, string blamTagName, CachedTag blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             switch (blamTagName)
             {
@@ -979,7 +987,7 @@ namespace TagTool.Shaders.ShaderMatching
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
             using (var reader = new EndianReader(cacheStream, true))
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in CacheContext.TagCache.TagTable)
                 {
                     if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                         continue;
@@ -1012,9 +1020,9 @@ namespace TagTool.Shaders.ShaderMatching
 
         public void FixRmdfTagRef(RenderMethod finalRm)
         {
-            var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Name;
+            var rmdfName = finalRm.BaseRenderMethod.Name;
 
-            foreach (var instance in CacheContext.TagCache.Index)
+            foreach (var instance in CacheContext.TagCache.TagTable)
             {
                 if (instance == null || !instance.IsInGroup("rmdf") || instance.Name == null)
                     continue;

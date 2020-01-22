@@ -8,7 +8,7 @@ namespace Sentinel.Controls
 {
     public partial class BoundsControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; }
         public bool Loading { get; set; } = false;
         public object Owner { get; set; } = null;
@@ -18,10 +18,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public BoundsControl(HaloOnlineCacheContext cacheContext, FieldInfo field) :
+        public BoundsControl(GameCache cache, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
             label1.Text = field.Name.ToSpaced().Replace("_", "");
 
@@ -53,8 +53,8 @@ namespace Sentinel.Controls
 
             if (value == null)
             {
-                if (!ValueControl.TryParseValue(CacheContext, Field.FieldType.GenericTypeArguments[0], lowerTextBox.Text, out var lower) ||
-                    !ValueControl.TryParseValue(CacheContext, Field.FieldType.GenericTypeArguments[0], upperTextBox.Text, out var upper))
+                if (!ValueControl.TryParseValue(Cache, Field.FieldType.GenericTypeArguments[0], lowerTextBox.Text, out var lower) ||
+                    !ValueControl.TryParseValue(Cache, Field.FieldType.GenericTypeArguments[0], upperTextBox.Text, out var upper))
                     return;
 
                 value = Activator.CreateInstance(Field.FieldType, new[] { lower, upper });

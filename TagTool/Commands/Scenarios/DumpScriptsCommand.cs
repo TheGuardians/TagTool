@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Scripting;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
 {
     class DumpScriptsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
         private Scenario Definition { get; }
 
-        public DumpScriptsCommand(HaloOnlineCacheContext cacheContext, Scenario definition) :
+        public DumpScriptsCommand(Scenario definition) :
             base(true,
                 
                 "DumpScripts",
@@ -22,7 +22,6 @@ namespace TagTool.Commands.Scenarios
 
                 "Extract a scenario's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.")
         {
-            CacheContext = cacheContext;
             Definition = definition;
         }
 
@@ -50,8 +49,6 @@ namespace TagTool.Commands.Scenarios
         {
             if (args.Count > 1)
                 return false;
-
-            var PortTagCommand = new Porting.PortTagCommand(CacheContext, null);
 
             var csvFileName = "scriptsDumpOutput.csv";
 
@@ -118,7 +115,7 @@ namespace TagTool.Commands.Scenarios
 
                 var opcodeName = "";
 
-                if (PortTagCommand.ScriptExpressionIsValue(expr))
+                if (ScriptExpressionIsValue(expr))
                 {
                     if (Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
                         opcodeName = $"{Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708][expr.Opcode]},value";
@@ -158,6 +155,29 @@ namespace TagTool.Commands.Scenarios
             CsvDumpQueueToFile(csvQueue1, csvFileName);
 
             return true;
+        }
+
+        public bool ScriptExpressionIsValue(HsSyntaxNode expr)
+        {
+            switch (expr.Flags)
+            {
+                case HsSyntaxNodeFlags.ParameterReference:
+                case HsSyntaxNodeFlags.GlobalsReference:
+                    return true;
+
+                case HsSyntaxNodeFlags.Expression:
+                    if ((int)expr.ValueType.HaloOnline > 0x4)
+                        return true;
+                    else
+                        return false;
+
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
+                case HsSyntaxNodeFlags.Group:
+                    return false;
+
+                default:
+                    return false;
+            }
         }
     }
 }

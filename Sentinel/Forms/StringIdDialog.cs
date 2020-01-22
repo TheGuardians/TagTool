@@ -8,7 +8,7 @@ namespace Sentinel.Forms
 {
     public partial class StringIdDialog : Form
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
 
         public StringId Value =>
             stringIdTreeView.SelectedNode?.Tag != null ?
@@ -33,10 +33,10 @@ namespace Sentinel.Forms
             InitializeComponent();
         }
 
-        public StringIdDialog(HaloOnlineCacheContext cacheContext) :
+        public StringIdDialog(GameCache cache) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -59,14 +59,15 @@ namespace Sentinel.Forms
 
             var stringIdSets = new Dictionary<string, List<StringId>>();
 
-            for (var stringIndex = 0; stringIndex < CacheContext.StringIdCache.Strings.Count; stringIndex++)
+            for (var stringIndex = 0; stringIndex < Cache.StringTable.Count; stringIndex++)
             {
-                var stringId = CacheContext.GetStringId(stringIndex);
+                var stringId = Cache.StringTable.GetStringId(stringIndex);
 
                 if (stringId == StringId.Invalid)
                     continue;
 
-                var set = SetNames[stringId.Set];
+                var stringIdResolver = Cache.StringTable.Resolver;
+                var set = SetNames[stringIdResolver.GetSet(stringId)];
 
                 if (!stringIdSets.ContainsKey(set))
                     stringIdSets[set] = new List<StringId>();
@@ -86,7 +87,7 @@ namespace Sentinel.Forms
 
                 foreach (var stringId in stringIdSets[set])
                 {
-                    var stringValue = CacheContext.GetString(stringId);
+                    var stringValue = Cache.StringTable.GetString(stringId);
 
                     if (stringValue == null || (filter != null && !stringValue.Contains(filter)))
                         continue;

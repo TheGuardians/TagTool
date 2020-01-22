@@ -5,11 +5,15 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xA0, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xA4, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xA4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xD8, MinVersion = CacheVersion.HaloReach)]
     public class CameraGlobalsDefinition : TagStructure
 	{
         [TagField(Flags = Label, ValidTags = new[] { "trak" })]
-        public CachedTagInstance DefaultUnitCameraTrack;
+        public CachedTag DefaultUnitCameraTrack;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public TagFunction Unknown;
 
         public float Unknown1;
         public float Unknown2;
@@ -25,6 +29,12 @@ namespace TagTool.Tags.Definitions
         public float Unknown12;
         public float Unknown13;
         public float Unknown14;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown46;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown47;
+
         public float Unknown15;
         public float Unknown16;
         public float Unknown17;
@@ -53,5 +63,18 @@ namespace TagTool.Tags.Definitions
         public float Unknown36;
         public float Unknown37;
         public float Unknown38;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown39;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Angle Unknown41;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown42;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown43;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown44;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown45;
     }
 }

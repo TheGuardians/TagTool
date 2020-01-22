@@ -6,9 +6,9 @@ namespace TagTool.Commands.Tags
 {
     class NameTagCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
 
-        public NameTagCommand(HaloOnlineCacheContext cacheContext)
+        public NameTagCommand(GameCache cache)
             : base(true,
                   
                   "NameTag",
@@ -21,7 +21,7 @@ namespace TagTool.Commands.Tags
                   "<name> - The name of the tag. Should be a concise name that resembles the format \n" +
                   "         of existing tag names.\n")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -29,7 +29,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 1 || args.Count > 3)
                 return false;
 
-            if (!CacheContext.TryGetTag(args[0], out var tag))
+            if (!Cache.TryGetCachedTag(args[0], out var tag))
             {
                 Console.WriteLine($"ERROR: Invalid tag specifier: {args[0]}");
                 return false;
@@ -43,7 +43,7 @@ namespace TagTool.Commands.Tags
 
             tag.Name = args[1];
 
-            Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {args[1]}.{CacheContext.GetString(tag.Group.Name)}");
+            Console.WriteLine($"[Index: 0x{tag.Index:X4}] {args[1]}.{Cache.StringTable.GetString(tag.Group.Name)}");
 
             return true;
         }

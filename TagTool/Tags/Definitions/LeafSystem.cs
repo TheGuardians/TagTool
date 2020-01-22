@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
         public FlagBits Flags;
         public StringId MarkerAttachName;
         [TagField(ValidTags = new[] { "bitm" })]
-        public CachedTagInstance BitmapSpritePlate;
+        public CachedTag BitmapSpritePlate;
         public Bounds<float> EmissionRate;
         public float Lifetime;
         public Bounds<float> WindBounds;

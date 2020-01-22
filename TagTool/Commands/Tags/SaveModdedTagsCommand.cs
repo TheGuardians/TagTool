@@ -6,9 +6,9 @@ namespace TagTool.Commands.Tags
 {
     class SaveModdedTagsCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public SaveModdedTagsCommand(HaloOnlineCacheContext cacheContext) :
+        public SaveModdedTagsCommand(GameCacheHaloOnlineBase cache) :
             base(true,
 
                 "SaveModdedTags",
@@ -18,7 +18,7 @@ namespace TagTool.Commands.Tags
 
                 "Saves the name of the modified tags from the current session.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -26,7 +26,7 @@ namespace TagTool.Commands.Tags
             if (args.Count > 1)
                 return false;
 
-            CacheContext.SaveModifiedTagNames(args.Count == 1 ? args[0] : null);
+            Cache.SaveModifiedTagNames(args.Count == 1 ? args[0] : null);
             Console.WriteLine("Done!");
             return true;
         }

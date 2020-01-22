@@ -34,11 +34,12 @@ namespace TagTool.Commands
             start:
             // Get the file path from the first argument
             // If no argument is given, load tags.dat
+            // legacy from older cache system where only HO caches could be loaded
             var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
 
             while (!fileInfo.Exists)
             {
-                Console.WriteLine("Enter the path to 'tags.dat':");
+                Console.WriteLine("Enter the path to a Halo cache file (.map or tags.dat)':");
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
 
@@ -65,13 +66,13 @@ namespace TagTool.Commands
                 Console.WriteLine();
             }
 
-            HaloOnlineCacheContext cacheContext = null;
+            GameCache gameCache = null;
 
 #if !DEBUG
             try
             {
 #endif
-                cacheContext = new HaloOnlineCacheContext(fileInfo.Directory);
+                gameCache = GameCache.Open(fileInfo);
 #if !DEBUG
             }
             catch (Exception e)
@@ -85,7 +86,7 @@ namespace TagTool.Commands
 
             // Create command context
             var contextStack = new CommandContextStack();
-            var tagsContext = TagCacheContextFactory.Create(contextStack, cacheContext);
+            var tagsContext = TagCacheContextFactory.Create(contextStack, gameCache);
             contextStack.Push(tagsContext);
 
             // If autoexecuting a command, just run it and return

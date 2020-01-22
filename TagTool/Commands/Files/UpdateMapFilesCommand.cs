@@ -7,14 +7,15 @@ using TagTool.Common;
 using TagTool.Tags.Definitions;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Files
 {
     class UpdateMapFilesCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
 
-        public UpdateMapFilesCommand(HaloOnlineCacheContext cacheContext)
+        public UpdateMapFilesCommand(GameCache cache)
             : base(true,
 
                   "UpdateMapFiles",
@@ -24,7 +25,7 @@ namespace TagTool.Commands.Files
 
                   "Updates the game's .map files to contain valid scenario indices.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -44,12 +45,12 @@ namespace TagTool.Commands.Files
                     forceUpdate = true;
 
             // Generate / update the map files
-            foreach(var scenario in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
+            foreach(var scenario in Cache.TagCache.FindAllInGroup("scnr"))
             {
                 var name = scenario.Name.Split('\\').Last();
                 var mapInfoName = $"{name}.mapinfo";
                 var mapFileName = $"{name}.map";
-                var targetPath = Path.Combine(CacheContext.Directory.FullName, mapFileName);
+                var targetPath = Path.Combine(Cache.Directory.FullName, mapFileName);
 
                 MapFile map;
                 Blf mapInfo = null;
@@ -78,19 +79,19 @@ namespace TagTool.Commands.Files
                             }
                             mapInfo = new Blf(version);
                             mapInfo.Read(reader);
-                            mapInfo.ConvertBlf(CacheContext.Version);
+                            mapInfo.ConvertBlf(Cache.Version);
                         }
                     }
                 }
 
                 try
                 {
-                    var fileInfo = CacheContext.Directory.GetFiles(mapFileName)[0];
+                    var fileInfo = Cache.Directory.GetFiles(mapFileName)[0];
                     map = new MapFile();
                     using (var stream = fileInfo.Open(FileMode.Open, FileAccess.Read))
                     using (var reader = new EndianReader(stream))
                         map.Read(reader);
-                    map.UpdateScenarioIndices(scenario.Index);
+                    map.Header.ScenarioTagIndex = scenario.Index;
 
                     if(mapInfo != null)
                         if(forceUpdate || map.MapFileBlf == null)
@@ -119,25 +120,24 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-        private MapFile GenerateMapFile(CachedTagInstance scenarioTag, Blf mapInfo = null)
+        private MapFile GenerateMapFile(CachedTag scenarioTag, Blf mapInfo = null)
         {
             MapFile map = new MapFile();
             var header = new MapFileHeader();
             Scenario scnr;
-            using (var stream = CacheContext.OpenTagCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
-                var deserializer = new TagDeserializer(CacheContext.Version);
-                scnr = (Scenario)CacheContext.Deserialize(stream, scenarioTag);
+                scnr = Cache.Deserialize<Scenario>(stream, scenarioTag);
             }
                 
-            map.Version = CacheContext.Version;
+            map.Version = Cache.Version;
             map.EndianFormat = EndianFormat.LittleEndian;
             map.MapVersion = MapFileVersion.HaloOnline;
 
             header.HeadTag = new Tag("head");
             header.FootTag = new Tag("foot");
-            header.Version = (int)map.MapVersion;
-            header.Build = CacheVersionDetection.GetBuildName(CacheContext.Version);
+            header.Version = map.MapVersion;
+            header.Build = CacheVersionDetection.GetBuildName(Cache.Version);
 
             switch (scnr.MapType)
             {

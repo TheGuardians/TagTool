@@ -4,14 +4,15 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
     class ExportTagModCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public ExportTagModCommand(HaloOnlineCacheContext cacheContext) :
+        public ExportTagModCommand(GameCacheHaloOnlineBase cache) :
             base(false,
 
                 "ExportTagMod",
@@ -29,7 +30,7 @@ namespace TagTool.Commands.Tags
                 "\n" +
                 "Warning: Tags with a ton of dependencies will cause the command to take a long time to finish.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -45,7 +46,7 @@ namespace TagTool.Commands.Tags
 
             var scriptFile = new FileInfo(Path.Combine(directory.FullName, $"{name}.cmds"));
 
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             using (var scriptWriter = new StreamWriter(scriptFile.Exists ? scriptFile.Open(FileMode.Open, FileAccess.ReadWrite) : scriptFile.Create()))
             {
                 var tagIndices = new HashSet<int>();
@@ -62,7 +63,7 @@ namespace TagTool.Commands.Tags
                         {
                             if (!tagIndices.Contains(entry))
                             {
-                                var instance = CacheContext.TagCache.Index[entry];
+                                var instance = Cache.TagCacheGenHO.Tags[entry];
 
                                 if (instance == null || instance.IsInGroup("rmt2") || instance.IsInGroup("rmdf") || instance.IsInGroup("vtsh") || instance.IsInGroup("pixl") || instance.IsInGroup("glvs") || instance.IsInGroup("glps"))
                                     continue;
@@ -90,7 +91,7 @@ namespace TagTool.Commands.Tags
 
                 while ((line = Console.ReadLine()) != "")
                 {
-                    if (!CacheContext.TryGetTag(line, out var instance))
+                    if (!Cache.TryGetTag(line, out var instance))
                         continue;
 
                     LoadTagDependencies(instance.Index);
@@ -117,17 +118,17 @@ namespace TagTool.Commands.Tags
                     if (importedTags.Contains(index))
                         continue;
 
-                    var instance = CacheContext.GetTag(index);
+                    var instance = (CachedTagHaloOnline)Cache.TagCache.GetTag(index);
 
                     if (instance == null)
                         continue;
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-                    var groupName = CacheContext.GetString(instance.Group.Name);
+                    var groupName = Cache.StringTable.GetString(instance.Group.Name);
 
                     var file = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}.{groupName}"));
-                    var data = CacheContext.TagCache.ExtractTagRaw(cacheStream, instance);
+                    var data = Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, instance);
 
                     if (!file.Directory.Exists)
                         file.Directory.Create();
@@ -153,16 +154,16 @@ namespace TagTool.Commands.Tags
                     if (completedTags.Contains(index))
                         continue;
 
-                    var instance = CacheContext.GetTag(index);
+                    var instance = (CachedTagHaloOnline)Cache.TagCache.GetTag(index);
 
                     if (instance == null)
                         continue;
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-                    var groupName = CacheContext.GetString(instance.Group.Name);
+                    var groupName = Cache.StringTable.GetString(instance.Group.Name);
 
-                    var tagDefinition = CacheContext.Deserialize(cacheStream, instance);
+                    var tagDefinition = Cache.Deserialize(cacheStream, instance);
 
                     FileInfo ExportResource(PageableResource pageable, string resourceGroup, string suffix = "")
                     {
@@ -170,12 +171,12 @@ namespace TagTool.Commands.Tags
                             return null;
 
                         var outFile = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}{suffix}.{resourceGroup}"));
-                        var cache = CacheContext.GetResourceCache(location);
+                        var cache = Cache.ResourceCaches.GetResourceCache(location);
 
                         if (!outFile.Directory.Exists)
                             outFile.Directory.Create();
 
-                        using (var stream = CacheContext.OpenResourceCacheRead(location))
+                        using (var stream = Cache.ResourceCaches.OpenCacheRead(location))
                         using (var outStream = outFile.Create())
                             cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
 
@@ -188,7 +189,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(bink.Resource, "bink_resource");
+                                var resourceFile = ExportResource(bink.ResourceReference.HaloOnlinePageableResource, "bink_resource");
 
                                 if (resourceFile == null)
                                 {
@@ -212,7 +213,7 @@ namespace TagTool.Commands.Tags
 
                                 for (var i = 0; i < bitm.Resources.Count; i++)
                                 {
-                                    var resourceFile = ExportResource(bitm.Resources[i].Resource, "bitmap_texture_interop_resource", bitm.Resources.Count > 1 ? $"_image_{i}" : "_image");
+                                    var resourceFile = ExportResource(bitm.Resources[i].HaloOnlinePageableResource, "bitmap_texture_interop_resource", bitm.Resources.Count > 1 ? $"_image_{i}" : "_image");
 
                                     if (resourceFile == null)
                                     {
@@ -234,7 +235,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(mode.Geometry.Resource, "render_geometry_api_resource_definition", "_geometry");
+                                var resourceFile = ExportResource(mode.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_geometry");
 
                                 if (resourceFile == null)
                                 {
@@ -258,7 +259,7 @@ namespace TagTool.Commands.Tags
 
                                 for (var i = 0; i < jmad.ResourceGroups.Count; i++)
                                 {
-                                    var resourceFile = ExportResource(jmad.ResourceGroups[i].Resource, "model_animation_tag_resource", jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group");
+                                    var resourceFile = ExportResource(jmad.ResourceGroups[i].ResourceReference.HaloOnlinePageableResource, "model_animation_tag_resource", jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group");
 
                                     if (resourceFile == null)
                                     {
@@ -280,7 +281,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(sbsp.Geometry.Resource, "render_geometry_api_resource_definition", "_decorator_geometry");
+                                var resourceFile = ExportResource(sbsp.DecoratorGeometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_decorator_geometry");
 
                                 if (resourceFile == null)
                                 {
@@ -292,7 +293,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField Geometry.Resource ResourcesB \"tags\\{tagName}_decorator_geometry.render_geometry_api_resource_definition\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.Geometry2.Resource, "render_geometry_api_resource_definition", "_bsp_geometry");
+                                resourceFile = ExportResource(sbsp.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_bsp_geometry");
 
                                 if (resourceFile == null)
                                 {
@@ -304,7 +305,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField Geometry2.Resource ResourcesB \"tags\\{tagName}_bsp_geometry.render_geometry_api_resource_definition\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.CollisionBspResource, "structure_bsp_tag_resources", "_collision");
+                                resourceFile = ExportResource(sbsp.CollisionBspResource.HaloOnlinePageableResource, "structure_bsp_tag_resources", "_collision");
 
                                 if (resourceFile == null)
                                 {
@@ -316,7 +317,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField CollisionBspResource ResourcesB \"tags\\{tagName}_collision.structure_bsp_tag_resources\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.PathfindingResource, "structure_bsp_cache_file_tag_resources", "_pathfinding");
+                                resourceFile = ExportResource(sbsp.PathfindingResource.HaloOnlinePageableResource, "structure_bsp_cache_file_tag_resources", "_pathfinding");
 
                                 if (resourceFile == null)
                                 {
@@ -338,7 +339,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(sLdT.Geometry.Resource, "render_geometry_api_resource_definition", "_lightmap_geometry");
+                                var resourceFile = ExportResource(sLdT.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_lightmap_geometry");
 
                                 if (resourceFile == null)
                                 {
@@ -360,7 +361,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(pmdf.Geometry.Resource, "render_geometry_api_resource_definition", "_particle_geometry");
+                                var resourceFile = ExportResource(pmdf.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_particle_geometry");
 
                                 if (resourceFile == null)
                                 {
@@ -382,7 +383,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(snd_.Resource, "sound_resource");
+                                var resourceFile = ExportResource(snd_.Resource.HaloOnlinePageableResource, "sound_resource");
 
                                 if (resourceFile == null)
                                 {

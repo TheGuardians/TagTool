@@ -5,17 +5,17 @@ namespace TagTool.Commands.Bipeds
 {
     static class BipedContextFactory
     {
-        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Biped biped)
+        public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, Biped biped)
         {
-            var groupName = cacheContext.GetString(tag.Group.Name);
+            var groupName = cache.StringTable.GetString(tag.Group.Name);
             var commandContext = new CommandContext(parent, string.Format("{0:X8}.{1}", tag.Index, groupName));
 
-            Populate(commandContext, cacheContext, tag, biped);
+            Populate(commandContext, cache, tag, biped);
 
             return commandContext;
         }
 
-        public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Biped biped)
+        public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, Biped biped)
         {
         }
     }

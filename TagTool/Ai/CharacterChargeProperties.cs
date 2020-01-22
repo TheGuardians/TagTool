@@ -28,7 +28,7 @@ namespace TagTool.Ai
         public uint Unknown4;
         public uint Unknown5;
         [TagField(Flags = Label)]
-        public CachedTagInstance BerserkWeapon;
+        public CachedTag BerserkWeapon;
         public uint Unknown6;
         public uint Unknown7;
         public uint Unknown8;

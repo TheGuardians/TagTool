@@ -11,10 +11,10 @@ namespace TagTool.Commands.Geometry
 {
     class DumpRenderGeometryCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private RenderGeometry Geometry { get; }
 
-        public DumpRenderGeometryCommand(HaloOnlineCacheContext cacheContext, RenderGeometry geometry, string title = "") :
+        public DumpRenderGeometryCommand(GameCache cache, RenderGeometry geometry, string title = "") :
             base(true,
 
                 $"Dump{title}RenderGeometry",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Geometry
 
                 $"Dumps {title.ToLower()} render geometry in ascii format.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Geometry = geometry;
         }
 
@@ -42,13 +42,12 @@ namespace TagTool.Commands.Geometry
             else
                 file = args[1];
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Geometry.Resource);
-            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Geometry.Resource);
 
             if (args.Count == 2)
             {
                 using (var edResourceStream = new MemoryStream())
-                using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
+                using (var vertexReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                 {
                     var directory = args[1];
                     if (!Directory.Exists(directory))
@@ -58,7 +57,7 @@ namespace TagTool.Commands.Geometry
 
                     for (var i = 0; i < definition.VertexBuffers.Count; i++)
                     {
-                        edResourceStream.Position = definition.VertexBuffers[i].Definition.Data.Address.Offset;
+                        edResourceStream.Position = 0;
 
                         var vertexBuffer = definition.VertexBuffers[i].Definition;
 
@@ -66,7 +65,7 @@ namespace TagTool.Commands.Geometry
 
                         using (EndianWriter output = new EndianWriter(File.OpenWrite(dataOutDir), EndianFormat.LittleEndian))
                         {
-                            byte[] data = edResourceReader.ReadBytes((int)vertexBuffer.Data.Size);
+                            byte[] data = null;
                             output.WriteBlock(data);
                         }
                     }
@@ -74,44 +73,24 @@ namespace TagTool.Commands.Geometry
             }
             else
             {
-                //
-                // Convert Blam data to ElDorado data
-                //
-
                 using (var fileStream = File.Create(file))
                 using (var fileWriter = new StreamWriter(fileStream))
                 {
-                    using (var edResourceStream = new MemoryStream())
-                    using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
+                    for (var i = 0; i < definition.VertexBuffers.Count; i++)
                     {
-                        //
-                        // Convert Blam vertex buffers
-                        //
+                        var vertexBuffer = definition.VertexBuffers[i].Definition;
 
-                        Console.Write("Converting vertex buffers...");
-                        CacheContext.ExtractResource(Geometry.Resource, edResourceStream);
-
-                        for (var i = 0; i < definition.VertexBuffers.Count; i++)
+                        using(var vertexStream = new MemoryStream(vertexBuffer.Data.Data))
+                        using(var vertexReader = new EndianReader(vertexStream, EndianFormat.LittleEndian))
                         {
-                            edResourceStream.Position = definition.VertexBuffers[i].Definition.Data.Address.Offset;
-
-                            var vertexBuffer = definition.VertexBuffers[i].Definition;
-                            
-                            //fileWriter.WriteLine($"Offset = {vertexBuffer.Data.Address.Offset.ToString("X8")} Count = {vertexBuffer.Count} Size = {vertexBuffer.VertexSize}, Format = {vertexBuffer.Format.ToString()}");
-                            //fileWriter.WriteLine(Environment.NewLine);
-                            
-                            //fileWriter.WriteLine($"Vertex buffer index: {i}");
-                            
                             switch (vertexBuffer.Format)
                             {
                                 case VertexBufferFormat.TinyPosition:
                                     for (var j = 0; j < vertexBuffer.Count; j++)
                                     {
-                                        
-                                        fileWriter.WriteLine($"Position = ({edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")})");
-                                        fileWriter.WriteLine($"Normal   = ({edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")})");
-                                        fileWriter.WriteLine($"Color    = {edResourceReader.ReadUInt32().ToString("X8")}");
-                                        
+                                        fileWriter.WriteLine($"Position = ({vertexReader.ReadUInt16().ToString("X4")},{vertexReader.ReadUInt16().ToString("X4")},{vertexReader.ReadUInt16().ToString("X4")},{vertexReader.ReadUInt16().ToString("X4")})");
+                                        fileWriter.WriteLine($"Normal   = ({vertexReader.ReadByte().ToString("X2")},{vertexReader.ReadByte().ToString("X2")},{vertexReader.ReadByte().ToString("X2")},{vertexReader.ReadByte().ToString("X2")})");
+                                        fileWriter.WriteLine($"Color    = {vertexReader.ReadUInt32().ToString("X8")}");
                                     }
                                     break;
 
@@ -119,11 +98,11 @@ namespace TagTool.Commands.Geometry
                                     for (var j = 0; j < vertexBuffer.Count; j++)
                                     {
                                         fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
-                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + vertexReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + vertexReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + vertexReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + vertexReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + vertexReader.ReadUInt32().ToString("X8"));
                                         fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
                                         fileWriter.WriteLine(Environment.NewLine);
                                     }
@@ -133,164 +112,16 @@ namespace TagTool.Commands.Geometry
                                     for (var j = 0; j < vertexBuffer.Count; j++)
                                     {
                                         fileWriter.WriteLine($"{j}:");
-                                        fileWriter.WriteLine($"Position X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                        fileWriter.WriteLine($"Texcoord U = " + edResourceReader.ReadSingle() + " V = " + edResourceReader.ReadSingle());
-                                        fileWriter.WriteLine($"Normal   X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                        fileWriter.WriteLine($"Tangent  X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                        fileWriter.WriteLine($"Binormal X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                        edResourceReader.ReadUInt32();
-                                        edResourceReader.ReadUInt32();
+                                        fileWriter.WriteLine($"Position X = " + vertexReader.ReadSingle() + " Y = " + vertexReader.ReadSingle() + " Z = " + vertexReader.ReadSingle());
+                                        fileWriter.WriteLine($"Texcoord U = " + vertexReader.ReadSingle() + " V = " + vertexReader.ReadSingle());
+                                        fileWriter.WriteLine($"Normal   X = " + vertexReader.ReadSingle() + " Y = " + vertexReader.ReadSingle() + " Z = " + vertexReader.ReadSingle());
+                                        fileWriter.WriteLine($"Tangent  X = " + vertexReader.ReadSingle() + " Y = " + vertexReader.ReadSingle() + " Z = " + vertexReader.ReadSingle());
+                                        fileWriter.WriteLine($"Binormal X = " + vertexReader.ReadSingle() + " Y = " + vertexReader.ReadSingle() + " Z = " + vertexReader.ReadSingle());
+                                        vertexReader.ReadUInt32();
+                                        vertexReader.ReadUInt32();
                                     }
                                     break;
-                                    /*
-                                    case VertexBufferFormat.Unknown1B:
-                                        var goodCount = 0;
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            //fileWriter.WriteLine($"Index: {j}:");
-                                            string values = $"({ edResourceReader.ReadSingle()},{ edResourceReader.ReadSingle()}," +
-                                                $"{edResourceReader.ReadSingle()},{edResourceReader.ReadSingle()},{edResourceReader.ReadSingle()},{edResourceReader.ReadSingle()}" +
-                                                $",{edResourceReader.ReadSingle()},{edResourceReader.ReadSingle()},{edResourceReader.ReadSingle()})";
-                                            if(values != "(0,0,0,0,0,0,0,0,0)")
-                                            {
-                                                goodCount++;
-                                                //fileWriter.WriteLine($"(1,2,3,4,5,6,7,8,9) = "+values);
-                                            }
-
-
-                                            /*
-                                            fileWriter.WriteLine($"Unknown 1 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 2 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 3 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 4 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 5 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 6 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 7 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 8 = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Unknown 9 = " + edResourceReader.ReadSingle());
-
-                                        }
-                                        //fileWriter.WriteLine($"Valid Unknown1B count = {goodCount}");
-                                        break;
-
-                                    case VertexBufferFormat.Unknown1A:
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            //fileWriter.WriteLine($"Index: {j}:");
-                                            //fileWriter.WriteLine($"Unknown 1 = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                            fileWriter.WriteLine($"(1,2,3) = ({edResourceReader.ReadUInt32().ToString("X8")},{edResourceReader.ReadUInt32().ToString("X8")},{edResourceReader.ReadUInt32().ToString("X8")})");
-                                        }
-                                        break;
-
-                                    case VertexBufferFormat.Rigid:
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            fileWriter.WriteLine($"{j}:");
-                                            fileWriter.WriteLine($"Position X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Texcoord U = " + edResourceReader.ReadSingle() + " V = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Normal   X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Tangent  X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Binormal X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                        }
-                                        break;
-
-                                    case VertexBufferFormat.StaticPerPixel:
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            fileWriter.WriteLine($"{j} U = " + edResourceReader.ReadSingle() + " V = " + edResourceReader.ReadSingle());
-                                            //fileWriter.WriteLine(Environment.NewLine);
-                                        }
-                                        break;
-
-                                    case VertexBufferFormat.AmbientPrt:
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            fileWriter.WriteLine($"{j} Blend weight = " + edResourceReader.ReadSingle());
-                                            //fileWriter.WriteLine(Environment.NewLine);
-                                        }
-                                        break;
-
-
-                                    case VertexBufferFormat.World:
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            fileWriter.WriteLine($"{j}:");
-                                            fileWriter.WriteLine($"Position X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Texcoord U = " + edResourceReader.ReadSingle() + " V = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Normal   X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Tangent  X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                            fileWriter.WriteLine($"Binormal X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                        }
-                                        break;
-
-
-                                    
-                                        */
-                                    /*
-                                        case VertexBufferFormat.QuadraticPrt:
-                                            for (var j = 0; j < vertexBuffer.Count; j++)
-                                            {
-                                                fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
-                                                fileWriter.WriteLine($"A X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"B X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"C X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
-                                                fileWriter.WriteLine(Environment.NewLine);
-                                            }
-                                            break;
-
-
-
-                                        case VertexBufferFormat.Unknown1B:
-                                            for (var j = 0; j < vertexBuffer.Count; j++)
-                                            {
-                                                fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
-                                                fileWriter.WriteLine($"Unknown 1 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 2 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 3 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 4 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 5 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 6 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 7 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 8 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Unknown 9 = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
-                                                fileWriter.WriteLine(Environment.NewLine);
-                                            }
-                                            break;
-
-                                        case VertexBufferFormat.Decorator:
-                                            for (var j = 0; j < vertexBuffer.Count; j++)
-                                            {
-                                                fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
-                                                fileWriter.WriteLine($"Position X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Texcoord U = " + edResourceReader.ReadSingle() + " V = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"Normal   X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
-                                                fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
-                                                fileWriter.WriteLine(Environment.NewLine);
-                                            }
-                                            break;
-
-                                        case VertexBufferFormat.LinearPrt:
-                                            for (var j = 0; j < vertexBuffer.Count; j++)
-                                            {
-                                                fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
-                                                fileWriter.WriteLine($"Hex : " + edResourceReader.ReadUInt32().ToString("X8"));
-                                                fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
-                                                fileWriter.WriteLine(Environment.NewLine);
-                                            }
-                                            break;
-                                            */
-
-
-
-
                             }
-                            
-                            //fileWriter.WriteLine($"End of Vertex Buffer index: {i}");
-                            
-                            //fileWriter.WriteLine(Environment.NewLine);
-                            
                         }
                     }
                 }

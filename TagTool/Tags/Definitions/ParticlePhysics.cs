@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
     public class ParticlePhysics : TagStructure
 	{
-        public CachedTagInstance Template;
+        public CachedTag Template;
         public FlagsValue Flags;
         public List<Movement> Movements;
 

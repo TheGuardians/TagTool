@@ -10,9 +10,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
 {
     class ApplySprintFixupsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ApplySprintFixupsCommand(HaloOnlineCacheContext cacheContext) :
+        public ApplySprintFixupsCommand(GameCache cache) :
             base(true,
                 
                 "ApplySprintFixups",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -36,19 +36,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var tagIndices = new List<int>();
 
             while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
-                if (CacheContext.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
+                if (Cache.TryGetCachedTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
                     tagIndices.Add(instance.Index);
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 foreach (var tagIndex in tagIndices)
                 {
-                    var instance = CacheContext.GetTag(tagIndex);
+                    var instance = Cache.TagCache.GetTag(tagIndex);
 
                     if (instance == null || !instance.IsInGroup("jmad"))
                         continue;
 
-                    var jmad = CacheContext.Deserialize<ModelAnimationGraph>(stream, instance);
+                    var jmad = Cache.Deserialize<ModelAnimationGraph>(stream, instance);
 
                     var putAwayIndex = -1;
                     var readyIndex = -1;
@@ -56,7 +56,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     for (var i = 0; i < jmad.Animations.Count; i++)
                     {
                         var animation = jmad.Animations[i];
-                        var name = CacheContext.GetString(animation.Name);
+                        var name = Cache.StringTable.GetString(animation.Name);
 
                         if (name.EndsWith(":put_away"))
                         {
@@ -82,7 +82,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                                 foreach (var action in weaponType.Actions)
                                 {
-                                    var label = CacheContext.GetString(action.Label);
+                                    var label = Cache.StringTable.GetString(action.Label);
 
                                     switch (label)
                                     {
@@ -111,7 +111,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                 if (!sprintEnterFound)
                                     weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
-                                        Label = CacheContext.GetStringId("sprint_enter"),
+                                        Label = Cache.StringTable.GetStringId("sprint_enter"),
                                         GraphIndex = -1,
                                         Animation = (short)putAwayIndex
                                     });
@@ -119,7 +119,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                 if (!sprintLoopFound)
                                     weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
-                                        Label = CacheContext.GetStringId("sprint_loop"),
+                                        Label = Cache.StringTable.GetStringId("sprint_loop"),
                                         GraphIndex = -1,
                                         Animation = (short)putAwayIndex
                                     });
@@ -127,7 +127,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                 if (!sprintLoopAirborneFound)
                                     weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
-                                        Label = CacheContext.GetStringId("sprint_loop_airborne"),
+                                        Label = Cache.StringTable.GetStringId("sprint_loop_airborne"),
                                         GraphIndex = -1,
                                         Animation = (short)putAwayIndex
                                     });
@@ -135,7 +135,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                 if (!sprintExitFound)
                                     weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
-                                        Label = CacheContext.GetStringId("sprint_exit"),
+                                        Label = Cache.StringTable.GetStringId("sprint_exit"),
                                         GraphIndex = -1,
                                         Animation = (short)readyIndex
                                     });
@@ -143,7 +143,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         }
                     }
 
-                    CacheContext.Serialize(stream, instance, jmad);
+                    Cache.Serialize(stream, instance, jmad);
                 }
             }
 

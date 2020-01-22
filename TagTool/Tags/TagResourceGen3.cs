@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TagTool.Cache;
 using static TagTool.Tags.TagFieldFlags;
@@ -9,7 +10,7 @@ namespace TagTool.Tags
     [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     public class TagResourceGen3 : TagStructure
 	{
-        public CachedTagInstance ParentTag;
+        public CachedTag ParentTag;
         public ushort Salt;
 
         [TagField(Gen = CacheGeneration.Third)]
@@ -20,16 +21,16 @@ namespace TagTool.Tags
         public byte Flags;
 
         [TagField(Gen = CacheGeneration.Third)]
-        public int FixupInformationOffset;
+        public int DefinitionDataOffset;
 
         [TagField(Gen = CacheGeneration.Third)]
-        public int FixupInformationLength;
+        public int DefinitionDataLength;
 
         [TagField(Gen = CacheGeneration.Third)]
         public int SecondaryFixupInformationOffset;
 
         [TagField(Gen = CacheGeneration.Third)]
-        public short Unknown1;
+        public UnknownFlags Unknown1;
 
         [TagField(Gen = CacheGeneration.Third)]
         public short SegmentIndex;
@@ -37,10 +38,10 @@ namespace TagTool.Tags
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] DefinitionData;
 
-        public CacheResourceAddress DefinitionAddress;
+        public CacheAddress DefinitionAddress;
 
         public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
-        public List<ResourceDefinitionFixup> ResourceDefinitionFixups = new List<ResourceDefinitionFixup>();
+        public List<D3DFixup> D3DFixups = new List<D3DFixup>();
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown2 = 1;
@@ -49,7 +50,7 @@ namespace TagTool.Tags
         public class ResourceFixup : TagStructure
 		{
             public uint BlockOffset;
-            public CacheResourceAddress Address;
+            public CacheAddress Address;
 
             [TagField(Flags = Runtime)]
             public int Type;
@@ -60,21 +61,18 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x8)]
-        public class ResourceDefinitionFixup : TagStructure
+        public class D3DFixup : TagStructure
 		{
-            public CacheResourceAddress Address;
+            public CacheAddress Address;
             public int ResourceStructureTypeIndex;
         }
 
-        /// <summary>
-        /// D3D object types.
-        /// </summary>
-        public enum D3DObjectType : int
+        [Flags]
+        public enum UnknownFlags : short
         {
-            VertexBuffer,      // s_tag_d3d_vertex_buffer
-            IndexBuffer,       // s_tag_d3d_index_buffer
-            Texture,           // s_tag_d3d_texture
-            InterleavedTexture // s_tag_d3d_texture_interleaved
+            Invalid = 0,
+            PrimaryPageValid = 1 << 0,
+            SecondaryPageValid =  1 << 1
         }
     }
 }

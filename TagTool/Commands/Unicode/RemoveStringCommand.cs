@@ -7,11 +7,11 @@ namespace TagTool.Commands.Unicode
 {
     class RemoveStringCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private MultilingualUnicodeStringList Definition { get; set; }
 
-        public RemoveStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList definition) :
+        public RemoveStringCommand(GameCache cache, CachedTag tag, MultilingualUnicodeStringList definition) :
             base(false,
                 
                 "RemoveString",
@@ -21,7 +21,7 @@ namespace TagTool.Commands.Unicode
 
                 "Removes a string entry from the multilingual_unicode_string_list definition.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -31,7 +31,7 @@ namespace TagTool.Commands.Unicode
             if (args.Count != 1)
                 return false;
 
-            var stringID = CacheContext.GetStringId(args[0]);
+            var stringID = Cache.StringTable.GetStringId(args[0]);
 
             var newDefinition = new MultilingualUnicodeStringList
             {

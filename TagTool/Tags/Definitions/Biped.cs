@@ -83,7 +83,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown33;
 
         public float HeadshotAccelerationScale;
-        public CachedTagInstance AreaDamageEffect;
+        public CachedTag AreaDamageEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<MovementGateBlock> MovementGates;
@@ -146,9 +146,9 @@ namespace TagTool.Tags.Definitions
         public float CrouchVelocityModifier;
         
         public List<ContactPoint> ContactPoints;
-        public CachedTagInstance ReanimationCharacter;
-        public CachedTagInstance TransformationMuffin;
-        public CachedTagInstance DeathSpawnCharacter;
+        public CachedTag ReanimationCharacter;
+        public CachedTag TransformationMuffin;
+        public CachedTag DeathSpawnCharacter;
         public short DeathSpawnCount;
         public short Unknown52;
 

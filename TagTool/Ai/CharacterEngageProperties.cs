@@ -13,7 +13,7 @@ namespace TagTool.Ai
         public float StandDangerThreshold;
         public float FightDangerMoveThreshold;
         public float FightDangerMoveThresholdCooldown;
-        public CachedTagInstance OverrideGrenadeProjectile;
+        public CachedTag OverrideGrenadeProjectile;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown4;

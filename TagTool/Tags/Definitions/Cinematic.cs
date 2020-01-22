@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown2;
 
         public List<SceneIndex> SceneIndices;
-        public CachedTagInstance ImportScenario;
+        public CachedTag ImportScenario;
         public int Unknown3;
         public StringId ScenarioName; 
         public short Unknown4;
@@ -31,7 +31,7 @@ namespace TagTool.Tags.Definitions
         public int Unknown15;
         public int Unknown16;
 
-        public CachedTagInstance Unknown17;
+        public CachedTag Unknown17;
 
         // Scripts are in ASCIIZ format, they will probably need conversion to work in HO
 
