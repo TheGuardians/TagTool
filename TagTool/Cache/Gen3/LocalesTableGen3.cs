@@ -15,6 +15,18 @@ namespace TagTool.Cache.Gen3
             
             List<LocaleTable> localesTable = new List<LocaleTable>();
             string localesKey = "";
+            switch (baseMapFile.Version)
+            {
+                case CacheVersion.Halo3Retail:
+                    localesKey = "";
+                    break;
+                case CacheVersion.Halo3ODST:
+                    localesKey = "";
+                    break;
+                case CacheVersion.HaloReach:
+                    localesKey = "BungieHaloReach!";
+                    break;
+            }
             var sectionTable = baseMapFile.Header.SectionTable;
 
             if (sectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
@@ -61,6 +73,7 @@ namespace TagTool.Cache.Gen3
                         table[i].String = "<null>";
                         continue;
                     }
+                    newReader.SeekTo(stringOffsets[i]);
                     table[i].String = newReader.ReadNullTerminatedString();
                 }
 
