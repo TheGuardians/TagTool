@@ -14,115 +14,37 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        public List<ModelAnimationGraph.ResourceGroup> ConvertModelAnimationGraphResourceGroups(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.ResourceGroup> resourceGroups)
+        public List<ModelAnimationGraph.ResourceGroup> ConvertModelAnimationGraphResourceGroups(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.ResourceGroup> resourceGroups)
         {
-            if (BlamCache.ResourceGestalt == null)
-                BlamCache.LoadResourceTags();
-
-            var resourceDefinition = new List<ModelAnimationTagResource>();
+            var resourceDefinitions = new List<ModelAnimationTagResource>();
 
             foreach (var group in resourceGroups)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetHandle.Index];
+                var resourceDefinition = BlamCache.ResourceCache.GetModelAnimationTagResource(group.ResourceReference);
 
-                group.Resource = new PageableResource
+                if(resourceDefinition == null)
                 {
-                    Page = new RawPage
-                    {
-                        Index = -1,
-                    },
-                    Resource = new TagResourceGen3
-                    {
-                        ResourceType = TagResourceTypeGen3.Animation,
-                        DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray(),
-                        DefinitionAddress = resourceEntry.DefinitionAddress,
-                        ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
-                        ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
-                        Unknown2 = 1
-                    }
-                };
-
-                // Convert blam fixups
-
-                // get the list of members in this resourcegroup. this list contains address, various offsets, and other info about the member.
-                if (group.Resource.Resource.DefinitionData.Length != 0)
-                {
-                    using (var definitionStream = new MemoryStream(group.Resource.Resource.DefinitionData, true))
-                    using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
-                    using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
-                    {
-                        foreach (var fixup in resourceEntry.ResourceFixups)
-                        {
-                            var newFixup = new TagResourceGen3.ResourceFixup
-                            {
-                                BlockOffset = (uint)fixup.BlockOffset,
-                                Address = new CacheAddress(CacheAddressType.Resource, fixup.Offset)
-                            };
-
-                            definitionStream.Position = newFixup.BlockOffset;
-                            definitionWriter.Write(newFixup.Address.Value);
-
-                            group.Resource.Resource.ResourceFixups.Add(newFixup);
-                        }
-
-                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
-
-                        definitionStream.Position = group.Resource.Resource.DefinitionAddress.Offset + 0x4;
-                        definitionWriter.Write(0x20000000);
-                        // ODST's resource type is 4 when it's supposed to be 2 because the resource definition is in the tag and not as a raw resource 
-
-                        definitionStream.Position = group.Resource.Resource.DefinitionAddress.Offset;
-
-                        resourceDefinition.Add(BlamCache.Deserializer.Deserialize<ModelAnimationTagResource>(dataContext));
-                    }
-                }
-            }
-
-            var diffLines = new List<string>();
-            var resDefIndex = -1;
-
-            foreach (var group in resourceGroups)
-            {
-                resDefIndex++;
-
-                if (resourceDefinition.Count < resDefIndex + 1)
-                    continue; // rare cases, might break the game
-
-                // Get the resource group real size, which is probably not in the resource definition
-                var groupSize = 0;
-                foreach (var groupMember in resourceDefinition[resDefIndex].GroupMembers)
-                {
-                    groupSize += groupMember.AnimationData.Size;
-                    while (groupSize % 0x10 != 0) // align to 0x10. 
-                        groupSize += 4;
+                    group.ResourceReference = null;
+                    continue;
                 }
 
-                var resourceData = BlamCache.GetRawFromID(group.ZoneAssetHandle, groupSize);
-
-                if (resourceData == null)
-                    return null;
-
-                using (var blamResourceStream = new MemoryStream(resourceData))
-                using (var resourceReader = new EndianReader(blamResourceStream, EndianFormat.BigEndian))
-                using (var dataStream = new MemoryStream(new byte[groupSize]))
-                using (var resourceWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
+                for (var memberIndex = 0; memberIndex < resourceDefinition.GroupMembers.Count; memberIndex++)
                 {
-                    var dataContext = new DataSerializationContext(resourceReader, resourceWriter);
+                    var member = resourceDefinition.GroupMembers[memberIndex];
+                    var animationData = member.AnimationData.Data;
 
-                    var memberOffset = 0;
-
-                    for (var memberIndex = 0; memberIndex < resourceDefinition[resDefIndex].GroupMembers.Count; memberIndex++)
+                    using(var sourceStream = new MemoryStream(animationData))
+                    using(var sourceReader = new EndianReader(sourceStream, CacheVersionDetection.IsLittleEndian(BlamCache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+                    using(var destStream = new MemoryStream())
+                    using(var destWriter = new EndianWriter(destStream, CacheVersionDetection.IsLittleEndian(CacheContext.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
                     {
-                        var member = resourceDefinition[resDefIndex].GroupMembers[memberIndex];
+                        var dataContext = new DataSerializationContext(sourceReader, destWriter);
 
                         ModelAnimationTagResource.GroupMember.Codec codec;
                         ModelAnimationTagResource.GroupMember.FrameInfo frameInfo;
 
                         if (member.BaseHeader != ModelAnimationTagResource.GroupMemberHeaderType.Overlay)
                         {
-                            blamResourceStream.Position = member.AnimationData.Address.Offset;
-                            dataStream.Position = member.AnimationData.Address.Offset;
-
                             codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
 
                             CacheContext.Serializer.Serialize(dataContext, codec);
@@ -131,25 +53,23 @@ namespace TagTool.Commands.Porting
 
                             CacheContext.Serializer.Serialize(dataContext, Format1);
 
-                            // blamResourceStream.Position = (long)member.AnimationData.Address.Offset + headerSize;
-                            // edResourceStream.Position = blamResourceStream.Position;
                             for (int i = 0; i < codec.RotationNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                            blamResourceStream.Position = member.AnimationData.Address.Offset + Format1.DataStart;
-                            dataStream.Position = blamResourceStream.Position;
+                            sourceStream.Position = Format1.DataStart;
+                            destStream.Position = sourceStream.Position;
                             for (int i = 0; i < codec.PositionNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                            blamResourceStream.Position = member.AnimationData.Address.Offset + Format1.ScaleFramesOffset;
-                            dataStream.Position = blamResourceStream.Position;
+                            sourceStream.Position = Format1.ScaleFramesOffset;
+                            destStream.Position = sourceStream.Position;
                             for (int i = 0; i < codec.ScaleNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
                         // If the overlay header is alone, member.OverlayOffset = 0
-                        blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset;
-                        dataStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset;
+                        sourceStream.Position = member.OverlayOffset;
+                        destStream.Position = member.OverlayOffset;
 
                         codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
                         CacheContext.Serializer.Serialize(dataContext, codec);
@@ -166,17 +86,18 @@ namespace TagTool.Commands.Porting
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + header.DataStart;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + header.DataStart;
+                                destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.PositionNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + header.ScaleFramesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + header.ScaleFramesOffset;
+                                destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                                 break;
 
@@ -242,8 +163,8 @@ namespace TagTool.Commands.Porting
                                     ScaleFrameCount.Add(keyframes);
                                 }
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + overlay.RotationKeyframesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + overlay.RotationKeyframesOffset;
+                                destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type4)
@@ -255,8 +176,8 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + overlay.PositionKeyframesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + overlay.PositionKeyframesOffset;
+                                destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type4)
@@ -268,8 +189,8 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + overlay.ScaleKeyframesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + overlay.ScaleKeyframesOffset;
+                                destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type4)
@@ -281,20 +202,20 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + overlay.RotationFramesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + overlay.RotationFramesOffset;
+                                destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + overlay.PositionFramesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + overlay.PositionFramesOffset;
+                                destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + overlay.ScaleFramesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + overlay.ScaleFramesOffset;
+                                destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
@@ -310,20 +231,25 @@ namespace TagTool.Commands.Porting
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrameFloat>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + Format8.PositionFramesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + Format8.PositionFramesOffset;
+                                destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.PositionNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + Format8.ScaleFramesOffset;
-                                dataStream.Position = blamResourceStream.Position;
+                                sourceStream.Position = member.OverlayOffset + Format8.ScaleFramesOffset;
+                                destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                                 break;
 
+
+                            case ModelAnimationTagResource.AnimationCompressionFormats.None_:
+                                // empty data, copy buffer and skip
+                                member.AnimationData.Data = sourceStream.ToArray();
+                                continue;
                             default:
                                 throw new DataMisalignedException();
                         }
@@ -349,8 +275,8 @@ namespace TagTool.Commands.Porting
                         // If the animated nodes count is over 32, then a new flags set is added.
                         // 1 set per header is added, such as 32 nodes = 1 set, 64 = 2 sets, 96 = 3 sets etc , 128-256 maybe max
 
-                        blamResourceStream.Position = (long)member.AnimationData.Address.Offset + member.OverlayOffset + member.FlagsOffset;
-                        dataStream.Position = blamResourceStream.Position;
+                        sourceStream.Position = member.OverlayOffset + member.FlagsOffset;
+                        destStream.Position = sourceStream.Position;
 
                         var footerSizeBase = (byte)member.BaseHeader / 4;
                         for (int flagsCount = 0; flagsCount < footerSizeBase; flagsCount++)
@@ -402,89 +328,40 @@ namespace TagTool.Commands.Porting
                                 break;
                         }
 
-                        dataStream.Position = memberOffset + member.AnimationData.Size;
-
-                        // Before the next animation member, there's some padding that is garbage data in H3/ODST, but zeroed in HO.
-                        // In order to compare converted to original raw easily, copy the original data.
-                        while (blamResourceStream.Position % 0x10 != 0) // align to 0x10, useless padding of garbage data, it's zeroed in 1:1 HO raw, just read as 4 lame bytes
-                        {
-                            if (blamResourceStream.Position == blamResourceStream.Length)
-                                break;
-
-                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
-                        }
-
-                        // Align the next animation member to 0x10. 
-                        memberOffset += member.AnimationData.Size;
-                        while (memberOffset % 0x10 != 0)
-                            memberOffset += 4;
+                        // set new data
+                        member.AnimationData.Data = destStream.ToArray();
                     }
-
-                    dataStream.Position = 0;
-
-                    CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, group.Resource), resourceDefinition[resDefIndex]);
-
-                    group.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                    var resource = group.Resource;
-
-                    if (resource == null)
-                        throw new ArgumentNullException("resource");
-
-                    if (!dataStream.CanRead)
-                        throw new ArgumentException("The input stream is not open for reading", "dataStream");
-
-                    var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
-
-                    if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
-                    {
-                        resourceStreams[ResourceLocation.ResourcesB] = FlagIsSet(PortingFlags.Memory) ?
-                            new MemoryStream() :
-                            (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.ResourcesB);
-
-                        if (FlagIsSet(PortingFlags.Memory))
-                            using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
-                                resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
-                    }
-
-                    var dataSize = (int)(dataStream.Length - dataStream.Position);
-                    var data = new byte[dataSize];
-                    dataStream.Read(data, 0, dataSize);
-
-                    resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
-                    resource.Page.CompressedBlockSize = compressedSize;
-                    resource.Page.UncompressedBlockSize = (uint)dataSize;
-                    resource.DisableChecksum();
                 }
+
+                group.ResourceReference = CacheContext.ResourceCache.CreateModelAnimationGraphResource(resourceDefinition);
             }
 
             return resourceGroups;
         }
 
-        public ModelAnimationGraph ConvertModelAnimationGraph(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ModelAnimationGraph definition)
+        public ModelAnimationGraph ConvertModelAnimationGraph(Stream cacheStream, Stream blamCacheStream,  Dictionary<ResourceLocation, Stream> resourceStreams, ModelAnimationGraph definition)
         {
-            if (BlamCache.ResourceGestalt == null)
-                BlamCache.LoadResourceTags();
-
-            definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, resourceStreams, definition.ResourceGroups);
-            definition.Modes = definition.Modes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+            definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, blamCacheStream, resourceStreams, definition.ResourceGroups);
+            var resolver = CacheContext.StringTable.Resolver;
+            definition.Modes = definition.Modes.OrderBy(a => resolver.GetSet(a.Name)).ThenBy(a => resolver.GetIndex(a.Name)).ToList();
 
             foreach (var mode in definition.Modes)
             {
-                mode.WeaponClass = mode.WeaponClass.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+                mode.WeaponClass = mode.WeaponClass.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
 
                 foreach (var weaponClass in mode.WeaponClass)
                 {
-                    weaponClass.WeaponType = weaponClass.WeaponType.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+                    weaponClass.WeaponType = weaponClass.WeaponType.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
 
                     foreach (var weaponType in weaponClass.WeaponType)
                     {
-                        weaponType.Actions = weaponType.Actions.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
-                        weaponType.Overlays = weaponType.Overlays.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
-                        weaponType.DeathAndDamage = weaponType.DeathAndDamage.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
-                        weaponType.Transitions = weaponType.Transitions.OrderBy(a => a.FullName.Set).ThenBy(a => a.FullName.Index).ToList();
+                        weaponType.Actions = weaponType.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Overlays = weaponType.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.DeathAndDamage = weaponType.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Transitions = weaponType.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
 
                         foreach (var transition in weaponType.Transitions)
-                            transition.Destinations = transition.Destinations.OrderBy(a => a.FullName.Set).ThenBy(a => a.FullName.Index).ToList();
+                            transition.Destinations = transition.Destinations.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
                     }
                 }
             }

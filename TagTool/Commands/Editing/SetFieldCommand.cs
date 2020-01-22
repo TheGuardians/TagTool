@@ -6,19 +6,20 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Editing
 {
     class SetFieldCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
 
-        public SetFieldCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public SetFieldCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(true,
 
                   "SetField",
@@ -29,7 +30,7 @@ namespace TagTool.Commands.Editing
                   $"Sets the value of a specific field in the current {structure.Types[0].Name} definition.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Structure = structure;
             Owner = owner;
@@ -56,7 +57,7 @@ namespace TagTool.Commands.Editing
                 fieldNameLow = fieldName.ToLower();
                 fieldNameSnake = fieldName.ToSnakeCase();
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, Owner);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, Owner);
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
@@ -99,7 +100,7 @@ namespace TagTool.Commands.Editing
             var fieldAttrs = field.GetCustomAttributes(typeof(TagFieldAttribute), false);
             var fieldAttr = fieldAttrs?.Length < 1 ? new TagFieldAttribute() : (TagFieldAttribute)fieldAttrs[0];
             var fieldInfo = new TagFieldInfo(field, fieldAttr, uint.MaxValue, uint.MaxValue);
-            var fieldValue = ParseArgs(field.FieldType, fieldInfo, args.Skip(1).ToList());
+            var fieldValue = ParseArgs(Cache, field.FieldType, fieldInfo, args.Skip(1).ToList());
 
             if (fieldValue != null && fieldValue.Equals(false))
             {
@@ -109,8 +110,10 @@ namespace TagTool.Commands.Editing
                 return false;
             }
 
-            if (field.FieldType == typeof(PageableResource))
+            if (Cache is GameCacheHaloOnlineBase && field.FieldType == typeof(PageableResource))
             {
+                var haloOnlineGameCache = (GameCacheHaloOnlineBase)Cache;
+
                 var ownerValue = field.GetValue(Owner);
 
                 if (fieldValue == null)
@@ -122,7 +125,7 @@ namespace TagTool.Commands.Editing
                     var newLocation = ResourceLocation.None;
 
                     FileInfo resourceFile = null;
-                    
+
                     switch (fieldValue)
                     {
                         case FileInfo file:
@@ -135,17 +138,17 @@ namespace TagTool.Commands.Editing
                             newLocation = tuple.Item1;
                             resourceFile = tuple.Item2;
                             break;
-                            
+
                         default:
                             throw new FormatException(fieldValue.ToString());
                     }
 
-                    ResourceCache oldCache = null;
+                    ResourceCacheHaloOnline oldCache = null;
 
                     if (pageable.GetLocation(out var oldLocation))
-                        oldCache = CacheContext.GetResourceCache(oldLocation);
+                        oldCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(oldLocation));
 
-                    var newCache = CacheContext.GetResourceCache(newLocation);
+                    var newCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(newLocation));
 
                     var data = File.ReadAllBytes(resourceFile.FullName);
 
@@ -153,14 +156,14 @@ namespace TagTool.Commands.Editing
 
                     if (oldLocation == newLocation && pageable.Page.Index != -1)
                     {
-                        using (var stream = CacheContext.OpenResourceCacheReadWrite(oldLocation))
+                        using (var stream = haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(oldLocation))
                         {
                             pageable.Page.CompressedBlockSize = oldCache.Compress(stream, pageable.Page.Index, data);
                         }
                     }
                     else
                     {
-                        using (var destStream = CacheContext.OpenResourceCacheReadWrite(newLocation))
+                        using (var destStream = haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(newLocation))
                         {
                             pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);
                         }
@@ -192,14 +195,14 @@ namespace TagTool.Commands.Editing
                 if (fieldValue == null)
                     valueString = "null";
                 else if (fieldType == typeof(StringId))
-                    valueString = CacheContext.GetString((StringId)fieldValue);
-                else if (fieldType == typeof(CachedTagInstance))
+                    valueString = Cache.StringTable.GetString((StringId)fieldValue);
+                else if (fieldType == typeof(CachedTag))
                 {
-                    var instance = (CachedTagInstance)fieldValue;
+                    var instance = (CachedTag)fieldValue;
 
                     var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-                    valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
+                    valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
                 }
                 else if (fieldType == typeof(TagFunction))
                 {
@@ -257,7 +260,7 @@ namespace TagTool.Commands.Editing
             return true;
         }
 
-        public object ParseArgs(Type type, TagFieldInfo info, List<string> args)
+        public static object ParseArgs(GameCache cache, Type type, TagFieldInfo info, List<string> args)
         {
             var input = args[0];
             object output = null;
@@ -340,131 +343,6 @@ namespace TagTool.Commands.Editing
                     return false;
                 output = input;
             }
-            else if (type == typeof(CachedTagInstance))
-            {
-                if (args.Count != 1 || !CacheContext.TryGetTag(input, out var tag))
-                    return false;
-                output = tag;
-            }
-            else if (type == typeof(Tag))
-            {
-                if (args.Count != 1)
-                    return false;
-                if (!CacheContext.TryParseGroupTag(args[0], out var result))
-                {
-                    Console.WriteLine($"Invalid tag group specifier: {args[0]}");
-                    return false;
-                }
-                output = result;
-            }
-            else if (type == typeof(StringId))
-            {
-                if (args.Count != 1)
-                    return false;
-                output = CacheContext.GetStringId(input);
-            }
-            else if (type == typeof(Angle))
-            {
-                if (args.Count != 1)
-                    return false;
-                if (!float.TryParse(input, out float value))
-                    return false;
-                output = Angle.FromDegrees(value);
-            }
-            else if (type == typeof(RealEulerAngles2d))
-            {
-                if (args.Count != 2)
-                    return false;
-                if (!float.TryParse(args[0], out float yaw) ||
-                    !float.TryParse(args[1], out float pitch))
-                    return false;
-                output = new RealEulerAngles2d(
-                    Angle.FromDegrees(yaw),
-                    Angle.FromDegrees(pitch));
-            }
-            else if (type == typeof(RealEulerAngles3d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float yaw) ||
-                    !float.TryParse(args[1], out float pitch) ||
-                    !float.TryParse(args[2], out float roll))
-                    return false;
-                output = new RealEulerAngles3d(
-                    Angle.FromDegrees(yaw),
-                    Angle.FromDegrees(pitch),
-                    Angle.FromDegrees(roll));
-            }
-            else if (type == typeof(RealPoint2d))
-            {
-                if (args.Count != 2)
-                    return false;
-                if (!float.TryParse(args[0], out float x) ||
-                    !float.TryParse(args[1], out float y))
-                    return false;
-                output = new RealPoint2d(x, y);
-            }
-            else if (type == typeof(RealPoint3d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float x) ||
-                    !float.TryParse(args[1], out float y) ||
-                    !float.TryParse(args[2], out float z))
-                    return false;
-                output = new RealPoint3d(x, y, z);
-            }
-            else if (type == typeof(RealVector2d))
-            {
-                if (args.Count != 2)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j))
-                    return false;
-                output = new RealVector2d(i, j);
-            }
-            else if (type == typeof(RealVector3d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k))
-                    return false;
-                output = new RealVector3d(i, j, k);
-            }
-            else if (type == typeof(RealQuaternion))
-            {
-                if (args.Count != 4)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k) ||
-                    !float.TryParse(args[3], out float w))
-                    return false;
-                output = new RealQuaternion(i, j, k, w);
-            }
-            else if (type == typeof(RealPlane2d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float d))
-                    return false;
-                output = new RealPlane2d(i, j, d);
-            }
-            else if (type == typeof(RealPlane3d))
-            {
-                if (args.Count != 4)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k) ||
-                    !float.TryParse(args[3], out float d))
-                    return false;
-                output = new RealPlane3d(i, j, k, d);
-            }
             else if (type.IsEnum)
             {
                 if (args.Count != 1)
@@ -531,23 +409,6 @@ namespace TagTool.Commands.Editing
 
                 output = found;
             }
-            else if (type == typeof(Bounds<>))
-            {
-                var rangeType = type.GenericTypeArguments[0];
-                var argCount = RangeArgCount(rangeType);
-
-                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
-
-                if (min.Equals(false))
-                    return false;
-
-                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
-
-                if (max.Equals(false))
-                    return false;
-
-                output = Activator.CreateInstance(type, new object[] { min, max });
-            }
             else if (type.IsArray)
             {
                 if (info?.FieldType == typeof(byte[]) && info?.Attribute.Length == 0)
@@ -559,7 +420,7 @@ namespace TagTool.Commands.Editing
 
                     List<byte> bytes = new List<byte>();
 
-                    for (int i = 0; i < input.Length; i = i + 2)
+                    for (int i = 0; i < input.Length; i += 2)
                         bytes.Add(Convert.ToByte(input.Substring(i, 2), 16));
 
                     output = bytes.ToArray();
@@ -573,44 +434,32 @@ namespace TagTool.Commands.Editing
                     var values = Array.CreateInstance(elementType, info.Attribute.Length);
 
                     for (var i = 0; i < info.Attribute.Length; i++)
-                        values.SetValue(Convert.ChangeType(ParseArgs(elementType, null, new List<string> { args[i] }), elementType), i);
+                        values.SetValue(Convert.ChangeType(ParseArgs(cache, elementType, null, new List<string> { args[i] }), elementType), i);
 
                     return values;
                 }
             }
-			else if (type == typeof(RealRgbColor))
-			{
-				if (args.Count != 3)
-					return false;
-				if (!float.TryParse(args[0], out float i) ||
-					!float.TryParse(args[1], out float j) ||
-					!float.TryParse(args[2], out float k))
-					return false;
-				output = new RealRgbColor(i, j, k);
-			}
-			else if (type == typeof(ArgbColor))
-			{
-				if (args.Count != 4)
-					return false;
-				if (!byte.TryParse(args[0], out byte i) ||
-					!byte.TryParse(args[1], out byte j) ||
-					!byte.TryParse(args[2], out byte k) ||
-					!byte.TryParse(args[3], out byte w))
-					return false;
-				output = new ArgbColor(i, j, k, w);
-			}
-			else if (type == typeof(Bounds<Angle>))
+            else if (type.IsBlamType())
             {
-                if (args.Count != 2)
-                    return false;
+                if (type.IsGenericType)
+                {
+                    var tDefinition = type.GetGenericTypeDefinition();
+                    var tArguments = type.GetGenericArguments();
+                    type = tDefinition.MakeGenericType(tArguments);
+                }
 
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j))
-                    return false;
-
-                output = new Bounds<Angle> { Lower = Angle.FromDegrees(i), Upper = Angle.FromDegrees(j) };
+                var blamType = Activator.CreateInstance(type) as IBlamType;
+                if (!blamType.TryParse(cache, args, out blamType, out string error))
+                    Console.WriteLine(error);
+                return blamType;
             }
-            else if (type == typeof(PageableResource))
+            else if (type == typeof(CachedTag))
+            {
+                if (args.Count != 1 || !cache.TryGetCachedTag(args[0], out var tagInstance))
+                    return false;
+                output = tagInstance;
+            }
+            else if (cache is GameCacheHaloOnlineBase && type == typeof(PageableResource))
             {
                 if (args.Count < 1 || args.Count > 2)
                     return false;
@@ -656,11 +505,11 @@ namespace TagTool.Commands.Editing
                             resourceLocation = ResourceLocation.ResourcesB;
                             break;
 
-                        case "render_models" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                        case "render_models" when cache.Version >= CacheVersion.HaloOnline235640:
                             resourceLocation = ResourceLocation.RenderModels;
                             break;
 
-                        case "lightmaps" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                        case "lightmaps" when cache.Version >= CacheVersion.HaloOnline235640:
                             resourceLocation = ResourceLocation.Lightmaps;
                             break;
 
@@ -687,7 +536,7 @@ namespace TagTool.Commands.Editing
             return output;
         }
         
-        private int RangeArgCount(Type type)
+        public static int RangeArgCount(Type type)
         {
             if (type.IsEnum ||
                 type == typeof(byte) ||
@@ -700,7 +549,7 @@ namespace TagTool.Commands.Editing
                 type == typeof(ulong) ||
                 type == typeof(float) ||
                 type == typeof(string) ||
-                type == typeof(CachedTagInstance) ||
+                type == typeof(CachedTag) ||
                 type == typeof(StringId) ||
                 type == typeof(Angle))
                 return 1;

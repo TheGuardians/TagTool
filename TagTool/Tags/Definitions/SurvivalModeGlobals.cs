@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,9 +10,9 @@ namespace TagTool.Tags.Definitions
     public class SurvivalModeGlobals : TagStructure
 	{
         public uint Unknown;
-        public CachedTagInstance InGameStrings;
-        public CachedTagInstance TimerSound;
-        public CachedTagInstance TimerSoundZero;
+        public CachedTag InGameStrings;
+        public CachedTag TimerSound;
+        public CachedTag TimerSoundZero;
         public List<SurvivalEvent> SurvivalEvents;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -28,7 +29,7 @@ namespace TagTool.Tags.Definitions
 		{
             public ushort Flags;
             public TypeValue Type;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Event;
             public AudienceValue Audience;
             public short Unknown;
@@ -49,18 +50,18 @@ namespace TagTool.Tags.Definitions
             public float SoundDelayAnnouncerOnly;
             public ushort SoundFlags;
             public short Unknown4;
-            public CachedTagInstance EnglishSound;
-            public CachedTagInstance JapaneseSound;
-            public CachedTagInstance GermanSound;
-            public CachedTagInstance FrenchSound;
-            public CachedTagInstance SpanishSound;
-            public CachedTagInstance LatinAmericanSpanishSound;
-            public CachedTagInstance ItalianSound;
-            public CachedTagInstance KoreanSound;
-            public CachedTagInstance ChineseTraditionalSound;
-            public CachedTagInstance ChineseSimplifiedSound;
-            public CachedTagInstance PortugueseSound;
-            public CachedTagInstance PolishSound;
+            public CachedTag EnglishSound;
+            public CachedTag JapaneseSound;
+            public CachedTag GermanSound;
+            public CachedTag FrenchSound;
+            public CachedTag SpanishSound;
+            public CachedTag LatinAmericanSpanishSound;
+            public CachedTag ItalianSound;
+            public CachedTag KoreanSound;
+            public CachedTag ChineseTraditionalSound;
+            public CachedTag ChineseSimplifiedSound;
+            public CachedTag PortugueseSound;
+            public CachedTag PolishSound;
             public uint Unknown5;
             public uint Unknown6;
             public uint Unknown7;
@@ -114,21 +115,21 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class ArmorCustomization : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId CharacterName;
             public List<Region> Regions;
 
             [TagStructure(Size = 0x10)]
             public class Region : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId RegionName;
                 public List<Permutation> Permutations;
 
                 [TagStructure(Size = 0x1C)]
                 public class Permutation : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
+                    [TagField(Flags = Label)]
                     public StringId Name;
                     public StringId Description;
                     public short Flags;
@@ -139,7 +140,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x8)]
                     public class Variant : TagStructure
 					{
-                        [TagField(Flags = TagFieldFlags.Label)]
+                        [TagField(Flags = Label)]
                         public StringId Region;
                         public StringId Permutation;
                     }

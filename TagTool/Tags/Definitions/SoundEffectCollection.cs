@@ -1,17 +1,14 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound_effect_collection", Tag = "sfx+", Size = 0xC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "sound_effect_collection", Tag = "sfx+", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "sound_effect_collection", Tag = "sfx+", Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
     public class SoundEffectCollection : TagStructure
 	{
         public List<SoundEffect> SoundEffects;
-
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x4C)]
         public class SoundEffect : TagStructure
@@ -71,7 +68,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48)]
             public class SoundEffectBlock : TagStructure
 			{
-                public CachedTagInstance SoundEffectTemplate;
+                public CachedTag SoundEffectTemplate;
                 public List<Component> Components;
                 public List<TemplateCollectionBlock> TemplateCollection;
                 public uint Unknown1;
@@ -86,7 +83,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x18)]
                 public class Component : TagStructure
 				{
-                    public CachedTagInstance Sound;
+                    public CachedTag Sound;
                     public uint Gain;
                     public int Flags;
                 }

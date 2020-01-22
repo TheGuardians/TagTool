@@ -11,18 +11,77 @@ namespace TagTool.Common
     /// </summary>
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline106708)]
-    [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloOnline235640)]
+    [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
     public class PageableResource : TagStructure
 	{
         /// <summary>
         /// The <see cref="RawPage"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public RawPage Page;
+        public RawPage Page = new RawPage
+        {
+            Index = -1
+        };
 
         /// <summary>
         /// The <see cref="TagResourceGen3"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public TagResourceGen3 Resource;
+        public TagResourceGen3 Resource = new TagResourceGen3
+        {
+            ResourceType = TagResourceTypeGen3.None,
+            ResourceFixups = new System.Collections.Generic.List<TagResourceGen3.ResourceFixup>(),
+            D3DFixups = new System.Collections.Generic.List<TagResourceGen3.D3DFixup>()
+        };
+
+        public PageableResource() { }
+
+        public PageableResource(TagResourceTypeGen3 type, CacheVersion version) :
+            this()
+        {
+            uint? size = null;
+            switch (type)
+            {
+                case TagResourceTypeGen3.Collision:
+                    size = typeof(StructureBspTagResources).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Bitmap:
+                    size = typeof(BitmapTextureInteropResource).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.BitmapInterleaved:
+                    size = typeof(BitmapTextureInterleavedInteropResource).GetSize(version);
+                    break;
+                case TagResourceTypeGen3.Sound:
+                    size = typeof(SoundResourceDefinition).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Animation:
+                    size = typeof(ModelAnimationTagResource).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.RenderGeometry:
+                    size = typeof(RenderGeometryApiResourceDefinition).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Bink:
+                    size = typeof(BinkResource).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Pathfinding:
+                    size = typeof(StructureBspCacheFileTagResources).GetSize(version);
+                    break;
+            }
+
+            Resource.DefinitionData = new byte[size ?? 0];
+            Resource.ResourceType = type;
+        }
+
+        public PageableResource(TagResourceTypeGen3 type, CacheVersion version, ResourceLocation location) :
+            this(type, version)
+        {
+            ChangeLocation(location);
+        }
 
         /// <summary>
         /// Gets the definition type of the pageable_resource.

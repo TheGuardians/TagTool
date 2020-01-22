@@ -9,11 +9,11 @@ namespace TagTool.Commands.Unicode
 {
     class GetStringCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private MultilingualUnicodeStringList Definition { get; }
 
-        public GetStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
+        public GetStringCommand(GameCache cache, CachedTag tag, MultilingualUnicodeStringList unic)
             : base(true,
 
                   "GetString",
@@ -23,7 +23,7 @@ namespace TagTool.Commands.Unicode
 
                   "Gets the value of a string.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = unic;
         }
@@ -39,14 +39,14 @@ namespace TagTool.Commands.Unicode
                 return false;
 
             var stringIdStr = args[1];
-            var stringIdIndex = CacheContext.StringIdCache.Strings.IndexOf(stringIdStr);
+            var stringIdIndex = Cache.StringTable.IndexOf(stringIdStr);
             if (stringIdIndex < 0)
             {
                 Console.WriteLine("Unable to find stringID \"{0}\".", stringIdStr);
                 return true;
             }
 
-            var stringId = CacheContext.GetStringId(stringIdIndex);
+            var stringId = Cache.StringTable.GetStringId(stringIdIndex);
             if (stringId == StringId.Invalid)
             {
                 Console.WriteLine("Failed to resolve the stringID.");

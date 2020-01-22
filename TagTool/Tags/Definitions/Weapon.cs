@@ -3,6 +3,7 @@ using TagTool.Common;
 using System.Collections.Generic;
 using TagTool.Damage;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -20,8 +21,8 @@ namespace TagTool.Tags.Definitions
         public float TurnOnTime;
         public float ReadyTime;
 
-        public CachedTagInstance ReadyEffect;
-        public CachedTagInstance ReadyDamageEffect;
+        public CachedTag ReadyEffect;
+        public CachedTag ReadyDamageEffect;
 
         public float HeatRecoveryThreshold;
         public float OverheatedThreshold;
@@ -31,12 +32,12 @@ namespace TagTool.Tags.Definitions
         public float HeatIllumination;
         public float OverheatedHeatLossPerSecond;
 
-        public CachedTagInstance Overheated;
-        public CachedTagInstance OverheatedDamageEffect;
-        public CachedTagInstance Detonation;
-        public CachedTagInstance DetonationDamageEffect2;
-        public CachedTagInstance PlayerMeleeDamage;
-        public CachedTagInstance PlayerMeleeResponse;
+        public CachedTag Overheated;
+        public CachedTag OverheatedDamageEffect;
+        public CachedTag Detonation;
+        public CachedTag DetonationDamageEffect2;
+        public CachedTag PlayerMeleeDamage;
+        public CachedTag PlayerMeleeResponse;
 
         [TagField(MinVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown27;
@@ -45,19 +46,19 @@ namespace TagTool.Tags.Definitions
         public Angle DamagePyramidAnglesP;
         public float DamagePyramidDepth;
 
-        public CachedTagInstance FirstHitDamage;
-        public CachedTagInstance FirstHitResponse;
-        public CachedTagInstance SeconddHitDamage;
-        public CachedTagInstance SecondHitResponse;
-        public CachedTagInstance ThirdHitDamage;
-        public CachedTagInstance ThirdHitResponse;
-        public CachedTagInstance LungeMeleeDamage;
-        public CachedTagInstance LungeMeleeResponse;
-        public CachedTagInstance GunGunClangDamage;
-        public CachedTagInstance GunGunClangResponse;
-        public CachedTagInstance GunSwordClangDamage;
-        public CachedTagInstance GunSwordClangResponse;
-        public CachedTagInstance ClashEffect;
+        public CachedTag FirstHitDamage;
+        public CachedTag FirstHitResponse;
+        public CachedTag SeconddHitDamage;
+        public CachedTag SecondHitResponse;
+        public CachedTag ThirdHitDamage;
+        public CachedTag ThirdHitResponse;
+        public CachedTag LungeMeleeDamage;
+        public CachedTag LungeMeleeResponse;
+        public CachedTag GunGunClangDamage;
+        public CachedTag GunGunClangResponse;
+        public CachedTag GunSwordClangDamage;
+        public CachedTag GunSwordClangResponse;
+        public CachedTag ClashEffect;
 
         public DamageReportingType MeleeDamageReportingType;
         public sbyte Unknown9;
@@ -108,15 +109,15 @@ namespace TagTool.Tags.Definitions
         public float AiScariness;
         public float WeaponPowerOnTime;
         public float WeaponPowerOffTime;
-        public CachedTagInstance WeaponPowerOnEffect;
-        public CachedTagInstance WeaponPowerOffEffect;
+        public CachedTag WeaponPowerOnEffect;
+        public CachedTag WeaponPowerOffEffect;
         public float AgeHeatRecoveryPenalty;
         public float AgeRateOfFirePenalty;
         public float AgeMisfireStart;
         public float AgeMisfireChance;
-        public CachedTagInstance PickupSound;
-        public CachedTagInstance ZoomInSound;
-        public CachedTagInstance ZoomOutSound;
+        public CachedTag PickupSound;
+        public CachedTag ZoomInSound;
+        public CachedTag ZoomOutSound;
         public float ActiveCamoDing;
         public float CamoRegrowthRate;
 
@@ -141,11 +142,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int SpecialHudIcon;
         
-        [TagField(Flags = TagFieldFlags.Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] UnknownBlock;
         
         public List<FirstPersonBlock> FirstPerson;
-        public CachedTagInstance HudInterface;
+        public CachedTag HudInterface;
         public List<PredictedResource> PredictedWeaponResources;
         public List<Magazine> Magazines;
         public List<Trigger> Triggers;
@@ -156,11 +157,11 @@ namespace TagTool.Tags.Definitions
         public float MaximumMovementVelocity;
         public float MaximumTurningAcceleration;
         public float MaximumTurningVelocity;
-        public CachedTagInstance DeployedVehicle;
-        public CachedTagInstance DeployedWeapon;
-        public CachedTagInstance AgeModel;
-        public CachedTagInstance AgeWeapon;
-        public CachedTagInstance AgedMaterialEffects;
+        public CachedTag DeployedVehicle;
+        public CachedTag DeployedWeapon;
+        public CachedTag AgeModel;
+        public CachedTag AgeWeapon;
+        public CachedTag AgedMaterialEffects;
         public float HammerAgePerUse;
         public uint UnknownSwordAgePerUse;
         public RealVector3d FirstPersonWeaponOffset;
@@ -194,8 +195,8 @@ namespace TagTool.Tags.Definitions
             public float AcquireTime;
             public float GraceTime;
             public float DecayTime;
-            public CachedTagInstance TrackingSound;
-            public CachedTagInstance LockedSound;
+            public CachedTag TrackingSound;
+            public CachedTag LockedSound;
 
             [TagStructure(Size = 0x4)]
             public class TrackingType : TagStructure
@@ -248,14 +249,14 @@ namespace TagTool.Tags.Definitions
         {
             NoTracking = 0,
             HumanTracking = 1,
-            CovenantTracking =2,
+            CovenantTracking = 2,
         }
 
         [TagStructure(Size = 0x20)]
         public class FirstPersonBlock : TagStructure
 		{
-            public CachedTagInstance FirstPersonModel;
-            public CachedTagInstance FirstPersonAnimations;
+            public CachedTag FirstPersonModel;
+            public CachedTag FirstPersonAnimations;
         }
 
         [TagStructure(Size = 0x80)]
@@ -278,10 +279,10 @@ namespace TagTool.Tags.Definitions
             public uint Unknown6;
             public uint Unknown7;
             public uint Unknown8;
-            public CachedTagInstance ReloadingEffect;
-            public CachedTagInstance ReloadingDamageEffect;
-            public CachedTagInstance ChamberingEffect;
-            public CachedTagInstance ChamberingDamageEffect;
+            public CachedTag ReloadingEffect;
+            public CachedTag ReloadingDamageEffect;
+            public CachedTag ChamberingEffect;
+            public CachedTag ChamberingDamageEffect;
             public List<MagazineEquipmentBlock> MagazineEquipment;
 
             [TagStructure(Size = 0x14)]
@@ -289,7 +290,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public short Rounds0ForMax;
                 public short Unknown;
-                public CachedTagInstance Equipment;
+                public CachedTag Equipment;
             }
         }
 
@@ -313,12 +314,12 @@ namespace TagTool.Tags.Definitions
             public ushort ChargeFlags;
             public float ChargedIllumination;
             public float SpewTime;
-            public CachedTagInstance ChargingEffect;
-            public CachedTagInstance ChargingDamageEffect;
-            public CachedTagInstance ChargingResponse;
+            public CachedTag ChargingEffect;
+            public CachedTag ChargingDamageEffect;
+            public CachedTag ChargingResponse;
             public float ChargingAgeDegeneration;
-            public CachedTagInstance Unknown2;
-            public CachedTagInstance Unknown3;
+            public CachedTag Unknown2;
+            public CachedTag Unknown3;
             public uint Unknown4;
             public uint Unknown5;
             public uint Unknown6;
@@ -445,10 +446,10 @@ namespace TagTool.Tags.Definitions
             public DamageReportingType DamageReportingType;
             public sbyte Unknown3;
             public short Unknown4;
-            public CachedTagInstance InitialProjectile;
-            public CachedTagInstance TrailingProjectile;
-            public CachedTagInstance DamageEffect;
-            public CachedTagInstance CrateProjectile;
+            public CachedTag InitialProjectile;
+            public CachedTag TrailingProjectile;
+            public CachedTag DamageEffect;
+            public CachedTag CrateProjectile;
             public float CrateProjectileSpeed;
             public float EjectionPortRecoveryTime;
             public float IlluminationRecoveryTime;
@@ -558,18 +559,18 @@ namespace TagTool.Tags.Definitions
 			{
                 public short ShotCountLowerBound;
                 public short ShotCountUpperBound;
-                public CachedTagInstance FiringEffect2;
-                public CachedTagInstance MisfireEffect;
-                public CachedTagInstance EmptyEffect;
-                public CachedTagInstance UnknownEffect;
-                public CachedTagInstance FiringResponse;
-                public CachedTagInstance MisfireResponse;
-                public CachedTagInstance EmptyResponse;
-                public CachedTagInstance UnknownResponse;
-                public CachedTagInstance RiderFiringResponse;
-                public CachedTagInstance RiderMisfireResponse;
-                public CachedTagInstance RiderEmptyResponse;
-                public CachedTagInstance RiderUnknownResponse;
+                public CachedTag FiringEffect2;
+                public CachedTag MisfireEffect;
+                public CachedTag EmptyEffect;
+                public CachedTag UnknownEffect;
+                public CachedTag FiringResponse;
+                public CachedTag MisfireResponse;
+                public CachedTag EmptyResponse;
+                public CachedTag UnknownResponse;
+                public CachedTag RiderFiringResponse;
+                public CachedTag RiderMisfireResponse;
+                public CachedTag RiderEmptyResponse;
+                public CachedTag RiderUnknownResponse;
             }
         }
 

@@ -9,10 +9,10 @@ namespace TagTool.Commands.Unicode
 {
     class ListStringsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private MultilingualUnicodeStringList Definition { get; }
 
-        public ListStringsCommand(HaloOnlineCacheContext cacheContext, MultilingualUnicodeStringList definition)
+        public ListStringsCommand(GameCache cache, MultilingualUnicodeStringList definition)
             : base(true,
                   "ListStrings",
                   "Lists the unicode strings belonging to a certain language.",
@@ -28,7 +28,7 @@ namespace TagTool.Commands.Unicode
                   "chinese-trad, chinese-simp, portuguese, russian")
         {
             // TODO: Can we dynamically generate the language list from the dictionary in ArgumentParser?
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -41,7 +41,7 @@ namespace TagTool.Commands.Unicode
                 return false;
 
             var filter = (args.Count == 2) ? args[1] : null;
-            var strings = LocalizedStringPrinter.PrepareForDisplay(Definition, CacheContext.StringIdCache, Definition.Strings, language, filter);
+            var strings = LocalizedStringPrinter.PrepareForDisplay(Definition, Cache.StringTable, Definition.Strings, language, filter);
 
             if (strings.Count > 0)
                 LocalizedStringPrinter.PrintStrings(strings);

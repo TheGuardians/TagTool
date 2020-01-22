@@ -2,5 +2,6 @@
 {
     public interface IScriptSyntax
     {
+        int Line { get; }
     }
 }

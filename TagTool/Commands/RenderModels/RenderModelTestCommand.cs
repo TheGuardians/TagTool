@@ -12,9 +12,9 @@ namespace TagTool.Commands.RenderModels
 {
     class RenderModelTestCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public RenderModelTestCommand(HaloOnlineCacheContext cacheContext)
+        public RenderModelTestCommand(GameCache cache)
             : base(true,
 
                   "RenderModelTest",
@@ -25,17 +25,16 @@ namespace TagTool.Commands.RenderModels
                   "A test command for 'mode' tag resources.\n" +
                   "The model must only have a single material and no nodes.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1)
+            if (args.Count < 1 || args.Count > 2)
                 return false;
 
-            var stringIdCount = CacheContext.StringIdCache.Strings.Count;
-            var resourceLocation = ResourceLocation.Resources;
-            var destinationTag = CacheContext.TagCache.Index[0x3317];
+            var stringIdCount = Cache.StringTable.Count;
+            var destinationTag = Cache.TagCache.GetTag(@"objects\gear\human\industrial\street_cone\street_cone", "mode");
 
             string vertexType = "rigid";
             if (args[0] == "skinned" || args[0] == "rigid")
@@ -44,51 +43,9 @@ namespace TagTool.Commands.RenderModels
                 args.RemoveAt(0);
             }
 
-            if (args.Count == 3)
-            {
-                var value = args[0];
-
-                switch (value)
-                {
-                    case "resources":
-                        resourceLocation = ResourceLocation.Resources;
-                        break;
-
-                    case "textures":
-                        resourceLocation = ResourceLocation.Textures;
-                        break;
-
-                    case "textures_b":
-                        resourceLocation = ResourceLocation.TexturesB;
-                        break;
-
-                    case "audio":
-                        resourceLocation = ResourceLocation.Audio;
-                        break;
-
-                    case "resources_b":
-                        resourceLocation = ResourceLocation.ResourcesB;
-                        break;
-
-                    case "render_models":
-                        resourceLocation = ResourceLocation.RenderModels;
-                        break;
-
-                    case "lightmaps":
-                        resourceLocation = ResourceLocation.Lightmaps;
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid resource location: " + value);
-                        return false;
-                }
-
-                args.RemoveAt(0);
-            }
-
             if (args.Count == 2)
             {
-                if (!CacheContext.TryGetTag(args[0], out destinationTag) || !destinationTag.IsInGroup("mode"))
+                if (!Cache.TryGetTag(args[0], out destinationTag) || !destinationTag.IsInGroup("mode"))
                 {
                     Console.WriteLine("Specified tag is not a render_model: " + args[0]);
                     return false;
@@ -99,14 +56,14 @@ namespace TagTool.Commands.RenderModels
 
             RenderModel edMode = null;
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                edMode = CacheContext.Deserialize<RenderModel>(cacheStream, destinationTag);
+            using (var cacheStream = Cache.OpenCacheReadWrite())
+                edMode = Cache.Deserialize<RenderModel>(cacheStream, destinationTag);
 
             // Get a list of the original nodes
             var nodeIndices = new Dictionary<string, int>();
 
             foreach (var a in edMode.Nodes)
-                nodeIndices.Add(CacheContext.StringIdCache.GetString(a.Name), edMode.Nodes.IndexOf(a));
+                nodeIndices.Add(Cache.StringTable.GetString(a.Name), edMode.Nodes.IndexOf(a));
 
             // Read the custom model file
             if (!File.Exists(args[0]))
@@ -114,7 +71,7 @@ namespace TagTool.Commands.RenderModels
 
             Console.WriteLine($"File date: {File.GetLastWriteTime(args[0])}");
 
-            var builder = new RenderModelBuilder(CacheContext);
+            var builder = new RenderModelBuilder(Cache);
 
             using (var importer = new AssimpContext())
             {
@@ -158,7 +115,7 @@ namespace TagTool.Commands.RenderModels
                 // Add nodes
                 var rigidNode = builder.AddNode(new RenderModel.Node
                 {
-                    Name = CacheContext.GetStringId("street_cone"),
+                    Name = Cache.StringTable.GetStringId("street_cone"),
                     ParentNode = -1,
                     FirstChildNode = -1,
                     NextSiblingNode = -1,
@@ -186,14 +143,14 @@ namespace TagTool.Commands.RenderModels
 
                     Console.Write($"Enter a region name for '{mesh.Name}' (mesh index {meshIndex}): ");
                     var regionName = Console.ReadLine();
-                    var regionStringId = CacheContext.GetStringId(regionName);
+                    var regionStringId = Cache.StringTable.GetStringId(regionName);
 
                     if (regionStringId == StringId.Invalid)
-                        regionStringId = CacheContext.StringIdCache.AddString(regionName);
+                        regionStringId = Cache.StringTable.AddString(regionName);
 
                     // Begin building the default region and permutation
                     builder.BeginRegion(regionStringId);
-                    builder.BeginPermutation(CacheContext.GetStringId("default"));
+                    builder.BeginPermutation(Cache.StringTable.GetStringId("default"));
                     builder.BeginMesh();
 
                     for (var i = 0; i < mesh.VertexCount; i++)
@@ -270,7 +227,7 @@ namespace TagTool.Commands.RenderModels
                     // Define a material and part for this mesh
                     var material = builder.AddMaterial(new RenderMaterial
                     {
-                        RenderMethod = CacheContext.TagCache.Index[0x3AB0],
+                        RenderMethod = Cache.TagCache.GetTag(@"shaders\invalid", "rmsh"),
                     });
 
                     builder.BeginPart(material, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
@@ -297,7 +254,7 @@ namespace TagTool.Commands.RenderModels
             Console.Write("Building render_geometry...");
 
             var resourceStream = new MemoryStream();
-            var renderModel = builder.Build(CacheContext.Serializer, resourceStream);
+            var renderModel = builder.Build(Cache.Serializer, resourceStream);
 
             if (vertexType == "skinned")
             {
@@ -309,18 +266,6 @@ namespace TagTool.Commands.RenderModels
 
             Console.WriteLine("done.");
 
-            //
-            // Add a new resource for the render_geometryc data
-            //
-
-            Console.Write("Writing render_geometry resource data...");
-
-            resourceStream.Position = 0;
-
-            renderModel.Geometry.Resource.ChangeLocation(resourceLocation);
-            CacheContext.AddResource(renderModel.Geometry.Resource, resourceStream);
-
-            Console.WriteLine("done.");
 
             //
             // Serialize the new render_model tag
@@ -328,8 +273,8 @@ namespace TagTool.Commands.RenderModels
 
             Console.Write("Writing render_model tag data...");
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(cacheStream, destinationTag, renderModel);
+            using (var cacheStream = Cache.OpenCacheReadWrite())
+                Cache.Serialize(cacheStream, destinationTag, renderModel);
 
             Console.WriteLine("done.");
 
@@ -337,12 +282,12 @@ namespace TagTool.Commands.RenderModels
             // Save any new string ids
             //
 
-            if (stringIdCount != CacheContext.StringIdCache.Strings.Count)
+            if (stringIdCount != Cache.StringTable.Count)
             {
                 Console.Write("Saving string ids...");
 
-                using (var stream = CacheContext.OpenStringIdCacheReadWrite())
-                    CacheContext.StringIdCache.Save(stream);
+
+                Cache.SaveStrings();
 
                 Console.WriteLine("done");
             }

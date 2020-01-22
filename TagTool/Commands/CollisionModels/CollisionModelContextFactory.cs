@@ -5,19 +5,19 @@ namespace TagTool.Commands.CollisionModels
 {
     public static class CollisionModelContextFactory
     {
-        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, CollisionModel definition)
+        public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, CollisionModel definition)
         {
-            var groupName = cacheContext.GetString(tag.Group.Name);
+            var groupName = cache.StringTable.GetString(tag.Group.Name);
             var commandContext = new CommandContext(parent, string.Format("{0:X8}.{1}", tag.Index, groupName));
 
-            Populate(commandContext, cacheContext, tag, definition);
+            Populate(commandContext, cache, tag, definition);
 
             return commandContext;
         }
 
-        public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, CollisionModel definition)
+        public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, CollisionModel definition)
         {
-            commandContext.AddCommand(new ExtractModelCommand(cacheContext, definition));
+            commandContext.AddCommand(new ExtractModelCommand(cache, definition));
         }
     }
 }

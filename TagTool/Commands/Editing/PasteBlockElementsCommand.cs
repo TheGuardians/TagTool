@@ -9,12 +9,12 @@ namespace TagTool.Commands.Editing
     class PasteBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private TagStructureInfo Structure { get; set; }
         private object Owner { get; set; }
 
-        public PasteBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public PasteBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(true,
 
                   "PasteBlockElements",
@@ -25,7 +25,7 @@ namespace TagTool.Commands.Editing
                   $"Pastes block element(s) to a specific tag block in the current {structure.Types[0].Name} definition.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Structure = structure;
             Owner = owner;
@@ -56,7 +56,7 @@ namespace TagTool.Commands.Editing
                 fieldName = fieldName.Substring(lastIndex + 1, (fieldName.Length - lastIndex) - 1);
                 fieldNameLow = fieldName.ToLower();
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, Owner);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, Owner);
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {

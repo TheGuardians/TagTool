@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
-    public struct Bounds<T> : IBounds, IBlamType, IEquatable<Bounds<T>> where T : IComparable<T>
+    public struct Bounds<T> : IBounds, IEquatable<Bounds<T>> where T : IComparable<T>
     {
         /// <summary>
         /// Gets the lowerimum value within the range.
@@ -14,12 +17,18 @@ namespace TagTool.Common
         /// </summary>
         public T Upper { get; set; }
 
-		/// <summary>
-		/// Creates a new range from a lowerimum and a upperimum value.
-		/// </summary>
-		/// <param name="lower">The lowerimum value of the range.</param>
-		/// <param name="upper">The upperimum value of the range.</param>
-		public Bounds(T lower, T upper)
+        /// <summary>
+        /// Gets the length of the bounds.
+        /// </summary>
+        public T Length => (T)Convert.ChangeType(Convert.ToDouble(Upper) - Convert.ToDouble(Lower), typeof(T));
+
+
+        /// <summary>
+        /// Creates a new range from a lowerimum and a upperimum value.
+        /// </summary>
+        /// <param name="lower">The lowerimum value of the range.</param>
+        /// <param name="upper">The upperimum value of the range.</param>
+        public Bounds(T lower, T upper)
         {
             Lower = lower;
             Upper = upper;
@@ -43,6 +52,7 @@ namespace TagTool.Common
         public override int GetHashCode() => 13 * 17 + Lower.GetHashCode() * 17 + Upper.GetHashCode();
 
         public override string ToString() => $"{{ Lower: {Lower}, Upper: {Upper} }}";
+
     }
 
 	public interface IBounds { }

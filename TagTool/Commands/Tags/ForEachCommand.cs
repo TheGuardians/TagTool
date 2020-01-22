@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using TagTool.Cache;
 using TagTool.Commands.Editing;
-using TagTool.Tags;
+using TagTool.Common;
+using System.IO;
 
 namespace TagTool.Commands.Tags
 {
     class ForEachCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ForEachCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext) :
+        public ForEachCommand(CommandContextStack contextStack, GameCache cache) :
             base(false,
                 
                 "ForEach",
@@ -24,12 +25,12 @@ namespace TagTool.Commands.Tags
                 "Executes a command on every instance of the specified tag group.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2)
+            if (args.Count < 1)
                 return false;
 
             var isConst = false;
@@ -40,10 +41,10 @@ namespace TagTool.Commands.Tags
                 isConst = true;
             }
 
-            if (args.Count < 2)
+            if (args.Count < 1)
                 return false;
 
-            if (!CacheContext.TryParseGroupTag(args[0], out var groupTag))
+            if (!Cache.TryParseGroupTag(args[0], out var groupTag))
             {
                 Console.WriteLine($"Invalid tag group: {args[0]}");
                 return true;
@@ -54,13 +55,18 @@ namespace TagTool.Commands.Tags
             var startFilter = "";
             var endFilter = "";
             var filter = "";
+            var filename = "";
 
             string pattern = null;
 
-            while (args[0].EndsWith(":"))
+            while (args.Count > 0 && args[0].EndsWith(":"))
             {
                 switch (args[0].ToLower())
                 {
+                    case "in_file:":
+                        filename = args[1];
+                        args.RemoveRange(0, 2);
+                        break;
                     case "regex:":
                         if (args.Count < 3)
                             return false;
@@ -102,14 +108,46 @@ namespace TagTool.Commands.Tags
                 }
             }
 
-            var rootContext = ContextStack.Context;
-            var groupName = CacheContext.GetString(TagGroup.Instances[groupTag].Name);
+            var commandsToExecute = new List<List<string>>();
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            // if no command is given, keep reading commands from stdin until an empty line encountered
+            if (args.Count < 1)
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                string line;
+                while (!string.IsNullOrWhiteSpace(line = Console.ReadLine()))
                 {
-                    if (instance == null || !instance.IsInGroup(groupTag))
+                    var commandsArgs = ArgumentParser.ParseCommand(line, out string redirectFile);
+                    commandsToExecute.Add(commandsArgs);
+                }
+            }
+            else
+            {
+                commandsToExecute.Add(args);
+            }
+
+            IEnumerable<CachedTag> tags = null;
+
+            // if a file is given use that as the source for tags
+            if (!string.IsNullOrWhiteSpace(filename))
+            {
+                var tagsList = new List<CachedTag>();
+                foreach (var line in File.ReadAllLines(filename))
+                    tagsList.Add(Cache.GetTag(line));
+
+                tags = tagsList;
+            }
+            else
+            {
+                tags = Cache.TagCache.NonNull();
+            }
+
+            var rootContext = ContextStack.Context;
+
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                foreach (var instance in tags)
+                {
+                    if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
                         continue;
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
@@ -127,17 +165,17 @@ namespace TagTool.Commands.Tags
                     if (!tagName.StartsWith(startFilter) || !tagName.Contains(filter) || !tagName.EndsWith(endFilter))
                         continue;
 
-                    var definition = CacheContext.Deserialize(stream, instance);
-                    ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, instance, definition));
+                    var definition = Cache.Deserialize(stream, instance);
+                    ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
 
                     Console.WriteLine();
-                    Console.WriteLine($"{tagName}.{groupName}:");
+                    Console.WriteLine($"{tagName}.{Cache.StringTable.GetString(instance.Group.Name)}:");
                     ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
 
                     while (ContextStack.Context != rootContext) ContextStack.Pop();
 
                     if (!isConst)
-                        CacheContext.Serialize(stream, instance, definition);
+                        Cache.Serialize(stream, instance, definition);
                 }
 
                 Console.WriteLine();

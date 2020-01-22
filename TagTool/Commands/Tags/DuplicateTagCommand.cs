@@ -1,44 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
-using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Tags
 {
     class DuplicateTagCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public DuplicateTagCommand(HaloOnlineCacheContext cacheContext)
+        public DuplicateTagCommand(GameCache cache)
             : base(false,
                   
                   "DuplicateTag",
-                  "Creates a new copy of a tag in the tag cache.",
+                  "Copies a tags data into a new tag.",
                   
                   "DuplicateTag <tag>",
-                  
-                  "All of the tag's data, including tag blocks, will be copied into a new tag.\n" +
-                  "The new tag can then be edited independently of the old tag.")
+                  "Copies a tags data into a new tag.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count < 1 || !Cache.TryGetCachedTag(args[0], out var originalTag))
                 return false;
 
-            if (!CacheContext.TryGetTag(args[0], out var tag))
-                return false;
+            var newTag = Cache.TagCache.AllocateTag(originalTag.Group);
 
-            CachedTagInstance newTag;
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-                newTag = CacheContext.TagCache.DuplicateTag(stream, tag);
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                var originalDefinition = Cache.Deserialize(stream, originalTag);
+                Cache.Serialize(stream, newTag, originalDefinition);
+            }
 
-            Console.WriteLine("Tag duplicated successfully!");
-            Console.Write("New tag: ");
-            TagPrinter.PrintTagShort(newTag);
-
+            Console.Write($"Tag duplicated to 0x{newTag.Index.ToString("X")}\n");
             return true;
         }
     }

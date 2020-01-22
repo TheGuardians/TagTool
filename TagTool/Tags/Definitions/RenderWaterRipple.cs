@@ -1,5 +1,6 @@
 using System;
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -52,7 +53,7 @@ namespace TagTool.Tags.Definitions
 
         public FunctionValue PatternTransition;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused1 = new byte[2];
 
         //
@@ -66,7 +67,7 @@ namespace TagTool.Tags.Definitions
 
         public FunctionValue FoamFadeFunction;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused2 = new byte[2];
 
         [Flags]

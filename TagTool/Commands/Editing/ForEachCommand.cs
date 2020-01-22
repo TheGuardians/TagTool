@@ -6,19 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Commands.Editing
 {
     class ForEachCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
 
-        public ForEachCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public ForEachCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(true,
 
                   "ForEach",
@@ -29,7 +30,7 @@ namespace TagTool.Commands.Editing
                   "Executes a command for each element in the specified tag block.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Structure = structure;
             Owner = owner;
@@ -58,7 +59,7 @@ namespace TagTool.Commands.Editing
                 fieldNameLow = fieldName.ToLower();
                 fieldNameSnake = fieldName.ToSnakeCase();
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, Owner);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, Owner);
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
@@ -110,7 +111,7 @@ namespace TagTool.Commands.Editing
             string toName = null;
             int? to = null;
 
-            while (true)
+            while (args.Count > 1)
             {
                 var found = false;
 
@@ -146,9 +147,26 @@ namespace TagTool.Commands.Editing
             }
 
             blockName = args[0];
-            args = args.Skip(1).ToList();
+            args.RemoveRange(0, 1);
 
-            for (var i = (from.HasValue ? from.Value : 0);
+            var commandsToExecute = new List<List<string>>();
+
+            // if no command is given, keep reading commands from stdin until an empty line encountered
+            if (args.Count < 1)
+            {
+                string line;
+                while (!string.IsNullOrWhiteSpace(line = Console.ReadLine()))
+                {
+                    var commandsArgs = ArgumentParser.ParseCommand(line, out string redirectFile);
+                    commandsToExecute.Add(commandsArgs);
+                }
+            }
+            else
+            {
+                commandsToExecute.Add(args);
+            }
+
+            for (var i = (from ?? 0);
                 i < (to.HasValue ? to.Value + 1 : fieldValue.Count);
                 i++)
             {
@@ -158,7 +176,7 @@ namespace TagTool.Commands.Editing
                 Owner = previousOwner;
                 Structure = previousStructure;
 
-                if (blockName != "" && new EditBlockCommand(ContextStack, CacheContext, Tag, Owner)
+                if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
                         .Execute(new List<string> { $"{blockName}[{i}]" })
                         .Equals(false))
                     return false;
@@ -166,7 +184,8 @@ namespace TagTool.Commands.Editing
                 var label = GetLabel(fieldValue, i);
 
                 Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
-                ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
+                foreach (var command in commandsToExecute)
+                    ContextStack.Context.GetCommand(command[0]).Execute(command.Skip(1).ToList());
             }
 
             while (ContextStack.Context != previousContext)
@@ -183,9 +202,9 @@ namespace TagTool.Commands.Editing
             if (index < 0 || index >= elements.Count)
                 return null;
 
-            foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], CacheContext.Version))
+            foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], Cache.Version))
             {
-                if (info.Attribute == null || !info.Attribute.Flags.HasFlag(TagFieldFlags.Label))
+                if (info.Attribute == null || !info.Attribute.Flags.HasFlag(Label))
                     continue;
 
                 var value = info.FieldInfo.GetValue(elements[index]);
@@ -193,8 +212,8 @@ namespace TagTool.Commands.Editing
                 if (info.FieldType == typeof(string))
                     return (string)value;
                 else if (info.FieldType == typeof(StringId))
-                    return CacheContext.GetString((StringId)value);
-                else if (info.FieldType.IsPrimitive && Tag.IsInGroup<Scenario>())
+                    return Cache.StringTable.GetString((StringId)value);
+                else if (info.FieldType.IsPrimitive && Tag.IsInGroup("scnr"))
                     return GetLabel((IList)typeof(Scenario).GetField(nameof(Scenario.ObjectNames)).GetValue(Owner), Convert.ToInt32(value));
                 else
                     return value.ToString();

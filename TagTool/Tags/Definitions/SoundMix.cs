@@ -1,10 +1,10 @@
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x70, MinVersion = CacheVersion.Halo3Retail,MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x74, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x80, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x74, MinVersion = CacheVersion.Halo3ODST)]
     public class SoundMix : TagStructure
 	{
         public float LeftStereoGain;
@@ -33,11 +33,8 @@ namespace TagTool.Tags.Definitions
         public float SoloPlayerFadeOutTime;
         public float SoloPlayerFadeInTime;
         public float GameMusicFadeOutTime;
-        public CachedTagInstance Unknown2;
+        public CachedTag Unknown2;
         public float Unknown3;
         public float Unknown4;
-
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
     }
 }

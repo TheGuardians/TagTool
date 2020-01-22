@@ -1,5 +1,6 @@
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -8,7 +9,7 @@ namespace TagTool.Ai
     {
         public AiDialogueType DialogueType;
         public short VocalizationsIndex;
-        [TagField(Flags = TagFieldFlags.Label)]
+        [TagField(Flags = Label)]
         public StringId VocalizationName;
         public AiDialogueSpeakerType SpeakerType;
         public AiDialogueSpeakerType ListenerType;

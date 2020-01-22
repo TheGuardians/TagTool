@@ -51,7 +51,7 @@ namespace TagTool.Serialization
         /// </summary>
         /// <param name="index">The index of the tag to get.</param>
         /// <returns>The tag if it exists, or <c>null</c> otherwise.</returns>
-        CachedTagInstance GetTagByIndex(int index);
+        CachedTag GetTagByIndex(int index);
 
         /// <summary>
         /// Looks up a tag by its name.
@@ -59,7 +59,7 @@ namespace TagTool.Serialization
         /// <param name="group">The tag group of the tag instance.</param>
         /// <param name="name">The name of the tag instance.</param>
         /// <returns></returns>
-        CachedTagInstance GetTagByName(TagGroup group, string name);
+        CachedTag GetTagByName(TagGroup group, string name);
 
         /// <summary>
         /// Creates a data block.

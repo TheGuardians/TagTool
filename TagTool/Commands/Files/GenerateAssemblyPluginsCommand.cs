@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using static TagTool.Tags.TagFieldFlags;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Files
 {
@@ -38,6 +40,9 @@ namespace TagTool.Commands.Files
 
             foreach (KeyValuePair<Tag, Type> tagType in TagDefinition.Types)
             {
+                if (tagType.Key == "test")  // skip test definition as it contains unsuported bounds of type long and ulong
+                    continue;
+
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
                 {
                     if (path != null)
@@ -170,7 +175,7 @@ namespace TagTool.Commands.Files
                 //{typeof(RealPoint2d), AssemblyPluginFieldTypes.range},
                 {typeof(Angle), AssemblyPluginFieldTypes.degree},
                 {typeof(StringId), AssemblyPluginFieldTypes.stringId},
-                {typeof(CachedTagInstance), AssemblyPluginFieldTypes.tagref},
+                {typeof(CachedTag), AssemblyPluginFieldTypes.tagref},
                 //{typeof(RealVector2d), AssemblyPluginFieldTypes.range},
                 {typeof(RealArgbColor), AssemblyPluginFieldTypes.colorf },
                 {typeof(RealRgbColor), AssemblyPluginFieldTypes.color24 },
@@ -569,7 +574,9 @@ namespace TagTool.Commands.Files
 
                     foreach (object value in System.Enum.GetValues(enumType))
                     {
-                        if (isBitfield && (int)Convert.ChangeType(value, typeof(int)) == 0) //Skip the "None" value.
+                        var underlyingType = System.Enum.GetUnderlyingType(enumType);
+                        var typeofvalue = value.GetType();  //(int)Convert.ChangeType(value, underlyingType)
+                        if (isBitfield && Convert.ToInt64(value) == 0) //Skip the "None" value.
                             continue;
 
                         if (isBitfield)
@@ -650,7 +657,7 @@ namespace TagTool.Commands.Files
 
                     if (elementAssemblyPluginFieldType == AssemblyPluginFieldTypes.undefined && (elementType.IsClass || (elementType.IsValueType && !elementType.IsEnum)) && !elementType.IsGenericType)
                     {
-                        int childClassOffset = 0;
+                        int childClassOffset = 0; // here
                         reflexiveAssemblyPluginField.children = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, null, ref childClassOffset);
                         reflexiveAssemblyPluginField.attributes.Add("entrySize", "0x" + childClassOffset.ToString("X"));
                         assemblyPluginFields.Add(reflexiveAssemblyPluginField);
@@ -672,6 +679,11 @@ namespace TagTool.Commands.Files
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 0", ref offset));
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 1", ref offset));
+                    }
+                    else if (fieldType == typeof(long))
+                    {
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 0", ref offset));
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.int32, fieldName + " 1", ref offset));
                     }
                     else if (fieldType == typeof(string))
                     {
@@ -719,6 +731,22 @@ namespace TagTool.Commands.Files
                         assemblyPluginFields.AddRange(CommonFieldTypes.Rectangle2d(fieldName, ref offset));
                     else if (fieldType == typeof(RealMatrix4x3))
                         assemblyPluginFields.AddRange(CommonFieldTypes.RealMatrix4x3(fieldName, ref offset));
+                    // Handles datum indices
+                    else if (fieldType == typeof(DatumIndex))
+                    {
+                        assemblyPluginFields.AddRange(
+                            cacheVersion > CacheVersion.Halo2Vista && cacheVersion < CacheVersion.HaloOnline106708 ?
+                            new[]
+                            {
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Identifier", ref offset),
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Index", ref offset)
+                            } :
+                            new[]
+                            {
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Index", ref offset),
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Identifier", ref offset)
+                            });
+                    }
                     //Handles resource pointers
                     else if (fieldType == typeof(PageableResource))
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName, ref offset));
@@ -737,7 +765,7 @@ namespace TagTool.Commands.Files
                             {
                                 for (int i = 0; i < tagFieldAttribute.Length; i++)
                                 {
-                                    if (tagFieldAttribute.Flags.HasFlag(TagFieldFlags.Padding))
+                                    if (tagFieldAttribute.Flags.HasFlag(Padding))
                                     {
                                         AssemblyPluginField assemblyPluginField = new AssemblyPluginField(elementAssemblyPluginType, fieldName + "Padding " + i.ToString(), ref offset);
                                         assemblyPluginField.attributes["visible"] = "false";

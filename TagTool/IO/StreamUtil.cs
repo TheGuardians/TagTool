@@ -11,13 +11,17 @@ namespace TagTool.IO
         /// <param name="input">The stream to read from.</param>
         /// <param name="output">The stream to copy the read data to.</param>
         /// <param name="size">The size of the data to copy.</param>
-        public static void Copy(Stream input, Stream output, int size)
+        public static void Copy(Stream input, Stream output, long size)
         {
             const int bufferSize = 0x1000;
             var buffer = new byte[bufferSize];
             while (size > 0)
             {
-                var read = input.Read(buffer, 0, Math.Min(bufferSize, size));
+                long chunkSize = bufferSize;
+                if (size < chunkSize)
+                    chunkSize = size;
+
+                var read = input.Read(buffer, 0, (int)chunkSize);
                 output.Write(buffer, 0, read);
                 size -= bufferSize;
             }

@@ -6,6 +6,7 @@ using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Shaders.ShaderMatching
 {
@@ -36,12 +37,12 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Halo Online cache context reference
         /// </summary>
-        private HaloOnlineCacheContext CacheContext;
+        private GameCacheHaloOnlineBase CacheContext;
 
         /// <summary>
         /// CacheFile Reference
         /// </summary>
-        private CacheFile BlamCache;
+        private GameCache BlamCache;
 
         /// <summary>
         /// Cache stream reference
@@ -68,7 +69,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <param name="cacheStream"></param>
         /// <param name="cacheContext"></param>
         /// <param name="blamCache"></param>
-        public void Init(Stream cacheStream, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        public void Init(Stream cacheStream, GameCacheHaloOnlineBase cacheContext, GameCache blamCache)
         {
             CacheStream = cacheStream;
             CacheContext = cacheContext;
@@ -118,24 +119,20 @@ namespace TagTool.Shaders.ShaderMatching
 
             using (var reader = new EndianReader(cacheStream, true))
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in CacheContext.TagCache.TagTable)
                 {
-                    if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
+                    if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null || instance.Name.StartsWith("s3d"))
                         continue;
 
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
-                    var vertexShaderIndex = reader.ReadInt32();
-
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
-                    var pixelShaderIndex = reader.ReadInt32();
-
-                    if (!UseMS30 && (vertexShaderIndex >= 0x4455 || pixelShaderIndex >= 0x4455))
+                    if (!UseMS30 && instance.Name.StartsWith("ms30"))
                         continue;
 
                     var bitmaps = new List<string>();
                     var arguments = new List<string>();
 
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 0x48);
+                    var hoInstance = (CachedTagHaloOnline)instance;
+                    
+                    reader.SeekTo(hoInstance.HeaderOffset + hoInstance.DefinitionOffset + 0x48);
                     var vectorArgsCount = reader.ReadInt32();
                     var vectorArgsAddress = reader.ReadUInt32();
 
@@ -143,12 +140,12 @@ namespace TagTool.Shaders.ShaderMatching
                     {
                         for (var i = 0; i < vectorArgsCount; i++)
                         {
-                            reader.SeekTo(instance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
-                            arguments.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            reader.SeekTo(hoInstance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
+                            arguments.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 0x6C);
+                    reader.SeekTo(hoInstance.HeaderOffset + hoInstance.DefinitionOffset + 0x6C);
                     var samplerArgsCount = reader.ReadInt32();
                     var samplerArgsAddress = reader.ReadUInt32();
 
@@ -156,8 +153,8 @@ namespace TagTool.Shaders.ShaderMatching
                     {
                         for (var i = 0; i < samplerArgsCount; i++)
                         {
-                            reader.SeekTo(instance.HeaderOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
-                            bitmaps.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            reader.SeekTo(hoInstance.HeaderOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
+                            bitmaps.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
@@ -166,21 +163,26 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
-        private List<ShaderTemplateItem> CollectRmt2Info(Stream cacheStream, CacheFile.IndexItem bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
+        private List<ShaderTemplateItem> CollectRmt2Info(Stream cacheStream, CachedTag bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
         {
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
-            var bmRmt2Context = new CacheSerializationContext(ref BlamCache, bmRmt2Instance);
-            var bmRmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(bmRmt2Context);
-            var bmPixlContext = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.GetItemByID(bmRmt2.PixelShader.Index));
-            var bmPixl = BlamCache.Deserializer.Deserialize<PixelShader>(bmPixlContext);
+            RenderMethodTemplate bmRmt2;
+            PixelShader bmPixl;
+
+            using(var blamStream = BlamCache.OpenCacheRead())
+            {
+                bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamStream, bmRmt2Instance);
+                bmPixl = BlamCache.Deserialize<PixelShader>(blamStream, bmRmt2.PixelShader);
+            }
+            
 
             // loop trough all rmt2 and find the closest
             foreach (var edRmt2_ in Rmt2TagsInfo)
             {
                 var rmt2Type = bmRmt2Instance.Name.Split("\\".ToArray())[1];
 
-                var edRmt2Tag = CacheContext.GetTag(edRmt2_.Key);
+                var edRmt2Tag = (CachedTagHaloOnline)CacheContext.TagCache.GetTag(edRmt2_.Key);
 
                 // Ignore all rmt2 that are not of the same type. 
                 if (edRmt2Tag == null || !(edRmt2Tag.Name?.Contains(rmt2Type) ?? false))
@@ -189,7 +191,7 @@ namespace TagTool.Shaders.ShaderMatching
                 using (var reader = new EndianReader(cacheStream, true))
                 {
                     reader.SeekTo(edRmt2Tag.HeaderOffset + edRmt2Tag.DefinitionOffset + 28);
-                    var edPixl = CacheContext.GetTag(reader.ReadInt32());
+                    var edPixl = (CachedTagHaloOnline)CacheContext.TagCache.GetTag(reader.ReadInt32());
 
                     if (edPixl == null)
                         continue;
@@ -264,7 +266,19 @@ namespace TagTool.Shaders.ShaderMatching
             return edRmt2BestStats;
         }
 
-        public CachedTagInstance FindEquivalentRmt2(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        private List<string> SplitRenderMethodTemplateName(string rmt2Name, ref string type)
+        {
+            var split = rmt2Name.Split("\\".ToCharArray()).ToList();
+            if (rmt2Name.StartsWith("ms30"))
+                    split.RemoveAt(0);
+
+            type = split[1];    // shader_template, halogram_template and so on
+            var rmdfOptions = split.Last().Split("_".ToCharArray()).ToList();
+            rmdfOptions.RemoveAt(0);    // remove empty option
+            return rmdfOptions;
+        }
+
+        public CachedTag FindEquivalentRmt2(Stream cacheStream, CachedTag blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
             var edRmt2Temp = new List<ShaderTemplateItem>();
@@ -277,20 +291,16 @@ namespace TagTool.Shaders.ShaderMatching
             // rmt2 tagnames have a bunch of values, they're tagblock indexes in rmdf methods.ShaderOptions
             foreach (var d in edRmt2BestStats)
             {
-                var dInstance = CacheContext.GetTag(d.rmt2TagIndex);
+                var dInstance = CacheContext.TagCache.GetTag(d.rmt2TagIndex);
 
                 if (dInstance == null || dInstance.Name == null)
                     continue;
+                
+                string edType = "";
+                var edRmdfValues = SplitRenderMethodTemplateName(dInstance.Name, ref edType);
 
-                var edSplit = dInstance.Name.Split("\\".ToCharArray());
-                var edType = edSplit[1];
-                var edRmdfValues = edSplit[2].Split("_".ToCharArray()).ToList();
-                edRmdfValues.RemoveAt(0);
-
-                var bmSplit = blamRmt2Tag.Name.Split("\\".ToCharArray());
-                var bmType = bmSplit[1];
-                var bmRmdfValues = bmSplit[2].Split("_".ToCharArray()).ToList();
-                bmRmdfValues.RemoveAt(0);
+                string bmType = "";
+                var bmRmdfValues = SplitRenderMethodTemplateName(blamRmt2Tag.Name, ref bmType);
 
                 int matchingValues = 0;
                 for (int i = 0; i < bmRmdfValues.Count; i++)
@@ -327,7 +337,7 @@ namespace TagTool.Shaders.ShaderMatching
                 }
             }
 
-            return CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
+            return CacheContext.TagCache.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
         }
 
         public RenderMethod.ShaderProperty.Argument DefaultArgumentsValues(string arg)
@@ -674,14 +684,14 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
-        public CachedTagInstance FixRmt2Reference(Stream cacheStream, string blamTagName, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        public CachedTag FixRmt2Reference(Stream cacheStream, string blamTagName, CachedTag blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             switch (blamTagName)
             {
                 case @"levels\multi\snowbound\shaders\cov_grey_icy":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_7_2_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"ms30\shaders\shader_templates\_0_2_0_1_7_2_0_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -701,7 +711,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\vehicles\wraith\shaders\wraith_torn":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_2_2_0_0_0_1_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_2_2_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -709,7 +719,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\vehicles\wraith\shaders\wraith_torn_metal":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_1_2_0_0_0_1_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_1_2_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -752,28 +762,16 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_1_2_2_5_0_1_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_1_2_2_5_0_1_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\dlc\sidewinder\shaders\justin\sw_ground_ice1":
@@ -783,28 +781,16 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\terrain_templates\_0_0_1_1_1_2");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\terrain_templates\_0_0_1_1_1_2_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\multi\snowbound\sky\shaders\skydome":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\solo\020_base\lights\light_volume_hatlight":
@@ -829,7 +815,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"levels\dlc\armory\shaders\razor_wire":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_2_5_2_0_1_0_1_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_2_5_2_0_1_0_0_0");
                     }
                     catch { }
                     break;
@@ -938,7 +924,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\characters\flood_infection\shaders\flood_infection":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_1_0_0_1");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"ms30\shaders\shader_templates\_0_2_0_1_1_0_1_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -949,13 +935,7 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_3_3_1_1_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_3_3_1_1_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"objects\weapons\rifle\plasma_rifle_red\shaders\plasma_rifle_red":
@@ -973,13 +953,7 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_1_1_0_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_1_1_0_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"objects\weapons\pistol\needler\shaders\needler_glass":
@@ -988,13 +962,7 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_1_0_3_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_1_0_3_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"objects\weapons\rifle\sniper_rifle\shaders\scope_alpha":
@@ -1019,24 +987,30 @@ namespace TagTool.Shaders.ShaderMatching
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
             using (var reader = new EndianReader(cacheStream, true))
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in CacheContext.TagCache.TagTable)
                 {
                     if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                         continue;
 
-                    if (instance.Name.StartsWith(blamRmt2Tag.Name))
+                    var rmt2Name = instance.Name;
+
+                    // ignore s3d rmt2s
+                    if (rmt2Name.StartsWith("s3d"))
+                        continue;
+
+                    // check if rmt2 is from ms30
+                    if (rmt2Name.StartsWith("ms30"))
                     {
-                        reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
-                        var vertexShaderIndex = reader.ReadInt32();
-
-                        reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
-                        var pixelShaderIndex = reader.ReadInt32();
-
-                        if (!UseMS30 && (vertexShaderIndex >= 0x4455 || pixelShaderIndex >= 0x4455))
+                        rmt2Name = rmt2Name.Replace("ms30\\", "");
+                        // skip over ms30 rmt2s
+                        if (!UseMS30)
                             continue;
-
-                        return instance;
                     }
+
+                    //match found    
+                    if (rmt2Name.StartsWith(blamRmt2Tag.Name))
+                        return instance;
+
                 }
             }
 
@@ -1046,9 +1020,9 @@ namespace TagTool.Shaders.ShaderMatching
 
         public void FixRmdfTagRef(RenderMethod finalRm)
         {
-            var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Name;
+            var rmdfName = finalRm.BaseRenderMethod.Name;
 
-            foreach (var instance in CacheContext.TagCache.Index)
+            foreach (var instance in CacheContext.TagCache.TagTable)
             {
                 if (instance == null || !instance.IsInGroup("rmdf") || instance.Name == null)
                     continue;
@@ -1064,6 +1038,5 @@ namespace TagTool.Shaders.ShaderMatching
             finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
             Console.WriteLine($"WARNING: Unable to locate `{rmdfName}.rmdf`; using `shaders\\shader.rmdf` instead.");
         }
-
     }
 }

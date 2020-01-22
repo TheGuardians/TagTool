@@ -5,8 +5,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3D0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
 	{
         public short IncTextUpdatePeriod;
@@ -14,19 +13,19 @@ namespace TagTool.Tags.Definitions
         public float NearClipPlaneDistance;
         public float ProjectionPlaneDistance;
         public float FarClipPlaneDistance;
-        public CachedTagInstance GlobalStrings;
-        public CachedTagInstance DamageTypeStrings;
+        public CachedTag GlobalStrings;
+        public CachedTag DamageTypeStrings;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance UnknownStrings;
+        public CachedTag UnknownStrings;
 
-        public CachedTagInstance MainMenuMusic;
+        public CachedTag MainMenuMusic;
         public int MusicFadeTime;
         public RealArgbColor Color;
         public RealArgbColor TextColor;
         public List<TextColorBlock> TextColors;
         public List<PlayerColor> PlayerColors;
-        public CachedTagInstance UiSounds;
+        public CachedTag UiSounds;
         public List<Alert> Alerts;
         public List<Dialog> Dialogs;
         public List<GlobalDataSource> GlobalDataSources;
@@ -124,8 +123,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown5;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown6;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown7;      
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        public CachedTag Unknown7;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public RealArgbColor Unknown17;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -140,16 +139,15 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown22;
 
-        //Missing ARG related tags in HO
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ARGBlock> ARG;
 
         [TagStructure(Size = 0x24)]
         public class ARGBlock : TagStructure
 		{
             public StringId Name;
-            public CachedTagInstance Audio;
-            public CachedTagInstance Timing;
+            public CachedTag Audio;
+            public CachedTag Timing;
         }
 
         [TagStructure(Size = 0x14)]
@@ -241,7 +239,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class GlobalDataSource : TagStructure
 		{
-            public CachedTagInstance DataSource;
+            public CachedTag DataSource;
         }
 
         [TagStructure(Size = 0x154)]

@@ -1,21 +1,18 @@
 using TagTool.Cache;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "scenery", Tag = "scen", Size = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "scenery", Tag = "scen", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "scenery", Tag = "scen", Size = 0x8)]
     public class Scenery : GameObject
     {
         public PathfindingPolicyValue PathfindingPolicy;
         public SceneryFlagBits SceneryFlags;
         public LightmappingPolicyValue LightmappingPolicy;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused2;
-
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused3;
 
         public enum PathfindingPolicyValue : short
         {

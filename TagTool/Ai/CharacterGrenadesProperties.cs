@@ -1,5 +1,6 @@
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -7,7 +8,7 @@ namespace TagTool.Ai
     public class CharacterGrenadesProperties : TagStructure
 	{
         public int GrenadesFlags;
-        [TagField(Flags = TagFieldFlags.Label)]
+        [TagField(Flags = Label)]
         public CharacterGrenadeType GrenadeType;
         public CharacterGrenadeTrajectoryType TrajectoryType;
         public int MinimumEnemyCount;

@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -26,8 +27,8 @@ namespace TagTool.Ai
         public uint Unknown3;
         public uint Unknown4;
         public uint Unknown5;
-        [TagField(Flags = TagFieldFlags.Label)]
-        public CachedTagInstance BerserkWeapon;
+        [TagField(Flags = Label)]
+        public CachedTag BerserkWeapon;
         public uint Unknown6;
         public uint Unknown7;
         public uint Unknown8;

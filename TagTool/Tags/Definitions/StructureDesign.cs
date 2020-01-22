@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -13,7 +14,7 @@ namespace TagTool.Tags.Definitions
 
         public List<CollisionMoppCode> SoftCeilingMoppCodes;
         public List<SoftCeiling> SoftCeilings;
-        public List<WaterMoppCode> WaterMoppCodes;
+        public List<CollisionMoppCode> WaterMoppCodes;
         public List<WaterGroup> WaterGroups;
         public List<WaterInstance> WaterInstances;
 
@@ -44,7 +45,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public SoftCeilingType Type;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public List<SoftCeilingTriangle> SoftCeilingTriangles;
@@ -75,7 +76,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short WaterNameIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public RealVector3d FlowVelocity;

@@ -13,104 +13,82 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTagInstance instance, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTag instance, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
-            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, resourceStreams);
-            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, resourceStreams);
+            var converter = new RenderGeometryConverter(CacheContext, BlamCache);   // should be made static
+
+            var blamDecoratorResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(sbsp.DecoratorGeometry.Resource);
+            var blamGeometryResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(sbsp.Geometry.Resource);
+
+            var decoratorGeometry = converter.Convert(sbsp.DecoratorGeometry, blamDecoratorResourceDefinition);
+            var geometry = converter.Convert(sbsp.Geometry, blamGeometryResourceDefinition);
+
+            var test = new List<int>();
+
+            var newDecoratorBuffers = new List<VertexBufferDefinition>();
+
+            foreach (var cluster in sbsp.Clusters)
+            {
+                List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
+
+                foreach (var grid in cluster.DecoratorGrids)
+                {
+                    var buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
+                    var offset = grid.VertexBufferOffset;              
+
+                    grid.Vertices = new List<TinyPositionVertex>();
+                    using (var stream = new MemoryStream(buffer.Data.Data))
+                    {
+                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, stream);
+                        stream.Position = offset;
+
+                        for(int i = 0; i < grid.Amount; i++)
+                            grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
+                    }
+
+                    if (grid.Amount == 0)
+                        newDecoratorGrids.Add(grid);
+                    else
+                    {
+                        // Get the new grids
+                        var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
+
+                        // Add all to list
+                        foreach (var newGrid in newGrids)
+                            newDecoratorGrids.Add(newGrid);
+                    }
+                }
+                cluster.DecoratorGrids = newDecoratorGrids;
+            }
+
+            // convert all the decorator vertex buffers
+            foreach(var d3dBuffer in blamDecoratorResourceDefinition.VertexBuffers)
+            {
+                VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, CacheContext.Version, d3dBuffer.Definition);
+                decoratorGeometry.VertexBuffers.Add(d3dBuffer);
+            }
+
+            sbsp.DecoratorGeometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(decoratorGeometry);
+            sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
+
+            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
+            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp);
 
             sbsp.Unknown86 = 1;
 
             //
-            // Fix cluster tag ref and decorator grids
+            // Set compatibility flag for H3 mopps for the engine to perform some fixups just in time
             //
 
-            var resource = sbsp.Geometry.Resource;
-
-            if (resource != null && resource.Page.Index >= 0 && resource.GetLocation(out var location))
-            {
-                var resourceContext = new ResourceSerializationContext(CacheContext, sbsp.Geometry.Resource);
-                var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
-
-                using (var edResourceStream = new MemoryStream())
-                using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
-                {
-                    var pageable = sbsp.Geometry.Resource;
-
-                    if (pageable == null)
-                        throw new ArgumentNullException("sbsp.Geometry.Resource");
-
-                    if (!edResourceStream.CanWrite)
-                        throw new ArgumentException("The output stream is not open for writing", "outStream");
-                    
-                    pageable.GetLocation(out var resourceLocation);
-
-                    var cache = CacheContext.GetResourceCache(resourceLocation);
-
-                    if (!resourceStreams.ContainsKey(resourceLocation))
-                    {
-                        resourceStreams[resourceLocation] = FlagIsSet(PortingFlags.Memory) ?
-                            new MemoryStream() :
-                            (Stream)CacheContext.OpenResourceCacheReadWrite(resourceLocation);
-
-                        if (FlagIsSet(PortingFlags.Memory))
-                            using (var resourceStream = CacheContext.OpenResourceCacheRead(resourceLocation))
-                                resourceStream.CopyTo(resourceStreams[resourceLocation]);
-                    }
-
-                    cache.Decompress(resourceStreams[resourceLocation], pageable.Page.Index, pageable.Page.CompressedBlockSize, edResourceStream);
-
-                    var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
-
-                    foreach (var cluster in sbsp.Clusters)
-                    {
-                        List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
-
-                        foreach (var grid in cluster.DecoratorGrids)
-                        {
-                            grid.DecoratorGeometryIndex_HO = grid.DecoratorGeometryIndex_H3;
-                            grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
-
-                            if (grid.Amount == 0)
-                                newDecoratorGrids.Add(grid);
-                            else
-                            {
-                                List<TinyPositionVertex> vertices = new List<TinyPositionVertex>();
-
-                                // Get the buffer the right grid
-                                var vertexBuffer = definition.VertexBuffers[grid.DecoratorGeometryIndex_HO].Definition;
-                                // Get the offset from the grid
-                                edResourceStream.Position = vertexBuffer.Data.Address.Offset + grid.DecoratorGeometryOffset;
-                                // Read all vertices and add to the list
-                                for (int i = 0; i < grid.Amount; i++)
-                                    vertices.Add(inVertexStream.ReadTinyPositionVertex());
-
-                                // Get the new grids
-                                List<ScenarioStructureBsp.Cluster.DecoratorGrid> newGrids = ConvertDecoratorGrid(vertices, grid);
-
-                                // Add all to list
-                                foreach (var newGrid in newGrids)
-                                    newDecoratorGrids.Add(newGrid);
-                            }
-                        }
-
-                        cluster.DecoratorGrids = newDecoratorGrids;
-                    }
-                }
-            }
+            if (BlamCache.Version == CacheVersion.Halo3Retail || BlamCache.Version == CacheVersion.Halo3Beta)
+                sbsp.CompatibilityFlags |= ScenarioStructureBsp.StructureBspCompatibilityValue.UseMoppIndexPatch;
 
             //
             // Temporary Fixes:
             //
 
-            // Without this 005_intro crash on cortana sbsp
-
-            for (int i = 0; i < sbsp.Clusters.Count; i++)
-            {
-                sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
-                sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
-            }
-            
-            sbsp.Geometry2.UnknownSections = new List<RenderGeometry.UnknownSection>();
+            // Without this 005_intro crash on cortana sbsp       
+            sbsp.Geometry.UnknownSections = new List<RenderGeometry.UnknownSection>();
             
             return sbsp;
         }
@@ -125,11 +103,13 @@ namespace TagTool.Commands.Porting
             {
                 var newGrid = grid.DeepClone();
 
+                newGrid.HaloOnlineInfo = new ScenarioStructureBsp.Cluster.DecoratorGrid.HaloOnlineDecoratorInfo();
                 newGrid.Amount = data.Amount;
-                newGrid.DecoratorGeometryOffset = grid.DecoratorGeometryOffset+data.GeometryOffset;
-                newGrid.DecoratorVariant = data.Variant;
+                newGrid.VertexBufferOffset = grid.VertexBufferOffset + data.GeometryOffset;
 
-                //Position fixups should go here if needed
+                newGrid.HaloOnlineInfo.Variant = data.Variant;
+                newGrid.HaloOnlineInfo.PaletteIndex = grid.Gen3Info.PaletteIndex;
+                newGrid.HaloOnlineInfo.VertexBufferIndex = grid.Gen3Info.VertexBufferIndex; // this doesn't change as each vertex buffer corresponds to the palette index
 
                 decoratorGrids.Add(newGrid);
             }
@@ -143,11 +123,11 @@ namespace TagTool.Commands.Porting
             while(currentIndex < vertices.Count)
             {
                 var currentVertex = vertices[currentIndex];
-                var currentVariant = currentVertex.Variant;
+                var currentVariant = (currentVertex.Variant >> 8) & 0xFF;
 
                 DecoratorData data = new DecoratorData(0,(short)currentVariant,currentIndex*16);
 
-                while(currentIndex < vertices.Count && currentVariant == currentVertex.Variant)
+                while(currentIndex < vertices.Count && currentVariant == ((currentVertex.Variant >> 8) & 0xFF))
                 {
                     currentVertex = vertices[currentIndex];
                     data.Amount++;

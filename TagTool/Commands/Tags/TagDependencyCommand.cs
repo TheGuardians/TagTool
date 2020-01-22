@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
@@ -10,9 +11,9 @@ namespace TagTool.Commands.Tags
     /// </summary>
     class TagDependencyCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public TagDependencyCommand(HaloOnlineCacheContext cacheContext) : base(
+        public TagDependencyCommand(GameCacheHaloOnlineBase cache) : base(
             true,
 
             "TagDependency",
@@ -33,7 +34,7 @@ namespace TagTool.Commands.Tags
             "To add dependencies to a map, use the \"GetMapInfo\" command to get its scenario tag\n" +
             "index and then add dependencies to the scenario tag.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -41,40 +42,40 @@ namespace TagTool.Commands.Tags
             if (args.Count < 2)
                 return false;
 
-            if (!CacheContext.TryGetTag(args[1], out var tag))
+            if (!Cache.TryGetCachedTag(args[1], out var tag))
                 return false;
 
             switch (args[0].ToLower())
             {
                 case "add":
                 case "remove":
-                    return ExecuteAddRemove(tag, args);
+                    return ExecuteAddRemove((CachedTagHaloOnline)tag, args);
 
                 case "list":
                 case "listall":
-                    return ExecuteList(tag, (args[0] == "listall"), args.Skip(2).ToArray());
+                    return ExecuteList((CachedTagHaloOnline)tag, (args[0] == "listall"), args.Skip(2).ToArray());
 
                 case "liston":
-                    return ExecuteListDependsOn(tag);
+                    return ExecuteListDependsOn((CachedTagHaloOnline)tag);
 
                 default:
                     return false;
             }
         }
 
-        private bool ExecuteAddRemove(CachedTagInstance tag, List<string> args)
+        private bool ExecuteAddRemove(CachedTagHaloOnline tag, List<string> args)
         {
             if (args.Count < 3)
                 return false;
 
-            var dependencies = args.Skip(2).Select(name => CacheContext.GetTag(name)).ToList();
+            var dependencies = args.Skip(2).Select(name => Cache.GetTag(name)).ToList();
             
             if (dependencies.Count == 0 || dependencies.Any(d => d == null))
                 return false;
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
-                var data = CacheContext.TagCache.ExtractTag(stream, tag);
+                var data = Cache.TagCacheGenHO.ExtractTag(stream, tag);
 
                 if (args[0].ToLower() == "add")
                 {
@@ -97,13 +98,13 @@ namespace TagTool.Commands.Tags
                     }
                 }
 
-                CacheContext.TagCache.SetTagData(stream, tag, data);
+                Cache.TagCacheGenHO.SetTagData(stream, tag, data);
             }
 
             return true;
         }
 
-        private bool ExecuteList(CachedTagInstance tag, bool all, params string[] groups)
+        private bool ExecuteList(CachedTagHaloOnline tag, bool all, params string[] groups)
         {
             if (tag.Dependencies.Count == 0)
             {
@@ -111,14 +112,14 @@ namespace TagTool.Commands.Tags
                 return true;
             }
 
-            IEnumerable<CachedTagInstance> dependencies;
+            IEnumerable<CachedTagHaloOnline> dependencies;
 
             if (all)
-                dependencies = CacheContext.TagCache.Index.FindDependencies(tag);
+                dependencies = Cache.TagCacheGenHO.FindDependencies(tag);
             else
-                dependencies = tag.Dependencies.Where(i => CacheContext.TagCache.Index.Contains(i)).Select(i => CacheContext.TagCache.Index[i]);
+                dependencies = tag.Dependencies.Where(i => i >= 0 && i <= Cache.TagCache.Count).Select(i => Cache.TagCacheGenHO.Tags[i]);
 
-            var groupTags = groups.Select(group => CacheContext.ParseGroupTag(group)).ToArray();
+            var groupTags = groups.Select(group => Cache.ParseGroupTag(group)).ToArray();
 
             foreach (var dependency in dependencies)
             {
@@ -127,25 +128,25 @@ namespace TagTool.Commands.Tags
 
                 var tagName = dependency?.Name ?? $"0x{dependency.Index:X4}";
 
-                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{CacheContext.GetString(dependency.Group.Name)}");
+                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{Cache.StringTable.GetString(dependency.Group.Name)}");
             }
             
             foreach (var instance in tag.Dependencies)
-                if (!CacheContext.TagCache.Index.Contains(instance))
+                if (instance < 0 || instance >= Cache.TagCache.Count)
                     Console.WriteLine($"WARNING: dependency is an inexistent tag: 0x{instance:X4}");
                     
             return true;
         }
 
-        private bool ExecuteListDependsOn(CachedTagInstance tag)
+        private bool ExecuteListDependsOn(CachedTagHaloOnline tag)
         {
-            var dependsOn = CacheContext.TagCache.Index.NonNull().Where(t => t.Dependencies.Contains(tag.Index));
+            var dependsOn = Cache.TagCacheGenHO.NonNull().Where(t => ((CachedTagHaloOnline)t).Dependencies.Contains(tag.Index));
 
             foreach (var dependency in dependsOn)
             {
                 var tagName = dependency?.Name ?? $"0x{dependency.Index:X4}";
 
-                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{CacheContext.GetString(dependency.Group.Name)}");
+                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.DefinitionOffset:X8}] {tagName}.{Cache.StringTable.GetString(dependency.Group.Name)}");
             }
 
             return true;

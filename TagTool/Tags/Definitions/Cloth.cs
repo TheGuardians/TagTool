@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -11,7 +12,7 @@ namespace TagTool.Tags.Definitions
         public ClothFlags Flags;
         public StringId MarkerAttachmentName;
         public StringId SecondMarkerAttachmentName;
-        public CachedTagInstance Shader;
+        public CachedTag Shader;
         public short GridXDimension;
         public short GridYDimension;
         public float GridSpacingX;
@@ -26,7 +27,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class CollisionSphere : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId ObjectMarkerName;
             public float Radius;
         }
@@ -71,7 +72,7 @@ namespace TagTool.Tags.Definitions
         public float WindFlappinessScale;
         public float LongestRod;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 24)]
+        [TagField(Flags = Padding, Length = 24)]
         public byte[] Unused;
     }
 }

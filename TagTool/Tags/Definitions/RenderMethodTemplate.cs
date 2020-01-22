@@ -1,14 +1,15 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x84)]
     public class RenderMethodTemplate : TagStructure
 	{
-        public CachedTagInstance VertexShader;
-        public CachedTagInstance PixelShader;
+        public CachedTag VertexShader;
+        public CachedTag PixelShader;
         public ShaderModeBitmask DrawModeBitmask;
         public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
         public List<DrawModeRegisterOffsetBlock> RegisterOffsets;
@@ -18,7 +19,7 @@ namespace TagTool.Tags.Definitions
         public List<ShaderArgument> BooleanArguments;
         public List<ShaderArgument> SamplerArguments;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused;
 
         public enum RenderMethodExtern : byte

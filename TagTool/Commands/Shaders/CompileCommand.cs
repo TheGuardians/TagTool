@@ -9,13 +9,13 @@ namespace TagTool.Commands.Shaders
 {
     public class CompileCommand<T> : Command
 	{
-		private GameCacheContext CacheContext { get; }
-		private CachedTagInstance Tag { get; }
+		private GameCache Cache { get; }
+		private CachedTag Tag { get; }
 		private T Definition { get; }
         public static bool IsVertexShader => typeof(T) == typeof(GlobalVertexShader) || typeof(T) == typeof(VertexShader);
         public static bool IsPixelShader => typeof(T) == typeof(GlobalPixelShader) || typeof(T) == typeof(PixelShader);
 
-        public CompileCommand(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public CompileCommand(GameCache cache, CachedTag tag, T definition) :
 			base(true,
 
 				"Compile",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Shaders
 				"into shader bytecode, generates a VertexShaderBlock element\n" +
 				"and writes it over <index>")
 		{
-			CacheContext = cacheContext;
+			Cache = cache;
 			Tag = tag;
 			Definition = definition;
 		}
@@ -170,7 +170,7 @@ namespace TagTool.Commands.Shaders
 						var split = line.Split(' ');
                         parameters.Add(new ShaderParameter
                         {
-                            ParameterName = (CacheContext as HaloOnlineCacheContext).GetStringId(split[0]),
+                            ParameterName = Cache.StringTable.GetStringId(split[0]),
                             RegisterType = (ShaderParameter.RType)Enum.Parse(typeof(ShaderParameter.RType), split[1][0].ToString()),
                             RegisterIndex = byte.Parse(split[1].Substring(1)),
                             RegisterCount = byte.Parse(split[2])

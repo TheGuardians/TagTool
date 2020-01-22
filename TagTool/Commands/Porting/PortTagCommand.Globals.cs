@@ -34,7 +34,7 @@ namespace TagTool.Commands.Porting
                     aigl.Data.Add(value);
                 }
 
-                CachedTagInstance edTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("aigl")]);
+                CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag(TagGroup.Instances[new Tag("aigl")]);
                 edTag.Name = "globals\ai_globals";
                 CacheContext.Serialize(cacheStream, edTag, aigl);
                 matg.AiGlobals = edTag;
@@ -82,51 +82,49 @@ namespace TagTool.Commands.Porting
             return matg;
         }
 
-        private void MergeMultiplayerEvent(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.RuntimeBlock.EventBlock edEvent, MultiplayerGlobals.RuntimeBlock.EventBlock h3Event)
+        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.RuntimeBlock.EventBlock edEvent, MultiplayerGlobals.RuntimeBlock.EventBlock h3Event)
         {
             if (h3Event.EnglishSound != null)
-                edEvent.EnglishSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.EnglishSound.Index));
+                edEvent.EnglishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.EnglishSound);
 
             if (h3Event.JapaneseSound != null)
-                edEvent.JapaneseSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.JapaneseSound.Index));
+                edEvent.JapaneseSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.JapaneseSound);
 
             if (h3Event.GermanSound != null)
-                edEvent.GermanSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.GermanSound.Index));
+                edEvent.GermanSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.GermanSound);
 
             if (h3Event.FrenchSound != null)
-                edEvent.FrenchSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.FrenchSound.Index));
+                edEvent.FrenchSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.FrenchSound);
 
             if (h3Event.SpanishSound != null)
-                edEvent.SpanishSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.SpanishSound.Index));
+                edEvent.SpanishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.SpanishSound);
 
             if (h3Event.LatinAmericanSpanishSound != null)
-                edEvent.LatinAmericanSpanishSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.LatinAmericanSpanishSound.Index));
+                edEvent.LatinAmericanSpanishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.LatinAmericanSpanishSound);
 
             if (h3Event.ItalianSound != null)
-                edEvent.ItalianSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.ItalianSound.Index));
+                edEvent.ItalianSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.ItalianSound);
 
             if (h3Event.KoreanSound != null)
-                edEvent.KoreanSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.KoreanSound.Index));
+                edEvent.KoreanSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.KoreanSound);
 
             if (h3Event.ChineseTraditionalSound != null)
-                edEvent.ChineseTraditionalSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.ChineseTraditionalSound.Index));
+                edEvent.ChineseTraditionalSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.ChineseTraditionalSound);
 
             if (h3Event.ChineseSimplifiedSound != null)
-                edEvent.ChineseSimplifiedSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.ChineseSimplifiedSound.Index));
+                edEvent.ChineseSimplifiedSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.ChineseSimplifiedSound);
 
             if (h3Event.PortugueseSound != null)
-                edEvent.PortugueseSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.PortugueseSound.Index));
+                edEvent.PortugueseSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.PortugueseSound);
 
             if (h3Event.PolishSound != null)
-                edEvent.PolishSound = ConvertTag(cacheStream, resourceStreams, BlamCache.GetIndexItemFromID(h3Event.PolishSound.Index));
+                edEvent.PolishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.PolishSound);
         }
 
-        private void MergeMultiplayerGlobals(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTagInstance edTag, CacheFile.IndexItem h3Tag)
+        private void MergeMultiplayerGlobals(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag edTag, CachedTag h3Tag)
         {
             var edDef = CacheContext.Deserialize<MultiplayerGlobals>(cacheStream, edTag);
-
-            var h3Def = BlamCache.Deserializer.Deserialize<MultiplayerGlobals>(
-                new CacheSerializationContext(ref BlamCache, h3Tag));
+            var h3Def = BlamCache.Deserialize<MultiplayerGlobals>(blamCacheStream, h3Tag);
 
             if (h3Def.Runtime == null || h3Def.Runtime.Count == 0)
                 return;
@@ -138,15 +136,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].GeneralEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].GeneralEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -157,15 +155,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].FlavorEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].FlavorEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -176,15 +174,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].SlayerEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].SlayerEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -195,15 +193,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].CtfEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].CtfEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -214,15 +212,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].OddballEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].OddballEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -233,15 +231,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].KingOfTheHillEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].KingOfTheHillEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -252,15 +250,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].VipEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].VipEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -271,15 +269,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].JuggernautEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].JuggernautEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -290,15 +288,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].TerritoriesEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].TerritoriesEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -309,15 +307,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].AssaultEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].AssaultEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 
@@ -328,15 +326,15 @@ namespace TagTool.Commands.Porting
                 if (h3Event.DisplayString == StringId.Invalid)
                     continue;
 
-                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
+                var h3String = BlamCache.StringTable.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].InfectionEvents.Count; j++)
                 {
                     var edEvent = edDef.Runtime[0].InfectionEvents[j];
-                    var edString = CacheContext.GetString(edEvent.DisplayString);
+                    var edString = CacheContext.StringTable.GetString(edEvent.DisplayString);
 
                     if (edString == h3String)
-                        MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
+                        MergeMultiplayerEvent(cacheStream, blamCacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
 

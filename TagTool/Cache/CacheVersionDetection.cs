@@ -1,20 +1,10 @@
 using System;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
     public static class CacheVersionDetection
     {
-        /// <summary>
-        /// Detects the engine that a tags.dat was built for.
-        /// </summary>
-        /// <param name="cache">The cache file.</param>
-        /// <param name="closestGuess">On return, the closest guess for the engine's version.</param>
-        /// <returns>The engine version if it is known for sure, otherwise <see cref="CacheVersion.Unknown"/>.</returns>
-        public static CacheVersion DetectFromTagCache(TagCache cache, out CacheVersion closestGuess)
-        {
-            return DetectFromTimestamp(cache.Timestamp, out closestGuess);
-        }
-
         /// <summary>
         /// Detects the engine that a tags.dat was built for based on its timestamp.
         /// </summary>
@@ -59,10 +49,18 @@ namespace TagTool.Cache
         {
             switch (buildName)
             {
+                
+                case "01.09.25.2247":
+                case "01.10.12.2276":
+                    return CacheVersion.HaloXbox;
+                case "01.00.00.0564":
+                    return CacheVersion.HaloPC;
                 case "02.09.27.09809":
                     return CacheVersion.Halo2Xbox;
                 case "11081.07.04.30.0934.main":
                     return CacheVersion.Halo2Vista;
+                case "09699.07.05.01.1534.delta":
+                   return CacheVersion.Halo3Beta;
                 case "11855.07.08.20.2317.halo3_ship":
                 case "12065.08.08.26.0819.halo3_ship":
                     return CacheVersion.Halo3Retail;
@@ -100,6 +98,8 @@ namespace TagTool.Cache
                     return CacheVersion.HaloOnline700123;
                 case "11860.10.07.24.0147.omaha_relea":
                     return CacheVersion.HaloReach;
+                //case "Jun 24 2019 00:36:03":
+                //    return CacheVersion.HaloReachMCC824;
                 default:
                     return CacheVersion.Unknown;
             }
@@ -154,8 +154,12 @@ namespace TagTool.Cache
                     return "12.1.700123 cert_ms30_oct19";
                 case CacheVersion.HaloReach:
                     return "11860.10.07.24.0147.omaha_relea";
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
+                    return "May 29 2019 00:44:52";
+                case CacheVersion.HaloReachMCC887:
                     return "Jun 24 2019 00:36:03";
+                //case CacheVersion.HaloReachMCC1035:
+                //    return "Jul 30 2019 14:17:16";
                 default:
                     return version.ToString();
             }
@@ -191,47 +195,40 @@ namespace TagTool.Cache
 				case CacheVersion.HaloOnline554482:
 				case CacheVersion.HaloOnline571627:
 				case CacheVersion.HaloOnline700123:
-                case CacheVersion.HaloReachMCCInsiderM35:
-					return true;
+                case CacheVersion.HaloReachMCC824:
+                    return true;
 				default:
 					throw new NotImplementedException(version.ToString());
 			}
 		}
 
         /// <summary>
-        /// Checks if a <see cref="CacheVersion"/> is for a 64-bit (true) or 32-bit (false) game;
+        /// Determines whether a field exists in the given CacheVersion. Defines a priority : Version, Gen, Min/Max.
         /// </summary>
-        /// <param name="version">The <see cref="CacheVersion"/> to check the address size of.</param>
-        /// <returns>True if the <see cref="CacheVersion"/> is for a 64-bit game; false otherwise.</returns>
-        public static bool Is64Bit(CacheVersion version)
+        /// <param name="attr"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public static bool AttributeInCacheVersion(TagFieldAttribute attr, CacheVersion compare)
         {
-            switch (version)
+            if(attr.Version != CacheVersion.Unknown)
             {
-                case CacheVersion.Halo2Xbox:
-                case CacheVersion.Halo2Vista:
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                case CacheVersion.HaloOnline106708:
-                case CacheVersion.HaloOnline235640:
-                case CacheVersion.HaloOnline301003:
-                case CacheVersion.HaloOnline327043:
-                case CacheVersion.HaloOnline372731:
-                case CacheVersion.HaloOnline416097:
-                case CacheVersion.HaloOnline430475:
-                case CacheVersion.HaloOnline454665:
-                case CacheVersion.HaloOnline449175:
-                case CacheVersion.HaloOnline498295:
-                case CacheVersion.HaloOnline530605:
-                case CacheVersion.HaloOnline532911:
-                case CacheVersion.HaloOnline554482:
-                case CacheVersion.HaloOnline571627:
-                case CacheVersion.HaloOnline700123:
-                case CacheVersion.HaloReach:
-                    return false;
-                case CacheVersion.HaloReachMCCInsiderM35:
-                    return true;
-                default:
-                    return false;
+                // has a specific version specified.
+                return attr.Version == compare;
+            }
+            else if(attr.Gen != CacheGeneration.Unknown)
+            {
+                // Has a generation specified
+                return IsInGen(attr.Gen, compare);
+            }
+            else if(attr.MinVersion != CacheVersion.Unknown || attr.MaxVersion != CacheVersion.Unknown)
+            {
+                // Has a min or a max or both specified.
+                return IsBetween(compare, attr.MinVersion, attr.MaxVersion);
+            }
+            else
+            {
+                // has no version attribute therefore it's valid in all cache versions
+                return true;
             }
         }
 
@@ -264,13 +261,80 @@ namespace TagTool.Cache
         }
 
         /// <summary>
+        /// Determine whether a CacheVersion belongs to a CacheGeneration
+        /// </summary>
+        /// <param name="gen"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public static bool IsInGen(CacheGeneration gen, CacheVersion compare)
+        {
+            if (compare == CacheVersion.Unknown)
+                return true;
+            else
+            {
+                if (GetGeneration(compare) == gen)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Get CacheGeneration from CacheVersion
+        /// </summary>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        public static CacheGeneration GetGeneration(CacheVersion version)
+        {
+            switch (version)
+            {
+                case CacheVersion.HaloXbox:
+                case CacheVersion.HaloPC:
+                    return CacheGeneration.First;
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    return CacheGeneration.Second;
+                case CacheVersion.Halo3Beta:
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloReach:
+                    return CacheGeneration.Third;
+                case CacheVersion.HaloOnline106708:
+                case CacheVersion.HaloOnline235640:
+                case CacheVersion.HaloOnline301003:
+                case CacheVersion.HaloOnline327043:
+                case CacheVersion.HaloOnline372731:
+                case CacheVersion.HaloOnline416097:
+                case CacheVersion.HaloOnline430475:
+                case CacheVersion.HaloOnline454665:
+                case CacheVersion.HaloOnline449175:
+                case CacheVersion.HaloOnline498295:
+                case CacheVersion.HaloOnline530605:
+                case CacheVersion.HaloOnline532911:
+                case CacheVersion.HaloOnline554482:
+                case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline700123:
+                    return CacheGeneration.HaloOnline;
+
+                case CacheVersion.HaloReachMCC824:
+                    return CacheGeneration.MCC;
+
+                default:
+                    return CacheGeneration.Unknown;
+            }
+        }
+
+        /// <summary>
         /// tags.dat timestamps for each game version.
         /// Timestamps in here should correspond directly to <see cref="CacheVersion"/> enum values (excluding <see cref="CacheVersion.Unknown"/>).
         /// </summary>
         private static readonly long[] VersionTimestamps =
         {
+            -1, // Halo Xbox
+            -1, // Halo PC
             -1, // Halo2Xbox
             -1, // Halo2Vista
+            -1, // Halo3Beta
             -1, // Halo3Retail
             -1, // Halo3ODST
             130713360239499012, // HaloOnline106708
@@ -289,15 +353,20 @@ namespace TagTool.Cache
             130881889330693956, // HaloOnline571627
             130930071628935939, // HaloOnline700123
             -1, // HaloReach
-            -1, // HaloReachMCCInsiderM35
+            -1, // HaloReachMCC824
+            -1, // HaloReachMCC887
+            //-1, // HaloReachMCC1035
         };
     }
 
     public enum CacheVersion : int
     {
         Unknown = -1,
+        HaloXbox,
+        HaloPC,
         Halo2Xbox,
         Halo2Vista,
+        Halo3Beta,
         Halo3Retail,
         Halo3ODST,
         HaloOnline106708,
@@ -316,6 +385,18 @@ namespace TagTool.Cache
         HaloOnline571627,
         HaloOnline700123,
         HaloReach,
-        HaloReachMCCInsiderM35,
+        HaloReachMCC824,
+        HaloReachMCC887,
+        HaloReachMCC1035,
+    }
+
+    public enum CacheGeneration : int
+    {
+        Unknown = -1,
+        First = 1,
+        Second = 2,
+        Third = 3,
+        HaloOnline = 4,
+        MCC = 5
     }
 }

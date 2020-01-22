@@ -65,7 +65,8 @@ namespace TagTool.Commands.Tags
 
             using (var stream = new ProcessMemoryStream(process))
             {
-                var address = GetTagAddress(stream, tagIndex);
+                var exeBase = (uint)stream.BaseProcess.MainModule.BaseAddress - 0x400000;
+                var address = GetTagAddress(stream, tagIndex, exeBase);
 
                 if (address != 0)
                     Console.WriteLine("Tag 0x{0:X} is loaded at 0x{1:X8} in process 0x{2:X}.", tagIndex, address, process.Id);
@@ -76,17 +77,17 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private static uint GetTagAddress(ProcessMemoryStream stream, int tagIndex)
+        private static uint GetTagAddress(ProcessMemoryStream stream, int tagIndex, uint exeBase)
         {
             // Read the tag count and validate the tag index
             var reader = new BinaryReader(stream);
-            reader.BaseStream.Position = 0x22AB008;
+            reader.BaseStream.Position = 0x22AB008 + exeBase;
             var maxIndex = reader.ReadInt32();
             if (tagIndex >= maxIndex)
                 return 0;
 
             // Read the tag index table to get the index of the tag in the address table
-            reader.BaseStream.Position = 0x22AAFFC;
+            reader.BaseStream.Position = 0x22AAFFC + exeBase;
             var tagIndexTableAddress = reader.ReadUInt32();
             if (tagIndexTableAddress == 0)
                 return 0;
@@ -96,7 +97,7 @@ namespace TagTool.Commands.Tags
                 return 0;
 
             // Read the tag's address in the address table
-            reader.BaseStream.Position = 0x22AAFF8;
+            reader.BaseStream.Position = 0x22AAFF8 + exeBase;
             var tagAddressTableAddress = reader.ReadUInt32();
             if (tagAddressTableAddress == 0)
                 return 0;

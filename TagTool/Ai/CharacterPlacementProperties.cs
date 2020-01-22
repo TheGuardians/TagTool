@@ -1,11 +1,12 @@
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x34)]
     public class CharacterPlacementProperties : TagStructure
 	{
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+        [TagField(Flags = Padding, Length = 4)]
         public byte[] Unused;
 
         public float FewUpgradeChanceEasy;

@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,39 +9,17 @@ namespace TagTool.Tags.Definitions
     public class GuiButtonKeyDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYBoundsMin;
-        public short WidescreenXBoundsMin;
-        public short WidescreenYBoundsMax;
-        public short WidescreenXBoundsMax;
-        public short StandardYBoundsMin;
-        public short StandardXBoundsMin;
-        public short StandardYBoundsMax;
-        public short StandardXBoundsMax;
-        public CachedTagInstance Animation;
-        public CachedTagInstance Strings;
+        public GuiDefinition GuiRenderBlock;
+        public CachedTag Strings;
         public List<TextWidget> TextWidgets;
         public List<BitmapWidget> BitmapWidgets;
 
         [TagStructure(Size = 0x4C)]
         public class TextWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public StringId DataSourceName;
             public StringId TextString;
             public StringId TextColor;
@@ -51,22 +30,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C)]
         public class BitmapWidget : TagStructure
 		{
-            public CachedTagInstance Parent;
+            public CachedTag Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
-            public CachedTagInstance Bitmap;
-            public CachedTagInstance Unknown2;
+            public GuiDefinition GuiRenderBlock;
+            public CachedTag Bitmap;
+            public CachedTag Unknown2;
             public BlendMethodValue BlendMethod;
             public short Unknown3;
             public short SpriteIndex;

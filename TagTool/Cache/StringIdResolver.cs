@@ -8,6 +8,10 @@ namespace TagTool.Cache
     /// </summary>
     public abstract class StringIdResolver
     {
+        public int LengthBits;
+        public int SetBits;
+        public int IndexBits;
+
         /// <summary>
         /// Gets the index of the first string which belongs to a set.
         /// </summary>
@@ -23,6 +27,24 @@ namespace TagTool.Cache
         /// </summary>
         public abstract int[] GetSetOffsets();
 
+        public int GetSet(StringId stringId)
+        {
+            var setMask = (0x1 << SetBits) - 1;
+            return (int)((stringId.Value >> IndexBits) & setMask);
+        }
+
+        public int GetIndex(StringId stringId)
+        {
+            var indexMask = (0x1 << IndexBits) - 1;
+            return (int)((stringId.Value >> 0) & indexMask);
+        }
+
+        public int GetLength(StringId stringId)
+        {
+            var lengthMask = (0x1 << LengthBits) - 1;
+            return (int)((stringId.Value >> (IndexBits + SetBits)) & lengthMask);
+        }
+
         /// <summary>
         /// Converts a stringID value to a string list index.
         /// </summary>
@@ -34,8 +56,8 @@ namespace TagTool.Cache
             var setMax = GetMaxSetStringIndex();
             var setOffsets = GetSetOffsets();
 
-            var set = stringId.Set;
-            var index = stringId.Index;
+            var set = GetSet(stringId);
+            var index = GetIndex(stringId);
 
             if (set == 0 && (index < setMin || index > setMax))
             {
@@ -70,7 +92,7 @@ namespace TagTool.Cache
 
             // If the value is outside of a set, just return it
             if (index < setMin || index > setMax)
-                return new StringId(0, index, version);
+                return new StringId(0, index);
 
             // Find the set which the index is closest to
             var set = 0;
@@ -90,7 +112,7 @@ namespace TagTool.Cache
             var idIndex = index - setOffsets[set];
             if (set == 0)
                 idIndex += setMin;
-            return new StringId(set, idIndex, version);
+            return new StringId(set, idIndex);
         }
     }
 }

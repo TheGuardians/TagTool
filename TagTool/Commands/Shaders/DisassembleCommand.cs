@@ -9,11 +9,11 @@ namespace TagTool.Commands.Shaders
 {
     public class DisassembleCommand<T> : Command
     {
-        private GameCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private T Definition { get; }
 
-        public DisassembleCommand(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public DisassembleCommand(GameCache cache, CachedTag tag, T definition) :
             base(true,
 
                 "Disassemble",
@@ -23,7 +23,7 @@ namespace TagTool.Commands.Shaders
 
                 "<index> - index into the VertexShaders tagblock.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }

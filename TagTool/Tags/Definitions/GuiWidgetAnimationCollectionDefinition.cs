@@ -6,49 +6,49 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x280, MinVersion = CacheVersion.Halo3ODST)]
     public class GuiWidgetAnimationCollectionDefinition : TagStructure
 	{
-        public CachedTagInstance Unknown;
-        public CachedTagInstance Unknown2;
-        public CachedTagInstance Unknown3;
-        public CachedTagInstance Unknown4;
-        public CachedTagInstance Unknown5;
-        public CachedTagInstance Unknown6;
-        public CachedTagInstance Unknown7;
-        public CachedTagInstance Unknown8;
-        public CachedTagInstance Unknown9;
-        public CachedTagInstance Unknown10;
-        public CachedTagInstance Unknown11;
-        public CachedTagInstance Unknown12;
-        public CachedTagInstance Unknown13;
-        public CachedTagInstance Unknown14;
-        public CachedTagInstance Unknown15;
-        public CachedTagInstance Unknown16;
-        public CachedTagInstance Unknown17;
-        public CachedTagInstance Unknown18;
-        public CachedTagInstance Unknown19;
-        public CachedTagInstance Unknown20;
-        public CachedTagInstance Unknown21;
-        public CachedTagInstance Unknown22;
-        public CachedTagInstance Unknown23;
-        public CachedTagInstance Unknown24;
-        public CachedTagInstance Unknown25;
-        public CachedTagInstance Unknown26;
-        public CachedTagInstance Unknown27;
-        public CachedTagInstance Unknown28;
-        public CachedTagInstance Unknown29;
-        public CachedTagInstance Unknown30;
-        public CachedTagInstance Unknown31;
-        public CachedTagInstance Unknown32;
-        public CachedTagInstance Unknown33;
-        public CachedTagInstance Unknown34;
-        public CachedTagInstance Unknown35;
-        public CachedTagInstance Unknown36;
+        public CachedTag Unknown;
+        public CachedTag Unknown2;
+        public CachedTag Unknown3;
+        public CachedTag Unknown4;
+        public CachedTag Unknown5;
+        public CachedTag Unknown6;
+        public CachedTag Unknown7;
+        public CachedTag Unknown8;
+        public CachedTag Unknown9;
+        public CachedTag Unknown10;
+        public CachedTag Unknown11;
+        public CachedTag Unknown12;
+        public CachedTag Unknown13;
+        public CachedTag Unknown14;
+        public CachedTag Unknown15;
+        public CachedTag Unknown16;
+        public CachedTag Unknown17;
+        public CachedTag Unknown18;
+        public CachedTag Unknown19;
+        public CachedTag Unknown20;
+        public CachedTag Unknown21;
+        public CachedTag Unknown22;
+        public CachedTag Unknown23;
+        public CachedTag Unknown24;
+        public CachedTag Unknown25;
+        public CachedTag Unknown26;
+        public CachedTag Unknown27;
+        public CachedTag Unknown28;
+        public CachedTag Unknown29;
+        public CachedTag Unknown30;
+        public CachedTag Unknown31;
+        public CachedTag Unknown32;
+        public CachedTag Unknown33;
+        public CachedTag Unknown34;
+        public CachedTag Unknown35;
+        public CachedTag Unknown36;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown37;
+        public CachedTag Unknown37;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown38;
+        public CachedTag Unknown38;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown39;
+        public CachedTag Unknown39;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown40;
+        public CachedTag Unknown40;
     }
 }

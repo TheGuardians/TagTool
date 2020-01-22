@@ -23,6 +23,6 @@ namespace TagTool.Ai
         public Angle ZigZagAngle;
         public float ZigZagPeriod;
         public float RetreatGrenadeChance;
-        public CachedTagInstance BackupWeapon;
+        public CachedTag BackupWeapon;
     }
 }

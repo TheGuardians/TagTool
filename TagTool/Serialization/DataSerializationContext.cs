@@ -33,10 +33,6 @@ namespace TagTool.Serialization
         public uint AddressToOffset(uint currentOffset, uint address)
         {
             var resourceAddress = new CacheAddress(address);
-
-            if (resourceAddress.Type != AddressType)
-                throw new InvalidOperationException("Cannot dereference a resource address of type " + resourceAddress.Type);
-
             return (uint)resourceAddress.Offset;
         }
 
@@ -63,12 +59,12 @@ namespace TagTool.Serialization
             Writer.Write(data);
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public CachedTag GetTagByIndex(int index)
         {
             return null;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }
@@ -81,12 +77,12 @@ namespace TagTool.Serialization
         private class GenericDataBlock : IDataBlock
         {
             public MemoryStream Stream { get; private set; }
-            public BinaryWriter Writer { get; private set; }
+            public EndianWriter Writer { get; private set; }
 
             public GenericDataBlock()
             {
                 Stream = new MemoryStream();
-                Writer = new BinaryWriter(Stream);
+                Writer = new EndianWriter(Stream);
             }
 
             public void WritePointer(uint targetOffset, Type type)
@@ -113,6 +109,10 @@ namespace TagTool.Serialization
                 Writer = null;
 
                 return dataOffset;
+            }
+
+            public void AddTagReference(CachedTag referencedTag, bool isShort)
+            {
             }
         }
     }

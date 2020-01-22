@@ -1,6 +1,6 @@
 using System.IO;
 using System.Linq;
-
+using System.Text;
 using static System.BitConverter;
 using static TagTool.IO.EndianFormat;
 namespace TagTool.IO
@@ -11,6 +11,12 @@ namespace TagTool.IO
         
         public EndianWriter(Stream stream, EndianFormat format = EndianFormat.LittleEndian)
             : base(stream)
+        {
+            Format = format;
+        }
+
+        public EndianWriter(Stream stream, bool leaveOpen, EndianFormat format = EndianFormat.LittleEndian)
+            : base(stream, Encoding.ASCII, leaveOpen)
         {
             Format = format;
         }

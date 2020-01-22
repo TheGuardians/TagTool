@@ -9,12 +9,12 @@ namespace TagTool.Commands.Editing
     class RemoveBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private TagStructureInfo Structure { get; set; }
         private object Owner { get; set; }
 
-        public RemoveBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public RemoveBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(true,
 
                   "RemoveBlockElements",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Editing
                   $"Removes block element(s) from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Structure = structure;
             Owner = owner;
@@ -49,7 +49,7 @@ namespace TagTool.Commands.Editing
                 fieldName = fieldName.Substring(lastIndex + 1, (fieldName.Length - lastIndex) - 1);
                 fieldNameLow = fieldName.ToLower();
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, Owner);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, Owner);
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
@@ -103,6 +103,12 @@ namespace TagTool.Commands.Editing
 
             var index = blockValue.Count - 1;
             var count = 1;
+
+            if (index < 0)
+            {
+                Console.WriteLine("TagBlock is already null!");
+                return true;
+            }
 
             var genericIndex = false;
             var genericCount = false;

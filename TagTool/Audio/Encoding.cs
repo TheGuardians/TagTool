@@ -31,4 +31,11 @@ namespace TagTool.Audio
         Surround,
         _51Surround
     }
+
+    public enum EncodingH2 : sbyte
+    {
+        Mono,
+        Stereo,
+        Codec
+    }
 }

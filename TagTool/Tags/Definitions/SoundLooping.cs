@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         public float Unknown1;
         public float Unknown2;
         public float Unknown3;
-        public CachedTagInstance Unused;
+        public CachedTag Unused;
         public SoundClassValue SoundClass;
         public short Unknown4;
         public List<Track> Tracks;
@@ -179,15 +179,15 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short Unknown3;
 
-            public CachedTagInstance In;
-            public CachedTagInstance Loop;
-            public CachedTagInstance Out;
-            public CachedTagInstance AlternateLoop;
-            public CachedTagInstance AlternateOut;
+            public CachedTag In;
+            public CachedTag Loop;
+            public CachedTag Out;
+            public CachedTag AlternateLoop;
+            public CachedTag AlternateOut;
             public OutputEffectValue OutputEffect;
             public short Unknown4;
-            public CachedTagInstance AlternateTransitionIn;
-            public CachedTagInstance AlternateTransitionOut;
+            public CachedTag AlternateTransitionIn;
+            public CachedTag AlternateTransitionOut;
 
             public float AlternateCrossfadeDuration;
 
@@ -212,7 +212,7 @@ namespace TagTool.Tags.Definitions
         public class DetailSound : TagStructure
 		{
             public StringId Name;
-            public CachedTagInstance Sound;
+            public CachedTag Sound;
             public Bounds<float> RandomPeriodBounds;
             public float Unknown;
             public uint Flags;

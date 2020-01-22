@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -42,5 +44,41 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ Alpha: {Alpha}, Red: {Red}, Green: {Green}, Blue: {Blue} }}";
+
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 4)
+            {
+                error = $"{args.Count} arguments supplied; should be 4";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float a))
+            {
+                error = $"Unable to parse \"{args[0]}\" (a) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float r))
+            {
+                error = $"Unable to parse \"{args[1]}\" (r) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[2], out float g))
+            {
+                error = $"Unable to parse \"{args[2]}\" (g) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[3], out float b))
+            {
+                error = $"Unable to parse \"{args[3]}\" (b) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealArgbColor(a, r, g, b);
+                error = null;
+                return true;
+            }
+        }
     }
 }

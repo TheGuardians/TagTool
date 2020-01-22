@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Damage;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -13,16 +14,16 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1B8, MinVersion = CacheVersion.HaloOnline498295)]
     public partial class Model : TagStructure
 	{
-        public CachedTagInstance RenderModel;
+        public CachedTag RenderModel;
 
-        public CachedTagInstance CollisionModel;
+        public CachedTag CollisionModel;
 
-        public CachedTagInstance Animation;
+        public CachedTag Animation;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance Physics;
+        public CachedTag Physics;
 
-        public CachedTagInstance PhysicsModel;
+        public CachedTag PhysicsModel;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public float DisappearDistance;
@@ -30,7 +31,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public float BeginFadeDistance;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1;
 
         public float ReduceToL1SuperLow;
@@ -39,17 +40,17 @@ namespace TagTool.Tags.Definitions
         public float ReduceToL4High;
         public float ReduceToL5SuperHigh;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused2;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public ShadowFadeDistanceValue ShadowFadeDistance;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused3;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance LodModel;
+        public CachedTag LodModel;
 
         public List<Variant> Variants;
 
@@ -76,18 +77,18 @@ namespace TagTool.Tags.Definitions
 
         public List<Node> Nodes;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+        [TagField(Flags = Padding, Length = 4)]
         public byte[] Unused4;
 
         public List<ModelObjectDatum> ModelObjectData;
 
-        public CachedTagInstance PrimaryDialogue;
+        public CachedTag PrimaryDialogue;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance ActiveCamoShader;
+        public CachedTag ActiveCamoShader;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance SecondaryDialogue;
+        public CachedTag SecondaryDialogue;
 
         public FlagsValue Flags;
 
@@ -107,7 +108,7 @@ namespace TagTool.Tags.Definitions
         public List<ScenarioLoadParametersBlock> ScenarioLoadParameters;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance HologramShader;
+        public CachedTag HologramShader;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public StringId HologramControlFunction;
@@ -131,16 +132,16 @@ namespace TagTool.Tags.Definitions
         public List<UnknownBlock4> Unknown8;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance ShieldImpactThirdPerson;
+        public CachedTag ShieldImpactThirdPerson;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance ShieldImpactFirstPerson;
+        public CachedTag ShieldImpactFirstPerson;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance OvershieldThirdPerson;
+        public CachedTag OvershieldThirdPerson;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance OvershieldFirstPerson;
+        public CachedTag OvershieldFirstPerson;
 
         public enum ShadowFadeDistanceValue : short
         {
@@ -160,7 +161,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance VariantDialogue;
+            public CachedTag VariantDialogue;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public StringId DefaultDialogEffect;
@@ -192,7 +193,7 @@ namespace TagTool.Tags.Definitions
             public StringId DialogueSoundEffect;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance Dialogue;
+            public CachedTag Dialogue;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public uint Unknown6;
@@ -214,7 +215,7 @@ namespace TagTool.Tags.Definitions
 
                 public short ParentVariant;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+                [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
                 public byte[] Unused = new byte[2];
 
                 public List<Permutation> Permutations;
@@ -230,16 +231,13 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte RenderModelPermutationIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-                    public byte[] Unused1 = new byte[2];
-
                     public FlagsValue Flags;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.HaloOnline106708)]
-                    public byte[] Unused2 = new byte[2];
+                    public byte Unknown1;
+                    public byte Unknown2;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
-                    public byte[] Unused3 = new byte[3];
+                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+                    public byte Unknown3;
 
                     public float Probability;
                     public List<State> States;
@@ -262,7 +260,7 @@ namespace TagTool.Tags.Definitions
                         public byte ModelPermutationIndex;
                         public PropertyFlagsValue PropertyFlags;
                         public StateValue State2;
-                        public CachedTagInstance LoopingEffect;
+                        public CachedTag LoopingEffect;
                         public StringId LoopingEffectMarkerName;
                         public float InitialProbability;
 
@@ -318,7 +316,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public StringId ChildVariant;
 
-                public CachedTagInstance ChildObject;
+                public CachedTag ChildObject;
             }
         }
 
@@ -372,7 +370,7 @@ namespace TagTool.Tags.Definitions
             public StringId MaterialName;
             public short GlobalMaterialIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public enum MaterialTypeValue : short
@@ -429,23 +427,23 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public short IndirectDamageSection;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 6)]
+            [TagField(Flags = Padding, Length = 6)]
             public byte[] Unused1 = new byte[6];
 
             public DamageReportingType CollisionDamageReportingType;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
             public byte[] Unused2 = new byte[1];
 
             public DamageReportingType ResponseDamageReportingType;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
             public byte[] Unused3 = new byte[1];
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
-            public byte[] Unused4 = new byte[2];
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public short Unknown4;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 20)]
+            [TagField(Flags = Padding, Length = 20)]
             public byte[] Unused5 = new byte[20];
 
             public float MaxVitality;
@@ -454,14 +452,14 @@ namespace TagTool.Tags.Definitions
             public float RechargeTime;
             public float RechargeFraction;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 64)]
+            [TagField(Flags = Padding, Length = 64)]
             public byte[] Unused6 = new byte[64];
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance ShieldDamagedFirstPersonShader;
+            public CachedTag ShieldDamagedFirstPersonShader;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance ShieldDamagedShader;
+            public CachedTag ShieldDamagedShader;
 
             public float MaxShieldVitality;
             public StringId GlobalShieldMaterialName;
@@ -469,9 +467,9 @@ namespace TagTool.Tags.Definitions
             public float StunTime2;
             public float ShieldRechargeTime;
             public float ShieldDamagedThreshold;
-            public CachedTagInstance ShieldDamagedEffect;
-            public CachedTagInstance ShieldDepletedEffect;
-            public CachedTagInstance ShieldRechargingEffect;
+            public CachedTag ShieldDamagedEffect;
+            public CachedTag ShieldDepletedEffect;
+            public CachedTag ShieldRechargingEffect;
             public List<DamageSection> DamageSections;
             public List<Node> Nodes;
             public short GlobalShieldMaterialIndex;
@@ -482,10 +480,10 @@ namespace TagTool.Tags.Definitions
             public List<DamageConstraint> DamageConstraints;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance OvershieldFirstPersonShader;
+            public CachedTag OvershieldFirstPersonShader;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance OvershieldShader;
+            public CachedTag OvershieldShader;
 
             [Flags]
             public enum FlagsValue : int
@@ -519,7 +517,7 @@ namespace TagTool.Tags.Definitions
                 public float VitalityPercentage;
                 public List<InstantResponse> InstantResponses;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 20)]
+                [TagField(Flags = Padding, Length = 20)]
                 public byte[] Unused1 = new byte[20];
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -534,7 +532,7 @@ namespace TagTool.Tags.Definitions
                 public StringId ResurrectionRegionName;
                 public short RessurectionRegionRuntimeIndex;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused2 = new byte[2];
 
                 [Flags]
@@ -567,12 +565,12 @@ namespace TagTool.Tags.Definitions
 
                     public FlagsValue Flags;
                     public float DamageThreshold;
-                    public CachedTagInstance PrimaryTransitionEffect;
+                    public CachedTag PrimaryTransitionEffect;
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                    public CachedTagInstance SecondaryTransitionEffect;
+                    public CachedTag SecondaryTransitionEffect;
 
-                    public CachedTagInstance TransitionDamageEffect;
+                    public CachedTag TransitionDamageEffect;
                     public StringId Region;
                     public NewStateValue NewState;
                     public short RuntimeRegionIndex;
@@ -586,8 +584,8 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public short SecondaryRuntimeRegionIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
-                    public byte[] Unused = new byte[2];
+                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                    public short Unknown; // ???
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public UnknownSpecialDamageValue UnknownSpecialDamage;
@@ -598,7 +596,7 @@ namespace TagTool.Tags.Definitions
                     public StringId EffectMarkerName;
                     public StringId DamageEffectMarkerName;
                     public float ResponseDelay;
-                    public CachedTagInstance DelayEffect;
+                    public CachedTag DelayEffect;
                     public StringId DelayEffectMarkerName;
 
                     [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -745,7 +743,7 @@ namespace TagTool.Tags.Definitions
                     public StringId DamageRegionName;
                     public short RuntimeDamageRegionIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public short Unused;
 
                     public float DirectDamageScaleMinor;
@@ -1006,10 +1004,10 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x44)]
         public class ScenarioLoadParametersBlock : TagStructure
 		{
-            public CachedTagInstance Scenario;
+            public CachedTag Scenario;
             public byte[] Data;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 32)]
+            [TagField(Flags = Padding, Length = 32)]
             public byte[] Unused;
         }
 

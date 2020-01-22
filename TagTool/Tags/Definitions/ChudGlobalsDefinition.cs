@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -12,23 +13,23 @@ namespace TagTool.Tags.Definitions
     {
         public List<HudGlobal> HudGlobals;
         public List<HudShader> HudShaders;
-        public List<UnusedCortanaEffectBlock> UnusedCortanaEffect;
-        public List<UnknownBlock2> Unknown2;
+        public List<UnknownBlock> UnknownBlock40;
+        public List<CortanaSuckBlock> CortanaSuck;
         public List<PlayerTrainingDatum> PlayerTrainingData;
-        public CachedTagInstance StartMenuEmblems;
-        public CachedTagInstance CampaignMedals;
-        public CachedTagInstance CampaignMedalHudAnimation;
+        public CachedTag StartMenuEmblems;
+        public CachedTag CampaignMedals;
+        public CachedTag CampaignMedalHudAnimation;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public short Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public short Unknown4;
+        public ChudDefinition.HudWidget.PlacementDatum.AnchorValue CampaignMedalChudAnchor;
+        [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 2, Flags = Padding)]
+        public byte[] PostAnchorPadding;
         public float CampaignMedalScale;
         public float CampaignMedalSpacing;
         public float CampaignMedalOffsetX;
         public float CampaignMedalOffsetY;
         public float MetagameScoreboardTopY;
         public float MetagameScoreboardSpacing;
-        public CachedTagInstance UnitDamageGrid;
+        public CachedTag UnitDamageGrid;
         public float MicroTextureTileAmount;
         public float MediumSensorBlipScale;
         public float SmallSensorBlipScale;
@@ -36,12 +37,12 @@ namespace TagTool.Tags.Definitions
         public float SensorBlipGlowAmount;
         public float SensorBlipGlowRadius;
         public float SensorBlipGlowOpacity;
-        public CachedTagInstance MotionSensorBlip;
-        public CachedTagInstance BirthdayPartyEffect;
-        public CachedTagInstance CampaignFloodMask;
-        public CachedTagInstance CampaignFloodMaskTile;
+        public CachedTag MotionSensorBlip;
+        public CachedTag BirthdayPartyEffect;
+        public CachedTag CampaignFloodMask;
+        public CachedTag CampaignFloodMaskTile;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown5;
+        public float MotionSensorBlipHeightModifier;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float ShieldMinorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -55,13 +56,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float HealthCriticalThreshold;
 
-        //POSSIBLY SHADER RELATED
+        //suspect that these are realArgbcolors
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown12;
+        public float Unknown12 = 1.0f;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown13;
+        public float Unknown13 = 1.0f;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown13_2;
+        public float Unknown13_2 = 1.0f;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown14;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -91,55 +92,70 @@ namespace TagTool.Tags.Definitions
 
         //DAMAGE MASK FUNCTIONS AND VARIABLES
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction DamageMaskFunction1;
+        public TagFunction DamageMaskFunction1 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x08, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6F, 0x12, 0x83, 0x3A,
+                0x6F, 0x12, 0x03, 0x3B, 0x28, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                0x0A, 0x00, 0x00, 0xCD, 0xFF, 0xFF, 0x7F, 0x7F, 0x77, 0xBE, 0xFF, 0xBF,
+                0xD9, 0xCE, 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x4B, 0xDD, 0x97, 0x40
+            }
+        };
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown28;
+        public RealRgbColor DamageMaskColorOverlay;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown29;
+        public float DamageMaskColorOverlayAlpha;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown30;
+        public float DamageMaskOpacityRed;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown31;
+        public float DamageMaskOpacityGreen;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown32;
+        public float DamageMaskOpacityBlue;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown33;
+        public float DamageMaskOpacityAlpha;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown34;
+        public RealRgbColor DamageMaskColorFloor;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown35;
+        public float DamageMaskColorFloorAlpha;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown36;
+        public RealRgbColor DamageMaskBitmapTint;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown37;
+        public float DamageMaskBitmapTintAlpha;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown38;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown39;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown40;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown41;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown42;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown43;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction DamageMaskFunction2;
+        public TagFunction DamageMaskFunction2 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x08, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                0x0A, 0x00, 0x00, 0xCD, 0xFF, 0xFF, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0xC0,
+                0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x4B, 0xDD, 0x97, 0x40
+            }
+        };
 
         //ODST VALUES FOR PDA/BEACON
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown50;
+        public float PDABeaconTextOuterFadeAngle;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown51;
+        public float PDABeaconTextInnerFadeAngle;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown52;
+        public float PDABeaconRadiusmin;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown53;
+        public float PDABeaconRadiusmax;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown54;
+        public float PDAUserBeaconRadius;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown55;
+        public float PDAUserBeaconAngle;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public TagFunction PDABeaconFunction1;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -147,41 +163,141 @@ namespace TagTool.Tags.Definitions
 
         //HO VALUES
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float SprintFOVMultiplier;
+        public float SprintFOVMultiplier = 1.0f;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float SprintFOVTransitionInTime;
+        public float SprintFOVTransitionInTime = 0.5f;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float SprintFOXTransitionOutTime;
+        public float SprintFOXTransitionOutTime = 1.0f;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance ParallaxData = null;
+        public CachedTag ParallaxData = null;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown49;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown60;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown61;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown62;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown63;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown64;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown65;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown66;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown67;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown68;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown69;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown70;
 
-        //NOT SURE WHAT THIS IS
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown60 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown61 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown62 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown63 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown64 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float Unknown65 = 1.33f;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown66 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown67 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x03, 0x34, 0x00, 0x00, 0x9A, 0x99, 0x99, 0xBD, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00, 0x00, 0xCD, 0xCC, 0xCC, 0xBD,
+                0xCD, 0xCC, 0x8C, 0x3F
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown68 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x03, 0x34, 0x00, 0x00, 0xBC, 0x74, 0x93, 0xBB, 0xBC, 0x74, 0x93, 0x3B,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x3F
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown69 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown70 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x03, 0x34, 0x00, 0x00, 0x6F, 0x12, 0x83, 0xBB, 0x6F, 0x12, 0x83, 0x3B,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00, 0x3F, 0xCD, 0xCC, 0xCC, 0xBD,
+                0xCD, 0xCC, 0x8C, 0x3F
+            }
+        };
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown71 = null;  //chdt tagreference which activates in firefight
+        public CachedTag SurvivalHUDUnknown = null;  //chdt tagreference which activates in firefight
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown72 = 3.0f;
@@ -196,7 +312,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x2B0, MinVersion = CacheVersion.HaloOnline106708)]
         public class HudGlobal : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public BipedValue Biped;
 
             public ArgbColor HUDDisabled;
@@ -252,25 +368,25 @@ namespace TagTool.Tags.Definitions
 
             public List<HudAttribute> HudAttributes;
             public List<HudSound> HudSounds;
-            public CachedTagInstance Unknown;
-            public CachedTagInstance FragGrenadeSwapSound;
-            public CachedTagInstance PlasmaGrenadeSwapSound;
-            public CachedTagInstance SpikeGrenadeSwapSound;
-            public CachedTagInstance FirebombGrenadeSwapSound;
-            public CachedTagInstance DamageMicrotexture;
-            public CachedTagInstance DamageNoise;
-            public CachedTagInstance DirectionalArrow;
+            public CachedTag Unknown;
+            public CachedTag FragGrenadeSwapSound;
+            public CachedTag PlasmaGrenadeSwapSound;
+            public CachedTag SpikeGrenadeSwapSound;
+            public CachedTag FirebombGrenadeSwapSound;
+            public CachedTag DamageMicrotexture;
+            public CachedTag DamageNoise;
+            public CachedTag DirectionalArrow;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance GrenadeWaypoint = null;
+            public CachedTag GrenadeWaypoint = null;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance PinkGradient = null;
+            public CachedTag PinkGradient = null;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown7;
+            public float DirectionalArrowDisplayTime;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown8;
+            public float DirectionalCutoffAngle;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown9;
+            public float DirectionalArrowScale;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown10;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -278,40 +394,38 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown12;
 
-            public CachedTagInstance ObjectiveWaypoints;
+            public CachedTag ObjectiveWaypoints;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance PlayerWaypoints = null;
-            public CachedTagInstance ScoreboardHud;
-            public CachedTagInstance MetagameScoreboardHud;
+            public CachedTag PlayerWaypoints = null;
+            public CachedTag ScoreboardHud;
+            public CachedTag MetagameScoreboardHud;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance SurvivalHud = null;
+            public CachedTag SurvivalHud = null;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance MetagameScoreboardHud2 = null;
-            public CachedTagInstance TheaterHud;
-            public CachedTagInstance ForgeHud;
-            public CachedTagInstance HudStrings;
-            public CachedTagInstance Medals;
+            public CachedTag MetagameScoreboardHud2 = null;
+            public CachedTag TheaterHud;
+            public CachedTag ForgeHud;
+            public CachedTag HudStrings;
+            public CachedTag Medals;
             public List<MultiplayerMedal> MultiplayerMedals;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance MedalHudAnimation2 = null;
-            public CachedTagInstance MedalHudAnimation;
-            public CachedTagInstance CortanaChannel;
-            public CachedTagInstance Unknown20;
-            public CachedTagInstance Unknown21;
-            public CachedTagInstance JammerResponse;
-            public CachedTagInstance JammerShieldHit;
+            public CachedTag MedalHudAnimation2 = null;
+            public CachedTag MedalHudAnimation;
+            public CachedTag CortanaChannel;
+            public CachedTag Unknown20;
+            public CachedTag Unknown21;
+            public CachedTag JammerResponse;
+            public CachedTag JammerShieldHit;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown24;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown25;
+            public RealPoint2d GrenadeSchematicsOffset;
             public float GrenadeScematicsSpacing;
             public float EquipmentScematicOffsetY;
             public float DualEquipmentScematicOffsetY;
-            public float Unknown26;
-            public float Unknown27;
+            public float UnknownScematicOffsetY; //equipment related
+            public float UnknownScematicOffsetY_2; //equipment related
             public float ScoreboardLeaderOffsetY;
-            public float Unknown28;
-            public float WaypointScale;
+            public float WaypointScaleMin;
+            public float WaypointScaleMax;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown29;
 
@@ -408,28 +522,31 @@ namespace TagTool.Tags.Definitions
                 public float VerticalScale;
                 public float HorizontalStretch;
                 public float VerticalStretch;
+
+                //these four tagrefs have no function in HO
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance Unknown = null;
+                public CachedTag FirstPersonUnknownBitmap = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance Unknown19 = null;
+                public CachedTag ThirdPersonUnknownBitmap = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance FirstPersonDamageBorder = null;
+                public CachedTag FirstPersonDamageBorder = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public CachedTagInstance ThirdPersonDamageBorder = null;
+                public CachedTag ThirdPersonDamageBorder = null;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float PickupDialogScale;
+                public float StateScale_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public RealPoint2d PickupDialogOffset;
+                public RealPoint2d StateLeftRightOffset_HO;
 
                 //these only exist in HO
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown23;
+                public float ScaleUnknown1; //related to state scale (alternate version?)
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown24;
+                public float SpacingUnknown1;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown25;
+                public float ScaleUnknown2;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown26;
+                public float SpacingUnknown2;
 
                 //From here, fields have been moved around a bit.
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -440,47 +557,44 @@ namespace TagTool.Tags.Definitions
                 public float StateLeftRightOffsetY_H3;
 
                 public float StateCenterOffsetY;
-                public float Unknown28;
-                public float Unknown29;
-                public float Unknown30;
+                public float StateCenterOffsetY_2;
+                public float MedalScale;
+                public float MedalSpacing;
+
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public float StateScale;
 
-                //HO ONLY
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public RealPoint2d MedalsOffset;
+                public RealPoint2d SurvivalMedalsOffset; //referenced by chud anchors -- must be neither campaign nor multiplayer
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown33;
+                public float Unknown32;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown34;
+                public RealPoint2d MultiplayerMedalsOffset; //referenced by chud anchors
 
                 public float NotificationScale;
                 public float NotificationLineSpacing;
-
-                public float Unknown35;
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public float PromptOffsetY;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public float PromptOffsetX;
+                public int NotificationLineCountModifier; //controls max number of notification lines onscreen
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float NotificationOffsetX_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float NotificationOffsetY_HO;
+
+                //This group of 5 floats is all part of the same system
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown36;
+                public float ScaleUnknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown37;
+                public float SpacingUnknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown38;
+                public float NullUnknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown39;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown40;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown41;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown42;
+                public RealPoint2d UnknownOffset3; //referenced by chud anchors
+
+                //this is present in HO, it is still used in chud anchors
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float PromptOffsetY;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float PromptOffsetX;
 
                 [Flags]
                 public enum ResolutionFlagValue : int
@@ -488,11 +602,11 @@ namespace TagTool.Tags.Definitions
                     None,
                     WideFull = 1 << 0,
                     WideHalf = 1 << 1,
-                    Bit2 = 1 << 2,
+                    NativeFull = 1 << 2,
                     StandardFull = 1 << 3,
                     WideQuarter = 1 << 4,
                     StandardHalf = 1 << 5,
-                    Bit6 = 1 << 6,
+                    NativeQuarter = 1 << 6,
                     StandardQuarter = 1 << 7,
                     Bit8 = 1 << 8,
                     Bit9 = 1 << 9,
@@ -527,7 +641,7 @@ namespace TagTool.Tags.Definitions
             public class HudSound : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public CachedTagInstance SpartanSound;
+                public CachedTag SpartanSound;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public LatchedToValues_H3 LatchedTo_H3;
@@ -542,7 +656,7 @@ namespace TagTool.Tags.Definitions
                 public List<BipedData> Bipeds;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public CachedTagInstance EliteSound;
+                public CachedTag EliteSound;
 
                 [Flags]
                 public enum LatchedToValues : int
@@ -629,10 +743,10 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public BipedTypeValue_HO BipedType_HO;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 3, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                    [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                     public byte[] Unused = new byte[3];
 
-                    public CachedTagInstance Sound;
+                    public CachedTag Sound;
 
                     public enum BipedTypeValue_ODST : sbyte
                     {
@@ -658,7 +772,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class MultiplayerMedal : TagStructure
             {
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Medal;
             }
         }
@@ -666,12 +780,12 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x20)]
         public class HudShader : TagStructure
         {
-            public CachedTagInstance VertexShader;
-            public CachedTagInstance PixelShader;
+            public CachedTag VertexShader;
+            public CachedTag PixelShader;
         }
 
         [TagStructure(Size = 0x40)]
-        public class UnusedCortanaEffectBlock : TagStructure
+        public class UnknownBlock : TagStructure
         {
             public uint Unknown;
             public uint Unknown2;
@@ -692,72 +806,74 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class UnknownBlock2 : TagStructure
+        public class CortanaSuckBlock : TagStructure
         {
             public uint Unknown;
-            public List<UnknownBlock> Unknown2;
+            public List<LevelsBlock> Levels;
 
             [TagStructure(Size = 0xE4)]
-            public class UnknownBlock : TagStructure
+            public class LevelsBlock : TagStructure
             {
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public uint Unknown11;
-                public uint Unknown12;
-                public uint Unknown13;
-                public uint Unknown14;
-                public uint Unknown15;
-                public uint Unknown16;
-                public uint Unknown17;
-                public uint Unknown18;
-                public uint Unknown19;
-                public uint Unknown20;
-                public uint Unknown21;
-                public uint Unknown22;
-                public uint Unknown23;
-                public uint Unknown24;
-                public uint Unknown25;
-                public CachedTagInstance Sound;
-                public uint Unknown26;
-                public uint Unknown27;
-                public uint Unknown28;
-                public uint Unknown29;
-                public uint Unknown30;
-                public uint Unknown31;
-                public uint Unknown32;
-                public uint Unknown33;
-                public uint Unknown34;
-                public uint Unknown35;
-                public uint Unknown36;
-                public uint Unknown37;
-                public uint Unknown38;
-                public uint Unknown39;
-                public uint Unknown40;
-                public uint Unknown41;
-                public uint Unknown42;
-                public uint Unknown43;
-                public uint Unknown44;
-                public uint Unknown45;
-                public uint Unknown46;
-                public uint Unknown47;
-                public uint Unknown48;
-                public uint Unknown49;
-                public CachedTagInstance Sound2;
+                public float Scale;
+                //Section A
+                public float NoiseaVelocitymin;
+                public float NoiseaVelocitymax;
+                public float NoiseaScalexmin;
+                public float NoiseaScalexmax;
+                public float NoiseaScaleymin;
+                public float NoiseaScaleymax;
+                public float NoisebVelocitymin;
+                public float NoisebVelocitymax;
+                public float NoisebScalexmin;
+                public float NoisebScalexmax;
+                public float NoisebScaleymin;
+                public float NoisebScaleymax;
+                public float NoisePixelThresholdmin;
+                public float NoisePixelThresholdmax;
+                public float NoisePixelPersistencemin;
+                public float NoisePixelPersistencemax;
+                public float NoisePixelVelocitymin;
+                public float NoisePixelVelocitymax;
+                public float NoisePixelTurbulencemin;
+                public float NoisePixelTurbulencemax;
+                public float NoiseTranslationScalexmin;
+                public float NoiseTranslationScalexmax;
+                public float NoiseTranslationScaleymin;
+                public float NoiseTranslationScaleymax;
+                public CachedTag Message;
+                //Section B
+                public float NoiseaVelocitymin_B;
+                public float NoiseaVelocitymax_B;
+                public float NoiseaScalexmin_B;
+                public float NoiseaScalexmax_B;
+                public float NoiseaScaleymin_B;
+                public float NoiseaScaleymax_B;
+                public float NoisebVelocitymin_B;
+                public float NoisebVelocitymax_B;
+                public float NoisebScalexmin_B;
+                public float NoisebScalexmax_B;
+                public float NoisebScaleymin_B;
+                public float NoisebScaleymax_B;
+                public float NoisePixelThresholdmin_B;
+                public float NoisePixelThresholdmax_B;
+                public float NoisePixelPersistencemin_B;
+                public float NoisePixelPersistencemax_B;
+                public float NoisePixelVelocitymin_B;
+                public float NoisePixelVelocitymax_B;
+                public float NoisePixelTurbulencemin_B;
+                public float NoisePixelTurbulencemax_B;
+                public float NoiseTranslationScalexmin_B;
+                public float NoiseTranslationScalexmax_B;
+                public float NoiseTranslationScaleymin_B;
+                public float NoiseTranslationScaleymax_B;
+                public CachedTag Message_B;
             }
         }
 
         [TagStructure(Size = 0x14)]
         public class PlayerTrainingDatum : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId DisplayString;
             public short MaxDisplayTime;
             public short DisplayCount;

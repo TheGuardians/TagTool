@@ -2,11 +2,11 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194)]
     public class Particle : TagStructure
 	{
         public int Flags;
@@ -32,15 +32,12 @@ namespace TagTool.Tags.Definitions
         public TagMapping FrameIndex;
         public TagMapping AnimationRate;
         public TagMapping PaletteAnimation;
-        public CachedTagInstance ParticleModel;
+        public CachedTag ParticleModel;
         public uint RuntimeMUsedParticleStates;
         public uint RuntimeMConstantPerParticleProperties;
         public uint RuntimeMConstantOverTimeProperties;
         public List<RuntimeMSpritesBlock> RuntimeMSprites;
         public List<RuntimeMFramesBlock> RuntimeMFrames;
-
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [Flags]
         public enum FlagsValue : int
@@ -57,8 +54,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class Attachment : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
-            public CachedTagInstance Type;
+            [TagField(Flags = Label)]
+            public CachedTag Type;
             public TriggerValue Trigger;
             public byte SkipFraction;
             public TagMapping.VariableTypeValue PrimaryScale;

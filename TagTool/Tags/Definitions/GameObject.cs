@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,7 +10,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "object", Tag = "obje", Size = 0xF8, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x104, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x120, MinVersion = CacheVersion.HaloOnline106708)]
-    public abstract class GameObject : TagStructure
+    public class GameObject : TagStructure
 	{
         public GameObjectType ObjectType;
         public GameObjectFlags ObjectFlags;
@@ -23,28 +24,28 @@ namespace TagTool.Tags.Definitions
         public float DynamicLightSphereRadius;
         public RealPoint3d DynamicLightSphereOffset;
         public StringId DefaultModelVariant;
-        public CachedTagInstance Model;
+        public CachedTag Model;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline449175)]
-        public CachedTagInstance CrateObject;
+        public CachedTag CrateObject;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance ModifierShader;
+        public CachedTag ModifierShader;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance CollisionDamage;
+        public CachedTag CollisionDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<EarlyMoverProperty> EarlyMoverProperties;
 
-        public CachedTagInstance CreationEffect;
-        public CachedTagInstance MaterialEffects;
+        public CachedTag CreationEffect;
+        public CachedTag MaterialEffects;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance ArmorSounds;
+        public CachedTag ArmorSounds;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance MeleeImpact;
+        public CachedTag MeleeImpact;
 
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
@@ -66,13 +67,12 @@ namespace TagTool.Tags.Definitions
 
         public short HudTextMessageIndex;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
-        public byte[] Unused1;
+        public short Unknown;
 
         public List<Attachment> Attachments;
         public List<TagReferenceBlock> Widgets;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] OldFunctionsBlock = new byte[8];
 
         public List<ChangeColor> ChangeColors;
@@ -87,14 +87,14 @@ namespace TagTool.Tags.Definitions
         public List<MultiplayerObjectBlock> MultiplayerObject;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-        public CachedTagInstance SimulationInterpolation;
+        public CachedTag SimulationInterpolation;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<TagReferenceBlock> RevivingEquipment;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<ModelObjectDatum> ModelObjectData;
-        
+        public List<PathfindingSphere> PathfindingSpheres;
+
         public enum LightmapShadowModeValue : short
         {
             Default,
@@ -130,7 +130,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28)]
         public class EarlyMoverProperty : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public Bounds<float> XBounds;
             public Bounds<float> YBounds;
@@ -219,8 +219,8 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public AtlasFlagsValue AtlasFlags;
 
-            [TagField(Flags = TagFieldFlags.Label)]
-            public CachedTagInstance Type;
+            [TagField(Flags = Label)]
+            public CachedTag Type;
 
             public StringId Marker;
             public ChangeColorValue ChangeColor;
@@ -268,7 +268,7 @@ namespace TagTool.Tags.Definitions
                 public float Weight;
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId VariantName;
             }
 
@@ -276,7 +276,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
             public class Function : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
                 public byte[] Unused = new byte[4];
 
                 public ScaleFlagsValue ScaleFlags;
@@ -300,8 +300,8 @@ namespace TagTool.Tags.Definitions
 		{
             public short Type;
             public short ResourceIndex;
-            [TagField(Flags = TagFieldFlags.Short)]
-            public CachedTagInstance TagIndex;
+            [TagField(Flags = Short)]
+            public CachedTag TagIndex;
         }
 
         [TagStructure(Size = 0x1)]
@@ -333,7 +333,7 @@ namespace TagTool.Tags.Definitions
             public StringId BoundaryCenterMarker;
             public StringId SpawnedObjectMarkerName;
 
-            public CachedTagInstance SpawnedObject;
+            public CachedTag SpawnedObject;
 
             public StringId NyiBoundaryMaterial;
 
@@ -436,24 +436,27 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x20)]
             public class BoundaryShader : TagStructure
             {
-                public CachedTagInstance StandardShader;
-                public CachedTagInstance OpaqueShader;
+                public CachedTag StandardShader;
+                public CachedTag OpaqueShader;
             }
         }
 
+        [Flags]
+        public enum PathfindingSphereFlags : ushort
+        {
+            None = 0,
+            RemainsWhenOpen = 1 << 0,
+            VehicleOnly = 1 << 1,
+            WithSectors = 1 << 2
+        }
+
         [TagStructure(Size = 0x14)]
-        public class ModelObjectDatum : TagStructure
-		{
-            public TypeValue Type;
-            public short Unknown;
-            public RealPoint3d Offset;
+        public class PathfindingSphere : TagStructure
+        {
+            public short Node;
+            public PathfindingSphereFlags Flags;
+            public RealPoint3d Center;
             public float Radius;
-            public enum TypeValue : short
-            {
-                NotSet,
-                UserDefined,
-                AutoGenerated,
-            }
         }
     }
 
@@ -540,7 +543,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public GameObjectTypeHalo2 Halo2;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] Unused1;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
@@ -552,7 +555,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public GameObjectTypeHaloOnline HaloOnline;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused2;
     }
 

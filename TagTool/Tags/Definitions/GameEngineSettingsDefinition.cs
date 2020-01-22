@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -35,7 +36,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x40)]
         public class TraitProfile : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public List<ShieldsAndHealthBlock> ShieldsAndHealth;
             public List<WeaponsAndDamageBlock> WeaponsAndDamage;
@@ -301,9 +302,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnline106708)]
         public abstract class BaseVariant : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label, Length = 32, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(Flags = Label, Length = 32, MinVersion = CacheVersion.HaloOnline106708)]
             public string NameAscii;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public StringId Description;
             public List<GeneralSetting> GeneralSettings;

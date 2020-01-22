@@ -9,15 +9,15 @@ namespace TagTool.Commands.Editing
     class CopyBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private TagStructureInfo Structure { get; set; }
         private object Owner { get; set; }
         
         public static Type ElementType { get; set; } = null;
         public static List<object> Elements { get; set; } = null;
 
-        public CopyBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public CopyBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(false,
 
                   "CopyBlockElements",
@@ -28,7 +28,7 @@ namespace TagTool.Commands.Editing
                   "Copies block elements from one tag to another.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Structure = structure;
             Owner = owner;
@@ -57,7 +57,7 @@ namespace TagTool.Commands.Editing
                 fieldName = fieldName.Substring(lastIndex + 1, (fieldName.Length - lastIndex) - 1);
                 fieldNameLow = fieldName.ToLower();
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, Owner);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, Owner);
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
@@ -96,7 +96,7 @@ namespace TagTool.Commands.Editing
 
             if (args.Count > 2)
             {
-                if (!int.TryParse(args[2], out count) || count < 1)
+                if (args[2] != "*" && (!int.TryParse(args[2], out count) || count < 1))
                 {
                     Console.WriteLine($"Invalid count specified: {args[2]}");
                     return false;

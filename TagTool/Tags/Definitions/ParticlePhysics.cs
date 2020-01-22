@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,11 +9,11 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
     public class ParticlePhysics : TagStructure
 	{
-        public CachedTagInstance Template;
+        public CachedTag Template;
         public FlagsValue Flags;
         public List<Movement> Movements;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [Flags]
@@ -34,7 +35,7 @@ namespace TagTool.Tags.Definitions
 		{
             public TypeValue Type;
             public byte Flags;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+            [TagField(Flags = Padding, Length = 1)]
             public byte Unused;
             public List<Parameter> Parameters;
             public int Unknown2;

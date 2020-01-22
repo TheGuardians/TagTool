@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -36,6 +38,32 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ X: {X}, Y: {Y} }}";
+
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 2)
+            {
+                error = $"{args.Count} arguments supplied; should be 2";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float x))
+            {
+                error = $"Unable to parse \"{args[0]}\" (x) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float y))
+            {
+                error = $"Unable to parse \"{args[1]}\" (y) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealPoint2d(x, y);
+                error = null;
+                return true;
+            }
+        }
 
         public float[] ToArray() => new[] { X, Y };
     }

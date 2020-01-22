@@ -6,8 +6,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x58, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x4C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x50, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x4C, MinVersion = CacheVersion.Halo3ODST)]
     public class ScenarioLightmap : TagStructure
 	{
         public uint Unknown;
@@ -25,13 +24,10 @@ namespace TagTool.Tags.Definitions
         public uint Unknown6;
         public uint Unknown7;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown8;
-
         [TagStructure(Size = 0x10)]
         public class LightmapDataReference : TagStructure
 		{
-            public CachedTagInstance LightmapData;
+            public CachedTag LightmapData;
         }
         
         [Flags]

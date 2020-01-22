@@ -6,12 +6,12 @@ namespace TagTool.Tags.Resources
 {
     [TagStructure(Name = "model_animation_tag_resource", Size = 0xC)]
     public class ModelAnimationTagResource : TagStructure
-	{
-        public List<GroupMember> GroupMembers;
+    {
+        public TagBlock<GroupMember> GroupMembers;
 
         [TagStructure(Size = 0x30)]
         public class GroupMember : TagStructure
-		{
+        {
             public StringId Name;
             public uint Checksum;
             public short FrameCount;
@@ -26,11 +26,12 @@ namespace TagTool.Tags.Resources
             public short Unknown4; // always 0x0
             public uint FlagsOffset; // with OverlayOffset as origin , not member offset
 
+            [TagField(Align = 0x10)]
             public TagData AnimationData; // this will point to an Animation object
 
             [TagStructure(Size = 0xC)]
             public class Codec : TagStructure
-			{
+            {
                 public AnimationCompressionFormats AnimationCodec; // base/overlay
                 public byte RotationNodeCount; // number of nodes with rotation frames (XYZW short per frame)
                 public byte PositionNodeCount; // number of nodes with position frames (XYZ float per frame)
@@ -41,7 +42,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x14)]
             public class Format1 : TagStructure // used by Format3
-			{
+            {
                 public uint DataStart;
                 public uint ScaleFramesOffset;
                 public uint RotationFramesSize;
@@ -53,7 +54,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x14)]
             public class Format8 : TagStructure // Format8; OverlayRotations are 4x uint32) per frame
-			{
+            {
                 public uint PositionFramesOffset;
                 public uint ScaleFramesOffset;
                 public uint FrameCountPerNode;  // spooky sbyte; FrameCount = FrameCountPerNode / 10
@@ -63,7 +64,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x24)]
             public class Overlay : TagStructure // Format4,Format6,Format7
-			{
+            {
                 public uint PositionFrameInfoOffset;
                 public uint ScaleFrameInfoOffset;
                 public uint RotationKeyframesOffset;
@@ -77,7 +78,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x24)]
             public class Node : TagStructure
-			{
+            {
                 public List<RotationNode> RotationNodes;
                 public List<PositionNode> PositionNodes;
                 public List<ScaleNode> ScaleNodes;
@@ -85,32 +86,32 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0xC)]
             public class RotationNode : TagStructure
-			{
+            {
                 public List<RotationFrame> RotationFrames;
             }
 
             [TagStructure(Size = 0xC)]
             public class PositionNode : TagStructure
-			{
+            {
                 public List<PositionFrame> PositionFrames;
             }
 
             [TagStructure(Size = 0xC)]
             public class ScaleNode : TagStructure
-			{
+            {
                 public List<ScaleFrame> ScaleFrames;
             }
 
             [TagStructure(Size = 0x18)]
             public class FrameInfoNode : TagStructure
-			{
+            {
                 public List<FrameInfoDxDy> frameInfoDxDy;
                 public List<FrameInfoDxDyDyaw> frameInfoDxDyDyaw;
             }
 
             [TagStructure(Size = 0x8)]
             public class RotationFrame : TagStructure
-			{
+            {
                 public short X;
                 public short Y;
                 public short Z;
@@ -119,31 +120,31 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x4)]
             public class ScaleFrame : TagStructure
-			{
+            {
                 public uint X;
             }
 
             [TagStructure(Size = 0x4)]
             public class PositionFramesCountPerNode : TagStructure
-			{
+            {
                 public uint X;
             }
 
             [TagStructure(Size = 0x1)]
             public class Keyframe : TagStructure
-			{
+            {
                 public byte Frame;
             }
 
             [TagStructure(Size = 0x2)]
             public class KeyframeType5 : TagStructure
-			{
+            {
                 public short Frame;
             }
 
             [TagStructure(Size = 0x10)]
             public class RotationFrameFloat : TagStructure
-			{
+            {
                 public uint X;
                 public uint Y;
                 public uint Z;
@@ -152,7 +153,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0xC)]
             public class PositionFrame : TagStructure
-			{
+            {
                 public uint X;
                 public uint Y;
                 public uint Z;
@@ -160,26 +161,26 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x4)]
             public class FrameInfo : TagStructure
-			{
+            {
                 public uint FrameCount;
             }
 
             [TagStructure(Size = 0x4)]
             public class FrameInfoDyaw : TagStructure
-			{
+            {
                 public uint X;
             }
 
             [TagStructure(Size = 0x8)]
             public class FrameInfoDxDy : TagStructure
-			{
+            {
                 public uint X;
                 public uint Y;
             }
 
             [TagStructure(Size = 0xC)]
             public class FrameInfoDxDyDyaw : TagStructure
-			{
+            {
                 public uint X;
                 public uint Y;
                 public uint Z;
@@ -187,7 +188,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x10)]
             public class FrameInfoDxDyDzDyaw : TagStructure
-			{
+            {
                 public uint X;
                 public uint Y;
                 public uint Z;
@@ -196,7 +197,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0xC)]
             public class Footer32 : TagStructure
-			{
+            {
                 public PrimaryNodeFlags RotationFlags;
                 public PrimaryNodeFlags PositionFlags;
                 public PrimaryNodeFlags ScaleFlags;
@@ -204,7 +205,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x18)]
             public class Footer64 : TagStructure
-			{
+            {
                 public PrimaryNodeFlags RotationFlags1;
                 public SecondaryNodeFlags RotationFlags2;
                 public PrimaryNodeFlags PositionFlags1;
@@ -215,7 +216,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x18)]
             public class Footer32_Overlay : TagStructure
-			{
+            {
                 public PrimaryNodeFlags RotationFlags;
                 public PrimaryNodeFlags PositionFlags;
                 public PrimaryNodeFlags ScaleFlags;
@@ -226,7 +227,7 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x30)]
             public class Footer64_Overlay : TagStructure
-			{
+            {
                 public PrimaryNodeFlags RotationFlags1;
                 public SecondaryNodeFlags RotationFlags2;
                 public PrimaryNodeFlags PositionFlags1;

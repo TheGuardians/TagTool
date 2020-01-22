@@ -1,3 +1,6 @@
+using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
+
 namespace TagTool.Tags
 {
     /// <summary>
@@ -9,7 +12,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The definition data for the object.
         /// </summary>
-        [TagField(Flags = TagFieldFlags.Pointer)]
+        [TagField(Flags = Pointer)]
         public TDefinition Definition;
 
         /// <summary>
@@ -23,5 +26,16 @@ namespace TagTool.Tags
         /// This should be set to 0 because it will be used at runtime.
         /// </summary>
         public uint DefinitionAddress;
+    }
+
+    /// <summary>
+    /// D3Dstructure, size is 0xC, enforced in the deserializer
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    [TagStructure(Size = 0xC)]
+    public class D3DStructure<T> : TagStructure
+    {
+        public T Definition;
+        public CacheAddressType AddressType = CacheAddressType.Definition;
     }
 }

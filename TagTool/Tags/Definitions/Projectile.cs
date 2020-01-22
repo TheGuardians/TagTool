@@ -3,6 +3,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using TagTool.Damage;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -30,28 +31,29 @@ namespace TagTool.Tags.Definitions
         public NoiseLevelValue DetonationNoise;
         public short SuperDetonationProjectileCount;
         public float SuperDetonationDelay;
-        public CachedTagInstance DetonationStarted;
-        public CachedTagInstance AirborneDetonationEffect;
-        public CachedTagInstance GroundDetonationEffect;
-        public CachedTagInstance DetonationDamage;
-        public CachedTagInstance AttachedDetonationDamage;
-        public CachedTagInstance SuperDetonation;
-        public CachedTagInstance SuperDetonationDamage;
-        public CachedTagInstance DetonationSound;
+        public CachedTag DetonationStarted;
+        public CachedTag AirborneDetonationEffect;
+        public CachedTag GroundDetonationEffect;
+        public CachedTag DetonationDamage;
+        public CachedTag AttachedDetonationDamage;
+        public CachedTag SuperDetonation;
+        public CachedTag SuperDetonationDamage;
+        public CachedTag DetonationSound;
         public DamageReportingType DamageReportingType;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
-        public byte[] Unused2;
+        public byte Unknown3;
+        public byte Unknown4;
+        public byte Unknown5;
 
-        public CachedTagInstance AttachedSuperDetonationDamage;
+        public CachedTag AttachedSuperDetonationDamage;
         public float MaterialEffectRadius;
-        public CachedTagInstance FlybySound;
-        public CachedTagInstance FlybyResponse;
-        public CachedTagInstance ImpactEffect;
-        public CachedTagInstance ImpactDamage;
+        public CachedTag FlybySound;
+        public CachedTag FlybyResponse;
+        public CachedTag ImpactEffect;
+        public CachedTag ImpactDamage;
         public float BoardingDetonationTime;
-        public CachedTagInstance BoardingDetonationDamage;
-        public CachedTagInstance BoardingAttachedDetonationDamage;
+        public CachedTag BoardingDetonationDamage;
+        public CachedTag BoardingAttachedDetonationDamage;
         public float AirGravityScale;
         public Bounds<float> AirDamageRange;
         public float WaterGravityScale;
@@ -116,11 +118,11 @@ namespace TagTool.Tags.Definitions
 		{
             public FlagBits Flags;
             public ResponseValue DefaultResponse;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId MaterialName;
             public short GlobalMaterialIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused1;
 
             public ResponseValue PotentialResponse;
@@ -130,7 +132,7 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> AndVelocity;
             public ScaleEffectsByValue ScaleEffectsBy;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused2;
 
             public Angle AngularNoise;

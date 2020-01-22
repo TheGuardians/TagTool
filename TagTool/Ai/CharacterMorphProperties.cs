@@ -1,19 +1,20 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0xE4)]
     public class CharacterMorphProperties : TagStructure
 	{
-        public CachedTagInstance MorphCharacter1;
-        public CachedTagInstance MorphCharacter2;
-        public CachedTagInstance MorphCharacter3;
-        public CachedTagInstance MorphMuffin;
-        public CachedTagInstance MorphWeapon1;
-        public CachedTagInstance MorphWeapon2;
-        public CachedTagInstance MorphWeapon3;
+        public CachedTag MorphCharacter1;
+        public CachedTag MorphCharacter2;
+        public CachedTag MorphCharacter3;
+        public CachedTag MorphMuffin;
+        public CachedTag MorphWeapon1;
+        public CachedTag MorphWeapon2;
+        public CachedTag MorphWeapon3;
         public uint Unknown;
         public uint Unknown2;
         public uint Unknown3;
@@ -22,8 +23,8 @@ namespace TagTool.Ai
         public uint Unknown6;
         public uint Unknown7;
         public uint Unknown8;
-        [TagField(Flags = TagFieldFlags.Label)]
-        public CachedTagInstance Character;
+        [TagField(Flags = Label)]
+        public CachedTag Character;
         public uint Unknown9;
         public StringId Unknown10;
         public uint Unknown11;

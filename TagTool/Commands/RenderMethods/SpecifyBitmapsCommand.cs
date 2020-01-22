@@ -8,11 +8,11 @@ namespace TagTool.Commands.RenderMethods
 {
     class SpecifyBitmapsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private RenderMethod Definition { get; }
 
-        public SpecifyBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
+        public SpecifyBitmapsCommand(GameCache cache, CachedTag tag, RenderMethod definition)
             : base(true,
 
                  "SpecifyBitmaps",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.RenderMethods
 
                  "Allows the bitmaps of the render_method to be respecified.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -32,22 +32,22 @@ namespace TagTool.Commands.RenderMethods
             if (args.Count != 0)
                 return false;
             
-            var shaderMaps = new Dictionary<StringId, CachedTagInstance>();
+            var shaderMaps = new Dictionary<StringId, CachedTag>();
 
             foreach (var property in Definition.ShaderProperties)
             {
                 RenderMethodTemplate template = null;
 
-                using (var cacheStream = CacheContext.OpenTagCacheRead())
-                    template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
+                using (var cacheStream = Cache.OpenCacheRead())
+                    template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.SamplerArguments.Count; i++)
                 {
                     var mapTemplate = template.SamplerArguments[i];
 
-                    Console.Write(string.Format("Please enter the {0} index: ", CacheContext.GetString(mapTemplate.Name)));
+                    Console.Write(string.Format("Please enter the {0} index: ", Cache.StringTable.GetString(mapTemplate.Name)));
 
-                    if (!CacheContext.TryGetTag(Console.ReadLine(), out var shaderMap))
+                    if (!Cache.TryGetCachedTag(Console.ReadLine(), out var shaderMap))
                     {
                         Console.WriteLine($"ERROR: Invalid bitmap name, setting to null.");
                         shaderMaps[mapTemplate.Name] = null;
@@ -61,8 +61,8 @@ namespace TagTool.Commands.RenderMethods
                 if (shaderMaps.ContainsKey(import.Name))
                     import.Bitmap = shaderMaps[import.Name];
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(cacheStream, Tag, Definition);
+            using (var cacheStream = Cache.OpenCacheReadWrite())
+                Cache.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("Done!");
 

@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
     class CreateTagCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheHaloOnlineBase Cache { get; }
 
-        public CreateTagCommand(HaloOnlineCacheContext cacheContext)
+        public CreateTagCommand(GameCacheHaloOnlineBase cache)
             : base(true,
 
                   "CreateTag",
@@ -20,7 +21,7 @@ namespace TagTool.Commands.Tags
 
                   "Creates a new tag of the specified tag group in the current tag cache.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -28,7 +29,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 1 || args.Count > 2)
                 return false;
 
-        begin:
+            begin:
             var groupTagString = args[0];
 
             if (groupTagString.Length > 4)
@@ -37,13 +38,7 @@ namespace TagTool.Commands.Tags
                 return true;
             }
 
-            var groupTag = Tag.Null;
-
-            try
-            {
-                groupTag = CacheContext.ParseGroupTag(groupTagString);
-            }
-            catch (KeyNotFoundException)
+            if (!Cache.TryParseGroupTag(groupTagString, out var groupTag))
             {
                 var chars = new char[] { ' ', ' ', ' ', ' ' };
 
@@ -74,24 +69,25 @@ namespace TagTool.Commands.Tags
 
                 switch (groupArgs.Count)
                 {
-                    case 2: new TagGroup(new Tag(groupArgs[0]), Tag.Null, Tag.Null, CacheContext.GetStringId(groupArgs[1])); break;
-                    case 3: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), Tag.Null, CacheContext.GetStringId(groupArgs[2])); break;
-                    case 4: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), new Tag(groupArgs[2]), CacheContext.GetStringId(groupArgs[3])); break;
+                    case 2: new TagGroup(new Tag(groupArgs[0]), Tag.Null, Tag.Null, Cache.StringTable.GetStringId(groupArgs[1])); break;
+                    case 3: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), Tag.Null, Cache.StringTable.GetStringId(groupArgs[2])); break;
+                    case 4: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), new Tag(groupArgs[2]), Cache.StringTable.GetStringId(groupArgs[3])); break;
                     default: return false;
                 }
 
                 goto begin;
             }
 
-            CachedTagInstance instance = null;
+            CachedTag instance = null;
+            TagGroup.Instances.TryGetValue(groupTag, out var tagGroup);
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 if (args.Count == 2)
                 {
                     var tagIndex = -1;
 
-                    if (!CacheContext.TryGetTag(args[1], out var tag))
+                    if (!Cache.TryGetCachedTag(args[1], out instance))
                     {
                         if (args[1].StartsWith("0x"))
                             tagIndex = Convert.ToInt32(args[1], 16);
@@ -100,36 +96,35 @@ namespace TagTool.Commands.Tags
                     }
                     else
                     {
-                        tagIndex = tag.Index;
+                        tagIndex = instance.Index;
                     }
 
-                    while (tagIndex >= CacheContext.TagCache.Index.Count)
-                        CacheContext.TagCache.AllocateTag();
+                    while (tagIndex >= Cache.TagCache.Count)
+                        Cache.TagCache.AllocateTag(TagGroup.None);
 
-                    if (tagIndex < CacheContext.TagCache.Index.Count)
+                    if (tagIndex < Cache.TagCache.Count)
                     {
-                        if (CacheContext.TagCache.Index[tagIndex] != null)
+                        if (Cache.TagCacheGenHO.Tags[tagIndex] != null)
                         {
-                            var oldInstance = CacheContext.TagCache.Index[tagIndex];
-                            CacheContext.TagCache.Index[tagIndex] = null;
-                            CacheContext.TagCache.SetTagDataRaw(stream, oldInstance, new byte[] { });
+                            var oldInstance = Cache.TagCacheGenHO.Tags[tagIndex];
+                            Cache.TagCacheGenHO.Tags[tagIndex] = null;
+                            Cache.TagCacheGenHO.SetTagDataRaw(stream, oldInstance, new byte[] { });
                         }
 
-                        instance = new CachedTagInstance(tagIndex, TagGroup.Instances[groupTag]);
-                        CacheContext.TagCache.Index[tagIndex] = instance;
+                        instance = Cache.TagCache.CreateCachedTag(tagIndex, TagGroup.Instances[groupTag]);
+                        Cache.TagCacheGenHO.Tags[tagIndex] = (CachedTagHaloOnline)instance;
                     }
                 }
 
                 if (instance == null)
-                    instance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+                    instance = Cache.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
 
-                CacheContext.Serialize(stream, instance, Activator.CreateInstance(TagDefinition.Find(groupTag)));
+                Cache.Serialize(stream, instance, Activator.CreateInstance(TagDefinition.Find(groupTag)));
             }
 
             var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-            Console.WriteLine($"[Index: 0x{instance.Index:X4}, Offset: 0x{instance.HeaderOffset:X8}, Size: 0x{instance.TotalSize:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}");
-
+            Console.WriteLine($"[Index: 0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}");
             return true;
         }
     }

@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -42,7 +43,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloOnline106708)]
         public class ScreenEffectBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
 
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -152,7 +153,7 @@ namespace TagTool.Tags.Definitions
             public float ScreenShake;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance ScreenShader; ///#applies this shader to the entire screen
+            public CachedTag ScreenShader; ///#applies this shader to the entire screen
 
             [Flags]
             public enum FlagBits : ushort

@@ -3,8 +3,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "flock", Tag = "flck", Size = 0x5C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "flock", Tag = "flck", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "flock", Tag = "flck", Size = 0x5C)]
     public class Flock : TagStructure
 	{
         public float ForwardScale;
@@ -28,8 +27,5 @@ namespace TagTool.Tags.Definitions
         public float AlignmentScale;
         public float PositionScale;
         public Bounds<float> PositionRadii;
-
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
     }
 }

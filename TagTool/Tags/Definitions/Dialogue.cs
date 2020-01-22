@@ -4,17 +4,13 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x24, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x30, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x24)]
     public class Dialogue : TagStructure
 	{
-        public CachedTagInstance GlobalDialogueInfo;
+        public CachedTag GlobalDialogueInfo;
         public uint Flags;
         public List<Vocalization> Vocalizations;
         public StringId MissionDialogueDesignator;
-
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x18)]
         public class Vocalization : TagStructure
@@ -22,7 +18,7 @@ namespace TagTool.Tags.Definitions
             public ushort Flags;
             public short Unknown;
             public StringId Name;
-            public CachedTagInstance Sound;
+            public CachedTag Sound;
         }
     }
 }

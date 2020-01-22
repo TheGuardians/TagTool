@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -11,7 +12,7 @@ namespace TagTool.Tags.Definitions
         public FlagBits Flags;
         public StringId MarkerAttachName;
         [TagField(ValidTags = new[] { "bitm" })]
-        public CachedTagInstance BitmapSpritePlate;
+        public CachedTag BitmapSpritePlate;
         public Bounds<float> EmissionRate;
         public float Lifetime;
         public Bounds<float> WindBounds;
@@ -38,7 +39,7 @@ namespace TagTool.Tags.Definitions
         public class LeafType : TagStructure
 		{
             public short BitmapSpriteIndex;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused;
             public float Frequency;
             public float Mass;

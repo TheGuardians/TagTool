@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -39,7 +40,18 @@ namespace TagTool.Tags.Definitions
         public float CrouchTransitionTime;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction CrouchingCameraFunction = new TagFunction { Data = new byte[0] };
+        public TagFunction CrouchingCameraFunction = new TagFunction
+        {
+            // TODO: make high-level constructors...
+            Data = new byte[]
+            {
+                0x08, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE0, 0x3F,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x1C, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                0x07, 0x00, 0x00, 0xCD, 0xFF, 0xFF, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0xC0, 0x00, 0x00, 0x80, 0x40, 0x00, 0x00, 0x00, 0x00
+            }
+        };
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<CameraHeightBlock> CameraHeights;
@@ -71,7 +83,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown33;
 
         public float HeadshotAccelerationScale;
-        public CachedTagInstance AreaDamageEffect;
+        public CachedTag AreaDamageEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<MovementGateBlock> MovementGates;
@@ -134,9 +146,9 @@ namespace TagTool.Tags.Definitions
         public float CrouchVelocityModifier;
         
         public List<ContactPoint> ContactPoints;
-        public CachedTagInstance ReanimationCharacter;
-        public CachedTagInstance TransformationMuffin;
-        public CachedTagInstance DeathSpawnCharacter;
+        public CachedTag ReanimationCharacter;
+        public CachedTag TransformationMuffin;
+        public CachedTag DeathSpawnCharacter;
         public short DeathSpawnCount;
         public short Unknown52;
 
@@ -202,7 +214,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18)]
         public class CameraHeightBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Class;
             public float StandingHeightFraction;
             public float CrouchingHeightFraction;
@@ -233,7 +245,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class ContactPoint : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId MarkerName;
         }
     }

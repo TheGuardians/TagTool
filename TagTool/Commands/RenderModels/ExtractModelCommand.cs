@@ -6,41 +6,55 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Serialization;
+using Assimp;
 
 namespace TagTool.Commands.RenderModels
 {
     class ExtractModelCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private RenderModel Definition { get; }
 
-        public ExtractModelCommand(HaloOnlineCacheContext cacheContext, RenderModel model)
+        public ExtractModelCommand(GameCache cacheContext, RenderModel model)
             : base(true,
 
                   "ExtractModel",
-                  "Extracts the current render model definition.",
+                  "Extracts the current render model definition. (filetypes: obj, dae)",
 
-                  "ExtractModel <variant> <filetype> <filename>",
+                  "ExtractModel [variant name] <filetype> <filename>",
 
-                  "Extracts a variant of the render model to a file.\n" +
-                  "Supported file types: obj")
+                  "Extracts a variant of the render model to a file. \n" +
+                  "Supported file types: obj, dae")
         {
-            CacheContext = cacheContext;
+            Cache = cacheContext;
             Definition = model;
         }
         
         public override object Execute(List<string> args)
         {
-            if (args.Count != 3)
-                return false;
+            string variantName;
+            string fileType;
+            string modelFileName;
 
-            var variantName = args[0];
-            var fileType = args[1].ToLower();
-            var modelFileName = args[2];
+            if(args.Count == 2)
+            {
+                variantName = "*";
+                fileType = args[0].ToLower();
+                modelFileName = args[1];
+            }
+            else if (args.Count == 3)
+            {
+                variantName = args[0];
+                fileType = args[1].ToLower();
+                modelFileName = args[2];
+            }
+            else
+                return false;
 
             switch (fileType)
             {
                 case "obj":
+                case "dae":
                     break;
 
                 default:
@@ -57,81 +71,31 @@ namespace TagTool.Commands.RenderModels
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry.Resource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
+            Definition.Geometry.SetResourceBuffers(definition);
 
             using (var resourceStream = new MemoryStream())
             {
-                //
-                // Extract the resource data
-                //
-
-                CacheContext.ExtractResource(Definition.Geometry.Resource, resourceStream);
-
                 var modelFile = new FileInfo(modelFileName);
 
                 if (!modelFile.Directory.Exists)
                     modelFile.Directory.Create();
 
+                ModelExtractor extractor = new ModelExtractor(Cache, Definition);
+                extractor.ExtractRenderModel(variantName);
+
                 switch (fileType)
                 {
                     case "obj":
-                        return ExtractObj(variantName, modelFile, Definition, resourceDefinition, resourceStream);
-                        
+                        return extractor.ExportObject(modelFile);
+
+                    case "dae":
+                        return extractor.ExportCollada(modelFile);
+
                     default:
                         throw new NotImplementedException(fileType);
                 }
             }
-        }
-
-        private bool ExtractObj(string variantName, FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
-        {
-            var meshes = new Dictionary<string, Mesh>();
-            var vertexCompressor = new VertexCompressor(renderModel.Geometry.Compression[0]);
-
-            foreach (var region in renderModel.Regions)
-            {
-                var regionName = CacheContext.GetString(region.Name);
-
-                foreach (var permutation in region.Permutations)
-                {
-                    var permutationName = CacheContext.GetString(permutation.Name);
-
-                    if (variantName != "*" && variantName != permutationName)
-                        continue;
-
-                    for (var i = 0; i < permutation.MeshCount; i++)
-                    {
-                        var name = $"{regionName}_{permutationName}_{i}";
-                        meshes[name] = renderModel.Geometry.Meshes[permutation.MeshIndex + i];
-                    }
-                }
-            }
-
-            if (meshes.Count == 0)
-            {
-                Console.WriteLine($"ERROR: No meshes found under variant '{variantName}'!");
-                return false;
-            }
-
-            Console.Write("Extracting {0} mesh(es)...", meshes.Count);
-
-            using (var objFile = new StreamWriter(modelFile.Create()))
-            {
-                var objExtractor = new ObjExtractor(objFile);
-
-                foreach (var entry in meshes)
-                {
-                    var meshReader = new MeshReader(CacheContext.Version, entry.Value, resourceDefinition);
-                    objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream, entry.Key);
-                }
-
-                objExtractor.Finish();
-            }
-
-            Console.WriteLine("done!");
-
-            return true;
         }
     }
 }

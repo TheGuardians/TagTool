@@ -2,6 +2,8 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Tags.Definitions
 {
@@ -67,12 +69,12 @@ namespace TagTool.Tags.Definitions
         public uint Unknown48;
         public uint Unknown49;
         public uint Unknown50;
-        public CachedTagInstance PrimaryMap;
-        public CachedTagInstance IntensityMap;
-        public List<InstancedMesh> InstancedMeshes;
-        public List<UnknownBlock> Unknown51;
-        public List<InstancedGeometryBlock> InstancedGeometry;
-        public List<UnknownBBlock> UnknownB;
+        public CachedTag PrimaryMap;
+        public CachedTag IntensityMap;
+        public List<StaticPerVertexLighting> StaticPerVertexLightingBuffers;
+        public List<ClusterStaticPerVertexLighting> ClusterStaticPerVertexLightingBuffers;
+        public List<InstancedGeometryLighting> InstancedGeometry;
+        public List<UnknownSHCoefficients> InstancedSHCoefficients;
         public RenderGeometry Geometry;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -91,36 +93,37 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown68;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x10)]
-        public class InstancedMesh : TagStructure
+        public class StaticPerVertexLighting : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public int UnknownIndex;
+            public List<int> UnusedVertexBuffer;
+            public int VertexBufferIndex;
+
+            [TagField(Flags = Runtime)]
+            public VertexBufferDefinition VertexBuffer;
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock : TagStructure
+        public class ClusterStaticPerVertexLighting : TagStructure
 		{
             public short Unknown;
-            public short Unknown2;
+            public short StaticPerVertexLightingIndex;
         }
 
         [TagStructure(Size = 0x8)]
-        public class InstancedGeometryBlock : TagStructure
+        public class InstancedGeometryLighting : TagStructure
 		{
             public short Unknown;
-            public short InstancedMeshIndex;
-            public short UnknownBIndex;
+            public short StaticPerVertexLightingIndex;
+            public short UnknownSHCoefficientsIndex;
             public short Unknown2;
         }
 
         [TagStructure(Size = 0x48)]
-        public class UnknownBBlock : TagStructure
+        public class UnknownSHCoefficients : TagStructure
 		{
             public short Unknown1;
             public short Unknown2;

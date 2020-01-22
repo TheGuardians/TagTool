@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -70,5 +72,39 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ Yaw: {Yaw}, Pitch: {Pitch}, Roll: {Roll} }}";
+
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 3)
+            {
+                error = $"{args.Count} arguments supplied; should be 3";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float yaw))
+            {
+                error = $"Unable to parse \"{args[0]}\" (yaw) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float pitch))
+            {
+                error = $"Unable to parse \"{args[1]}\" (pitch) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float roll))
+            {
+                error = $"Unable to parse \"{args[2]}\" (roll) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealEulerAngles3d(
+                    Angle.FromDegrees(yaw),
+                    Angle.FromDegrees(pitch),
+                    Angle.FromDegrees(roll));
+                error = null;
+                return true;
+            }
+        }
     }
 }

@@ -1,27 +1,16 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x84, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x84)]
     public class GuiModelWidgetDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYBoundsMin;
-        public short WidescreenXBoundsMin;
-        public short WidescreenYBoundsMax;
-        public short WidescreenXBoundsMax;
-        public short StandardYBoundsMin;
-        public short StandardXBoundsMin;
-        public short StandardYBoundsMax;
-        public short StandardXBoundsMax;
-        public CachedTagInstance Animation;
+        public GuiDefinition GuiRenderBlock;
         public List<CameraRefinement> CameraControl;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -70,13 +59,6 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<TexCam> TextureCameraSections;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown23;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown24;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown25;
-
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
         public class CameraRefinement : TagStructure
@@ -122,7 +104,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown32;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance Unknown33;
+            public CachedTag Unknown33;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown34;
 

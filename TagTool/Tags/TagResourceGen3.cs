@@ -1,47 +1,50 @@
+using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     public class TagResourceGen3 : TagStructure
 	{
-        public CachedTagInstance ParentTag;
+        public CachedTag ParentTag;
         public ushort Salt;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public sbyte ResourceTypeIndex;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public TagResourceTypeGen3 ResourceType;
 
         public byte Flags;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public int FixupInformationOffset;
+        [TagField(Gen = CacheGeneration.Third)]
+        public int DefinitionDataOffset;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public int FixupInformationLength;
+        [TagField(Gen = CacheGeneration.Third)]
+        public int DefinitionDataLength;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int SecondaryFixupInformationOffset;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short Unknown1;
+        [TagField(Gen = CacheGeneration.Third)]
+        public UnknownFlags Unknown1;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public short SegmentIndex;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] DefinitionData;
 
         public CacheAddress DefinitionAddress;
 
-        public List<ResourceFixup> ResourceFixups;
-        public List<ResourceDefinitionFixup> ResourceDefinitionFixups;
+        public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
+        public List<D3DFixup> D3DFixups = new List<D3DFixup>();
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public int Unknown2;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        public int Unknown2 = 1;
 
         [TagStructure(Size = 0x8)]
         public class ResourceFixup : TagStructure
@@ -49,30 +52,27 @@ namespace TagTool.Tags
             public uint BlockOffset;
             public CacheAddress Address;
 
-            [TagField(Flags = TagFieldFlags.Runtime)]
+            [TagField(Flags = Runtime)]
             public int Type;
-            [TagField(Flags = TagFieldFlags.Runtime)]
+            [TagField(Flags = Runtime)]
             public int Offset;
-            [TagField(Flags = TagFieldFlags.Runtime)]
+            [TagField(Flags = Runtime)]
             public int RawAddress;
         }
 
         [TagStructure(Size = 0x8)]
-        public class ResourceDefinitionFixup : TagStructure
+        public class D3DFixup : TagStructure
 		{
             public CacheAddress Address;
             public int ResourceStructureTypeIndex;
         }
 
-        /// <summary>
-        /// D3D object types.
-        /// </summary>
-        public enum D3DObjectType : int
+        [Flags]
+        public enum UnknownFlags : short
         {
-            VertexBuffer,      // s_tag_d3d_vertex_buffer
-            IndexBuffer,       // s_tag_d3d_index_buffer
-            Texture,           // s_tag_d3d_texture
-            InterleavedTexture // s_tag_d3d_texture_interleaved
+            Invalid = 0,
+            PrimaryPageValid = 1 << 0,
+            SecondaryPageValid =  1 << 1
         }
     }
 }

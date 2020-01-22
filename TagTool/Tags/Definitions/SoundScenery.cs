@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -10,7 +11,7 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> Distance;
         public Bounds<Angle> ConeAngle;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused2;
     }
 }

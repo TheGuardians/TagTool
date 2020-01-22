@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -8,7 +9,7 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
     public class CharacterIdleProperties : TagStructure
 	{
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+        [TagField(Flags = Padding, Length = 4)]
         public byte[] Unused;
 
         public Bounds<float> IdlePoseDelayTime;

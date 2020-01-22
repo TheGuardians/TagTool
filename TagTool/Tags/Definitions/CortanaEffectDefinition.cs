@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
 
         public byte[] Data1;
         public byte[] Data2;
-        public CachedTagInstance CinematicScene;
+        public CachedTag CinematicScene;
         public StringId AnchorName;
 
         public List<UnknownBlock1> Unknown2;
@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public class SoundBlock : TagStructure
         {
             public uint Unknown;
-            public CachedTagInstance Sound;
+            public CachedTag Sound;
         }
 
         [TagStructure(Size = 0x48)]

@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using TagTool.Geometry;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting
 {
@@ -128,26 +130,29 @@ namespace TagTool.Commands.Porting
             return lensFlare;
         }
 
-        private ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
+        private ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
             if (BlamCache.Version > CacheVersion.Halo3Retail)
                 return scenarioLightmap;
 
             scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
 
-            foreach (var entry in scenarioLightmap.Lightmaps)
+            for(int i = 0; i< scenarioLightmap.Lightmaps.Count; i++)
             {
+                var entry = scenarioLightmap.Lightmaps[i];
+
                 var wasReplacing = FlagIsSet(PortingFlags.Replace);
 
-				RemoveFlags(PortingFlags.Replace);
-				var Lbsp = ConvertStructure(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
-				if (wasReplacing)
-					SetFlags(PortingFlags.Replace);
+                RemoveFlags(PortingFlags.Replace);
+                var Lbsp = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
+                Lbsp = ConvertScenarioLightmapBspData(Lbsp);
+                if (wasReplacing)
+                    SetFlags(PortingFlags.Replace);
 
                 Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
                 Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
 
-                CachedTagInstance edTag = null;
+                CachedTag edTag = null;
                 TagGroup edGroup = null;
 
                 var groupTag = new Tag("Lbsp");
@@ -158,11 +163,15 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    edGroup = new TagGroup(groupTag, Tag.Null, Tag.Null, CacheContext.GetStringId("scenario_lightmap_bsp_data"));
+                    edGroup = new TagGroup(groupTag, Tag.Null, Tag.Null, CacheContext.StringTable.GetStringId("scenario_lightmap_bsp_data"));
                 }
 
-                edTag = CacheContext.TagCache.AllocateTag(edGroup);
-                edTag.Name = blamTagName + "_data";
+                edTag = CacheContext.TagCacheGenHO.AllocateTag(edGroup);
+
+                if(scenarioLightmap.Lightmaps.Count != 1)
+                    edTag.Name = $"{blamTagName}_{i}_data";
+                else
+                    edTag.Name = $"{blamTagName}_data";
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 
@@ -171,6 +180,7 @@ namespace TagTool.Commands.Porting
                     LightmapData = edTag
                 });
             }
+            
 
             scenarioLightmap.Airprobes.Clear();
 
@@ -179,7 +189,31 @@ namespace TagTool.Commands.Porting
 
         private ScenarioLightmapBspData ConvertScenarioLightmapBspData(ScenarioLightmapBspData Lbsp)
         {
-            //Test
+            var lightmapResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
+
+            var converter = new RenderGeometryConverter(CacheContext, BlamCache);
+            var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
+
+            //
+            // convert vertex buffers and add them to the new resource
+            //
+
+            foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)
+            {
+                if (staticPerVertexLighting.VertexBufferIndex != -1)
+                {
+                    staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
+                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, CacheContext.Version, staticPerVertexLighting.VertexBuffer);
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
+                    newLightmapResourceDefinition.VertexBuffers.Add(d3dPointer);
+                    // set the new buffer index
+                    staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
+                }
+            }
+
+            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
+
             return Lbsp;
         }
 

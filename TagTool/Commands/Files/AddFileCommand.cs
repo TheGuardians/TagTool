@@ -8,11 +8,11 @@ namespace TagTool.Commands.Files
 {
     class AddFileCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private VFilesList Definition { get; }
 
-        public AddFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition) :
+        public AddFileCommand(GameCache cache, CachedTag tag, VFilesList definition) :
             base(true,
                 
                 "AddFile",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.Files
 
                 "Adds a new file to the virtual files list.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -46,8 +46,8 @@ namespace TagTool.Commands.Files
 
             Definition.Insert(file.Name, folder, File.ReadAllBytes(file.FullName));
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(stream, Tag, Definition);
+            using (var stream = Cache.OpenCacheReadWrite())
+                Cache.Serialize(stream, Tag, Definition);
 
             Console.WriteLine($"Add virtual file \"{folder}\".");
 

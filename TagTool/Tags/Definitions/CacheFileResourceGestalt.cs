@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -45,7 +46,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown8;
         public uint Unknown9;
         public List<ScenarioZonesetGroup> ScenarioZonesetGroups;
-        public List<CachedTagInstance> ScenarioBsps;
+        public List<CachedTag> ScenarioBsps;
         public uint Unknown10;
         public uint Unknown11;
         public uint Unknown12;
@@ -55,7 +56,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown16;
         public uint Unknown17;
         public uint Unknown18;
-        public byte[] FixupInformation;
+        public byte[] DefinitionData;
         public uint Unknown19;
         public uint Unknown20;
         public uint Unknown21;
@@ -126,7 +127,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown2;
             public short Unknown3;
             public short Unknown4;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
         }
 
@@ -135,7 +136,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Length = 16)]
             public byte[] Guid;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
         }
 
@@ -220,7 +221,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class ScenarioZonesetGroup : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public int BspGroupIndex;
             public BspFlagsValue ImportLoadedBsps;
@@ -351,7 +352,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18)]
         public class PredictionD2Tag : TagStructure
 		{
-            public CachedTagInstance Tag;
+            public CachedTag Tag;
             public int FirstValue;
             public int SecondValue;
         }

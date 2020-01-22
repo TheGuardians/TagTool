@@ -85,7 +85,7 @@ namespace TagTool.Commands.Porting
             for (int hudWidgetIndex = 0; hudWidgetIndex < chudDefinition.HudWidgets.Count; hudWidgetIndex++)
             {
                 //get stringid text for patch targeting
-                var widgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].Name);
+                var widgetname = CacheContext.StringTable.GetString(chudDefinition.HudWidgets[hudWidgetIndex].Name);
 
                 for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].StateData.Count; stateDatumIndex++)
                     chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex]);
@@ -100,7 +100,7 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex]);
 
                     //get stringid text for patch targeting
-                    var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
+                    var bitmapwidgetname = CacheContext.StringTable.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
 
                     //fixup for waypoint light
                     if (bitmapwidgetname.Contains("waypoint_light"))
@@ -133,6 +133,51 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 13.0f;
                     }
 
+                    //odst HUD fixups
+                    if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        //bump up size, HO distortion doesnt stretch it enough
+                        if (widgetname.Contains("init_wipe"))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                        }
+
+                        if (widgetname.Contains("vitality_meter"))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -1.01333f;
+                        }
+
+                        //fix odst bottom HUD gap
+                        if (bitmapwidgetname.Contains("middle_bar_720"))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.006253f;
+                        }
+
+                        //fix odst top HUD gap
+                        if (bitmapwidgetname.Contains("center_720"))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.01005f;
+                        }
+
+                        //remove beacon and waypoint (non-functional in HO)
+                        if (bitmapwidgetname.Contains("beacon_") || bitmapwidgetname.Contains("user_placed_") || bitmapwidgetname.Contains("waypoint_light"))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 0.0f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 0.0f;
+                        }
+
+                        //fix binocular ruler scaling
+                        if (bitmapwidgetname.Contains("vertical_ruler"))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                        }
+
+                    }
+
                     //widget names of widgets whose bitmapwidgets need extra scaling
                     List<string> bitmappatchlist = new List<string>(){
                         "vitality_meter", "compass", "in_helmet" };
@@ -156,7 +201,7 @@ namespace TagTool.Commands.Porting
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
                     //get stringid text for patch targeting
-                    var textwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].Name);
+                    var textwidgetname = CacheContext.StringTable.GetString(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].Name);
 
                     //fixup for 'budget' label
                     if (textwidgetname == "budget_meter_name")
@@ -185,11 +230,17 @@ namespace TagTool.Commands.Porting
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.X *= 1.5f;
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y *= 1.5f;
                 }
+
+                //hide odst hud lines when in vehicle/turret
+                if (BlamCache.Version == CacheVersion.Halo3ODST && (widgetname.Contains("in_helmet_bottom") || widgetname.Contains("in_helmet_top")))
+                {
+                    chudDefinition.HudWidgets[hudWidgetIndex].StateData[0].UnitGeneralFlags = ChudDefinition.HudWidget.StateDatum.UnitGeneral.ThirdPersonCamera;
+                }
             }
             return chudDefinition;
         }
 
-        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ChudGlobalsDefinition H3Definition)
+        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ChudGlobalsDefinition H3Definition)
         {
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
@@ -233,11 +284,10 @@ namespace TagTool.Commands.Porting
                 {
                     var H3att = H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
 
-                    if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    if (BlamCache.Version <= CacheVersion.Halo3Retail)
                     {
-                        H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
-                        H3att.WarpAngle = Angle.FromDegrees(4.5f);
-                        H3att.WarpAmount = 0.1f;
+                        H3att.HorizontalScale = 1.0f;
+                        H3att.VerticalScale = 1.0f;
                     }
 
                     //more fixups
@@ -247,14 +297,19 @@ namespace TagTool.Commands.Porting
                     H3att.MotionSensorOffset.Y *= 1.5f;
                     H3att.MotionSensorRadius *= 1.5f;
                     H3att.MotionSensorScale *= 1.5f;
-                    H3att.HorizontalScale = 1.0f;
-                    H3att.VerticalScale = 1.0f;
-                    H3att.PickupDialogOffset.Y = 0.3f;
-                    H3att.PickupDialogScale = 1.5f;
+                    H3att.StateLeftRightOffset_HO.Y = H3att.StateLeftRightOffsetY_H3;
+                    H3att.StateScale_HO = H3att.StateScale;
                     H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
                     H3att.NotificationScale *= 1.5f;
                     H3att.NotificationLineSpacing *= 1.5f;
+
+                    if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        H3att.WarpAngle = Angle.FromDegrees(4.5f);
+                        H3att.WarpAmount = 0.1f;
+                        H3att.StateLeftRightOffset_HO.Y = 0.2f; // 0.2 due to odsts 0.87 hud scale
+                    }
                 }
 
 
@@ -272,14 +327,14 @@ namespace TagTool.Commands.Porting
                         {
                             var spartanBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
                             spartanBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
-                            spartanBiped.Sound = (CachedTagInstance)ConvertData(cacheStream, resourceStreams, H3snd.SpartanSound, null, H3snd.SpartanSound.Name);
+                            spartanBiped.Sound = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, H3snd.SpartanSound, null, H3snd.SpartanSound.Name);
                             H3snd.Bipeds.Add(spartanBiped);
                         }
                         if (H3snd.EliteSound != null)
                         {
                             var eliteBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
                             eliteBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Elite;
-                            eliteBiped.Sound = (CachedTagInstance)ConvertData(cacheStream, resourceStreams, H3snd.EliteSound, null, H3snd.EliteSound.Name);
+                            eliteBiped.Sound = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, H3snd.EliteSound, null, H3snd.EliteSound.Name);
                             H3snd.Bipeds.Add(eliteBiped);
                         }
                     }
@@ -307,13 +362,32 @@ namespace TagTool.Commands.Porting
             }
 
             //additional values
-            H3Definition.Unknown5 = 1.8f;
-            H3Definition.ShieldMinorThreshold = 1.0f;
-            H3Definition.ShieldMajorThreshold = 0.5f;
-            H3Definition.ShieldCriticalThreshold = 0.25f;
-            H3Definition.HealthMinorThreshold = 0.9f;
-            H3Definition.HealthMajorThreshold = 0.75f;
-            H3Definition.HealthCriticalThreshold = 0.5f;
+            if (BlamCache.Version <= CacheVersion.Halo3Retail)
+            {
+                H3Definition.ShieldMinorThreshold = 1.0f;
+                H3Definition.ShieldMajorThreshold = 0.5f;
+                H3Definition.ShieldCriticalThreshold = 0.25f;
+                H3Definition.HealthMinorThreshold = 0.9f;
+                H3Definition.HealthMajorThreshold = 0.75f;
+                H3Definition.HealthCriticalThreshold = 0.5f;
+            }
+
+            //prevent crash when porting from odst
+            if (BlamCache.Version == CacheVersion.Halo3ODST)
+            {
+                try
+                {
+                    H3Definition.MotionSensorBlip = CacheContext.GetTag<Bitmap>(@"ui\chud\bitmaps\sensor_blips");
+                }
+                catch
+                {
+                    Console.WriteLine("WARNING: Motion sensor bitmap 'ui\\chud\\bitmaps\\sensor_blips' not found.");
+                }
+            }
+
+            //metagame values
+            H3Definition.CampaignMedalScale = 1.5f;
+            H3Definition.CampaignMedalSpacing = 60.0f;
 
             //upscale blip bitmap sizes
             H3Definition.LargeSensorBlipScale *= 1.5f;

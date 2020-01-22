@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -17,7 +18,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
         public class HudWidget : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
             public byte Unknown;
@@ -28,7 +29,7 @@ namespace TagTool.Tags.Definitions
             public List<RenderDatum> RenderData;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance ParallaxData;
+            public CachedTag ParallaxData;
 
             public List<BitmapWidget> BitmapWidgets;
             public List<TextWidget> TextWidgets;
@@ -760,7 +761,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x1C)]
             public class PlacementDatum : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public AnchorValue Anchor;
                 public short Unknown;
                 public RealPoint2d MirrorOffset;
@@ -782,22 +783,22 @@ namespace TagTool.Tags.Definitions
                     ScoreboardFriendly,
                     ScoreboardEnemy,
                     HealthAndShield,
-                    BottomEdge,
-                    Unknown,
-                    Equipment,
-                    Unknown2,
+                    BottomEdge, //same as center
+                    EquipmentXY, //uses both x and y offsets
+                    EquipmentY, //x offset always 0
+                    Unknown2, //same as center
                     Depreciated,
                     Depreciated2,
                     Depreciated3,
                     Depreciated4,
                     Depreciated5,
-                    Unknown3,
-                    Gametype,
+                    Notification, //uses notification offset in chgd
+                    Gametype, //bottom center
                     Unknown4,
                     StateRight,
                     StateLeft,
                     StateCenter,
-                    Unknown5,
+                    StateCenter2, //separate float for this in chgd
                     GametypeFriendly,
                     GametypeEnemy,
                     MetagameTop,
@@ -806,7 +807,12 @@ namespace TagTool.Tags.Definitions
                     MetagamePlayer3,
                     MetagamePlayer4,
                     Theater,
-                    Unknown6 //ODST
+                    Prompt, //ODST, corresponds to prompt offset in chgd
+                    HologramTarget, 
+                    Medals, //uses medal offset in chgd
+                    SurvivalMedals, //has values in chgd
+                    UnknownHO_Offset3, //has values in chgd
+                    MotionSensor
                 }
             }
 
@@ -817,42 +823,42 @@ namespace TagTool.Tags.Definitions
                 //HUD Initialize Animation
                 public AnimationFlags HUDInitializeFlags;
                 public AnimationFunction HUDInitializeFunction;
-                public CachedTagInstance HUDInitialize;
+                public CachedTag HUDInitialize;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float HUDInitializeUnknown;
 
                 //Idle Animation
                 public AnimationFlags IdleFlags;
                 public AnimationFunction IdleFunction;
-                public CachedTagInstance Idle;
+                public CachedTag Idle;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float IdleUnknown;
 
                 //Special State Animation
                 public AnimationFlags SpecialStateFlags;
                 public AnimationFunction SpecialStateFunction;
-                public CachedTagInstance SpecialState;
+                public CachedTag SpecialState;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float SpecialStateUnknown;
 
                 //Transition In Animation
                 public AnimationFlags TransitionInFlags;
                 public AnimationFunction TransitionInFunction;
-                public CachedTagInstance TransitionIn;
+                public CachedTag TransitionIn;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float TransitionInUnknown;
 
                 //Transition Out Animation
                 public AnimationFlags TransitionOutFlags;
                 public AnimationFunction TransitionOutFunction;
-                public CachedTagInstance TransitionOut;
+                public CachedTag TransitionOut;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float TransitionOutUnknown;
 
                 //Brief State Animation
                 public AnimationFlags BriefStateFlags;
                 public AnimationFunction BriefStateFunction;
-                public CachedTagInstance BriefState;
+                public CachedTag BriefState;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float BriefStateUnknown;
 
@@ -877,7 +883,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
             public class RenderDatum : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public ShaderIndexValue ShaderIndex;
                 public short Unknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -1147,7 +1153,6 @@ namespace TagTool.Tags.Definitions
                     Unknown2,
                     CompassDistanceToTarget,
                     CompassDistanceToTarget2,
-                    Unknown3,
                     SurvivalCurrentSet,
                     SurvivalCurrentRound,
                     SurvivalCurrentWave,
@@ -1311,6 +1316,7 @@ namespace TagTool.Tags.Definitions
                     GlobalDynamic16,
                     GlobalDynamic17,
                     GlobalDynamic18,
+                    BlueWaypoint_HO,
                     GlobalDynamic19,
                     GlobalDynamic20,
                     GlobalDynamic21,
@@ -1327,8 +1333,7 @@ namespace TagTool.Tags.Definitions
                     GlobalDynamic32,
                     GlobalDynamic33,
                     GlobalDynamic34,
-                    GlobalDynamic35,
-                    GlobalDynamic36
+                    GlobalDynamic35
                 }
                 
                 public enum OutputScalarValue : short
@@ -1347,7 +1352,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x54)]
             public class BitmapWidget : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
                 public byte Unknown;
@@ -1359,7 +1364,7 @@ namespace TagTool.Tags.Definitions
                 public int WidgetIndex;
                 public FlagsValue Flags;
                 public short Unknown3;
-                public CachedTagInstance Bitmap;
+                public CachedTag Bitmap;
                 public byte BitmapSpriteIndex;
                 public byte Unknown4;
                 public byte Unknown5;
@@ -1392,7 +1397,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
             public class TextWidget : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
                 public byte Unknown1;

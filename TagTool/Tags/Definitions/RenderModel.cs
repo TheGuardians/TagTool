@@ -3,12 +3,12 @@ using TagTool.Common;
 using TagTool.Geometry;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x84, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1D0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC)]
     public class RenderModel : TagStructure
 	{
         public StringId Name;
@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public short Version;
         public int Checksum;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1 = new byte[8];
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -57,7 +57,7 @@ namespace TagTool.Tags.Definitions
         public List<MarkerGroup> MarkerGroups;
         public List<RenderMaterial> Materials;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused; // "Errors" block
 
         public float DontDrawOverCameraCosineAngle;
@@ -82,9 +82,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<RuntimeNodeOrientation> RuntimeNodeOrientations;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public int Unknown1CC;
 
         [Flags]
         public enum FlagsValue : ushort
@@ -117,7 +114,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// The name of the region.
             /// </summary>
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
 
             /// <summary>
@@ -147,7 +144,7 @@ namespace TagTool.Tags.Definitions
                 /// <summary>
                 /// The name of the permutation as a string id.
                 /// </summary>
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
 
                 /// <summary>
@@ -204,7 +201,7 @@ namespace TagTool.Tags.Definitions
 		{
             public RenderGeometryClassification GlobalGeometryClassification;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public ushort TotalVertexCount;
@@ -234,15 +231,15 @@ namespace TagTool.Tags.Definitions
             public uint ResourceDataSize;
             public List<TagResourceGen2> Resources;
 
-            [TagField(Flags = TagFieldFlags.Short)]
-            public CachedTagInstance Original;
+            [TagField(Flags = Short)]
+            public CachedTag Original;
 
             public short OwnerTagSectionOffset;
             public byte RuntimeLinked;
             public byte RuntimeLoaded;
 
-            [TagField(Flags = TagFieldFlags.Short)]
-            public CachedTagInstance Runtime;
+            [TagField(Flags = Short)]
+            public CachedTag Runtime;
         }
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
@@ -391,15 +388,15 @@ namespace TagTool.Tags.Definitions
             public uint ResourceDataSize;
             public List<TagResourceGen2> Resources;
 
-            [TagField(Flags = TagFieldFlags.Short)]
-            public CachedTagInstance Original;
+            [TagField(Flags = Short)]
+            public CachedTag Original;
 
             public short OwnerTagSectionOffset;
             public byte RuntimeLinked;
             public byte RuntimeLoaded;
 
-            [TagField(Flags = TagFieldFlags.Short)]
-            public CachedTagInstance Runtime;
+            [TagField(Flags = Short)]
+            public CachedTag Runtime;
 
             [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
             public class LodInfoBlock : TagStructure

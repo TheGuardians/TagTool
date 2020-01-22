@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -9,8 +10,8 @@ namespace TagTool.Ai
     public class CharacterWeaponsProperties : TagStructure
 	{
         public CharacterWeaponFlags Flags;
-        [TagField(Flags = TagFieldFlags.Label)]
-        public CachedTagInstance Weapon;
+        [TagField(Flags = Label)]
+        public CachedTag Weapon;
         public float MaximumFiringRange;
         public float MinimumFiringRange;
         public Bounds<float> NormalCombatRange;
@@ -43,6 +44,6 @@ namespace TagTool.Ai
         public Bounds<float> LegendaryAccuracyBounds;
         public float LegendaryAccuracyTime;
         public List<CharacterFiringPattern> FiringPatterns;
-        public CachedTagInstance WeaponMeleeDamage;
+        public CachedTag WeaponMeleeDamage;
     }
 }

@@ -7,8 +7,8 @@ namespace TagTool.Ai
     [TagStructure(Size = 0xD0)]
     public class CharacterVehicleProperties : TagStructure
 	{
-        public CachedTagInstance Unit;
-        public CachedTagInstance Style;
+        public CachedTag Unit;
+        public CachedTag Style;
         public uint VehicleFlags;
         public float AiPathfindingRadius;
         public float AiDestinationRadius;

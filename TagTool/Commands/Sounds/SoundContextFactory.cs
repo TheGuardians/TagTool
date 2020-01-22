@@ -5,21 +5,26 @@ namespace TagTool.Commands.Sounds
 {
     static class SoundContextFactory
     {
-        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound sound)
+        public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, Sound sound)
         {
-            var groupName = cacheContext.GetString(tag.Group.Name);
+            var groupName = cache.StringTable.GetString(tag.Group.Name);
             var commandContext = new CommandContext(parent, string.Format("{0:X8}.{1}", tag.Index, groupName));
 
-            Populate(commandContext, cacheContext, tag, sound);
+            Populate(commandContext, cache, tag, sound);
 
             return commandContext;
         }
 
-        public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound sound)
+        public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, Sound sound)
         {
-            commandContext.AddCommand(new ImportSoundCommand(cacheContext, tag, sound));
-            commandContext.AddCommand(new ResourceDataCommand(cacheContext, tag, sound));
-            commandContext.AddCommand(new ExportSoundCommand(cacheContext, tag, sound));
+            commandContext.AddCommand(new ImportSoundCommand(cache, tag, sound));
+            commandContext.AddCommand(new ExportSoundCommand(cache, tag, sound));
+
+            if (cache.GetType() == typeof(GameCacheGen3))
+            {
+                var h3Cache = cache as GameCacheGen3;
+                commandContext.AddCommand(new ExtractXMACommand(h3Cache, tag, sound));
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -29,13 +30,14 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 32)]
             public string ImportName;
 
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public StringId Variant;
-            public CachedTagInstance PuppetAnimation;
-            public CachedTagInstance PuppetObject;
+            public CachedTag PuppetAnimation;
+            public CachedTag PuppetObject;
 
-            public int Unknown1;
+            public short Flags;
+            public short Unknown1;
             public int Unknown2;
             public int Unknown3;
 
@@ -56,7 +58,7 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown8;
                 public uint Unknown9;
                 public uint Unknown10;
-                public CachedTagInstance Unknown11;
+                public CachedTag Unknown11;
             }
         }
 
@@ -100,8 +102,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public uint Unknown;
 
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance CinematicLight;
+                [TagField(Flags = Label)]
+                public CachedTag CinematicLight;
                 public int OwnerPuppetIndex;
                 public StringId Marker;
             }
@@ -131,8 +133,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x24)]
             public class SoundBlock : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Sound;
+                [TagField(Flags = Label)]
+                public CachedTag Sound;
                 public int Frame;
                 public float Unknown1;
                 public StringId Unknown2;
@@ -144,16 +146,16 @@ namespace TagTool.Tags.Definitions
             public class BackgroundSoundBlock : TagStructure
 			{
                 public uint Unknown1;
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Sound;
+                [TagField(Flags = Label)]
+                public CachedTag Sound;
                 public int Frame;
             }
 
             [TagStructure(Size = 0x1C)]
             public class EffectBlock : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Effect;
+                [TagField(Flags = Label)]
+                public CachedTag Effect;
                 public int Frame;
                 public StringId Marker;
                 public int OwnerPuppetIndex;
@@ -163,7 +165,7 @@ namespace TagTool.Tags.Definitions
             public class FunctionBlock : TagStructure
 			{
                 public int OwnerPuppetIndex;
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId TargetFunctionName;
                 public List<UnknownBlock2> Unknown;
 
@@ -180,8 +182,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x18)]
             public class ScreenEffectBlock : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Effect;
+                [TagField(Flags = Label)]
+                public CachedTag Effect;
                 public int StartFrame;
                 public int EndFrame;
             }
@@ -189,8 +191,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x14)]
             public class CortanaEffectBlock : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Effect;
+                [TagField(Flags = Label)]
+                public CachedTag Effect;
                 public uint Unknown;
             }
 
@@ -235,7 +237,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class TextureCameraBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public StringId Unknown;
             public List<CameraShotBlock> Shots;

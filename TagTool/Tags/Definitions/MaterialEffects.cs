@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -20,13 +21,13 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3ODST)]
             public class EffectReference : TagStructure
 			{
-                public CachedTagInstance Effect;
-                public CachedTagInstance Sound;
+                public CachedTag Effect;
+                public CachedTag Sound;
                 public StringId MaterialName;
                 public short GlobalMaterialIndex;
                 public SweetenerModeValue SweetenerMode;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(Flags = Padding, Length = 1)]
                 public byte[] Unused;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]

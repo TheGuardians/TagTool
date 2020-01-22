@@ -1,4 +1,6 @@
-﻿using TagTool.Cache;
+﻿using System.IO;
+using TagTool.Cache;
+using TagTool.Commands.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
@@ -6,22 +8,27 @@ namespace TagTool.Commands.Porting
 {
     static class PortingContextFactory
     {
-        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        public static CommandContext Create(CommandContextStack contextStack, GameCache currentCache, GameCache portingCache)
         {
-            var context = new CommandContext(contextStack.Context, blamCache.Header.ScenarioPath);
+            var context = new CommandContext(contextStack.Context, portingCache.DisplayName + "\\tags");
 
-            Populate(contextStack, context, cacheContext, blamCache);
+            // only support gen3 to HO porting for now, add more later
+            if(portingCache.GetType() == typeof(GameCacheGen3) && currentCache is GameCacheHaloOnlineBase)
+                Populate(contextStack, context, currentCache, portingCache);
+
+            // add tags command to the new cache
+            TagCacheContextFactory.Populate(contextStack, context, portingCache);
 
             return context;
         }
         
-        public static SoundCacheFileGestalt LoadSoundGestalt(HaloOnlineCacheContext cacheContext, ref CacheFile blamCache)
+        public static SoundCacheFileGestalt LoadSoundGestalt(GameCache cache, Stream cacheStream)
         {
-            CacheFile.IndexItem blamTag = null;
+            CachedTag blamTag = null;
 
-            foreach (var tag in blamCache.IndexItems)
+            foreach (var tag in cache.TagCache.TagTable)
             {
-                if (tag.GroupTag == "ugh!")
+                if (tag.Group.Tag == "ugh!")
                 {
                     blamTag = tag;
                     break;
@@ -31,30 +38,21 @@ namespace TagTool.Commands.Porting
             if (blamTag == null)
                 return null;
 
-            var blamContext = new CacheSerializationContext(ref blamCache, blamTag);
-            var ugh = blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
-
-            //
-            // Apply conversion to ugh! data (gain increase and such)
-            //
-
-            return ugh;
+            SoundCacheFileGestalt result = cache.Deserialize<SoundCacheFileGestalt>(cacheStream, blamTag);
+            
+            return result;
         }
 
-        public static void Populate(CommandContextStack contextStack, CommandContext context, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)
         {
-            var portTagCommand = new PortTagCommand(cacheContext, blamCache);
-
-            context.AddCommand(portTagCommand);
-            context.AddCommand(new ExtractXMACommand(cacheContext, blamCache));
-            context.AddCommand(new ExtractSoundCommand(cacheContext, blamCache));
-            context.AddCommand(new ExtractBitmapCommand(blamCache));
-            context.AddCommand(new EditTagCommand(contextStack, blamCache));
-            context.AddCommand(new ListBlamTagsCommand(cacheContext, blamCache));
-            context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
-            context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
-            context.AddCommand(new NameBlamTagCommand(cacheContext, blamCache));
-            context.AddCommand(new MergeAnimationGraphsCommand(cacheContext, blamCache, portTagCommand));
-		}
-	}
+            if(currentCache is GameCacheHaloOnlineBase hoCache)
+            {
+                var portTagCommand = new PortTagCommand(hoCache, portingCache);
+                context.AddCommand(portTagCommand);
+                context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portTagCommand));
+                context.AddCommand(new PortMultiplayerEventsCommand(hoCache, portingCache));
+                context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand));
+            }
+        }
+    }
 }

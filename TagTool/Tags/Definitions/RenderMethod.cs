@@ -1,13 +1,14 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40)]
     public class RenderMethod : TagStructure
     {
-        public CachedTagInstance BaseRenderMethod;
+        public CachedTag BaseRenderMethod;
         public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
         public List<ImportDatum> ImportData;
         public List<ShaderProperty> ShaderProperties;
@@ -30,7 +31,7 @@ namespace TagTool.Tags.Definitions
             // TODO: determine if this is an enum or an index
             public int Type;
 
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId InputName;
 
             public StringId RangeName;
@@ -43,11 +44,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x3C)]
         public class ImportDatum : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
 
             public RenderMethodOption.OptionBlock.OptionDataType Type;
-            public CachedTagInstance Bitmap;
+            public CachedTag Bitmap;
             public uint Unknown2;
             public int Unknown3;
             public short Unknown4;
@@ -63,11 +64,12 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x84)]
         public class ShaderProperty : TagStructure
         {
-            public CachedTagInstance Template;
+            public CachedTag Template;
             public List<ShaderMap> ShaderMaps;
             public List<Argument> Arguments;
             public List<UnknownBlock1> Unknown;
-            public uint Unknown2;
+            public ushort DisableBooleanArg;
+            public short Unknown2;
             public List<RenderMethodTemplate.DrawMode> DrawModes;
             public List<UnknownBlock3> Unknown3;
             public List<ArgumentMapping> ArgumentMappings;
@@ -87,8 +89,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x18)]
             public class ShaderMap : TagStructure
             {
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Bitmap;
+                [TagField(Flags = Label)]
+                public CachedTag Bitmap;
                 public sbyte Unknown;
                 public sbyte BitmapIndex;
                 public sbyte Unknown2;

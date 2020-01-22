@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Scripting;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
 {
     class DumpScriptsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
         private Scenario Definition { get; }
 
-        public DumpScriptsCommand(HaloOnlineCacheContext cacheContext, Scenario definition) :
+        public DumpScriptsCommand(Scenario definition) :
             base(true,
                 
                 "DumpScripts",
@@ -22,7 +22,6 @@ namespace TagTool.Commands.Scenarios
 
                 "Extract a scenario's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.")
         {
-            CacheContext = cacheContext;
             Definition = definition;
         }
 
@@ -50,8 +49,6 @@ namespace TagTool.Commands.Scenarios
         {
             if (args.Count > 1)
                 return false;
-
-            var PortTagCommand = new Porting.PortTagCommand(CacheContext, null);
 
             var csvFileName = "scriptsDumpOutput.csv";
 
@@ -103,22 +100,22 @@ namespace TagTool.Commands.Scenarios
 
                 var scriptGroupName = "";
                 if (expr.NextExpressionHandle == DatumIndex.None &&
-                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
+                    expr.Flags == Scripting.HsSyntaxNodeFlags.Group &&
                     expr.Opcode == 0x0)
                 {
-                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Salt);
+                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Identifier);
                     if (ScriptGroupName != null)
                         scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
                 }
 
-                var ExpressionHandle = new DatumIndex((uint)((expr.Salt << 16) + i));
+                var ExpressionHandle = new DatumIndex((uint)((expr.Identifier << 16) + i));
 
                 if (globals.ContainsKey(ExpressionHandle))
                     scriptGroupName = $"G:{globals[ExpressionHandle]}";
 
                 var opcodeName = "";
 
-                if (PortTagCommand.ScriptExpressionIsValue(expr))
+                if (ScriptExpressionIsValue(expr))
                 {
                     if (Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
                         opcodeName = $"{Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708][expr.Opcode]},value";
@@ -129,10 +126,10 @@ namespace TagTool.Commands.Scenarios
                         opcodeName = Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708][expr.Opcode].Name;
                 }
 
-                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                if (expr.Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
-                if (Definition.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                if (i > 0 && Definition.ScriptExpressions[i - 1].Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
                 var ValueType = "";
@@ -141,14 +138,14 @@ namespace TagTool.Commands.Scenarios
 
                 CsvAdd(
                     $"{i:D8}," +
-                    $"{expr.Salt:X4}{i:X4}," +
-                    $"{expr.NextExpressionHandle:X8}," +
+                    $"{((expr.Identifier << 16) | i):X8}," +
+                    $"{expr.NextExpressionHandle.Value:X8}," +
                     $"{expr.Opcode:X4}," +
                     $"{expr.Data[0]:X2}" +
                     $"{expr.Data[1]:X2}" +
                     $"{expr.Data[2]:X2}" +
                     $"{expr.Data[3]:X2}," +
-                    $"{expr.ExpressionType}," +
+                    $"{expr.Flags}," +
                     $"{ValueType}," +
                     $"{opcodeName}," +
                     $"{scriptGroupName}" +
@@ -158,6 +155,29 @@ namespace TagTool.Commands.Scenarios
             CsvDumpQueueToFile(csvQueue1, csvFileName);
 
             return true;
+        }
+
+        public bool ScriptExpressionIsValue(HsSyntaxNode expr)
+        {
+            switch (expr.Flags)
+            {
+                case HsSyntaxNodeFlags.ParameterReference:
+                case HsSyntaxNodeFlags.GlobalsReference:
+                    return true;
+
+                case HsSyntaxNodeFlags.Expression:
+                    if ((int)expr.ValueType.HaloOnline > 0x4)
+                        return true;
+                    else
+                        return false;
+
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
+                case HsSyntaxNodeFlags.Group:
+                    return false;
+
+                default:
+                    return false;
+            }
         }
     }
 }

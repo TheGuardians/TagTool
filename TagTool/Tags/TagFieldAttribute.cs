@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -15,7 +16,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The flags of the field.
         /// </summary>
-        public TagFieldFlags Flags { get; set; } = TagFieldFlags.None;
+        public TagFieldFlags Flags { get; set; } = None;
 
         /// <summary>
         /// The minimum cache version the tag field is present in.
@@ -31,6 +32,11 @@ namespace TagTool.Tags
         /// The tag field version.
         /// </summary>
         public CacheVersion Version { get; set; } = CacheVersion.Unknown;
+
+        /// <summary>
+        /// The game generation of the tag field. (1 = Halo, 2 = Halo 2, 3 = Halo 3, ODST, Reach, 4 = Halo Online)
+        /// </summary>
+        public CacheGeneration Gen { get; set; } = CacheGeneration.Unknown;
 
         /// <summary>
         /// The name of the field to upgrade to (if any).
@@ -69,6 +75,16 @@ namespace TagTool.Tags
         /// (i.e., world units, [0,1], degrees, etc...)
         /// </summary>
         public string Format { get; set; } = "";
+
+        /// <summary>
+        /// If the field is an array and has relative length, the name of the field containing the length.
+        /// </summary>
+        public string Field { get; set; } = "";
+
+        /// <summary>
+        /// If the field is a real number, the compression of the field.
+        /// </summary>
+        public TagFieldCompression Compression { get; set; } = TagFieldCompression.None;
     }
 
     [Flags]
@@ -80,7 +96,16 @@ namespace TagTool.Tags
         Padding = 1 << 2,
         Pointer = 1 << 3,
         Runtime = 1 << 4,
-        Fraction = 1 << 5,
-        Resource = 1 << 6,
+        Relative = 1 << 5,
+        Fraction = 1 << 6,
+        Resource = 1 << 7,
+    }
+
+    public enum TagFieldCompression
+    {
+        None,
+        Int8,
+        Int16,
+        Int32
     }
 }

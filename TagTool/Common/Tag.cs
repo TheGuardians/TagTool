@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
+using TagTool.Cache;
+using TagTool.Tags;
 
 namespace TagTool.Common
 {
@@ -46,7 +49,14 @@ namespace TagTool.Common
             var chars = new char[4] { ' ', ' ', ' ', ' ' };
 
             for (var i = 0; i < input.Length; i++)
-                chars[i] = input[i];
+            {
+                // hackfix to make h3 not crash
+                if (input[i] == 0)
+                    chars[i] = (char)0x20;
+                else
+                    chars[i] = input[i];
+            }
+                
 
             Value = 0;
             foreach (var c in chars)
@@ -78,6 +88,75 @@ namespace TagTool.Common
                 val >>= 8;
             }
             return (i < 4) ? new string(chars, i, chars.Length - i) : "";
+        }
+
+        public static Tag Parse(GameCache cache, string name)
+        {
+            if (name == "****" || name == "null")
+                return Null;
+
+            if (name.Length < 4)
+            {
+                if (name.Length == 3)
+                    name = $"{name} ";
+                else if (name.Length == 2)
+                    name = $"{name}  ";
+            }
+
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                return new Tag(attribute.Tag);
+            }
+
+            foreach (var pair in TagGroup.Instances)
+                if (name == cache.StringTable.GetString(pair.Value.Name))
+                    return pair.Value.Tag;
+
+            return Null;
+        }
+
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 1)
+            {
+                error = $"{args.Count} arguments supplied; should be 1";
+                return false;
+            }
+            else if (!cache.TryParseGroupTag(args[0], out Tag groupTag))
+            {
+                error = $"Invalid tag group specifier: {args[0]}";
+                return false;
+            }
+            else
+            {
+                result = groupTag;
+                error = null;
+                return true;
+            }
+        }
+
+        public static bool TryParseGroupTag(GameCache cache, string name, out Tag result)
+        {
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                result = new Tag(attribute.Tag);
+                return true;
+            }
+
+            foreach (var pair in TagGroup.Instances)
+            {
+                if (name == cache.StringTable.GetString(pair.Value.Name))
+                {
+                    result = pair.Value.Tag;
+                    return true;
+                }
+            }
+
+            result = Tag.Null;
+            return name == "none" || name == "null";
         }
 
         public override bool Equals(object obj)
@@ -117,5 +196,7 @@ namespace TagTool.Common
         {
             return Value - other.Value;
         }
+
+        public static implicit operator Tag(string tagString) => new Tag(tagString);
     }
 }

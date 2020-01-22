@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,41 +9,20 @@ namespace TagTool.Tags.Definitions
     public class GuiListWidgetDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYOffset;
-        public short WidescreenXOffset;
-        public short WidescreenYUnknown;
-        public short WidescreenXUnknown;
-        public short StandardYOffset;
-        public short StandardXOffset;
-        public short StandardYUnknown;
-        public short StandardXUnknown;
-        public CachedTagInstance Animation;
+        public GuiDefinition GuiRenderBlock;
+
         public StringId DataSourceName;
-        public CachedTagInstance Skin;
+        public CachedTag Skin;
         public int RowCount;
         public List<ListWidgetItem> ListWidgetItems;
-        public CachedTagInstance UpArrowBitmap;
-        public CachedTagInstance DownArrowBitmap;
+        public CachedTag UpArrowBitmap;
+        public CachedTag DownArrowBitmap;
 
         [TagStructure(Size = 0x30)]
         public class ListWidgetItem : TagStructure
 		{
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYOffset;
-            public short WidescreenXOffset;
-            public short WidescreenYUnknown;
-            public short WidescreenXUnknown;
-            public short StandardYOffset;
-            public short StandardXOffset;
-            public short StandardYUnknown;
-            public short StandardXUnknown;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public StringId Target;
         }
     }

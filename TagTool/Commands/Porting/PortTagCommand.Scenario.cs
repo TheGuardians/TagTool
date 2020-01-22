@@ -10,6 +10,7 @@ using TagTool.Scripting;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {
@@ -17,7 +18,7 @@ namespace TagTool.Commands.Porting
     {
         private Scenario CurrentScenario = null;
 
-        private Scenario ConvertScenario(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
+        private Scenario ConvertScenario(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
             CurrentScenario = scnr;
 
@@ -37,161 +38,18 @@ namespace TagTool.Commands.Porting
                 {
                     Console.Write($"{bspIndex}, ");
 
-                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(
-                        new TagSerializationContext(cacheStream, CacheContext, scnr.StructureBsps[bspIndex].StructureBsp));
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[bspIndex].StructureBsp);
 
                     StructureBspCacheFileTagResources pathfindingBsp = null;
 
                     if (sbsp.PathfindingResource != null)
                     {
-                        pathfindingBsp = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(
-                            new ResourceSerializationContext(CacheContext, sbsp.PathfindingResource));
+                        pathfindingBsp = CacheContext.ResourceCache.GetStructureBspCacheFileTagResources(sbsp.PathfindingResource);
 
-                        using (var resourceStream = new MemoryStream())
-                        using (var resourceReader = new EndianReader(resourceStream))
-                        {
-                            if (!sbsp.PathfindingResource.GetLocation(out var location))
-                                throw new NullReferenceException();
+                        if (!sbsp.PathfindingResource.HaloOnlinePageableResource.GetLocation(out var location))
+                            throw new NullReferenceException();
 
-                            var resourceCache = CacheContext.GetResourceCache(location);
-
-                            if (!resourceStreams.ContainsKey(location))
-                            {
-                                resourceStreams[location] = FlagIsSet(PortingFlags.Memory) ?
-                                    new MemoryStream() :
-                                    (Stream)CacheContext.OpenResourceCacheReadWrite(location);
-
-                                if (FlagIsSet(PortingFlags.Memory))
-                                    using (var stream = CacheContext.OpenResourceCacheRead(location))
-                                        stream.CopyTo(resourceStreams[location]);
-                            }
-
-                            CacheContext.ExtractResource(resourceStreams[location], sbsp.PathfindingResource, resourceStream);
-
-                            var resourceDataContext = new DataSerializationContext(resourceReader);
-
-                            resourceStream.Position = pathfindingBsp.UnknownRaw6ths.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.UnknownRaw6ths.Count; i++)
-                            {
-                                var UnknownRaw6th = CacheContext.Deserialize<ScenarioStructureBsp.UnknownRaw6th>(resourceDataContext);
-                                pathfindingBsp.UnknownRaw6ths.Add(UnknownRaw6th);
-                            }
-
-                            resourceStream.Position = pathfindingBsp.Planes.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.Planes.Count; i++)
-                            {
-                                var Plane = CacheContext.Deserialize<ScenarioStructureBsp.Plane>(resourceDataContext);
-                                pathfindingBsp.Planes.Add(Plane);
-                            }
-
-                            resourceStream.Position = pathfindingBsp.UnknownRaw7ths.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.UnknownRaw7ths.Count; i++)
-                            {
-                                var UnknownRaw7th = CacheContext.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(resourceDataContext);
-                                pathfindingBsp.UnknownRaw7ths.Add(UnknownRaw7th);
-                            }
-
-                            foreach (var pathfinding in pathfindingBsp.PathfindingData)
-                            {
-                                resourceStream.Position = pathfinding.Sectors.Address.Offset;
-                                for (var i = 0; i < pathfinding.Sectors.Count; i++)
-                                {
-                                    var Sector = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(resourceDataContext);
-                                    pathfinding.Sectors.Add(Sector);
-                                }
-
-                                resourceStream.Position = pathfinding.Links.Address.Offset;
-                                for (var i = 0; i < pathfinding.Links.Count; i++)
-                                {
-                                    var Link = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(resourceDataContext);
-                                    pathfinding.Links.Add(Link);
-                                }
-
-                                resourceStream.Position = pathfinding.References.Address.Offset;
-                                for (var i = 0; i < pathfinding.References.Count; i++)
-                                {
-                                    var Reference = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(resourceDataContext);
-                                    pathfinding.References.Add(Reference);
-                                }
-
-                                resourceStream.Position = pathfinding.Bsp2dNodes.Address.Offset;
-                                for (var i = 0; i < pathfinding.Bsp2dNodes.Count; i++)
-                                {
-                                    var Bsp2dNode = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(resourceDataContext);
-                                    pathfinding.Bsp2dNodes.Add(Bsp2dNode);
-                                }
-
-                                resourceStream.Position = pathfinding.Vertices.Address.Offset;
-                                for (var i = 0; i < pathfinding.Vertices.Count; i++)
-                                {
-                                    var Vertex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(resourceDataContext);
-                                    pathfinding.Vertices.Add(Vertex);
-                                }
-
-                                foreach (var objectReference in pathfinding.ObjectReferences)
-                                {
-                                    foreach (var bsp in objectReference.Bsps)
-                                    {
-                                        resourceStream.Position = bsp.Bsp2dRefs.Address.Offset;
-                                        for (var i = 0; i < bsp.Bsp2dRefs.Count; i++)
-                                        {
-                                            var Bsp2dRef = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(resourceDataContext);
-                                            bsp.Bsp2dRefs.Add(Bsp2dRef);
-                                        }
-                                    }
-                                }
-
-                                resourceStream.Position = pathfinding.PathfindingHints.Address.Offset;
-                                for (var i = 0; i < pathfinding.PathfindingHints.Count; i++)
-                                {
-                                    var PathfindingHint = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(resourceDataContext);
-                                    pathfinding.PathfindingHints.Add(PathfindingHint);
-                                }
-
-                                resourceStream.Position = pathfinding.InstancedGeometryReferences.Address.Offset;
-                                for (var i = 0; i < pathfinding.InstancedGeometryReferences.Count; i++)
-                                {
-                                    var InstancedGeometryReference = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(resourceDataContext);
-                                    pathfinding.InstancedGeometryReferences.Add(InstancedGeometryReference);
-                                }
-
-                                resourceStream.Position = pathfinding.GiantPathfinding.Address.Offset;
-                                for (var i = 0; i < pathfinding.GiantPathfinding.Count; i++)
-                                {
-                                    var GiantPathfinding = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock>(resourceDataContext);
-                                    pathfinding.GiantPathfinding.Add(GiantPathfinding);
-                                }
-
-                                foreach (var seam in pathfinding.Seams)
-                                {
-                                    resourceStream.Position = seam.LinkIndices.Address.Offset;
-                                    for (var i = 0; i < seam.LinkIndices.Count; i++)
-                                    {
-                                        var LinkIndex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(resourceDataContext);
-                                        seam.LinkIndices.Add(LinkIndex);
-                                    }
-                                }
-
-                                foreach (var jumpSeam in pathfinding.JumpSeams)
-                                {
-                                    resourceStream.Position = jumpSeam.JumpIndices.Address.Offset;
-                                    for (var i = 0; i < jumpSeam.JumpIndices.Count; i++)
-                                    {
-                                        var JumpIndex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(resourceDataContext);
-                                        jumpSeam.JumpIndices.Add(JumpIndex);
-                                    }
-                                }
-
-                                resourceStream.Position = pathfinding.Doors.Address.Offset;
-                                for (var i = 0; i < pathfinding.Doors.Count; i++)
-                                {
-                                    var Door = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(resourceDataContext);
-                                    pathfinding.Doors.Add(Door);
-                                }
-                            }
-                        }
                     }
-
                     pathfindingBsps.Add(pathfindingBsp);
                 }
 
@@ -236,12 +94,12 @@ namespace TagTool.Commands.Porting
                                 {
                                     using (var reader = new EndianReader(cacheStream, true))
                                     {
-                                        cacheStream.Position = entry.Instance.HeaderOffset + entry.Instance.DefinitionOffset + 32;
+                                        cacheStream.Position = entry.Instance.DefinitionOffset + entry.Instance.DefinitionOffset + 32;
                                         unitIndex = reader.ReadInt32();
                                     }
                                 }
 
-                                if (unitIndex != -1 && (CacheContext.GetTag(unitIndex)?.IsInGroup<Giant>() ?? false))
+                                if (unitIndex != -1 && (CacheContext.TagCache.GetTag(unitIndex)?.IsInGroup("gint") ?? false))
                                     scnr.Zones[squad.InitialZoneIndex].FlagsNew |= Scenario.Zone.ZoneFlagsNew.GiantsZone;
                             }
                         }
@@ -375,9 +233,10 @@ namespace TagTool.Commands.Porting
                         var area = zone.Areas[areaIndex];
 
                         area.ManualReferenceFrameNew = area.ManualReferenceFrameOld;
-                        area.AreaTypeNew = area.AreaTypeOld;
-                        area.Points = new List<Scenario.Zone.Area.Point>();
-                        /*{
+                        //This is definitely a bsp index, not an area type
+                        area.BSPIndex = zone.ManualBspIndex;
+                        area.Points = new List<Scenario.Zone.Area.Point>()
+                        {
                             new Scenario.Zone.Area.Point
                             {
                                 Position = new RealPoint3d(
@@ -385,7 +244,7 @@ namespace TagTool.Commands.Porting
                                     area.RuntimeRelativeMeanPoint.Y - area.RuntimeStandardDeviation,
                                     area.RuntimeRelativeMeanPoint.Z),
                                 ReferenceFrame = -1,
-                                BspIndex = 0, // TODO: find the proper bsp index
+                                BspIndex = area.BSPIndex, // TODO: find the proper bsp index
                                 Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             },
                             new Scenario.Zone.Area.Point
@@ -395,7 +254,7 @@ namespace TagTool.Commands.Porting
                                     area.RuntimeRelativeMeanPoint.Y - area.RuntimeStandardDeviation,
                                     area.RuntimeRelativeMeanPoint.Z),
                                 ReferenceFrame = -1,
-                                BspIndex = 0, // TODO: find the proper bsp index
+                                BspIndex = area.BSPIndex, // TODO: find the proper bsp index
                                 Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             },
                             new Scenario.Zone.Area.Point
@@ -405,7 +264,7 @@ namespace TagTool.Commands.Porting
                                     area.RuntimeRelativeMeanPoint.Y + area.RuntimeStandardDeviation,
                                     area.RuntimeRelativeMeanPoint.Z),
                                 ReferenceFrame = -1,
-                                BspIndex = 0, // TODO: find the proper bsp index
+                                BspIndex = area.BSPIndex, // TODO: find the proper bsp index
                                 Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             },
                             new Scenario.Zone.Area.Point
@@ -415,10 +274,10 @@ namespace TagTool.Commands.Porting
                                     area.RuntimeRelativeMeanPoint.Y + area.RuntimeStandardDeviation,
                                     area.RuntimeRelativeMeanPoint.Z),
                                 ReferenceFrame = -1,
-                                BspIndex = 0, // TODO: find the proper bsp index
+                                BspIndex = area.BSPIndex, // TODO: find the proper bsp index
                                 Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             }
-                        };*/
+                        };
 
                         var sectors = new List<(short, short)>();
 
@@ -737,29 +596,29 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var global in scnr.Globals)
                 {
-                    ConvertScriptValueType(global.Type);
+                    ConvertHsType(global.Type);
                 }
 
                 foreach (var script in scnr.Scripts)
                 {
-                    ConvertScriptValueType(script.ReturnType);
+                    ConvertHsType(script.ReturnType);
 
                     foreach (var parameter in script.Parameters)
-                        ConvertScriptValueType(parameter.Type);
+                        ConvertHsType(parameter.Type);
                 }
 
                 foreach (var expr in scnr.ScriptExpressions)
                 {
-                    ConvertScriptExpression(cacheStream, resourceStreams, scnr, expr);
+                    ConvertScriptExpression(cacheStream, blamCacheStream, resourceStreams, scnr, expr);
                 }
 
                 AdjustScripts(scnr, tagName);
             }
             else
             {
-                scnr.Globals = new List<ScriptGlobal>();
-                scnr.Scripts = new List<Script>();
-                scnr.ScriptExpressions = new List<ScriptExpression>();
+                scnr.Globals = new List<HsGlobal>();
+                scnr.Scripts = new List<HsScript>();
+                scnr.ScriptExpressions = new List<HsSyntaxNode>();
             }
 
             return scnr;
@@ -797,54 +656,51 @@ namespace TagTool.Commands.Porting
             return new RealEulerAngles3d(Angle.FromRadians(x2), Angle.FromRadians(y2), Angle.FromRadians(z2));
         }
 
-        public void ConvertScriptExpression(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, ScriptExpression expr)
+        public void ConvertScriptExpression(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, HsSyntaxNode expr)
         {
             if (expr.Opcode == 0xBABA)
                 return;
 
-            ConvertScriptValueType(expr.ValueType);
+            ConvertHsType(expr.ValueType);
 
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.Expression:
-                case ScriptExpressionType.Group:
-                case ScriptExpressionType.GlobalsReference:
-                case ScriptExpressionType.ParameterReference:
+                case HsSyntaxNodeFlags.Expression:
+                case HsSyntaxNodeFlags.Group:
+                case HsSyntaxNodeFlags.GlobalsReference:
+                case HsSyntaxNodeFlags.ParameterReference:
                     if (ScriptExpressionIsValue(expr))
                         ConvertScriptValueOpcode(expr);
-                    else
-                    {
-                        if (!ConvertScriptUsingPresets(scnr, expr))
-                            ConvertScriptExpressionOpcode(scnr, expr);
-                    }
+                    else if (!ConvertScriptUsingPresets(cacheStream, scnr, expr))
+                        ConvertScriptExpressionOpcode(scnr, expr);
                     break;
 
-                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
                     break;
 
                 default:
                     break;
             }
 
-            ConvertScriptExpressionData(cacheStream, resourceStreams, expr);
+            ConvertScriptExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
         }
 
-        public bool ScriptExpressionIsValue(ScriptExpression expr)
+        public bool ScriptExpressionIsValue(HsSyntaxNode expr)
         {
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.ParameterReference:
-                case ScriptExpressionType.GlobalsReference:
+                case HsSyntaxNodeFlags.ParameterReference:
+                case HsSyntaxNodeFlags.GlobalsReference:
                     return true;
 
-                case ScriptExpressionType.Expression:
+                case HsSyntaxNodeFlags.Expression:
                     if ((int)expr.ValueType.HaloOnline > 0x4)
                         return true;
                     else
                         return false;
 
-                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
-                case ScriptExpressionType.Group:
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
+                case HsSyntaxNodeFlags.Group:
                     return false;
 
                 default:
@@ -852,7 +708,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public void ConvertScriptValueType(ScriptValueType type)
+        public void ConvertHsType(HsType type)
         {
             if (!Enum.TryParse(
                 BlamCache.Version == CacheVersion.Halo3Retail ?
@@ -867,23 +723,23 @@ namespace TagTool.Commands.Porting
             }
 
             if ((int)type.HaloOnline == 255)
-                type.HaloOnline = ScriptValueType.HaloOnlineValue.Invalid;
+                type.HaloOnline = HsType.HaloOnlineValue.Invalid;
         }
 
-        public void ConvertScriptValueOpcode(ScriptExpression expr)
+        public void ConvertScriptValueOpcode(HsSyntaxNode expr)
         {
             if (expr.Opcode == 0xFFFF || expr.Opcode == 0xBABA || expr.Opcode == 0x0000)
                 return;
 
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.Expression:
-                case ScriptExpressionType.Group:
-                case ScriptExpressionType.GlobalsReference:
-                case ScriptExpressionType.ParameterReference:
+                case HsSyntaxNodeFlags.Expression:
+                case HsSyntaxNodeFlags.Group:
+                case HsSyntaxNodeFlags.GlobalsReference:
+                case HsSyntaxNodeFlags.ParameterReference:
                     break;
 
-                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
                     return;
 
                 default:
@@ -909,7 +765,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public void ConvertScriptExpressionUnsupportedOpcode(ScriptExpression expr)
+        public void ConvertScriptExpressionUnsupportedOpcode(HsSyntaxNode expr)
         {
             if (expr.Opcode == 0xBABA || expr.Opcode == 0xCDCD)
                 return;
@@ -917,26 +773,26 @@ namespace TagTool.Commands.Porting
             expr.Opcode = 0x000; // begin
         }
 
-        public void ConvertScriptExpressionOpcode(Scenario scnr, ScriptExpression expr)
+        public void ConvertScriptExpressionOpcode(Scenario scnr, HsSyntaxNode expr)
         {
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.Expression:
-                    if (expr.ExpressionType == ScriptExpressionType.ScriptReference)
+                case HsSyntaxNodeFlags.Expression:
+                    if (expr.Flags == HsSyntaxNodeFlags.ScriptReference)
                         return;
 
                     // If the previous scriptExpr is a scriptRef, don't convert. The opcode is the script reference. They always come in pairs.
-                    if (scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) - 1].ExpressionType == ScriptExpressionType.ScriptReference)
+                    if (scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) - 1].Flags == HsSyntaxNodeFlags.ScriptReference)
                         return;
 
                     break;
 
-                case ScriptExpressionType.Group:
+                case HsSyntaxNodeFlags.Group:
                     break;
 
-                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
-                case ScriptExpressionType.GlobalsReference: // The opcode is the tagblock index of the global it uses. Don't convert opcode
-                case ScriptExpressionType.ParameterReference: // Probably as above
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
+                case HsSyntaxNodeFlags.GlobalsReference: // The opcode is the tagblock index of the global it uses. Don't convert opcode
+                case HsSyntaxNodeFlags.ParameterReference: // Probably as above
                     return;
 
                 default:
@@ -961,14 +817,14 @@ namespace TagTool.Commands.Porting
                 if (newScript.Name != blamScript.Name)
                     continue;
 
-                if (newScript.Arguments.Count != blamScript.Arguments.Count)
+                if (newScript.Parameters.Count != blamScript.Parameters.Count)
                     continue;
 
                 match = true;
 
-                for (var k = 0; k < newScript.Arguments.Count; k++)
+                for (var k = 0; k < newScript.Parameters.Count; k++)
                 {
-                    if (newScript.Arguments[k].Type != blamScript.Arguments[k].Type)
+                    if (newScript.Parameters[k].Type != blamScript.Parameters[k].Type)
                     {
                         match = false;
                         break;
@@ -991,34 +847,34 @@ namespace TagTool.Commands.Porting
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
 
-        public void ConvertScriptExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
+        public void ConvertScriptExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
-            if (expr.ExpressionType == ScriptExpressionType.Expression)
+            if (expr.Flags == HsSyntaxNodeFlags.Expression)
                 switch (expr.ValueType.HaloOnline)
                 {
-                    case ScriptValueType.HaloOnlineValue.Sound:
-                    case ScriptValueType.HaloOnlineValue.Effect:
-                    case ScriptValueType.HaloOnlineValue.Damage:
-                    case ScriptValueType.HaloOnlineValue.LoopingSound:
-                    case ScriptValueType.HaloOnlineValue.AnimationGraph:
-                    case ScriptValueType.HaloOnlineValue.DamageEffect:
-                    case ScriptValueType.HaloOnlineValue.ObjectDefinition:
-                    case ScriptValueType.HaloOnlineValue.Bitmap:
-                    case ScriptValueType.HaloOnlineValue.Shader:
-                    case ScriptValueType.HaloOnlineValue.RenderModel:
-                    case ScriptValueType.HaloOnlineValue.StructureDefinition:
-                    case ScriptValueType.HaloOnlineValue.LightmapDefinition:
-                    case ScriptValueType.HaloOnlineValue.CinematicDefinition:
-                    case ScriptValueType.HaloOnlineValue.CinematicSceneDefinition:
-                    case ScriptValueType.HaloOnlineValue.BinkDefinition:
-                    case ScriptValueType.HaloOnlineValue.AnyTag:
-                    case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
-                        ConvertScriptTagReferenceExpressionData(cacheStream, resourceStreams, expr);
+                    case HsType.HaloOnlineValue.Sound:
+                    case HsType.HaloOnlineValue.Effect:
+                    case HsType.HaloOnlineValue.Damage:
+                    case HsType.HaloOnlineValue.LoopingSound:
+                    case HsType.HaloOnlineValue.AnimationGraph:
+                    case HsType.HaloOnlineValue.DamageEffect:
+                    case HsType.HaloOnlineValue.ObjectDefinition:
+                    case HsType.HaloOnlineValue.Bitmap:
+                    case HsType.HaloOnlineValue.Shader:
+                    case HsType.HaloOnlineValue.RenderModel:
+                    case HsType.HaloOnlineValue.StructureDefinition:
+                    case HsType.HaloOnlineValue.LightmapDefinition:
+                    case HsType.HaloOnlineValue.CinematicDefinition:
+                    case HsType.HaloOnlineValue.CinematicSceneDefinition:
+                    case HsType.HaloOnlineValue.BinkDefinition:
+                    case HsType.HaloOnlineValue.AnyTag:
+                    case HsType.HaloOnlineValue.AnyTagNotResolving:
+                        ConvertScriptTagReferenceExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
 
-                    case ScriptValueType.HaloOnlineValue.AiLine:
-                    case ScriptValueType.HaloOnlineValue.StringId:
-                        ConvertScriptStringIdExpressionData(cacheStream, resourceStreams, expr);
+                    case HsType.HaloOnlineValue.AiLine:
+                    case HsType.HaloOnlineValue.StringId:
+                        ConvertScriptStringIdExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
 
                     default:
@@ -1027,22 +883,22 @@ namespace TagTool.Commands.Porting
 
             var dataSize = 4;
 
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.Expression:
+                case HsSyntaxNodeFlags.Expression:
                     switch (expr.ValueType.HaloOnline)
                     {
-                        case ScriptValueType.HaloOnlineValue.Object:
-                        case ScriptValueType.HaloOnlineValue.Unit:
-                        case ScriptValueType.HaloOnlineValue.Vehicle:
-                        case ScriptValueType.HaloOnlineValue.Weapon:
-                        case ScriptValueType.HaloOnlineValue.Device:
-                        case ScriptValueType.HaloOnlineValue.Scenery:
-                        case ScriptValueType.HaloOnlineValue.EffectScenery:
+                        case HsType.HaloOnlineValue.Object:
+                        case HsType.HaloOnlineValue.Unit:
+                        case HsType.HaloOnlineValue.Vehicle:
+                        case HsType.HaloOnlineValue.Weapon:
+                        case HsType.HaloOnlineValue.Device:
+                        case HsType.HaloOnlineValue.Scenery:
+                        case HsType.HaloOnlineValue.EffectScenery:
                             dataSize = 2; // definitely not 4
                             break;
 
-                        case ScriptValueType.HaloOnlineValue.Ai: // int
+                        case HsType.HaloOnlineValue.Ai: // int
                             break;
 
                         default:
@@ -1051,7 +907,7 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-                case ScriptExpressionType.GlobalsReference:
+                case HsSyntaxNodeFlags.GlobalsReference:
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
@@ -1060,7 +916,7 @@ namespace TagTool.Commands.Porting
                     {
                         switch (expr.ValueType.HaloOnline)
                         {
-                            case ScriptValueType.HaloOnlineValue.Long:
+                            case HsType.HaloOnlineValue.Long:
                                 dataSize = 2; // definitely not 4
                                 break;
                             default:
@@ -1076,7 +932,7 @@ namespace TagTool.Commands.Porting
             }
 
 #if DEBUG
-            if (expr.ExpressionType == ScriptExpressionType.Expression && BitConverter.ToInt32(expr.Data, 0) != -1)
+            if (expr.Flags == HsSyntaxNodeFlags.Expression && BitConverter.ToInt32(expr.Data, 0) != -1)
             {
                 //
                 // Breakpoint any case statement below to examine different types of "object" expression data
@@ -1084,32 +940,32 @@ namespace TagTool.Commands.Porting
 
                 switch (expr.ValueType.HaloOnline)
                 {
-                    case ScriptValueType.HaloOnlineValue.Object: break;
-                    case ScriptValueType.HaloOnlineValue.Unit: break;
-                    case ScriptValueType.HaloOnlineValue.Vehicle: break;
-                    case ScriptValueType.HaloOnlineValue.Weapon: break;
-                    case ScriptValueType.HaloOnlineValue.Device: break;
-                    case ScriptValueType.HaloOnlineValue.Scenery: break;
-                    case ScriptValueType.HaloOnlineValue.EffectScenery: break;
+                    case HsType.HaloOnlineValue.Object: break;
+                    case HsType.HaloOnlineValue.Unit: break;
+                    case HsType.HaloOnlineValue.Vehicle: break;
+                    case HsType.HaloOnlineValue.Weapon: break;
+                    case HsType.HaloOnlineValue.Device: break;
+                    case HsType.HaloOnlineValue.Scenery: break;
+                    case HsType.HaloOnlineValue.EffectScenery: break;
                 }
             }
 #endif
 
             Array.Reverse(expr.Data, 0, dataSize);
 
-            if (expr.ExpressionType == ScriptExpressionType.GlobalsReference)
+            if (expr.Flags == HsSyntaxNodeFlags.GlobalsReference)
             {
                 if (expr.Data[2] == 0xFF && expr.Data[3] == 0xFF)
                 {
                     var opcode = BitConverter.ToUInt16(expr.Data, 0) & ~0x8000;
-                    var name = GlobalOpcodes[BlamCache.Version][opcode];
-                    opcode = GlobalOpcodes[CacheContext.Version].First(p => p.Value == name).Key | 0x8000;
+                    var name = ScriptInfo.Globals[BlamCache.Version][opcode];
+                    opcode = ScriptInfo.Globals[CacheContext.Version].First(p => p.Value == name).Key | 0x8000;
                     var bytes = BitConverter.GetBytes(opcode);
                     expr.Data[0] = bytes[0];
                     expr.Data[1] = bytes[1];
                 }
             }
-            else if (expr.ExpressionType == ScriptExpressionType.Expression && expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Ai)
+            else if (expr.Flags == HsSyntaxNodeFlags.Expression && expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Ai)
             {
                 var value = BitConverter.ToUInt32(expr.Data, 0);
 
@@ -1157,12 +1013,12 @@ namespace TagTool.Commands.Porting
             return (uint)(prevSpawnPoints + spawnPointIndex);
         }
 
-        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
+        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
 
-            var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(x => x.ID == BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
+            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0)));
 
             if (tag == null)
                 return;
@@ -1170,22 +1026,22 @@ namespace TagTool.Commands.Porting
             expr.Data = BitConverter.GetBytes(tag?.Index ?? -1).ToArray();
         }
 
-        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
+        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
             int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
-            var value = BlamCache.Strings.GetItemByID(blamStringId);
+            var value = BlamCache.StringTable.GetString(new StringId((uint)blamStringId));
 
             if (value == null)
                 return;
 
-            if (!CacheContext.StringIdCache.Contains(value))
-                ConvertStringId(new StringId((uint)blamStringId, BlamCache.Version));
+            if (!CacheContext.StringTable.Contains(value))
+                ConvertStringId(new StringId((uint)blamStringId));
 
-            var edStringId = CacheContext.StringIdCache.GetStringId(value);
+            var edStringId = CacheContext.StringTable.GetStringId(value);
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
         }
 
-        public bool ConvertScriptUsingPresets(Scenario scnr, ScriptExpression expr)
+        public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
         {
             // Return false to convert normally.
 
@@ -1193,46 +1049,38 @@ namespace TagTool.Commands.Porting
             {
                 switch (expr.Opcode)
                 {
-                    case 0x0B3:
-                        expr.Opcode = 0x0B9; // Change the player appearance aspect ratio
+                    case 0x0B3: // texture_camera_set_aspect_ratio
+                        expr.Opcode = 0x0B9;
+                        // Change the player appearance aspect ratio
                         if (scnr.MapId == 0x10231971 && // mainmenu map id
-                            expr.ExpressionType == ScriptExpressionType.Group &&
-                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
+                            expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Void)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 2];
+                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+                            for (var n = 1; n < 2; n++)
+                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+                            var expr2 = scnr.ScriptExpressions[exprIndex];
                             expr2.Data = BitConverter.GetBytes(1.777f).Reverse().ToArray();
                         }
                         return true;
 
-                    case 0x353:
-                        expr.Opcode = 0x3A6; // Remove the additional H3 argument
-                        if (expr.ExpressionType == ScriptExpressionType.Group &&
-                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
+                    case 0x0F9: // vehicle_test_seat_list
+                        expr.Opcode = 0x114;
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 4];
-                            expr2.NextExpressionHandle = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 5].NextExpressionHandle;
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
                         }
                         return true;
 
-                    case 0x2D2: // player_action_test_cinematic_skip
-                        expr.Opcode = 0x2F5; // player_action_test_jump
-                        return true;
-
-                    case 0x3CD: // chud_show_weapon_stats
-                        expr.Opcode = 0x423; // chud_show_crosshair
-                        return true;
-
-                    case 0x34D: // cinematic_scripting_destroy_object; remove last argument
-                        expr.Opcode = 0x3A0;
-                        return true;
-
-                    case 0x44D: // objectives_secondary_show (Doesn't exist in H3)
-                        expr.Opcode = 0x4AE; // objectives_show
-                        return true;
-
-                    case 0x44F: // objectives_secondary_unavailable (Doesn't exist in H3)
-                    case 0x44E: // objectives_primary_unavailable ""
-                        expr.Opcode = 0x4B2; // objectives_show
+                    case 0x0FA: // vehicle_test_seat
+                        expr.Opcode = 0x115; // -> vehicle_test_seat_unit
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        {
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
+                        }
                         return true;
 
                     case 0x1B7: // campaign_metagame_award_primary_skull
@@ -1243,14 +1091,52 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x1E6; // ^
                         return true;
 
+                    case 0x2D2: // player_action_test_cinematic_skip
+                        expr.Opcode = 0x2F5; // player_action_test_jump
+                        return true;
+
                     case 0x33C: // cinematic_object_get_unit
                     case 0x33D: // cinematic_object_get_scenery
                     case 0x33E: // cinematic_object_get_effect_scenery
-                        expr.Opcode = 0x391; // cinematic_object_get
+                        expr.Opcode = 0x391; // -> cinematic_object_get
+                        return true;
+
+                    case 0x34D: // cinematic_scripting_destroy_object; remove last argument
+                        expr.Opcode = 0x3A0;
+                        return true;
+
+                    case 0x353: // cinematic_scripting_create_and_animate_cinematic_object
+                        expr.Opcode = 0x3A6;
+                        // Remove the additional H3 argument
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Void)
+                        {
+                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+                            for (var n = 1; n < 4; n++)
+                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+                            var expr2 = scnr.ScriptExpressions[exprIndex];
+                            var expr3 = scnr.ScriptExpressions[expr2.NextExpressionHandle.Index];
+
+                            expr2.NextExpressionHandle = expr3.NextExpressionHandle;
+                        }
                         return true;
 
                     case 0x354: //cinematic_scripting_create_and_animate_object_no_animation
                         expr.Opcode = 0x3A7; // ^
+                        return true;
+
+                    case 0x3CD: // chud_show_weapon_stats
+                        expr.Opcode = 0x423; // -> chud_show_crosshair
+                        return true;
+
+                    case 0x44D: // objectives_secondary_show
+                        expr.Opcode = 0x4AE; // -> objectives_show
+                        return true;
+
+                    case 0x44F: // objectives_secondary_unavailable
+                    case 0x44E: // objectives_primary_unavailable
+                        expr.Opcode = 0x4B2; // -> objectives_show
                         return true;
 
                     default:
@@ -1271,6 +1157,149 @@ namespace TagTool.Commands.Porting
             }
             else
                 return false;
+        }
+
+        private void UpdateAiTestSeat(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        {
+            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+            for (var n = 1; n < 2; n++)
+                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+            var vehicleExpr = scnr.ScriptExpressions[exprIndex]; // <vehicle> parameter
+            var seatMappingExpr = scnr.ScriptExpressions[vehicleExpr.NextExpressionHandle.Index]; // <string_id> parameter
+
+            var seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
+            var seatMappingString = BlamCache.StringTable.GetString(seatMappingStringId);
+            var seatMappingIndex = (int)-1;
+
+            if (vehicleExpr.Flags == HsSyntaxNodeFlags.Group &&
+                seatMappingStringId != StringId.Invalid)
+            {
+                if (vehicleExpr.Opcode == 0x193) // ai_vehicle_get_from_starting_location
+                {
+                    var expr3 = scnr.ScriptExpressions[++exprIndex]; // function name
+                    var expr4 = scnr.ScriptExpressions[expr3.NextExpressionHandle.Index]; // <ai> parameter
+
+                    var value = BitConverter.ToUInt32(expr4.Data.Reverse().ToArray(), 0);
+
+                    if (value != uint.MaxValue)
+                    {
+                        var squadIndex = (value >> 16) & 0x1FFF;
+                        var fireTeamIndex = (value >> 8) & 0xFF;
+
+                        var fireTeam = scnr.Squads[(int)squadIndex].Fireteams[(int)fireTeamIndex];
+
+                        var unitInstance = scnr.VehiclePalette[fireTeam.VehicleTypeIndex].Object;
+                        var unitDefinition = (Unit)CacheContext.Deserialize<Vehicle>(cacheStream, unitInstance);
+
+                        var variantName = CacheContext.StringTable.GetString(unitDefinition.DefaultModelVariant);
+
+                        if (fireTeam.VehicleVariant != StringId.Invalid)
+                            variantName = CacheContext.StringTable.GetString(fireTeam.VehicleVariant);
+
+                        var modelDefinition = CacheContext.Deserialize<Model>(cacheStream, unitDefinition.Model);
+                        var modelVariant = default(Model.Variant);
+
+                        foreach (var variant in modelDefinition.Variants)
+                        {
+                            if (variantName == CacheContext.StringTable.GetString(variant.Name))
+                            {
+                                modelVariant = variant;
+                                break;
+                            }
+                        }
+
+                        var seats1 = (Scenario.UnitSeatFlags)(0);
+                        var seats2 = (Scenario.UnitSeatFlags)(0);
+
+                        for (var seatIndex = 0; seatIndex < unitDefinition.Seats.Count; seatIndex++)
+                        {
+                            var seat = unitDefinition.Seats[seatIndex];
+                            var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
+
+                            if (seatMappingString == seatName)
+                            {
+                                if (seatIndex < 32)
+                                    seats1 = (Scenario.UnitSeatFlags)(1 << seatIndex);
+                                else
+                                    seats2 = (Scenario.UnitSeatFlags)(1 << (seatIndex - 32));
+                                break;
+                            }
+                        }
+
+                        if (seats1 == Scenario.UnitSeatFlags.None && seats2 == Scenario.UnitSeatFlags.None)
+                        {
+                            foreach (var obj in modelVariant.Objects)
+                            {
+                                if (obj.ChildObject == null || !obj.ChildObject.IsInGroup("unit"))
+                                    continue;
+
+                                var definition = (Unit)CacheContext.Deserialize(cacheStream, obj.ChildObject);
+
+                                for (var seatIndex = 0; seatIndex < definition.Seats.Count; seatIndex++)
+                                {
+                                    var seat = definition.Seats[seatIndex];
+                                    var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
+
+                                    if (seatMappingString == seatName)
+                                    {
+                                        if (seatIndex < 32)
+                                            seats1 = (Scenario.UnitSeatFlags)(1 << seatIndex);
+                                        else
+                                            seats2 = (Scenario.UnitSeatFlags)(1 << (seatIndex - 32));
+                                        break;
+                                    }
+                                }
+
+                                if (seats1 != Scenario.UnitSeatFlags.None || seats2 != Scenario.UnitSeatFlags.None)
+                                {
+                                    unitInstance = obj.ChildObject;
+                                    unitDefinition = definition;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (seats1 == Scenario.UnitSeatFlags.None && seats2 == Scenario.UnitSeatFlags.None)
+                        {
+                            for (var i = 0; i < unitDefinition.Seats.Count; i++)
+                            {
+                                if (i < 32)
+                                    seats1 |= (Scenario.UnitSeatFlags)(1 << i);
+                                else
+                                    seats2 |= (Scenario.UnitSeatFlags)(1 << (i - 32));
+                            }
+                        }
+
+                        for (var mappingIndex = 0; mappingIndex < scnr.UnitSeatsMapping.Count; mappingIndex++)
+                        {
+                            var mapping = scnr.UnitSeatsMapping[mappingIndex];
+
+                            if (mapping.Unit == unitInstance && mapping.Seats1 == seats1 && mapping.Seats2 == seats2)
+                            {
+                                seatMappingIndex = mappingIndex;
+                                break;
+                            }
+                        }
+
+                        if (seatMappingIndex == -1)
+                        {
+                            seatMappingIndex = scnr.UnitSeatsMapping.Count;
+
+                            scnr.UnitSeatsMapping.Add(new Scenario.UnitSeatsMappingBlock
+                            {
+                                Unit = unitInstance,
+                                Seats1 = seats1,
+                                Seats2 = seats2
+                            });
+                        }
+                    }
+                }
+            }
+
+            seatMappingExpr.Opcode = 0x00C; // -> unit_seat_mapping
+            seatMappingExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.UnitSeatMapping;
+            seatMappingExpr.Data = BitConverter.GetBytes((seatMappingIndex & ushort.MaxValue) | (1 << 16)).Reverse().ToArray();
         }
 
         public void AdjustScripts(Scenario scnr, string tagName)
@@ -1302,155 +1331,9 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
                 scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
                 scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
-            }
-
-            if (mapName == "010_jungle")
-            {
-                // player0 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2448].Opcode = 0x115;
-                scnr.ScriptExpressions[2449].Opcode = 0x115;
-                scnr.ScriptExpressions[2451].Opcode = 0x00C;
-                scnr.ScriptExpressions[2451].Data[0] = 21;
-
-                // player1 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2456].Opcode = 0x115;
-                scnr.ScriptExpressions[2457].Opcode = 0x115;
-                scnr.ScriptExpressions[2459].Opcode = 0x00C;
-                scnr.ScriptExpressions[2459].Data[0] = 21;
-
-                // player2 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2464].Opcode = 0x115;
-                scnr.ScriptExpressions[2465].Opcode = 0x115;
-                scnr.ScriptExpressions[2467].Opcode = 0x00C;
-                scnr.ScriptExpressions[2467].Data[0] = 21;
-
-                // player3 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2472].Opcode = 0x115;
-                scnr.ScriptExpressions[2473].Opcode = 0x115;
-                scnr.ScriptExpressions[2475].Opcode = 0x00C;
-                scnr.ScriptExpressions[2475].Data[0] = 21;
+                scnr.ScriptExpressions[scriptIndex].Flags = (HsSyntaxNodeFlags)Enum.Parse(typeof(HsSyntaxNodeFlags), items[5]);
             }
         }
-
-        private static Dictionary<CacheVersion, Dictionary<int, string>> GlobalOpcodes = new Dictionary<CacheVersion, Dictionary<int, string>>
-        {
-            [CacheVersion.Halo3Retail] = new Dictionary<int, string>
-            {
-                [0x28] = "game_speed",
-                [0xA3] = "render_lightmap_shadows",
-                [0xC8] = "texture_camera_near_plane",
-                [0xC9] = "texture_camera_exposure",
-                [0xCB] = "render_near_clip_distance",
-                [0xF3] = "render_postprocess_saturation",
-                [0xF4] = "render_postprocess_red_filter",
-                [0xF5] = "render_postprocess_green_filter",
-                [0xF6] = "render_postprocess_blue_filter",
-                [0x2C3] = "ai_current_squad",
-                [0x2C4] = "ai_current_actor",
-                [0x2CD] = "ai_combat_status_alert",
-                [0x2CE] = "ai_combat_status_active",
-                [0x2D0] = "ai_combat_status_definite",
-                [0x2D2] = "ai_combat_status_visible",
-                [0x2D4] = "ai_combat_status_dangerous",
-                [0x2D8] = "ai_task_status_inactive",
-                [0x2D9] = "ai_task_status_exhausted",
-                [0x310] = "ai_action_berserk",
-                [0x315] = "ai_action_dive_forward",
-                [0x318] = "ai_action_dive_right",
-                [0x319] = "ai_action_advance",
-                [0x31A] = "ai_action_cheer",
-                [0x31B] = "ai_action_fallback",
-                [0x31D] = "ai_action_point",
-                [0x31F] = "ai_action_shakefist",
-                [0x320] = "ai_action_signal_attack",
-                [0x321] = "ai_action_signal_move",
-                [0x322] = "ai_action_taunt",
-                [0x324] = "ai_action_wave",
-                [0x352] = "ai_movement_patrol",
-                [0x354] = "ai_movement_combat",
-                [0x355] = "ai_movement_flee",
-                [0x401] = "cinematic_letterbox_style",
-                [0x413] = "global_playtest_mode"
-            },
-            [CacheVersion.Halo3ODST] = new Dictionary<int, string>
-            {
-                [0x28] = "game_speed",
-                [0xB8] = "render_lightmap_shadows",
-                [0xE3] = "texture_camera_near_plane",
-                [0xE4] = "texture_camera_exposure",
-                [0xE6] = "render_near_clip_distance",
-                [0x10E] = "render_postprocess_saturation",
-                [0x10F] = "render_postprocess_red_filter",
-                [0x110] = "render_postprocess_green_filter",
-                [0x111] = "render_postprocess_blue_filter",
-                [0x2EF] = "ai_current_squad",
-                [0x2F0] = "ai_current_actor",
-                [0x2F9] = "ai_combat_status_alert",
-                [0x2FA] = "ai_combat_status_active",
-                [0x2FC] = "ai_combat_status_definite",
-                [0x2FE] = "ai_combat_status_visible",
-                [0x300] = "ai_combat_status_dangerous",
-                [0x304] = "ai_task_status_inactive",
-                [0x305] = "ai_task_status_exhausted",
-                [0x340] = "ai_action_berserk",
-                [0x345] = "ai_action_dive_forward",
-                [0x348] = "ai_action_dive_right",
-                [0x349] = "ai_action_advance",
-                [0x34A] = "ai_action_cheer",
-                [0x34B] = "ai_action_fallback",
-                [0x34D] = "ai_action_point",
-                [0x34F] = "ai_action_shakefist",
-                [0x350] = "ai_action_signal_attack",
-                [0x351] = "ai_action_signal_move",
-                [0x352] = "ai_action_taunt",
-                [0x354] = "ai_action_wave",
-                [0x382] = "ai_movement_patrol",
-                [0x384] = "ai_movement_combat",
-                [0x385] = "ai_movement_flee",
-                [0x432] = "cinematic_letterbox_style",
-                [0x444] = "global_playtest_mode",
-                [0x522] = "survival_performance_mode"
-            },
-            [CacheVersion.HaloOnline106708] = new Dictionary<int, string>
-            {
-                [0x2A] = "game_speed",
-                [0xBE] = "render_lightmap_shadows",
-                [0xE8] = "texture_camera_near_plane",
-                [0xE9] = "texture_camera_exposure",
-                [0xEB] = "render_near_clip_distance",
-                [0x113] = "render_postprocess_saturation",
-                [0x114] = "render_postprocess_red_filter",
-                [0x115] = "render_postprocess_green_filter",
-                [0x116] = "render_postprocess_blue_filter",
-                [0x2FA] = "ai_current_squad",
-                [0x2FB] = "ai_current_actor",
-                [0x304] = "ai_combat_status_alert",
-                [0x305] = "ai_combat_status_active",
-                [0x307] = "ai_combat_status_definite",
-                [0x309] = "ai_combat_status_visible",
-                [0x30B] = "ai_combat_status_dangerous",
-                [0x30F] = "ai_task_status_inactive",
-                [0x310] = "ai_task_status_exhausted",
-                [0x34B] = "ai_action_berserk",
-                [0x350] = "ai_action_dive_forward",
-                [0x353] = "ai_action_dive_right",
-                [0x354] = "ai_action_advance",
-                [0x355] = "ai_action_cheer",
-                [0x356] = "ai_action_fallback",
-                [0x358] = "ai_action_point",
-                [0x35A] = "ai_action_shakefist",
-                [0x35B] = "ai_action_signal_attack",
-                [0x35C] = "ai_action_signal_move",
-                [0x35D] = "ai_action_taunt",
-                [0x35F] = "ai_action_wave",
-                [0x38D] = "ai_movement_patrol",
-                [0x38F] = "ai_movement_combat",
-                [0x390] = "ai_movement_flee",
-                [0x42A] = "cinematic_letterbox_style",
-                [0x43C] = "global_playtest_mode",
-                [0x51A] = "survival_performance_mode"
-            }
-        };
 
         private static Dictionary<string, List<string>> DisabledScriptsString = new Dictionary<string, List<string>>
         {
@@ -1526,6 +1409,11 @@ namespace TagTool.Commands.Porting
                 "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E9790606"
             },
 
+            ["sc150"] = new List<string>
+            {
+                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
+            },
+
             ["sc140"] = new List<string>
             {
                 "00000909,E700038D,E6F60383,0000,00000000,Expression,FunctionName,begin,// E6EE037B",
@@ -1552,6 +1440,7 @@ namespace TagTool.Commands.Porting
                 "00018134,AA4A46D6,AA5346DF,0166,D7464BAA,Group,Void,ai_place,// AA4D46D9",
                 "00021577,B7BD5449,B7C3544F,0333,4A54BEB7,Group,Void,switch_zone_set,// B7C0544C",
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
+                "00018790,ACDA4966,ACDB4967,0044,70010000,GlobalsReference,Vehicle,Value,//makes phantom fill up, allows level to finish"
             },
 
             ["h100"] = new List<string>
@@ -1755,6 +1644,7 @@ namespace TagTool.Commands.Porting
                 "00035397,EDB98A45,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// ED068992 disable the whole thing for now",
                 "00035767,EF2B8BB7,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EF238BAF",
                 "00035910,EFBA8C46,EFC08C4C,0333,478CBBEF,Group,Void,switch_zone_set,// EFBD8C49",
+                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604 prevent cinematic skipping",
             },
 
             ["005_intro"] = new List<string>

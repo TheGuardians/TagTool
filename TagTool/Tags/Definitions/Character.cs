@@ -1,6 +1,7 @@
 using TagTool.Ai;
 using TagTool.Cache;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,14 +10,14 @@ namespace TagTool.Tags.Definitions
     public class Character : TagStructure
 	{
         public uint Flags;
-        public CachedTagInstance ParentCharacter;
-        public CachedTagInstance Unit;
+        public CachedTag ParentCharacter;
+        public CachedTag Unit;
         /// <summary>
         /// Creature reference for swarm characters ONLY
         /// </summary>
-        public CachedTagInstance Creature;
-        public CachedTagInstance Style;
-        public CachedTagInstance MajorCharacter;
+        public CachedTag Creature;
+        public CachedTag Style;
+        public CachedTag MajorCharacter;
 
         public List<CharacterVariant> Variants;
         public List<CharacterUnitDialogue> UnitDialogue;
@@ -40,14 +41,12 @@ namespace TagTool.Tags.Definitions
         public List<CharacterVocalizationProperties> VocalizationProperties;
         public List<CharacterBoardingProperties> BoardingProperties;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused1; // guardian properties
-        
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public List<CharacterBunkerProperties> BunkerProperties;
+
+        public List<CharacterGuardianProperties> GuardianProperties;       
         public List<CharacterCombatformProperties> CombatformProperties;
        
-        [TagField(Flags = TagFieldFlags.Padding, Length = 24, MinVersion = CacheVersion.Halo3ODST)]
-        public byte[] Unused2;
-
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<CharacterEngineerProperties> EngineerProperties;
 

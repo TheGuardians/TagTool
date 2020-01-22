@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -9,7 +10,7 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3ODST)]
     public class AiVocalization : TagStructure
 	{
-        [TagField(Flags = TagFieldFlags.Label)]
+        [TagField(Flags = Label)]
         public StringId Name;
         public short ParentIndex;
         public AiVocalizationPriority Priority;

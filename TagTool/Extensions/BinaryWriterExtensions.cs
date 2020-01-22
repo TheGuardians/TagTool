@@ -3,6 +3,7 @@ using TagTool.IO;
 using System;
 using System.IO;
 using System.Linq;
+using TagTool.Tags;
 
 namespace Sytem.IO
 {
@@ -22,6 +23,24 @@ namespace Sytem.IO
                 writer.Write(BitConverter.GetBytes(value).Reverse().ToArray());
             else
                 writer.Write(value);
+        }
+
+        public static void Write(this BinaryWriter writer, float value, TagFieldCompression compression)
+        {
+            switch (compression)
+            {
+                case TagFieldCompression.Int8:
+                    writer.Write((sbyte)(value * sbyte.MaxValue));
+                    break;
+
+                case TagFieldCompression.Int16:
+                    writer.Write((short)(value * short.MaxValue));
+                    break;
+
+                default:
+                    writer.Write(value);
+                    break;
+            }
         }
 
         public static void Write(this BinaryWriter writer, Tag value, EndianFormat format = EndianFormat.LittleEndian)

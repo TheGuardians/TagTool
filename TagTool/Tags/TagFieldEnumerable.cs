@@ -75,8 +75,7 @@ namespace TagTool.Tags
 				{
 					var attr = TagStructure.GetTagFieldAttribute(type, field);
 
-                    if ((attr.Version != CacheVersion.Unknown && attr.Version == Info.Version) ||
-                        (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Info.Version, attr.MinVersion, attr.MaxVersion)))
+                    if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version))
                     {
                         CreateTagFieldInfo(field, attr, Info.Version, ref offset);
                     }

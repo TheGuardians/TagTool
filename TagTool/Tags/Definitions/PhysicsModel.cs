@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Havok;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -18,7 +19,7 @@ namespace TagTool.Tags.Definitions
         public float MaximumPenetrationDepthScale;
         public sbyte ImportVersion;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
+        [TagField(Flags = Padding, Length = 3)]
         public byte[] Unused;
 
         public List<DampedSprintMotor> DampedSpringMotors;
@@ -30,7 +31,7 @@ namespace TagTool.Tags.Definitions
         public List<Material> Materials;
         public List<Sphere> Spheres;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedMultiSpheres;
 
         public List<Pill> Pills;
@@ -40,7 +41,7 @@ namespace TagTool.Tags.Definitions
         public List<PolyhedronFourVector> PolyhedronFourVectors;
         public List<PolyhedronPlaneEquation> PolyhedronPlaneEquations;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedMassDistributions;
 
         public List<List> Lists;
@@ -59,13 +60,13 @@ namespace TagTool.Tags.Definitions
         public uint Unknown16;
         public List<LimitedHingeConstraint> LimitedHingeConstraints;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedBallAndSocketConstraints;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedStiffSprintConstraints;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedPrismaticConstraints;
 
         public List<Phantom> Phantoms;
@@ -126,121 +127,154 @@ namespace TagTool.Tags.Definitions
             public HaloOnlineBits HaloOnline;
 
             [Flags]
-            public enum Halo2Bits : int
+            public enum Halo2Bits : uint
             {
                 None = 0,
-                GeneratesEffects = 1 << 0,
-                UseAccelerationAsForce = 1 << 1,
-                NegatesGravity = 1 << 2,
-                IgnoresPlayers = 1 << 3,
-                IgnoresNonPlayers = 1 << 4,
-                IgnoresBipeds = 1 << 5,
-                IgnoresVehicles = 1 << 6,
-                IgnoresWeapons = 1 << 7,
-                IgnoresEquipement = 1 << 8,
-                IgnoresGarbage = 1 << 9,
-                IgnoresProjectiles = 1 << 10,
-                IgnoresScenery = 1 << 11,
-                IgnoresMachines = 1 << 12,
-                IgnoresControls = 1 << 13,
-                IgnoresLightFixtures = 1 << 14,
-                IgnoresSoundScenery = 1 << 15,
-                IgnoresCrates = 1 << 16,
-                IgnoresCreatures = 1 << 17,
-                LocalizesPhysics = 1 << 19,
-                DisableLinearDamping = 1 << 20,
-                DisableAngularDamping = 1 << 21,
-                IgnoresDeadBipeds = 1 << 22
+                GeneratesEffects = 1u << 0,
+                UseAccelerationAsForce = 1u << 1,
+                NegatesGravity = 1u << 2,
+                IgnoresPlayers = 1u << 3,
+                IgnoresNonPlayers = 1u << 4,
+                IgnoresBipeds = 1u << 5,
+                IgnoresVehicles = 1u << 6,
+                IgnoresWeapons = 1u << 7,
+                IgnoresEquipement = 1u << 8,
+                IgnoresGarbage = 1u << 9,
+                IgnoresProjectiles = 1u << 10,
+                IgnoresScenery = 1u << 11,
+                IgnoresMachines = 1u << 12,
+                IgnoresControls = 1u << 13,
+                IgnoresLightFixtures = 1u << 14,
+                IgnoresSoundScenery = 1u << 15,
+                IgnoresCrates = 1u << 16,
+                IgnoresCreatures = 1u << 17,
+                Unknown19 = 1u << 19,
+                Unknown20 = 1u << 20,
+                Unknown21 = 1u << 21,
+                Unknown22 = 1u << 22,
+                Unknown23 = 1u << 23,
+                LocalizesPhysics = 1 << 24,
+                DisableLinearDamping = 1 << 25,
+                DisableAngularDamping = 1 << 26,
+                IgnoresDeadBipeds = 1 << 27,
+                Unknown28 = 1u << 28,
+                Unknown29 = 1u << 29,
+                Unknown30 = 1u << 30,
+                Unknown31 = 1u << 31
             }
 
             [Flags]
-            public enum Halo3RetailBits : int
+            public enum Halo3RetailBits : uint
             {
                 None = 0,
-                GeneratesEffects = 1 << 0,
-                UseAccelerationAsForce = 1 << 1,
-                NegatesGravity = 1 << 2,
-                IgnoresPlayers = 1 << 3,
-                IgnoresNonPlayers = 1 << 4,
-                IgnoresBipeds = 1 << 5,
-                IgnoresVehicles = 1 << 6,
-                IgnoresWeapons = 1 << 7,
-                IgnoresEquipement = 1 << 8,
-                IgnoresTerminals = 1 << 9,
-                IgnoresProjectiles = 1 << 10,
-                IgnoresScenery = 1 << 11,
-                IgnoresMachines = 1 << 12,
-                IgnoresControls = 1 << 13,
-                IgnoresSoundScenery = 1 << 14,
-                IgnoresCrates = 1 << 15,
-                IgnoresCreatures = 1 << 16,
-                IgnoresGiants = 1 << 17,
-                IgnoresEffectScenery = 1 << 18,
-                LocalizesPhysics = 1 << 19,
-                DisableLinearDamping = 1 << 20,
-                DisableAngularDamping = 1 << 21,
-                IgnoresDeadBipeds = 1 << 22
+                GeneratesEffects = 1u << 0,
+                UseAccelerationAsForce = 1u << 1,
+                NegatesGravity = 1u << 2,
+                IgnoresPlayers = 1u << 3,
+                IgnoresNonPlayers = 1u << 4,
+                IgnoresBipeds = 1u << 5,
+                IgnoresVehicles = 1u << 6,
+                IgnoresWeapons = 1u << 7,
+                IgnoresEquipement = 1u << 8,
+                IgnoresTerminals = 1u << 9,
+                IgnoresProjectiles = 1u << 10,
+                IgnoresScenery = 1u << 11,
+                IgnoresMachines = 1u << 12,
+                IgnoresControls = 1u << 13,
+                IgnoresSoundScenery = 1u << 14,
+                IgnoresCrates = 1u << 15,
+                IgnoresCreatures = 1u << 16,
+                IgnoresGiants = 1u << 17,
+                IgnoresEffectScenery = 1u << 18,
+                Unused1 = 1u << 19,     
+                Unknown1 = 1u << 20,
+                Unknown2 = 1u << 21,
+                Unknown3 = 1u << 22,
+                Unknown4 = 1u << 23,
+                LocalizesPhysics = 1u << 24,
+                DisableLinearDamping = 1u << 25,
+                DisableAngularDamping = 1u << 26,
+                IgnoresDeadBipeds = 1u << 27,
+                Unknown5 = 1u << 28,
+                Unknown6 = 1u << 29,
+                Unknown7 = 1u << 30,
+                AccelerateAlongInputDirection = 1u << 31
             }
 
             [Flags]
-            public enum Halo3ODSTBits : int
+            public enum Halo3ODSTBits : uint
             {
                 None = 0,
-                GeneratesEffects = 1 << 0,
-                UseAccelerationAsForce = 1 << 1,
-                NegatesGravity = 1 << 2,
-                IgnoresPlayers = 1 << 3,
-                IgnoresNonPlayers = 1 << 4,
-                IgnoresBipeds = 1 << 5,
-                IgnoresVehicles = 1 << 6,
-                IgnoresWeapons = 1 << 7,
-                IgnoresEquipement = 1 << 8,
-                IgnoresARGDevices = 1 << 9,
-                IgnoresTerminals = 1 << 10,
-                IgnoresProjectiles = 1 << 11,
-                IgnoresScenery = 1 << 12,
-                IgnoresMachines = 1 << 13,
-                IgnoresControls = 1 << 14,
-                IgnoresSoundScenery = 1 << 15,
-                IgnoresCrates = 1 << 16,
-                IgnoresCreatures = 1 << 17,
-                IgnoresGiants = 1 << 18,
-                IgnoresEffectScenery = 1 << 19,
-                LocalizesPhysics = 1 << 20,
-                DisableLinearDamping = 1 << 21,
-                DisableAngularDamping = 1 << 22,
-                IgnoresDeadBipeds = 1 << 23
+                GeneratesEffects = 1u << 0,
+                UseAccelerationAsForce = 1u << 1,
+                NegatesGravity = 1u << 2,
+                IgnoresPlayers = 1u << 3,
+                IgnoresNonPlayers = 1u << 4,
+                IgnoresBipeds = 1u << 5,
+                IgnoresVehicles = 1u << 6,
+                IgnoresWeapons = 1u << 7,
+                IgnoresEquipement = 1u << 8,
+                IgnoresARGDevices = 1u << 9,
+                IgnoresTerminals = 1u << 10,
+                IgnoresProjectiles = 1u << 11,
+                IgnoresScenery = 1u << 12,
+                IgnoresMachines = 1u << 13,
+                IgnoresControls = 1u << 14,
+                IgnoresSoundScenery = 1u << 15,
+                IgnoresCrates = 1u << 16,
+                IgnoresCreatures = 1u << 17,
+                IgnoresGiants = 1u << 18,
+                IgnoresEffectScenery = 1u << 19,
+                Unknown1 = 1u << 20,
+                Unknown2 = 1u << 21,
+                Unknown3 = 1u << 22,
+                Unknown4 = 1u << 23,
+                LocalizesPhysics = 1u << 24,
+                DisableLinearDamping = 1 << 25,
+                DisableAngularDamping = 1 << 26,
+                IgnoresDeadBipeds = 1u << 27,
+                Unknown5 = 1u << 28,
+                Unknown6 = 1u << 29,
+                Unknown7 = 1u << 30,
+                AccelerateAlongInputDirection = 1u << 31
             }
 
             [Flags]
-            public enum HaloOnlineBits : int
+            public enum HaloOnlineBits : uint
             {
                 None = 0,
-                GeneratesEffects = 1 << 0,
-                UseAccelerationAsForce = 1 << 1,
-                NegatesGravity = 1 << 2,
-                IgnoresPlayers = 1 << 3,
-                IgnoresNonPlayers = 1 << 4,
-                IgnoresBipeds = 1 << 5,
-                IgnoresVehicles = 1 << 6,
-                IgnoresWeapons = 1 << 7,
-                IgnoresArmor = 1 << 8,
-                IgnoresEquipement = 1 << 9,
-                IgnoresARGDevices = 1 << 10,
-                IgnoresTerminals = 1 << 11,
-                IgnoresProjectiles = 1 << 12,
-                IgnoresScenery = 1 << 13,
-                IgnoresMachines = 1 << 14,
-                IgnoresControls = 1 << 15,
-                IgnoresSoundScenery = 1 << 16,
-                IgnoresCrates = 1 << 17,
-                IgnoresCreatures = 1 << 18,
-                IgnoresGiants = 1 << 19,
-                IgnoresEffectScenery = 1 << 20,
-                LocalizesPhysics = 1 << 21,
-                DisableLinearDamping = 1 << 22,
-                DisableAngularDamping = 1 << 23,
-                IgnoresDeadBipeds = 1 << 24
+                GeneratesEffects = 1u << 0,
+                UseAccelerationAsForce = 1u << 1,
+                NegatesGravity = 1u << 2,
+                IgnoresPlayers = 1u << 3,
+                IgnoresNonPlayers = 1u << 4,
+                IgnoresBipeds = 1u << 5,
+                IgnoresVehicles = 1u << 6,
+                IgnoresWeapons = 1u << 7,
+                IgnoresArmor = 1u << 8,
+                IgnoresEquipement = 1u << 9,
+                IgnoresARGDevices = 1u << 10,
+                IgnoresTerminals = 1u << 11,
+                IgnoresProjectiles = 1u << 12,
+                IgnoresScenery = 1u << 13,
+                IgnoresMachines = 1u << 14,
+                IgnoresControls = 1u << 15,
+                IgnoresSoundScenery = 1u << 16,
+                IgnoresCrates = 1u << 17,
+                IgnoresCreatures = 1u << 18,
+                IgnoresGiants = 1u << 19,
+                IgnoresEffectScenery = 1u << 20,
+                Unknown21 = 1u << 21,
+                Unknown22 = 1u << 22,
+                Unknown23 = 1u << 23,
+                LocalizesPhysics = 1u << 24,
+                DisableLinearDamping = 1 << 25,
+                DisableAngularDamping = 1 << 26,
+                Unknown27 = 1 << 27,
+                IgnoresDeadBipeds = 1u << 28,
+                Unknown29 = 1u << 29,
+                Unknown30 = 1u << 30,
+                AccelerateAlongInputDirection = 1u << 31
             }
         }
 
@@ -262,13 +296,13 @@ namespace TagTool.Tags.Definitions
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused1;
 
             public StringId MarkerName;
             public StringId AlignmentMarkerName;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 8)]
+            [TagField(Flags = Padding, Length = 8)]
             public byte[] Unused2;
 
             public float HookesLawE;
@@ -280,14 +314,14 @@ namespace TagTool.Tags.Definitions
             public float DirectionAcceleration;
             public float DirectionMaxVelocity;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 28)]
+            [TagField(Flags = Padding, Length = 28)]
             public byte[] Unused3;
 
             public float AlignmentHookesLawE;
             public float AlignmentAcceleration;
             public float AlignmentMaxVelocity;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 8)]
+            [TagField(Flags = Padding, Length = 8)]
             public byte[] Unused4;
         }
 

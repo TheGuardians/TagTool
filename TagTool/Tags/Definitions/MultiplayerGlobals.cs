@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -16,41 +17,33 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xD0, MinVersion = CacheVersion.HaloOnline498295)]
         public class UniversalBlock : TagStructure
 		{
-            public CachedTagInstance RandomPlayerNameStrings;
-
-            public CachedTagInstance TeamNameStrings;
-
-            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public CachedTag RandomPlayerNameStrings;
+            public CachedTag TeamNameStrings;
             public List<TeamColor> TeamColors;
 
-            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public List<Halo3ArmorCustomizationBlock> ArmorCustomization;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline449175)]
-            public List<HaloOnlineArmorCustomizationBlock> SpartanArmorCustomization;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline449175)]
-            public List<HaloOnlineArmorCustomizationBlock> EliteArmorCustomization;
+            public List<ArmorCustomizationBlock> ArmorCustomization;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public List<EquipmentBlock> Equipment;
+            public List<Consumable> Equipment;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public List<UnknownBlock> Unknown;
+            public List<EnergyRegenerationBlock> EnergyRegeneration;
 
-            public CachedTagInstance MultiplayerStrings;
-            public CachedTagInstance SandboxUiStrings;
-            public CachedTagInstance SandboxUiProperties;
+            public CachedTag MultiplayerStrings;
+            public CachedTag SandboxUiStrings;
+            public CachedTag SandboxUiProperties;
             public List<GameVariantWeapon> GameVariantWeapons;
             public List<GameVariantVehicle> GameVariantVehicles;
             public List<GameVariantEquipmentBlock> GameVariantEquipment;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance Unknown2;
+            public CachedTag Unknown2;
             public List<WeaponSet> WeaponSets;
             public List<VehicleSet> VehicleSets;
+
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public List<PodiumAnimation> PodiumAnimations;
-            public CachedTagInstance EngineSettings;
+
+            public CachedTag EngineSettings;
 
             [TagStructure(Size = 0xC)]
             public class TeamColor : TagStructure
@@ -59,23 +52,23 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class Halo3ArmorCustomizationBlock : TagStructure
+            public class ArmorCustomizationBlock : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId CharacterName;
                 public List<Region> Regions;
 
                 [TagStructure(Size = 0x10)]
                 public class Region : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
+                    [TagField(Flags = Label)]
                     public StringId Name;
                     public List<Permuation> Permuations;
 
                     [TagStructure(Size = 0x1C)]
                     public class Permuation : TagStructure
 					{
-                        [TagField(Flags = TagFieldFlags.Label)]
+                        [TagField(Flags = Label)]
                         public StringId Name;
                         public StringId Description;
                         public FlagsValue Flags;
@@ -108,7 +101,7 @@ namespace TagTool.Tags.Definitions
                         [TagStructure(Size = 0x8)]
                         public class VariantBlock : TagStructure
 						{
-                            [TagField(Flags = TagFieldFlags.Label)]
+                            [TagField(Flags = Label)]
                             public StringId Region;
                             public StringId Permutation;
                         }
@@ -116,81 +109,61 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x14)]
-            public class HaloOnlineArmorCustomizationBlock : TagStructure
-			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public StringId ArmorObjectRegion;
-                public StringId BipedRegion;
-                public List<Permutation> Permutations;
-
-                [TagStructure(Size = 0x30)]
-                public class Permutation : TagStructure
-				{
-                    [TagField(Flags = TagFieldFlags.Label)]
-                    public StringId Name;
-                    public CachedTagInstance ThirdPersonArmorObject;
-                    public CachedTagInstance FirstPersonArmorModel;
-                    public short Unknown;
-                    public short Unknown2;
-                    public StringId ParentAttachMarker;
-                    public StringId ChildAttachMarker;
-                }
-            }
-            
             [TagStructure(Size = 0x18)]
-            public class EquipmentBlock : TagStructure
+            public class Consumable : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
-                public CachedTagInstance Equipment;
-                public short Unknown;
-                public short Unknown2;
+                public CachedTag Object;
+                public short Type;
+
+                [TagField(Flags = Padding, Length = 2)]
+                public byte[] Unused = new byte[2];
             }
 
             [TagStructure(Size = 0x8)]
-            public class UnknownBlock : TagStructure
+            public class EnergyRegenerationBlock : TagStructure
 			{
-                public int Unknown;
-                public int Unknown2;
+                public int Duration;
+                public int EnergyLevel;
             }
 
             [TagStructure(Size = 0x18)]
             public class GameVariantWeapon : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public float RandomChance;
-                public CachedTagInstance Weapon;
+                public CachedTag Weapon;
             }
 
             [TagStructure(Size = 0x14)]
             public class GameVariantVehicle : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
-                public CachedTagInstance Vehicle;
+                public CachedTag Vehicle;
             }
 
             [TagStructure(Size = 0x14)]
             public class GameVariantEquipmentBlock : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
-                public CachedTagInstance Grenade;
+                public CachedTag Grenade;
             }
 
             [TagStructure(Size = 0x10)]
             public class WeaponSet : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public List<Substitution> Substitutions;
 
                 [TagStructure(Size = 0x8)]
                 public class Substitution : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
+                    [TagField(Flags = Label)]
                     public StringId OriginalWeapon;
                     public StringId SubstitutedWeapon;
                 }
@@ -199,27 +172,33 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10)]
             public class VehicleSet : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public List<Substitution> Substitutions;
 
                 [TagStructure(Size = 0x8)]
                 public class Substitution : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
+                    [TagField(Flags = Label)]
                     public StringId OriginalVehicle;
                     public StringId SubstitutedVehicle;
                 }
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class PlayerCharacterType : TagStructure
+            {
+                public StringId Name;
             }
 
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnline498295)]
             public class PodiumAnimation : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance AnimationGraph;
+                [TagField(Flags = Label)]
+                public CachedTag AnimationGraph;
                 [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-                public CachedTagInstance Unknown;
+                public CachedTag Unknown;
                 public StringId DefaultUnarmed;
                 public StringId DefaultArmed;
                 public List<StanceAnimation> StanceAnimations;
@@ -228,7 +207,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure]
                 public class StanceAnimation : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label, Length = 32)]
+                    [TagField(Flags = Label, Length = 32)]
                     public string Name;
                     public StringId BaseAnimation;
                     public StringId LoopAnimation;
@@ -240,14 +219,14 @@ namespace TagTool.Tags.Definitions
                 [TagStructure]
                 public class MoveAnimation : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label, Length = 32)]
+                    [TagField(Flags = Label, Length = 32)]
                     public string Name;
                     public StringId InAnimation;
                     public StringId LoopAnimation;
                     public StringId OutAnimation;
                     public int Unknown;
-                    public CachedTagInstance PrimaryWeapon;
-                    public CachedTagInstance SecondaryWeapon;
+                    public CachedTag PrimaryWeapon;
+                    public CachedTag SecondaryWeapon;
                 }
             }
         }
@@ -257,23 +236,23 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x308, MinVersion = CacheVersion.HaloOnline498295)]
         public class RuntimeBlock : TagStructure
 		{
-            public CachedTagInstance SandboxEditorUnit;
-            public CachedTagInstance SandboxEditorObject;
-            public CachedTagInstance Flag;
-            public CachedTagInstance Ball;
-            public CachedTagInstance Bomb;
-            public CachedTagInstance VipZone;
-            public CachedTagInstance InGameStrings;
+            public CachedTag SandboxEditorUnit;
+            public CachedTag SandboxEditorObject;
+            public CachedTag Flag;
+            public CachedTag Ball;
+            public CachedTag Bomb;
+            public CachedTag VipZone;
+            public CachedTag InGameStrings;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance Unknown;
+            public CachedTag Unknown;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance Unknown2;
+            public CachedTag Unknown2;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance Unknown3;
+            public CachedTag Unknown3;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance Unknown4;
+            public CachedTag Unknown4;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance Unknown5;
+            public CachedTag Unknown5;
             public List<Sound> Sounds;
             public List<LoopingSound> LoopingSounds;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -293,53 +272,53 @@ namespace TagTool.Tags.Definitions
             public int DefaultPlasmaGrenadeCount;
             public List<MultiplayerConstant> MultiplayerConstants;
             public List<StateResponse> StateResponses;
-            public CachedTagInstance ScoreboardEmblemBitmap;
-            public CachedTagInstance ScoreboardDeadEmblemBitmap;
-            public CachedTagInstance DefaultShapeShader;
-            public CachedTagInstance Unknown6;
-            public CachedTagInstance CtfIntroUi;
-            public CachedTagInstance SlayerIntroUi;
-            public CachedTagInstance OddballIntroUi;
-            public CachedTagInstance KingOfTheHillIntroUi;
-            public CachedTagInstance SandboxIntroUi;
-            public CachedTagInstance VipIntroUi;
-            public CachedTagInstance JuggernautIntroUi;
-            public CachedTagInstance TerritoriesIntroUi;
-            public CachedTagInstance AssaultIntroUi;
-            public CachedTagInstance InfectionIntroUi;
+            public CachedTag ScoreboardEmblemBitmap;
+            public CachedTag ScoreboardDeadEmblemBitmap;
+            public CachedTag DefaultShapeShader;
+            public CachedTag Unknown6;
+            public CachedTag CtfIntroUi;
+            public CachedTag SlayerIntroUi;
+            public CachedTag OddballIntroUi;
+            public CachedTag KingOfTheHillIntroUi;
+            public CachedTag SandboxIntroUi;
+            public CachedTag VipIntroUi;
+            public CachedTag JuggernautIntroUi;
+            public CachedTag TerritoriesIntroUi;
+            public CachedTag AssaultIntroUi;
+            public CachedTag InfectionIntroUi;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance SimulationInterpolation1;
+            public CachedTag SimulationInterpolation1;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance SimulationInterpolation2;
+            public CachedTag SimulationInterpolation2;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance SimulationInterpolation3;
+            public CachedTag SimulationInterpolation3;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance SimulationInterpolation4;
+            public CachedTag SimulationInterpolation4;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance SimulationInterpolation5;
+            public CachedTag SimulationInterpolation5;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTagInstance Unknown13;
+            public CachedTag Unknown13;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance MenuMusic1;
+            public CachedTag MenuMusic1;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance MenuMusic2;
+            public CachedTag MenuMusic2;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance MenuMusic3;
+            public CachedTag MenuMusic3;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance MenuMusic4;
+            public CachedTag MenuMusic4;
 
             [TagStructure(Size = 0x10)]
             public class Sound : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Type;
+                [TagField(Flags = Label)]
+                public CachedTag Type;
             }
 
             [TagStructure(Size = 0x10)]
             public class LoopingSound : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
-                public CachedTagInstance Type;
+                [TagField(Flags = Label)]
+                public CachedTag Type;
             }
 
 			[TagStructure(Size = 0x104, MaxVersion = CacheVersion.Halo3Retail)]
@@ -352,7 +331,7 @@ namespace TagTool.Tags.Definitions
                 public TypeValue Type;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public EventValue Event_H3;
-                [TagField(Flags = TagFieldFlags.Label, MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(Flags = Label, MinVersion = CacheVersion.HaloOnline106708)]
                 public StringId Event;
                 [TagField(Length = 256, MinVersion = CacheVersion.HaloOnline498295)]
                 public string Unknown_;
@@ -378,18 +357,18 @@ namespace TagTool.Tags.Definitions
                 public float SoundDelayAnnouncerOnly;
                 public ushort SoundFlags;
                 public short Unknown5;
-                public CachedTagInstance EnglishSound;
-                public CachedTagInstance JapaneseSound;
-                public CachedTagInstance GermanSound;
-                public CachedTagInstance FrenchSound;
-                public CachedTagInstance SpanishSound;
-                public CachedTagInstance LatinAmericanSpanishSound;
-                public CachedTagInstance ItalianSound;
-                public CachedTagInstance KoreanSound;
-                public CachedTagInstance ChineseTraditionalSound;
-                public CachedTagInstance ChineseSimplifiedSound;
-                public CachedTagInstance PortugueseSound;
-                public CachedTagInstance PolishSound;
+                public CachedTag EnglishSound;
+                public CachedTag JapaneseSound;
+                public CachedTag GermanSound;
+                public CachedTag FrenchSound;
+                public CachedTag SpanishSound;
+                public CachedTag LatinAmericanSpanishSound;
+                public CachedTag ItalianSound;
+                public CachedTag KoreanSound;
+                public CachedTag ChineseTraditionalSound;
+                public CachedTag ChineseSimplifiedSound;
+                public CachedTag PortugueseSound;
+                public CachedTag PolishSound;
                 public uint Unknown6;
                 public uint Unknown7;
                 public uint Unknown8;
@@ -586,16 +565,16 @@ namespace TagTool.Tags.Definitions
                 public float VehicleDangerRadius;
                 public float VehicleDangerLeadTime;
                 public float VehicleNearbyPlayerDistance;
-                public CachedTagInstance HillShader;
+                public CachedTag HillShader;
                 public float Unknown67;
                 public float Unknown68;
                 public float Unknown69;
                 public float Unknown70;
-                public CachedTagInstance BombExplodeEffect;
-                public CachedTagInstance Unknown71;
-                public CachedTagInstance BombExplodeDamageEffect;
-                public CachedTagInstance BombDefuseEffect;
-                public CachedTagInstance CursorImpactEffect;
+                public CachedTag BombExplodeEffect;
+                public CachedTag Unknown71;
+                public CachedTag BombExplodeDamageEffect;
+                public CachedTag BombDefuseEffect;
+                public CachedTag CursorImpactEffect;
                 public StringId BombDefusalString;
                 public StringId BlockedTeleporterString;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -620,8 +599,8 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x20)]
                 public class Weapon : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
-                    public CachedTagInstance Type;
+                    [TagField(Flags = Label)]
+                    public CachedTag Type;
                     public float Unknown1;
                     public float Unknown2;
                     public float Unknown3;
@@ -631,8 +610,8 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x20)]
                 public class Vehicle : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
-                    public CachedTagInstance Type;
+                    [TagField(Flags = Label)]
+                    public CachedTag Type;
                     public float Unknown1;
                     public float Unknown2;
                     public float Unknown3;
@@ -642,8 +621,8 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x1C)]
                 public class Projectile : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
-                    public CachedTagInstance Type;
+                    [TagField(Flags = Label)]
+                    public CachedTag Type;
                     public float Unknown;
                     public float Unknown2;
                     public float Unknown3;
@@ -652,8 +631,8 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x14)]
                 public class EquipmentBlock : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
-                    public CachedTagInstance Type;
+                    [TagField(Flags = Label)]
+                    public CachedTag Type;
                     public float Unknown;
                 }
             }
@@ -663,12 +642,12 @@ namespace TagTool.Tags.Definitions
 			{
                 public ushort Flags;
                 public short Unknown;
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StateValue State;
                 public short Unknown2;
                 public StringId FreeForAllMessage;
                 public StringId TeamMessage;
-                public CachedTagInstance Unknown3;
+                public CachedTag Unknown3;
                 public uint Unknown4;
 
                 public enum StateValue : short

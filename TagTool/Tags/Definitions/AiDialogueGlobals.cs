@@ -2,6 +2,7 @@ using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -21,14 +22,14 @@ namespace TagTool.Tags.Definitions
 
         public List<AiDialoguePattern> Patterns;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused1;
 
         public List<DialogDatum> DialogData;
 
         public List<InvoluntaryDatum> InvoluntaryData;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused2;
         
         [TagStructure(Size = 0x4)]
@@ -43,7 +44,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short InvoluntaryVocalizationIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused;
         }
     }
