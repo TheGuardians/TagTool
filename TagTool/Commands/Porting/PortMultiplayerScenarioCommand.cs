@@ -695,7 +695,7 @@ namespace TagTool.Commands.Porting
                 instance.BspPolicy = ScenarioInstance.BspPolicyValue.Default;
                 instance.OriginBspIndex = 0;
                 instance.AllowedZoneSets = (1 << 0);
-                instance.Team = SceneryInstance.TeamValue.Neutral;
+                instance.Multiplayer.Team = MultiplayerObjectProperties.TeamValue.Neutral;
                 Scnr.Scenery.Add(instance);
 
                 Scnr.SceneryPalette.Add(new ScenarioPaletteEntry()
