@@ -178,7 +178,8 @@ namespace TagTool.Commands.Modding
 
                     // Failed to find tag in base cache
                     Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group.ToString()} in the base cache, returning null tag reference.");
-                    return null;
+                    //return null;
+                    throw new Exception("Failed to find tag when applying.");
                 }
             }     
             else

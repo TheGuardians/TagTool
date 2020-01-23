@@ -307,6 +307,7 @@ namespace TagTool.Bitmaps
             image.DataSize = bitmap.Data.Length;
             image.XboxFlags = BitmapFlagsXbox.None;
             image.Flags = bitmap.Flags;
+            image.Curve = bitmap.Curve;
 
             if (image.Format == BitmapFormat.Dxn)
                 image.Flags |= BitmapFlags.Unknown3;
