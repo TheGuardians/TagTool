@@ -221,6 +221,7 @@
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
+    <Compile Include="Commands\Porting\MatchTemplateCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
