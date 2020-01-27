@@ -259,14 +259,14 @@ namespace TagTool.Commands.Porting
                     var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, blamStream, resourceStreams,
                         blamLbsp, blamLbsp, blamLightmapTag.Name);
 
-                    Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
+                    Lbsp.Airprobes = new List<Airprobe>();
                     Lbsp.Airprobes.AddRange(blamLightmap.Airprobes);
                     Lbsp.BspIndex = (short)j++;
 
                     var LbspTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>($"{blamLightmapTag.Name}_{i}_data");
                     CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
 
-                    lightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
+                    lightmap.LightmapDataReferences.Add(LbspTag);
                 }
 
                 lightmap.Airprobes.Clear();
@@ -276,14 +276,14 @@ namespace TagTool.Commands.Porting
             {
                 var lightmapTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
                 var lightmap = blamLightmap;
-                var newDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
+                var newDataReferences = new List<CachedTag>();
 
                 for (int i = 0, j = 0; i < blamLightmap.LightmapDataReferences.Count; i++)
                 {
                     if (((BspFlags)(1u << i) & bspMask) == 0)
                         continue;
 
-                    var blamLbspTag = blamLightmap.LightmapDataReferences[i].LightmapData;
+                    var blamLbspTag = blamLightmap.LightmapDataReferences[i];
                     var blamLbsp = blamCache.Deserialize<ScenarioLightmapBspData>(blamStream, blamLbspTag);
 
                     var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, blamStream, resourceStreams, blamLbsp, blamLbsp, blamLbspTag.Name);
@@ -292,7 +292,7 @@ namespace TagTool.Commands.Porting
                     var LbspTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(blamLbspTag.Name);
                     CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
 
-                    newDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
+                    newDataReferences.Add(LbspTag);
                 }
 
                 lightmap.LightmapDataReferences = newDataReferences;
@@ -523,7 +523,7 @@ namespace TagTool.Commands.Porting
 
                 var lightmap = CacheContext.Deserialize<ScenarioLightmap>(CacheStream, lightmapTag);
 
-                var newLightmapDataReference = new List<ScenarioLightmap.LightmapDataReference>();
+                var newLightmapDataReference = new List<CachedTag>();
                 for (int i = 0; i < lightmap.LightmapDataReferences.Count; i++)
                 {
                     if (DesiredBsps.HasFlag((BspFlags)(1 << i)))
@@ -532,7 +532,7 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < newLightmapDataReference.Count; i++)
                 {
-                    var lbspTag = newLightmapDataReference[i].LightmapData;
+                    var lbspTag = newLightmapDataReference[i];
                     if (lbspTag == null)
                         continue;
 

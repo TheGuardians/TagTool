@@ -279,6 +279,7 @@
     <Compile Include="Commands\Tags\ListUnusedTagsCommand.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
+    <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3DObjectType.cs" />
     <Compile Include="Bitmaps\Utils\BitmapConverter.cs" />
     <Compile Include="Bitmaps\Utils\BitmapDdsFormatDetection.cs" />

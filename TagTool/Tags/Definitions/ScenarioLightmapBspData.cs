@@ -74,17 +74,17 @@ namespace TagTool.Tags.Definitions
         public List<StaticPerVertexLighting> StaticPerVertexLightingBuffers;
         public List<ClusterStaticPerVertexLighting> ClusterStaticPerVertexLightingBuffers;
         public List<InstancedGeometryLighting> InstancedGeometry;
-        public List<UnknownSHCoefficients> InstancedSHCoefficients;
+        public List<CompressedSH> InstancedSHCoefficients;
         public RenderGeometry Geometry;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.Airprobe> Airprobes;
+        public List<Airprobe> Airprobes;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.UnknownBlock2> Unknown64;
+        public List<UnknownSHBlock2> Unknown64;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.UnknownBlock3> Unknown65;
+        public List<UnknownSHBlock3> Unknown65;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown66;
@@ -109,7 +109,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class ClusterStaticPerVertexLighting : TagStructure
 		{
-            public short Unknown;
+            public short LightmapBitmapImageIndex;
             public short StaticPerVertexLightingIndex;
         }
 
@@ -120,47 +120,6 @@ namespace TagTool.Tags.Definitions
             public short StaticPerVertexLightingIndex;
             public short UnknownSHCoefficientsIndex;
             public short Unknown2;
-        }
-
-        [TagStructure(Size = 0x48)]
-        public class UnknownSHCoefficients : TagStructure
-		{
-            public short Unknown1;
-            public short Unknown2;
-            public short Unknown3;
-            public short Unknown4;
-            public short Unknown5;
-            public short Unknown6;
-            public short Unknown7;
-            public short Unknown8;
-            public short Unknown9;
-            public short Unknown10;
-            public short Unknown11;
-            public short Unknown12;
-            public short Unknown13;
-            public short Unknown14;
-            public short Unknown15;
-            public short Unknown16;
-            public short Unknown17;
-            public short Unknown18;
-            public short Unknown19;
-            public short Unknown20;
-            public short Unknown21;
-            public short Unknown22;
-            public short Unknown23;
-            public short Unknown24;
-            public short Unknown25;
-            public short Unknown26;
-            public short Unknown27;
-            public short Unknown28;
-            public short Unknown29;
-            public short Unknown30;
-            public short Unknown31;
-            public short Unknown32;
-            public short Unknown33;
-            public short Unknown34;
-            public short Unknown35;
-            public short Unknown36;
         }
     }
 
