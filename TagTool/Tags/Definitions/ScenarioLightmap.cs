@@ -15,10 +15,10 @@ namespace TagTool.Tags.Definitions
         public List<ScenarioLightmapBspData> Lightmaps;
 
         public List<CachedTag> LightmapDataReferences;
-        public List<TagReferenceBlock> Unknown2;
+        public List<CachedTag> Unknown2;
         public List<Airprobe> Airprobes;
-        public List<UnknownSHBlock2> Unknown3;
-        public List<UnknownSHBlock3> Unknown4;
+        public List<SceneryLightProbe> SceneryLightProbes;
+        public List<MachineLightProbe> MachineLightProbes;
         // block is always empty, format not known
         public List<int> Unknown5;
     }

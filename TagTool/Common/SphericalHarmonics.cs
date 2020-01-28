@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Tags;
 
 namespace TagTool.Common
@@ -36,7 +33,7 @@ namespace TagTool.Common
         public RealPoint3d Position;
         public StringId Name;
         public AirprobeFlags Flags;
-        public CompressedSH SHCoeffcients;
+        public HalfRGBLightProbe LightProbe;
     }
 
     [Flags]
@@ -46,7 +43,7 @@ namespace TagTool.Common
     }
 
     [TagStructure(Size = 0x48)]
-    public class CompressedSH : TagStructure
+    public class HalfRGBLightProbe : TagStructure
     {
         [TagField(Length = 3)]
         public short[] DominantLightDirection = new short[3];
@@ -69,17 +66,17 @@ namespace TagTool.Common
     }
 
     [TagStructure(Size = 0x50)]
-    public class UnknownSHBlock2 : TagStructure
+    public class SceneryLightProbe : TagStructure
     {
         public int Unknown1;
         public short Unknown2;
         public byte Unknown3;
         public byte Unknown4;
-        public CompressedSH SHCoefficients;
+        public HalfRGBLightProbe LightProbe;
     }
 
     [TagStructure(Size = 0x2C)]
-    public class UnknownSHBlock3 : TagStructure
+    public class MachineLightProbe : TagStructure
     {
         public uint Unknown;
         public short Unknown2;
@@ -90,14 +87,25 @@ namespace TagTool.Common
         public float Unknown7;
         public float Unknown8;
         public float Unknown9;
-        public List<UnknownBlock> Unknown10;
+        public List<UnknownBlock> LightProbes;
 
         [TagStructure(Size = 0x54)]
         public class UnknownBlock : TagStructure
         {
             public RealPoint3d Position;
-            public CompressedSH SHCoefficients;
+            public HalfRGBLightProbe LightProbe;
         }
+    }
+
+    [TagStructure(Size = 0x18)]
+    public class LuminanceScale
+    {
+        public float Scale;
+        public float Unknown1;
+        public float Unknown2;
+        public float Unknown3;
+        public float Unknown4;
+        public float Unknown5;
     }
 }
 
