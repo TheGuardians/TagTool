@@ -98,7 +98,7 @@ namespace TagTool.Common
     }
 
     [TagStructure(Size = 0x18)]
-    public class LuminanceScale
+    public class LuminanceScale : TagStructure
     {
         public float Scale;
         public float Unknown1;
