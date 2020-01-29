@@ -18,7 +18,7 @@ namespace TagTool.Tags.Definitions
         public List<CachedTag> Unknown2;
         public List<Airprobe> Airprobes;
         public List<SceneryLightProbe> SceneryLightProbes;
-        public List<MachineLightProbe> MachineLightProbes;
+        public List<MachineLightProbes> MachineLightProbes;
         // block is always empty, format not known
         public List<int> Unknown5;
     }

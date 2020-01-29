@@ -21,12 +21,12 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 9)]
         public LuminanceScale[] CoefficientsMapScale;
 
-        public CachedTag LightmapSHCoefficients;
-        public CachedTag LightmapLightDirectionIntensity;
+        public CachedTag LightmapSHCoefficientsBitmap;
+        public CachedTag LightmapDominantLightDirectionBitmap;
         public List<StaticPerVertexLighting> StaticPerVertexLightingBuffers;
         public List<ClusterStaticPerVertexLighting> ClusterStaticPerVertexLightingBuffers;
         public List<InstancedGeometryLighting> InstancedGeometry;
-        public List<HalfRGBLightProbe> InstancedSHCoefficients;
+        public List<HalfRGBLightProbe> InstancedGeometryLightProbes;
         public RenderGeometry Geometry;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         public List<SceneryLightProbe> SceneryLightProbes;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<MachineLightProbe> MachineLightProbes;
+        public List<MachineLightProbes> MachineLightProbes;
 
         /// <summary>
         /// Actually unused in all games. Probably intended for another object type.

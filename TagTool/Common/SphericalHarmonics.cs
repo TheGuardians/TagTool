@@ -76,7 +76,7 @@ namespace TagTool.Common
     }
 
     [TagStructure(Size = 0x2C)]
-    public class MachineLightProbe : TagStructure
+    public class MachineLightProbes : TagStructure
     {
         public uint Unknown;
         public short Unknown2;
@@ -87,10 +87,10 @@ namespace TagTool.Common
         public float Unknown7;
         public float Unknown8;
         public float Unknown9;
-        public List<UnknownBlock> LightProbes;
+        public List<MachineLightProbe> LightProbes;
 
         [TagStructure(Size = 0x54)]
-        public class UnknownBlock : TagStructure
+        public class MachineLightProbe : TagStructure
         {
             public RealPoint3d Position;
             public HalfRGBLightProbe LightProbe;
