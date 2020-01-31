@@ -25,6 +25,6 @@ namespace TagTool.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public TagBlock<TagHkpMoppCode> UnknownBspPhysics;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown6;
+        public uint RuntimePointer;
     }
 }
