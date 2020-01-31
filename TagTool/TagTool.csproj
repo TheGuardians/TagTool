@@ -617,7 +617,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexType.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\Vertices.cs" />
     <Compile Include="Havok\HavokShapeType.cs" />
-    <Compile Include="Havok\MoppCode.cs" />
+    <Compile Include="Havok\HavokTypes.cs" />
     <Compile Include="IO\ConsoleHistory.cs" />
     <Compile Include="IO\EndianFormat.cs" />
     <Compile Include="IO\EndianReader.cs" />

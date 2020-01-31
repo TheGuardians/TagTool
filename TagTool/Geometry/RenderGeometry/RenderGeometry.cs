@@ -36,7 +36,7 @@ namespace TagTool.Geometry
         public uint Unknown4;
         public uint Unknown5;
 
-        public List<UnknownSection> UnknownSections;
+        public List<MoppClusterVisiblity> UnknownSections;
 
         /// <summary>
         /// The per-mesh node mappings of the render geometry.
@@ -81,18 +81,10 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x20)]
-        public class UnknownSection : TagStructure
+        public class MoppClusterVisiblity : TagStructure
 		{
-            [TagField(Align = 0x10)]
-            public byte[] Unknown;
-
-            public List<UnknownBlock> Unknown2;
-
-            [TagStructure(Size = 0x2)]
-			public class UnknownBlock : TagStructure
-			{
-                public short Unknown;
-            }
+            public byte[] MoppData;
+            public List<short> UnknownMeshPartIndicesCount;
         }
 
         [TagStructure(Size = 0xC)]

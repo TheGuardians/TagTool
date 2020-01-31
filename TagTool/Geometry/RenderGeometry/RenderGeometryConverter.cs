@@ -57,7 +57,7 @@ namespace TagTool.Geometry
 
             for (int i = 0; i < geometry.UnknownSections.Count; i++)
             {
-                byte[] dataref = geometry.UnknownSections[i].Unknown;
+                byte[] dataref = geometry.UnknownSections[i].MoppData;
 
                 if (dataref.Length == 0)
                     continue;
@@ -124,7 +124,7 @@ namespace TagTool.Geometry
 
                     // Write back to tag
                     outStream.Position = 0;
-                    geometry.UnknownSections[i].Unknown = outStream.ToArray();
+                    geometry.UnknownSections[i].MoppData = outStream.ToArray();
                 }
             }
 

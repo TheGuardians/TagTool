@@ -88,7 +88,7 @@ namespace TagTool.Commands.Porting
             //
 
             // Without this 005_intro crash on cortana sbsp       
-            sbsp.Geometry.UnknownSections = new List<RenderGeometry.UnknownSection>();
+            sbsp.Geometry.UnknownSections = new List<RenderGeometry.MoppClusterVisiblity>();
             
             return sbsp;
         }
