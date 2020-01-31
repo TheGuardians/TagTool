@@ -36,7 +36,7 @@ namespace TagTool.Geometry
         public uint Unknown4;
         public uint Unknown5;
 
-        public List<MoppClusterVisiblity> UnknownSections;
+        public List<MoppClusterVisiblity> MeshClusterVisibility;
 
         /// <summary>
         /// The per-mesh node mappings of the render geometry.

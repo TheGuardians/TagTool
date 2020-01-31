@@ -66,7 +66,7 @@ namespace TagTool.Tags.Definitions
                 public List<BspPhysicsBlock> BspPhysics;
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                public List<CollisionMoppCode> BspMoppCodes;
+                public List<TagHkpMoppCode> BspMoppCodes;
 
                 [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo2Vista)]
                 [TagStructure(Size = 0x64, MaxVersion = CacheVersion.HaloOnline700123)]

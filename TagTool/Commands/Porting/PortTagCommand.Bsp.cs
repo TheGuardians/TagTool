@@ -23,10 +23,6 @@ namespace TagTool.Commands.Porting
             var decoratorGeometry = converter.Convert(sbsp.DecoratorGeometry, blamDecoratorResourceDefinition);
             var geometry = converter.Convert(sbsp.Geometry, blamGeometryResourceDefinition);
 
-            var test = new List<int>();
-
-            var newDecoratorBuffers = new List<VertexBufferDefinition>();
-
             foreach (var cluster in sbsp.Clusters)
             {
                 List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
@@ -88,7 +84,7 @@ namespace TagTool.Commands.Porting
             //
 
             // Without this 005_intro crash on cortana sbsp       
-            sbsp.Geometry.UnknownSections = new List<RenderGeometry.MoppClusterVisiblity>();
+            sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
             
             return sbsp;
         }

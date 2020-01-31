@@ -46,8 +46,8 @@ namespace TagTool.Tags.Definitions
 
         public List<List> Lists;
         public List<ListShape> ListShapes;
-        public List<Mopp> Mopps;
-        public byte[] MoppCodes;
+        public List<HkpBvMoppTreeShape> Mopps;
+        public byte[] MoppData;
         public List<HingeConstraint> HingeConstraints;
         public List<RagdollConstraint> RagdollConstraints;
         public List<Region> Regions;
@@ -456,7 +456,7 @@ namespace TagTool.Tags.Definitions
             public uint Unknown7;
             public uint Unknown8;
             public uint Unknown9;
-            public HavokShapeType ShapeType;
+            public BlamShapeType ShapeType;
             public short ShapeIndex;
             public float Mass;
             public RealVector3d CenterOfMass;
@@ -673,26 +673,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class ListShape : TagStructure
 		{
-            public HavokShapeType ShapeType;
+            public BlamShapeType ShapeType;
             public short ShapeIndex;
             public uint Unknown;
             public uint Unknown2;
             public int Unknown3;
-        }
-
-        [TagStructure(Size = 0x20, Align = 0x10)]
-        public class Mopp : TagStructure
-		{
-            public int Unknown;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown2;
-            public uint Unknown3;
-            public HavokShapeType ShapeType;
-            public short ShapeIndex;
-            public uint Unknown4;
-            public uint Unknown5;
         }
 
         [TagStructure(Size = 0x78, Align = 0x10)]
@@ -802,7 +787,7 @@ namespace TagTool.Tags.Definitions
             public short Count;
             public int Offset;
             public int Unknown2;
-            public HavokShapeType ShapeType;
+            public BlamShapeType ShapeType;
             public short ShapeIndex;
             public uint Unknown3;
             public uint Unknown4;

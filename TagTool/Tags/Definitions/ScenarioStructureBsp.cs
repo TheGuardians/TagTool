@@ -165,11 +165,11 @@ namespace TagTool.Tags.Definitions
         public uint Unknown64;
         public uint Unknown65;
         public uint Unknown66;
-        public List<CollisionMoppCode> CollisionMoppCodes;
+        public List<TagHkpMoppCode> CollisionMoppCodes;
         public uint Unknown67;
         public RealPoint3d CollisionWorldBoundsLower;
         public RealPoint3d CollisionWorldBoundsUpper;
-        public List<CollisionMoppCode> BreakableSurfaceMoppCodes;
+        public List<TagHkpMoppCode> BreakableSurfaceMoppCodes;
         public List<BreakableSurfaceKeyTableBlock> BreakableSurfaceKeyTable;
         public uint Unknown68;
         public uint Unknown69;
@@ -526,7 +526,7 @@ namespace TagTool.Tags.Definitions
             public uint Unknown17;
             public uint Unknown18;
             public uint Unknown19;
-            public List<CollisionMoppCode> CollisionMoppCodes;
+            public List<TagHkpMoppCode> CollisionMoppCodes;
             public short MeshIndex;
             public short Unknown20;
             public List<Seam> Seams;

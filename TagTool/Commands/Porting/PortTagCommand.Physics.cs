@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using TagTool.Serialization;
 using TagTool.Cache;
+using System.Collections.Generic;
 
 namespace TagTool.Commands.Porting
 {
@@ -12,32 +13,7 @@ namespace TagTool.Commands.Porting
     {
         private PhysicsModel ConvertPhysicsModel(CachedTag instance, PhysicsModel phmo)
         {
-            //
-            // Fix mopp code array headers for both H3 and ODST
-            //
-
-            byte[] result = new byte[phmo.MoppCodes.Length];
-
-            using (var inputReader = new EndianReader(new MemoryStream(phmo.MoppCodes), CacheVersionDetection.IsLittleEndian(BlamCache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
-            using (var outputWriter = new EndianWriter(new MemoryStream(result), EndianFormat.LittleEndian))
-            {
-                var dataContext = new DataSerializationContext(inputReader, outputWriter);
-
-                for (int i = 0; i < phmo.Mopps.Count; i++)
-                {
-                    var header = BlamCache.Deserializer.Deserialize<MoppCodeHeader>(dataContext);   // TODO: check if it can be read as CollisionMoppCode instead of MoppCodeHeader
-                    CacheContext.Serializer.Serialize(dataContext, header);
-
-                    var adjustedDataSize = header.DataSize % 16 == 0 ? header.DataSize : (header.DataSize / 16 + 1) * 16;       //Align on 16 bytes.
-
-                    Array.Copy(phmo.MoppCodes, inputReader.Position, result, inputReader.Position, adjustedDataSize);
-                    inputReader.SeekTo(inputReader.Position + adjustedDataSize);
-                    outputWriter.Seek((int)inputReader.Position, 0);
-                }
-
-                phmo.MoppCodes = result;
-            }
-
+            phmo.MoppData = HavokConverter.ConvertHkpMoppData(BlamCache.Version, CacheContext.Version, phmo.MoppData);
             return phmo;
         }
     }

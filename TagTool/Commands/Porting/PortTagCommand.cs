@@ -820,11 +820,9 @@ namespace TagTool.Commands.Porting
 						return ConvertTag(cacheStream, blamCacheStream, resourceStreams, (CachedTag)data);
 					}
 
-                case CollisionMoppCode collisionMopp:
-                    // only mopp codes from halo 3 beta and retail need a form of conversion
-                    if (BlamCache.Version < CacheVersion.Halo3ODST)
-                        collisionMopp.Data.Elements = ConvertCollisionMoppData(collisionMopp.Data.Elements);
-                    return collisionMopp;
+                case TagHkpMoppCode hkpMoppCode:
+                    hkpMoppCode.Data.Elements = HavokConverter.ConvertMoppCodes(BlamCache.Version, CacheContext.Version, hkpMoppCode.Data.Elements);
+                    return hkpMoppCode;
 
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
                     return ConvertPhantomTypeFlags(blamTagName, phantomTypeFlags);
