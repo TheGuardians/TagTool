@@ -40,8 +40,8 @@ namespace TagTool.Commands
             if (!outDir.Exists)
                 outDir.Create();
 
-            var mapFiles = new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
-            //mapFilesFolder.GetFiles("*.map"); // 
+            var mapFiles = mapFilesFolder.GetFiles("*.map"); // new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
+            //
             //
             // Insert what test command you want below
             //
@@ -56,42 +56,17 @@ namespace TagTool.Commands
                 {
                     foreach (var tag in cache.TagCache.TagTable)
                     {
-                        
-                        if (tag.IsInGroup("phmo"))
-                        {
-                            //Console.WriteLine($"{tag.Name}.phmo");
-                            var phmo = cache.Deserialize<PhysicsModel>(stream, tag);
-
-                            foreach(var mopp in phmo.Mopps)
-                            {
-                                var test = 0;
-                            }
-
-                            byte[] result = new byte[phmo.MoppCodes.Length];
-
-                            using (var inputReader = new EndianReader(new MemoryStream(phmo.MoppCodes), CacheVersionDetection.IsLittleEndian(cache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
-                            {
-                                var dataContext = new DataSerializationContext(inputReader);
-
-                                for (int i = 0; i < phmo.Mopps.Count; i++)
-                                {
-                                    var header = cache.Deserializer.Deserialize<HkpMoppCode>(dataContext); 
-
-                                }
-
-                                phmo.MoppCodes = result;
-                            }
-                        }
-
                         if (tag.IsInGroup("sLdT"))
                         {
                             var sLdT = cache.Deserialize<ScenarioLightmap>(stream, tag);
-                            //Console.WriteLine($"{tag.Name}.sLdT");
+                            Console.WriteLine($"{tag.Name}.sLdT");
                             if(sLdT.Lightmaps != null)
                             {
                                 foreach (var lightmap in sLdT.Lightmaps)
                                 {
                                     var geometry = lightmap.Geometry;
+                                    if (geometry.Unknown2 != null)
+                                        Console.WriteLine($"{geometry.Unknown2.Count}");
 
                                     foreach (var unknown in geometry.Unknown2)
                                     {
@@ -107,6 +82,9 @@ namespace TagTool.Commands
                             var lbsp = cache.Deserialize<ScenarioLightmapBspData>(stream, tag);
                             //Console.WriteLine($"{tag.Name}.Lbsp");
                             var geometry = lbsp.Geometry;
+
+                            if (geometry.Unknown2 != null)
+                                Console.WriteLine($"{geometry.Unknown2.Count}");
 
                             foreach (var unknown in geometry.Unknown2)
                             {
