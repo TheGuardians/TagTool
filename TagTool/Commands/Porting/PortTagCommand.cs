@@ -677,18 +677,18 @@ namespace TagTool.Commands.Porting
                     {
                         // Fix citadel glass
                         case @"levels\dlc\fortress\shaders\floor_glass":
-                            rmsh.ShaderProperties[0].Transparency = 1;
+                            rmsh.ShaderProperties[0].AlphaBlendMode = 1;
                             break;
 
                         // Fix avalanche trees
                         case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
-                            rmsh.ShaderProperties[0].BlendMode = 1;
+                            rmsh.ShaderProperties[0].BlendFlags = 1;
                             break;
 
                         // Fix citadel panel wall alcove
                         case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
-                            rmsh.ShaderProperties[0].ShaderMaps[0].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove.bitmap")[0]);
-                            rmsh.ShaderProperties[0].ShaderMaps[2].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump.bitmap")[0]);
+                            rmsh.ShaderProperties[0].TextureConstants[0].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove.bitmap")[0]);
+                            rmsh.ShaderProperties[0].TextureConstants[2].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump.bitmap")[0]);
                             break;
                     }
                     break;
@@ -857,7 +857,7 @@ namespace TagTool.Commands.Porting
 					return propertyType;
 
 				case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders):
-					ConvertCollection(cacheStream, blamCacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
+					ConvertCollection(cacheStream, blamCacheStream, resourceStreams, renderMethod.ShaderProperties[0].TextureConstants, renderMethod.ShaderProperties[0].TextureConstants, blamTagName);
 					return ConvertRenderMethod(cacheStream, blamCacheStream, resourceStreams, renderMethod, blamTagName);
 
 				case ScenarioObjectType scenarioObjectType:

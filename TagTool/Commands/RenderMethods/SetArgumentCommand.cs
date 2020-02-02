@@ -52,19 +52,19 @@ namespace TagTool.Commands.RenderMethods
 
             var argumentIndex = -1;
 
-            for (var i = 0; i < template.VectorArguments.Count; i++)
+            for (var i = 0; i < template.RealParameterNames.Count; i++)
             {
-                if (Cache.StringTable.GetString(template.VectorArguments[i].Name) == argumentName)
+                if (Cache.StringTable.GetString(template.RealParameterNames[i].Name) == argumentName)
                 {
                     argumentIndex = i;
                     break;
                 }
             }
 
-            if (argumentIndex < 0 || argumentIndex >= properties.Arguments.Count)
+            if (argumentIndex < 0 || argumentIndex >= properties.RealConstants.Count)
                 throw new KeyNotFoundException($"Invalid argument name: {argumentName}");
 
-            var argument = properties.Arguments[argumentIndex];
+            var argument = properties.RealConstants[argumentIndex];
 
             for (var i = 0; i < argument.Values.Length; i++)
             {

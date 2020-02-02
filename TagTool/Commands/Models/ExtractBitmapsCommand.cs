@@ -62,22 +62,22 @@ namespace TagTool.Commands.Models
                     {
                         var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                        for (var i = 0; i < template.SamplerArguments.Count; i++)
+                        for (var i = 0; i < template.TextureParameterNames.Count; i++)
                         {
-                            var mapTemplate = template.SamplerArguments[i];
+                            var mapTemplate = template.TextureParameterNames[i];
 
-                            var bitmap = CacheContext.Deserialize<Bitmap>(cacheStream, property.ShaderMaps[i].Bitmap);
+                            var bitmap = CacheContext.Deserialize<Bitmap>(cacheStream, property.TextureConstants[i].Bitmap);
                             var ddsOutDir = directory;
 
                             if (bitmap.Images.Count > 1)
                             {
-                                ddsOutDir = Path.Combine(directory, property.ShaderMaps[i].Bitmap.Index.ToString("X8"));
+                                ddsOutDir = Path.Combine(directory, property.TextureConstants[i].Bitmap.Index.ToString("X8"));
                                 Directory.CreateDirectory(ddsOutDir);
                             }
 
                             for (var j = 0; j < bitmap.Images.Count; j++)
                             {
-                                var outPath = Path.Combine(ddsOutDir, CacheContext.StringTable.GetString(mapTemplate.Name) + "_" + property.ShaderMaps[i].Bitmap.Index.ToString("X4")) + ".dds";
+                                var outPath = Path.Combine(ddsOutDir, CacheContext.StringTable.GetString(mapTemplate.Name) + "_" + property.TextureConstants[i].Bitmap.Index.ToString("X4")) + ".dds";
 
                                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                                 using(var writer = new EndianWriter(outStream))
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Models
                                 }
                                     
 
-                                Console.WriteLine($"Bitmap {i} ({CacheContext.StringTable.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4} extracted to '{outPath}'");
+                                Console.WriteLine($"Bitmap {i} ({CacheContext.StringTable.GetString(mapTemplate.Name)}): {property.TextureConstants[i].Bitmap.Group.Tag} 0x{property.TextureConstants[i].Bitmap.Index:X4} extracted to '{outPath}'");
                             }
                         }
                     }
