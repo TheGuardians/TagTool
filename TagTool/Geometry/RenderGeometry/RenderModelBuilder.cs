@@ -438,7 +438,8 @@ namespace TagTool.Geometry
                 VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(),
                 IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>()
             };
-
+            definition.IndexBuffers.AddressType = CacheAddressType.Definition;
+            definition.VertexBuffers.AddressType = CacheAddressType.Definition;
             foreach (var mesh in Meshes)
             {
                 // Serialize the mesh's vertex buffer
