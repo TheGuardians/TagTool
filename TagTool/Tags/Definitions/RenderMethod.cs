@@ -77,7 +77,7 @@ namespace TagTool.Tags.Definitions
             public int Transparency;
             public int BlendMode;
             public uint Unknown8;
-            public short blend_map_index;
+            public short Unknown9;
             public short Unknown10;
             public short Unknown11;
             public short Unknown12;
@@ -91,13 +91,14 @@ namespace TagTool.Tags.Definitions
             {
                 [TagField(Flags = Label)]
                 public CachedTag Bitmap;
-                public sbyte ImageIndex;
+                public sbyte Unknown;
                 public sbyte BitmapIndex;
                 public sbyte Unknown2;
                 public byte BitmapFlags;
                 public sbyte UnknownBitmapIndexEnable;
                 public sbyte XFormArgumentIndex;
-                public short AnimationPropertyCode; // index = 0x3FF & value, 0xFC00 & value is the count?
+                public sbyte Unknown3;
+                public sbyte Unknown4;
             }
 
             [TagStructure(Size = 0x10)]
