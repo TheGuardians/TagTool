@@ -360,7 +360,7 @@ namespace TagTool.Serialization
                     if (!referencedTag.IsInGroup(tag))
                        throw new Exception($"Invalid group for tag reference: {referencedTag.Group.Tag}");
 
-            block.AddTagReference(referencedTag, valueInfo.Flags.HasFlag(Short));
+            block.AddTagReference(referencedTag, valueInfo == null ? false : valueInfo.Flags.HasFlag(Short));
 
             if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
             {

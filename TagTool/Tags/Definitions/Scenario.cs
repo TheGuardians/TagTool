@@ -797,46 +797,14 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloOnline106708)]
-        public class PermutationInstance : ScenarioInstance
+        public interface IMultiplayerInstance
         {
-            public StringId Variant;
-            public byte ActiveChangeColors;
-            public sbyte Unknown7;
-            public sbyte Unknown8;
-            public sbyte Unknown9;
-            public ArgbColor PrimaryColor;
-            public ArgbColor SecondaryColor;
-            public ArgbColor TertiaryColor;
-            public ArgbColor QuaternaryColor;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public uint Unknown10;
+            MultiplayerObjectProperties Multiplayer { get; set; }
         }
 
-        [TagStructure(Size = 0x30)]
-        public class ScenarioPaletteEntry : TagStructure
-		{
-            public CachedTag Object;
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-        }
-
-        [TagStructure(Size = 0x48)]
-        public class SceneryInstance : PermutationInstance
+        [TagStructure(Size = 0x34)]
+        public class MultiplayerObjectProperties : TagStructure
         {
-            public PathfindingPolicyValue PathfindingPolicy;
-            public LightmappingPolicyValue LightmappingPolicy;
-            public List<PathfindingReference> PathfindingReferences;
-            public short Unknown11;
-            public short Unknown12;
             public SymmetryValue Symmetry;
             public ushort EngineFlags;
             public TeamValue Team;
@@ -845,7 +813,7 @@ namespace TagTool.Tags.Definitions
             public sbyte RuntimeMaximum;
             public byte MultiplayerFlags;
             public short SpawnTime;
-            public short UnknownSpawnTime;
+            public short AbandonTime;
             public sbyte TeleporterFlags;
             public ShapeValue Shape;
             public sbyte TeleporterChannel;
@@ -889,6 +857,51 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloOnline106708)]
+        public class PermutationInstance : ScenarioInstance
+        {
+            public StringId Variant;
+            public byte ActiveChangeColors;
+            public sbyte Unknown7;
+            public sbyte Unknown8;
+            public sbyte Unknown9;
+            public ArgbColor PrimaryColor;
+            public ArgbColor SecondaryColor;
+            public ArgbColor TertiaryColor;
+            public ArgbColor QuaternaryColor;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public uint Unknown10;
+        }
+
+        [TagStructure(Size = 0x30)]
+        public class ScenarioPaletteEntry : TagStructure
+		{
+            public CachedTag Object;
+            public uint Unknown;
+            public uint Unknown2;
+            public uint Unknown3;
+            public uint Unknown4;
+            public uint Unknown5;
+            public uint Unknown6;
+            public uint Unknown7;
+            public uint Unknown8;
+        }
+
+        [TagStructure(Size = 0x48)]
+        public class SceneryInstance : PermutationInstance, IMultiplayerInstance
+        {
+            public PathfindingPolicyValue PathfindingPolicy;
+            public LightmappingPolicyValue LightmappingPolicy;
+            public List<PathfindingReference> PathfindingReferences;
+            public short Unknown11;
+            public short Unknown12;
+            public MultiplayerObjectProperties Multiplayer;
+
+            MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
+        }
+
         [TagStructure(Size = 0x8)]
         public class BipedInstance : PermutationInstance
         {
@@ -897,60 +910,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class VehicleInstance : PermutationInstance
+        public class VehicleInstance : PermutationInstance, IMultiplayerInstance
         {
             public float BodyVitalityPercentage;
             public uint Flags;
-            public SymmetryValue Symmetry;
-            public ushort EngineFlags;
-            public TeamValue Team;
-            public sbyte SpawnSequence;
-            public sbyte RuntimeMinimum;
-            public sbyte RuntimeMaximum;
-            public byte MultiplayerFlags;
-            public short SpawnTime;
-            public short UnknownSpawnTime;
-            public sbyte Unknown11;
-            public ShapeValue Shape;
-            public sbyte TeleporterChannel;
-            public sbyte Unknown12;
-            public short Unknown13;
-            public short AttachedNameIndex;
-            public uint Unknown14;
-            public uint Unknown15;
-            public float WidthRadius;
-            public float Depth;
-            public float Top;
-            public float Bottom;
-            public uint Unknown16;
+            public MultiplayerObjectProperties Multiplayer;
 
-            public enum SymmetryValue : int
-            {
-                Both,
-                Symmetric,
-                Asymmetric,
-            }
-
-            public enum TeamValue : short
-            {
-                Red,
-                Blue,
-                Green,
-                Orange,
-                Purple,
-                Yellow,
-                Brown,
-                Pink,
-                Neutral,
-            }
-
-            public enum ShapeValue : sbyte
-            {
-                None,
-                Sphere,
-                Cylinder,
-                Box,
-            }
+            MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
 
         public enum PathfindingPolicyValue : short
@@ -977,117 +943,23 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x38)]
-        public class EquipmentInstance : ScenarioInstance
+        public class EquipmentInstance : ScenarioInstance, IMultiplayerInstance
         {
             public uint EquipmentFlags;
-            public SymmetryValue Symmetry;
-            public ushort EngineFlags;
-            public TeamValue Team;
-            public sbyte SpawnSequence;
-            public sbyte RuntimeMinimum;
-            public sbyte RuntimeMaximum;
-            public byte MultiplayerFlags;
-            public short SpawnTime;
-            public short UnknownSpawnTime;
-            public sbyte Unknown7;
-            public ShapeValue Shape;
-            public sbyte TeleporterChannel;
-            public sbyte Unknown8;
-            public short Unknown9;
-            public short AttachedNameIndex;
-            public uint Unknown10;
-            public uint Unknown11;
-            public float WidthRadius;
-            public float Depth;
-            public float Top;
-            public float Bottom;
-            public uint Unknown12;
+            public MultiplayerObjectProperties Multiplayer;
 
-            public enum SymmetryValue : int
-            {
-                Both,
-                Symmetric,
-                Asymmetric,
-            }
-
-            public enum TeamValue : short
-            {
-                Red,
-                Blue,
-                Green,
-                Orange,
-                Purple,
-                Yellow,
-                Brown,
-                Pink,
-                Neutral,
-            }
-
-            public enum ShapeValue : sbyte
-            {
-                None,
-                Sphere,
-                Cylinder,
-                Box,
-            }
+            MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
 
         [TagStructure(Size = 0x3C)]
-        public class WeaponInstance : PermutationInstance
+        public class WeaponInstance : PermutationInstance, IMultiplayerInstance
         {
             public short RoundsLeft;
             public short RoundsLoaded;
             public uint WeaponFlags;
-            public SymmetryValue Symmetry;
-            public ushort EngineFlags;
-            public TeamValue Team;
-            public sbyte SpawnSequence;
-            public sbyte RuntimeMinimum;
-            public sbyte RuntimeMaximum;
-            public byte MultiplayerFlags;
-            public short SpawnTime;
-            public short UnknownSpawnTime;
-            public sbyte Unknown11;
-            public ShapeValue Shape;
-            public sbyte TeleporterChannel;
-            public sbyte Unknown12;
-            public short Unknown13;
-            public short AttachedNameIndex;
-            public uint Unknown14;
-            public uint Unknown15;
-            public float WidthRadius;
-            public float Depth;
-            public float Top;
-            public float Bottom;
-            public uint Unknown16;
+            public MultiplayerObjectProperties Multiplayer;
 
-            public enum SymmetryValue : int
-            {
-                Both,
-                Symmetric,
-                Asymmetric,
-            }
-
-            public enum TeamValue : short
-            {
-                Red,
-                Blue,
-                Green,
-                Orange,
-                Purple,
-                Yellow,
-                Brown,
-                Pink,
-                Neutral,
-            }
-
-            public enum ShapeValue : sbyte
-            {
-                None,
-                Sphere,
-                Cylinder,
-                Box,
-            }
+            MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
 
         [Flags]
@@ -2947,66 +2819,19 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44)]
-        public class CrateInstance : PermutationInstance
+        public class CrateInstance : PermutationInstance, IMultiplayerInstance
         {
             public PathfindingPolicyValue PathfindingPolicy;
             public LightmappingPolicyValue LightmappingPolicy;
             public List<PathfindingReference> PathfindingReferences;
-            public SymmetryValue Symmetry;
-            public ushort EngineFlags;
-            public TeamValue Team;
-            public sbyte SpawnSequence;
-            public sbyte RuntimeMinimum;
-            public sbyte RuntimeMaximum;
-            public byte MultiplayerFlags;
-            public short SpawnTime;
-            public short UnknownSpawnTime;
-            public sbyte Unknown13;
-            public ShapeValue Shape;
-            public sbyte TeleporterChannel;
-            public sbyte Unknown14;
-            public short Unknown15;
-            public short AttachedNameIndex;
-            public uint Unknown16;
-            public uint Unknown17;
-            public float WidthRadius;
-            public float Depth;
-            public float Top;
-            public float Bottom;
-            public uint Unknown18;
+            public MultiplayerObjectProperties Multiplayer;
+
+            MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
 
             [TagStructure]
             public class UnknownBlock2 : TagStructure
 			{
                 public uint Unknown;
-            }
-
-            public enum SymmetryValue : int
-            {
-                Both,
-                Symmetric,
-                Asymmetric
-            }
-
-            public enum TeamValue : short
-            {
-                Red,
-                Blue,
-                Green,
-                Orange,
-                Purple,
-                Yellow,
-                Brown,
-                Pink,
-                Neutral
-            }
-
-            public enum ShapeValue : sbyte
-            {
-                None,
-                Sphere,
-                Cylinder,
-                Box
             }
         }
 

@@ -8,93 +8,41 @@ using TagTool.Tags.Resources;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1B4, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1E4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1EC, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1E4, MinVersion = CacheVersion.Halo3ODST)]
     public class ScenarioLightmapBspData : TagStructure
 	{
         public short Unknown;
         public short BspIndex;
         public int StructureChecksum;
-        public float Shadows;
-        public uint Unknown2;
-        public uint Unknown3;
-        public uint Unknown4;
-        public uint Unknown5;
-        public uint Unknown6;
-        public float Midtones;
-        public uint Unknown7;
-        public uint Unknown8;
-        public uint Unknown9;
-        public uint Unknown10;
-        public uint Unknown11;
-        public float Highlights;
-        public uint Unknown12;
-        public uint Unknown13;
-        public uint Unknown14;
-        public uint Unknown15;
-        public uint Unknown16;
-        public float TopDownWhites;
-        public uint Unknown17;
-        public uint Unknown18;
-        public uint Unknown19;
-        public uint Unknown20;
-        public uint Unknown21;
-        public float TopDownBlacks;
-        public uint Unknown22;
-        public uint Unknown23;
-        public uint Unknown24;
-        public uint Unknown25;
-        public uint Unknown26;
-        public uint Unknown27;
-        public uint Unknown28;
-        public uint Unknown29;
-        public uint Unknown30;
-        public uint Unknown31;
-        public uint Unknown32;
-        public uint Unknown33;
-        public uint Unknown34;
-        public uint Unknown35;
-        public uint Unknown36;
-        public uint Unknown37;
-        public uint Unknown38;
-        public uint Unknown39;
-        public uint Unknown40;
-        public uint Unknown41;
-        public uint Unknown42;
-        public uint Unknown43;
-        public uint Unknown44;
-        public uint Unknown45;
-        public uint Unknown46;
-        public uint Unknown47;
-        public uint Unknown48;
-        public uint Unknown49;
-        public uint Unknown50;
-        public CachedTag PrimaryMap;
-        public CachedTag IntensityMap;
+
+        /// <summary>
+        /// When sampling from the lightmap coefficient map, the resuling rgb SH coefficients are multiplied by this luminance scale.
+        /// </summary>
+        [TagField(Length = 9)]
+        public LuminanceScale[] CoefficientsMapScale;
+
+        public CachedTag LightmapSHCoefficientsBitmap;
+        public CachedTag LightmapDominantLightDirectionBitmap;
         public List<StaticPerVertexLighting> StaticPerVertexLightingBuffers;
         public List<ClusterStaticPerVertexLighting> ClusterStaticPerVertexLightingBuffers;
         public List<InstancedGeometryLighting> InstancedGeometry;
-        public List<UnknownSHCoefficients> InstancedSHCoefficients;
+        public List<HalfRGBLightProbe> InstancedGeometryLightProbes;
         public RenderGeometry Geometry;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.Airprobe> Airprobes;
+        public List<Airprobe> Airprobes;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.UnknownBlock2> Unknown64;
+        public List<SceneryLightProbe> SceneryLightProbes;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.UnknownBlock3> Unknown65;
+        public List<MachineLightProbes> MachineLightProbes;
 
+        /// <summary>
+        /// Actually unused in all games. Probably intended for another object type.
+        /// </summary>
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown66;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown67;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown68;
-
-        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused1;
+        public List<int> Unused;
 
         [TagStructure(Size = 0x10)]
         public class StaticPerVertexLighting : TagStructure
@@ -109,58 +57,17 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class ClusterStaticPerVertexLighting : TagStructure
 		{
-            public short Unknown;
+            public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
         }
 
         [TagStructure(Size = 0x8)]
         public class InstancedGeometryLighting : TagStructure
 		{
-            public short Unknown;
+            public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
             public short UnknownSHCoefficientsIndex;
-            public short Unknown2;
-        }
-
-        [TagStructure(Size = 0x48)]
-        public class UnknownSHCoefficients : TagStructure
-		{
-            public short Unknown1;
-            public short Unknown2;
-            public short Unknown3;
-            public short Unknown4;
-            public short Unknown5;
-            public short Unknown6;
-            public short Unknown7;
-            public short Unknown8;
-            public short Unknown9;
-            public short Unknown10;
-            public short Unknown11;
-            public short Unknown12;
-            public short Unknown13;
-            public short Unknown14;
-            public short Unknown15;
-            public short Unknown16;
-            public short Unknown17;
-            public short Unknown18;
-            public short Unknown19;
-            public short Unknown20;
-            public short Unknown21;
-            public short Unknown22;
-            public short Unknown23;
-            public short Unknown24;
-            public short Unknown25;
-            public short Unknown26;
-            public short Unknown27;
-            public short Unknown28;
-            public short Unknown29;
-            public short Unknown30;
-            public short Unknown31;
-            public short Unknown32;
-            public short Unknown33;
-            public short Unknown34;
-            public short Unknown35;
-            public short Unknown36;
+            public short Padding;
         }
     }
 

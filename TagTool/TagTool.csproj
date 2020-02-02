@@ -221,6 +221,7 @@
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
+    <Compile Include="Commands\Porting\MatchTemplateCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
@@ -278,6 +279,7 @@
     <Compile Include="Commands\Tags\ListUnusedTagsCommand.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
+    <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3DObjectType.cs" />
     <Compile Include="Bitmaps\Utils\BitmapConverter.cs" />
     <Compile Include="Bitmaps\Utils\BitmapDdsFormatDetection.cs" />
@@ -451,6 +453,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
     <Compile Include="IO\OffsetStream.cs" />
     <Compile Include="Pathfinding\PathfindingGeometry.cs" />
@@ -480,6 +483,7 @@
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Cache\HaloOnline\Strings.cs" />
+    <Compile Include="Shaders\ShaderMatching\ShaderMatcherNew.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
     <Compile Include="Tags\Definitions\Gen1\Sound.cs" />
@@ -598,7 +602,6 @@
     <Compile Include="Geometry\RenderGeometry\MeshFlags.cs" />
     <Compile Include="Geometry\PhysicsModel\PhysicsModelBuilder.cs" />
     <Compile Include="Geometry\RenderGeometry\PrimitiveType.cs" />
-    <Compile Include="Geometry\RenderGeometry\SH\PrtSHType.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryClassification.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryCompression.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryCompressionFlags.cs" />
@@ -613,8 +616,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamXbox.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexType.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\Vertices.cs" />
-    <Compile Include="Havok\HavokShapeType.cs" />
-    <Compile Include="Havok\MoppCode.cs" />
+    <Compile Include="Havok\HavokTypes.cs" />
     <Compile Include="IO\ConsoleHistory.cs" />
     <Compile Include="IO\EndianFormat.cs" />
     <Compile Include="IO\EndianReader.cs" />

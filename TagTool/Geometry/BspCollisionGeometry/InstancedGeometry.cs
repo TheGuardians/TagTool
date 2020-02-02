@@ -14,7 +14,7 @@ namespace TagTool.BspCollisionGeometry
         public float BoundingSphereRadius;
         public CollisionGeometry CollisionInfo;
         public TagBlock<CollisionGeometry> CollisionGeometries;
-        public TagBlock<CollisionMoppCode> CollisionMoppCodes;
+        public TagBlock<TagHkpMoppCode> CollisionMoppCodes;
         public TagBlock<BreakableSurfaceBits> BreakableSurfaces;
         public TagBlock<SurfacesPlanes> SurfacePlanes;
         public TagBlock<PlaneReference> Planes;
@@ -23,8 +23,8 @@ namespace TagTool.BspCollisionGeometry
         public float Unknown4;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagBlock<CollisionMoppCode> UnknownBspPhysics;
+        public TagBlock<TagHkpMoppCode> UnknownBspPhysics;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown6;
+        public uint RuntimePointer;
     }
 }

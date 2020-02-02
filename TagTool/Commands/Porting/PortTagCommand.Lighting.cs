@@ -135,7 +135,7 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version > CacheVersion.Halo3Retail)
                 return scenarioLightmap;
 
-            scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
+            scenarioLightmap.LightmapDataReferences = new List<CachedTag>();
 
             for(int i = 0; i< scenarioLightmap.Lightmaps.Count; i++)
             {
@@ -149,7 +149,7 @@ namespace TagTool.Commands.Porting
                 if (wasReplacing)
                     SetFlags(PortingFlags.Replace);
 
-                Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
+                Lbsp.Airprobes = new List<Airprobe>();
                 Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
 
                 CachedTag edTag = null;
@@ -175,10 +175,7 @@ namespace TagTool.Commands.Porting
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 
-                scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference
-                {
-                    LightmapData = edTag
-                });
+                scenarioLightmap.LightmapDataReferences.Add(edTag);
             }
             
 

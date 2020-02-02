@@ -78,12 +78,12 @@ namespace TagTool.Geometry
                 // as a level of indirection for multiple shapes.
                 //Also for ease of shape encoding, AddShape returns the 
                 //shape-type added. 'Unused0' is used to represent failure.
-                if (AddShape(_phmo, shapedefs[0]) == HavokShapeType.TriangleMesh)
+                if (AddShape(_phmo, shapedefs[0]) == BlamShapeType.TriangleMesh)
                 {
                     return false;
                 }
 
-                rigidbody.ShapeType = HavokShapeType.Polyhedron;
+                rigidbody.ShapeType = BlamShapeType.Polyhedron;
                 
                 //this field does not have any influence
                 //rigidbody.BoundingSphereRadius = 0.5f;
@@ -92,27 +92,26 @@ namespace TagTool.Geometry
             {
                 MemoryStream moppCodeBlockStream = BlenderPhmoMoppUtil.GenerateForBlenderPhmoJsonFile(fname);
 
-                rigidbody.ShapeType = HavokShapeType.Mopp;
+                rigidbody.ShapeType = BlamShapeType.Mopp;
                 rigidbody.ShapeIndex = 0;
 
                 //phmo needs to use shapelist and listelements reflexives
                 _phmo.Lists = new List<PhysicsModel.List>();
                 _phmo.ListShapes = new List<PhysicsModel.ListShape>();
-                _phmo.Mopps = new List<PhysicsModel.Mopp>();
-
-                var moppTagblock = new PhysicsModel.Mopp
+                _phmo.Mopps = new List<HkpBvMoppTreeShape>();
+                
+                var moppTagblock = new HkpBvMoppTreeShape
                 {
-                    Count = 128,
-                    Unknown = 27,
-                    ShapeType = HavokShapeType.List,
-                    ShapeIndex = 0
+                    ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80},
+                    Type = 27,
+                    Child = new HkpSingleShapeContainer { Type = BlamShapeType.List, Index = 0},
                 };
-
-                _phmo.MoppCodes = moppCodeBlockStream.ToArray();
+                
+                _phmo.MoppData = moppCodeBlockStream.ToArray();
 
 
                 _phmo.Mopps.Add(moppTagblock);
-
+                
                 //_phmo.MoppCodes = new 
                 PhysicsModel.List shapeList = new PhysicsModel.List();
 
@@ -120,8 +119,8 @@ namespace TagTool.Geometry
                 int amountAdded = 0;
                 foreach (JSONNode listelem in fileStruct.AsArray)
                 {
-                    HavokShapeType typeAdded = AddShape(_phmo, listelem);
-                    if (typeAdded == HavokShapeType.TriangleMesh)
+                    BlamShapeType typeAdded = AddShape(_phmo, listelem);
+                    if (typeAdded == BlamShapeType.TriangleMesh)
                     {
                         Console.WriteLine("Failed loading shape.");
                         return false;
@@ -156,11 +155,11 @@ namespace TagTool.Geometry
         /// <param name="phmo">the tag to add the shape to</param> 
         /// <param name="n">the json node from which to parse the shape description.</param>
         /// <returns>shape type added, 'Unused0' is used to represent failure.</returns>
-        private HavokShapeType AddShape(PhysicsModel phmo, JSONNode n)
+        private BlamShapeType AddShape(PhysicsModel phmo, JSONNode n)
         {
             if (n == null)
             {
-                return HavokShapeType.TriangleMesh;
+                return BlamShapeType.TriangleMesh;
             }
 
             //an element of the top-level JSON array is a map
@@ -168,9 +167,9 @@ namespace TagTool.Geometry
             switch (n["Type"])
             {
                 case "Polyhedron":
-                    return AddPolyhedron(phmo, n["Data"]) ? HavokShapeType.Polyhedron : HavokShapeType.TriangleMesh;
+                    return AddPolyhedron(phmo, n["Data"]) ? BlamShapeType.Polyhedron : BlamShapeType.TriangleMesh;
                 default:
-                    return HavokShapeType.TriangleMesh;
+                    return BlamShapeType.TriangleMesh;
             }
         }
 
@@ -180,21 +179,21 @@ namespace TagTool.Geometry
         /// <param name="phmo">the serialized phmo from which to get the counts</param>
         /// <param name="type">the shape for which to get the count</param>
         /// <returns></returns>
-        private int GetNumberOfShapes(PhysicsModel phmo, HavokShapeType type)
+        private int GetNumberOfShapes(PhysicsModel phmo, BlamShapeType type)
         {
             switch (type)
             {
-                case HavokShapeType.Box:
+                case BlamShapeType.Box:
                     return phmo.Boxes != null ? phmo.Boxes.Count : 0;
-                case HavokShapeType.List:
+                case BlamShapeType.List:
                     return phmo.Lists != null ? phmo.Lists.Count : 0;
-                case HavokShapeType.Mopp:
+                case BlamShapeType.Mopp:
                     return phmo.Mopps != null ? phmo.Mopps.Count : 0;
-                case HavokShapeType.Pill:
+                case BlamShapeType.Pill:
                     return phmo.Pills != null ? phmo.Pills.Count : 0;
-                case HavokShapeType.Polyhedron:
+                case BlamShapeType.Polyhedron:
                     return phmo.Polyhedra != null ? phmo.Polyhedra.Count : 0;
-                case HavokShapeType.Sphere:
+                case BlamShapeType.Sphere:
                     return phmo.Spheres != null ? phmo.Spheres.Count : 0;
 
                 default:

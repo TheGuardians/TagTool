@@ -38,7 +38,7 @@ namespace TagTool.Geometry
             JsonToMopp jtm = new JsonToMopp();
             MemoryStream moppStream = jtm.CreateMopp(jsonString);
             moppStream.Position = 0;
-            CollisionMoppCode resource = SynthesizeMoppBlock(moppStream);
+            TagHkpMoppCode resource = SynthesizeMoppBlock(moppStream);
 
             MemoryStream outStream = null;
 
@@ -74,20 +74,17 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="moppStream">A havok 6.5.0 moppcode block</param>
         /// <returns></returns>
-        private static CollisionMoppCode SynthesizeMoppBlock(MemoryStream moppStream)
+        private static TagHkpMoppCode SynthesizeMoppBlock(MemoryStream moppStream)
         {
             BinaryReader binaryReader = new BinaryReader(moppStream);
-            CollisionMoppCode resource = new CollisionMoppCode()
+            TagHkpMoppCode resource = new TagHkpMoppCode()
             {
-                Size = 0,
-                Count = 0x80,
-                Address = 4,
-                Offset = new RealQuaternion(binaryReader.ReadSingle(), binaryReader.ReadSingle(), binaryReader.ReadSingle(), binaryReader.ReadSingle()),
-                DataSize = binaryReader.ReadInt32(),
-                DataBuildType = -101
+                ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80 },
+                Info = new CodeInfo { Offset = new RealQuaternion(binaryReader.ReadSingle(), binaryReader.ReadSingle(), binaryReader.ReadSingle(), binaryReader.ReadSingle())},
+                ArrayBase = new HkArrayBase { CapacityAndFlags = binaryReader.ReadUInt32() },
             };
 
-            resource.DataCapacityAndFlags = (uint)resource.DataSize;
+            resource.ArrayBase.Size = resource.ArrayBase.CapacityAndFlags;
 
             return resource;
         }

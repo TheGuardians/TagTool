@@ -12,9 +12,9 @@ namespace TagTool.Tags.Definitions
 	{
         public int Version;
 
-        public List<CollisionMoppCode> SoftCeilingMoppCodes;
+        public List<TagHkpMoppCode> SoftCeilingMoppCodes;
         public List<SoftCeiling> SoftCeilings;
-        public List<CollisionMoppCode> WaterMoppCodes;
+        public List<TagHkpMoppCode> WaterMoppCodes;
         public List<WaterGroup> WaterGroups;
         public List<WaterInstance> WaterInstances;
 

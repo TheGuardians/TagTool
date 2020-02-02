@@ -79,8 +79,8 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             }
 
             var moppData = Definition.CollisionMoppCodes[0];
-            moppData.DataSize = newMoppData.Count;
-            moppData.DataCapacityAndFlags = (uint)(moppData.DataSize + 0x80000000);
+            moppData.ArrayBase.Size = (uint)newMoppData.Count;
+            moppData.ArrayBase.CapacityAndFlags = moppData.ArrayBase.Size + HkArrayFlags.DONT_DEALLOCATE_FLAG; // works since they are bytes
             moppData.Data = new TagBlock<byte>(CacheAddressType.Memory, newMoppData);
 
 

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using TagTool.Commands.Porting;
 using TagTool.Serialization;
+using TagTool.Havok;
 
 namespace TagTool.Geometry
 {
@@ -52,81 +53,11 @@ namespace TagTool.Geometry
             }
 
             //
-            // Convert UnknownSection.Unknown byte[] endian
+            // Convert mopps in cluster visibility
             //
 
-            for (int i = 0; i < geometry.UnknownSections.Count; i++)
-            {
-                byte[] dataref = geometry.UnknownSections[i].Unknown;
-
-                if (dataref.Length == 0)
-                    continue;
-
-                using (var outStream = new MemoryStream())
-                using (var outReader = new BinaryReader(outStream))
-                using (var outWriter = new EndianWriter(outStream, HOCache.Endianness))
-                using (var stream = new MemoryStream(dataref))
-                using (var reader = new EndianReader(stream, SourceCache.Endianness))
-                {
-                    var dataContext = new DataSerializationContext(reader, outWriter);
-                    var header = HOCache.Deserializer.Deserialize<ScenarioLightmapBspDataSection.Header>(dataContext);
-
-                    var section = new ScenarioLightmapBspDataSection
-                    {
-                        Headers = new List<ScenarioLightmapBspDataSection.Header>
-                        {
-                            header
-                        },
-                        VertexLists = new ScenarioLightmapBspDataSection.VertexList
-                        {
-                            Vertex = new List<ScenarioLightmapBspDataSection.VertexList.Datum>()
-                        }
-                    };
-
-                    HOCache.Serializer.Serialize(dataContext, header);
-
-                    while (reader.BaseStream.Position < dataref.Length) // read the rest of dataref
-                    {
-                        if (section.Headers.Count == 2) // remove "wrongfully" added ones
-                            section.Headers.RemoveAt(1);
-
-                        section.Headers.Add(HOCache.Deserializer.Deserialize<ScenarioLightmapBspDataSection.Header>(dataContext));
-
-                        // if some values match header1, continue
-                        if (section.Headers[0].Position == section.Headers[1].Position)
-                        {
-                            header = section.Headers[1];
-                            HOCache.Serializer.Serialize(dataContext, header);
-
-                            while (reader.BaseStream.Position < dataref.Length)
-                            {
-                                section.VertexLists.Vertex.Add(new ScenarioLightmapBspDataSection.VertexList.Datum { Value = reader.ReadByte() });
-                                outWriter.Write(section.VertexLists.Vertex[section.VertexLists.Vertex.Count - 1].Value);
-                            }
-                        }
-                        else // if read data doesn't match, go back and just read 4 bytes
-                        {
-                            reader.BaseStream.Position = reader.BaseStream.Position - 0x2C; // if read data doesn't match, go back and serialize 
-
-                            section.VertexLists.Vertex.Add(new ScenarioLightmapBspDataSection.VertexList.Datum { Value = reader.ReadByte() });
-                            outWriter.Write(section.VertexLists.Vertex[section.VertexLists.Vertex.Count - 1].Value);
-
-                            section.VertexLists.Vertex.Add(new ScenarioLightmapBspDataSection.VertexList.Datum { Value = reader.ReadByte() });
-                            outWriter.Write(section.VertexLists.Vertex[section.VertexLists.Vertex.Count - 1].Value);
-
-                            section.VertexLists.Vertex.Add(new ScenarioLightmapBspDataSection.VertexList.Datum { Value = reader.ReadByte() });
-                            outWriter.Write(section.VertexLists.Vertex[section.VertexLists.Vertex.Count - 1].Value);
-
-                            section.VertexLists.Vertex.Add(new ScenarioLightmapBspDataSection.VertexList.Datum { Value = reader.ReadByte() });
-                            outWriter.Write(section.VertexLists.Vertex[section.VertexLists.Vertex.Count - 1].Value);
-                        }
-                    }
-
-                    // Write back to tag
-                    outStream.Position = 0;
-                    geometry.UnknownSections[i].Unknown = outStream.ToArray();
-                }
-            }
+            foreach(var clusterVisibility in geometry.MeshClusterVisibility)
+                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, HOCache.Version, clusterVisibility.MoppData);
 
             //
             // Port resource definition

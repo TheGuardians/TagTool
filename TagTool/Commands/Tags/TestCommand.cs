@@ -15,6 +15,7 @@ using TagTool.Geometry;
 using TagTool.BlamFile;
 using TagTool.Tags.Definitions.Gen1;
 using TagTool.Cache.HaloOnline;
+using TagTool.Havok;
 
 namespace TagTool.Commands
 {
@@ -34,82 +35,70 @@ namespace TagTool.Commands
                 return false;
 
             
-            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Reach");
+            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Halo3");
             var outDir = new DirectoryInfo("CacheTest");
             if (!outDir.Exists)
                 outDir.Create();
 
-            var mapFiles = mapFilesFolder.GetFiles("*.map");
-
+            var mapFiles = mapFilesFolder.GetFiles("*.map"); // new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
+            //
             //
             // Insert what test command you want below
             //
 
-            var newStringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, null);
+            //var cache = GameCache.Open(new FileInfo(@"D:\halo\maps\halo3\100_citadel.map"));
 
-            for(int i = 0; i < newStringTable.Count; i++)
-            {
-                var cacheString = Cache.StringTable[i];
-                var newString = newStringTable[i];
-                if (newString != cacheString)
-                {
-                    var test = 1;
-                }
-            }
-
-
-            return true;
-            if (Cache.StringTable != null)
-            {
-                using (var fileStream = new FileInfo($"stringids\\ms23.txt").CreateText())
-                {
-                    var resolver = Cache.StringTable.Resolver;
-                    for (int i = 0; i < Cache.StringTable.Count; i++)
-                    {
-                        var stringId = Cache.StringTable.GetStringId(i);
-                        var set = resolver.GetSet(stringId);
-                        var index = resolver.GetIndex(stringId);
-                        fileStream.WriteLine($"{i:X8}, {set:X2}, {index:X4}, {Cache.StringTable[i]}");
-
-                    }
-                }
-            }
-
-            return true;
-            foreach(var mapFile in mapFiles)
+            foreach (var mapFile in mapFiles)
             {
                 var cache = GameCache.Open(mapFile);
-                if(cache.StringTable != null)
+                Console.WriteLine(cache.DisplayName);
+                using (var stream = cache.OpenCacheRead())
                 {
-                    using (var fileStream = new FileInfo($"stringids\\reach\\{mapFile.Name}.txt").CreateText())
+                    foreach (var tag in cache.TagCache.TagTable)
                     {
-                        var resolver = cache.StringTable.Resolver;
-                        for (int i = 0; i < cache.StringTable.Count; i++)
+                        if (tag.IsInGroup("sLdT"))
                         {
-                            var stringId = cache.StringTable.GetStringId(i);
-                            var set = resolver.GetSet(stringId);
-                            var index = resolver.GetIndex(stringId);
-                            fileStream.WriteLine($"{i:X8}, {set:X2}, {index:X4}, {cache.StringTable[i]}");
+                            var sLdT = cache.Deserialize<ScenarioLightmap>(stream, tag);
+                            Console.WriteLine($"{tag.Name}.sLdT");
+                            if(sLdT.Lightmaps != null)
+                            {
+                                foreach (var lightmap in sLdT.Lightmaps)
+                                {
+                                    var geometry = lightmap.Geometry;
+                                    if (geometry.Unknown2 != null)
+                                        Console.WriteLine($"{geometry.Unknown2.Count}");
+
+                                    foreach (var unknown in geometry.Unknown2)
+                                    {
+                                        //Console.WriteLine($"{unknown.UnknownByte1}, {unknown.UnknownByte2}, {unknown.Unknown2}, {unknown.Unknown3.Length}");
+                                    }
+                                }
+                            }
+                            
+                        }
+
+                        if (tag.IsInGroup("Lbsp"))
+                        {
+                            var lbsp = cache.Deserialize<ScenarioLightmapBspData>(stream, tag);
+                            //Console.WriteLine($"{tag.Name}.Lbsp");
+                            var geometry = lbsp.Geometry;
+
+                            if (geometry.Unknown2 != null)
+                                Console.WriteLine($"{geometry.Unknown2.Count}");
+
+                            foreach (var unknown in geometry.Unknown2)
+                            {
+                                //Console.WriteLine($"{unknown.UnknownByte1}, {unknown.UnknownByte2}, {unknown.Unknown2}, {unknown.Unknown3.Length}");
+                            }
 
                         }
+
                     }
                 }
             }
 
-            /*
-            using(var fileStream = new FileInfo("ms23set0.txt").CreateText())
-            {
-                var resolver = Cache.StringTable.Resolver;
-                for (int i = 0; i < Cache.StringTable.Count; i++)
-                {
-                    var stringId = Cache.StringTable.GetStringId(i);
-                    var set = resolver.GetSet(stringId);
-                    var index = resolver.GetIndex(stringId);
-                    fileStream.WriteLine($"{i:X8}, {set:X2}, {index:X4}, {Cache.StringTable[i]}");
-
-                }
-            }
-            */
+            
+            
 
 
 
