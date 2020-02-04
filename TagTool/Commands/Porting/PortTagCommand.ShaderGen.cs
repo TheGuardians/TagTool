@@ -34,7 +34,7 @@ namespace TagTool.Commands.Porting
             var shader_properties = shaderCortana.ShaderProperties[0];
             shader_properties.TextureConstants = new List<RenderMethod.ShaderProperty.TextureConstant>();
             shader_properties.RealConstants = new List<RenderMethod.ShaderProperty.RealConstant>();
-            shader_properties.IntegerConstants = new List<RenderMethod.ShaderProperty.IntegerConstant>();
+            shader_properties.IntegerConstants = new List<uint>();
             shader_properties.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
             shader_properties.ParameterTables = new List<RenderMethod.ShaderProperty.ParameterTable>();
             shader_properties.Parameters = new List<RenderMethod.ShaderProperty.ParameterMapping>();

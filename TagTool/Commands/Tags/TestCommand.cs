@@ -16,6 +16,7 @@ using TagTool.BlamFile;
 using TagTool.Tags.Definitions.Gen1;
 using TagTool.Cache.HaloOnline;
 using TagTool.Havok;
+using System.Linq;
 
 namespace TagTool.Commands
 {
@@ -40,8 +41,8 @@ namespace TagTool.Commands
             if (!outDir.Exists)
                 outDir.Create();
 
-            var mapFiles = mapFilesFolder.GetFiles("*.map"); // new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
-            //
+            var mapFiles = new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
+            //mapFilesFolder.GetFiles("*.map"); // 
             //
             // Insert what test command you want below
             //
@@ -51,50 +52,59 @@ namespace TagTool.Commands
             foreach (var mapFile in mapFiles)
             {
                 var cache = GameCache.Open(mapFile);
-                Console.WriteLine(cache.DisplayName);
-                using (var stream = cache.OpenCacheRead())
+                int total = 0;
+                int failed = 0;
+                using(var stream = cache.OpenCacheRead())
                 {
-                    foreach (var tag in cache.TagCache.TagTable)
+                    foreach(var tag in cache.TagCache.NonNull())
                     {
-                        if (tag.IsInGroup("sLdT"))
+                        if (tag.IsInGroup("rm  "))
                         {
-                            var sLdT = cache.Deserialize<ScenarioLightmap>(stream, tag);
-                            Console.WriteLine($"{tag.Name}.sLdT");
-                            if(sLdT.Lightmaps != null)
-                            {
-                                foreach (var lightmap in sLdT.Lightmaps)
-                                {
-                                    var geometry = lightmap.Geometry;
-                                    if (geometry.Unknown2 != null)
-                                        Console.WriteLine($"{geometry.Unknown2.Count}");
+                            total++;
+                            var renderMethod = cache.Deserialize<RenderMethod>(stream, tag);
+                            var templateTag = renderMethod.ShaderProperties[0].Template;
 
-                                    foreach (var unknown in geometry.Unknown2)
+                            string indexString = templateTag.Name.Split('\\').ToList().Last();
+                            var indices = indexString.Split('_').ToList();
+                            indices.RemoveAt(0);
+                            List<short> methodIndices = new List<short>();
+                            foreach(var strIndex in indices)
+                            {
+                                methodIndices.Add(Convert.ToInt16(strIndex));
+                            }
+
+
+                            
+
+                            if(methodIndices.Count != renderMethod.RenderMethodDefinitionOptionIndices.Count)
+                            {
+                                Console.WriteLine($"WARNING: Failed to match render method option count in {tag.Name}");
+                                failed++;
+                            }
+                            else
+                            {
+                                for (int i = 0; i < methodIndices.Count; i++)
+                                {
+                                    if( methodIndices[i] != renderMethod.RenderMethodDefinitionOptionIndices[i].OptionIndex)
                                     {
-                                        //Console.WriteLine($"{unknown.UnknownByte1}, {unknown.UnknownByte2}, {unknown.Unknown2}, {unknown.Unknown3.Length}");
+                                        string actualName = "";
+                                        for(int j = 0; j < methodIndices.Count; j++)
+                                        {
+                                            actualName += $"_{renderMethod.RenderMethodDefinitionOptionIndices[i].OptionIndex}";
+                                        }
+                                        Console.WriteLine($"Failed to match render method option indices in {tag.Name}");
+                                        Console.WriteLine($"Current: {indexString}");
+                                        Console.WriteLine($"Real   : {actualName}");
+                                        failed++;
+                                        break;
                                     }
                                 }
                             }
-                            
                         }
-
-                        if (tag.IsInGroup("Lbsp"))
-                        {
-                            var lbsp = cache.Deserialize<ScenarioLightmapBspData>(stream, tag);
-                            //Console.WriteLine($"{tag.Name}.Lbsp");
-                            var geometry = lbsp.Geometry;
-
-                            if (geometry.Unknown2 != null)
-                                Console.WriteLine($"{geometry.Unknown2.Count}");
-
-                            foreach (var unknown in geometry.Unknown2)
-                            {
-                                //Console.WriteLine($"{unknown.UnknownByte1}, {unknown.UnknownByte2}, {unknown.Unknown2}, {unknown.Unknown3.Length}");
-                            }
-
-                        }
-
                     }
                 }
+
+                Console.WriteLine($"Out of {total} render methods, {failed} didn't have the right rmt2 name");
             }
 
             

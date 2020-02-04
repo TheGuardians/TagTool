@@ -44,9 +44,13 @@ namespace TagTool.Commands.Porting
 
             // TODO hardcode shader values such as argument changes for specific shaders
             var bmMaps = new List<string>();
-            var bmArgs = new List<string>();
+            var bmRealConstants = new List<string>();
+            var bmIntConstants = new List<string>();
+            var bmBoolConstants = new List<string>();
             var edMaps = new List<string>();
-            var edArgs = new List<string>();
+            var edRealConstants = new List<string>();
+            var edIntConstants = new List<string>();
+            var edBoolConstants = new List<string>();
 
             // Reset rmt2 preset
             var pRmt2 = 0;
@@ -55,7 +59,8 @@ namespace TagTool.Commands.Porting
             var newShaderProperty = new RenderMethod.ShaderProperty
             {
                 TextureConstants = new List<RenderMethod.ShaderProperty.TextureConstant>(),
-                RealConstants = new List<RenderMethod.ShaderProperty.RealConstant>()
+                RealConstants = new List<RenderMethod.ShaderProperty.RealConstant>(),
+                IntegerConstants = new List<uint>()
             };
 
             // Get a simple list of bitmaps and arguments names
@@ -66,10 +71,14 @@ namespace TagTool.Commands.Porting
             foreach (var a in bmRmt2.TextureParameterNames)
                 bmMaps.Add(BlamCache.StringTable.GetString(a.Name));
             foreach (var a in bmRmt2.RealParameterNames)
-                bmArgs.Add(BlamCache.StringTable.GetString(a.Name));
+                bmRealConstants.Add(BlamCache.StringTable.GetString(a.Name));
+            foreach (var a in bmRmt2.IntegerParameterNames)
+                bmIntConstants.Add(BlamCache.StringTable.GetString(a.Name));
+            foreach (var a in bmRmt2.BooleanParameterNames)
+                bmBoolConstants.Add(BlamCache.StringTable.GetString(a.Name));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
+            var edRmt2Instance = Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmRealConstants);
 
             if (edRmt2Instance == null)
             {
@@ -105,7 +114,12 @@ namespace TagTool.Commands.Porting
             foreach (var a in edRmt2.TextureParameterNames)
                 edMaps.Add(CacheContext.StringTable.GetString(a.Name));
             foreach (var a in edRmt2.RealParameterNames)
-                edArgs.Add(CacheContext.StringTable.GetString(a.Name));
+                edRealConstants.Add(CacheContext.StringTable.GetString(a.Name));
+            foreach (var a in edRmt2.IntegerParameterNames)
+                edIntConstants.Add(CacheContext.StringTable.GetString(a.Name));
+            foreach (var a in edRmt2.BooleanParameterNames)
+                edBoolConstants.Add(CacheContext.StringTable.GetString(a.Name));
+
 
             // The bitmaps are default textures.
             // Arguments are probably default values. I took the values that appeared the most frequently, assuming they are the default value.
@@ -134,27 +148,76 @@ namespace TagTool.Commands.Porting
                     });
             }
 
-            foreach (var a in edArgs)
+            foreach (var a in edRealConstants)
                 newShaderProperty.RealConstants.Add(Matcher.DefaultArgumentsValues(a));
 
+            foreach (var a in edIntConstants)
+                newShaderProperty.IntegerConstants.Add(Matcher.DefaultIntegerArgumentsValues(a));
+
             // Reorder blam bitmaps to match the HO rmt2 order
-            // Reorder blam arguments to match the HO rmt2 order
+            // Reorder blam real constants to match the HO rmt2 order
+            // Reorder blam int constants to match the HO rmt2 order
+            // Reorder blam bool constants to match the HO rmt2 order
             foreach (var eM in edMaps)
                 foreach (var bM in bmMaps)
                     if (eM == bM)
                         newShaderProperty.TextureConstants[edMaps.IndexOf(eM)] = finalRm.ShaderProperties[0].TextureConstants[bmMaps.IndexOf(bM)];
 
-            foreach (var eA in edArgs)
-                foreach (var bA in bmArgs)
+            foreach (var eA in edRealConstants)
+                foreach (var bA in bmRealConstants)
                     if (eA == bA)
-                        newShaderProperty.RealConstants[edArgs.IndexOf(eA)] = finalRm.ShaderProperties[0].RealConstants[bmArgs.IndexOf(bA)];
+                        newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].RealConstants[bmRealConstants.IndexOf(bA)];
 
+            foreach (var eA in edIntConstants)
+                foreach (var bA in bmIntConstants)
+                    if (eA == bA)
+                        newShaderProperty.IntegerConstants[edIntConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].IntegerConstants[bmIntConstants.IndexOf(bA)];
+
+            foreach (var eA in edBoolConstants)
+                foreach (var bA in bmBoolConstants)
+                    if (eA == bA)
+                    {
+                        newShaderProperty.BooleanConstants &= ~(uint)(1 << bmBoolConstants.IndexOf(bA));
+                        newShaderProperty.BooleanConstants |= (uint)(1 << edBoolConstants.IndexOf(eA));
+                    }
+                       
             // Remove some tagblocks
             // finalRm.Unknown = new List<RenderMethod.UnknownBlock>(); // hopefully not used; this gives rmt2's name. They correspond to the first tagblocks in rmdf, they tell what the shader does
             finalRm.ImportData = new List<RenderMethod.ImportDatum>(); // most likely not used
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
             finalRm.ShaderProperties[0].TextureConstants = newShaderProperty.TextureConstants;
             finalRm.ShaderProperties[0].RealConstants = newShaderProperty.RealConstants;
+
+            // fixup runtime queryable properties
+            for(int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
+            {
+                if (finalRm.ShaderProperties[0].QueryableProperties[i] == -1)
+                    continue;
+
+                switch(i)
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 5:
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edMaps.IndexOf(bmMaps[finalRm.ShaderProperties[0].QueryableProperties[i]]);
+                        break;
+                    case 4:
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edRealConstants.IndexOf(bmRealConstants[finalRm.ShaderProperties[0].QueryableProperties[i]]);
+                        break;
+                    default:
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
+                        break;
+                } 
+            }
+
+            // fixup xform arguments;
+            foreach(var tex in finalRm.ShaderProperties[0].TextureConstants)
+            {
+                if(tex.XFormArgumentIndex != -1)
+                    tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
+            }
 
             Matcher.FixRmdfTagRef(finalRm);
 
@@ -177,16 +240,6 @@ namespace TagTool.Commands.Porting
                     a.Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag($"{defaultBitmap}.bitm")[0]);
                 }
             }
-
-            if (Matcher.RmhgUnknownTemplates.Contains(edRmt2Instance.Name))
-                if (finalRm.ShaderProperties[0].IntegerConstants.Count == 0)
-                    finalRm.ShaderProperties[0].IntegerConstants = new List<RenderMethod.ShaderProperty.IntegerConstant>
-                    {
-                        new RenderMethod.ShaderProperty.IntegerConstant
-                        {
-                            Value = 1
-                        }
-                    };
 
             switch (blamTagName)
             {
@@ -621,14 +674,223 @@ namespace TagTool.Commands.Porting
 
         private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, GameCache blamCache, GameCacheHaloOnlineBase CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
         {
-            // TODO fix
-            finalRm.ShaderProperties[0].EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
-            finalRm.ShaderProperties[0].ParameterTables = new List<ParameterTable>();
-            finalRm.ShaderProperties[0].Parameters = new List<ParameterMapping>();
-            finalRm.ShaderProperties[0].Functions = new List<ShaderFunction>();
+            // finalRm is a H3 rendermethod with ported bitmaps, 
+            if (finalRm.ShaderProperties[0].Functions.Count == 0)
+                return finalRm;
 
-            foreach(var texture in finalRm.ShaderProperties[0].TextureConstants)
-                texture.Functions.Integer = 0;
+            foreach (var properties in finalRm.ShaderProperties[0].Functions)
+            {
+                properties.InputName = ConvertStringId(properties.InputName);
+                properties.RangeName = ConvertStringId(properties.RangeName);
+
+                ConvertTagFunction(properties.Function);
+            }
+
+            var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);
+            var edPixl = (PixelShader)pixlTag;
+            var bmPixl = BlamCache.Deserialize<PixelShader>(blamCacheStream, bmRmt2.PixelShader);
+
+            // Make a collection of drawmodes and their DrawModeItem's
+            // DrawModeItem are has info about all registers modified by functions for each drawmode.
+
+            var bmPixlParameters = new Dictionary<int, List<ArgumentMapping>>(); // key is shader index
+
+            // pixl side
+            // For each drawmode, find its shader, and get all that shader's parameter.
+            // Each parameter has a registerIndex, a registerType, and a registerName.
+            // We'll use this to know which function acts on what shader and which registers
+
+            var RegistersList = new Dictionary<int, string>();
+
+            foreach (var a in finalRm.ShaderProperties[0].Parameters)
+                if (!RegistersList.ContainsKey(a.RegisterIndex))
+                    RegistersList.Add(a.RegisterIndex, "");
+
+            var DrawModeIndex = -1;
+            foreach (var a in bmPixl.DrawModes)
+            {
+                DrawModeIndex++;
+
+                bmPixlParameters.Add(DrawModeIndex, new List<ArgumentMapping>());
+
+                if (a.Count == 0)
+                    continue;
+
+                foreach (var b in bmPixl.Shaders[a.Offset].XboxParameters)
+                {
+                    var ParameterName = BlamCache.StringTable.GetString(b.ParameterName);
+
+                    bmPixlParameters[DrawModeIndex].Add(new ArgumentMapping
+                    {
+                        ShaderIndex = a.Offset,
+                        ParameterName = ParameterName,
+                        RegisterIndex = b.RegisterIndex,
+                        RegisterType = b.RegisterType
+                    });
+                }
+            }
+
+            // rm side
+            var bmDrawmodesFunctions = new Dictionary<int, Unknown3Tagblock>(); // key is shader index
+            DrawModeIndex = -1;
+            foreach (var a in finalRm.ShaderProperties[0].EntryPoints)
+            {
+                DrawModeIndex++;
+
+                // These are not modes. This is an indireciton table of packed 10_6 shorts
+                // from RMT2 ShaderDrawmodes to RegisterOffsets
+                // register_offset = ShaderDrawmodes[current_drawmode].Offset
+                var drawmodeRegisterOffset = (int)a.Offset;
+                var drawmodeRegisterCount = (int)a.Count;
+
+
+                var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].Texture.Offset;
+                var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].Texture.Count;
+                var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealVertex.Offset;
+                var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealVertex.Count;
+                var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealPixel.Offset;
+                var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealPixel.Count;
+                var ArgumentMappings = new List<ArgumentMapping>();
+
+                for (int j = 0; j < ArgumentMappingsCountSampler; j++)
+                {
+                    ArgumentMappings.Add(new ArgumentMapping
+                    {
+                        RegisterIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexSampler + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexSampler + j].SourceIndex, // i don't think i can use it to match stuf
+                        ArgumentMappingsTagblockIndex = ArgumentMappingsIndexSampler + j,
+                        RegisterType = TagTool.Shaders.ShaderParameter.RType.Sampler,
+                        ShaderIndex = drawmodeRegisterOffset,
+                        // WARNING i think drawmodes in rm aren't the same as in pixl, because rm drawmodes can point to a global shader .
+                        // say rm.drawmodes[17]'s value is 13, pixl.drawmodes[17] would typically be 12
+                    });
+                }
+
+                for (int j = 0; j < ArgumentMappingsCountUnknown; j++)
+                {
+                    ArgumentMappings.Add(new ArgumentMapping
+                    {
+                        RegisterIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexUnknown + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexUnknown + j].SourceIndex,
+                        ArgumentMappingsTagblockIndex = ArgumentMappingsIndexUnknown + j,
+                        RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
+                        ShaderIndex = drawmodeRegisterOffset,
+                        // it's something else, uses a global shader or some shit, one water shader pointed to a vtsh in rasg, but not in H3, maybe coincidence
+                        // yeah guaranteed rmdf's glvs or rasg shaders
+                    });
+                }
+
+                for (int j = 0; j < ArgumentMappingsCountVector; j++)
+                {
+                    ArgumentMappings.Add(new ArgumentMapping
+                    {
+                        RegisterIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexVector + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexVector + j].SourceIndex,
+                        ArgumentMappingsTagblockIndex = ArgumentMappingsIndexVector + j,
+                        RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
+                        ShaderIndex = drawmodeRegisterOffset,
+                    });
+                }
+
+                bmDrawmodesFunctions.Add(DrawModeIndex, new Unknown3Tagblock
+                {
+                    Unknown3Index = drawmodeRegisterOffset, // not shader index for rm and rmt2
+                    Unknown3Count = drawmodeRegisterCount, // should always be 4 for enabled drawmodes
+                    ArgumentMappingsIndexSampler = ArgumentMappingsIndexSampler,
+                    ArgumentMappingsCountSampler = ArgumentMappingsCountSampler,
+                    ArgumentMappingsIndexUnknown = ArgumentMappingsIndexUnknown, // no clue what it's used for, global shaders? i know one of the drawmodes will use one or more shaders from glvs, no idea if always or based on something
+                    ArgumentMappingsCountUnknown = ArgumentMappingsCountUnknown,
+                    ArgumentMappingsIndexVector = ArgumentMappingsIndexVector,
+                    ArgumentMappingsCountVector = ArgumentMappingsCountVector,
+                    ArgumentMappings = ArgumentMappings
+                });
+            }
+
+            DrawModeIndex = -1;
+            foreach (var a in bmDrawmodesFunctions)
+            {
+                DrawModeIndex++;
+                if (a.Value.Unknown3Count == 0)
+                    continue;
+
+                foreach (var b in a.Value.ArgumentMappings)
+                {
+                    foreach (var c in bmPixlParameters[a.Key])
+                    {
+                        if (b.RegisterIndex == c.RegisterIndex && b.RegisterType == c.RegisterType)
+                        {
+                            b.ParameterName = c.ParameterName;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // // Now that we know which register is what for each drawmode, find its halo online equivalent register indexes based on register name.
+            // // This is where it gets tricky because drawmodes count changed in HO. 
+            foreach (var a in bmDrawmodesFunctions)
+            {
+                if (a.Value.Unknown3Count == 0)
+                    continue;
+
+                foreach (var b in a.Value.ArgumentMappings)
+                {
+                    foreach (var c in edPixl.Shaders[edPixl.DrawModes[a.Key].Offset].PCParameters)
+                    {
+                        var ParameterName = CacheContext.StringTable.GetString(c.ParameterName);
+
+                        if (ParameterName == b.ParameterName && b.RegisterType == c.RegisterType)
+                        {
+                            if (RegistersList[b.RegisterIndex] == "")
+                                RegistersList[b.RegisterIndex] = $"{c.RegisterIndex}";
+                            else
+                                RegistersList[b.RegisterIndex] = $"{RegistersList[b.RegisterIndex]},{c.RegisterIndex}";
+
+                            b.EDRegisterIndex = c.RegisterIndex;
+                        }
+                    }
+                }
+            }
+
+            // DEBUG draw registers
+            // DEBUG check for invalid registers
+            foreach (var a in bmDrawmodesFunctions)
+            {
+                if (a.Value.Unknown3Count == 0)
+                    continue;
+
+                foreach (var b in a.Value.ArgumentMappings)
+                {
+                    finalRm.ShaderProperties[0].Parameters[b.ArgumentMappingsTagblockIndex].RegisterIndex = (short)b.EDRegisterIndex;
+                }
+            }
+
+            // one final check
+            // Gather all register indexes from pixl tag. Then check against all the converted register indexes. 
+            // It should detect registers that are invalid and would crash, but it does not verify if the register is valid.
+            var validEDRegisters = new List<int>();
+
+            foreach (var a in edPixl.Shaders)
+                foreach (var b in a.PCParameters)
+                    if (!validEDRegisters.Contains(b.RegisterIndex))
+                        validEDRegisters.Add(b.RegisterIndex);
+
+            foreach (var a in finalRm.ShaderProperties[0].Parameters)
+            {
+                if (!validEDRegisters.Contains((a.RegisterIndex)))
+                {
+                    // Display a warning
+                    // Console.WriteLine($"INVALID REGISTERS IN TAG {blamTagName}!");
+
+                    finalRm.ShaderProperties[0].EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
+                    finalRm.ShaderProperties[0].ParameterTables = new List<ParameterTable>();
+                    finalRm.ShaderProperties[0].Parameters = new List<ParameterMapping>();
+                    finalRm.ShaderProperties[0].Functions = new List<ShaderFunction>();
+                    foreach (var map in finalRm.ShaderProperties[0].TextureConstants)
+                        map.Functions.Integer = 0;
+                    return finalRm;
+                }
+            }
 
             return finalRm;
         }

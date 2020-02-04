@@ -68,7 +68,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag Template;
             public List<TextureConstant> TextureConstants;
             public List<RealConstant> RealConstants;
-            public List<IntegerConstant> IntegerConstants;
+            public List<uint> IntegerConstants;
             public uint BooleanConstants; // Each bit indicates true/false. SourceIndex = bit index
             public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables
             public List<ParameterTable> ParameterTables; // Ranges of Parameters by usage
@@ -112,12 +112,6 @@ namespace TagTool.Tags.Definitions
                 public float Arg1 { get => _Values[1]; set => _Values[1] = value; }
                 public float Arg2 { get => _Values[2]; set => _Values[2] = value; }
                 public float Arg3 { get => _Values[3]; set => _Values[3] = value; }
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class IntegerConstant : TagStructure
-            {
-                public uint Value;
             }
 
             [TagStructure(Size = 0x6)]
