@@ -194,6 +194,7 @@
     <Compile Include="Audio\SoundConverter.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
+    <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="Cache\CachedTag.cs" />
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
     <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
@@ -298,7 +299,7 @@
     <Compile Include="Direct3D\D3D10\D3D10MiscFlags.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Utils.cs" />
     <Compile Include="Direct3D\D3D9\D3DFormat.cs" />
-    <Compile Include="Direct3D\Xbox360\D3DFormatXbox.cs" />
+    <Compile Include="Direct3D\Xbox360\D3DFormat.cs" />
     <Compile Include="Bitmaps\DDS\DDSComplexityFlags.cs" />
     <Compile Include="Bitmaps\DDS\DDSFile.cs" />
     <Compile Include="Bitmaps\DDS\DDSFlags.cs" />

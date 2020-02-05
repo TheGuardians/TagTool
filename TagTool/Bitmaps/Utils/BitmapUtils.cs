@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Direct3D.D3D9;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -313,5 +314,50 @@ namespace TagTool.Bitmaps
                 image.Flags |= BitmapFlags.Unknown3;
 
         }
+
+        public static RealArgbColor DecodeBitmapPixel(byte[] bitmapData, Bitmap.Image image, RealVector2d textureCoordinate, int layerIndex, int mipmapIndex, int unknown)
+        {
+            RealArgbColor result = new RealArgbColor(0,0,0,0);
+
+            if(image.RuntimeAddress > 0 && (int)image.Type != -1)
+            {
+                var currentMipmapIndex = 0;
+                if (mipmapIndex > 0)
+                    currentMipmapIndex = mipmapIndex;
+                if (mipmapIndex > image.MipmapCount)
+                    currentMipmapIndex = image.MipmapCount;
+
+                var currentHeight = image.Height >> currentMipmapIndex;
+                var currentWidth = image.Width >> currentMipmapIndex;
+
+                if (currentWidth < 1)
+                    currentWidth = 1;
+
+                if (currentHeight < 1)
+                    currentHeight = 1;
+
+                if (image.Flags.HasFlag(BitmapFlags.Compressed))
+                {
+                    currentHeight += -currentHeight & 3;
+                    currentWidth += -currentWidth & 3;
+                }
+
+                currentHeight = (int)Math.Floor(currentHeight * textureCoordinate.I);
+                currentWidth = (int)Math.Floor(currentWidth * textureCoordinate.J);
+
+                if(unknown != 0)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+
+
+            return result;
+        }
+
     }
 }
