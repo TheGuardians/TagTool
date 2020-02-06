@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Direct3D.Xbox360;
 
 namespace TagTool.Direct3D.D3D9x
 {
@@ -229,6 +230,28 @@ namespace TagTool.Direct3D.D3D9x
 
         public static int MAKEINDEXFMT(int Is32Bits, int Endian) => ((Is32Bits) << D3DINDEXFORMAT_32BITS_SHIFT | (Endian) << D3DINDEXFORMAT_ENDIAN_SHIFT);
 
+        [Flags]
+        public enum D3DUSAGE : int
+        {
+            D3DUSAGE_CPU_CACHED_MEMORY              = 0x00000004, // Xbox 360 only
+            D3DUSAGE_RUNCOMMANDBUFFER_TIMESTAMP     = 0x00000200, // Xbox 360 only
+            D3DUSAGE_RENDERTARGET                   = 0x00000001,
+            D3DUSAGE_DEPTHSTENCIL                   = 0x00000002,
+            D3DUSAGE_DMAP                           = 0x00004000,
+            D3DUSAGE_QUERY_LEGACYBUMPMAP            = 0x00008000,
+            D3DUSAGE_QUERY_SRGBREAD                 = 0x00010000,
+            D3DUSAGE_QUERY_FILTER                   = 0x00020000,
+            D3DUSAGE_QUERY_SRGBWRITE                = 0x00040000,
+            D3DUSAGE_QUERY_POSTPIXELSHADER_BLENDING = 0x00080000,
+            D3DUSAGE_QUERY_VERTEXTEXTURE            = 0x00100000,
+            D3DUSAGE_WRITEONLY                      = 0x00000008,
+            D3DUSAGE_SOFTWAREPROCESSING             = 0x00000010,
+            D3DUSAGE_DONOTCLIP                      = 0x00000020,
+            D3DUSAGE_POINTS                         = 0x00000040,
+            D3DUSAGE_RTPATCHES                      = 0x00000080,
+            D3DUSAGE_NPATCHES                       = 0x00000100
+        }
+
         public enum D3DRESOURCETYPE : int
         {
             D3DRTYPE_NONE = 0,
@@ -259,6 +282,14 @@ namespace TagTool.Direct3D.D3D9x
     }
 
 
+    public static class D3D
+    {
+        public static void SetTextureHeader(D3D9xTypes.D3DRESOURCETYPE resourceType, int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, 
+            D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int flags, int expBias, uint nBlocksPitch, ref D3DTexture9 texture, ref uint baseSize, ref uint mipmapSize)
+        {
+
+        }
+    }
 
 
 

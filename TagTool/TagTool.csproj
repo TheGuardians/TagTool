@@ -299,7 +299,7 @@
     <Compile Include="Direct3D\D3D10\D3D10MiscFlags.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Utils.cs" />
     <Compile Include="Direct3D\D3D9\D3DFormat.cs" />
-    <Compile Include="Direct3D\Xbox360\D3DFormat.cs" />
+    <Compile Include="Direct3D\Xbox360\D3D.cs" />
     <Compile Include="Bitmaps\DDS\DDSComplexityFlags.cs" />
     <Compile Include="Bitmaps\DDS\DDSFile.cs" />
     <Compile Include="Bitmaps\DDS\DDSFlags.cs" />

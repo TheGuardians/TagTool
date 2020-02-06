@@ -258,59 +258,117 @@ namespace TagTool.Bitmaps
         }
 
 
-        public static uint XGSetTextureHeader(int width, int height, int levels, int usage, int format, int pool, int baseOffset, int mipOffset,
-            int pitch, ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetTextureHeader(int width, int height, int levels, D3D9xTypes.D3DUSAGE usage, int format, int pool, int baseOffset, int mipOffset,
+            uint pitch, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(width, height, 1, levels, usage, format, D3D9xTypes.D3DMIPPACKINGTYPE.unknown2, 0, 0, baseOffset, mipOffset, pitch, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_TEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetCubeTextureHeader(int edgeLength, int levels, int usage, int format, int pool, int baseOffset, int mipOffset,
-            ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetCubeTextureHeader(int edgeLength, int levels, D3D9xTypes.D3DUSAGE usage, int format, int pool, int baseOffset, int mipOffset,
+            ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(edgeLength, edgeLength, 6, levels, usage, format, D3D9xTypes.D3DMIPPACKINGTYPE.unknown2, 0, 0, baseOffset, mipOffset, 0, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_CUBETEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetArrayTextureHeader(int width, int height, int arraySize, int levels, int usage, int format, int pool, int baseOffset, int mipOffset,
-            int pitch, ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetArrayTextureHeader(int width, int height, int arraySize, int levels, D3D9xTypes.D3DUSAGE usage, int format, int pool, int baseOffset, int mipOffset,
+            uint pitch, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(width, height, arraySize, levels, usage, format, D3D9xTypes.D3DMIPPACKINGTYPE.unknown2, 0, 0, baseOffset, mipOffset, pitch, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_ARRAYTEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetVolumeTextureHeader(int width, int height, int depth, int levels, int usage, int format, int pool, int baseOffset, int mipOffset,
-           ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetVolumeTextureHeader(int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, int pool, int baseOffset, int mipOffset,
+           ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(width, height, depth, levels, usage, format, D3D9xTypes.D3DMIPPACKINGTYPE.unknown2, 0, 0, baseOffset, mipOffset, 0, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_VOLUMETEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetTextureHeaderEx(int width, int height, int levels, int usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
-            int pitch, ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetTextureHeaderEx(int width, int height, int levels, D3D9xTypes.D3DUSAGE usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
+            uint pitch, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(width, height, 1, levels, usage, format, (D3D9xTypes.D3DMIPPACKINGTYPE)(~flags & 1), (flags >> 1) & 1, expBias, baseOffset, mipOffset, pitch, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_TEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetCubeTextureHeaderEx(int edgeLength, int levels, int usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
-            ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetCubeTextureHeaderEx(int edgeLength, int levels, D3D9xTypes.D3DUSAGE usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
+            ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(edgeLength, edgeLength, 6, levels, usage, format, (D3D9xTypes.D3DMIPPACKINGTYPE)(~flags & 1), (flags >> 1) & 1, expBias, baseOffset, mipOffset, 0, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_CUBETEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetArrayTextureHeaderEx(int width, int height, int arraySize, int levels, int usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
-            int pitch, ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetArrayTextureHeaderEx(int width, int height, int arraySize, int levels, D3D9xTypes.D3DUSAGE usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
+            uint pitch, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(width, height, arraySize, levels, usage, format, (D3D9xTypes.D3DMIPPACKINGTYPE)(~flags & 1), (flags >> 1) & 1, expBias, baseOffset, mipOffset, pitch, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_ARRAYTEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-        public static uint XGSetVolumeTextureHeaderEx(int width, int height, int depth, int levels, int usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
-           ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        public static uint XGSetVolumeTextureHeaderEx(int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, int expBias, int flags, int baseOffset, int mipOffset,
+           ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
             return SetBaseTextureHeader(width, height, depth, levels, usage, format, (D3D9xTypes.D3DMIPPACKINGTYPE)(~flags & 1), (flags >> 1) & 1, expBias, baseOffset, mipOffset, 0, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_VOLUMETEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
 
-        private static uint SetBaseTextureHeader(int width, int height, int depth, int levels, int usage, int format, D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int flags_unknown, 
-            int expBias, int base_offset, int mip_offset, int pitch, D3D9xTypes.D3DRESOURCETYPE resourceType, ref D3DTexture9 pTexture, ref int pBaseSize, ref int pMipSize)
+        private static uint SetBaseTextureHeader(int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int flags_unknown, 
+            int expBias, int initialBaseOffset, int initialMipOffset, uint pitch, D3D9xTypes.D3DRESOURCETYPE resourceType, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
-            return 0;
+            uint blockHeight = 0;
+            uint blockWidth = 0;
+            uint nBlocksPitch = 0;
+            uint baseSize = 0;
+            uint mipSize = 0;
+
+            XGGetBlockDimensions(XGGetGpuFormat(format), ref blockWidth, ref blockHeight);
+
+            if(levels != 0)
+            {
+                if(levels == 1 || (width == 1 && height == 1 && depth == 1 && flags_unknown > 0) || (width == 3 && height == 3 && depth == 3 && flags_unknown > 0))
+                {
+                    if (levels == 1 && resourceType == D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_TEXTURE)
+                    {
+                        nBlocksPitch = pitch / blockHeight;
+                    }
+                }
+            }
+            
+            Direct3D.D3D9x.D3D.SetTextureHeader(resourceType, width, height, depth, levels, usage, format, mipPackingType, flags_unknown,
+                expBias, nBlocksPitch, ref pTexture, ref baseSize, ref mipSize);
+
+            pTexture.Unknown14 = 0xFFFF0000;
+            pTexture.Unknown18 = 0xFFFF0000;
+            pTexture.Flags = D3DTexture9Flags.Unknown1 | D3DTexture9Flags.Unknown2;
+            if (usage.HasFlag(D3D9xTypes.D3DUSAGE.D3DUSAGE_CPU_CACHED_MEMORY))
+                pTexture.Flags |= D3DTexture9Flags.CPU_CACHED_MEMORY;
+            if (usage.HasFlag(D3D9xTypes.D3DUSAGE.D3DUSAGE_RUNCOMMANDBUFFER_TIMESTAMP))
+                pTexture.Flags |= D3DTexture9Flags.RUNCOMMANDBUFFER_TIMESTAMP;
+
+            pTexture.BaseOffset = UnknownAlign(initialBaseOffset, pTexture.BaseOffset);
+            pBaseSize = baseSize;
+            pMipSize = mipSize;
+
+            if (levels > 0)
+            {
+                if(initialMipOffset == -1)
+                {
+                    pBaseSize = AlignToPage(baseSize);
+                    pTexture.MipOffset = UnknownAlign((int)(initialBaseOffset + pBaseSize), pTexture.MipOffset);
+                }
+                else
+                    pTexture.MipOffset = UnknownAlign(initialMipOffset, pTexture.MipOffset);
+            }
+            else
+                pTexture.MipOffset &=  0xFFF;
+
+            
+            return pBaseSize + pMipSize;
+        }
+
+        private static uint AlignToPage(uint offset)
+        {
+            return (offset + 0xFFF) & 0xFFFFF000;
+        }
+
+        private static int UnknownAlign(int offset1, int offset2)
+        {
+            return offset1 ^ (offset1 ^ offset2) & 0xFFF;
         }
     }
 }
