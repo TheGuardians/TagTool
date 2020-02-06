@@ -349,7 +349,7 @@ namespace TagTool.Bitmaps
             if (usage.HasFlag(D3D9xTypes.D3DUSAGE.D3DUSAGE_RUNCOMMANDBUFFER_TIMESTAMP))
                 pTexture.Flags |= D3DTexture9Flags.RUNCOMMANDBUFFER_TIMESTAMP;
 
-            pTexture.BaseOffset = UnknownAlign(initialBaseOffset, pTexture.BaseOffset);
+            pTexture.Unknown20 = UnknownAlign(initialBaseOffset, pTexture.Unknown20);
             pBaseSize = baseSize;
             pMipSize = mipSize;
 
@@ -358,13 +358,13 @@ namespace TagTool.Bitmaps
                 if(initialMipOffset == -1)
                 {
                     pBaseSize = AlignToPage(baseSize);
-                    pTexture.MipOffset = UnknownAlign((int)(initialBaseOffset + pBaseSize), pTexture.MipOffset);
+                    pTexture.Unknown30 = UnknownAlign((int)(initialBaseOffset + pBaseSize), pTexture.Unknown30);
                 }
                 else
-                    pTexture.MipOffset = UnknownAlign(initialMipOffset, pTexture.MipOffset);
+                    pTexture.Unknown30 = UnknownAlign(initialMipOffset, pTexture.Unknown30);
             }
             else
-                pTexture.MipOffset &=  0xFFF;
+                pTexture.Unknown30 &=  0xFFF;
 
             
             return pBaseSize + pMipSize;

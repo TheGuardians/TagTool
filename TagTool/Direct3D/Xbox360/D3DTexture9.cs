@@ -26,10 +26,19 @@ namespace TagTool.Direct3D.Xbox360
         public uint Unknown14;
         public uint Unknown18;
         public int Unknown1C;
-        public int BaseOffset;
+        public int Unknown20;
         public int Unknown24;
         public int Unknown28;
         public int Unknown2C;
-        public int MipOffset;
+        public int Unknown30;
+
+        public int GetBaseOffset() => (int)(Unknown20 & 0xFFFFF000);
+
+        public int GetMipOffset() => (int)(Unknown30 & 0xFFFFF000);
+
+        public int GetMinMipLevel() => (Unknown2C >> 2) & 0xF;
+
+        public int GetMaxMipLevel() => (Unknown2C >> 6) & 0xF;
+
     }
 }

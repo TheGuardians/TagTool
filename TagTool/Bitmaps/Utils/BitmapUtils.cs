@@ -7,6 +7,7 @@ using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Direct3D.D3D9;
+using TagTool.Direct3D.Xbox360;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
@@ -315,20 +316,34 @@ namespace TagTool.Bitmaps
 
         }
 
-        public static RealArgbColor DecodeBitmapPixel(byte[] bitmapData, Bitmap.Image image, RealVector2d textureCoordinate, int layerIndex, int mipmapIndex, int unknown)
+        public static RealArgbColor DecodeBitmapPixelXbox(byte[] bitmapData, Bitmap.Image image, D3DTexture9 pTexture, int layerIndex, int mipmapIndex)
         {
-            RealArgbColor result = new RealArgbColor(0,0,0,0);
+            RealArgbColor result = new RealArgbColor(1,0,0,0);
 
-            if(image.RuntimeAddress > 0 && (int)image.Type != -1)
+            if( image.Type != BitmapType.Texture3D && (
+                (image.Type == BitmapType.Texture2D && layerIndex == 1) || 
+                (image.Type == BitmapType.CubeMap && layerIndex >= 0 && layerIndex < 6)  ||
+                (image.Type == BitmapType.Array && layerIndex >= 0 && layerIndex < image.Depth)) && 
+                (pTexture.GetBaseOffset() > 0 || pTexture.GetMipOffset() > 0))
             {
-                var currentMipmapIndex = 0;
-                if (mipmapIndex > 0)
-                    currentMipmapIndex = mipmapIndex;
-                if (mipmapIndex > image.MipmapCount)
-                    currentMipmapIndex = image.MipmapCount;
+                uint blockWidth = 0;
+                uint blockHeight = 0;
+                int dataOffset = 0;
+                int layerOffset = 0;
 
-                var currentHeight = image.Height >> currentMipmapIndex;
-                var currentWidth = image.Width >> currentMipmapIndex;
+                // verify the mipmap level index 
+                var minMipLevel = pTexture.GetMinMipLevel();
+                var maxMipLevel = pTexture.GetMaxMipLevel();
+
+                // if mipmapIndex is too low
+                if (mipmapIndex < minMipLevel)
+                    mipmapIndex = minMipLevel;
+                // if mipmapIndex is too high
+                if (mipmapIndex > maxMipLevel)
+                    mipmapIndex = maxMipLevel;
+
+                var currentHeight = image.Height >> mipmapIndex;
+                var currentWidth = image.Width >> mipmapIndex;
 
                 if (currentWidth < 1)
                     currentWidth = 1;
@@ -336,22 +351,27 @@ namespace TagTool.Bitmaps
                 if (currentHeight < 1)
                     currentHeight = 1;
 
-                if (image.Flags.HasFlag(BitmapFlags.Compressed))
-                {
-                    currentHeight += -currentHeight & 3;
-                    currentWidth += -currentWidth & 3;
-                }
 
-                currentHeight = (int)Math.Floor(currentHeight * textureCoordinate.I);
-                currentWidth = (int)Math.Floor(currentWidth * textureCoordinate.J);
+                //XGGetTextureDesc
+                XboxGraphics.XGTEXTURE_DESC textureDesc = new XboxGraphics.XGTEXTURE_DESC();
 
-                if(unknown != 0)
-                {
+                
+                XboxGraphics.XGGetBlockDimensions(XboxGraphics.XGGetGpuFormat(textureDesc.D3DFormat), ref blockWidth, ref blockHeight);
 
-                }
+                layerOffset = 0; // Unknown XG function
+                
+
+                if (mipmapIndex > 0 && pTexture.GetMipOffset() > 0)
+                    dataOffset = pTexture.GetMipOffset() + layerOffset;
                 else
-                {
+                    dataOffset = pTexture.GetBaseOffset() + layerOffset;
 
+                for(int h = 0; h < currentHeight; h++)
+                {
+                    for(int w = 0; w < currentWidth; w++)
+                    {
+
+                    }
                 }
             }
 
