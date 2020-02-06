@@ -274,9 +274,9 @@ namespace TagTool.Direct3D.D3D9x
 
         public enum D3DMIPPACKINGTYPE
         {
-            unknown0 = 0,
-            unknown1 = 1,
-            unknown2 = 2
+            None = 0,
+            NonPacked = 1,
+            Packed = 2
         }
 
     }
@@ -284,9 +284,75 @@ namespace TagTool.Direct3D.D3D9x
 
     public static class D3D
     {
-        public static void SetTextureHeader(D3D9xTypes.D3DRESOURCETYPE resourceType, int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, 
-            D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int flags, int expBias, uint nBlocksPitch, ref D3DTexture9 texture, ref uint baseSize, ref uint mipmapSize)
+        public static int GetMaxMipLevels(int width, int height, int depth, int hasBorder)
         {
+            return 0;
+        }
+
+        public static void FindTextureSize(int width, int height, int depth, int levels, D3D9xGPU.GPUTEXTUREFORMAT format, int someType, int unknown,
+            bool mipsPacked, int hasBorder, int expBias, uint nBlocksPitch, ref int unknown2, ref int outWidth, ref int outHeight)
+        {
+            
+        }
+
+        public static D3D9xGPU.GPUTEXTUREFORMAT GpuFormat(int d3dFormat)
+        {
+            return (D3D9xGPU.GPUTEXTUREFORMAT)((d3dFormat & D3D9xTypes.D3DFORMAT_TEXTUREFORMAT_MASK) >> D3D9xTypes.D3DFORMAT_TEXTUREFORMAT_SHIFT);
+        }
+
+        public static void SetTextureHeader(D3D9xTypes.D3DRESOURCETYPE resourceType, int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, 
+            D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int hasBorder, int expBias, uint nBlocksPitch, ref D3DTexture9 pTexture, ref uint baseSize, ref uint mipmapSize)
+        {
+            var someType = 0;
+
+            switch (resourceType)
+            {
+                case D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_ARRAYTEXTURE:
+                case D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_TEXTURE:
+                    someType = 1;
+                    break;
+                case D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_CUBETEXTURE:
+                    someType = 3;
+                    depth = 1;
+                    break;
+                case D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_VOLUMETEXTURE:
+                    someType = 2;
+                    break;
+                case D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_LINETEXTURE:
+                    someType = 0;
+                    mipPackingType = D3D9xTypes.D3DMIPPACKINGTYPE.None;
+                    break;
+                default:
+                    someType = 0;
+                    depth = 1;
+                    break;
+            }
+
+            if (levels == 0)
+                levels = GetMaxMipLevels(width, height, depth, hasBorder);
+
+            bool mipsPacked = false;
+            if (mipPackingType == D3D9xTypes.D3DMIPPACKINGTYPE.Packed)
+                mipsPacked = true;
+
+            int tempUnknown2 = 0;
+            int tempWidth = 0;
+            int tempHeight = 0;
+            FindTextureSize(width, height, depth, levels, GpuFormat(format), someType, (format >> 8) & 0xFF, mipsPacked,
+                hasBorder, expBias, nBlocksPitch, ref tempUnknown2, ref tempWidth, ref tempHeight);
+
+            pTexture.Unknown4 = 1;
+            pTexture.Unknown8 = 0;
+            pTexture.Unknown14 = 0xFFFF0000;
+            pTexture.Unknown18 = 0xFFFF0000;
+
+            pTexture.Flags = D3DTexture9Flags.Unknown1 | D3DTexture9Flags.Unknown2 | D3DTexture9Flags.Unknown3;
+            if (usage.HasFlag(D3D9xTypes.D3DUSAGE.D3DUSAGE_CPU_CACHED_MEMORY))
+                pTexture.Flags |= D3DTexture9Flags.CPU_CACHED_MEMORY;
+            if (usage.HasFlag(D3D9xTypes.D3DUSAGE.D3DUSAGE_RUNCOMMANDBUFFER_TIMESTAMP))
+                pTexture.Flags |= D3DTexture9Flags.RUNCOMMANDBUFFER_TIMESTAMP;
+
+
 
         }
     }
