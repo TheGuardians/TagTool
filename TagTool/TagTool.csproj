@@ -199,6 +199,10 @@
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
     <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
+    <Compile Include="Cache\Gen2\CachedTagGen2.cs" />
+    <Compile Include="Cache\Gen2\StringTableGen2.cs" />
+    <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
+    <Compile Include="Cache\Gen2\TagCacheGen2.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
@@ -474,6 +478,7 @@
     <Compile Include="Scripting\HsScriptParameter.cs" />
     <Compile Include="Scripting\HsScriptType.cs" />
     <Compile Include="Scripting\HsType.cs" />
+    <Compile Include="Serialization\Gen2SerializationContext.cs" />
     <Compile Include="Serialization\Gen1SerializationContext.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Serialization\ResourceDefinitionSerializationContext.cs" />

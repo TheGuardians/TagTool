@@ -41,14 +41,19 @@ namespace TagTool.Commands
             if (!outDir.Exists)
                 outDir.Create();
 
-            var mapFiles = new List<FileInfo>() { new FileInfo(@"D:\halo\maps\halo3\100_citadel.map") };//new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
+            var mapFiles = new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
             //mapFilesFolder.GetFiles("*.map"); // 
+
             //
             // Insert what test command you want below
             //
 
-                //var cache = GameCache.Open(new FileInfo(@"D:\halo\maps\halo3\100_citadel.map"));
+            
 
+            var cache = GameCache.Open(new FileInfo(@"D:\halo\maps\halo2Vista\zanzibar.map"));
+            Console.WriteLine("Success!");
+
+            /*
             foreach (var mapFile in mapFiles)
             {
                 var cache = GameCache.Open(mapFile);
@@ -72,9 +77,9 @@ namespace TagTool.Commands
                     }
                 }
             }
+            */
 
-            
-            
+
 
 
 
