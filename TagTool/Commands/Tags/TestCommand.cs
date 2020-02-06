@@ -41,70 +41,36 @@ namespace TagTool.Commands
             if (!outDir.Exists)
                 outDir.Create();
 
-            var mapFiles = new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
+            var mapFiles = new List<FileInfo>() { new FileInfo(@"D:\halo\maps\halo3\100_citadel.map") };//new List<FileInfo>() { new FileInfo(@"D:\halo online test\maps\tags.dat")};
             //mapFilesFolder.GetFiles("*.map"); // 
             //
             // Insert what test command you want below
             //
 
-            //var cache = GameCache.Open(new FileInfo(@"D:\halo\maps\halo3\100_citadel.map"));
+                //var cache = GameCache.Open(new FileInfo(@"D:\halo\maps\halo3\100_citadel.map"));
 
             foreach (var mapFile in mapFiles)
             {
                 var cache = GameCache.Open(mapFile);
-                int total = 0;
-                int failed = 0;
+
                 using(var stream = cache.OpenCacheRead())
                 {
                     foreach(var tag in cache.TagCache.NonNull())
                     {
-                        if (tag.IsInGroup("rm  "))
+                        if (tag.IsInGroup("bitm"))
                         {
-                            total++;
-                            var renderMethod = cache.Deserialize<RenderMethod>(stream, tag);
-                            var templateTag = renderMethod.ShaderProperties[0].Template;
-
-                            string indexString = templateTag.Name.Split('\\').ToList().Last();
-                            var indices = indexString.Split('_').ToList();
-                            indices.RemoveAt(0);
-                            List<short> methodIndices = new List<short>();
-                            foreach(var strIndex in indices)
+                            var bitmap = cache.Deserialize<Bitmap>(stream, tag);
+                            foreach(var resource in bitmap.Resources)
                             {
-                                methodIndices.Add(Convert.ToInt16(strIndex));
-                            }
-
-
-                            
-
-                            if(methodIndices.Count != renderMethod.RenderMethodDefinitionOptionIndices.Count)
-                            {
-                                Console.WriteLine($"WARNING: Failed to match render method option count in {tag.Name}");
-                                failed++;
-                            }
-                            else
-                            {
-                                for (int i = 0; i < methodIndices.Count; i++)
+                                var bitmapResource = cache.ResourceCache.GetBitmapTextureInteropResource(resource);
+                                if(bitmapResource != null)
                                 {
-                                    if( methodIndices[i] != renderMethod.RenderMethodDefinitionOptionIndices[i].OptionIndex)
-                                    {
-                                        string actualName = "";
-                                        for(int j = 0; j < methodIndices.Count; j++)
-                                        {
-                                            actualName += $"_{renderMethod.RenderMethodDefinitionOptionIndices[i].OptionIndex}";
-                                        }
-                                        Console.WriteLine($"Failed to match render method option indices in {tag.Name}");
-                                        Console.WriteLine($"Current: {indexString}");
-                                        Console.WriteLine($"Real   : {actualName}");
-                                        failed++;
-                                        break;
-                                    }
+                                    Console.WriteLine($"{XboxGraphics.XGGetGpuFormat(bitmapResource.Texture.Definition.Bitmap.D3DFormat)}");
                                 }
                             }
                         }
                     }
                 }
-
-                Console.WriteLine($"Out of {total} render methods, {failed} didn't have the right rmt2 name");
             }
 
             

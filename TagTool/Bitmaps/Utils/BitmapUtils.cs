@@ -179,23 +179,23 @@ namespace TagTool.Bitmaps
             switch (result.Format)
             {
                 case BitmapFormat.Dxt1:
-                    result.D3DFormat = D3DFormat.D3DFMT_DXT1;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT1;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxt3:
-                    result.D3DFormat = D3DFormat.D3DFMT_DXT3;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT3;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxt5:
-                    result.D3DFormat = D3DFormat.D3DFMT_DXT5;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT5;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxn:
-                    result.D3DFormat = D3DFormat.D3DFMT_ATI2;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_ATI2;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 default:
-                    result.D3DFormat = D3DFormat.D3DFMT_UNKNOWN;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_UNKNOWN;
                     break;
             }
 
@@ -224,23 +224,23 @@ namespace TagTool.Bitmaps
             switch (result.Format)
             {
                 case BitmapFormat.Dxt1:
-                    result.D3DFormat = D3DFormat.D3DFMT_DXT1;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT1;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxt3:
-                    result.D3DFormat = D3DFormat.D3DFMT_DXT3;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT3;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxt5:
-                    result.D3DFormat = D3DFormat.D3DFMT_DXT5;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT5;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxn:
-                    result.D3DFormat = D3DFormat.D3DFMT_ATI2;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_ATI2;
                     result.Flags |= BitmapFlags.Compressed;
                     break;
                 default:
-                    result.D3DFormat = D3DFormat.D3DFMT_UNKNOWN;
+                    result.D3DFormat = (int)D3DFormat.D3DFMT_UNKNOWN;
                     break;
             }
 

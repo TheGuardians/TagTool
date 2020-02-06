@@ -229,6 +229,32 @@ namespace TagTool.Direct3D.D3D9x
 
         public static int MAKEINDEXFMT(int Is32Bits, int Endian) => ((Is32Bits) << D3DINDEXFORMAT_32BITS_SHIFT | (Endian) << D3DINDEXFORMAT_ENDIAN_SHIFT);
 
+        public enum D3DRESOURCETYPE : int
+        {
+            D3DRTYPE_NONE = 0,
+            D3DRTYPE_VERTEXBUFFER = 1,
+            D3DRTYPE_INDEXBUFFER = 2,
+            D3DRTYPE_TEXTURE = 3,
+            D3DRTYPE_SURFACE = 4,
+            D3DRTYPE_VERTEXDECLARATION = 5,
+            D3DRTYPE_VERTEXSHADER = 6,
+            D3DRTYPE_PIXELSHADER = 7,
+            D3DRTYPE_CONSTANTBUFFER = 8,
+            D3DRTYPE_COMMANDBUFFER = 9,
+
+            D3DRTYPE_VOLUME = 16,
+            D3DRTYPE_VOLUMETEXTURE = 17,
+            D3DRTYPE_CUBETEXTURE = 18,
+            D3DRTYPE_ARRAYTEXTURE = 19,
+            D3DRTYPE_LINETEXTURE = 20,
+        }
+
+        public enum D3DMIPPACKINGTYPE
+        {
+            unknown0 = 0,
+            unknown1 = 1,
+            unknown2 = 2
+        }
 
     }
 
