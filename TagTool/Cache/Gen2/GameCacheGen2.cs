@@ -19,8 +19,8 @@ namespace TagTool.Cache
 
         public TagCacheGen2 TagCacheGen2;
         public StringTableGen2 StringTableGen2;
-        public override TagCache TagCache => TagCacheGen2;
 
+        public override TagCache TagCache => TagCacheGen2;
         public override StringTable StringTable => StringTableGen2;
 
         public override ResourceCache ResourceCache => throw new NotImplementedException();
@@ -34,13 +34,14 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = BaseMapFile.EndianFormat;
-            DisplayName = "halo2unknown.map";
+            DisplayName = mapFile.Header.Name + ".map";
             Directory = file.Directory;
 
             using (var cacheStream = OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, Endianness))
             {
                 TagCacheGen2 = new TagCacheGen2(reader, mapFile);
+                StringTableGen2 = new StringTableGen2(reader, mapFile);
             }
         }
 
@@ -60,11 +61,16 @@ namespace TagTool.Cache
                 throw new Exception($"Try to serialize a {instance.GetType()} into a Gen 3 Game Cache");
         }
 
-        //TODO: Implement serialization for gen3
         public void Serialize(Stream stream, CachedTagGen2 instance, object definition)
         {
             throw new NotImplementedException();
         }
+
+        public T Deserialize<T>(Stream stream, CachedTagGen2 instance) =>
+            Deserialize<T>(new Gen2SerializationContext(stream, this, instance));
+
+        public object Deserialize(Stream stream, CachedTagGen2 instance) =>
+            Deserialize(new Gen2SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
         //
         // private methods for internal use
@@ -75,16 +81,6 @@ namespace TagTool.Cache
 
         private object Deserialize(ISerializationContext context, Type type) =>
             Deserializer.Deserialize(context, type);
-
-        //
-        // public methods specific to gen3
-        //
-
-        public T Deserialize<T>(Stream stream, CachedTagGen2 instance) =>
-            Deserialize<T>(new Gen2SerializationContext(stream, this, instance));
-
-        public object Deserialize(Stream stream, CachedTagGen2 instance) =>
-            Deserialize(new Gen2SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
         #endregion
 

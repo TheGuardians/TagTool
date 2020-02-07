@@ -17,8 +17,8 @@ namespace TagTool.Cache.Gen2
         public uint TagGroupsOffset;
         public int TagGroupCount;
         public uint TagsOffset;
-        public DatumIndex ScenarioHandle;
-        public DatumIndex GlobalsHandle;
+        public uint ScenarioID;
+        public uint GlobalsID;
         public int CRC;
         public int TagCount;
         public Tag Tags;
@@ -27,15 +27,19 @@ namespace TagTool.Cache.Gen2
 
     public class TagCacheGen2 : TagCache
     {
+        /// <summary>
+        /// Address in memory (xbox) of the tag data. For Halo 2 Vista, this values turns out to be 0. Every address in the tag data is converted to an offset using this value.
+        /// </summary>
+        public uint BaseTagAddress;
 
         public TagCacheGen2Header Header;
-        public uint BaseTagAddress;
         public List<CachedTagGen2> Tags = new List<CachedTagGen2>();
         public Dictionary<Tag, TagGroup> TagGroups = new Dictionary<Tag, TagGroup>();
-        
+        public Dictionary<Tag, CachedTagGen2> HardcodedTags = new Dictionary<Tag, CachedTagGen2>();
 
         public TagCacheGen2(EndianReader reader, MapFile mapFile)
         {
+            Version = mapFile.Version;
             var tagDataSectionOffset = mapFile.Header.TagDataOffset;
             reader.SeekTo(tagDataSectionOffset);
 
@@ -43,8 +47,14 @@ namespace TagTool.Cache.Gen2
             var deserializer = new TagDeserializer(mapFile.Version);
             Header = deserializer.Deserialize<TagCacheGen2Header>(dataContext);
 
+            BaseTagAddress = (Header.TagGroupsOffset - 0x20);
+
+            //
+            // Read tag groups
+            //
+
             //seek to the tag groups offset, seems to be contiguous to the header
-            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset);   // TODO: check how halo 2 xbox uses this
+            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - BaseTagAddress);   // TODO: check how halo 2 xbox uses this
 
             for(int i = 0; i < Header.TagGroupCount; i++)
             {
@@ -59,7 +69,11 @@ namespace TagTool.Cache.Gen2
                 TagGroups[tag] = group;
             }
 
-            reader.SeekTo(tagDataSectionOffset + Header.TagsOffset);
+            //
+            // Read cached tags
+            //
+
+            reader.SeekTo(tagDataSectionOffset + Header.TagsOffset - BaseTagAddress);
 
             for (int i = 0; i < Header.TagCount; i++)
             {
@@ -79,6 +93,9 @@ namespace TagTool.Cache.Gen2
             for (int i = 0; i < Header.TagCount; i++)
                 tagNamesOffset[i] = reader.ReadInt32();
 
+            //
+            // Read tag names
+            //
 
             reader.SeekTo(mapFile.Header.TagNamesBufferAddress);
 
@@ -94,6 +111,15 @@ namespace TagTool.Cache.Gen2
 
                 Tags[i].Name = reader.ReadNullTerminatedString();
             }
+
+            //
+            // Set hardcoded tags from the header
+            //
+
+            var scnrTag = GetTag(Header.ScenarioID);
+            HardcodedTags[scnrTag.Group.Tag] = (CachedTagGen2)scnrTag;
+            var globalTag = GetTag(Header.GlobalsID);
+            HardcodedTags[globalTag.Group.Tag] = (CachedTagGen2)globalTag;
         }
 
 

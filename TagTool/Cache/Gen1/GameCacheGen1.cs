@@ -108,16 +108,4 @@ namespace TagTool.Cache
 
     }
 
-    public class StringTableGen1 : StringTable
-    {
-        public StringTableGen1()
-        {
-            
-        }
-        public override StringId AddString(string newString)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }

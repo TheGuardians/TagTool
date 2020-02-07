@@ -5,29 +5,30 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.BlamFile;
+using TagTool.Serialization;
 
 namespace TagTool.Cache.Gen3
 {
-
-    public class TagTableHeaderGen3
+    [TagStructure(Size = 0x28)]
+    public class TagCacheGen3Header
     {
-        public uint TagGroupsAddress;
         public int TagGroupCount;
-        public uint TagsAddress;
-        public DatumIndex ScenarioHandle;
-        public DatumIndex GlobalsHandle;
-        public int CRC;
+        public uint TagGroupsAddress;
         public int TagCount;
+        public uint TagsAddress;
         public int PrimaryTagsCount;
         public uint PrimaryTagsInfoAddress;
         public int TagInfoHeaderCount2;
         public uint TagInfoHeaderAddress2;
+        public int CRC;
+        public Tag Tags;
+        
     }
 
     public class TagCacheGen3 : TagCache
     {
         public List<CachedTagGen3> Tags;
-        public TagTableHeaderGen3 TagTableHeader;
+        public TagCacheGen3Header TagTableHeader;
         public List<TagGroup> TagGroups;
         public string TagsKey = "";
 
@@ -104,20 +105,14 @@ namespace TagTool.Cache.Gen3
             var tagTableHeaderOffset = baseMapFile.Header.TagIndexAddress - tagAddressToOffset;
 
             reader.SeekTo(tagTableHeaderOffset);
-            TagTableHeader = new TagTableHeaderGen3
-            {
-                TagGroupCount = reader.ReadInt32(),
-                TagGroupsAddress = reader.ReadUInt32(),
-                TagCount = reader.ReadInt32(),
-                TagsAddress = reader.ReadUInt32(),
-                PrimaryTagsCount = reader.ReadInt32(),
-                PrimaryTagsInfoAddress = reader.ReadUInt32(),
-                TagInfoHeaderCount2 = reader.ReadInt32(),
-                TagInfoHeaderAddress2 = reader.ReadUInt32()
-            };
+
+            var dataContext = new DataSerializationContext(reader);
+            var deserializer = new TagDeserializer(baseMapFile.Version);
+            TagTableHeader = deserializer.Deserialize<TagCacheGen3Header>(dataContext);
+
 
             if (TagTableHeader.TagInfoHeaderCount2 != 0)
-                throw new Exception("Well hello there");
+                throw new Exception("wEll HelLo THerE");
 
             var tagGroupsOffset = TagTableHeader.TagGroupsAddress - tagAddressToOffset;
             var tagsOffset = TagTableHeader.TagsAddress - tagAddressToOffset;

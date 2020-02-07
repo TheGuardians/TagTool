@@ -17,25 +17,21 @@ namespace TagTool.Cache.Gen1
     {
         public uint CachedTagArrayAddress;
         public uint ScenarioTagID;
-        public uint Unused;
+        public uint MapID;
         public uint TagCount;
 
-        public uint ModelPartCount; // looks like vertex and index buffer to me
-        [TagField(MinVersion = CacheVersion.HaloPC)]
-        public uint ModelDataFileOffset;
+        public uint VertexPartsCount;
+        public uint ModelDataOffset;
+        public uint IndexPartsCount;
         [TagField(MaxVersion = CacheVersion.HaloXbox)]
-        public uint UnknownAddress;
-
-        public uint ModelPartCount2;
-        [TagField(MinVersion = CacheVersion.HaloPC)]
-        public uint ModelVertexSize;
-        [TagField(MaxVersion = CacheVersion.HaloXbox)]
-        public uint UnknownAddress2;
+        public uint IndexPartsOffset;
 
         [TagField(MinVersion = CacheVersion.HaloPC)]
-        public uint ModelDataSize;
+        public uint VertexDataSize;
+        [TagField(MinVersion = CacheVersion.HaloPC)]
+        public uint ModelDataSize; // (size of vertices + indices)
 
-        public Tag TagsTag;
+        public Tag Tags;
     }
 
     public class TagCacheGen1 : TagCache
