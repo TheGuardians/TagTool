@@ -49,34 +49,6 @@ namespace TagTool.Commands
             // Insert what test command you want below
             //
 
-            var map = new MapFile();
-            using(var stream = new FileInfo(@"D:\halo\maps\haloxbox\bloodgulch.map").OpenRead())
-            using(var reader = new EndianReader(stream))
-            using(var compressedStream = new MemoryStream())
-            using(var uncompressedStream = new MemoryStream())
-                
-            {
-                map.Read(reader);
-                var compressedSize = stream.Length - 0x800;
-                var uncompressedSize = map.Header.FileLength - 0x800;
-                stream.Position = 0x800;
-                StreamUtil.Copy(stream, compressedStream, compressedSize);
-                using (var decompressionStream = new DeflateStream(compressedStream, CompressionMode.Decompress, true))
-                {
-                    var test = new byte[uncompressedSize];
-                    decompressionStream.Read(test, 0, uncompressedSize);
-                    decompressionStream.CopyTo(uncompressedStream);
-                    compressedStream.Flush();
-                    compressedStream.Close();
-                }
-
-            }
-
-            
-
-
-            //var cache = GameCache.Open(new FileInfo(@"D:\halo\maps\haloxbox\bloodgulch.map"));
-            Console.WriteLine("Success!");
 
             /*
             foreach (var mapFile in mapFiles)

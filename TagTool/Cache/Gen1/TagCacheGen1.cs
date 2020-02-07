@@ -48,7 +48,12 @@ namespace TagTool.Cache.Gen1
             var dataContext = new DataSerializationContext(reader);
             var deserializer = new TagDeserializer(mapFile.Version);
             Header = deserializer.Deserialize<TagCacheGen1Header>(dataContext);
-            BaseTagAddress = Header.CachedTagArrayAddress & 0xFFFF0000;
+
+            if (mapFile.Version == CacheVersion.HaloXbox)
+                BaseTagAddress = 0x803A6000;
+            else
+                BaseTagAddress = 0x40440000;
+            
 
             //
             // Read all tags offsets are all broken, need some proper look
