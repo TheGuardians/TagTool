@@ -284,6 +284,55 @@ namespace TagTool.Direct3D.D3D9x
 
     public static class D3D
     {
+        public static uint Log2Ceiling(int input)
+        {
+            uint result = 0;
+            do
+            {
+                if (input < 0)
+                    break;
+                input *= 2;
+                result++;
+            }
+            while (result < 32);
+            return 32 - result;
+        }
+
+        public static uint Log2Floor(int input)
+        {
+            uint result = 0;
+            do
+            {
+                if (input < 0)
+                    break;
+                input *= 2;
+                result++;
+            }
+            while (result < 32);
+            return 31 - result;
+        }
+
+        /// <summary>
+        /// input must be a power of 2
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static uint Log2(int input)
+        {
+            if (IsPowerOfTwo(input))
+            {
+                return Log2Floor(input);
+            }
+            else
+                throw new Exception("Input is not a power of two");
+        }
+
+        public static bool IsPowerOfTwo(int x)
+        {
+            return (x & (x - 1)) == 0;
+        }
+
+
         public static int GetMaxMipLevels(int width, int height, int depth, int hasBorder)
         {
             return 0;

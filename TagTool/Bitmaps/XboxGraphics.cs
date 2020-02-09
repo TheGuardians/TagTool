@@ -378,7 +378,118 @@ namespace TagTool.Bitmaps
             return pBaseSize + pMipSize;
         }
 
-        public static byte[] UntileVolume(D3DBOX box, uint width, uint height, uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, uint depth, uint texelPitch)
+
+        private static uint GetMipTailLevelOffsetCoords(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, bool isTiled, bool hasBorder, int SHOULDBE3DOFFSETS)
+        {
+            return 0;
+        }
+
+
+        public static byte[] XGUntileVolume(uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, uint width, uint height, uint depth, D3DBOX box, uint texelPitch)
+        {
+            return UntileVolume(box, width, height, rowPitch, slicePitch, point, source, depth, texelPitch);
+        } 
+
+        public static byte[] XGUntileVolumeTextureLevel(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, XGTILE flags, uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, D3DBOX box)
+        {
+            uint width_as_blocks;
+            uint height_as_blocks;
+            uint texelPitch;
+
+            uint blockWidth = 0;
+            uint blockHeight = 0;
+
+
+            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+            int blockLogWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockWidth);
+            int blockLogHeight = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockHeight);
+            var bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
+            texelPitch = (bitsPerPixel << (blockLogWidth + blockLogHeight)) >> 8; // also bytes per block
+
+
+            int borderSize = flags.HasFlag(XGTILE.XGTILE_BORDER) ? 2 : 0;
+            int hasBorder = flags.HasFlag(XGTILE.XGTILE_BORDER) ? 1 : 0;
+
+            if (level > 0)
+            {
+                /*
+                 * Textures with border are a special case. For example if there is a border around a 254 x 254 bitmap, the actual base map is 256x256. The next mipmap would be
+                 * 127x127 but with the border it is 129x129 so it requires the next power of two size to store. This is what the following code is doing. 
+                 * 
+                 * I am not sure what happens with level = 0 and border texture, I assume the border has already been handled somewhere else
+                 * 
+                 * We can clean it up later to separate the mipmap from power of two code. The final >> is for the mipmap size
+                 */
+
+
+                // code assumes that if the left shift value is negative, the sign is ignored
+                int nextPowerOfTwoWidth = 1 << (hasBorder - (int)Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - borderSize - 1))) >> (int)level;
+                int nextPowerOfTwoHeight = 1 << (hasBorder - (int)Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - borderSize - 1))) >> (int)level;
+                int nextPowerOfTwoDepth = 1 << (hasBorder - (int)Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - borderSize - 1))) >> (int)level;
+                
+                if (nextPowerOfTwoDepth <= 1)
+                    nextPowerOfTwoDepth = 1;
+                if (nextPowerOfTwoWidth <= 1)
+                    nextPowerOfTwoWidth = 1;
+                if (nextPowerOfTwoHeight <= 1)
+                    nextPowerOfTwoHeight = 1;
+
+                width_as_blocks = (uint)(nextPowerOfTwoWidth + blockWidth - 1) >> blockLogWidth;
+                height_as_blocks = (uint)(nextPowerOfTwoHeight + blockHeight - 1) >> blockLogHeight;
+                depth = (uint)nextPowerOfTwoDepth;
+            }
+            else
+            {
+                width_as_blocks = (width + blockWidth - 1) >> blockLogWidth;
+                height_as_blocks = (height + blockHeight - 1) >> blockLogHeight;
+            }
+
+            // update point to be in terms of the block width and height
+            if(point != null)
+            {
+                point.X >>= blockLogWidth;
+                point.Y >>= blockLogWidth;
+            }
+
+            // update box bounds to be in terms of the block width and height
+            if (box != null)
+            {
+                box.Left >>= blockLogWidth;
+                box.Right = (box.Right + blockWidth - 1) >> blockLogWidth;
+                box.Top >>= blockLogHeight;
+                box.Bottom = (box.Bottom + blockHeight - 1) >> blockLogHeight;
+            }
+            else
+            {
+                box = new D3DBOX();
+                box.Left = 0;
+                box.Top = 0;
+                box.Front = 0;
+
+                var tempWidth = (width - borderSize) >> (int)level;
+                if (tempWidth <= 1)
+                    tempWidth = 1;
+                box.Right = (uint)(tempWidth + blockWidth - 1) >> blockLogWidth;
+
+                var tempHeight = (height - borderSize) >> (int)level;
+                if (tempHeight <= 1)
+                    tempHeight = 1;
+                box.Bottom = (uint)(tempHeight + blockHeight - 1) >> blockLogHeight;
+
+                box.Back = (uint)(borderSize + (depth - borderSize) >> (int)level);
+
+            }
+
+            if (!flags.HasFlag(XGTILE.XGTILE_NONPACKED))
+            {
+                var offsetInByteArray = GetMipTailLevelOffsetCoords(width, height, depth, level, format, true, flags.HasFlag(XGTILE.XGTILE_BORDER), 0);
+                // update box using the returned 3d offsets TODO
+            }
+
+            return UntileVolume(box, width_as_blocks, height_as_blocks, rowPitch, slicePitch, point, source, depth, texelPitch);
+        }
+
+        private static byte[] UntileVolume(D3DBOX box, uint width, uint height, uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, uint depth, uint texelPitch)
         {
             uint boxWidth = box.Right - box.Left;
             uint boxHeight = box.Bottom - box.Top;
