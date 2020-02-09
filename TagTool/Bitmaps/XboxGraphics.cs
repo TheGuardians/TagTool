@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Direct3D.D3D9;
 using TagTool.Direct3D.D3D9x;
 using TagTool.Direct3D.Xbox360;
 
@@ -37,6 +38,13 @@ namespace TagTool.Bitmaps
             public int ExpBias;
             public XGTILE Flags;
             public int MultiSampleType;
+        }
+
+        public class XGPOINT
+        {
+            public int X;
+            public int Y;
+            public int Z;
         }
 
         public static D3D9xGPU.GPUTEXTUREFORMAT  XGGetGpuFormat(int d3dFormat)
@@ -368,6 +376,105 @@ namespace TagTool.Bitmaps
 
             
             return pBaseSize + pMipSize;
+        }
+
+        public static byte[] UntileVolume(D3DBOX box, uint width, uint height, uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, uint depth, uint texelPitch)
+        {
+            uint boxWidth = box.Right - box.Left;
+            uint boxHeight = box.Bottom - box.Top;
+            uint boxDepth = box.Back - box.Front;
+
+            uint heightRounded = (height + 31) & ~31u; // round to multiple of 32
+            uint widthRounded = (width + 31) & ~31u; // round to multiple of 32
+            uint depthRounded = (depth + 3) & ~3u; // round to multiple of 4
+
+            uint totalSize = AlignToPage(widthRounded * heightRounded * depthRounded);
+            byte[] result = new byte[totalSize];
+
+            uint v15 = 1u << (int)((texelPitch >> 4) - (texelPitch >> 2) + 3);
+            uint v16 = (texelPitch >> 2) + (texelPitch >> 1 >> (int)(texelPitch >> 2));
+            uint v17 = (~(v15 - 1) & (box.Left + v15)) - box.Left;
+            uint v18 = (~(v15 - 1) & (box.Left + boxWidth)) - box.Left;
+
+            uint sliceOffset = slicePitch * (uint)point.Z;
+
+            for (uint z = 0; z < boxDepth; z++)
+            {
+                uint v19 = z + box.Front;
+                uint v20 = (v19 & 3) << (int)(v16 + 6);
+                v19 >>= 2;
+
+                for (uint y = 0; y < boxHeight; y++)
+                {
+                    uint v23 = y + box.Top;
+                    uint v59 = 4 * (v23 & 6);
+                    uint v57 = (uint)((byte)v19 + (byte)(v23 >> 3)) & 1;
+                    uint v58 = 16 * (v23 & 1);
+                    uint v25 = (widthRounded >> 5) * ((v19 * (heightRounded >> 4)) + (v23 >> 4));
+                    uint v29 = sliceOffset + rowPitch * (y + (uint)point.Y);
+
+                    {
+
+                        uint v61 = v25 + (box.Left >> 5);
+                        uint v32 = box.Left;
+                        uint v27 = v59 + (v32 & 7u);
+                        uint v33 = v27 << (int)(v16 + 6);
+                        uint v34 = v58 + v20 + ((v33 >> 6) & 0xFu) + 2 * (((v33 >> 6) & ~0xFu) + 2 * ((v61 << (int)(v16 + 6)) & 0xFFFFFFFu));
+                        uint v35 = v57 + 2 * ((2 * v57 + (byte)(box.Left >> 3)) & 3);
+                        uint v36 = (((v34 >> 6) & 7) + 8 * (v35 & 1));
+
+                        uint v17a = v17;
+                        if (v17a > boxWidth) v17a = boxWidth;
+
+                        uint sourceOffset = 8 * ((v34 & ~0x1FFu) + 4 * ((v35 & ~1u) + 8 * v36)) + (v34 & 0x3F);
+                        uint destinationOffset = v29 + ((uint)point.X << (int)v16);
+                        uint blockSize = v17a << (int)v16;
+
+                        Array.Copy(source, sourceOffset, result, destinationOffset, blockSize);
+                    }
+
+                    var x = v17;
+                    while (x < v18)
+                    {
+                        uint v61 = v25 + (box.Left >> 5);
+                        uint v32 = x + box.Left;
+                        uint v27 = v59 + (v32 & 7);
+                        uint v33 = v27 << (int)(v16 + 6);
+                        uint v34 = v58 + v20 + ((v33 >> 6) & 0xF) + 2 * (((v33 >> 6) & ~0xFu) + 2 * ((v61 << (int)(v16 + 6)) & 0xFFFFFFF));
+                        uint v35 = v57 + 2 * ((2 * v57 + (v32 >> 3)) & 3);
+                        uint v36 = ((v34 >> 6) & 7) + 8 * (v35 & 1);
+
+                        uint sourceOffset = 8 * ((v34 & ~0x1FFu) + 4 * ((v35 & ~1u) + 8 * v36)) + (v34 & 0x3F);
+                        uint destinationOffset = v29 + ((x + (uint)point.X) << (int)v16);
+                        uint blockSize = v15 << (int)v16;
+
+                        Array.Copy(source, sourceOffset, result, destinationOffset, blockSize);
+
+                        x += v15;
+                    }
+
+                    if (x < boxWidth)
+                    {
+                        uint v61 = v25 + (box.Left >> 5);
+                        uint v32 = x + box.Left;
+                        uint v27 = v59 + (v32 & 7);
+                        uint v33 = v27 << (int)(v16 + 6);
+                        uint v34 = v58 + v20 + ((v33 >> 6) & 0xF) + 2 * (((v33 >> 6) & ~0xFu) + 2 * ((v61 << (int)(v16 + 6)) & 0xFFFFFFF));
+                        uint v35 = v57 + 2 * ((2 * v57 + (v32 >> 3)) & 3);
+                        uint v36 = ((v34 >> 6) & 7) + 8 * (v35 & 1);
+
+                        uint sourceOffset = 8 * ((v34 & ~0x1FFu) + 4 * ((v35 & ~1u) + 8 * v36)) + (v34 & 0x3F);
+                        uint destinationOffset = v29 + ((x + (uint)point.X) << (int)v16);
+                        uint blockSize = (boxWidth - x) << (int)v16;
+
+                        Array.Copy(source, sourceOffset, result, destinationOffset, blockSize);
+                    }
+                }
+
+                sliceOffset += slicePitch;
+            }
+
+            return result;
         }
 
         private static uint AlignToPage(uint offset)
