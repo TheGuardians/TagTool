@@ -321,7 +321,6 @@ namespace TagTool.Bitmaps
             return SetBaseTextureHeader(width, height, depth, levels, usage, format, (D3D9xTypes.D3DMIPPACKINGTYPE)(~(int)flags & 1), ((int)flags >> 1) & 1, expBias, baseOffset, mipOffset, 0, D3D9xTypes.D3DRESOURCETYPE.D3DRTYPE_VOLUMETEXTURE, ref pTexture, ref pBaseSize, ref pMipSize);
         }
 
-
         private static uint SetBaseTextureHeader(int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int hasBorder, 
             int expBias, int initialBaseOffset, int initialMipOffset, uint pitch, D3D9xTypes.D3DRESOURCETYPE resourceType, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
         {
@@ -379,16 +378,25 @@ namespace TagTool.Bitmaps
         }
 
 
-        private static uint GetMipTailLevelOffsetCoords(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, bool isTiled, bool hasBorder, int SHOULDBE3DOFFSETS)
+        private static uint GetMipTailLevelOffsetCoords(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, bool isTiled, bool hasBorder, XGPOINT point)
         {
             return 0;
         }
 
+        public static byte[] XGUntileSurface(uint rowPitch, XGPOINT point, byte[] source, uint width, uint height, D3DBOX box, uint texelPitch)
+        {
+            return UntileSurface(box, width, height, rowPitch, point, source, texelPitch);
+        }
 
         public static byte[] XGUntileVolume(uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, uint width, uint height, uint depth, D3DBOX box, uint texelPitch)
         {
             return UntileVolume(box, width, height, rowPitch, slicePitch, point, source, depth, texelPitch);
         } 
+
+        public static byte[] XGUntileTextureLevel(uint width, uint height, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, XGTILE flags, uint rowPitch, XGPOINT point, byte[] source, D3DBOX box)
+        {
+            return null;
+        }
 
         public static byte[] XGUntileVolumeTextureLevel(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, XGTILE flags, uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, D3DBOX box)
         {
@@ -482,8 +490,16 @@ namespace TagTool.Bitmaps
 
             if (!flags.HasFlag(XGTILE.XGTILE_NONPACKED))
             {
-                var offsetInByteArray = GetMipTailLevelOffsetCoords(width, height, depth, level, format, true, flags.HasFlag(XGTILE.XGTILE_BORDER), 0);
-                // update box using the returned 3d offsets TODO
+                XGPOINT offset = new XGPOINT();
+                // need to understand the return value and modify the byte[]
+                var offsetInByteArray = GetMipTailLevelOffsetCoords(width, height, depth, level, format, true, flags.HasFlag(XGTILE.XGTILE_BORDER), offset);
+
+                box.Top += (uint)offset.Y;
+                box.Bottom += (uint)offset.Y;
+                box.Left += (uint)offset.X;
+                box.Right += (uint)offset.X;
+                box.Back += (uint)offset.Z;
+                box.Front += (uint)offset.Z;
             }
 
             return UntileVolume(box, width_as_blocks, height_as_blocks, rowPitch, slicePitch, point, source, depth, texelPitch);
@@ -586,6 +602,11 @@ namespace TagTool.Bitmaps
             }
 
             return result;
+        }
+
+        private static byte[] UntileSurface(D3DBOX box, uint width, uint height, uint rowPitch,  XGPOINT point, byte[] source, uint texelPitch)
+        {
+            return null;
         }
 
         private static uint AlignToPage(uint offset)
