@@ -50,6 +50,46 @@ namespace TagTool.Commands
             //
 
 
+            var file = new FileInfo(@"D:\halo\maps\halo3\guardian.map");
+
+            var cache = GameCache.Open(file);
+
+            using(var stream = cache.OpenCacheRead())
+            {
+                var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
+                var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
+                
+                var resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[0]);
+
+                var bitmapResource = resource.Texture.Definition.Bitmap;
+                var primaryData = resource.Texture.Definition.PrimaryResourceData.Data;
+                var secondaryData = resource.Texture.Definition.SecondaryResourceData.Data;
+                byte[] data = null;
+                if (bitmapResource.HighResInSecondaryResource == 1)
+                {
+                    data = secondaryData;
+                }
+                else
+                {
+                    data = primaryData;
+                }
+
+                var format = XboxGraphics.XGGetGpuFormat(bitmapResource.D3DFormat);
+                uint blockWidth = 0;
+                uint blockHeight = 0;
+
+                XboxGraphics.XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+                
+                var bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
+                uint rowPitch = (uint)(((blockWidth * blockHeight * bitsPerPixel) >> 3) * bitmapResource.Width);
+
+
+                byte[] result = XboxGraphics.XGUntileTextureLevel((uint)bitmapResource.Width, (uint)bitmapResource.Height, 0, format, XboxGraphics.XGTILE.NONE, rowPitch, null, data, null);
+
+            }
+
+
+
             /*
             foreach (var mapFile in mapFiles)
             {

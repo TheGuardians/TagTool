@@ -17,6 +17,7 @@ namespace TagTool.Bitmaps
         [Flags]
         public enum XGTILE : int
         {
+            NONE = 0x0,
             XGTILE_NONPACKED = 0x1,
             XGTILE_BORDER = 0x2
         }
@@ -395,7 +396,96 @@ namespace TagTool.Bitmaps
 
         public static byte[] XGUntileTextureLevel(uint width, uint height, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, XGTILE flags, uint rowPitch, XGPOINT point, byte[] source, D3DBOX box)
         {
-            return null;
+            uint width_as_blocks;
+            uint height_as_blocks;
+            uint texelPitch;
+
+            uint blockWidth = 0;
+            uint blockHeight = 0;
+
+
+            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+            int blockLogWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockWidth);
+            int blockLogHeight = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockHeight);
+            var bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
+            texelPitch = (bitsPerPixel << (blockLogWidth + blockLogHeight)) >> 3; // also bytes per block
+
+
+            int borderSize = flags.HasFlag(XGTILE.XGTILE_BORDER) ? 2 : 0;
+            int hasBorder = flags.HasFlag(XGTILE.XGTILE_BORDER) ? 1 : 0;
+
+            if (level > 0)
+            {
+                int nextPowerOfTwoWidth = 1 << (hasBorder - (int)Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - borderSize - 1))) >> (int)level;
+                int nextPowerOfTwoHeight = 1 << (hasBorder - (int)Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - borderSize - 1))) >> (int)level;
+   
+                if (nextPowerOfTwoWidth <= 1)
+                    nextPowerOfTwoWidth = 1;
+                if (nextPowerOfTwoHeight <= 1)
+                    nextPowerOfTwoHeight = 1;
+
+                width_as_blocks = (uint)(nextPowerOfTwoWidth + blockWidth - 1) >> blockLogWidth;
+                height_as_blocks = (uint)(nextPowerOfTwoHeight + blockHeight - 1) >> blockLogHeight;
+            }
+            else
+            {
+                width_as_blocks = (width + blockWidth - 1) >> blockLogWidth;
+                height_as_blocks = (height + blockHeight - 1) >> blockLogHeight;
+            }
+
+            // update point to be in terms of the block width and height
+            if (point != null)
+            {
+                point.X >>= blockLogWidth;
+                point.Y >>= blockLogWidth;
+            }
+            else
+            {
+                point = new XGPOINT();
+                point.X = 0;
+                point.Y = 0;
+            }
+
+            // update box bounds to be in terms of the block width and height
+            if (box != null)
+            {
+                box.Left >>= blockLogWidth;
+                box.Right = (box.Right + blockWidth - 1) >> blockLogWidth;
+                box.Top >>= blockLogHeight;
+                box.Bottom = (box.Bottom + blockHeight - 1) >> blockLogHeight;
+            }
+            else
+            {
+                box = new D3DBOX();
+                box.Left = 0;
+                box.Top = 0;
+
+                var tempWidth = (width - borderSize) >> (int)level;
+                if (tempWidth <= 1)
+                    tempWidth = 1;
+                box.Right = (uint)(tempWidth + blockWidth - 1) >> blockLogWidth;
+
+                var tempHeight = (height - borderSize) >> (int)level;
+                if (tempHeight <= 1)
+                    tempHeight = 1;
+                box.Bottom = (uint)(tempHeight + blockHeight - 1) >> blockLogHeight;
+
+
+            }
+
+            if (!flags.HasFlag(XGTILE.XGTILE_NONPACKED))
+            {
+                XGPOINT offset = new XGPOINT();
+                // need to understand the return value and modify the byte[]
+                var offsetInByteArray = GetMipTailLevelOffsetCoords(width, height, 1, level, format, true, flags.HasFlag(XGTILE.XGTILE_BORDER), offset);
+
+                box.Top += (uint)offset.Y;
+                box.Bottom += (uint)offset.Y;
+                box.Left += (uint)offset.X;
+                box.Right += (uint)offset.X;
+            }
+
+            return UntileSurface(width_as_blocks, height_as_blocks, rowPitch, point, source, texelPitch, box);
         }
 
         public static byte[] XGUntileVolumeTextureLevel(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, XGTILE flags, uint rowPitch, uint slicePitch, XGPOINT point, byte[] source, D3DBOX box)
@@ -412,7 +502,7 @@ namespace TagTool.Bitmaps
             int blockLogWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockWidth);
             int blockLogHeight = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockHeight);
             var bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
-            texelPitch = (bitsPerPixel << (blockLogWidth + blockLogHeight)) >> 8; // also bytes per block
+            texelPitch = (bitsPerPixel << (blockLogWidth + blockLogHeight)) >> 3; // also bytes per block
 
 
             int borderSize = flags.HasFlag(XGTILE.XGTILE_BORDER) ? 2 : 0;
@@ -458,7 +548,12 @@ namespace TagTool.Bitmaps
                 point.X >>= blockLogWidth;
                 point.Y >>= blockLogWidth;
             }
-
+            else
+            {
+                point = new XGPOINT();
+                point.X = 0;
+                point.Y = 0;
+            }
             // update box bounds to be in terms of the block width and height
             if (box != null)
             {
