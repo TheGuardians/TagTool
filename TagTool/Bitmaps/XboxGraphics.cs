@@ -394,12 +394,12 @@ namespace TagTool.Bitmaps
             if (logWidth >= logHeight)
                 minLogDim = logHeight;
 
-            uint result = minLogDim - 4;
+            int result = (int)minLogDim - 4;
 
             if (result <= 0)
                 result = 0;
 
-            return result;
+            return (uint)result;
         }
 
         private static uint sub_D55E38(uint level, uint width, uint height, uint depth, uint slicePitch, uint size, D3D9xGPU.GPUTEXTUREFORMAT format, ref uint offsetX, ref uint offsetY, ref uint offsetZ)
