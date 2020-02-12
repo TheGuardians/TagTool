@@ -82,9 +82,10 @@ namespace TagTool.Commands
                 
                 var bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
                 uint rowPitch = (uint)(((blockWidth * blockHeight * bitsPerPixel) >> 3) * bitmapResource.Width);
+                var point = new XboxGraphics.XGPOINT();
 
-
-                byte[] result = XboxGraphics.XGUntileTextureLevel((uint)bitmapResource.Width, (uint)bitmapResource.Height, 0, format, XboxGraphics.XGTILE.NONE, rowPitch, null, data, null);
+                var test = XboxGraphics.GetMipTailLevelOffsetCoords((uint)bitmapResource.Width, (uint)bitmapResource.Height, (uint)bitmapResource.Depth, 0, format, true, false, point);
+                byte[] result = XboxGraphics.XGUntileTextureLevel((uint)bitmapResource.Width, (uint)bitmapResource.Height, 0, format, XboxGraphics.XGTILE.NONE, rowPitch, point, data, null);
 
             }
 
