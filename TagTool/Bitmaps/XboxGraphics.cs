@@ -402,7 +402,68 @@ namespace TagTool.Bitmaps
             return result;
         }
 
-        private static uint GetMipTailLevelOffsetCoords(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, bool isTiled, bool hasBorder, XGPOINT point)
+        private static uint sub_D55E38(uint level, uint width, uint height, uint depth, uint slicePitch, uint size, D3D9xGPU.GPUTEXTUREFORMAT format, ref uint offsetX, ref uint offsetY, ref uint offsetZ)
+        {
+            offsetX = 0;
+            offsetY = 0;
+            offsetZ = 0;
+            uint blockWidth = 0;
+            uint blockHeight = 0;
+
+            uint bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
+            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+
+            uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - 1));
+            uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 1));
+            uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - 1));
+
+            uint nextPowerTwoWidth = (uint)1 << (int)logWidth;
+            uint nextPowerTwoHeight = (uint)1 << (int)logHeight;
+
+            if (level < 3)
+            {
+                if(logHeight < logWidth)
+                    offsetY = (uint)16 >> (int)level;
+                else
+                    offsetX = (uint)16 >> (int)level;
+
+                offsetZ = 0;
+            }
+            else
+            {
+                uint offset = 0;
+                if (logHeight >= logWidth)
+                {
+                    offset = nextPowerTwoHeight >> (int)(level - 2);
+                    offsetY = offset;
+                }
+                else
+                {
+                    offset = nextPowerTwoWidth >> (int)(level - 2);
+                    offsetX = offset;
+                }
+
+                if (offset >= 4)
+                    offsetZ = 0;
+                else
+                {
+                    uint depthOffset = logDepth - level;
+                    if (depthOffset <= 1)
+                        depthOffset = 1;
+                    offsetZ = 4 * depthOffset;
+                }
+            }
+
+            uint xPixelOffset = offsetX;
+            uint yPixelOffest = offsetY;
+
+            offsetX = offsetX / blockWidth;
+            offsetY = offsetY / blockHeight;
+
+            return size * offsetZ + slicePitch * yPixelOffest + (xPixelOffset * bitsPerPixel * blockWidth >> 3);
+        }
+
+        public static uint GetMipTailLevelOffsetCoords(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, bool isTiled, bool hasBorder, XGPOINT point)
         {
             uint border = (uint)(hasBorder ? 1 : 0);
             uint mipLevelRequiresOffset = GetMipLevelRequiresOffset(width, height, border);
@@ -430,24 +491,20 @@ namespace TagTool.Bitmaps
                 uint yOffset = 0;
                 uint zOffset = 0;
 
-                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref tempWidth, ref tempHeight, ref tempDepth, bitsPerPixel, ref xOffset, ref yOffset, ref zOffset);
+                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref tempWidth, ref tempHeight, ref tempDepth, bitsPerPixel, format, 1, isTiled);
                 // previous size maybe?
                 uint size = (tempHeight * tempWidth * bitsPerPixel) >> 3;
                 if(depth <= 1)
                     size = AlignToPage(size);   // probably not required on PC
 
-                // TODO: code in aligntexture dimensions and that sub
-                //sub_D55E38
-                uint result = 0;
+                uint result = sub_D55E38(level - mipLevelRequiresOffset, width, height, depth, bitsPerPixel * width >> 3, size, format, ref xOffset, ref yOffset, ref zOffset);
                 point.X = (int)xOffset;
                 point.Y = (int)yOffset;
                 point.Z = (int)zOffset;
                 return result;
-
             }
             else
             {
-                //No need to offset
                 point.X = 0;
                 point.Y = 0;
                 point.Z = 0;

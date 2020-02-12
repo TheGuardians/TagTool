@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Direct3D.Xbox360;
+using TagTool.Bitmaps;
 
 namespace TagTool.Direct3D.D3D9x
 {
@@ -284,9 +285,39 @@ namespace TagTool.Direct3D.D3D9x
 
     public static class D3D
     {
-        public static uint AlignTextureDimensions(ref uint width, ref uint height, ref uint depth, uint bitsPerPixel, ref uint xOffset, ref uint yOffset, ref uint zOffset)
+        public static uint AlignTextureDimensions(ref uint width, ref uint height, ref uint depth, uint bitsPerPixel, D3D9xGPU.GPUTEXTUREFORMAT format, uint unknown, bool isTiled)
         {
-            return 0;
+            uint heightPitch = (uint)(unknown != 0 ? 32 : 1);
+            uint blockDepth = (uint)(unknown != 2 ? 1 : 4); // is volume?
+            uint blockWidth = 0;
+            uint blockHeight = 0;
+            uint slicePitch = 32;
+
+            XboxGraphics.XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+
+            if (!isTiled)
+            {
+                uint blockPitch = bitsPerPixel * blockHeight * blockWidth >> 3;
+                if(blockPitch > 0)
+                {
+                    if (0x100 / blockHeight >= 0x20)
+                        slicePitch = 0x100 / blockHeight;
+                }
+            }
+
+            // align width, height and depth then compute size
+
+            width = (width + slicePitch * blockWidth - 1) & ~(slicePitch * blockWidth - 1);
+            height = (height + heightPitch * blockHeight - 1) & ~(heightPitch * blockHeight - 1);
+            depth = (depth + blockDepth - 1) & ~(blockDepth - 1);
+
+            uint result = height * ((bitsPerPixel * width) >> 3);
+            if(unknown == 2) // if volume, align with depth
+                result = (result * depth + 0xFFF) & 0xFFFFF000;
+            else
+                result = depth * ((result + 0xFFF) & 0xFFFFF000);
+            
+            return result;
         }
 
 
