@@ -284,6 +284,12 @@ namespace TagTool.Direct3D.D3D9x
 
     public static class D3D
     {
+        public static uint AlignTextureDimensions(ref uint width, ref uint height, ref uint depth, uint bitsPerPixel, ref uint xOffset, ref uint yOffset, ref uint zOffset)
+        {
+            return 0;
+        }
+
+
         public static uint Log2Ceiling(int input)
         {
             uint result = 0;

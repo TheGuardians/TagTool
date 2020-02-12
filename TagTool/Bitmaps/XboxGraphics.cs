@@ -378,10 +378,82 @@ namespace TagTool.Bitmaps
             return pBaseSize + pMipSize;
         }
 
+        /// <summary>
+        /// This takes the current width and height and checks wether  the minimal dimension with border is <= 16.
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="hasBorder"></param>
+        /// <returns>0 if min dimension less or equal to 16, else returns the mipmap level at which the min width would be less or equal to 16</returns>
+        private static uint GetMipLevelRequiresOffset(uint width, uint height, uint hasBorder)
+        {
+            uint logWidth = hasBorder + Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - 2 * hasBorder - 1));
+            uint logHeight = hasBorder + Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 2 * hasBorder - 1));
+            uint minLogDim = logWidth;
+
+            if (logWidth >= logHeight)
+                minLogDim = logHeight;
+
+            uint result = minLogDim - 4;
+
+            if (result <= 0)
+                result = 0;
+
+            return result;
+        }
 
         private static uint GetMipTailLevelOffsetCoords(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format, bool isTiled, bool hasBorder, XGPOINT point)
         {
-            return 0;
+            uint border = (uint)(hasBorder ? 1 : 0);
+            uint mipLevelRequiresOffset = GetMipLevelRequiresOffset(width, height, border);
+
+            if (level >= mipLevelRequiresOffset) // happens when the requested level bitmap dimensions are <= 16
+            {
+                uint logWidth = border + Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - 2 * border - 1));
+                uint logHeight = border + Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 2 * border - 1));
+                uint logDepth = 0;
+                if (depth > 1)
+                    logDepth = border + Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - 2 * border - 1));
+
+                width = (uint)1 << (int)(logWidth - mipLevelRequiresOffset);
+                height = (uint)1 << (int)(logHeight - mipLevelRequiresOffset);
+                if (logDepth - mipLevelRequiresOffset <= 0)
+                    depth = 1;
+                else
+                    depth = (uint)1 << (int)(logDepth - mipLevelRequiresOffset);
+
+                uint bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
+                uint tempWidth = width;
+                uint tempHeight = height;
+                uint tempDepth = depth;
+                uint xOffset = 0;
+                uint yOffset = 0;
+                uint zOffset = 0;
+
+                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref tempWidth, ref tempHeight, ref tempDepth, bitsPerPixel, ref xOffset, ref yOffset, ref zOffset);
+                // previous size maybe?
+                uint size = (tempHeight * tempWidth * bitsPerPixel) >> 3;
+                if(depth <= 1)
+                    size = AlignToPage(size);   // probably not required on PC
+
+                // TODO: code in aligntexture dimensions and that sub
+                //sub_D55E38
+                uint result = 0;
+                point.X = (int)xOffset;
+                point.Y = (int)yOffset;
+                point.Z = (int)zOffset;
+                return result;
+
+            }
+            else
+            {
+                //No need to offset
+                point.X = 0;
+                point.Y = 0;
+                point.Z = 0;
+                return 0;
+            }
+            
         }
 
         public static byte[] XGUntileSurface(uint rowPitch, XGPOINT point, byte[] source, uint width, uint height, D3DBOX box, uint texelPitch)
@@ -699,50 +771,133 @@ namespace TagTool.Bitmaps
             return result;
         }
 
+        public static uint XGLog2LE16(uint texelPitch)
+        {
+            return (texelPitch >> 2) + ((texelPitch >> 1) >> (int)(texelPitch >> 2));
+        }
+
+        /// <summary>
+        /// Translates the x and y offset of a pixel to the tiled memory offset in blocks
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="texelPitch"></param>
+        /// <returns></returns>
+        public static uint XGAddress2DTiledOffset(uint x, uint y, uint width, uint texelPitch)
+        {
+            uint alignedWidth; // width aligned to 32 (blocks)
+            uint logBpp;       // log of bytes per pixel/texel
+            uint macro;
+            uint micro;
+            uint offset;
+
+            alignedWidth = (uint)((width + 31) & ~31);
+            logBpp = XGLog2LE16(texelPitch);
+            macro = ((x >> 5) + (y >> 5) * (alignedWidth >> 5)) << (int)(logBpp + 7);
+            micro = (((x & 7) + ((y & 6) << 2)) << (int)logBpp);
+            offset = (uint)(macro + ((micro & ~15) << 1) + (micro & 15) + ((y & 8) << (3 + (int)logBpp)) + ((y & 1) << 4));
+
+            return (uint)((((offset & ~511) << 3) + ((offset & 448) << 2) + (offset & 63) +
+                    ((y & 16) << 7) + (((((y & 8) >> 2) + (x >> 3)) & 3) << 6)) >> (int)logBpp);
+        }
+
+        private static uint XGAddress2DTiledX(uint offset, uint width, uint texelPitch)
+        {
+            uint alignedWidth = (uint)((width + 31) & ~31);
+
+            uint logBpp = XGLog2LE16(texelPitch);
+            uint offsetB = offset << (int)logBpp;
+            uint offsetT = (uint)((offsetB & ~4095) >> 3) + ((offsetB & 1792) >> 2) + (offsetB & 63);
+            uint offsetM = offsetT >> (7 + (int)logBpp);
+
+            uint macroX = ((offsetM % (alignedWidth >> 5)) << 2);
+            uint tile = ((((offsetT >> (5 + (int)logBpp)) & 2) + (offsetB >> 6)) & 3);
+            uint macro = (macroX + tile) << 3;
+            uint micro = (uint)(((((offsetT >> 1) & ~15) + (offsetT & 15)) & ((texelPitch << 3) - 1)) >> (int)logBpp);
+
+            return macro + micro;
+        }
+
+        private static uint XGAddress2DTiledY(uint offset, uint width, uint texelPitch)
+        {
+            uint alignedWidth = (uint)((width + 31) & ~31);
+
+            uint logBpp = XGLog2LE16(texelPitch);
+            uint offsetB = offset << (int)logBpp;
+            uint offsetT = (uint)((offsetB & ~4095) >> 3) + ((offsetB & 1792) >> 2) + (offsetB & 63);
+            uint offsetM = offsetT >> (7 + (int)logBpp);
+
+            uint macroY = ((offsetM / (alignedWidth >> 5)) << 2);
+            uint tile = ((offsetT >> (6 + (int)logBpp)) & 1) + (((offsetB & 2048) >> 10));
+            uint macro = (macroY + tile) << 3;
+            uint micro = (uint)((((offsetT & (((texelPitch << 6) - 1) & ~31)) + ((offsetT & 15) << 1)) >> (3 + (int)logBpp)) & ~1);
+
+            return macro + micro + ((offsetT & 16) >> 4);
+        }
+
+        /// <summary>
+        /// Untile surface. The input dimensions must be in terms of blocks.
+        /// </summary>
+        /// <param name="width">Width of the surface in blocks</param>
+        /// <param name="height">Height of the surface in blocks</param>
+        /// <param name="rowPitch">Size in bytes of a row of pixels in the destination image</param>
+        /// <param name="point">Offset in the surface</param>
+        /// <param name="source">Source data</param>
+        /// <param name="texelPitch">Size in bytes of a block</param>
+        /// <param name="rect">Image rectangle to untile</param>
+        /// <returns></returns>
         private static byte[] UntileSurface(uint width, uint height, uint rowPitch, XGPOINT point, byte[] source, uint texelPitch, D3DBOX rect)
         {
-            uint rectWidth = rect.Right - rect.Left;
-            uint rectHeight = rect.Bottom - rect.Top;
+            uint nBlocksWidth = rect.Right - rect.Left;
+            uint nBlocksHeight = rect.Bottom - rect.Top;
 
-            uint widthRounded = (width + 31) & ~31u;
-            uint heightRounded = (height + 31) & ~31u;
+            uint alignedWidth = (width + 31) & ~31u;
+            uint alignedHeight = (height + 31) & ~31u;
 
-            uint totalSize = AlignToPage(widthRounded * heightRounded);
+            uint totalSize = AlignToPage(alignedWidth * alignedHeight); // may not be necessary on PC
+
             byte[] result = new byte[totalSize];
 
             uint v12 = 1u << (int)((texelPitch >> 4) - (texelPitch >> 2) + 3);
-            uint v51 = (texelPitch >> 2) + (texelPitch >> 1 >> (int)(texelPitch >> 2));
+            uint logBpp = XGLog2LE16(texelPitch); // log bytes per pixel
             uint v14 = (~(v12 - 1u) & (rect.Left + v12)) - rect.Left;
-            uint v42 = (~(v12 - 1u) & (rect.Left + rectWidth)) - rect.Left;
+            uint v42 = (~(v12 - 1u) & (rect.Left + nBlocksWidth)) - rect.Left;
 
-            for (uint y = 0; y < rectHeight; y++)
+
+            //int x = XGAddress2DTiledX(offset, xChunks, texPitch);
+            //int y = XGAddress2DTiledY(offset, xChunks, texPitch);
+            //int sourceIndex = ((i * xChunks) * texPitch) + (j * texPitch);
+            //int destinationIndex = ((y * xChunks) * texPitch) + (x * texPitch);
+
+            for (uint yBlockIndex = 0; yBlockIndex < nBlocksHeight; yBlockIndex++)
             {
-                uint v38 = widthRounded >> 5;
-                uint v15 = y + rect.Top;
-                uint v47 = v38 * (v15 >> 5);
-                uint v44 = (v15 >> 4) & 1;
-                uint v16 = (uint)point.Y;
-                uint v17 = (v15 >> 3) & 1;
-                uint v46 = 16 * (v15 & 1);
+                uint v38 = alignedWidth >> 5;
+                uint _y = yBlockIndex + rect.Top;
+                uint v47 = v38 * (_y >> 5);
+                uint v44 = (_y >> 4) & 1;
+                uint yBlockOffset = (uint)point.Y;
+                uint v17 = (_y >> 3) & 1;
+                uint v46 = 16 * (_y & 1);
                 uint v45 = 2 * v17;
                 uint v19 = rect.Left;
-                uint v18 = 4 * (v15 & 6);
-                uint v52 = v17 << (int)(v51 + 6);
-                uint v21 = rowPitch * (y + v16);
+                uint v18 = 4 * (_y & 6);
+                uint v52 = v17 << (int)(logBpp + 6);
+                uint heightOffset = rowPitch * (yBlockIndex + yBlockOffset);
 
                 {
                     uint v30 = rect.Left;
                     uint v31 = (v44 + 2 * ((v45 + (byte)(v19 >> 3)) & 3));
-                    uint v25 = (v18 + (v30 & 7)) << (int)(v51 + 6);
-                    uint v32 = v46 + v52 + ((v25 >> 6) & 0xF) + 2 * (((v25 >> 6) & ~0xFu) + (((v47 + (v19 >> 5)) << (int)(v51 + 6)) & 0x1FFFFFFF));
+                    uint micro = (v18 + (v30 & 7)) << (int)(logBpp + 6);
+                    uint v32 = v46 + v52 + ((micro >> 6) & 0xF) + 2 * (((micro >> 6) & ~0xFu) + (((v47 + (v19 >> 5)) << (int)(logBpp + 6)) & 0x1FFFFFFF));
                     uint v28 = ((v32 >> 6) & 7) + 8 * (v31 & 1);
 
                     var v37a = v14;
-                    if (v37a > rectWidth)
-                        v37a = rectWidth;
+                    if (v37a > nBlocksWidth)
+                        v37a = nBlocksWidth;
 
                     uint sourceOffset = 8 * ((v32 & ~0x1FFu) + 4 * ((v31 & ~1u) + 8 * v28)) + (v32 & 0x3F);
-                    uint destinationOffset = v21 + ((uint)point.X << (int)v51);
+                    uint destinationOffset = heightOffset + ((uint)point.X << (int)logBpp);
                     uint blockSize = v37a;
 
                     Array.Copy(source, sourceOffset, result, destinationOffset, blockSize);
@@ -755,30 +910,30 @@ namespace TagTool.Bitmaps
                 {
                     uint v30 = x + rect.Left;
                     uint v31 = v44 + 2 * ((v45 + (byte)(v30 >> 3)) & 3);
-                    uint v25 = (v18 + (v30 & 7)) << (int)(v51 + 6);
-                    uint v32 = v46 + v52 + ((v25 >> 6) & 0xF) + 2 * (((v25 >> 6) & ~0xFu) + (((v47 + (v30 >> 5)) << (int)(v51 + 6)) & 0x1FFFFFFF));
+                    uint v25 = (v18 + (v30 & 7)) << (int)(logBpp + 6);
+                    uint v32 = v46 + v52 + ((v25 >> 6) & 0xF) + 2 * (((v25 >> 6) & ~0xFu) + (((v47 + (v30 >> 5)) << (int)(logBpp + 6)) & 0x1FFFFFFF));
                     uint v28 = ((v32 >> 6) & 7) + 8 * (v31 & 1);
 
                     uint sourceOffset = 8 * ((v32 & ~0x1FFu) + 4 * ((v31 & ~1u) + 8 * v28)) + (v32 & 0x3F);
-                    uint destinationOffset = v21 + ((v48 + (uint)point.X) << (int)v51);
-                    uint blockSize = v12 << (int)v51;
+                    uint destinationOffset = heightOffset + ((v48 + (uint)point.X) << (int)logBpp);
+                    uint blockSize = v12 << (int)logBpp;
 
                     Array.Copy(source, sourceOffset, result, destinationOffset, blockSize);
 
                     x += v12;
                 }
 
-                if (x < rectWidth)
+                if (x < nBlocksWidth)
                 {
                     uint v30 = x + rect.Left;
                     uint v31 = v44 + 2 * ((v45 + (byte)(v30 >> 3)) & 3);
-                    uint v25 = (v18 + (v30 & 7)) << (int)(v51 + 6);
-                    uint v32 = v46 + v52 + ((v25 >> 6) & 0xF) + 2 * (((v25 >> 6) & ~0xFu) + (((v47 + (v30 >> 5)) << (int)(v51 + 6)) & 0x1FFFFFFF));
+                    uint v25 = (v18 + (v30 & 7)) << (int)(logBpp + 6);
+                    uint v32 = v46 + v52 + ((v25 >> 6) & 0xF) + 2 * (((v25 >> 6) & ~0xFu) + (((v47 + (v30 >> 5)) << (int)(logBpp + 6)) & 0x1FFFFFFF));
                     uint v28 = ((v32 >> 6) & 7) + 8 * (v31 & 1);
 
                     uint sourceOffset = 8 * ((v32 & ~0x1FFu) + 4 * ((v31 & ~1u) + 8 * v28)) + (v32 & 0x3F);
-                    uint destinationOffset = v21 + ((v48 + (uint)point.X) << (int)v51);
-                    uint blockSize = (rectWidth - v48) << (int)v51;
+                    uint destinationOffset = heightOffset + ((v48 + (uint)point.X) << (int)logBpp);
+                    uint blockSize = (nBlocksWidth - v48) << (int)logBpp;
 
                     Array.Copy(source, sourceOffset, result, destinationOffset, blockSize);
                 }
