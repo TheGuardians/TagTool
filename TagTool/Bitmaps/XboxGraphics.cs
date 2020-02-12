@@ -417,6 +417,12 @@ namespace TagTool.Bitmaps
             uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 1));
             uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - 1));
 
+            uint logSize = logWidth <= logHeight ? logWidth : logHeight;
+
+            uint packedMipBase = logSize > 4 ? (logSize - 4) : 0;
+            uint packedMip = level - packedMipBase;
+
+
             uint nextPowerTwoWidth = (uint)1 << (int)logWidth;
             uint nextPowerTwoHeight = (uint)1 << (int)logHeight;
 
@@ -431,16 +437,19 @@ namespace TagTool.Bitmaps
             }
             else
             {
-                uint offset = 0;
-                if (logHeight >= logWidth)
+                uint offset;
+
+                if (logWidth > logHeight)
                 {
-                    offset = nextPowerTwoHeight >> (int)(level - 2);
-                    offsetY = offset;
+                    offset = (uint)((1 << (int)(logWidth - packedMipBase)) >> (int)(packedMip - 2));
+                    offsetX = offset;
+                    offsetY = 0;
                 }
                 else
                 {
-                    offset = nextPowerTwoWidth >> (int)(level - 2);
-                    offsetX = offset;
+                    offset = (uint)((1 << (int)(logHeight - packedMipBase)) >> (int)(packedMip - 2));
+                    offsetY = offset;
+                    offsetX = 0;
                 }
 
                 if (offset >= 4)
@@ -457,8 +466,8 @@ namespace TagTool.Bitmaps
             uint xPixelOffset = offsetX;
             uint yPixelOffest = offsetY;
 
-            offsetX = offsetX / blockWidth;
-            offsetY = offsetY / blockHeight;
+            offsetX /= blockWidth;
+            offsetY /= blockHeight;
 
             return size * offsetZ + slicePitch * yPixelOffest + (xPixelOffset * bitsPerPixel * blockWidth >> 3);
         }
@@ -916,10 +925,10 @@ namespace TagTool.Bitmaps
 
             byte[] result = new byte[totalSize];
 
-            uint v12 = 1u << (int)((texelPitch >> 4) - (texelPitch >> 2) + 3);
+            uint v12 = 16 / texelPitch;
             uint logBpp = XGLog2LE16(texelPitch); // log bytes per pixel
-            uint v14 = (~(v12 - 1u) & (rect.Left + v12)) - rect.Left;
-            uint v42 = (~(v12 - 1u) & (rect.Left + nBlocksWidth)) - rect.Left;
+            uint v14 = (~(v12 - 1u) & (rect.Left + v12)) - rect.Left; //  v12 - (rect.Left) % v12
+            uint v42 = (~(v12 - 1u) & (rect.Left + nBlocksWidth)) - rect.Left; // nBlocksWidth - (rect.Left + nBlocksWidth) % v12
 
 
             //int x = XGAddress2DTiledX(offset, xChunks, texPitch);
@@ -1008,5 +1017,88 @@ namespace TagTool.Bitmaps
         {
             return offset1 ^ (offset1 ^ offset2) & 0xFFF;
         }
+
+        public static uint GetUntiledLevelOffset(uint width, uint height, uint depth, uint level, D3D9xGPU.GPUTEXTUREFORMAT format)
+        {
+            /*
+             * Returns the offset of the level in the untiled texture
+             */
+            uint blockWidth = 0;
+            uint blockHeight = 0;
+
+            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+
+            uint mipLevelRequiresOffset = GetMipLevelRequiresOffset(width, height, 0);
+
+            if (level >= mipLevelRequiresOffset) // happens when the requested level bitmap dimensions are <= 16
+            {
+                uint result = 0;
+                uint blockOffsetX = 0;
+                uint blockOffsetY = 0;
+                uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - 1));
+                uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 1));
+                // get level width and height
+                uint logLevelWidth = logWidth - level;
+                uint logLevelHeight = logHeight - level;
+                uint nextPo2Width = (uint)1 << (int)(logLevelWidth);
+                uint nextPo2Height = (uint)1 << (int)(logLevelHeight);
+
+                uint bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
+                uint texelPitch = (blockWidth * blockHeight * bitsPerPixel) >> 3;
+                uint slicePitch = 32 * texelPitch;
+                // convert to block sizes
+
+                nextPo2Height /= blockHeight;
+                nextPo2Width /= blockWidth;
+
+                // a tile is 32x32 (blocks)
+
+                if(logLevelWidth == logLevelHeight)
+                {
+                    // square
+                    switch (logLevelWidth)
+                    {
+                        case 4:
+                            blockOffsetX = 16 / blockWidth;
+                            blockOffsetY = 0;
+                            break;
+                        case 3:
+                            blockOffsetX = 8 / blockWidth;
+                            blockOffsetY = 0;
+                            break;
+                        case 2:
+                            blockOffsetX = 4 / blockWidth;
+                            blockOffsetY = 0;
+                            break;
+                        case 1:
+                            blockOffsetX = 0;
+                            blockOffsetY = 8 / blockHeight;
+                            break;
+                        case 0:
+                            blockOffsetX = 0;
+                            blockOffsetY = 4 / blockHeight;
+                            break;
+                    }
+
+                }
+                else if (logLevelWidth < logLevelHeight)
+                {
+                    // vertical
+                }
+                else
+                {
+                    // horizontal
+                }
+
+                result = slicePitch * blockOffsetY + texelPitch * blockOffsetX;
+
+                return result;
+            }
+            else
+            {
+                return 0;
+            }
+        }
     }
+
 }
