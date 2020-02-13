@@ -178,7 +178,7 @@ namespace TagTool.Commands.Files
                 {typeof(CachedTag), AssemblyPluginFieldTypes.tagref},
                 //{typeof(RealVector2d), AssemblyPluginFieldTypes.range},
                 {typeof(RealArgbColor), AssemblyPluginFieldTypes.colorf },
-                {typeof(RealRgbColor), AssemblyPluginFieldTypes.color24 },
+                {typeof(RealRgbColor), AssemblyPluginFieldTypes.colorf },
                 //{typeof(RgbColor), AssemblyPluginFieldTypes.color24},
                 {typeof(ArgbColor), AssemblyPluginFieldTypes.color},
                 {typeof(CachedTagData), AssemblyPluginFieldTypes.dataRef},
@@ -219,8 +219,8 @@ namespace TagTool.Commands.Files
                 {AssemblyPluginFieldTypes.colour24, 3},
                 {AssemblyPluginFieldTypes.color32, 4},
                 {AssemblyPluginFieldTypes.colour32, 4},
-                {AssemblyPluginFieldTypes.colorf, 16},
-                {AssemblyPluginFieldTypes.colourf, 16},
+                {AssemblyPluginFieldTypes.colorf, 12},
+                {AssemblyPluginFieldTypes.colourf, 12},
                 {AssemblyPluginFieldTypes.dataRef, 20},
                 {AssemblyPluginFieldTypes.reflexive, 12},
                 {AssemblyPluginFieldTypes.raw, 20}
@@ -526,7 +526,7 @@ namespace TagTool.Commands.Files
                 /// <returns>A list of AssemblyPluginFields that represent RgbaColor, an uint representing alpha and a rgb format color24</returns>
                 public static List<AssemblyPluginField> ArgbColor(string fieldName, ref int offset)
                 {
-                    return new List<AssemblyPluginField>
+                    return new List<AssemblyPluginField> // TODO: fix little endian
                     {
                         new AssemblyPluginField(AssemblyPluginFieldTypes.uint8, fieldName + "Alpha", ref offset),
                         new AssemblyPluginField(AssemblyPluginFieldTypes.color24, fieldName, ref offset, new Dictionary<string, string>() { { "format", "rgb" } })
@@ -633,6 +633,10 @@ namespace TagTool.Commands.Files
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset, new Dictionary<string, string>() { { "format", "argb" } }));
                     }
+                    else if (fieldType == typeof(RealRgbColor))
+                    {
+                        assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset, new Dictionary<string, string>() { { "format", "rgb" } }));
+                    }
                     else
                         throw new NotImplementedException("This color needs implementing to the converter!");
                 }
@@ -642,7 +646,7 @@ namespace TagTool.Commands.Files
                     AssemblyPluginField reflexiveAssemblyPluginField = new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset);
                     AssemblyPluginFieldTypes elementAssemblyPluginFieldType;
 
-                    if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(List<>))
+                    if (fieldType.IsGenericType && (fieldType.GetGenericTypeDefinition() == typeof(List<>) || fieldType.GetGenericTypeDefinition() == typeof(TagBlock<>)))
                     {
                         elementType = fieldType.GetGenericArguments()[0];
                     }
@@ -795,7 +799,7 @@ namespace TagTool.Commands.Files
                         assemblyPluginFields.AddRange(CommonFieldTypes.ReferencedStructure(fieldType, cacheVersion, fieldName, ref offset));
                     }
                     else
-                        throw new NotImplementedException("Undefined field type not implemted.");
+                        throw new NotImplementedException($"Undefined field type \"{fieldType}\" not implemented.");
                 }
                 else
                     assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset));
@@ -829,7 +833,7 @@ namespace TagTool.Commands.Files
                     else if (underlyingType == typeof(System.SByte) || underlyingType == typeof(System.Byte))
                         assemblyPluginFieldType = bitfield ? AssemblyPluginFieldTypes.bitfield8 : AssemblyPluginFieldTypes.enum8;
                 }
-                else if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(List<>))
+                else if (fieldType.IsGenericType && (fieldType.GetGenericTypeDefinition() == typeof(List<>) || fieldType.GetGenericTypeDefinition() == typeof(TagBlock<>)))
                 {
                     assemblyPluginFieldType = AssemblyPluginFieldTypes.reflexive;
                 }
@@ -1038,7 +1042,7 @@ namespace TagTool.Commands.Files
             //Do stuff.
 
 #if DEBUG
-            Console.WriteLine("Converting tag definition {0} for {1} to an assmebly plugin at {3}\\{1}\\{2}.xml", tagGroup.ToString(), gameName, tagGroup.ToString().Replace('<', '_').Replace('>', '_'), pluginsDirectory);
+            Console.WriteLine("Converting tag definition {0} for {1} to an assembly plugin at {3}\\{1}\\{2}.xml", tagGroup.ToString(), gameName, tagGroup.ToString().Replace('<', '_').Replace('>', '_'), pluginsDirectory);
 #endif
 
             AssemblyPluginField.ConvertTagStructure(tagType, cacheVersion, out List<AssemblyPluginField> pluginFields, out int size);
