@@ -57,6 +57,7 @@ namespace TagTool.Commands
             using(var stream = cache.OpenCacheRead())
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_black", "bitm");
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
                 
                 var resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[0]);
@@ -64,6 +65,13 @@ namespace TagTool.Commands
                 var bitmapResource = resource.Texture.Definition.Bitmap;
                 var primaryData = resource.Texture.Definition.PrimaryResourceData.Data;
                 var secondaryData = resource.Texture.Definition.SecondaryResourceData.Data;
+
+                var filename = bitmapTag.Name.Split('\\').Last();
+
+                generateXboxFiles(filename, primaryData, secondaryData, bitmapResource);
+
+                return true;
+                /*
                 byte[] data = null;
                 if (bitmapResource.HighResInSecondaryResource == 1)
                 {
@@ -84,46 +92,34 @@ namespace TagTool.Commands
                 uint rowPitch = (uint)(((blockWidth * blockHeight * bitsPerPixel) >> 3) * bitmapResource.Width);
                 var point = new XboxGraphics.XGPOINT();
 
-                var test = XboxGraphics.GetMipTailLevelOffsetCoords((uint)bitmapResource.Width, (uint)bitmapResource.Height, (uint)bitmapResource.Depth, 0, format, true, false, point);
+                var test = XboxGraphics.GetMipTailLevelOffsetCoords((uint)bitmapResource.Width, (uint)bitmapResource.Height, (uint)bitmapResource.Depth, 2 , format, true, false, point);
                 byte[] result = XboxGraphics.XGUntileTextureLevel((uint)bitmapResource.Width, (uint)bitmapResource.Height, 0, format, XboxGraphics.XGTILE.NONE, rowPitch, point, data, null);
-
+                */
             }
-
-
-
-            /*
-            foreach (var mapFile in mapFiles)
-            {
-                var cache = GameCache.Open(mapFile);
-
-                using(var stream = cache.OpenCacheRead())
-                {
-                    foreach(var tag in cache.TagCache.NonNull())
-                    {
-                        if (tag.IsInGroup("bitm"))
-                        {
-                            var bitmap = cache.Deserialize<Bitmap>(stream, tag);
-                            foreach(var resource in bitmap.Resources)
-                            {
-                                var bitmapResource = cache.ResourceCache.GetBitmapTextureInteropResource(resource);
-                                if(bitmapResource != null)
-                                {
-                                    Console.WriteLine($"{XboxGraphics.XGGetGpuFormat(bitmapResource.Texture.Definition.Bitmap.D3DFormat)}");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            */
-
-
-
-
-
-
 
             return true;
+        }
+
+        public void generateXboxFiles(string filename, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition)
+        {
+            using(var stream = new FileStream($"XboxBitmaps/{filename}.primary", FileMode.Create))
+            {
+                stream.Write(primaryData, 0, primaryData.Length);
+            }
+
+            using (var stream = new FileStream($"XboxBitmaps/{filename}.secondary", FileMode.Create))
+            {
+                stream.Write(secondaryData, 0, secondaryData.Length);
+            }
+
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708, EndianFormat.LittleEndian);
+
+            using (var stream = new FileStream($"XboxBitmaps/{filename}.bitmapdefinition", FileMode.Create))
+            using(var writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+            {
+                var context = new DataSerializationContext(writer);
+                serializer.Serialize(context, definition);
+            }
         }
 
         public void PrintStringID(int set, int index, int tableIndex, string str, StringIDType type)
