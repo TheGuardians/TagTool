@@ -187,9 +187,11 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
             finalRm.ShaderProperties[0].TextureConstants = newShaderProperty.TextureConstants;
             finalRm.ShaderProperties[0].RealConstants = newShaderProperty.RealConstants;
+            finalRm.ShaderProperties[0].IntegerConstants = newShaderProperty.IntegerConstants;
+            finalRm.ShaderProperties[0].BooleanConstants = newShaderProperty.BooleanConstants;
 
             // fixup runtime queryable properties
-            for(int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
+            for (int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
             {
                 if (finalRm.ShaderProperties[0].QueryableProperties[i] == -1)
                     continue;
