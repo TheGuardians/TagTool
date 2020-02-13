@@ -197,7 +197,7 @@ namespace TagTool.Bitmaps.Utils
             foreach (var bitmap in xboxBitmaps)
             {
                 // extract bitmap from padded image
-                BaseBitmap finalBitmap = ExtractImage(bitmap);
+                BaseBitmap finalBitmap = ExtractImage(bitmap, bitmapTextureInteropDefinition.D3DFormat);
                 // convert to PC format
                 flipImage = ConvertImage(finalBitmap);
                 // flip data if required
@@ -267,7 +267,7 @@ namespace TagTool.Bitmaps.Utils
             return xboxBitmaps;
         }
 
-        private static BaseBitmap ExtractImage(XboxBitmap bitmap)
+        private static BaseBitmap ExtractImage(XboxBitmap bitmap, int d3dFormat)
         {
             if (bitmap.NotExact)
             {
@@ -284,9 +284,10 @@ namespace TagTool.Bitmaps.Utils
 
                 byte[] data = new byte[BitmapUtils.GetImageSize(bitmap)];
                 int numberOfPass = dataHeight / bitmap.BlockDimension;
+                int baseOffset = (int)XboxGraphics.GetUntiledLevelOffset((uint)bitmap.Width, (uint)bitmap.Height, 1, 0, XboxGraphics.XGGetGpuFormat(d3dFormat));
                 for (int i = 0; i < numberOfPass; i++)
                 {
-                    Array.Copy(bitmap.Data, i * bitmap.TilePitch , data, i * bitmap.Pitch, bitmap.Pitch); //+ bitmap.Offset
+                    Array.Copy(bitmap.Data, i * bitmap.TilePitch + baseOffset, data, i * bitmap.Pitch, bitmap.Pitch); //+ bitmap.Offset
                 }
                 bitmap.Data = data;
             }

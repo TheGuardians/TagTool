@@ -1083,11 +1083,11 @@ namespace TagTool.Bitmaps
                 }
                 else if (logLevelWidth < logLevelHeight)
                 {
-                    // vertical
+                    Console.WriteLine("Offset for packed non-square bitmap not supported yet");
                 }
                 else
                 {
-                    // horizontal
+                    Console.WriteLine("Offset for packed non-square bitmap not supported yet");
                 }
 
                 result = slicePitch * blockOffsetY + texelPitch * blockOffsetX;
