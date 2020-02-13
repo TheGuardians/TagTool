@@ -191,6 +191,8 @@ namespace TagTool.Tags.Definitions
         AlwaysRender = 0,
         RenderFirstPerson = 1 << 0,
         DontRenderThirdPerson = 1 << 1,
+        Unused = 1 << 2,
+        DontRenderAsEffect = 1 << 3 // HO only
     }
 
     /// <summary>

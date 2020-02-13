@@ -216,8 +216,14 @@ namespace TagTool.Commands.Porting
 
         private CameraFxSettings ConvertCameraFxSettings(CameraFxSettings cfxs, string blamTagName)
         {
-            cfxs.Flags15 = CameraFxSettings.FlagsValue.UseDefault;
-            cfxs.Flags16 = CameraFxSettings.FlagsValue.UseDefault;
+            cfxs.SsaoProperties = new CameraFxSettings.SsaoPropertiesBlock
+            {
+                Flags = CameraFxSettings.FlagsValue.UseDefault
+            };
+            cfxs.UnknownIntensity1 = new CameraFxSettings.CameraFxValue
+            {
+                Flags = CameraFxSettings.FlagsValue.UseDefault
+            };
 
             switch (blamTagName)
             {
