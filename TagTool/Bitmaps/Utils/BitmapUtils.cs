@@ -379,5 +379,78 @@ namespace TagTool.Bitmaps
             return result;
         }
 
+        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level)
+        {
+            uint unknownType = 0;
+            switch (bitmapResource.BitmapType)
+            {
+                case BitmapType.Texture2D:
+                case BitmapType.Array:
+                    unknownType = 1;
+                    break;
+                case BitmapType.Texture3D:
+                    unknownType = 2;
+                    break;
+                case BitmapType.CubeMap:
+                    unknownType = 3;
+                    break;
+            }
+
+            
+            var format = XboxGraphics.XGGetGpuFormat(bitmapResource.D3DFormat);
+            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
+
+            int logWidth = (int)Direct3D.D3D9x.D3D.Log2Ceiling(bitmapResource.Width - 1);
+            int logHeight = (int)Direct3D.D3D9x.D3D.Log2Ceiling(bitmapResource.Height - 1);
+            int logDepth = (int)Direct3D.D3D9x.D3D.Log2Ceiling(bitmapResource.Depth - 1);
+
+            int unknown = 1;
+            if (bitmapResource.BitmapType == BitmapType.CubeMap || bitmapResource.BitmapType == BitmapType.Array)
+            {
+                // need to figure this out
+            }
+
+            uint offset = 0;
+            int LevelIndex = Level - 1;
+            do
+            {
+                if (logWidth > 0) --logWidth;
+                if (logHeight > 0) --logHeight;
+                if (logDepth > 0) --logDepth;
+
+                uint width = 1u << logWidth;
+                uint height = 1u << logHeight;
+                uint depth = 1u << logDepth;
+
+                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref width, ref height, ref depth, bitsPerPixel, format, unknownType, true);
+
+                uint rowPitch = (bitsPerPixel * width) / 8;
+
+                if (bitmapResource.MipmapCount <= 1)
+                {
+                    // offset += Direct3D.D3D9x.D3D.GetMipTailLevelOffset(width, height, depth, rowPitch, height * rowPitch, format);
+                    break;
+                }
+
+                uint levelSizeBytes = 0;
+                if (LevelIndex > 0)
+                {
+                    if (unknownType == 2)
+                        levelSizeBytes = AlignToPage(height * depth * rowPitch);
+                    else
+                        levelSizeBytes = AlignToPage(height * rowPitch);
+                }
+
+                offset += (uint)unknown * levelSizeBytes;
+            }
+            while (--LevelIndex > 0);
+
+            return offset;
+        }
+
+        private static uint AlignToPage(uint offset)
+        {
+            return offset + 0xFFFu & ~0xFFFu;
+        }
     }
 }
