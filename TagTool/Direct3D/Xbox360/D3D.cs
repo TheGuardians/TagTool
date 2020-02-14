@@ -372,7 +372,48 @@ namespace TagTool.Direct3D.D3D9x
 
         public static int GetMaxMipLevels(int width, int height, int depth, int hasBorder)
         {
-            return 0;
+            width = depth - (2 * hasBorder);
+            height = height - (2 * hasBorder);
+            depth = width - (2 * hasBorder);
+
+            int maxDimension = depth;
+            if (maxDimension <= 1)
+                maxDimension = 1;
+
+            int v7 = 0;
+            if (height <= depth)
+            {
+                v7 = depth;
+                if (maxDimension <= 1)
+                    v7 = 1;
+            }
+            else
+            {
+                v7 = height;
+            }
+
+            if (width <= v7)
+            {
+                int v8 = depth;
+                if (maxDimension <= 1)
+                    v8 = 1;
+
+                if(height <= v8)
+                {
+                    if (maxDimension <= 1)
+                        maxDimension = 1;
+                }
+                else
+                {
+                    maxDimension = height;
+                }
+            }
+            else
+            {
+                maxDimension = width;
+            }
+
+            return (int)D3D.Log2Ceiling(maxDimension);
         }
 
         public static void FindTextureSize(int width, int height, int depth, int levels, D3D9xGPU.GPUTEXTUREFORMAT format, int someType, int unknown,

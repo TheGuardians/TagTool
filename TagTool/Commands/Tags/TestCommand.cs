@@ -48,7 +48,7 @@ namespace TagTool.Commands
             //
 
 
-            var file = new FileInfo(@"D:\halo\maps\halo3\guardian.map");
+            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"guardian.map"));
 
             var cache = GameCache.Open(file);
 
@@ -121,6 +121,7 @@ namespace TagTool.Commands
         public void DumpBitmapDDS(string filename, byte[] data, uint width, uint height, uint depth, Bitmap.Image image)
         {
             var file = new FileInfo($"Bitmaps\\{filename}.dds");
+            file.Directory.Create();
             using(var stream = file.OpenWrite())
             using(var writer = new EndianWriter(stream))
             {
@@ -226,9 +227,8 @@ namespace TagTool.Commands
             }
 
             // get surface offset and extract rectangle
-
-
-
+            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, level);
+            Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
         }
     }
 

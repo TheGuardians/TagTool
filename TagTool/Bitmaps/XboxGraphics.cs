@@ -438,7 +438,7 @@ namespace TagTool.Bitmaps
             return (uint)result;
         }
 
-        private static uint D3DGetMipTailLevelOffsetCoords(uint level, uint width, uint height, uint depth, uint slicePitch, uint size, D3D9xGPU.GPUTEXTUREFORMAT format, ref uint offsetX, ref uint offsetY, ref uint offsetZ)
+        public static uint D3DGetMipTailLevelOffsetCoords(uint level, uint width, uint height, uint depth, uint slicePitch, uint size, D3D9xGPU.GPUTEXTUREFORMAT format, ref uint offsetX, ref uint offsetY, ref uint offsetZ)
         {
             offsetX = 0;
             offsetY = 0;
