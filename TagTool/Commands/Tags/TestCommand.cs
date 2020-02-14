@@ -217,11 +217,11 @@ namespace TagTool.Commands
                 data = result;
             }
             
-            DumpBitmapDDS($"raw_bitmap_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            //DumpBitmapDDS($"raw_bitmap_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
 
-            DumpBitmapDDS($"raw_bitmap_endian_swapped_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            //DumpBitmapDDS($"raw_bitmap_endian_swapped_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             // dump dds here
 
@@ -244,6 +244,10 @@ namespace TagTool.Commands
                         uint y = XboxGraphics.XGAddress2DTiledY(offset, nBlockWidth, texelPitch);
                         int sourceIndex = (int)(((i * nBlockWidth) * texelPitch) + (j * texelPitch));
                         int destinationIndex = (int)(((y * nBlockWidth) * texelPitch) + (x * texelPitch));
+
+                        if (destinationIndex >= size) // ignore block if out of bounds for current array (happens when non square, not a big deal)
+                            continue;
+
                         Array.Copy(data, sourceIndex, result, destinationIndex, texelPitch);
                     }
                 }
