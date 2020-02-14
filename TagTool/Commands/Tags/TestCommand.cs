@@ -226,7 +226,8 @@ namespace TagTool.Commands
             //DumpBitmapDDS($"raw_bitmap_endian_swapped_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             // dump dds here
-
+            uint nBlockWidth;
+            uint nBlockHeight;
             if (isTiled)
             {
                 //
@@ -235,8 +236,8 @@ namespace TagTool.Commands
 
                 byte[] result = new byte[size];
 
-                uint nBlockWidth = alignedWidth / blockWidth;
-                uint nBlockHeight = alignedHeight / blockHeight;
+                nBlockWidth = alignedWidth / blockWidth;
+                nBlockHeight = alignedHeight / blockHeight;
                 for (int i = 0; i < nBlockHeight; i++)
                 {
                     for (int j = 0; j < nBlockWidth; j++)
@@ -265,6 +266,58 @@ namespace TagTool.Commands
 
             // use the point to extract the right rectangle out of the texture
             Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
+
+
+            uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Width - 1);
+            uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Height - 1);
+            uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Depth - 1);
+            // find next ceiling power of two, align on block size
+            uint logLevelWidth = (uint)(logWidth - level);
+            uint logLevelHeight = (uint)(logHeight - level);
+
+            int levelWidth = 1 << (int)logLevelWidth;
+            int levelHeight = 1 << (int)logLevelHeight;
+
+            if (levelWidth % blockWidth != 0)
+                levelWidth = (int)(levelWidth + blockWidth - levelWidth % blockWidth);
+
+            if (levelHeight % blockHeight != 0)
+                levelHeight = (int)(levelHeight + blockHeight - levelHeight % blockHeight);
+
+
+            int actualWidth = definition.Width >> level;
+            int actualHeight = definition.Height >> level;
+
+            if (actualHeight < 1)
+                actualHeight = 1;
+            if (actualWidth < 1)
+                actualWidth = 1;
+
+            byte[] finalData = new byte[levelWidth * levelHeight * bitsPerPixel >> 3];
+
+            nBlockWidth = (uint)(levelWidth / blockWidth);
+            nBlockHeight = (uint)(levelHeight / blockHeight);
+
+            uint sliceBlockWidth = alignedWidth / blockWidth;
+
+            // skip these loops if the bitmap is already the proper format
+            if(point.X != 0 || point.Y != 0 || finalData.Length != data.Length)
+            {
+                for (int i = 0; i < nBlockHeight; i++)
+                {
+                    for (int j = 0; j < nBlockWidth; j++)
+                    {
+                        uint offset = (uint)(((i + point.Y) * sliceBlockWidth) + j + point.X) * texelPitch;
+                        uint destOffset = (uint)((i * nBlockWidth) + j) * texelPitch;
+                        Array.Copy(data, offset, finalData, destOffset, texelPitch);
+                    }
+                }
+            }
+            else
+            {
+                finalData = data;
+            }
+            DumpBitmapDDS($"bitmap_trimmed_{level}", finalData, (uint)actualWidth, (uint)actualHeight, 1, bitmap.Images[imageIndex]);
         }
     }
 
