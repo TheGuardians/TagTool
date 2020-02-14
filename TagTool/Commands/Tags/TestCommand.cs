@@ -63,29 +63,36 @@ namespace TagTool.Commands
 
                 var image = bitmap.Images[imageIndex];
 
-                if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
-                {
-                    BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
-                    BitmapTextureInteropDefinition definition;
+                var mipCount = image.MipmapCount + 1;
 
-                    int pairIndex = 0;
-                    
-                    if(image.InterleavedTextureIndex2 > 0)
+                for(int i = 0; i < mipCount; i++)
+                {
+                    if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                     {
-                        definition = resource.Texture.Definition.Bitmap2;
-                        pairIndex = 1;   
+                        BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                        BitmapTextureInteropDefinition definition;
+
+                        int pairIndex = 0;
+
+                        if (image.InterleavedTextureIndex2 > 0)
+                        {
+                            definition = resource.Texture.Definition.Bitmap2;
+                            pairIndex = 1;
+                        }
+                        else
+                        {
+                            definition = resource.Texture.Definition.Bitmap1;
+                        }
+                        TestBitmapConverter(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, i, true, pairIndex);
                     }
                     else
                     {
-                        definition = resource.Texture.Definition.Bitmap1;
+                        BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
+                        TestBitmapConverter(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, i, false, 0);
                     }
-                    TestBitmapConverter(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, level, true, pairIndex);
                 }
-                else
-                {
-                    BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
-                    TestBitmapConverter(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, level, false, 0);
-                }
+
+                
             }
             return true;
         }
@@ -140,10 +147,30 @@ namespace TagTool.Commands
 
             byte[] data;
 
-            if (definition.HighResInSecondaryResource > 0 && targetLevel == 0)
-                data = secondaryData;
+            if (definition.HighResInSecondaryResource > 0)
+            {
+                var alignedSecondarySize = (secondaryData.Length + 0xFFF) & ~0xFFF;
+                var alignedPrimarySize = 0;
+
+                if(primaryData != null)
+                    alignedPrimarySize = (primaryData.Length + 0xFFF) & ~0xFFF;
+
+                byte[] result = new byte[alignedPrimarySize + alignedSecondarySize];
+                Array.Copy(secondaryData, 0, result, 0, secondaryData.Length);
+
+                if (primaryData != null)
+                    Array.Copy(primaryData, 0, result, alignedSecondarySize, primaryData.Length);
+
+                data = result;
+            }
             else
-                data = primaryData;
+            {
+                var alignedPrimarySize = (primaryData.Length + 0xFFF) & ~0xFFF;
+                byte[] result = new byte[alignedPrimarySize];
+                Array.Copy(primaryData, 0, result, 0, primaryData.Length);
+                data = result;
+            }
+                
 
             if (data == null)
                 return;
@@ -178,10 +205,10 @@ namespace TagTool.Commands
                 }
             }
 
-            if (targetLevel != 0)
-            {
-                tileOffset += (int)tileSize; // ultra hack for now, gets the next tile
-            }
+            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, targetLevel);
+            Console.WriteLine($"Level: {targetLevel}, Offset: 0x{levelOffset:X04}");
+
+            tileOffset += (int)levelOffset;
 
             if (tileOffset > 0)
             {
@@ -189,12 +216,12 @@ namespace TagTool.Commands
                 Array.Copy(data, tileOffset, result, 0, size);
                 data = result;
             }
-            /*
-            DumpBitmapDDS("raw_bitmap", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            
+            DumpBitmapDDS($"raw_bitmap_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
 
-            DumpBitmapDDS("raw_bitmap_endian_swapped", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            DumpBitmapDDS($"raw_bitmap_endian_swapped_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             // dump dds here
 
@@ -204,7 +231,7 @@ namespace TagTool.Commands
                 // Untile texture dumb way
                 //
 
-                byte[] result = new byte[data.Length];
+                byte[] result = new byte[size];
 
                 uint nBlockWidth = alignedWidth / blockWidth;
                 uint nBlockHeight = alignedHeight / blockHeight;
@@ -223,13 +250,9 @@ namespace TagTool.Commands
 
                 data = result;
 
-                DumpBitmapDDS("bitmap_untiled", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+                DumpBitmapDDS($"bitmap_untiled_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
             }
-            */
-            // get surface offset and extract rectangle
-            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, targetLevel);
-            Console.WriteLine($"Level: {targetLevel}, Offset: 0x{levelOffset:X04}");
-
+            
             // get surface offset and extract rectangle
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
             XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)targetLevel, gpuFormat, false, false, point);
