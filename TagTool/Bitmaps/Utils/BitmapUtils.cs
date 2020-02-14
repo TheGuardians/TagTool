@@ -395,8 +395,7 @@ namespace TagTool.Bitmaps
                     unknownType = 3;
                     break;
             }
-
-            
+       
             var format = XboxGraphics.XGGetGpuFormat(bitmapResource.D3DFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
 
@@ -407,43 +406,63 @@ namespace TagTool.Bitmaps
             int unknown = 1;
             if (bitmapResource.BitmapType == BitmapType.CubeMap || bitmapResource.BitmapType == BitmapType.Array)
             {
-                // need to figure this out
+                int v30 = bitmapResource.BitmapType == BitmapType.Array ? 2 : 0;
+                unknown = ~((1 << v30) - 1) & ((1 << v30) + (bitmapResource.Depth - 1));
             }
+
+            int levels = bitmapResource.MipmapCount;
+            if (levels == 0)
+                levels = Direct3D.D3D9x.D3D.GetMaxMipLevels(bitmapResource.Width, bitmapResource.Height, bitmapResource.Depth, 0);
+
+            bool isPacked = levels > 1;
+            bool isTiled = (bitmapResource.D3DFormat & 0x100) != 0; // D3DFORMAT_TILED_MASK - TODO: double check this actually works
 
             uint offset = 0;
-            int LevelIndex = Level - 1;
-            do
+
+            if (Level > 0 || isPacked)
             {
-                if (logWidth > 0) --logWidth;
-                if (logHeight > 0) --logHeight;
-                if (logDepth > 0) --logDepth;
-
-                uint width = 1u << logWidth;
-                uint height = 1u << logHeight;
-                uint depth = 1u << logDepth;
-
-                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref width, ref height, ref depth, bitsPerPixel, format, unknownType, true);
-
-                uint rowPitch = (bitsPerPixel * width) / 8;
-
-                if (bitmapResource.MipmapCount <= 1)
+                int LevelIndex = Level - 1;
+                do
                 {
-                    // offset += Direct3D.D3D9x.D3D.GetMipTailLevelOffset(width, height, depth, rowPitch, height * rowPitch, format);
-                    break;
-                }
+                    if (logWidth > 0) --logWidth;
+                    if (logHeight > 0) --logHeight;
+                    if (logDepth > 0) --logDepth;
 
-                uint levelSizeBytes = 0;
-                if (LevelIndex > 0)
-                {
-                    if (unknownType == 2)
-                        levelSizeBytes = AlignToPage(height * depth * rowPitch);
-                    else
-                        levelSizeBytes = AlignToPage(height * rowPitch);
-                }
+                    uint width = 1u << logWidth;
+                    uint height = 1u << logHeight;
+                    uint depth = 1u << logDepth;
 
-                offset += (uint)unknown * levelSizeBytes;
+                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref width, ref height, ref depth, bitsPerPixel, format, unknownType, isTiled);
+
+                    uint rowPitch = (bitsPerPixel * width) / 8;
+
+                    if (width <= 16 || height <= 16)
+                    {
+                        if (isPacked)
+                        {
+                            // TODO:
+                            // offset += Direct3D.D3D9x.D3D.GetMipTailLevelOffset(width, height, depth, rowPitch, height * rowPitch, format);
+                            break;
+                        }
+                    }
+
+                    uint levelSizeBytes = 0;
+                    if (LevelIndex > 0)
+                    {
+                        if (unknownType == 2)
+                            levelSizeBytes = AlignToPage(height * depth * rowPitch);
+                        else
+                            levelSizeBytes = AlignToPage(height * rowPitch);
+                    }
+
+                    offset += (uint)unknown * levelSizeBytes;
+                }
+                while (--LevelIndex > 0);
             }
-            while (--LevelIndex > 0);
+            else
+            {
+                // todo
+            }
 
             return offset;
         }
