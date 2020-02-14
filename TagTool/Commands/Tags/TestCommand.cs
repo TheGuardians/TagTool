@@ -175,20 +175,22 @@ namespace TagTool.Commands
             if (data == null)
                 return;
 
+            uint blockWidth = 0;
+            uint blockHeight = 0;
             uint alignedWidth = (uint)definition.Width >> targetLevel;
             uint alignedHeight = (uint)definition.Height >> targetLevel;
             uint alignedDepth = definition.Depth;
             var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
-            uint blockWidth = 0;
-            uint blockHeight = 0;
             
+            XboxGraphics.XGGetBlockDimensions(gpuFormat, ref blockWidth, ref blockHeight);
             Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, 0, isTiled);
 
-            XboxGraphics.XGGetBlockDimensions(gpuFormat, ref blockWidth, ref blockHeight);
+            // for our purpose aligned height should be at least 4 blocks (extracting mips)
+            if (alignedHeight < 4 * blockHeight)
+                alignedHeight = 4 * blockHeight;
 
             uint texelPitch = blockWidth * blockHeight * bitsPerPixel / 8;
-
             uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
             uint tileSize = 32 * 32 * blockWidth * blockHeight * bitsPerPixel / 8;
 

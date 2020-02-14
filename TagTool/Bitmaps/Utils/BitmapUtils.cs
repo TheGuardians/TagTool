@@ -445,9 +445,13 @@ namespace TagTool.Bitmaps
                     uint height = 1u << logHeight;
                     uint depth = 1u << logDepth;
 
-                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref width, ref height, ref depth, bitsPerPixel, format, unknownType, isTiled);
+                    uint alignedWidth = width;
+                    uint alignedHeight = height;
+                    uint alignedDepth = depth;
 
-                    rowPitch = (bitsPerPixel * width) / 8;
+                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
+
+                    rowPitch = (bitsPerPixel * alignedWidth) / 8;
 
                     if (width <= 16 || height <= 16)
                     {
@@ -456,10 +460,10 @@ namespace TagTool.Bitmaps
                             uint offsetX = 0, 
                                  offsetY = 0, 
                                  offsetZ = 0;
-
+                            /*
                             offset += XboxGraphics.D3DGetMipTailLevelOffsetCoords(
                                 (uint)Level, width, height, depth, rowPitch, height * rowPitch, format, ref offsetX, ref offsetY, ref offsetZ);
-
+                            */
                             break;
                         }
                     }
@@ -468,9 +472,9 @@ namespace TagTool.Bitmaps
                     if (LevelIndex > 0)
                     {
                         if (unknownType == 2)
-                            levelSizeBytes = AlignToPage(height * depth * rowPitch);
+                            levelSizeBytes = AlignToPage(alignedHeight * alignedDepth * rowPitch);
                         else
-                            levelSizeBytes = depth * AlignToPage(height * rowPitch);
+                            levelSizeBytes = alignedDepth * AlignToPage(alignedHeight * rowPitch);
                     }
 
                     offset += (uint)unknown * levelSizeBytes;
