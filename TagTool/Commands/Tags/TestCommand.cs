@@ -55,7 +55,7 @@ namespace TagTool.Commands
             using (var stream = cache.OpenCacheRead())
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\battle_rifle\bitmaps\numbers_plate", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -257,12 +257,17 @@ namespace TagTool.Commands
 
                 data = result;
 
-                DumpBitmapDDS($"bitmap_untiled_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+                
             }
-            
+
+            DumpBitmapDDS($"bitmap_untiled_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+
             // get surface offset and extract rectangle
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
-            XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)targetLevel, gpuFormat, false, false, point);
+
+            // should find a condition to not call this (level > 0) is not good enough
+            if(definition.MipmapCount > 1)
+                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)targetLevel, gpuFormat, false, false, point);
 
             // use the point to extract the right rectangle out of the texture
             Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");

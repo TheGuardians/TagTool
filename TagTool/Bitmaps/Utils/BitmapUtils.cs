@@ -421,7 +421,7 @@ namespace TagTool.Bitmaps
             uint offset = 0;
             uint rowPitch = 0;
 
-            if (Level > 0 || isPacked)
+            if (Level > 0 || isPacked || bitmapResource.Width <= 16 || bitmapResource.Width <= 16)
             {
                 if (isPacked)
                 {
@@ -457,13 +457,6 @@ namespace TagTool.Bitmaps
                     {
                         if (isPacked)
                         {
-                            uint offsetX = 0, 
-                                 offsetY = 0, 
-                                 offsetZ = 0;
-                            /*
-                            offset += XboxGraphics.D3DGetMipTailLevelOffsetCoords(
-                                (uint)Level, width, height, depth, rowPitch, height * rowPitch, format, ref offsetX, ref offsetY, ref offsetZ);
-                            */
                             break;
                         }
                     }
