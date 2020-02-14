@@ -271,6 +271,44 @@ namespace TagTool.Bitmaps
             return result;
         }
 
+        /// <summary>
+        /// Endianswap entire byte[] according to D3DFormat
+        /// </summary>
+        public static void XGEndianSwapSurface(int d3dFormat, byte[] data)
+        {
+            var gpuEndian = Direct3D.D3D9x.D3D.GetGpuEndian(d3dFormat);
+
+            switch (gpuEndian)
+            {
+                case D3D9xGPU.GPUENDIAN.GPUENDIAN_16IN32:
+                    for (int j = 0; j < data.Length; j += 4)
+                    {
+                        byte temp = data[j + 0];
+                        data[j + 0] = data[j + 2];
+                        data[j + 2] = temp;
+                        temp = data[j + 1];
+                        data[j + 1] = data[j + 3];
+                        data[j + 3] = temp;
+                    }
+                    break;
+
+                case D3D9xGPU.GPUENDIAN.GPUENDIAN_8IN32:
+                    for (int j = 0; j < data.Length; j += 4)
+                        Array.Reverse(data, j, 4);
+                    break;
+
+                case D3D9xGPU.GPUENDIAN.GPUENDIAN_8IN16:
+                    for (int j = 0; j < data.Length; j += 2)
+                        Array.Reverse(data, j, 2);
+                    break;
+
+                default:
+                case D3D9xGPU.GPUENDIAN.GPUENDIAN_NONE:
+                    break;
+            }
+
+            
+        }
 
         public static uint XGSetTextureHeader(int width, int height, int levels, D3D9xTypes.D3DUSAGE usage, int format, int pool, int baseOffset, int mipOffset,
             uint pitch, ref D3DTexture9 pTexture, ref uint pBaseSize, ref uint pMipSize)
@@ -860,7 +898,7 @@ namespace TagTool.Bitmaps
                     ((y & 16) << 7) + (((((y & 8) >> 2) + (x >> 3)) & 3) << 6)) >> (int)logBpp);
         }
 
-        private static uint XGAddress2DTiledX(uint offset, uint width, uint texelPitch)
+        public static uint XGAddress2DTiledX(uint offset, uint width, uint texelPitch)
         {
             uint alignedWidth = (uint)((width + 31) & ~31);
 
@@ -877,7 +915,7 @@ namespace TagTool.Bitmaps
             return macro + micro;
         }
 
-        private static uint XGAddress2DTiledY(uint offset, uint width, uint texelPitch)
+        public static uint XGAddress2DTiledY(uint offset, uint width, uint texelPitch)
         {
             uint alignedWidth = (uint)((width + 31) & ~31);
 

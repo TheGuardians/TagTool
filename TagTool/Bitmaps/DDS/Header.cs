@@ -55,6 +55,10 @@ namespace TagTool.Bitmaps.DDS
             CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type, image.Flags);
         }
 
+        public DDSHeader(uint height, uint width, uint depth, uint mipmapCount, BitmapFormat format, BitmapType type, BitmapFlags flags)
+        {
+            CreateHeaderFromType((int)height, (int)width, (int)depth, (int)mipmapCount, format, type, flags);
+        }
 
         /// <summary>
         /// Write a DDS header

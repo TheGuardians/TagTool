@@ -386,6 +386,16 @@ namespace TagTool.Direct3D.D3D9x
             return (D3D9xGPU.GPUTEXTUREFORMAT)((d3dFormat & D3D9xTypes.D3DFORMAT_TEXTUREFORMAT_MASK) >> D3D9xTypes.D3DFORMAT_TEXTUREFORMAT_SHIFT);
         }
 
+        public static D3D9xGPU.GPUENDIAN GetGpuEndian(int d3dFormat)
+        {
+            return (D3D9xGPU.GPUENDIAN)((d3dFormat & D3D9xTypes.D3DFORMAT_ENDIAN_MASK) >> D3D9xTypes.D3DFORMAT_ENDIAN_SHIFT);
+        }
+
+        public static bool IsTiled(int d3dFormat)
+        {
+            return ((d3dFormat & D3D9xTypes.D3DFORMAT_TILED_MASK) >> D3D9xTypes.D3DFORMAT_TILED_SHIFT) > 0;
+        }
+
         public static void SetTextureHeader(D3D9xTypes.D3DRESOURCETYPE resourceType, int width, int height, int depth, int levels, D3D9xTypes.D3DUSAGE usage, int format, 
             D3D9xTypes.D3DMIPPACKINGTYPE mipPackingType, int hasBorder, int expBias, uint nBlocksPitch, ref D3DTexture9 pTexture, ref uint baseSize, ref uint mipmapSize)
         {
