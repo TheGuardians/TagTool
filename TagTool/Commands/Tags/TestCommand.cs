@@ -55,11 +55,11 @@ namespace TagTool.Commands
             using (var stream = cache.OpenCacheRead())
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\battle_rifle\bitmaps\numbers_plate", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\battle_rifle\bitmaps\numbers_plate", "bitm");
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
-                var level = 1;
+                
 
                 var image = bitmap.Images[imageIndex];
 
@@ -189,7 +189,7 @@ namespace TagTool.Commands
                 Array.Copy(data, tileOffset, result, 0, size);
                 data = result;
             }
-
+            /*
             DumpBitmapDDS("raw_bitmap", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
@@ -225,10 +225,17 @@ namespace TagTool.Commands
 
                 DumpBitmapDDS("bitmap_untiled", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
             }
+            */
+            // get surface offset and extract rectangle
+            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, targetLevel);
+            Console.WriteLine($"Level: {targetLevel}, Offset: 0x{levelOffset:X04}");
 
             // get surface offset and extract rectangle
-            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, level);
-            Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
+            XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
+            XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)targetLevel, gpuFormat, false, false, point);
+
+            // use the point to extract the right rectangle out of the texture
+            Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
         }
     }
 

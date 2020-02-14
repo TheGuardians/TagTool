@@ -471,13 +471,13 @@ namespace TagTool.Bitmaps
 
                 if (logWidth > logHeight)
                 {
-                    offset = (uint)((1 << (int)(nextPowerTwoWidth)) >> (int)(level - 2));
+                    offset = (uint)(nextPowerTwoWidth >> (int)(level - 2));
                     offsetX = offset;
                     offsetY = 0;
                 }
                 else
                 {
-                    offset = (uint)((1 << (int)(nextPowerTwoHeight)) >> (int)(level - 2));
+                    offset = (uint)(nextPowerTwoHeight >> (int)(level - 2));
                     offsetY = offset;
                     offsetX = 0;
                 }
