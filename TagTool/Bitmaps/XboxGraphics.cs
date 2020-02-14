@@ -201,6 +201,14 @@ namespace TagTool.Bitmaps
                     pHeight = 1;
                     break;
 
+                case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_Cr_Y1_Cb_Y0_REP:
+                case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_Y1_Cr_Y0_Cb_REP:
+                case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_32_AS_8_8:
+                    pWidth = 2;
+                    pHeight = 1;
+                    result = 1;
+                    break;
+
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_1_REVERSE:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_1:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8:
@@ -212,20 +220,11 @@ namespace TagTool.Bitmaps
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_A:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_B:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_8:
-                case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_Cr_Y1_Cb_Y0_REP:
-                case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_Y1_Cr_Y0_Cb_REP:
-                case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_32_AS_8_8:
-                    pWidth = 2;
-                    pHeight = 1;
-                    result = 1;
-                    break;
-
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_16_16_EDRAM:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_8_8_8_A:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_4_4_4_4:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_10_11_11:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_11_11_10:
-
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_16_16_16_16_EDRAM:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_24_8:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_24_8_FLOAT:
@@ -249,7 +248,6 @@ namespace TagTool.Bitmaps
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_INTERLACED:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_8_8_8_GAMMA_EDRAM:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_2_10_10_10_FLOAT_EDRAM:
-
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_8_8_8_8_AS_16_16_16_16:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_2_10_10_10_AS_16_16_16_16:
                 case D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_10_11_11_AS_16_16_16_16:
@@ -402,7 +400,7 @@ namespace TagTool.Bitmaps
             return (uint)result;
         }
 
-        private static uint sub_D55E38(uint level, uint width, uint height, uint depth, uint slicePitch, uint size, D3D9xGPU.GPUTEXTUREFORMAT format, ref uint offsetX, ref uint offsetY, ref uint offsetZ)
+        private static uint D3DGetMipTailLevelOffsetCoords(uint level, uint width, uint height, uint depth, uint slicePitch, uint size, D3D9xGPU.GPUTEXTUREFORMAT format, ref uint offsetX, ref uint offsetY, ref uint offsetZ)
         {
             offsetX = 0;
             offsetY = 0;
@@ -416,12 +414,6 @@ namespace TagTool.Bitmaps
             uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - 1));
             uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 1));
             uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - 1));
-
-            uint logSize = logWidth <= logHeight ? logWidth : logHeight;
-
-            uint packedMipBase = logSize > 4 ? (logSize - 4) : 0;
-            uint packedMip = level - packedMipBase;
-
 
             uint nextPowerTwoWidth = (uint)1 << (int)logWidth;
             uint nextPowerTwoHeight = (uint)1 << (int)logHeight;
@@ -441,13 +433,13 @@ namespace TagTool.Bitmaps
 
                 if (logWidth > logHeight)
                 {
-                    offset = (uint)((1 << (int)(logWidth - packedMipBase)) >> (int)(packedMip - 2));
+                    offset = (uint)((1 << (int)(nextPowerTwoWidth)) >> (int)(level - 2));
                     offsetX = offset;
                     offsetY = 0;
                 }
                 else
                 {
-                    offset = (uint)((1 << (int)(logHeight - packedMipBase)) >> (int)(packedMip - 2));
+                    offset = (uint)((1 << (int)(nextPowerTwoHeight)) >> (int)(level - 2));
                     offsetY = offset;
                     offsetX = 0;
                 }
@@ -468,7 +460,7 @@ namespace TagTool.Bitmaps
 
             offsetX /= blockWidth;
             offsetY /= blockHeight;
-
+            
             return size * offsetZ + slicePitch * yPixelOffest + (xPixelOffset * bitsPerPixel * blockWidth >> 3);
         }
 
@@ -493,20 +485,20 @@ namespace TagTool.Bitmaps
                     depth = (uint)1 << (int)(logDepth - mipLevelRequiresOffset);
 
                 uint bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
-                uint tempWidth = width;
-                uint tempHeight = height;
-                uint tempDepth = depth;
+                uint tilePixelWidth = width;
+                uint tilePixelHeight = height;
+                uint tilePixelDepth = depth;
                 uint xOffset = 0;
                 uint yOffset = 0;
                 uint zOffset = 0;
 
-                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref tempWidth, ref tempHeight, ref tempDepth, bitsPerPixel, format, 1, isTiled);
+                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref tilePixelWidth, ref tilePixelHeight, ref tilePixelDepth, bitsPerPixel, format, 1, isTiled);
                 // previous size maybe?
-                uint size = (tempHeight * tempWidth * bitsPerPixel) >> 3;
+                uint size = (tilePixelHeight * tilePixelWidth * bitsPerPixel) >> 3;
                 if(depth <= 1)
                     size = AlignToPage(size);   // probably not required on PC
 
-                uint result = sub_D55E38(level - mipLevelRequiresOffset, width, height, depth, bitsPerPixel * width >> 3, size, format, ref xOffset, ref yOffset, ref zOffset);
+                uint result = D3DGetMipTailLevelOffsetCoords(level - mipLevelRequiresOffset, width, height, depth, bitsPerPixel * width >> 3, size, format, ref xOffset, ref yOffset, ref zOffset);
                 point.X = (int)xOffset;
                 point.Y = (int)yOffset;
                 point.Z = (int)zOffset;
