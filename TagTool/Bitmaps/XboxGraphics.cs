@@ -170,7 +170,7 @@ namespace TagTool.Bitmaps
         /// <param name="pWidth"></param>
         /// <param name="pHeight"></param>
         /// <returns></returns>
-        public static uint XGGetBlockDimensions(D3D9xGPU.GPUTEXTUREFORMAT format, ref uint pWidth, ref uint pHeight)
+        public static uint XGGetBlockDimensions(D3D9xGPU.GPUTEXTUREFORMAT format, out uint pWidth, out uint pHeight)
         {
             uint result;
 
@@ -367,7 +367,7 @@ namespace TagTool.Bitmaps
             uint baseSize = 0;
             uint mipSize = 0;
 
-            XGGetBlockDimensions(XGGetGpuFormat(format), ref blockWidth, ref blockHeight);
+            XGGetBlockDimensions(XGGetGpuFormat(format), out blockWidth, out blockHeight);
 
             if(levels != 0)
             {
@@ -447,7 +447,7 @@ namespace TagTool.Bitmaps
             uint blockHeight = 0;
 
             uint bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
-            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+            XGGetBlockDimensions(format, out blockWidth, out blockHeight);
 
             uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - 1));
             uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - 1));
@@ -572,7 +572,7 @@ namespace TagTool.Bitmaps
             uint blockHeight = 0;
 
 
-            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+            XGGetBlockDimensions(format, out blockWidth, out blockHeight);
             int blockLogWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockWidth);
             int blockLogHeight = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockHeight);
             var bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
@@ -666,7 +666,7 @@ namespace TagTool.Bitmaps
             uint blockHeight = 0;
 
 
-            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+            XGGetBlockDimensions(format, out blockWidth, out blockHeight);
             int blockLogWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockWidth);
             int blockLogHeight = (int)Direct3D.D3D9x.D3D.Log2Floor((int)blockHeight);
             var bitsPerPixel = XGBitsPerPixelFromGpuFormat(format);
@@ -1056,7 +1056,7 @@ namespace TagTool.Bitmaps
             uint blockWidth = 0;
             uint blockHeight = 0;
 
-            XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+            XGGetBlockDimensions(format, out blockWidth, out blockHeight);
 
             uint mipLevelRequiresOffset = GetMipLevelRequiresOffset(width, height, 0);
 

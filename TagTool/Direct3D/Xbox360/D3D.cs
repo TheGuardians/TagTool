@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.Direct3D.Xbox360;
 using TagTool.Bitmaps;
+using System.Diagnostics;
 
 namespace TagTool.Direct3D.D3D9x
 {
@@ -285,39 +286,48 @@ namespace TagTool.Direct3D.D3D9x
 
     public static class D3D
     {
-        public static uint AlignTextureDimensions(ref uint width, ref uint height, ref uint depth, uint bitsPerPixel, D3D9xGPU.GPUTEXTUREFORMAT format, uint unknown, bool isTiled)
+        public static uint NextMultipleOf(uint value, uint multiple)
         {
-            uint heightPitch = (uint)(unknown != 0 ? 32 : 1);
-            uint blockDepth = (uint)(unknown != 2 ? 1 : 4); // is volume?
-            uint blockWidth = 0;
-            uint blockHeight = 0;
-            uint slicePitch = 32;
+            Debug.Assert(IsPowerOfTwo((int)multiple));
+            return ~(multiple - 1) & (value + multiple - 1);
+        }
 
-            XboxGraphics.XGGetBlockDimensions(format, ref blockWidth, ref blockHeight);
+        public static uint AlignTextureDimensions(ref uint width, ref uint height, ref uint depth, uint bitsPerPixel, D3D9xGPU.GPUTEXTUREFORMAT format, uint textueType, bool isTiled)
+        {
+            Debug.Assert(!(textueType == 0 && isTiled), "AlignTextureDimensions: 1D textures cannot be tiled");
+
+            uint tileWidth = 32;
+            uint tileHeight = textueType != 0 ? 32u : 1u;
+            uint tileDepth = textueType != 2 ? 1u : 4u;
+
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(format, out blockWidth, out blockHeight);
 
             if (!isTiled)
             {
-                uint blockPitch = bitsPerPixel * blockHeight * blockWidth >> 3;
-                if(blockPitch > 0)
+                uint blockSize = blockHeight * blockWidth * bitsPerPixel >> 3;
+                if (blockSize > 0)
                 {
-                    if (0x100 / blockHeight >= 0x20)
-                        slicePitch = 0x100 / blockHeight;
+                    if (tileWidth <= 256 / blockSize)
+                        width = 256 / blockSize;
+                    else
+                        width = tileWidth;
+                    tileWidth = width;
                 }
             }
+            tileWidth *= blockWidth;
+            tileHeight *= blockHeight;
+            width = NextMultipleOf(width, tileWidth);
+            height = NextMultipleOf(height, tileHeight);
+            depth = NextMultipleOf(depth, tileDepth);
 
-            // align width, height and depth then compute size
-
-            width = (width + slicePitch * blockWidth - 1) & ~(slicePitch * blockWidth - 1);
-            height = (height + heightPitch * blockHeight - 1) & ~(heightPitch * blockHeight - 1);
-            depth = (depth + blockDepth - 1) & ~(blockDepth - 1);
-
-            uint result = height * ((bitsPerPixel * width) >> 3);
-            if(unknown == 2) // if volume, align with depth
-                result = (result * depth + 0xFFF) & 0xFFFFF000;
+            uint sizeBytes = height * (bitsPerPixel * width >> 3);
+            if (textueType == 2) // volume
+                sizeBytes = NextMultipleOf(depth * sizeBytes, 4096);
             else
-                result = depth * ((result + 0xFFF) & 0xFFFFF000);
-            
-            return result;
+                sizeBytes = NextMultipleOf(sizeBytes, 4096);
+
+            return sizeBytes;
         }
 
 

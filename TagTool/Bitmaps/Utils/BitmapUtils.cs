@@ -356,7 +356,7 @@ namespace TagTool.Bitmaps
                 XboxGraphics.XGTEXTURE_DESC textureDesc = new XboxGraphics.XGTEXTURE_DESC();
 
                 
-                XboxGraphics.XGGetBlockDimensions(XboxGraphics.XGGetGpuFormat(textureDesc.D3DFormat), ref blockWidth, ref blockHeight);
+                XboxGraphics.XGGetBlockDimensions(XboxGraphics.XGGetGpuFormat(textureDesc.D3DFormat), out blockWidth, out blockHeight);
 
                 layerOffset = 0; // Unknown XG function
                 
@@ -379,23 +379,26 @@ namespace TagTool.Bitmaps
             return result;
         }
 
-        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level)
+        public static uint GetXboxBitmapD3DTextureType(BitmapTextureInteropDefinition bitmapResource)
         {
-            uint unknownType = 0;
             switch (bitmapResource.BitmapType)
             {
                 case BitmapType.Texture2D:
                 case BitmapType.Array:
-                    unknownType = 1;
-                    break;
+                    return 1;
                 case BitmapType.Texture3D:
-                    unknownType = 2;
-                    break;
+                    return 2;
                 case BitmapType.CubeMap:
-                    unknownType = 3;
-                    break;
+                    return 3;
+                default:
+                    throw new NotSupportedException();
             }
-       
+        }
+
+        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level)
+        {
+            uint unknownType = GetXboxBitmapD3DTextureType(bitmapResource);
+
             var format = XboxGraphics.XGGetGpuFormat(bitmapResource.D3DFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
 

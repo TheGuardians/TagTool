@@ -56,6 +56,8 @@ namespace TagTool.Commands
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
+
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -183,8 +185,9 @@ namespace TagTool.Commands
             var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
             
-            XboxGraphics.XGGetBlockDimensions(gpuFormat, ref blockWidth, ref blockHeight);
-            Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, 0, isTiled);
+            XboxGraphics.XGGetBlockDimensions(gpuFormat, out blockWidth, out blockHeight);
+            var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
+            Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
 
             // for our purpose aligned height should be at least 4 blocks (extracting mips)
             if (alignedHeight < 4 * blockHeight)
