@@ -473,10 +473,8 @@ namespace TagTool.Bitmaps
                 if (bitmapResource.BitmapType == BitmapType.CubeMap || bitmapResource.BitmapType == BitmapType.Array)
                 {
                     int arrayFactor = bitmapResource.BitmapType == BitmapType.Array ? 2 : 0;
-                    arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(bitmapResource.Depth, 1u << arrayFactor);
-
-                    // btz hack
-                    arrayStride = (uint)(bitmapResource.BitmapType == BitmapType.CubeMap ? 6 : bitmapResource.Depth);
+                    uint actualDepth = (uint)(bitmapResource.BitmapType == BitmapType.CubeMap ? 6 : bitmapResource.Depth);
+                    arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
                 }
 
                 int logWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)levelWidth);
@@ -535,6 +533,17 @@ namespace TagTool.Bitmaps
                     offset += arrayStride * levelSizeBytes;
                 }
                 while (--LevelIndex > 0);
+
+                // btz hack
+
+                // compute level size when the loop stopped
+
+                if (ArrayIndex > 0)
+                {
+                    // level dimensions are already aligned, just compute the level size and add it
+                    uint nextLevelSize = levelWidth * levelHeight * bitsPerPixel >> 3;
+                    offset += (uint)(ArrayIndex * nextLevelSize);
+                }
             }
             else
             {
