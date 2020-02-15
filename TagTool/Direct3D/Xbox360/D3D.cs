@@ -426,6 +426,50 @@ namespace TagTool.Direct3D.D3D9x
             return (int)D3D.Log2Ceiling(maxDimension);
         }
 
+        public static uint GetMipTailLevelOffsetCoords(int level, int width, int height, int depth, uint rowPitch, uint slicePitch, D3D9xGPU.GPUTEXTUREFORMAT format, out uint offsetX, out uint offsetY, out uint offsetZ)
+        {
+            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
+
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(format, out blockWidth, out blockHeight);
+
+            int logWidth = (int)D3D.Log2Ceiling(width);
+            int logHeght = (int)D3D.Log2Ceiling(height);
+            int logDepth = (int)D3D.Log2Ceiling(depth);
+
+            uint[] dimensions = { 1u << logWidth, 1u << logHeght };
+            uint[] offsets = { 0, 0, 0 };
+
+            int lesserAxis = (logHeght < logWidth) ? 1 : 0;
+            if (level >= 3)
+            {
+                offsets[lesserAxis ^ 1] = dimensions[lesserAxis ^ 1] >> (level - 2);
+                if (offsets[lesserAxis ^ 1] < 4)
+                {
+                    int depthFactor = 1;
+                    if (logDepth - level > 1)
+                        depthFactor = logDepth - level;
+
+                    offsets[2] = 4 * (uint)depthFactor;
+                }
+            }
+            else
+            {
+                offsets[lesserAxis] = 16u >> level;
+            }
+            offsetX = offsets[0] / blockWidth;
+            offsetY = offsets[1] / blockHeight;
+            offsetZ = offsets[2];
+
+            return (bitsPerPixel * blockWidth * offsets[0] >> 3) + rowPitch * offsets[1] + slicePitch * offsets[2];
+        }
+
+        public static uint GetMipTailLevelOffset(int level, int width, int height, int depth, uint rowPitch, uint slicePitch, D3D9xGPU.GPUTEXTUREFORMAT format)
+        {
+            uint offsetX, offsetY, offsetZ;
+            return GetMipTailLevelOffsetCoords(level, width, height, depth, rowPitch, slicePitch, format, out offsetX, out offsetY, out offsetZ);
+        }
+
         public static void FindTextureSize(int width, int height, int depth, int levels, D3D9xGPU.GPUTEXTUREFORMAT format, int someType, int unknown,
             bool mipsPacked, int hasBorder, int expBias, uint nBlocksPitch, ref int unknown2, ref int outWidth, ref int outHeight)
         {
