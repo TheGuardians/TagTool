@@ -55,7 +55,7 @@ namespace TagTool.Commands
             using (var stream = cache.OpenCacheRead())
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
 
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
@@ -122,14 +122,14 @@ namespace TagTool.Commands
             }
         }
 
-        public void DumpBitmapDDS(string filename, byte[] data, uint width, uint height, uint depth, Bitmap.Image image)
+        public void DumpBitmapDDS(string filename, byte[] data, uint width, uint height, uint depth, uint mipmapCount, Bitmap.Image image)
         {
             var file = new FileInfo($"Bitmaps\\{filename}.dds");
             file.Directory.Create();
             using(var stream = file.OpenWrite())
             using(var writer = new EndianWriter(stream))
             {
-                DDSHeader header = new DDSHeader(width, height, depth, (uint)image.MipmapCount, image.Format, image.Type, image.Flags);
+                DDSHeader header = new DDSHeader(width, height, depth, mipmapCount, image.Format, image.Type, image.Flags);
                 DDSFile ddsFile = new DDSFile(header, data);
                 ddsFile.Write(writer);
             }
@@ -138,29 +138,28 @@ namespace TagTool.Commands
         public void TestBitmapConverter2(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex)
         {
             byte[] data;
-            if (definition.HighResInSecondaryResource > 0)
+            using(var dataStream = new MemoryStream())
             {
-                var alignedSecondarySize = (secondaryData.Length + 0xFFF) & ~0xFFF;
-                var alignedPrimarySize = 0;
+                if (definition.HighResInSecondaryResource > 0)
+                {
+                    dataStream.Write(secondaryData, 0, secondaryData.Length);
+                    StreamUtil.Align(dataStream, 0x1000);
 
-                if (primaryData != null)
-                    alignedPrimarySize = (primaryData.Length + 0xFFF) & ~0xFFF;
-
-                byte[] result = new byte[alignedPrimarySize + alignedSecondarySize];
-                Array.Copy(secondaryData, 0, result, 0, secondaryData.Length);
-
-                if (primaryData != null)
-                    Array.Copy(primaryData, 0, result, alignedSecondarySize, primaryData.Length);
-
-                data = result;
+                    if (primaryData != null)
+                    {
+                        dataStream.Write(primaryData, 0, primaryData.Length);
+                        StreamUtil.Align(dataStream, 0x1000);
+                    }
+                }
+                else
+                {
+                    dataStream.Write(primaryData, 0, primaryData.Length);
+                    StreamUtil.Align(dataStream, 0x1000);
+                }
+                StreamUtil.Align(dataStream, 0x4000);
+                data = dataStream.ToArray();
             }
-            else
-            {
-                var alignedPrimarySize = (primaryData.Length + 0xFFF) & ~0xFFF;
-                byte[] result = new byte[alignedPrimarySize];
-                Array.Copy(primaryData, 0, result, 0, primaryData.Length);
-                data = result;
-            }
+            
 
 
             if (data == null)
@@ -170,8 +169,10 @@ namespace TagTool.Commands
             {
                 int mipLevelCount = definition.MipmapCount;
                 int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
-
-                
+                /*
+                mipLevelCount = 1;
+                definition.MipmapCount = 1;
+                */
                 for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
                 {
                     for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
@@ -182,7 +183,7 @@ namespace TagTool.Commands
 
                 var resultData = result.ToArray();
 
-                DumpBitmapDDS($"bitmap_final", resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, bitmap.Images[imageIndex]);
+                DumpBitmapDDS($"bitmap_final", resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)definition.MipmapCount, bitmap.Images[imageIndex]);
             }
         }
 
@@ -268,7 +269,7 @@ namespace TagTool.Commands
                 data = result;
             }
 
-            DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            //DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, 1 bitmap.Images[imageIndex]);
 
             // get surface offset and extract rectangle
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
@@ -455,7 +456,7 @@ namespace TagTool.Commands
                 
             }
 
-            DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, 1, bitmap.Images[imageIndex]);
 
             // get surface offset and extract rectangle
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
@@ -517,7 +518,7 @@ namespace TagTool.Commands
             {
                 finalData = data;
             }
-            DumpBitmapDDS($"bitmap_trimmed_{level}", finalData, (uint)actualWidth, (uint)actualHeight, 1, bitmap.Images[imageIndex]);
+            DumpBitmapDDS($"bitmap_trimmed_{level}", finalData, (uint)actualWidth, (uint)actualHeight, 1, 1, bitmap.Images[imageIndex]);
         }
     }
 

@@ -474,6 +474,9 @@ namespace TagTool.Bitmaps
                 {
                     int arrayFactor = bitmapResource.BitmapType == BitmapType.Array ? 2 : 0;
                     arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(bitmapResource.Depth, 1u << arrayFactor);
+
+                    // btz hack
+                    arrayStride = (uint)(bitmapResource.BitmapType == BitmapType.CubeMap ? 6 : bitmapResource.Depth);
                 }
 
                 int logWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)levelWidth);
@@ -511,10 +514,11 @@ namespace TagTool.Bitmaps
                     {
                         if (isPacked)
                         {
+                            /*
                             tailLevelOffset = Direct3D.D3D9x.D3D.GetMipTailLevelOffset(
                                 levelIndex, 1 << logWidth, 1 << logHeight, 1 << logDepth, rowPitch, rowPitch * levelHeight, format);
 
-                            offset += tailLevelOffset;
+                            offset += tailLevelOffset;*/
                             break;
                         }
                     }
@@ -554,7 +558,7 @@ namespace TagTool.Bitmaps
                 }
 
                 if (unknownType > 0)
-                    rowPitch = bitsPerPixel * 32 * levelWidth >> 3;
+                    rowPitch = bitsPerPixel * levelWidth >> 3; // btz hack
                 else
                     rowPitch = bitsPerPixel * levelWidth >> 3;
 
