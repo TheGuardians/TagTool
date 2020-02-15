@@ -58,10 +58,9 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); // doesnt work properly
-                bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm"); // looks fine
-                bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm"); //doesnt work properly
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm"); // looks fine
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm"); // works fine
 
-                
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -130,7 +129,7 @@ namespace TagTool.Commands
         {
             var file = new FileInfo($"Bitmaps\\{filename}.dds");
             file.Directory.Create();
-            using(var stream = file.OpenWrite())
+            using(var stream = file.Create())
             using(var writer = new EndianWriter(stream))
             {
                 DDSHeader header = new DDSHeader(width, height, depth, mipmapCount, image.Format, image.Type, image.Flags);
@@ -193,10 +192,15 @@ namespace TagTool.Commands
             var d3dFormat = definition.D3DFormat;
             var isTiled = Direct3D.D3D9x.D3D.IsTiled(d3dFormat);
 
-            uint blockWidth = 0;
-            uint blockHeight = 0;
+            uint blockWidth;
+            uint blockHeight;
+
             uint alignedWidth = (uint)definition.Width >> level;
             uint alignedHeight = (uint)definition.Height >> level;
+
+            if (alignedWidth < 1) alignedWidth = 1;
+            if (alignedHeight < 1) alignedHeight = 1;
+
             uint alignedDepth = definition.Depth;
             var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
