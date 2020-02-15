@@ -408,21 +408,21 @@ namespace TagTool.Bitmaps
                 levels = Direct3D.D3D9x.D3D.GetMaxMipLevels(bitmapResource.Width, bitmapResource.Height, bitmapResource.Depth, 0);
 
             bool isPacked = levels > 1;
+
             bool isTiled = Direct3D.D3D9x.D3D.IsTiled(bitmapResource.D3DFormat);
-            bool hasBorder = false;
+            int hasBorder = 0;
 
             uint width = (uint)bitmapResource.Width;
             uint height = (uint)bitmapResource.Height;
             uint depth = (uint)bitmapResource.Depth;
 
-            uint borderSize = hasBorder ? 2u : 0u;
+            uint borderSize = (uint)hasBorder * 2;
             uint logAdjustedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - borderSize));
             uint logAdjustedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - borderSize));
-            uint logAdjustedDepth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - borderSize));
+            uint logAdjustedDepth = 1;
 
-
-            uint levelWidth = 1u << (int)((hasBorder ? 1 : 0) + logAdjustedWidth);
-            uint levelHeight = 1u << (int)((hasBorder ? 1 : 0) + logAdjustedHeight);
+            uint levelWidth = 1u << (int)(hasBorder + logAdjustedWidth);
+            uint levelHeight = 1u << (int)(hasBorder + logAdjustedHeight);
             uint levelDepth = 1;
 
             uint rowPitch = 0;
@@ -433,10 +433,10 @@ namespace TagTool.Bitmaps
             if (unknownType == 2)
             {
                 logAdjustedDepth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - borderSize));
-                levelDepth = 1u << (int)((hasBorder ? 1 : 0) + logAdjustedDepth);
+                levelDepth = 1u << (int)(hasBorder + logAdjustedDepth);
             }
 
-            if (Level > 0 && isPacked)
+            if (Level > 0 || (isPacked && (levelWidth <= 16 || levelHeight <= 16)))
             {
                 uint widthAdjustment = 0;
                 if ((width - borderSize) >> Level <= 1)
@@ -481,7 +481,7 @@ namespace TagTool.Bitmaps
                 int logDepth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)levelDepth);
 
                 int levelIndex = Level;
-                if (isPacked)
+                if (isPacked && (levelWidth <= 16 || levelHeight <= 16))
                 {
                     ++logWidth;
                     ++logHeight;
@@ -492,49 +492,45 @@ namespace TagTool.Bitmaps
                     levelIndex = Level - 1;
                 }
 
-                while (levelIndex >= 0)
+                int LevelIndex = Level;
+                do
                 {
-                    if (logWidth > 0)
-                        --logWidth;
-                    if (logHeight > 0)
-                        --logHeight;
-                    if (logDepth > 0)
-                        --logDepth;
+                    if (logWidth > 0) --logWidth;
+                    if (logHeight > 0) --logHeight;
+                    if (logDepth > 0) --logDepth;
 
                     levelWidth = 1u << logWidth;
                     levelHeight = 1u << logHeight;
                     levelDepth = 1u << logDepth;
 
+                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref levelWidth, ref levelHeight, ref levelDepth, bitsPerPixel, format, unknownType, isTiled);
 
-                    Direct3D.D3D9x.D3D.AlignTextureDimensions(
-                        ref levelWidth, ref levelHeight, ref levelDepth, bitsPerPixel, format, unknownType, isTiled);
+                    rowPitch = (bitsPerPixel * levelWidth) / 8;
 
-                    rowPitch = bitsPerPixel * levelWidth >> 3;
-                    if (isPacked)
+                    if (((1u << logWidth) <= 16 || (1u << logHeight) <= 16) && isPacked)
                     {
-                        uint offsetX = 0, offsetY = 0, offsetZ = 0;
-                        tailLevelOffset = XboxGraphics.D3DGetMipTailLevelOffsetCoords(
-                            (uint)levelIndex, levelWidth, levelHeight, levelDepth, rowPitch, rowPitch * levelHeight, format,
-                            ref offsetX, ref offsetY, ref offsetZ);
+                        if (isPacked)
+                        {
+                            tailLevelOffset = Direct3D.D3D9x.D3D.GetMipTailLevelOffset(
+                                levelIndex, 1 << logWidth, 1 << logHeight, 1 << logDepth, rowPitch, rowPitch * levelHeight, format);
 
-                        offset += tailLevelOffset;
-
-                        break;
+                            offset += tailLevelOffset;
+                            break;
+                        }
                     }
 
-
-                    if (levelIndex > 0)
+                    levelSizeBytes = 0;
+                    if (LevelIndex > 0)
                     {
                         if (unknownType == 2)
-                            levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelDepth * levelHeight * rowPitch, 4096);
+                            levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * levelDepth * rowPitch, 4096);
                         else
                             levelSizeBytes = levelDepth * Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
-
-                        offset += arrayStride * levelSizeBytes;
                     }
 
-                    --levelIndex;
+                    offset += arrayStride * levelSizeBytes;
                 }
+                while (--LevelIndex > 0);
             }
             else
             {
@@ -550,7 +546,7 @@ namespace TagTool.Bitmaps
                   && !(isPacked)
                   && unknownType == 1
                   && bitmapResource.MipmapCount < 1
-                  && !hasBorder)
+                  && hasBorder == 0)
                 {
                     uint blockWidth, blockHeight;
                     XboxGraphics.XGGetBlockDimensions(format, out blockWidth, out blockHeight);
