@@ -300,7 +300,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag SurvivalHUDUnknown = null;  //chdt tagreference which activates in firefight
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown72 = 3.0f;
+        public float AchievementDisplayTime = 3.0f;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown73;

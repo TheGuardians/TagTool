@@ -396,7 +396,7 @@ namespace TagTool.Commands.Porting
             H3Definition.SensorBlipGlowRadius *= 1.5f;
 
             //prevent crash?
-            H3Definition.Unknown72 = 3.0f;
+            H3Definition.AchievementDisplayTime = 3.0f;
 
             return H3Definition;
         }
