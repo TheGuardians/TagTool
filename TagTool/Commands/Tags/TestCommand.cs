@@ -65,36 +65,31 @@ namespace TagTool.Commands
 
                 var image = bitmap.Images[imageIndex];
 
-                var mipCount = image.MipmapCount + 1;
-
-                for(int i = 0; i < mipCount; i++)
+                if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {
-                    if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+                    BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                    BitmapTextureInteropDefinition definition;
+
+                    int pairIndex = 0;
+
+                    if (image.InterleavedTextureIndex2 > 0)
                     {
-                        BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
-                        BitmapTextureInteropDefinition definition;
-
-                        int pairIndex = 0;
-
-                        if (image.InterleavedTextureIndex2 > 0)
-                        {
-                            definition = resource.Texture.Definition.Bitmap2;
-                            pairIndex = 1;
-                        }
-                        else
-                        {
-                            definition = resource.Texture.Definition.Bitmap1;
-                        }
-                        TestBitmapConverter(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, i, true, pairIndex);
+                        definition = resource.Texture.Definition.Bitmap2;
+                        pairIndex = 1;
                     }
                     else
                     {
-                        BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
-                        TestBitmapConverter(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, i, false, 0);
+                        definition = resource.Texture.Definition.Bitmap1;
                     }
+                    TestBitmapConverter2(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, true, pairIndex);
+                }
+                else
+                {
+                    BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
+                    TestBitmapConverter2(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, false, 0);
                 }
 
-                
+
             }
             return true;
         }
@@ -134,19 +129,216 @@ namespace TagTool.Commands
             using(var stream = file.OpenWrite())
             using(var writer = new EndianWriter(stream))
             {
-                DDSHeader header = new DDSHeader(width, height, depth, 0, image.Format, image.Type, image.Flags);
+                DDSHeader header = new DDSHeader(width, height, depth, (uint)image.MipmapCount, image.Format, image.Type, image.Flags);
                 DDSFile ddsFile = new DDSFile(header, data);
                 ddsFile.Write(writer);
             }
         }
 
-        public void TestBitmapConverter(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, bool isPaired, int pairIndex)
+        public void TestBitmapConverter2(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex)
+        {
+            byte[] data;
+            if (definition.HighResInSecondaryResource > 0)
+            {
+                var alignedSecondarySize = (secondaryData.Length + 0xFFF) & ~0xFFF;
+                var alignedPrimarySize = 0;
+
+                if (primaryData != null)
+                    alignedPrimarySize = (primaryData.Length + 0xFFF) & ~0xFFF;
+
+                byte[] result = new byte[alignedPrimarySize + alignedSecondarySize];
+                Array.Copy(secondaryData, 0, result, 0, secondaryData.Length);
+
+                if (primaryData != null)
+                    Array.Copy(primaryData, 0, result, alignedSecondarySize, primaryData.Length);
+
+                data = result;
+            }
+            else
+            {
+                var alignedPrimarySize = (primaryData.Length + 0xFFF) & ~0xFFF;
+                byte[] result = new byte[alignedPrimarySize];
+                Array.Copy(primaryData, 0, result, 0, primaryData.Length);
+                data = result;
+            }
+
+
+            if (data == null)
+                return;
+
+            using(var result = new MemoryStream())
+            {
+                int mipLevelCount = definition.MipmapCount;
+                int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
+
+                
+                for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                {
+                    for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                    {
+                        ConvertBitmapTest(result, data, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex);
+                    }
+                }
+
+                var resultData = result.ToArray();
+
+                DumpBitmapDDS($"bitmap_final", resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, bitmap.Images[imageIndex]);
+            }
+        }
+
+        public void ConvertBitmapTest(Stream resultStream, byte[] data, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex)
         {
             var d3dFormat = definition.D3DFormat;
             var isTiled = Direct3D.D3D9x.D3D.IsTiled(d3dFormat);
 
-            int targetLevel = level;
+            uint blockWidth = 0;
+            uint blockHeight = 0;
+            uint alignedWidth = (uint)definition.Width >> level;
+            uint alignedHeight = (uint)definition.Height >> level;
+            uint alignedDepth = definition.Depth;
+            var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
+            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
 
+            XboxGraphics.XGGetBlockDimensions(gpuFormat, out blockWidth, out blockHeight);
+            var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
+            Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
+
+            // for our purpose aligned height should be at least 4 blocks (extracting mips)
+            if (alignedHeight < 4 * blockHeight)
+                alignedHeight = 4 * blockHeight;
+
+            uint texelPitch = blockWidth * blockHeight * bitsPerPixel / 8;
+            uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
+            uint tileSize = 32 * 32 * blockWidth * blockHeight * bitsPerPixel / 8;
+
+            //
+            // Offset data to the right surface
+            //
+
+            int tileOffset = 0;
+            if (isPaired)
+            {
+                if (pairIndex > 0)
+                {
+                    tileOffset = (int)tileSize / 2; // hacks?
+                }
+            }
+
+            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
+            Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
+
+            tileOffset += (int)levelOffset;
+
+            if (tileOffset > 0)
+            {
+                byte[] result = new byte[size];
+                Array.Copy(data, tileOffset, result, 0, size);
+                data = result;
+            }
+
+            //DumpBitmapDDS($"raw_bitmap_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+
+            //DumpBitmapDDS($"raw_bitmap_endian_swapped_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+
+            // dump dds here
+            uint nBlockWidth;
+            uint nBlockHeight;
+            if (isTiled)
+            {
+                //
+                // Untile texture, assumes input is a square texture
+                //
+
+                byte[] result = new byte[size];
+
+                nBlockWidth = alignedWidth / blockWidth;
+                nBlockHeight = alignedHeight / blockHeight;
+                for (int i = 0; i < nBlockHeight; i++)
+                {
+                    for (int j = 0; j < nBlockWidth; j++)
+                    {
+                        uint offset = (uint)((i * nBlockWidth) + j);
+                        uint x = XboxGraphics.XGAddress2DTiledX(offset, nBlockWidth, texelPitch);
+                        uint y = XboxGraphics.XGAddress2DTiledY(offset, nBlockWidth, texelPitch);
+                        int sourceIndex = (int)(((i * nBlockWidth) * texelPitch) + (j * texelPitch));
+                        int destinationIndex = (int)(((y * nBlockWidth) * texelPitch) + (x * texelPitch));
+                        Array.Copy(data, sourceIndex, result, destinationIndex, texelPitch);
+                    }
+                }
+                data = result;
+            }
+
+            DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+
+            // get surface offset and extract rectangle
+            XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
+
+            // should find a condition to not call this (level > 0) is not good enough
+            if (definition.MipmapCount > 1)
+                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
+
+            // use the point to extract the right rectangle out of the texture
+            Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
+
+
+            uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Width - 1);
+            uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Height - 1);
+            uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Depth - 1);
+            // find next ceiling power of two, align on block size
+            uint logLevelWidth = (uint)(logWidth - level);
+            uint logLevelHeight = (uint)(logHeight - level);
+
+            int levelWidth = 1 << (int)logLevelWidth;
+            int levelHeight = 1 << (int)logLevelHeight;
+
+            if (levelWidth % blockWidth != 0)
+                levelWidth = (int)(levelWidth + blockWidth - levelWidth % blockWidth);
+
+            if (levelHeight % blockHeight != 0)
+                levelHeight = (int)(levelHeight + blockHeight - levelHeight % blockHeight);
+
+
+            int actualWidth = definition.Width >> level;
+            int actualHeight = definition.Height >> level;
+
+            if (actualHeight < 1)
+                actualHeight = 1;
+            if (actualWidth < 1)
+                actualWidth = 1;
+
+            byte[] finalData = new byte[levelWidth * levelHeight * bitsPerPixel >> 3];
+
+            nBlockWidth = (uint)(levelWidth / blockWidth);
+            nBlockHeight = (uint)(levelHeight / blockHeight);
+
+            uint sliceBlockWidth = alignedWidth / blockWidth;
+
+            // skip these loops if the bitmap is already the proper format
+            if (point.X != 0 || point.Y != 0 || finalData.Length != data.Length)
+            {
+                for (int i = 0; i < nBlockHeight; i++)
+                {
+                    for (int j = 0; j < nBlockWidth; j++)
+                    {
+                        uint offset = (uint)(((i + point.Y) * sliceBlockWidth) + j + point.X) * texelPitch;
+                        uint destOffset = (uint)((i * nBlockWidth) + j) * texelPitch;
+                        Array.Copy(data, offset, finalData, destOffset, texelPitch);
+                    }
+                }
+            }
+            else
+            {
+                Array.Copy(data, 0, finalData, 0, data.Length);
+            }
+
+            XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
+
+            resultStream.Write(finalData, 0, finalData.Length);
+            //DumpBitmapDDS($"bitmap_trimmed_{level}", finalData, (uint)actualWidth, (uint)actualHeight, 1, bitmap.Images[imageIndex]);
+        }
+
+        public void TestBitmapConverter(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, bool isPaired, int pairIndex)
+        {
             byte[] data;
 
             if (definition.HighResInSecondaryResource > 0)
@@ -177,10 +369,14 @@ namespace TagTool.Commands
             if (data == null)
                 return;
 
+
+            var d3dFormat = definition.D3DFormat;
+            var isTiled = Direct3D.D3D9x.D3D.IsTiled(d3dFormat);
+
             uint blockWidth = 0;
             uint blockHeight = 0;
-            uint alignedWidth = (uint)definition.Width >> targetLevel;
-            uint alignedHeight = (uint)definition.Height >> targetLevel;
+            uint alignedWidth = (uint)definition.Width >> level;
+            uint alignedHeight = (uint)definition.Height >> level;
             uint alignedDepth = definition.Depth;
             var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
@@ -210,8 +406,8 @@ namespace TagTool.Commands
                 }
             }
 
-            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, targetLevel);
-            Console.WriteLine($"Level: {targetLevel}, Offset: 0x{levelOffset:X04}");
+            uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, 0, level);
+            Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
 
             tileOffset += (int)levelOffset;
 
@@ -234,7 +430,7 @@ namespace TagTool.Commands
             if (isTiled)
             {
                 //
-                // Untile texture dumb way
+                // Untile texture, assumes input is a square texture
                 //
 
                 byte[] result = new byte[size];
@@ -250,10 +446,6 @@ namespace TagTool.Commands
                         uint y = XboxGraphics.XGAddress2DTiledY(offset, nBlockWidth, texelPitch);
                         int sourceIndex = (int)(((i * nBlockWidth) * texelPitch) + (j * texelPitch));
                         int destinationIndex = (int)(((y * nBlockWidth) * texelPitch) + (x * texelPitch));
-
-                        if (destinationIndex >= size) // ignore block if out of bounds for current array (happens when non square, not a big deal)
-                            continue;
-
                         Array.Copy(data, sourceIndex, result, destinationIndex, texelPitch);
                     }
                 }
@@ -263,14 +455,14 @@ namespace TagTool.Commands
                 
             }
 
-            DumpBitmapDDS($"bitmap_untiled_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
+            DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
 
             // get surface offset and extract rectangle
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
 
             // should find a condition to not call this (level > 0) is not good enough
             if(definition.MipmapCount > 1)
-                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)targetLevel, gpuFormat, false, false, point);
+                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
 
             // use the point to extract the right rectangle out of the texture
             Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
