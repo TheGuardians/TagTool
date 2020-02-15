@@ -56,8 +56,12 @@ namespace TagTool.Commands
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); // doesnt work properly
+                bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm"); // looks fine
+                bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm"); //doesnt work properly
 
+                
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -169,10 +173,7 @@ namespace TagTool.Commands
             {
                 int mipLevelCount = definition.MipmapCount;
                 int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
-                /*
-                mipLevelCount = 1;
-                definition.MipmapCount = 1;
-                */
+
                 for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
                 {
                     for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
@@ -263,6 +264,10 @@ namespace TagTool.Commands
                         uint y = XboxGraphics.XGAddress2DTiledY(offset, nBlockWidth, texelPitch);
                         int sourceIndex = (int)(((i * nBlockWidth) * texelPitch) + (j * texelPitch));
                         int destinationIndex = (int)(((y * nBlockWidth) * texelPitch) + (x * texelPitch));
+
+                        if (destinationIndex >= result.Length)
+                            continue;
+
                         Array.Copy(data, sourceIndex, result, destinationIndex, texelPitch);
                     }
                 }
@@ -286,26 +291,20 @@ namespace TagTool.Commands
             uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Height - 1);
             uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Depth - 1);
             // find next ceiling power of two, align on block size
-            uint logLevelWidth = (uint)(logWidth - level);
-            uint logLevelHeight = (uint)(logHeight - level);
+            int logLevelWidth = (int)(logWidth - level);
+            int logLevelHeight = (int)(logHeight - level);
 
-            int levelWidth = 1 << (int)logLevelWidth;
-            int levelHeight = 1 << (int)logLevelHeight;
+            if (logLevelHeight < 0) logLevelHeight = 0;
+            if (logLevelWidth < 0) logLevelWidth = 0;
+
+            int levelWidth = 1 << logLevelWidth;
+            int levelHeight = 1 << logLevelHeight;
 
             if (levelWidth % blockWidth != 0)
                 levelWidth = (int)(levelWidth + blockWidth - levelWidth % blockWidth);
 
             if (levelHeight % blockHeight != 0)
                 levelHeight = (int)(levelHeight + blockHeight - levelHeight % blockHeight);
-
-
-            int actualWidth = definition.Width >> level;
-            int actualHeight = definition.Height >> level;
-
-            if (actualHeight < 1)
-                actualHeight = 1;
-            if (actualWidth < 1)
-                actualWidth = 1;
 
             byte[] finalData = new byte[levelWidth * levelHeight * bitsPerPixel >> 3];
 
@@ -335,7 +334,6 @@ namespace TagTool.Commands
             XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
 
             resultStream.Write(finalData, 0, finalData.Length);
-            //DumpBitmapDDS($"bitmap_trimmed_{level}", finalData, (uint)actualWidth, (uint)actualHeight, 1, bitmap.Images[imageIndex]);
         }
 
         public void TestBitmapConverter(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, bool isPaired, int pairIndex)

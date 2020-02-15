@@ -528,9 +528,9 @@ namespace TagTool.Bitmaps
                             levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * levelDepth * rowPitch, 4096);
                         else
                             levelSizeBytes = levelDepth * Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
-                    }
 
-                    offset += arrayStride * levelSizeBytes;
+                        offset += arrayStride * levelSizeBytes;
+                    }
                 }
                 while (--LevelIndex > 0);
 
