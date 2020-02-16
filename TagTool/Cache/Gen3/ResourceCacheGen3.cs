@@ -205,9 +205,9 @@ namespace TagTool.Cache.Gen3
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
             using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
             {
-                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                for (int i = 0; i < tagResource.FixupLocations.Count; i++)
                 {
-                    var fixup = tagResource.ResourceFixups[i];
+                    var fixup = tagResource.FixupLocations[i];
                     fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
                     fixupWriter.Write(fixup.Address.Value);
                 }

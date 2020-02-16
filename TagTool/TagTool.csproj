@@ -214,6 +214,8 @@
     <Compile Include="Cache\Resources\PredictionMoleculeKey.cs" />
     <Compile Include="Cache\Resources\PredictionQuantum.cs" />
     <Compile Include="Cache\Resources\ResourceDefinition.cs" />
+    <Compile Include="Cache\Resources\ResourceFixupLocation.cs" />
+    <Compile Include="Cache\Resources\ResourceInteropLocation.cs" />
     <Compile Include="Cache\Resources\ResourceLayoutTable.cs" />
     <Compile Include="Cache\Gen3\StringIdResolverHaloReachMCC.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />

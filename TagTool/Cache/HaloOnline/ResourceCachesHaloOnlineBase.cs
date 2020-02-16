@@ -209,9 +209,9 @@ namespace TagTool.Cache.HaloOnline
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
             using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.LittleEndian))
             {
-                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                for (int i = 0; i < tagResource.FixupLocations.Count; i++)
                 {
-                    var fixup = tagResource.ResourceFixups[i];
+                    var fixup = tagResource.FixupLocations[i];
                     fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
                     fixupWriter.Write(fixup.Address.Value);
                 }
@@ -339,9 +339,9 @@ namespace TagTool.Cache.HaloOnline
 
                 // add resource definition and fixups
                 pageableResource.Resource.DefinitionData = definitionData;
-                pageableResource.Resource.ResourceFixups = context.ResourceFixups;
+                pageableResource.Resource.FixupLocations = context.ResourceFixups;
                 pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
-                pageableResource.Resource.D3DFixups = context.D3DFixups;
+                pageableResource.Resource.InteropLocations = context.D3DFixups;
             }
             return resourceReference;
         }

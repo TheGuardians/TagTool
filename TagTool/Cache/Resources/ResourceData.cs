@@ -40,32 +40,11 @@ namespace TagTool.Cache.Resources
 
         public CacheAddress DefinitionAddress;
 
-        public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
-        public List<D3DFixup> D3DFixups = new List<D3DFixup>();
+        public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
+        public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown2 = 1;
-
-        [TagStructure(Size = 0x8)]
-        public class ResourceFixup : TagStructure
-		{
-            public uint BlockOffset;
-            public CacheAddress Address;
-
-            [TagField(Flags = Runtime)]
-            public int Type;
-            [TagField(Flags = Runtime)]
-            public int Offset;
-            [TagField(Flags = Runtime)]
-            public int RawAddress;
-        }
-
-        [TagStructure(Size = 0x8)]
-        public class D3DFixup : TagStructure
-		{
-            public CacheAddress Address;
-            public int ResourceStructureTypeIndex;
-        }
 
         [Flags]
         public enum UnknownFlags : short
