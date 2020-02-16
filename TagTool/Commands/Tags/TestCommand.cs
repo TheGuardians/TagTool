@@ -55,12 +55,13 @@ namespace TagTool.Commands
             using (var stream = cache.OpenCacheRead())
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); // doesnt work properly
-                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm"); // looks fine
-                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm"); // works fine
-                bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm"); 
+                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); // tiny bug in low low level mipmap
+
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -273,9 +274,11 @@ namespace TagTool.Commands
                 {
                     for (int j = 0; j < nBlockWidth; j++)
                     {
-                        int destinationIndex = (int)((i * nBlockWidth + j) * texelPitch);
-                        uint tiledOffset = XboxGraphics.XGAddress2DTiledOffset((uint)j, (uint)i, nBlockWidth, texelPitch);
-                        Array.Copy(data, tiledOffset, result, destinationIndex, texelPitch);
+                        int destinationIndex = (int)(i * nBlockWidth + j);  // offset in terms block
+                        int destinationOffset = (int)(destinationIndex * texelPitch);
+                        uint tiledIndex = XboxGraphics.XGAddress2DTiledOffset((uint)j, (uint)i, nBlockWidth, texelPitch); // returns offset in terms of block
+                        uint tiledOffset = tiledIndex * texelPitch;
+                        Array.Copy(data, tiledOffset, result, destinationOffset, texelPitch);
                     }
                 }
                 data = result;
