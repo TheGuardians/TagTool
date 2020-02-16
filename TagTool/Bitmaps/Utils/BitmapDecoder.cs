@@ -45,20 +45,11 @@ namespace TagTool.Bitmaps
 
         private static byte[] DecodeA8R8G8B8(byte[] data, int width, int height)
         {
-            /*
-            for (int i = 0; i < (data.Length); i += 4)
-                Array.Reverse(data, i, 4);
-            */
             return data;
         }
 
         private static byte[] EncodeA8R8G8B8(byte[] data, int width, int height)
         {
-            //Encoding A8R8G8B8 is the exact opposite of decoding it. Data is the array coming from the bitmap decoder
-            /*
-            for (int i = 0; i < (data.Length); i += 4)
-                Array.Reverse(data, i, 4);
-              */  
             return data;
         }
 
@@ -81,10 +72,10 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                buffer[i * 2 + 3] = (byte)(data[i] & 0xF0);
-                buffer[i * 2 + 2] = (byte)((data[i] & 0x0F) << 4);
-                buffer[i * 2 + 1] = (byte)(data[i + 1] & 0xF0);
-                buffer[i * 2] = (byte)((data[i + 1] & 0x0F) << 4);
+                buffer[i * 2 + 0] = (byte)((data[i] & 0x0F) << 4);
+                buffer[i * 2 + 1] = (byte)(data[i] & 0xF0);
+                buffer[i * 2 + 2] = (byte)((data[i + 1] & 0x0F) << 4);
+                buffer[i * 2 + 3] = (byte)(data[i + 1] & 0xF0);
             }
             return buffer;
         }
@@ -425,7 +416,7 @@ namespace TagTool.Bitmaps
                 var XIndices = FixCTX1Indices(Ctx1indices, minX, maxX);
                 var YIndices = FixCTX1Indices(Ctx1indices, minY, maxY);
 
-                // DXN indices
+                // DXN indices, table of 3 bits , 16 times 12 bytes total
                 buffer[b + 2] = (byte)(((XIndices[3]) << 0) | ((XIndices[2]) << 3) | ((XIndices[1] & 0x3) << 6));
                 buffer[b + 3] = (byte)(((XIndices[1] & 0x4) >> 2) | ((XIndices[0]) << 1) | ((XIndices[7]) << 4) | ((XIndices[6] & 0x1) << 7));
                 buffer[b + 4] = (byte)(((XIndices[6] & 0x6) >> 1) | ((XIndices[5]) << 2) | ((XIndices[4]) << 5));
@@ -1044,7 +1035,7 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                short temp = (short)(data[i+1] | (data[i] << 8));
+                short temp = (short)(data[i] | (data[i + 1] << 8));
                 buffer[i * 2] = (byte)((byte)(temp & 0x1F)<<3);
                 buffer[(i * 2) + 1] = (byte)((byte)((temp >> 5) & 0x3F)<<2);
                 buffer[(i * 2) + 2] = (byte)((byte)((temp >> 11) & 0x1F)<<3);
