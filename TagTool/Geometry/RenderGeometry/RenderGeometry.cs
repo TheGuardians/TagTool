@@ -196,7 +196,7 @@ namespace TagTool.Geometry
                 VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>()
             };
 
-            // valid for gen3, D3DFixups should also point to the definition.
+            // valid for gen3, InteropLocations should also point to the definition.
             result.IndexBuffers.AddressType = CacheAddressType.Definition;
             result.VertexBuffers.AddressType = CacheAddressType.Definition;
 

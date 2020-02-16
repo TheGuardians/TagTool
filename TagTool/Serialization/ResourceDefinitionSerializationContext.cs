@@ -21,8 +21,8 @@ namespace TagTool.Serialization
 
         public CacheAddressType InitialAddressType { get; }
         public CacheAddress MainStructOffset;
-        public List<ResourceFixupLocation> ResourceFixups = new List<ResourceFixupLocation>();
-        public List<ResourceInteropLocation> D3DFixups = new List<ResourceInteropLocation>();
+        public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
+        public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
 
         public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianWriter dataWriter, EndianReader secondaryDataReader, EndianWriter secondaryDataWriter, EndianReader definitionReader, EndianWriter definitionWriter, CacheAddressType initialAddressType)
         {
@@ -142,8 +142,8 @@ namespace TagTool.Serialization
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
 
-            public List<ResourceFixupLocation> ResourceFixups = new List<ResourceFixupLocation>();
-            public List<ResourceInteropLocation> D3DFixups = new List<ResourceInteropLocation>();
+            public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
+            public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
             public CacheAddressType BlockType;
 
             public ResourceDefinitionDataBlock()

@@ -339,9 +339,9 @@ namespace TagTool.Cache.HaloOnline
 
                 // add resource definition and fixups
                 pageableResource.Resource.DefinitionData = definitionData;
-                pageableResource.Resource.FixupLocations = context.ResourceFixups;
+                pageableResource.Resource.FixupLocations = context.FixupLocations;
                 pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
-                pageableResource.Resource.InteropLocations = context.D3DFixups;
+                pageableResource.Resource.InteropLocations = context.InteropLocations;
             }
             return resourceReference;
         }
