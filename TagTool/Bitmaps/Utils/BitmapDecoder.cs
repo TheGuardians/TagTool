@@ -482,10 +482,10 @@ namespace TagTool.Bitmaps
 
             for (int i = 0; i < (width * height); i += 16)
             {
-                byte mMin = data[i + 1];
-                byte mMax = data[i];
+                byte mMin = data[i + 0];
+                byte mMax = data[i + 1];
                 byte[] mIndices = new byte[16];
-                int temp = ((data[i + 5] << 0x10) | (data[i + 2] << 8)) | data[i + 3];
+                int temp = ((data[i + 4] << 0x10) | (data[i + 3] << 8)) | data[i + 2];
                 int indices = 0;
                 while (indices < 8)
                 {
@@ -493,17 +493,17 @@ namespace TagTool.Bitmaps
                     temp = temp >> 3;
                     indices++;
                 }
-                temp = ((data[i + 6] << 0x10) | (data[i + 7] << 8)) | data[i + 4];
+                temp = ((data[i + 7] << 0x10) | (data[i + 6] << 8)) | data[i + 5];
                 while (indices < 16)
                 {
                     mIndices[indices] = (byte)(temp & 7);
                     temp = temp >> 3;
                     indices++;
                 }
-                byte aMin = data[i + 9];
-                byte aMax = data[i + 8];
+                byte aMin = data[i + 8];
+                byte aMax = data[i + 9];
                 byte[] aIndices = new byte[16];
-                temp = ((data[i + 13] << 0x10) | (data[i + 10] << 8)) | data[i + 11];
+                temp = ((data[i + 12] << 0x10) | (data[i + 11] << 8)) | data[i + 10];
                 indices = 0;
                 while (indices < 8)
                 {
@@ -511,7 +511,7 @@ namespace TagTool.Bitmaps
                     temp = temp >> 3;
                     indices++;
                 }
-                temp = ((data[i + 14] << 0x10) | (data[i + 15] << 8)) | data[i + 12];
+                temp = ((data[i + 15] << 0x10) | (data[i + 14] << 8)) | data[i + 13];
                 while (indices < 16)
                 {
                     aIndices[indices] = (byte)(temp & 7);
@@ -780,10 +780,10 @@ namespace TagTool.Bitmaps
                     int i;
                     int blockDataStart = ((y * xBlocks) + x) * 8;
                     ushort[] alphaData = new ushort[] {
-                        (ushort)((data[blockDataStart + 0] << 8) + data[blockDataStart + 1]),
-                        (ushort)((data[blockDataStart + 2] << 8) + data[blockDataStart + 3]),
-                        (ushort)((data[blockDataStart + 4] << 8) + data[blockDataStart + 5]),
-                        (ushort)((data[blockDataStart + 6] << 8) + data[blockDataStart + 7]) };
+                        (ushort)((data[blockDataStart + 1] << 8) + data[blockDataStart + 0]),
+                        (ushort)((data[blockDataStart + 3] << 8) + data[blockDataStart + 2]),
+                        (ushort)((data[blockDataStart + 5] << 8) + data[blockDataStart + 4]),
+                        (ushort)((data[blockDataStart + 7] << 8) + data[blockDataStart + 6]) };
                     byte[,] alpha = new byte[4, 4];
                     int j = 0;
                     while (j < 4)
@@ -963,9 +963,9 @@ namespace TagTool.Bitmaps
             for (int i = 0; i < (width * height / 2); i += 8)
             {
                 byte mMin = data[i + 1];
-                byte mMax = data[i];
+                byte mMax = data[i + 0];
                 byte[] rIndices = new byte[16];
-                int temp = ((data[i + 5] << 16) | (data[i + 2] << 8)) | data[i + 3];
+                int temp = ((data[i + 4] << 16) | (data[i + 3] << 8)) | data[i + 2];
 
                 int indices = 0;
                 while (indices < 8)
@@ -975,7 +975,7 @@ namespace TagTool.Bitmaps
                     indices++;
                 }
 
-                temp = ((data[i + 6] << 16) | (data[i + 7] << 8)) | data[i + 4];
+                temp = ((data[i + 7] << 16) | (data[i + 6] << 8)) | data[i + 5];
                 while (indices < 16)
                 {
                     rIndices[indices] = (byte)(temp & 7);
@@ -1021,8 +1021,6 @@ namespace TagTool.Bitmaps
                         buffer[temp] = (byte)color.B;
                         buffer[temp + 1] = (byte)color.G;
                         buffer[temp + 2] = (byte)color.R;
-
-                        //buffer[temp + 3] = (type == AType.alpha) ? (byte)color.A : 0xFF;
                         buffer[temp + 3] = (byte)color.A;
                     }
                 }

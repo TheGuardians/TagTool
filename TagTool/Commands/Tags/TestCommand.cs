@@ -54,6 +54,19 @@ namespace TagTool.Commands
 
             using (var stream = cache.OpenCacheRead())
             {
+                /*
+                foreach(var tag in cache.TagCache.NonNull())
+                {
+                    if (tag.IsInGroup("bitm"))
+                    {
+                        var bitmap2 = cache.Deserialize<Bitmap>(stream, tag);
+                        if(bitmap2.Images[0].Format == BitmapFormat.Dxt3aAlpha)
+                        {
+                            Console.WriteLine(tag.Name);
+                        }
+                    }
+                }*/
+
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
@@ -67,11 +80,19 @@ namespace TagTool.Commands
                 //levels\multi\guardian\bitmaps\guardian_manconnon_bump
                 //fx\decals\ground_marks\_bitmaps\generic_foot_bump
                 //bitmapTag = cache.TagCache.GetTag(@"levels\shared\bitmaps\nature\water\water_ripples", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\bitmaps\guardian_manconnon_bump", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\bitmaps\guardian_manconnon_bump", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\ground_marks\_bitmaps\generic_foot_bump", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\covenant_carbine\bitmaps\covenant_carbine_switch_illum", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\scopes\beam_rifle_scope", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\blast_scorch_medium", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\plasma_impact_medium", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"objects\vehicles\mongoose\bitmaps\wheels_alpha", "bitm"); 
+                
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
+                if (bitmap.Images.Count > 1)
+                    imageIndex = 1;
 
                 var image = bitmap.Images[imageIndex];
 
@@ -201,6 +222,9 @@ namespace TagTool.Commands
                 var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
                 bitmap.Images[imageIndex].Format = newFormat;
                 definition.Format = newFormat;
+
+                if (!BitmapUtils.IsCompressedFormat(newFormat))
+                    bitmap.Images[0].Flags &= ~BitmapFlags.Compressed;
 
                 DumpBitmapDDS($"bitmap_final", resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)definition.MipmapCount, bitmap.Images[imageIndex]);
             }
