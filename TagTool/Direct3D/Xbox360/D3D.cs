@@ -309,10 +309,10 @@ namespace TagTool.Direct3D.D3D9x
                 if (blockSize > 0)
                 {
                     if (tileWidth <= 256 / blockSize)
+                    {
                         width = 256 / blockSize;
-                    else
-                        width = tileWidth;
-                    tileWidth = width;
+                        tileWidth = width;
+                    }
                 }
             }
             tileWidth *= blockWidth;

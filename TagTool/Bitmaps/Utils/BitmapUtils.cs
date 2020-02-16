@@ -583,5 +583,39 @@ namespace TagTool.Bitmaps
         {
             return offset + 0xFFFu & ~0xFFFu;
         }
+
+        /// <summary>
+        /// When converting xbox bitmap formats (and other rare formats), get the standard format that it can be converted it without loss
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static BitmapFormat GetEquivalentBitmapFormat(BitmapFormat format)
+        {
+            switch (format)
+            {
+                case BitmapFormat.Ctx1:
+                    return BitmapFormat.Dxn;
+
+                case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.AY8:
+                    return BitmapFormat.A8Y8;
+
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt3aAlpha:
+                    return BitmapFormat.A8;
+
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.Dxt3aMono:
+                    return BitmapFormat.Y8;
+
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.R5G6B5:
+                    return BitmapFormat.A8R8G8B8;
+
+                default:
+                    return format;
+            }
+        }
     }
 }

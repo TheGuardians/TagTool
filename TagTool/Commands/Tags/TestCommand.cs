@@ -61,7 +61,9 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); 
-
+                //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\monitor_shield_meter", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\elite_shield_flash_bleed", "bitm"); 
+                bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\energy_meter_left", "bitm");
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -287,19 +289,15 @@ namespace TagTool.Commands
                 data = result;
             }
 
-            uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Width - 1);
-            uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Height - 1);
-            uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Depth - 1);
+            // find level size aligned to block size
 
-            // find next ceiling power of two, align on block size
-            int logLevelWidth = (int)(logWidth - level);
-            int logLevelHeight = (int)(logHeight - level);
+            int levelWidth = definition.Width >> level;
+            int levelHeight = definition.Height >> level;
 
-            if (logLevelHeight < 0) logLevelHeight = 0;
-            if (logLevelWidth < 0) logLevelWidth = 0;
-
-            int levelWidth = 1 << logLevelWidth;
-            int levelHeight = 1 << logLevelHeight;
+            if (levelWidth < 1)
+                levelWidth = 1;
+            if (levelHeight < 1)
+                levelHeight = 1;
 
             if (levelWidth % blockWidth != 0)
                 levelWidth = (int)(levelWidth + blockWidth - levelWidth % blockWidth);
