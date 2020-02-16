@@ -18,7 +18,7 @@ namespace TagTool.Cache.Gen2
             // Read offsets
             //
 
-            reader.SeekTo(baseMapFile.Header.StringIDsIndicesAddress);
+            reader.SeekTo(baseMapFile.Header.StringIDsIndicesOffset);
 
             int[] stringOffset = new int[baseMapFile.Header.StringIDsCount];
             for (var i = 0; i < baseMapFile.Header.StringIDsCount; i++)
@@ -27,7 +27,7 @@ namespace TagTool.Cache.Gen2
                 Add("");
             }
 
-            reader.SeekTo(baseMapFile.Header.StringIDsBufferAddress);
+            reader.SeekTo(baseMapFile.Header.StringIDsBufferOffset);
 
             EndianReader newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.StringIDsBufferSize)), reader.Format);
 

@@ -9,49 +9,82 @@ using TagTool.Serialization;
 
 namespace TagTool.Cache.Gen3
 {
-    [TagStructure(Size = 0x28)]
+    [TagStructure(Size = 0x28, Platform = CachePlatform.Only32Bit)]
+    [TagStructure(Size = 0x50, Platform = CachePlatform.Only64Bit)]
     public class TagCacheGen3Header
     {
         public int TagGroupCount;
-        public uint TagGroupsAddress;
-        public int TagCount;
-        public uint TagsAddress;
-        public int PrimaryTagsCount;
-        public uint PrimaryTagsInfoAddress;
-        public int TagInfoHeaderCount2;
-        public uint TagInfoHeaderAddress2;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public Tag TagGroupSignature = new Tag("343i");
+        [TagField(Platform = CachePlatform.Only32Bit)]
+        public uint TagGroupsAddress32;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public ulong TagGroupsAddress64;
+
+        public int TagInstancesCount;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public Tag TagInstancesSignature = new Tag("343i");
+        [TagField(Platform = CachePlatform.Only32Bit)]
+        public uint TagInstancesAddress32;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public ulong TagInstancesAddress64;
+
+        public int GlobalIndicesCount;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public Tag GlobalIndicesSignature = new Tag("343i");
+        [TagField(Platform = CachePlatform.Only32Bit)]
+        public uint GlobalIndicesAddress32;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public ulong GlobalIndicesAddress64;
+
+        public int InteropsCount;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public Tag InteropsSignature = new Tag("343i");
+        [TagField(Platform = CachePlatform.Only32Bit)]
+        public uint InteropsAddress32;
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public ulong InteropsAddress64;
+
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public uint Unknown1;
+
         public int CRC;
-        public Tag Tags;
-        
+        public Tag Signature = new Tag("tags");
+
+        [TagField(Platform = CachePlatform.Only64Bit)]
+        public uint Unknown2;
     }
 
     public class TagCacheGen3 : TagCache
     {
-        public List<CachedTagGen3> Tags;
-        public TagCacheGen3Header TagTableHeader;
-        public List<TagGroup> TagGroups;
-        public string TagsKey = "";
+        public TagCacheGen3Header Header;
+
+        public List<TagGroup> Groups;
+
+        public List<CachedTagGen3> Instances;
 
         /// <summary>
-        /// Hardcoded list of tags that are most likely for runtime use.
+        /// Globals tag instances in the cache file.
         /// </summary>
-        public Dictionary<Tag, CachedTagGen3> HardcodedTags;
+        public Dictionary<Tag, CachedTagGen3> GlobalInstances;
 
-        public override IEnumerable<CachedTag> TagTable { get => Tags; }
+        public string TagsKey = "";
+
+        public override IEnumerable<CachedTag> TagTable { get => Instances; }
 
         public override CachedTag GetTag(uint ID) => GetTag((int)(ID & 0xFFFF));
 
         public override CachedTag GetTag(int index)
         {
-            if (index > 0 && index < Tags.Count)
-                return Tags[index];
+            if (index > 0 && index < Instances.Count)
+                return Instances[index];
             else
                 return null;
         }
 
         public override CachedTag GetTag(string name, Tag groupTag)
         {
-            foreach (var tag in Tags)
+            foreach (var tag in Instances)
             {
                 if (groupTag == tag.Group.Tag && name == tag.Name)
                     return tag;
@@ -76,10 +109,11 @@ namespace TagTool.Cache.Gen3
 
         public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable)
         {
-            Tags = new List<CachedTagGen3>();
-            TagGroups = new List<TagGroup>();
-            HardcodedTags = new Dictionary<Tag, CachedTagGen3>();
             Version = baseMapFile.Version;
+
+            Groups = new List<TagGroup>();
+            Instances = new List<CachedTagGen3>();
+            GlobalInstances = new Dictionary<Tag, CachedTagGen3>();
 
             switch (Version)
             {
@@ -100,97 +134,120 @@ namespace TagTool.Cache.Gen3
             if (sectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
                 return;
 
-            var tagAddressToOffset = baseMapFile.Header.TagBaseAddress - sectionOffset;
+            var addressMask = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                (baseMapFile.Header.VirtualBaseAddress64 - (ulong)sectionOffset) :
+                (ulong)(baseMapFile.Header.VirtualBaseAddress32 - sectionOffset);
 
-            var tagTableHeaderOffset = baseMapFile.Header.TagIndexAddress - tagAddressToOffset;
+            var tagTableHeaderOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                (baseMapFile.Header.TagsHeaderAddress64 - addressMask) :
+                ((ulong)baseMapFile.Header.TagsHeaderAddress32 - addressMask);
 
-            reader.SeekTo(tagTableHeaderOffset);
+            reader.SeekTo((long)tagTableHeaderOffset);
 
             var dataContext = new DataSerializationContext(reader);
             var deserializer = new TagDeserializer(baseMapFile.Version);
-            TagTableHeader = deserializer.Deserialize<TagCacheGen3Header>(dataContext);
 
+            Header = deserializer.Deserialize<TagCacheGen3Header>(dataContext);
 
-            if (TagTableHeader.TagInfoHeaderCount2 != 0)
-                throw new Exception("wEll HelLo THerE");
+            var tagGroupsOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                Header.TagGroupsAddress64 - addressMask :
+                (ulong)Header.TagGroupsAddress32 - addressMask;
 
-            var tagGroupsOffset = TagTableHeader.TagGroupsAddress - tagAddressToOffset;
-            var tagsOffset = TagTableHeader.TagsAddress - tagAddressToOffset;
-            var primaryTagBufferOffset = TagTableHeader.PrimaryTagsInfoAddress - tagAddressToOffset;
+            var tagInstancesOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                Header.TagInstancesAddress64 - addressMask :
+                (ulong)Header.TagInstancesAddress32 - addressMask;
 
-            var tagNamesOffsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.TagNamesOffsetsTableAddress);
-            var tagNamesBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.TagNamesBufferAddress);
+            var globalIndicesOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                Header.GlobalIndicesAddress64 - addressMask :
+                (ulong)Header.GlobalIndicesAddress32 - addressMask;
+
+            var tagNamesOffsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.TagNameIndicesOffset);
+            var tagNamesBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.TagNamesBufferOffset);
             
-            #region Read Class List
-            reader.SeekTo(tagGroupsOffset);
-            for (int i = 0; i < TagTableHeader.TagGroupCount; i++)
+            #region Read Tag Groups
+
+            reader.SeekTo((long)tagGroupsOffset);
+
+            for (int i = 0; i < Header.TagGroupCount; i++)
             {
                 var group = new TagGroup()
                 {
-                    Tag = new Tag(reader.ReadChars(4)),
-                    ParentTag = new Tag(reader.ReadChars(4)),
-                    GrandparentTag = new Tag(reader.ReadChars(4)),
+                    Tag = reader.ReadTag(),
+                    ParentTag = reader.ReadTag(),
+                    GrandparentTag = reader.ReadTag(),
                     Name = new StringId(reader.ReadUInt32())
                 };
-                TagGroups.Add(group);
+                Groups.Add(group);
             }
+
             #endregion
 
             #region Read Tags Info
-            reader.SeekTo(tagsOffset);
-            for (int i = 0; i < TagTableHeader.TagCount; i++)
+
+            reader.SeekTo((long)tagInstancesOffset);
+
+            for (int i = 0; i < Header.TagInstancesCount; i++)
             {
                 var groupIndex = reader.ReadInt16();
-                var tagGroup = groupIndex == -1 ? new TagGroup() : TagGroups[groupIndex];
+                var tagGroup = groupIndex == -1 ? new TagGroup() : Groups[groupIndex];
                 string groupName = groupIndex == -1 ? "" : stringTable.GetString(tagGroup.Name);
                 uint ID = (uint)((reader.ReadInt16() << 16) | i);
-                var offset = reader.ReadUInt32() - tagAddressToOffset;
+
+                var offset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                    (uint)((ulong)baseMapFile.Header.SectionTable.SectionAddressToOffsets[2] + (ulong)baseMapFile.Header.SectionTable.Sections[2].Offset + (((ulong)reader.ReadUInt32() * 4) - (baseMapFile.Header.VirtualBaseAddress64 - 0x50000000))) :
+                    (uint)(reader.ReadUInt32() - addressMask);
+
                 CachedTagGen3 tag = new CachedTagGen3(groupIndex, ID, offset, i, tagGroup, groupName);
-                Tags.Add(tag);
+                Instances.Add(tag);
             }
+
             #endregion
 
             #region Read Indices
 
             reader.SeekTo(tagNamesOffsetsTableOffset);
-            int[] stringOffsets = new int[TagTableHeader.TagCount];
-            for (int i = 0; i < TagTableHeader.TagCount; i++)
+
+            var stringOffsets = new int[Header.TagInstancesCount];
+
+            for (int i = 0; i < Header.TagInstancesCount; i++)
                 stringOffsets[i] = reader.ReadInt32();
+
             #endregion
 
             #region Read Names
+
             reader.SeekTo(tagNamesBufferOffset);
 
-            EndianReader newReader = null;
-            if (TagsKey == "" || TagsKey == null)
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.TagNamesBufferSize)), EndianFormat.BigEndian);
-            else
-                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.TagNamesBufferSize, TagsKey), EndianFormat.BigEndian);
-
-            for (int i = 0; i < stringOffsets.Length; i++)
+            using (var newReader = (TagsKey == "" || TagsKey == null) ?
+                new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.TagNamesBufferSize)), EndianFormat.BigEndian) :
+                new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.TagNamesBufferSize, TagsKey), EndianFormat.BigEndian))
             {
-                if (stringOffsets[i] == -1)
+                for (int i = 0; i < stringOffsets.Length; i++)
                 {
-                    Tags[i].Name = null;
-                    continue;
-                }
+                    if (stringOffsets[i] == -1)
+                    {
+                        Instances[i].Name = null;
+                        continue;
+                    }
 
-                newReader.SeekTo(stringOffsets[i]);
-                Tags[i].Name = newReader.ReadNullTerminatedString();
+                    newReader.SeekTo(stringOffsets[i]);
+                    Instances[i].Name = newReader.ReadNullTerminatedString();
+                }
             }
 
-            newReader.Close();
-            newReader.Dispose();
             #endregion
 
-            #region Read primary tags
-            reader.SeekTo(primaryTagBufferOffset);
-            for (int i = 0; i < TagTableHeader.PrimaryTagsCount; i++)
+            #region Read Global Tags
+
+            reader.SeekTo((long)globalIndicesOffset);
+
+            for (int i = 0; i < Header.GlobalIndicesCount; i++)
             {
-                var tag = new Tag(reader.ReadChars(4));
+                var tag = reader.ReadTag();
                 var ID = reader.ReadUInt32();
-                HardcodedTags[tag] = (CachedTagGen3)GetTag(ID);
+                GlobalInstances[tag] = (CachedTagGen3)GetTag(ID);
             }
+
             #endregion
 
         }

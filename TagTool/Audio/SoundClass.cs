@@ -7,7 +7,7 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x1)]
     public class SoundClass : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.HaloPC)]
+        [TagField(MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.HaloCustomEdition)]
         public SoundClassHalo Halo;
 
         [TagField(Version = CacheVersion.Halo3Retail)]

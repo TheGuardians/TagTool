@@ -345,8 +345,8 @@ namespace TagTool.Serialization
             // Read count and offset
             var startOffset = reader.BaseStream.Position;
             var count = reader.ReadInt32();
-            
             var pointer = new CacheAddress(reader.ReadUInt32());
+            
             if (count == 0)
             {
                 // Null tag block

@@ -545,5 +545,4 @@ namespace TagTool.BlamFile
         [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x40, Align = 0x1)]
         public string Name;
     }
-
 }

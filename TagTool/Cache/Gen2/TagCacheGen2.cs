@@ -40,7 +40,7 @@ namespace TagTool.Cache.Gen2
         public TagCacheGen2(EndianReader reader, MapFile mapFile)
         {
             Version = mapFile.Version;
-            var tagDataSectionOffset = mapFile.Header.TagDataOffset;
+            var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
@@ -88,7 +88,7 @@ namespace TagTool.Cache.Gen2
                     Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, TagGroups[tag], address, size, null));
             }
 
-            reader.SeekTo(mapFile.Header.TagNamesOffsetsTableAddress);
+            reader.SeekTo(mapFile.Header.TagNameIndicesOffset);
             var tagNamesOffset = new int[Header.TagCount];
             for (int i = 0; i < Header.TagCount; i++)
                 tagNamesOffset[i] = reader.ReadInt32();
@@ -97,7 +97,7 @@ namespace TagTool.Cache.Gen2
             // Read tag names
             //
 
-            reader.SeekTo(mapFile.Header.TagNamesBufferAddress);
+            reader.SeekTo(mapFile.Header.TagNamesBufferOffset);
 
             for (int i = 0; i < tagNamesOffset.Length; i++)
             {
@@ -107,7 +107,7 @@ namespace TagTool.Cache.Gen2
                 if (tagNamesOffset[i] == -1)
                     continue;
 
-                reader.SeekTo(tagNamesOffset[i] + mapFile.Header.TagNamesBufferAddress);
+                reader.SeekTo(tagNamesOffset[i] + mapFile.Header.TagNamesBufferOffset);
 
                 Tags[i].Name = reader.ReadNullTerminatedString();
             }

@@ -30,6 +30,13 @@ namespace TagTool.Cache.Gen3
                     StringKey = "ILikeSafeStrings";
                     break;
 
+                case CacheVersion.HaloReachMCC0824:
+                case CacheVersion.HaloReachMCC0887:
+                case CacheVersion.HaloReachMCC1035:
+                case CacheVersion.HaloReachMCC1211:
+                    Resolver = new StringIdResolverHaloReachMCC();
+                    break;
+
                 default:
                     throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
             }
@@ -40,8 +47,8 @@ namespace TagTool.Cache.Gen3
             if (sectionTable.Sections[(int)CacheFileSectionType.StringSection].Size == 0)
                 return;
 
-            var stringIdIndexTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsIndicesAddress);
-            var stringIdBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsBufferAddress);
+            var stringIdIndexTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsIndicesOffset);
+            var stringIdBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsBufferOffset);
 
             //
             // Read offsets

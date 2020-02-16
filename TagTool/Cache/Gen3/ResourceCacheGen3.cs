@@ -41,8 +41,8 @@ namespace TagTool.Cache.Gen3
             {
                 using (var cacheStream = Cache.OpenCacheRead())
                 {
-                    ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCacheGen3.HardcodedTags["zone"]);
-                    ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.HardcodedTags["play"]);
+                    ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCacheGen3.GlobalInstances["zone"]);
+                    ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);
                 }
             }
             isLoaded = true;

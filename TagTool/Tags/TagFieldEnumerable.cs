@@ -92,7 +92,14 @@ namespace TagTool.Tags
 		/// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
 		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, ref uint offset)
 		{
+			if (field.FieldType == typeof(byte[]) && field.Name == "Elements1")
+				Console.Write("");
+
 			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion);
+
+			if (fieldSize == 0)
+				throw new InvalidOperationException();
+
 			var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
 			TagFieldInfos.Add(tagFieldInfo);
 			offset += fieldSize;

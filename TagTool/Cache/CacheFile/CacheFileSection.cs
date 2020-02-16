@@ -28,7 +28,7 @@ namespace TagTool.Cache
         /// <returns></returns>
         public uint GetSectionOffset(CacheFileSectionType type)
         {
-            return (uint)(Sections[(int)type].VirtualAddress + SectionAddressToOffsets[(int)type]);
+            return (uint)(Sections[(int)type].Offset + SectionAddressToOffsets[(int)type]);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace TagTool.Cache
         /// <summary>
         /// The virtual address of the cache file interop section.
         /// </summary>
-        public uint VirtualAddress;
+        public int Offset;
 
         /// <summary>
         /// The size of the cache file interop section.

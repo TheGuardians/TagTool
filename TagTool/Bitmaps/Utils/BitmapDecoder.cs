@@ -437,6 +437,8 @@ namespace TagTool.Bitmaps
         /// Converts from 2 bit to 3 bit index in table
         /// </summary>
         /// <param name="indices"></param>
+        /// <param name="c0"></param>
+        /// <param name="c1"></param>
         /// <returns></returns>
         private static byte[] FixCTX1Indices(byte[] indices, byte c0, byte c1)
         {

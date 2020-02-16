@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using TagTool.BlamFile;
+using TagTool.Cache.HaloOnline;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.BlamFile;
-using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Cache
 {
@@ -59,17 +59,23 @@ namespace TagTool.Cache
 
             switch (estimatedVersion)
             {
-                case CacheVersion.HaloPC:
                 case CacheVersion.HaloXbox:
+                case CacheVersion.HaloPC:
+                case CacheVersion.HaloCustomEdition:
                     return new GameCacheGen1(map, file);
+
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
                     return new GameCacheGen2(map, file);
 
                 case CacheVersion.Halo3Beta:
-                case CacheVersion.Halo3ODST:
                 case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReachMCC0824:
+                case CacheVersion.HaloReachMCC0887:
+                case CacheVersion.HaloReachMCC1035:
+                case CacheVersion.HaloReachMCC1211:
                     return new GameCacheGen3(map, file);
 
                 case CacheVersion.HaloOnline106708:
@@ -87,14 +93,16 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline554482:
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline700123:
-                    var directory = file.Directory.FullName;
-                    var tagsPath = Path.Combine(directory, "tags.dat");
-                    var tagsFile = new FileInfo(tagsPath);
+                    {
+                        var directory = file.Directory.FullName;
+                        var tagsPath = Path.Combine(directory, "tags.dat");
+                        var tagsFile = new FileInfo(tagsPath);
 
-                    if (!tagsFile.Exists)
-                        throw new Exception("Failed to find tags.dat");
+                        if (!tagsFile.Exists)
+                            throw new Exception("Failed to find tags.dat");
 
-                    return new GameCacheHaloOnline(tagsFile.Directory);
+                        return new GameCacheHaloOnline(tagsFile.Directory);
+                    }
             }
 
             return null;

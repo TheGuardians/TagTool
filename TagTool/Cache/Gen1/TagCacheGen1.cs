@@ -12,7 +12,7 @@ using TagTool.Tags;
 namespace TagTool.Cache.Gen1
 {
     [TagStructure(MaxVersion = CacheVersion.HaloXbox, Size = 0x24)]
-    [TagStructure(MinVersion = CacheVersion.HaloPC, MaxVersion = CacheVersion.HaloPC, Size = 0x28)]
+    [TagStructure(MinVersion = CacheVersion.HaloPC, MaxVersion = CacheVersion.HaloCustomEdition, Size = 0x28)]
     public class TagCacheGen1Header : TagStructure
     {
         public uint CachedTagArrayAddress;
@@ -42,7 +42,7 @@ namespace TagTool.Cache.Gen1
 
         public TagCacheGen1(EndianReader reader, MapFile mapFile)
         {
-            var tagDataSectionOffset = mapFile.Header.TagDataOffset;
+            var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
@@ -54,14 +54,12 @@ namespace TagTool.Cache.Gen1
             else
                 BaseTagAddress = 0x40440000;
             
-
             //
             // Read all tags offsets are all broken, need some proper look
             //
 
             reader.SeekTo(Header.CachedTagArrayAddress - BaseTagAddress + tagDataSectionOffset);
             
-
             for (int i = 0; i < Header.TagCount; i++)
             {
                 var group = new TagGroup()

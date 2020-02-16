@@ -184,7 +184,7 @@ namespace TagTool.Tags
 				case TypeCode.Int64:
 				case TypeCode.UInt64:
 				case TypeCode.Object when type == typeof(CachedTag) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
-				case TypeCode.Object when type == typeof(byte[]) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
+				case TypeCode.Object when attr.Length == 0 && type == typeof(byte[]) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(Rectangle2d):
                 case TypeCode.Object when type == typeof(RealRectangle3d):
                 case TypeCode.Object when type == typeof(RealEulerAngles2d):
@@ -213,7 +213,7 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(RealPlane3d):
 					return 0x10;
 
-				case TypeCode.Object when type == typeof(byte[]) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
+				case TypeCode.Object when attr.Length == 0 && type == typeof(byte[]) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 					return 0x14;
 
                 case TypeCode.Object when type == typeof(RealBoundingBox):
@@ -226,8 +226,10 @@ namespace TagTool.Tags
                     return sizeof(uint);
 
 				case TypeCode.String:
-				case TypeCode.Object when type.IsArray:
 					return (uint)attr.Length;
+
+				case TypeCode.Object when type.IsArray && attr.Length != 0:
+					return TagFieldInfo.GetFieldSize(type.GetElementType(), attr, targetVersion) * (uint)attr.Length;
 
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Bounds<>):
 					return TagFieldInfo.GetFieldSize(type.GenericTypeArguments[0], attr, targetVersion) * 2;

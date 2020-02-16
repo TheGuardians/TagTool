@@ -123,7 +123,7 @@ namespace TagTool.Commands.Files
         private MapFile GenerateMapFile(CachedTag scenarioTag, Blf mapInfo = null)
         {
             MapFile map = new MapFile();
-            var header = new MapFileHeader();
+            var header = new CacheFileHeader();
             Scenario scnr;
             using (var stream = Cache.OpenCacheRead())
             {
@@ -132,11 +132,11 @@ namespace TagTool.Commands.Files
                 
             map.Version = Cache.Version;
             map.EndianFormat = EndianFormat.LittleEndian;
-            map.MapVersion = MapFileVersion.HaloOnline;
+            map.MapVersion = CacheFileVersion.HaloOnline;
 
-            header.HeadTag = new Tag("head");
-            header.FootTag = new Tag("foot");
-            header.Version = map.MapVersion;
+            header.HeaderSignature = new Tag("head");
+            header.FooterSignature = new Tag("foot");
+            header.FileVersion = map.MapVersion;
             header.Build = CacheVersionDetection.GetBuildName(Cache.Version);
 
             switch (scnr.MapType)

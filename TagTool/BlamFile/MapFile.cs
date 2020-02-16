@@ -1,28 +1,13 @@
 ﻿using System;
 using System.IO;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Cache.Gen3;
-using TagTool.BlamFile;
-using TagTool.Cache;
 
 namespace TagTool.BlamFile
 {
-    public enum MapFileVersion : int
-    {
-        Invalid = 0x0,
-        HaloXbox = 0x5,
-        HaloPC = 0x7,
-        Halo2 = 0x8,
-        Halo3Beta = 0x9,
-        Halo3 = 0xB,
-        HaloReach = 0xC,
-        HaloOnline = 0x12,
-        HaloCustomEdition = 0x261
-    }
-
     public class MapFile 
     {
         private static readonly Tag Head = new Tag("head");
@@ -30,10 +15,10 @@ namespace TagTool.BlamFile
         private static readonly int MapFileVersionOffset = 0x4;
 
         public CacheVersion Version { get; set; }
-        public MapFileVersion MapVersion { get; set; }
+        public CacheFileVersion MapVersion { get; set; }
         public EndianFormat EndianFormat { get; set; }
 
-        public MapFileHeader Header;
+        public CacheFileHeader Header;
 
         public Blf MapFileBlf;
 
@@ -62,12 +47,12 @@ namespace TagTool.BlamFile
             var deserializer = new TagDeserializer(Version);
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
-            Header = (MapFileHeader)deserializer.Deserialize(dataContext, typeof(MapFileHeader));
+            Header = (CacheFileHeader)deserializer.Deserialize(dataContext, typeof(CacheFileHeader));
 
             // temporary code until map file format cleanup
-            if (MapVersion == MapFileVersion.HaloOnline)
+            if (MapVersion == CacheFileVersion.HaloOnline)
             {
-                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize;
+                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(CacheFileHeader), Version).TotalSize;
 
                 // Seek to the blf
                 reader.SeekTo(mapFileHeaderSize);
@@ -114,29 +99,30 @@ namespace TagTool.BlamFile
                 return true;
         }
 
-        private static string GetBuildDate(EndianReader reader, MapFileVersion version)
+        private static string GetBuildDate(EndianReader reader, CacheFileVersion version)
         {
             var buildDataLength = 0x20;
             switch (version)
             {
-                case MapFileVersion.HaloPC:
-                case MapFileVersion.HaloXbox:
+                case CacheFileVersion.HaloPC:
+                case CacheFileVersion.HaloCustomEdition:
+                case CacheFileVersion.HaloXbox:
                     reader.SeekTo(0x40);
                     break;
-                case MapFileVersion.Halo2:
+                case CacheFileVersion.Halo2:
                     if (IsHalo2Vista(reader))
                         reader.SeekTo(0x12C);
                     else
                         reader.SeekTo(0x120);
                     break;
 
-                case MapFileVersion.Halo3Beta:
-                case MapFileVersion.Halo3:
-                case MapFileVersion.HaloOnline:
+                case CacheFileVersion.Halo3Beta:
+                case CacheFileVersion.Halo3:
+                case CacheFileVersion.HaloOnline:
                     reader.SeekTo(0x11C);
                     break;
 
-                case MapFileVersion.HaloReach:
+                case CacheFileVersion.HaloReach:
                     if (IsModifiedReachFormat(reader))
                         reader.SeekTo(0x120);
                     else
@@ -149,10 +135,10 @@ namespace TagTool.BlamFile
             return reader.ReadString(buildDataLength);
         }
 
-        private static MapFileVersion GetMapFileVersion(EndianReader reader)
+        private static CacheFileVersion GetMapFileVersion(EndianReader reader)
         {
             reader.SeekTo(MapFileVersionOffset);
-            return (MapFileVersion)reader.ReadInt32();
+            return (CacheFileVersion)reader.ReadInt32();
         }
 
         private static CacheVersion DetectCacheVersion(EndianReader reader)
@@ -161,8 +147,5 @@ namespace TagTool.BlamFile
             var buildDate = GetBuildDate(reader, version);
             return CacheVersionDetection.GetFromBuildName(buildDate);
         }
-
-
     }
-
 }

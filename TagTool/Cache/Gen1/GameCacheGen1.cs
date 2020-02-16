@@ -35,7 +35,7 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = BaseMapFile.EndianFormat;
-            DisplayName = mapFile.Header.HaloName + ".map";
+            DisplayName = mapFile.Header.NameOld + ".map";
             Directory = file.Directory;
 
             using (var cacheStream = OpenCacheRead())

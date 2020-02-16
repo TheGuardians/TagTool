@@ -196,6 +196,7 @@
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="Cache\CachedTag.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileVersion.cs" />
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
     <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
@@ -203,6 +204,7 @@
     <Compile Include="Cache\Gen2\StringTableGen2.cs" />
     <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
     <Compile Include="Cache\Gen2\TagCacheGen2.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHaloReachMCC.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
@@ -320,7 +322,6 @@
     <Compile Include="Cache\CacheFile\CacheAddress.cs" />
     <Compile Include="Cache\CacheFile\CacheAddressType.cs" />
     <Compile Include="Cache\HaloOnline\CachedTagData.cs" />
-    <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="Cache\CacheFile\CacheFilePartition.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSection.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSharedType.cs" />
@@ -331,7 +332,7 @@
     <Compile Include="Cache\GameCache.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnlineBase.cs" />
     <Compile Include="BlamFile\MapFile.cs" />
-    <Compile Include="BlamFile\MapFileHeader.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="BlamFile\MapVariant.cs" />
     <Compile Include="Cache\ModPackages\ModPackage.cs" />
     <Compile Include="Cache\ModPackages\ModPackageHeader.cs" />
@@ -881,7 +882,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cache\MCC\" />
     <Folder Include="Geometry\Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

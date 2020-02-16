@@ -21,11 +21,6 @@ namespace TagTool.Cache
         public FileInfo ModPackageFile;
         public ModPackage BaseModPackage;
 
-        /// <summary>
-        /// Tag cache index in the list of tag caches.
-        /// </summary>
-        private int CurrentTagCacheIndex = 0;
-
         public GameCacheModPackage(FileInfo file)
         {
             ModPackageFile = file;
