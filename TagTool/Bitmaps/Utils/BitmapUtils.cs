@@ -515,7 +515,7 @@ namespace TagTool.Bitmaps
                             /*
                             tailLevelOffset = Direct3D.D3D9x.D3D.GetMipTailLevelOffset(
                                 levelIndex, 1 << logWidth, 1 << logHeight, 1 << logDepth, rowPitch, rowPitch * levelHeight, format);
-
+                            
                             offset += tailLevelOffset;*/
                             break;
                         }

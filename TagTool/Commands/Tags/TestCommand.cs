@@ -55,12 +55,12 @@ namespace TagTool.Commands
             using (var stream = cache.OpenCacheRead())
             {
                 var bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); // tiny bug in low low level mipmap
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_white", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); 
 
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
@@ -206,25 +206,32 @@ namespace TagTool.Commands
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
 
             XboxGraphics.XGGetBlockDimensions(gpuFormat, out blockWidth, out blockHeight);
+            XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
+            uint mipOffset = 0;
+            if (definition.MipmapCount > 1)
+                mipOffset = XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
+
+            // use the point to extract the right rectangle out of the texture
+            Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
+
             var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
             Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
 
-            // for our purpose aligned height should be at least 4 blocks (extracting mips)
-            if (alignedHeight < 4 * blockHeight)
-                alignedHeight = 4 * blockHeight;
+            // hacks when the point is outside of the first aligned texture, compute how many tiles you need and extract them (non-square only)
+            if(point.X >= 32)
+                alignedWidth *= (uint)(1 + point.X / 32);
+            if(point.Y >= 32)
+                alignedHeight *= (uint)(1 + point.Y / 32);
 
             uint texelPitch = blockWidth * blockHeight * bitsPerPixel / 8;
             uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
+
             // documentation says that each packed mip level should be aligned to 4KB, required to make untiling work smoothly
             if(level > 0)
             {
                 size = (uint)((size + 0xFFF) & ~0xFFF);
             }
             uint tileSize = 32 * 32 * blockWidth * blockHeight * bitsPerPixel / 8;
-
-            //
-            // Offset data to the right surface
-            //
 
             int tileOffset = 0;
             if (isPaired)
@@ -236,6 +243,7 @@ namespace TagTool.Commands
             }
 
             uint levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
+            
             Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
 
             tileOffset += (int)levelOffset;
@@ -253,17 +261,12 @@ namespace TagTool.Commands
                 data = result;
             }
 
-            //DumpBitmapDDS($"raw_bitmap_{layerIndex}_{level}", data, alignedWidth, alignedHeight, alignedDepth, 1, bitmap.Images[imageIndex]);
-
-            //DumpBitmapDDS($"raw_bitmap_endian_swapped_{targetLevel}", data, alignedWidth, alignedHeight, alignedDepth, bitmap.Images[imageIndex]);
-
-            // dump dds here
             uint nBlockWidth;
             uint nBlockHeight;
             if (isTiled)
             {
                 //
-                // Untile texture, assumes input is a square texture
+                // Untile texture
                 //
 
                 byte[] result = new byte[size];
@@ -284,22 +287,10 @@ namespace TagTool.Commands
                 data = result;
             }
 
-            //DumpBitmapDDS($"bitmap_untiled_{level}", data, alignedWidth, alignedHeight, alignedDepth, 1 bitmap.Images[imageIndex]);
-
-            // get surface offset and extract rectangle
-            XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
-
-            // should find a condition to not call this (level > 0) is not good enough
-            if (definition.MipmapCount > 1)
-                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
-
-            // use the point to extract the right rectangle out of the texture
-            Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
-
-
             uint logWidth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Width - 1);
             uint logHeight = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Height - 1);
             uint logDepth = Direct3D.D3D9x.D3D.Log2Ceiling(definition.Depth - 1);
+
             // find next ceiling power of two, align on block size
             int logLevelWidth = (int)(logWidth - level);
             int logLevelHeight = (int)(logHeight - level);
