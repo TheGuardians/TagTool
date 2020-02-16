@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen1;
+using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;

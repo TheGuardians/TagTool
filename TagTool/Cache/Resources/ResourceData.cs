@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using TagTool.Cache;
+using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 
-namespace TagTool.Tags
+namespace TagTool.Cache.Resources
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
     [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-    public class TagResourceGen3 : TagStructure
+    public class ResourceData : TagStructure
 	{
         public CachedTag ParentTag;
         public ushort Salt;

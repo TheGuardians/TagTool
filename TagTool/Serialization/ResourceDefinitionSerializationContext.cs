@@ -5,7 +5,7 @@ using System.IO;
 using TagTool.Tags;
 using System.Collections;
 using System.Collections.Generic;
-using static TagTool.Tags.TagResourceGen3;
+using static TagTool.Cache.Resources.ResourceData;
 
 namespace TagTool.Serialization
 {

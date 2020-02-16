@@ -415,7 +415,7 @@ namespace TagTool.Bitmaps
         }
 
         /// <summary>
-        /// This takes the current width and height and checks wether  the minimal dimension with border is <= 16.
+        /// This takes the current width and height and checks wether  the minimal dimension with border is &lt;= 16.
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>

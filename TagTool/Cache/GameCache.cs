@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using TagTool.BlamFile;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;

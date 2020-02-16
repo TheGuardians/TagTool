@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Commands.Modding
 {
@@ -402,7 +403,7 @@ namespace TagTool.Commands.Modding
 
                                 pageable = resourceIndices[resourceLocation][resourceIndex] = new PageableResource
                                 {
-                                    Page = new RawPage
+                                    Page = new ResourcePage
                                     {
                                         OldFlags = OldRawPageFlags.InMods,
                                         Index = newResourceIndex

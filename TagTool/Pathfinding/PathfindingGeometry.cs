@@ -164,7 +164,7 @@ namespace TagTool.Pathfinding
             [TagStructure(Size = 0x4)]
             public class Bsp2dRef : TagStructure
             {
-                public DatumIndex Index;
+                public DatumHandle Index;
             }
         }
     }

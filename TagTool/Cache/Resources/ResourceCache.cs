@@ -1,7 +1,7 @@
 ﻿using TagTool.Tags;
 using TagTool.Tags.Resources;
 
-namespace TagTool.Cache
+namespace TagTool.Cache.Resources
 {
     public abstract class ResourceCache
     {

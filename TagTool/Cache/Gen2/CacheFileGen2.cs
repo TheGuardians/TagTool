@@ -177,7 +177,7 @@ namespace TagTool.Cache
             }
         }
 
-        public override byte[] GetRawFromID(DatumIndex ID, int DataLength)
+        public override byte[] GetRawFromID(DatumHandle ID, int DataLength)
         {
             EndianReader er;
             string fName = "";

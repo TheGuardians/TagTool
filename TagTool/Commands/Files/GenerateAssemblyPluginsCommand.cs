@@ -736,7 +736,7 @@ namespace TagTool.Commands.Files
                     else if (fieldType == typeof(RealMatrix4x3))
                         assemblyPluginFields.AddRange(CommonFieldTypes.RealMatrix4x3(fieldName, ref offset));
                     // Handles datum indices
-                    else if (fieldType == typeof(DatumIndex))
+                    else if (fieldType == typeof(DatumHandle))
                     {
                         assemblyPluginFields.AddRange(
                             cacheVersion > CacheVersion.Halo2Vista && cacheVersion < CacheVersion.HaloOnline106708 ?

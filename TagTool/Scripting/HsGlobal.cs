@@ -10,6 +10,6 @@ namespace TagTool.Scripting
         public string Name;
         public HsType Type;
         public short Unknown;
-        public DatumIndex InitializationExpressionHandle;
+        public DatumHandle InitializationExpressionHandle;
     }
 }

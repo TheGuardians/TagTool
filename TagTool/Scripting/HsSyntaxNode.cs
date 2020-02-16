@@ -11,7 +11,7 @@ namespace TagTool.Scripting
         public ushort Opcode;
         public HsType ValueType;
         public HsSyntaxNodeFlags Flags;
-        public DatumIndex NextExpressionHandle;
+        public DatumHandle NextExpressionHandle;
         public uint StringAddress;
 
         [TagField(Length = 4)]

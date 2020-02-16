@@ -1325,7 +1325,7 @@ namespace TagTool.Commands.Porting
                 byte.TryParse(items[4].Substring(4, 2), NumberStyles.HexNumber, null, out byte data2);
                 byte.TryParse(items[4].Substring(6, 2), NumberStyles.HexNumber, null, out byte data3);
 
-                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = new DatumIndex(NextExpressionHandle);
+                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = new DatumHandle(NextExpressionHandle);
                 scnr.ScriptExpressions[scriptIndex].Opcode = Opcode;
                 scnr.ScriptExpressions[scriptIndex].Data[0] = data0;
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;

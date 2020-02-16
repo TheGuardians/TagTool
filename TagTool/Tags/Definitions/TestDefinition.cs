@@ -44,7 +44,7 @@ namespace TagTool.Tags.Definitions
             public ArgbColor            ArgbColor; // 48
             public CachedTag    CachedTagInstance; // 64
             public CacheAddress         CacheAddress; // 68
-            public DatumIndex           DatumIndex; // 72
+            public DatumHandle           DatumIndex; // 72
             public PageableResource     PageableResource; // 180
             public Point2d              Point2d; // 184
             public RealArgbColor        RealArgbColor; // 200

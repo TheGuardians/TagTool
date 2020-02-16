@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 
@@ -196,7 +197,7 @@ namespace TagTool.Tags
             { new Tag("perf"), typeof(PerformanceThrottles) },
             { new Tag("phmo"), typeof(PhysicsModel) },
             { new Tag("pixl"), typeof(PixelShader) },
-            { new Tag("play"), typeof(CacheFileResourceLayoutTable) },
+            { new Tag("play"), typeof(ResourceLayoutTable) },
             { new Tag("pmdf"), typeof(ParticleModel) },
             { new Tag("pmov"), typeof(ParticlePhysics) },
             { new Tag("pphy"), typeof(PointPhysics) },
@@ -270,7 +271,7 @@ namespace TagTool.Tags
             { new Tag("wscl"), typeof(GuiWidgetScaleAnimationDefinition) },
             { new Tag("wspr"), typeof(GuiWidgetSpriteAnimationDefinition) },
             { new Tag("wtuv"), typeof(GuiWidgetTextureCoordinateAnimationDefinition) },
-            { new Tag("zone"), typeof(CacheFileResourceGestalt) }
+            { new Tag("zone"), typeof(ResourceGestalt) }
         };
     }
 }

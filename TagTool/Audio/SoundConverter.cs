@@ -66,7 +66,7 @@ namespace TagTool.Audio
             return blamSound;
         }
 
-        public static byte[] GetXMAData(CacheFile cache, DatumIndex handle, int size)
+        public static byte[] GetXMAData(CacheFile cache, DatumHandle handle, int size)
         {
             return cache.GetSoundRaw(handle, size);
         }

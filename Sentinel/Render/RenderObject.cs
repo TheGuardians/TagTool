@@ -118,7 +118,7 @@ namespace Sentinel.Render
                     {
                         var vertexBufferIndex = mesh.VertexBufferIndices[streamEntry.Key];
 
-                        if (vertexBufferIndex == ushort.MaxValue || VertexBuffers.ContainsKey(vertexBufferIndex))
+                        if (vertexBufferIndex == -1 || VertexBuffers.ContainsKey(vertexBufferIndex))
                             continue;
 
                         var vbDef = RenderGeometryResource.VertexBuffers[vertexBufferIndex].Definition;
@@ -322,7 +322,7 @@ namespace Sentinel.Render
 
                     Device.VertexDeclaration = renderVertex.GetDeclaration(Device);
                     Device.SetStreamSource(streamTypes.First().Key, VertexBuffers[mesh.VertexBufferIndices[streamIndex]], 0);
-                    Device.Indices = IndexBuffers[mesh.IndexBufferIndices.Where(index => index != ushort.MaxValue).First()];
+                    Device.Indices = IndexBuffers[mesh.IndexBufferIndices.Where(index => index != -1).First()];
 
                     foreach (var part in mesh.Parts)
                     {

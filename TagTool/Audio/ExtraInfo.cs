@@ -17,7 +17,7 @@ namespace TagTool.Audio
         public int Unknown6;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public DatumIndex BlockOffset;
+        public DatumHandle BlockOffset;
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public int BlockSize;
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]

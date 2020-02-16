@@ -57,7 +57,7 @@ namespace TagTool.Commands.Scenarios
                     csvFileName = a;
 
             csvQueue1 = new List<string>();
-            var globals = new Dictionary<DatumIndex, string>();
+            var globals = new Dictionary<DatumHandle, string>();
 
             var i = -1;
             CsvAdd("Globals");
@@ -99,7 +99,7 @@ namespace TagTool.Commands.Scenarios
                     continue;
 
                 var scriptGroupName = "";
-                if (expr.NextExpressionHandle == DatumIndex.None &&
+                if (expr.NextExpressionHandle == DatumHandle.None &&
                     expr.Flags == Scripting.HsSyntaxNodeFlags.Group &&
                     expr.Opcode == 0x0)
                 {
@@ -108,7 +108,7 @@ namespace TagTool.Commands.Scenarios
                         scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
                 }
 
-                var ExpressionHandle = new DatumIndex((uint)((expr.Identifier << 16) + i));
+                var ExpressionHandle = new DatumHandle((uint)((expr.Identifier << 16) + i));
 
                 if (globals.ContainsKey(ExpressionHandle))
                     scriptGroupName = $"G:{globals[ExpressionHandle]}";

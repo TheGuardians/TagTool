@@ -8,6 +8,7 @@ using static TagTool.Tags.Resources.BitmapTextureInterleavedInteropResource;
 using TagTool.Tags.Resources;
 using static TagTool.Tags.Resources.BitmapTextureInteropResource;
 using TagTool.Geometry;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Serialization
 {
@@ -108,7 +109,7 @@ namespace TagTool.Serialization
 
             var dataAddress = new CacheAddress(addressType, dataOffset);
 
-            var dataFixup = new TagResourceGen3.ResourceFixup
+            var dataFixup = new ResourceData.ResourceFixup
             {
                 BlockOffset = blockOffset,
                 Address = dataAddress
@@ -175,7 +176,7 @@ namespace TagTool.Serialization
             //var blockOffset = addressTypeStream.Position;               // no need to fix that particular fixup later
             var address = new CacheAddress(addressType, (int)offset);
 
-            var resourceFixup = new TagResourceGen3.ResourceFixup
+            var resourceFixup = new ResourceData.ResourceFixup
             {
                 Address = address,
                 BlockOffset = (uint)writer.BaseStream.Position + 0x4
@@ -253,13 +254,13 @@ namespace TagTool.Serialization
             else
                 throw new Exception();
 
-            var d3dFixup = new TagResourceGen3.D3DFixup
+            var d3dFixup = new ResourceData.D3DFixup
             {
                 ResourceStructureTypeIndex = structureTypeIndex,
                 Address = address
             };
 
-            var resourceFixup = new TagResourceGen3.ResourceFixup
+            var resourceFixup = new ResourceData.ResourceFixup
             {
                 Address = new CacheAddress(addressType, offset),
                 BlockOffset = (uint)blockOffset

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen2;
+using TagTool.Cache.Resources;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -204,7 +204,7 @@ namespace TagTool.Cache.HaloOnline
             return true;
         }
 
-        private void ApplyResourceDefinitionFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData)
+        private void ApplyResourceDefinitionFixups(ResourceData tagResource, byte[] resourceDefinitionData)
         {
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
             using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.LittleEndian))
@@ -310,8 +310,8 @@ namespace TagTool.Cache.HaloOnline
             var resourceReference = new TagResourceReference();
             var pageableResource = new PageableResource();
 
-            pageableResource.Page = new RawPage();
-            pageableResource.Resource = new TagResourceGen3();
+            pageableResource.Page = new ResourcePage();
+            pageableResource.Resource = new ResourceData();
             pageableResource.ChangeLocation(location);
             pageableResource.Resource.Unknown2 = 1;
             pageableResource.Resource.ResourceType = resourceType;
