@@ -540,8 +540,9 @@ namespace TagTool.Bitmaps
 
                 if (ArrayIndex > 0)
                 {
-                    // level dimensions are already aligned, just compute the level size and add it
+                    // level dimensions are already aligned, just compute the level size and add it, must be 4kb aligned
                     uint nextLevelSize = levelWidth * levelHeight * bitsPerPixel >> 3;
+                    nextLevelSize = Direct3D.D3D9x.D3D.NextMultipleOf(nextLevelSize, 4096);
                     offset += (uint)(ArrayIndex * nextLevelSize);
                 }
             }
