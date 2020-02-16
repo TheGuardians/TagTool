@@ -63,7 +63,12 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); 
                 //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\monitor_shield_meter", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\elite_shield_flash_bleed", "bitm"); 
-                bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\energy_meter_left", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\energy_meter_left", "bitm");
+                //levels\multi\guardian\bitmaps\guardian_manconnon_bump
+                //fx\decals\ground_marks\_bitmaps\generic_foot_bump
+                //bitmapTag = cache.TagCache.GetTag(@"levels\shared\bitmaps\nature\water\water_ripples", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\bitmaps\guardian_manconnon_bump", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"fx\decals\ground_marks\_bitmaps\generic_foot_bump", "bitm");
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -174,16 +179,28 @@ namespace TagTool.Commands
             {
                 int mipLevelCount = definition.MipmapCount;
                 int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
-
-                for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                
+                if (definition.BitmapType == BitmapType.Array && mipLevelCount > 1)
                 {
-                    for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                    mipLevelCount = 1;
+                    definition.MipmapCount = 1;
+                }
+                    
+
+                for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                {
+                    for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
                     {
+                    
                         ConvertBitmapTest(result, data, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex);
                     }
                 }
 
                 var resultData = result.ToArray();
+
+                var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
+                bitmap.Images[imageIndex].Format = newFormat;
+                definition.Format = newFormat;
 
                 DumpBitmapDDS($"bitmap_final", resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)definition.MipmapCount, bitmap.Images[imageIndex]);
             }
@@ -331,6 +348,16 @@ namespace TagTool.Commands
             }
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
+
+            uint actualWidth = (uint)definition.Width >> level;
+            uint actualHeight = (uint)definition.Height >> level;
+
+            if (actualWidth < 1)
+                actualWidth = 1;
+            if (actualHeight < 1)
+                actualHeight = 1;
+
+            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format);
 
             resultStream.Write(finalData, 0, finalData.Length);
         }

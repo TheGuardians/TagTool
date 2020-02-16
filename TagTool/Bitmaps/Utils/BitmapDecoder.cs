@@ -343,7 +343,12 @@ namespace TagTool.Bitmaps
 
         public static byte[] SwapXYDxn(byte[] data, int width, int height)
         {
-            for (int i = 0; i < (width * height); i += 16)
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            int texelPitch = (int)(blockWidth * blockHeight * XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN)) >> 3;
+            for (int i = 0; i < (alignedWidth * alignedHeight); i += texelPitch)
             {
                 // store x values and swap
                 byte xMin = data[i];
@@ -381,14 +386,24 @@ namespace TagTool.Bitmaps
 
         public static byte[] Ctx1ToDxn(byte[] data, int width, int height)
         {
-            byte[] buffer = new byte[width * height];
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_CTX1, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            uint DXNBpp = XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            uint CTXbpp = XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_CTX1);
+            int CTX1TexelPitch = (int)(blockWidth * blockHeight * CTXbpp) >> 3;
+            int DXNTexelPitch = (int)(blockWidth * blockHeight * DXNBpp);
+
+            byte[] buffer = new byte[alignedWidth * alignedHeight * DXNBpp];
+
             int b = 0;  // buffer block index (dxn)
-            for(int i =0; i< width * height / 2; i += 8, b += 16)
+            for(int i =0; i< width * height / 2; i += CTX1TexelPitch, b += DXNTexelPitch)
             {
-                // convert X,Y min and max components (swap X and Y)
+                // convert X,Y min and max components (swap X and Y at the same time)
                 byte minX = data[i + 0];
-                byte maxX = data[i + 2];
                 byte minY = data[i + 1];
+                byte maxX = data[i + 2];
                 byte maxY = data[i + 3];
 
                 buffer[b] = minX;
@@ -398,14 +413,12 @@ namespace TagTool.Bitmaps
                 
                 byte[] Ctx1indices = new byte[16];
                 // convert indices
-                int[] rowOrder = { 1,0,3,2};
-                for(int k = 0; k<4; k++)
+                for(int k = 0; k < 4; k++)
                 {
-                    int j = rowOrder[k];
-                    Ctx1indices[(k * 4 + 0)] = (byte)((data[i + 4 + j] & 0xC0) >> 6);
-                    Ctx1indices[(k * 4 + 1)] = (byte)((data[i + 4 + j] & 0x30) >> 4);
-                    Ctx1indices[(k * 4 + 2)] = (byte)((data[i + 4 + j] & 0x0C) >> 2);
-                    Ctx1indices[(k * 4 + 3)] = (byte)((data[i + 4 + j] & 0x03) >> 0);
+                    Ctx1indices[(k * 4 + 0)] = (byte)((data[i + 4 + k] & 0xC0) >> 6);
+                    Ctx1indices[(k * 4 + 1)] = (byte)((data[i + 4 + k] & 0x30) >> 4);
+                    Ctx1indices[(k * 4 + 2)] = (byte)((data[i + 4 + k] & 0x0C) >> 2);
+                    Ctx1indices[(k * 4 + 3)] = (byte)((data[i + 4 + k] & 0x03) >> 0);
                 }
 
 

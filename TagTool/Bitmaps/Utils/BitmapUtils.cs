@@ -617,5 +617,31 @@ namespace TagTool.Bitmaps
                     return format;
             }
         }
+
+        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format)
+        {
+            BitmapFormat destinationFormat = GetEquivalentBitmapFormat(format);
+
+            if(format == BitmapFormat.Dxn)
+            {
+                // flip x and y channels
+                data = BitmapDecoder.SwapXYDxn(data, (int)width, (int)height);
+            }
+
+
+            if (destinationFormat == format)
+                return data;
+
+            if(format == BitmapFormat.Ctx1)
+            {
+                data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
+            }
+            else
+            {
+                byte[] uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
+                data = BitmapDecoder.EncodeBitmap(uncompressedData, destinationFormat, (int)width, (int)height);
+            }
+            return data;
+        }
     }
 }
