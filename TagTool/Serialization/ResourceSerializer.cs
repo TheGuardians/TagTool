@@ -109,7 +109,7 @@ namespace TagTool.Serialization
 
             var dataAddress = new CacheAddress(addressType, dataOffset);
 
-            var dataFixup = new ResourceData.ResourceFixupLocation
+            var dataFixup = new ResourceFixupLocation
             {
                 BlockOffset = blockOffset,
                 Address = dataAddress
@@ -176,7 +176,7 @@ namespace TagTool.Serialization
             //var blockOffset = addressTypeStream.Position;               // no need to fix that particular fixup later
             var address = new CacheAddress(addressType, (int)offset);
 
-            var resourceFixup = new ResourceData.ResourceFixupLocation
+            var resourceFixup = new ResourceFixupLocation
             {
                 Address = address,
                 BlockOffset = (uint)writer.BaseStream.Position + 0x4
@@ -254,13 +254,13 @@ namespace TagTool.Serialization
             else
                 throw new Exception();
 
-            var d3dFixup = new ResourceData.ResourceInteropLocation
+            var d3dFixup = new ResourceInteropLocation
             {
                 ResourceStructureTypeIndex = structureTypeIndex,
                 Address = address
             };
 
-            var resourceFixup = new ResourceData.ResourceFixupLocation
+            var resourceFixup = new ResourceFixupLocation
             {
                 Address = new CacheAddress(addressType, offset),
                 BlockOffset = (uint)blockOffset

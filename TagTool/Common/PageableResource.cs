@@ -30,8 +30,8 @@ namespace TagTool.Common
         public ResourceData Resource = new ResourceData
         {
             ResourceType = TagResourceTypeGen3.None,
-            FixupLocations = new System.Collections.Generic.List<ResourceData.ResourceFixupLocation>(),
-            InteropLocations = new System.Collections.Generic.List<ResourceData.ResourceInteropLocation>()
+            FixupLocations = new System.Collections.Generic.List<ResourceFixupLocation>(),
+            InteropLocations = new System.Collections.Generic.List<ResourceInteropLocation>()
         };
 
         public PageableResource() { }
