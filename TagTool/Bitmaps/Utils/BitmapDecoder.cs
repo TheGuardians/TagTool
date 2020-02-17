@@ -438,7 +438,7 @@ namespace TagTool.Bitmaps
         }
 
         /// <summary>
-        /// Converts from 2 bit to 3 bit index in table
+        /// Converts from 2 bit index from CTX1 to the 3 bit index from DXN
         /// </summary>
         /// <param name="indices"></param>
         /// <param name="c0"></param>
@@ -474,13 +474,19 @@ namespace TagTool.Bitmaps
 
         private static byte[] DecodeDxnMA(byte[] data, int width, int height)
         {
-            byte[] buffer = new byte[height * width * 4];
-            int chunks = width / 4;
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            int BppDXN = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            int BppResult = 4;
+            int imageSize = (int)(alignedWidth * alignedHeight * BppDXN);
+            byte[] buffer = new byte[alignedHeight * alignedWidth * BppResult];
 
-            if (chunks == 0)
-                chunks = 1;
+            int nBlockWidth = (int)(alignedWidth / blockWidth);
+            int nBlockHeight = (int)(alignedHeight / blockWidth);
 
-            for (int i = 0; i < (width * height); i += 16)
+            for (int i = 0; i < imageSize; i += 16)
             {
                 byte mMin = data[i + 0];
                 byte mMax = data[i + 1];
@@ -561,8 +567,8 @@ namespace TagTool.Bitmaps
                     alphaTable[7] = (byte)255;
                 }
                 int chunkNum = i / 16;
-                int xPos = chunkNum % chunks;
-                int yPos = (chunkNum - xPos) / chunks;
+                int xPos = chunkNum % nBlockWidth;
+                int yPos = (chunkNum - xPos) / nBlockWidth;
                 int sizeh = (height < 4) ? height : 4;
                 int sizew = (width < 4) ? width : 4;
                 for (int j = 0; j < sizeh; j++)
@@ -808,8 +814,6 @@ namespace TagTool.Bitmaps
                             buffer[pixDataStart] = alpha[i, j];
                             buffer[pixDataStart + 1] = alpha[i, j];
                             buffer[pixDataStart + 2] = alpha[i, j];
-
-                            //buffer[pixDataStart + 3] = (type == AType.alpha) ? alpha[i, j] : 0xFF
                             buffer[pixDataStart + 3] = alpha[i, j];
 
                             code = code >> 2;

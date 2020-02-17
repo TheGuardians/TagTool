@@ -639,7 +639,16 @@ namespace TagTool.Bitmaps
             }
             else
             {
+                //
+                // BitmapDecoder needs to be updated to use the aligned height and width. look at DXN mono alpha or CTX1 to DXN for example
+                //
                 byte[] uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
+                //
+                // INSERT TRIMMING HERE: inbound formats can have block size > 1 (dxt based format), the input width and height are not aligned, if after
+                // aligning them the width or height differs, a simple double for loop is required to resize the uncompressed image to the actual with and height.
+                // use the xbox format to get the block size, uncompressedData is of the format A8R8G8B8 so you just need to iterate over the height, then width and move
+                // 4 bytes at each iteration for the actual width and height, but using the aligned width and height for the offsets
+                //
                 data = BitmapDecoder.EncodeBitmap(uncompressedData, destinationFormat, (int)width, (int)height);
             }
             return data;
