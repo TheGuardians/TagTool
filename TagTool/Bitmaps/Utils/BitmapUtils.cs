@@ -684,8 +684,8 @@ namespace TagTool.Bitmaps
             {
                 for (int j = 0; j < height; j++)
                 {
-                    uint offset = (uint)((i* alignedWidth) + j) * 4;
-                    uint destOffset = (uint)((i * width) + j) * 4;
+                    uint offset = (uint)((j* alignedWidth) + i) * 4;
+                    uint destOffset = (uint)((j * width) + i) * 4;
                     Array.Copy(data, offset, result, destOffset, 4);
                 }
             }
