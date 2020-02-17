@@ -438,6 +438,7 @@ namespace TagTool.Bitmaps
 
             if (Level > 0 || (isPacked && (levelWidth <= 16 || levelHeight <= 16)))
             {
+
                 uint widthAdjustment = 0;
                 if ((width - borderSize) >> Level <= 1)
                     widthAdjustment = 1;
@@ -450,7 +451,7 @@ namespace TagTool.Bitmaps
                 if ((height - borderSize) >> Level <= 1)
                     heightAdjustment = 1;
                 else
-                    heightAdjustment = (width - borderSize) >> Level;
+                    heightAdjustment = (height - borderSize) >> Level;
 
                 height = borderSize + heightAdjustment;
 
@@ -504,19 +505,19 @@ namespace TagTool.Bitmaps
                     levelHeight = 1u << logHeight;
                     levelDepth = 1u << logDepth;
 
+                    levelWidth = (uint)bitmapResource.Width >> (Level - LevelIndex);
+                    levelHeight = (uint)bitmapResource.Height >> (Level - LevelIndex);
+                    //levelDepth = (uint)bitmapResource.Depth >> (Level - LevelIndex);
+                    uint tempWidth = levelWidth;
+                    uint tempHeight = levelHeight;
                     Direct3D.D3D9x.D3D.AlignTextureDimensions(ref levelWidth, ref levelHeight, ref levelDepth, bitsPerPixel, format, unknownType, isTiled);
 
                     rowPitch = (bitsPerPixel * levelWidth) / 8;
 
-                    if (((1u << logWidth) <= 16 || (1u << logHeight) <= 16) && isPacked)
+                    if ((tempWidth <= 16 || tempHeight <= 16) && isPacked)
                     {
                         if (isPacked)
                         {
-                            /*
-                            tailLevelOffset = Direct3D.D3D9x.D3D.GetMipTailLevelOffset(
-                                levelIndex, 1 << logWidth, 1 << logHeight, 1 << logDepth, rowPitch, rowPitch * levelHeight, format);
-                            
-                            offset += tailLevelOffset;*/
                             break;
                         }
                     }

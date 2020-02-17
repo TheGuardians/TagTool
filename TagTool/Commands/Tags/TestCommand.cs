@@ -87,7 +87,8 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\blast_scorch_medium", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\plasma_impact_medium", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"objects\vehicles\mongoose\bitmaps\wheels_alpha", "bitm"); 
-                
+                //bitmapTag = cache.TagCache.GetTag(@"objects\characters\masterchief\bitmaps\mp_markv_zbump", "bitm");
+
                 var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
                 var imageIndex = 0;
@@ -372,7 +373,8 @@ namespace TagTool.Commands
             }
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
-
+            XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
+            DumpBitmapDDS($"bitmap_untiled_{level}", data, (uint)alignedWidth, (uint)alignedHeight, definition.Depth, 1, bitmap.Images[imageIndex]);
             uint actualWidth = (uint)definition.Width >> level;
             uint actualHeight = (uint)definition.Height >> level;
 
