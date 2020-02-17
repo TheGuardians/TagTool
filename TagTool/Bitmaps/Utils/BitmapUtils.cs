@@ -643,15 +643,54 @@ namespace TagTool.Bitmaps
                 // BitmapDecoder needs to be updated to use the aligned height and width. look at DXN mono alpha or CTX1 to DXN for example
                 //
                 byte[] uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
-                //
-                // INSERT TRIMMING HERE: inbound formats can have block size > 1 (dxt based format), the input width and height are not aligned, if after
-                // aligning them the width or height differs, a simple double for loop is required to resize the uncompressed image to the actual with and height.
-                // use the xbox format to get the block size, uncompressedData is of the format A8R8G8B8 so you just need to iterate over the height, then width and move
-                // 4 bytes at each iteration for the actual width and height, but using the aligned width and height for the offsets
-                //
+
+                uncompressedData = TrimAlignedBitmap(format, destinationFormat, (int)width, (int)height, uncompressedData);
+
                 data = BitmapDecoder.EncodeBitmap(uncompressedData, destinationFormat, (int)width, (int)height);
             }
             return data;
+        }
+
+        private static byte[] TrimAlignedBitmap(BitmapFormat originalFormat, BitmapFormat destinationFormat, int width, int height, byte[] data)
+        {
+            byte[] result = new byte[width * height * 4];
+            uint blockSize;
+            switch (originalFormat)
+            {
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.Dxt3aMono:
+                    blockSize = 4;
+                    break;
+                case BitmapFormat.AY8:
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.R5G6B5:
+                default:
+                    blockSize = 1;
+                    break;
+            }
+
+            if (blockSize == 1)
+                return data;
+
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockSize);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockSize);
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    uint offset = (uint)((i* alignedWidth) + j) * 4;
+                    uint destOffset = (uint)((i * width) + j) * 4;
+                    Array.Copy(data, offset, result, destOffset, 4);
+                }
+            }
+
+            return result;
         }
 
         public static bool IsCompressedFormat(BitmapFormat format)
