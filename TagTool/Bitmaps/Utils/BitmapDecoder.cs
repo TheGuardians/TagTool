@@ -776,15 +776,24 @@ namespace TagTool.Bitmaps
 
         private static byte[] DecodeDxt3A(byte[] data, int width, int height)
         {
-            byte[] buffer = new byte[(width * height) * 4];
-            int xBlocks = width / 4;
-            int yBlocks = height / 4;
-            for (int y = 0; y < yBlocks; y++)
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            int BppDXN = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            int BppResult = 4;
+            int imageSize = (int)(alignedWidth * alignedHeight * BppDXN);
+            byte[] buffer = new byte[alignedHeight * alignedWidth * BppResult];
+
+            int nBlockWidth = (int)(alignedWidth / blockWidth);
+            int nBlockHeight = (int)(alignedHeight / blockWidth);
+
+            for (int y = 0; y < nBlockHeight; y++)
             {
-                for (int x = 0; x < xBlocks; x++)
+                for (int x = 0; x < nBlockWidth; x++)
                 {
                     int i;
-                    int blockDataStart = ((y * xBlocks) + x) * 8;
+                    int blockDataStart = ((y * nBlockWidth) + x) * 8;
                     ushort[] alphaData = new ushort[] {
                         (ushort)((data[blockDataStart + 1] << 8) + data[blockDataStart + 0]),
                         (ushort)((data[blockDataStart + 3] << 8) + data[blockDataStart + 2]),
@@ -958,11 +967,17 @@ namespace TagTool.Bitmaps
 
         private static byte[] DecodeDxt5A(byte[] data, int width, int height)
         {
-            byte[] buffer = new byte[height * width * 4];
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            int BppDXN = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            int BppResult = 4;
+            int imageSize = (int)(alignedWidth * alignedHeight * BppDXN);
+            byte[] buffer = new byte[alignedHeight * alignedWidth * BppResult];
 
-            int chunks = width / 4;
-            if (chunks == 0)
-                chunks = 1;
+            int nBlockWidth = (int)(alignedWidth / blockWidth);
+            int nBlockHeight = (int)(alignedHeight / blockWidth);
 
             for (int i = 0; i < (width * height / 2); i += 8)
             {
@@ -1010,8 +1025,8 @@ namespace TagTool.Bitmaps
                 }
 
                 int chunkNum = i / 8;
-                int xPos = chunkNum % chunks;
-                int yPos = (chunkNum - xPos) / chunks;
+                int xPos = chunkNum % nBlockWidth;
+                int yPos = (chunkNum - xPos) / nBlockWidth;
                 int sizeh = (height < 4) ? height : 4;
                 int sizew = (width < 4) ? width : 4;
 
