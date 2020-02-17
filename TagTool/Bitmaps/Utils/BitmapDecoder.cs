@@ -1003,8 +1003,8 @@ namespace TagTool.Bitmaps
                 }
 
                 byte[] monoTable = new byte[8];
-                monoTable[0] = mMin;
-                monoTable[1] = mMax;
+                monoTable[1] = mMin;
+                monoTable[0] = mMax;
                 if (monoTable[0] > monoTable[1])
                 {
                     monoTable[2] = (byte)((6 * monoTable[0] + 1 * monoTable[1]) / 7.0f);
