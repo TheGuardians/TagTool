@@ -129,10 +129,10 @@ namespace TagTool.Audio
             [TagStructure(Size = 0xC)]
             public class UnknownBlock : TagStructure
 			{
-                public List<UnknownBlock2> Unknown;
+                public List<FacialAnimationPermutation> FacialAnimationPermutations;
 
                 [TagStructure(Size = 0x28)]
-                public class FacialAnimationPermutations : TagStructure
+                public class FacialAnimationPermutation : TagStructure
 				{
                     public float StartTime;
                     public float EndTime;
