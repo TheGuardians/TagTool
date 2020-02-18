@@ -132,14 +132,14 @@ namespace TagTool.Audio
                 public List<UnknownBlock2> Unknown;
 
                 [TagStructure(Size = 0x28)]
-                public class UnknownBlock2 : TagStructure
+                public class FacialAnimationPermutations : TagStructure
 				{
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                    public float StartTime;
+                    public float EndTime;
+                    public float BlendIn;
+                    public float BlendOut;
                     public List<UnknownBlock2_1> Unknown5;
-                    public List<UnknownBlock2_2> Unknown6;
+                    public List<FacialAnimationCurve> FacialAnimationCurves;
 
                     [TagStructure(Size = 0x8)]
                     public class UnknownBlock2_1 : TagStructure
@@ -149,9 +149,9 @@ namespace TagTool.Audio
                     }
 
                     [TagStructure(Size = 0x8)]
-                    public class UnknownBlock2_2 : TagStructure
+                    public class FacialAnimationCurve : TagStructure
 					{
-                        public short Unknown1;
+                        public short AnimationStartTime;
                         public sbyte Unknown2;
                         public sbyte Unknown3;
                         public sbyte Unknown4;
