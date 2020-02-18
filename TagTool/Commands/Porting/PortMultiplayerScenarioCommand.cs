@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using TagTool.BlamFile;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
+using TagTool.IO;
 using TagTool.Tags.Definitions;
-using static TagTool.Cache.CacheFile;
 using static TagTool.Commands.Porting.PortTagCommand;
 using static TagTool.Tags.Definitions.Scenario;
 
@@ -21,19 +22,21 @@ namespace TagTool.Commands.Porting
         [Flags]
         public enum MultiplayerScenarioConversionFlags
         {
-            None,
+            None = (1 << 0),
             // port scenario objects
-            Objects,
+            Objects = (1 << 1),
+            // port device objects
+            DeviceObjects = (1 << 2),
             // port audio
-            Audio,
+            Audio = (1 << 3),
             // use ms30 shaders
-            Ms30,
+            Ms30 = (1 << 4),
             // attempt to add an invisible point
-            SpawnPoint,
+            SpawnPoint = (1 << 5),
             // keep path finding data
-            PathFinding,
+            PathFinding = (1 << 6),
 
-            Default = Objects | Audio | Ms30 | SpawnPoint
+            Default = Objects | DeviceObjects | Audio | Ms30 | SpawnPoint
         }
 
         public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag) :
@@ -42,7 +45,7 @@ namespace TagTool.Commands.Porting
                 "PortMultiplayerScenario",
                 "Builds a multiplayer map from one or more bsps within a given zone set",
 
-                "PortMultiplayerScenario [options] [sbsp tag (leave blank for a wizard)]",
+                "PortMultiplayerScenario [options]",
 
                 "Builds a multiplayer map from one or more bsps within a given zone set")
         {
@@ -55,8 +58,10 @@ namespace TagTool.Commands.Porting
         {
             var blamCache = BlamCache;
             int zoneSetIndex = -1;
-            BspFlags bspMask = 0;
+            BspFlags desiredBspMask = 0;
             MultiplayerScenarioConversionFlags conversionFlags;
+            string scenarioPath = null;
+            int mapId = -1;
 
             var firstNonFlagArgumentIndex = ParseConversionFlags(args, out conversionFlags);
             args = args.Skip(firstNonFlagArgumentIndex).ToList();
@@ -64,99 +69,238 @@ namespace TagTool.Commands.Porting
             CachedTag blamScnrTag = BlamCache.TagCache.NonNull().First(x => x.Group.Tag == "scnr");
 
             using(var blamStream = BlamCache.OpenCacheRead())
+            using (var cacheStream = CacheContext.OpenCacheReadWrite())
             {
                 var blamScnr = BlamCache.Deserialize<Scenario>(blamStream, blamScnrTag);
+      
+                Dictionary<string, int> structureBspsByName = new Dictionary<string, int>();
+                Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
 
-                if (args.Count < 1)
+                Console.WriteLine("Enter the scenario name:");
+                var scenarioName = Console.ReadLine();
+                if (!Regex.IsMatch(scenarioName, "[a-z0-9_]+"))
                 {
-                    Dictionary<string, int> structureBspsByName = new Dictionary<string, int>();
-                    Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
+                    Console.WriteLine("Scenario name must consist of lowercase alphanumeric characters and underscores.");
+                    return false;
+                }
 
-                    Console.WriteLine("-----------------------------------------");
-                    for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
-                        Console.WriteLine($"{i}. {blamCache.StringTable.GetString(blamScnr.ZoneSets[i].Name)}");
-                    Console.WriteLine("-----------------------------------------");
-                    Console.WriteLine("Enter the name or index of the zone set to use:");
-                    string zoneSetName = Console.ReadLine().Trim();
+                scenarioPath = $@"levels\custom\{scenarioName}\{scenarioName}";
 
+                //
+                // try to parse the map id, if not use the randomly generated one unless it's actually invalid/out of range
+                //
 
-                    for (int i = 0; i < blamScnr.StructureBsps.Count; i++)
-                        structureBspsByName.Add(blamScnr.StructureBsps[i].StructureBsp.Name, i);
+                const int kMinMapId = 7000;
+                const int kMaxMapId = ushort.MaxValue-1;
 
-                    if (zoneSetsByName.ContainsKey(zoneSetName))
-                        zoneSetIndex = zoneSetsByName[zoneSetName];
-                    else
+                // generate a map id
+                mapId = new Random(Guid.NewGuid().GetHashCode()).Next(kMinMapId, kMaxMapId+1);
+
+                Console.WriteLine($"Enter map id in the range [{kMinMapId}, {kMaxMapId}] (or blank for {mapId}):");
+
+                // try to parse one from input
+                var tmpMapId = -1;
+                var mapIdInput = Console.ReadLine();
+                if (int.TryParse(mapIdInput, out tmpMapId))
+                {
+                    if(tmpMapId < kMinMapId || tmpMapId > kMaxMapId)
                     {
-                        if (!int.TryParse(zoneSetName, out zoneSetIndex))
-                            zoneSetIndex = -1;
-                    }
-
-                    if (zoneSetIndex == -1)
-                    {
-                        Console.WriteLine($"Zone set '{zoneSetName}' could not be found!\n");
-                        return true;
-                    }
-
-                    var zoneSet = blamScnr.ZoneSets[zoneSetIndex];
-
-                    Console.WriteLine("-----------------------------------------");
-                    for (int i = 0; i < 32; i++)
-                    {
-                        if ((zoneSet.LoadedBsps & (BspFlags)(1u << i)) != 0)
-                            Console.WriteLine($"{i}. {blamScnr.StructureBsps[i].StructureBsp.Name}");
-                    }
-                    Console.WriteLine("-----------------------------------------");
-                    Console.WriteLine("Enter the name or index of each bsp to include on a new line followed by a blank line:");
-
-                    for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
-                    {
-                        var sbspName = line.Trim();
-                        int bspIndex = -1;
-
-                        if (structureBspsByName.ContainsKey(sbspName))
-                            bspIndex = structureBspsByName[sbspName];
-                        else
-                        {
-                            if (!int.TryParse(sbspName, out bspIndex))
-                                bspIndex = -1;
-                        }
-
-                        if (bspIndex == -1)
-                            Console.WriteLine($"Could not find bsp '{sbspName}'");
-
-                        bspMask |= (BspFlags)(1u << bspIndex);
+                        Console.WriteLine($"Map id out of range.");
+                        return false;
                     }
                 }
                 else
                 {
-                    var tagName = args[0].Trim();
-                    var bspIndex = blamScnr.StructureBsps.FindIndex(x => x.StructureBsp.Name == tagName);
-                    if (bspIndex == -1)
-                    {
-                        Console.WriteLine($"Could not find bsp '{tagName}'");
-                        return true;
-                    }
-
-                    bspMask = (BspFlags)(1u << bspIndex);
-                    for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
-                    {
-                        if ((blamScnr.ZoneSets[i].LoadedBsps & bspMask) != 0)
-                        {
-                            zoneSetIndex = i;
-                            break;
-                        }
-                    }
-
-                    if (zoneSetIndex == -1)
-                    {
-                        Console.WriteLine($"No zone set includes bsp '{tagName}'!");
-                        return true;
-                    }
+                    tmpMapId = -1;
                 }
 
-                Console.WriteLine("Converting...");
-                Convert(blamScnr, blamScnrTag, blamStream, zoneSetIndex, bspMask, conversionFlags);
+                if (tmpMapId != -1)
+                    mapId = tmpMapId;
+
+                Console.WriteLine("Enter the map name (for display):");
+                var mapName = Console.ReadLine();
+                if(mapName.Length >= 4 && mapName.Length > 15)
+                {
+                    Console.WriteLine("Map name must be at 4 to 15 characters.");
+                    return false;
+                }
+
+                Console.WriteLine("Enter the map description:");
+                var mapDescription = Console.ReadLine();
+                if (mapDescription.Length > 127)
+                {
+                    Console.WriteLine("Map description must be no longer than 127 characters.");
+                    return false;
+                }
+
+                Console.WriteLine("-----------------------------------------");
+                for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
+                {
+                    // map the zone sets by name for easy lookup
+                    zoneSetsByName.Add(blamCache.StringTable.GetString(blamScnr.ZoneSets[i].Name), i);
+                    Console.WriteLine($"{i}. {blamCache.StringTable.GetString(blamScnr.ZoneSets[i].Name)}");
+                }
+                  
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine("Enter the name or index of the zone set to use:");
+
+                // read the zone set name from input, trim it so we don't have to worry about spaces
+                string zoneSetName = Console.ReadLine().Trim();
+                // if they entered a valid name, use that index it is mapped to
+                if (zoneSetsByName.ContainsKey(zoneSetName))
+                {
+                    zoneSetIndex = zoneSetsByName[zoneSetName];
+                }
+                else
+                {
+                    // otherwise try to parse the index
+                    if (!int.TryParse(zoneSetName, out zoneSetIndex))
+                        zoneSetIndex = -1;
+                }
+
+                if (zoneSetIndex == -1)
+                {
+                    Console.WriteLine($"Zone set '{zoneSetName}' could not be found!\n");
+                    return true;
+                }
+
+                var zoneSet = blamScnr.ZoneSets[zoneSetIndex];
+
+                Console.WriteLine("-----------------------------------------");
+                for (int i = 0; i < 32; i++)
+                {
+                    if ((zoneSet.LoadedBsps & (BspFlags)(1u << i)) != 0)
+                    {
+                        // map the bsps by name for easy lookup
+                        structureBspsByName.Add(blamScnr.StructureBsps[i].StructureBsp.Name, i);
+                        Console.WriteLine($"{i}. {blamScnr.StructureBsps[i].StructureBsp.Name}");
+                    }  
+                }
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine("Enter the name or index of each bsp to include on a new line followed by a blank line (leave blank for all):");
+
+                //
+                // keep reading lines from the console and parsing either a bsp name or index
+                // setting the bit corresponding to the bsp index of the desired bsp mask
+                //
+
+                for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                {
+                    var sbspName = line.Trim();
+                    int bspIndex = -1;
+
+                    // if they entered a valid name, use that index it is mapped to
+                    if (structureBspsByName.ContainsKey(sbspName))
+                    {
+                        bspIndex = structureBspsByName[sbspName];
+                    }
+                    else
+                    {
+                        // otherwise try to parse the index
+                        if (!int.TryParse(sbspName, out bspIndex))
+                            bspIndex = -1;
+                    }
+
+                    if (bspIndex == -1)
+                        Console.WriteLine($"Could not find bsp '{sbspName}'");
+
+                    desiredBspMask |= (BspFlags)(1u << bspIndex);
+                }
+
+                if (desiredBspMask == 0)
+                    desiredBspMask = blamScnr.ZoneSets[zoneSetIndex].LoadedBsps;
+
+                // perofrm the conversion
+                Convert(cacheStream, scenarioPath, mapId, blamScnr, blamScnrTag, blamStream, zoneSetIndex, desiredBspMask, conversionFlags);
+
+                // generate the .map file
+                GenerateMapFile(cacheStream, CacheContext.GetTag($"{scenarioPath}.scnr"), mapName, mapDescription);
+
+                // finish up
+                CacheContext.SaveStrings();
+                CacheContext.SaveTagNames();
+
+                Console.WriteLine("Done.");
                 return true;
+            }
+        }
+
+        void GenerateMapFile(Stream cacheStream, CachedTag scenarioTag, string mapName, string mapDescription)
+        {
+            var scenarioName = Path.GetFileName(scenarioTag.Name);
+            var mapFile = new FileInfo(Path.Combine(CacheContext.Directory.FullName, $"{scenarioName}.map"));
+
+            Console.WriteLine($"Generating map file '{mapFile.Name}'...");
+
+            using (var mapFileStream = mapFile.Create())
+            {
+                var blf = new BlamFile.Blf(CacheVersion.HaloOnline106708);
+
+                MapFile map = new MapFile();
+                var header = new CacheFileHeader();
+
+                var scnr = CacheContext.Deserialize<Scenario>(cacheStream, scenarioTag);
+
+                map.Version = CacheContext.Version;
+                map.EndianFormat = EndianFormat.LittleEndian;
+                map.MapVersion = CacheFileVersion.HaloOnline;
+
+                header.HeaderSignature = new Tag("head");
+                header.FooterSignature = new Tag("foot");
+                header.FileVersion = map.MapVersion;
+                header.Build = CacheVersionDetection.GetBuildName(CacheContext.Version);
+
+                switch (scnr.MapType)
+                {
+                    case ScenarioMapType.MainMenu:
+                        header.CacheType = CacheFileType.MainMenu;
+                        break;
+                    case ScenarioMapType.SinglePlayer:
+                        header.CacheType = CacheFileType.Campaign;
+                        break;
+                    case ScenarioMapType.Multiplayer:
+                        header.CacheType = CacheFileType.Multiplayer;
+                        break;
+                }
+                header.SharedType = CacheFileSharedType.None;
+
+                header.MapId = scnr.MapId;
+                header.ScenarioTagIndex = scenarioTag.Index;
+                header.Name = scenarioTag.Name.Split('\\').Last();
+                header.ScenarioPath = scenarioTag.Name;
+
+                map.Header = header;
+
+                header.FileLength = 0x3390;
+
+                map.MapFileBlf = new Blf(CacheContext.Version);
+                map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
+                map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
+                map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };
+
+                var scnrBlf = map.MapFileBlf.Scenario;
+                scnrBlf.MapId = scnr.MapId;
+                scnrBlf.Names = new NameUnicode32[12];
+                for (int i = 0; i < scnrBlf.Names.Length; i++)
+                    scnrBlf.Names[i] = new NameUnicode32() { Name = "" };
+
+                scnrBlf.Descriptions = new NameUnicode128[12];
+                for (int i = 0; i < scnrBlf.Descriptions.Length; i++)
+                    scnrBlf.Descriptions[i] = new NameUnicode128() { Name = "" };
+
+                scnrBlf.Names[0] = new NameUnicode32() { Name = mapName };
+                scnrBlf.Descriptions[0] = new NameUnicode128() { Name = mapDescription };
+
+                scnrBlf.MapName = scenarioName;
+                scnrBlf.ImageName = $"m_{scenarioName}";
+                scnrBlf.UnknownTeamCount1 = 2;
+                scnrBlf.UnknownTeamCount2 = 6;
+                scnrBlf.GameEngineTeamCounts = new byte[11] { 00, 02, 08, 08, 08, 08, 08, 08, 04, 02, 08 };
+
+                scnrBlf.MapFlags = BlfScenarioFlags.GeneratesFilm | BlfScenarioFlags.IsMainmenu | BlfScenarioFlags.IsDlc;
+
+                map.MapFileBlf.ContentFlags |= BlfFileContentFlags.StartOfFile | BlfFileContentFlags.Scenario | BlfFileContentFlags.EndOfFile;
+                map.Write(new EndianWriter(mapFileStream));
             }
         }
 
@@ -192,112 +336,72 @@ namespace TagTool.Commands.Porting
             return endIndex;
         }
 
-        private void Convert(Scenario blamScnr, CachedTag blamScnrTag, Stream blamStream, int zoneSetIndex, BspFlags bspMask, MultiplayerScenarioConversionFlags conversionFlags)
+        private void Convert(Stream cacheStream, string newScenarioPath, int newMapId, Scenario blamScnr, CachedTag blamScnrTag, Stream blamStream, int zoneSetIndex, BspFlags bspMask, MultiplayerScenarioConversionFlags conversionFlags)
         {
             var blamCache = BlamCache;
 
+            var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-            using (var cacheStream = CacheContext.OpenCacheReadWrite())
+            var defaultPortingFlags = PortingFlags.Default;
+            if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Audio))
+                defaultPortingFlags &= ~PortingFlags.Audio;
+            if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Ms30))
+                defaultPortingFlags &= ~PortingFlags.Ms30;
+
+            Console.WriteLine("Collecting tags...");
+            var tagCollector = new MultiplayerScenarioTagCollector(blamCache, blamScnr, blamStream, zoneSetIndex, bspMask, conversionFlags);
+            tagCollector.Collect();
+
+            PortTag.RemoveFlags(~defaultPortingFlags);
+            PortTag.SetFlags(defaultPortingFlags);
+
+            var oldScenarioPath = blamScnrTag.Name;
+            var scenarioDir = Path.GetDirectoryName(blamScnrTag.Name);
+            var newScenarioDir = Path.GetDirectoryName(newScenarioPath);
+
+            var renames = new List<KeyValuePair<CachedTag, string>>();
+
+            // rename the tags we are gong to modify first so they don't conflict when porting
+            foreach (var tag in tagCollector.Tags)
             {
-                var resourceStreams = new Dictionary<ResourceLocation, Stream>();
-
-                var defaultPortingFlags = PortingFlags.Default;
-                if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Audio))
-                    defaultPortingFlags &= ~PortingFlags.Audio;
-                if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Ms30))
-                    defaultPortingFlags &= ~PortingFlags.Ms30;
-
-                if (blamScnr.Lightmap != null)
+                switch(tag.Group.ToString())
                 {
-                    PortTag.RemoveFlags(~defaultPortingFlags);
-                    PortTag.SetFlags(defaultPortingFlags);
-                    ConvertLightmap(cacheStream, blamStream, resourceStreams,
-                        blamScnr.Lightmap, zoneSetIndex, bspMask);
-                }
-
-                var tagCollector = new MultiplayerScenarioTagCollector(blamCache, blamScnr, blamStream, zoneSetIndex, bspMask, conversionFlags);
-                tagCollector.Collect();
-
-                PortTag.RemoveFlags(~defaultPortingFlags);
-                PortTag.SetFlags(defaultPortingFlags);
-
-                foreach (var tag in tagCollector.Tags)
-                    PortTag.ConvertTag(cacheStream, blamStream, resourceStreams, tag);
-
-                PortTag.RemoveFlags(PortingFlags.Recursive);
-                var scnrTag = PortTag.ConvertTag(cacheStream, blamStream, resourceStreams, blamScnrTag);
-
-                new MultiplayerScenarioFixup(cacheStream, CacheContext, blamScnrTag.Name, zoneSetIndex, bspMask, conversionFlags).Fixup();
-
-                foreach (var entry in resourceStreams.Values)
-                    entry.Close();
+                    case "sbsp":
+                    case "sLdT":
+                    case "Lbsp":
+                        renames.Add(new KeyValuePair<CachedTag, string>(tag, tag.Name));
+                        tag.Name = tag.Name.Replace(scenarioDir, newScenarioDir);
+                        break;
+                };
             }
+            renames.Add(new KeyValuePair<CachedTag, string>(blamScnrTag, blamScnrTag.Name));
+            blamScnrTag.Name = newScenarioPath;
 
+            Console.WriteLine("Converting...");
 
-            CacheContext.SaveStrings();
+            // port the tags
+            foreach (var tag in tagCollector.Tags)
+                PortTag.ConvertTag(cacheStream, blamStream, resourceStreams, tag);
 
-            CacheContext.SaveTagNames();
-        }
+            PortTag.RemoveFlags(PortingFlags.Recursive | PortingFlags.Scripts);
 
-        private void ConvertLightmap(Stream cacheStream, Stream blamStream, Dictionary<ResourceLocation, Stream> resourceStreams,
-            CachedTag blamLightmapTag, int zoneSetIndex, BspFlags bspMask)
-        {
-            var blamCache = BlamCache;
-            var blamLightmap = BlamCache.Deserialize<ScenarioLightmap>(blamStream, blamLightmapTag);
+            PortTag.ConvertTag(cacheStream, blamStream, resourceStreams, blamScnrTag);
 
-            if (blamCache.Version < CacheVersion.Halo3ODST)
-            {
-                var lightmapTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
-                var lightmap = blamLightmap;
+            Console.WriteLine("Performing fixups...");
+            new MultiplayerScenarioFixup(cacheStream, CacheContext, blamScnrTag.Name, zoneSetIndex, bspMask, conversionFlags).Fixup();
 
-                for (int i = 0, j = 0; i < blamLightmap.Lightmaps.Count; i++)
-                {
-                    if (((BspFlags)(1u << i) & bspMask) == 0)
-                        continue;
+            // change the map id
+            var scnrTag = CacheContext.GetTag($"{blamScnrTag}");
+            var newScenario = CacheContext.Deserialize<Scenario>(cacheStream, scnrTag);
+            newScenario.MapId = newMapId;
+            CacheContext.Serialize(cacheStream, scnrTag, newScenario);
 
-                    var blamLbsp = blamLightmap.Lightmaps[i];
-                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, blamStream, resourceStreams,
-                        blamLbsp, blamLbsp, blamLightmapTag.Name);
+            // restore the tag names
+            foreach(var tagNamePair in renames)
+                tagNamePair.Key.Name = tagNamePair.Value;
 
-                    Lbsp.Airprobes = new List<Airprobe>();
-                    Lbsp.Airprobes.AddRange(blamLightmap.Airprobes);
-                    Lbsp.BspIndex = (short)j++;
-
-                    var LbspTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>($"{blamLightmapTag.Name}_{i}_data");
-                    CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
-
-                    lightmap.LightmapDataReferences.Add(LbspTag);
-                }
-
-                lightmap.Airprobes.Clear();
-                CacheContext.Serialize(cacheStream, lightmapTag, lightmap);
-            }
-            else
-            {
-                var lightmapTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
-                var lightmap = blamLightmap;
-                var newDataReferences = new List<CachedTag>();
-
-                for (int i = 0, j = 0; i < blamLightmap.LightmapDataReferences.Count; i++)
-                {
-                    if (((BspFlags)(1u << i) & bspMask) == 0)
-                        continue;
-
-                    var blamLbspTag = blamLightmap.LightmapDataReferences[i];
-                    var blamLbsp = blamCache.Deserialize<ScenarioLightmapBspData>(blamStream, blamLbspTag);
-
-                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, blamStream, resourceStreams, blamLbsp, blamLbsp, blamLbspTag.Name);
-                    Lbsp.BspIndex = (short)j++;
-
-                    var LbspTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(blamLbspTag.Name);
-                    CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
-
-                    newDataReferences.Add(LbspTag);
-                }
-
-                lightmap.LightmapDataReferences = newDataReferences;
-                CacheContext.Serialize(cacheStream, lightmapTag, lightmap);
-            }
+            foreach (var entry in resourceStreams.Values)
+                entry.Close();
         }
 
         class MultiplayerScenarioFixup
@@ -308,6 +412,7 @@ namespace TagTool.Commands.Porting
             private Scenario Scnr;
             private int DesiredZoneSetIndex;
             private BspFlags DesiredBsps;
+            private BspFlags NewBsps;
             private MultiplayerScenarioConversionFlags ConversionFlags;
             private Dictionary<int, int> BspIndexRemapping;
 
@@ -323,6 +428,13 @@ namespace TagTool.Commands.Porting
                 this.DesiredBsps = desiredBsps;
                 this.ConversionFlags = conversionFlags;
                 this.BspIndexRemapping = new Dictionary<int, int>();
+
+                // create mask, setting the bits of the remapped bsp indices
+                for(int i = 0, j = 0; i < 32; i++)
+                {
+                    if(desiredBsps.HasFlag((BspFlags)(1 << i)))
+                        NewBsps |= (BspFlags)(1 << j++);
+                }
             }
 
             public void Fixup()
@@ -331,12 +443,24 @@ namespace TagTool.Commands.Porting
                 Scnr.MapSubType = ScenarioMapSubType.None;
                 Scnr.CampaignId = -1;
 
+                //
+                // fixup any bsp indices across the different blocks and tags
+                // 
+
                 FixupStructureBspReferences();
                 FixupSkies();
                 FixupZoneSets();
                 FixupAllScenarioObjects();
                 FixupScenarioClusterData();
+                FixupLightmap();
+                FixupInstancedGeometry();
 
+                // find a good place to point the respawn point and prematch camera
+                var spawnPoint = FindPointToPlaceRespawnPoint();
+
+                //
+                // clear out the blocks we're not interested in
+                //
                 Scnr.BspAtlas.Clear();
                 Scnr.CampaignPlayers.Clear();
                 Scnr.SoftCeilings.Clear();
@@ -387,24 +511,18 @@ namespace TagTool.Commands.Porting
                 Scnr.ScenarioMetagame.Clear();
                 Scnr.EditorFolders.Clear();
 
+                // if we're not interested in path finding data clear that out too
                 if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.PathFinding))
                     Scnr.AiPathfindingData.Clear();
 
-                ScenarioInstance targetInstance = Scnr.Scenery.FirstOrDefault();
-                if (targetInstance == null)
-                    targetInstance = Scnr.Crates.FirstOrDefault();
+                // add the spawn point placement if required
+                if (ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.SpawnPoint))
+                    AddRespawnPoint(spawnPoint, new RealEulerAngles3d());
 
-                if (targetInstance != null)
-                {
-                    var position = targetInstance.Position;
-                    position.Z += 0.5f;
+                // add the prematch camera
+                AddPrematchCamera(spawnPoint, new RealEulerAngles3d());
 
-                    if (ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.SpawnPoint))
-                        AddRespawnPoint(position, targetInstance.Rotation);
-
-                    AddPrematchCamera(position, targetInstance.Rotation);
-                }
-
+                // add a starting profile (can't remember if this is actually needed. i'm going to say no, it's not)
                 Scnr.PlayerStartingProfile = new List<PlayerStartingProfileBlock>
                 {
                     new PlayerStartingProfileBlock
@@ -419,36 +537,58 @@ namespace TagTool.Commands.Porting
                 };
 
                 CacheContext.Serialize(CacheStream, ScnrTag, Scnr);
+            }
 
-                FixupInstancedGeometry();
+            private RealPoint3d FindPointToPlaceRespawnPoint()
+            {
+                // get the list of all potential objects we can use for a position
+                var targetInstance = Scnr.Weapons.Cast<Scenario.ScenarioInstance>()
+                    .Concat(Scnr.Vehicles)
+                    .Concat(Scnr.Crates)
+                    .Concat(Scnr.Scenery)
+                    .Where(x => ((uint)x.AllowedZoneSets & (uint)DesiredBsps) != 0)
+                    .FirstOrDefault();
+
+                // if we found one, move it up just a bit so we're not clipped into it hopefully
+                if (targetInstance != null)
+                {
+                    var position = targetInstance.Position;
+                    position.Z += 0.4f;
+                    return position;
+                }
+
+                return new RealPoint3d() { X = 0, Y = 0, Z = 0 };
             }
 
             private void FixupSkies()
             {
-                BspShortFlags bspMask = 0;
-                for(int i = 0, j =0; i < 32; i++)
-                {
-                    if ((DesiredBsps & (BspFlags)(1 << i)) != 0)
-                    {
-                        bspMask |= (BspShortFlags)(1u << j);
-                        j++;
-                    }
-                }
+                //
+                // fixup the scenario sky reference block
+                //
 
-                foreach(var sky in Scnr.SkyReferences)
+                foreach (var sky in Scnr.SkyReferences)
                 {
-                    if (sky.SkyObject != null)
-                        sky.ActiveBsps = bspMask;
-                    else
-                        sky.ActiveBsps = BspShortFlags.None;
+                    uint newMask = 0;
+                    for (int i = 0; i < 32; i++)
+                    {
+                        if (sky.ActiveBsps.HasFlag((BspShortFlags)(1 << i)) && DesiredBsps.HasFlag((BspFlags)(1 << i)))
+                            newMask |= (1u << BspIndexRemapping[i]);
+                    }
+
+                    sky.ActiveBsps = (BspShortFlags)newMask;
                 }
             }
 
             private void FixupStructureBspReferences()
             {
+                //
+                // fixup the scenario structure bsps block
+                //
+
                 var newStructureBsps = new List<StructureBspBlock>();
                 for (int bspIndex = 0; bspIndex < Scnr.StructureBsps.Count; bspIndex++)
                 {
+                    // remove any we're not interested in
                     if (DesiredBsps.HasFlag((BspFlags)(1 << bspIndex)))
                     {
                         BspIndexRemapping[bspIndex] = newStructureBsps.Count;
@@ -460,6 +600,12 @@ namespace TagTool.Commands.Porting
 
             private void FixupZoneSets()
             {
+                //
+                // zoneset/zoneset pvs fixup is a little bit involved. At a basic level: the blocks are either indexed by bsp or cluster
+                // we're not interested in bsps that are not in our desired bsp mask so the goal is to just remove those 
+                // leaving the order intact (matching the new bsp mask).
+                //
+
                 var zoneSet = Scnr.ZoneSets[DesiredZoneSetIndex];
                 var zoneSetAudibility = Scnr.ZoneSetAudibility[zoneSet.ScenarioBspAudibilityIndex];
                 var zoneSetPvs = Scnr.ZoneSetPvs[zoneSet.PotentiallyVisibleSetIndex];
@@ -480,6 +626,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
+                // we only want one zone set for multiplayer as we are not going to be switching bsps
                 Scnr.ZoneSets = new List<ZoneSet>()
                 {
                     new ZoneSet()
@@ -490,6 +637,10 @@ namespace TagTool.Commands.Porting
                         LoadedBsps = (BspFlags)newBspZoneFlags
                     }
                 };
+
+                //
+                // fixup the pvs (potentially visible set) data
+                //
 
                 zoneSetPvs.StructureBspMask = (BspFlags)newBspZoneFlags;
                 Scnr.ZoneSetPvs = new List<ZoneSetPvsBlock>() { zoneSetPvs };
@@ -517,6 +668,11 @@ namespace TagTool.Commands.Porting
 
             private void FixupLightmap()
             {
+                //
+                // to fixup the lightmap we need to remove any bsp data reference datums whos index (bsp index)
+                // is not a set bit in our desired bsp mask. the Lbsp also has a bsp index field which needs to be fixed up
+                //
+
                 CachedTag lightmapTag;
                 if (!CacheContext.TryGetTag<ScenarioLightmap>(Scnr.Lightmap.Name, out lightmapTag))
                     return;
@@ -548,6 +704,10 @@ namespace TagTool.Commands.Porting
 
             void FixupScenarioClusterData()
             {
+                //
+                // only indlude scenario cluster datums that are in our desired bsp set.
+                //
+
                 var newClusterData = new List<ScenarioClusterDatum>();
                 for (int bspIndex = 0; bspIndex < Scnr.StructureBsps.Count; bspIndex++)
                 {
@@ -559,6 +719,11 @@ namespace TagTool.Commands.Porting
 
             private void FixupInstancedGeometry()
             {
+                //
+                // there is a bsp index in the instance collision definitions 
+                // that just needs to be fixed up with the new bsp index.
+                //
+
                 for (var i = 0; i < Scnr.StructureBsps.Count; i++)
                 {
                     var sbspTag = Scnr.StructureBsps[i].StructureBsp;
@@ -569,9 +734,7 @@ namespace TagTool.Commands.Porting
                     foreach (var instance in sbsp.InstancedGeometryInstances)
                     {
                         foreach (var def in instance.CollisionDefinitions)
-                        {
                             def.BspIndex = (sbyte)i;
-                        }
                     }
 
                     CacheContext.Serialize(CacheStream, sbspTag, sbsp);
@@ -580,6 +743,10 @@ namespace TagTool.Commands.Porting
 
             void ClearBspPvsBlockElements<T>(List<T> block, ulong keepMask)
             {
+                //
+                // Removes block elements whos indices are not set bits of the keepMask
+                // 
+
                 var newBlock = new List<T>();
                 for (int i = 0; i < block.Count; i++)
                 {
@@ -622,54 +789,74 @@ namespace TagTool.Commands.Porting
                 FixupScenarioObjects(Scnr.Creatures, Scnr.CreaturePalette);
             }
 
-            private void FixupScenarioObjects<T>(List<T> objects, List<ScenarioPaletteEntry> palette)
+            private void FixupScenarioObjects<T>(List<T> placements, List<ScenarioPaletteEntry> palette)
                 where T : ScenarioInstance
             {
+                // if we're not interested in objects just clear both blocks and return
                 if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Objects))
                 {
-                    objects.Clear();
+                    placements.Clear();
                     palette.Clear();
                     return;
                 }
 
                 var visitedPaletteObjects = new HashSet<CachedTag>();
                 var newPalette = new List<ScenarioPaletteEntry>();
-                var newObjects = new List<T>();
+                var newPlacements = new List<T>();
                 var keepPaletteIndices = new HashSet<int>();
 
-                for (int placementIndex = 0; placementIndex < objects.Count; placementIndex++)
+                // loop through placements placements and determine which objects we are going to keep
+                for (int placementIndex = 0; placementIndex < placements.Count; placementIndex++)
                 {
-                    var obj = objects[placementIndex];
+                    var placement = placements[placementIndex];
 
-                    if (obj.OriginBspIndex < 0)
+                    // check if the object is supposed to be spawned on any of the desired bsps
+                    if (((uint)placement.AllowedZoneSets & (int)DesiredBsps) == 0)
                         continue;
-                    if (!DesiredBsps.HasFlag((BspFlags)(1 << (obj.OriginBspIndex))))
+                    // check the palette index is valid
+                    if (placement.PaletteIndex < 0 || placement.PaletteIndex >= palette.Count)
                         continue;
-                    if (obj.PaletteIndex < 0 || obj.PaletteIndex >= palette.Count)
+                    // check if the palette entry has a valid tag instance
+                    if (palette[placement.PaletteIndex].Object == null)
                         continue;
 
-                    keepPaletteIndices.Add(obj.PaletteIndex);
+                    keepPaletteIndices.Add(placement.PaletteIndex);
 
-                    obj.OriginBspIndex = (short)BspIndexRemapping[obj.OriginBspIndex];
-                    obj.AllowedZoneSets = (1 << 0);
-
-                    newObjects.Add(obj);
-
-                    if (obj.NameIndex >= 0 && obj.NameIndex < Scnr.ObjectNames.Count)
+                    // fixup the origin bsp index
+                    if (placement.OriginBspIndex >= 0 && DesiredBsps.HasFlag((BspFlags)(1 << placement.OriginBspIndex)))
                     {
-                        var name = Scnr.ObjectNames[obj.NameIndex];
-                        name.PlacementIndex = (short)(newObjects.Count - 1);
+                        placement.OriginBspIndex = (short)BspIndexRemapping[placement.OriginBspIndex];
                     }
+                    else
+                    {
+                        placement.OriginBspIndex = -1;
+                    }
+
+                    // fixup the name placement index (for children)
+                    if (placement.NameIndex >= 0 && placement.NameIndex < Scnr.ObjectNames.Count)
+                    {
+                        var name = Scnr.ObjectNames[placement.NameIndex];
+                        name.PlacementIndex = (short)(newPlacements.Count);
+                    }
+
+                    // fixup the allowed bsps
+                    placement.AllowedZoneSets = (ushort)NewBsps;
+
+                    // add the placement to the new list
+                    newPlacements.Add(placement);
                 }
 
+                // TODO: run another pass over the placements and fixup the palette index, 
+                // so we can just remove them rather than nulling the tag instance
                 for (int i = 0; i < palette.Count; i++)
                 {
                     if (!keepPaletteIndices.Contains(i))
                         palette[i].Object = null;
                 }
 
-                objects.Clear();
-                objects.AddRange(newObjects);
+                // add the new placements (in-place)
+                placements.Clear();
+                placements.AddRange(newPlacements);
             }
 
             private void AddPrematchCamera(RealPoint3d position, RealEulerAngles3d rotation)
@@ -693,14 +880,15 @@ namespace TagTool.Commands.Porting
                 instance.ObjectType = new ScenarioObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
                 instance.Source = ScenarioInstance.SourceValue.Editor;
                 instance.BspPolicy = ScenarioInstance.BspPolicyValue.Default;
-                instance.OriginBspIndex = 0;
-                instance.AllowedZoneSets = (1 << 0);
+                instance.OriginBspIndex = -1;
+                instance.AllowedZoneSets = (ushort)NewBsps;
+                instance.Multiplayer = new MultiplayerObjectProperties();
                 instance.Multiplayer.Team = MultiplayerObjectProperties.TeamValue.Neutral;
                 Scnr.Scenery.Add(instance);
 
                 Scnr.SceneryPalette.Add(new ScenarioPaletteEntry()
                 {
-                    Object = CacheContext.TagCache.GetTag(@"objects\multi\spawning\respawn_point_invisible", "scen")
+                    Object = CacheContext.TagCache.GetTag(@"objects\multi\spawning\respawn_point", "scen")
                 });
             }
         }
@@ -746,6 +934,8 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
+                Add(BlamScnr.Lightmap);
+
                 CollectSkies();
                 CollectAllScenarioObjects();
                 CollectFlocks();
@@ -773,17 +963,26 @@ namespace TagTool.Commands.Porting
             {
                 if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Objects))
                     return;
+                //
+                // the objects commented below work, but they have the potential to make porting times take longer than needed
+                // the majority of the time they won't be visible.
+                //
 
                 CollectScenarioObjects(BlamScnr.Scenery, BlamScnr.SceneryPalette);
-                CollectScenarioObjects(BlamScnr.Bipeds, BlamScnr.BipedPalette);
+                //CollectScenarioObjects(BlamScnr.Bipeds, BlamScnr.BipedPalette);
                 CollectScenarioObjects(BlamScnr.Vehicles, BlamScnr.VehiclePalette);
                 CollectScenarioObjects(BlamScnr.Equipment, BlamScnr.EquipmentPalette);
                 CollectScenarioObjects(BlamScnr.Weapons, BlamScnr.WeaponPalette);
-                CollectScenarioObjects(BlamScnr.Machines, BlamScnr.MachinePalette);
-                CollectScenarioObjects(BlamScnr.Terminals, BlamScnr.TerminalPalette);
-                CollectScenarioObjects(BlamScnr.Controls, BlamScnr.ControlPalette);
+
+                if (ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.DeviceObjects))
+                {
+                    CollectScenarioObjects(BlamScnr.Machines, BlamScnr.MachinePalette);
+                    CollectScenarioObjects(BlamScnr.Terminals, BlamScnr.TerminalPalette);
+                    CollectScenarioObjects(BlamScnr.Controls, BlamScnr.ControlPalette);
+                }
+
                 CollectScenarioObjects(BlamScnr.SoundScenery, BlamScnr.SoundSceneryPalette);
-                CollectScenarioObjects(BlamScnr.Giants, BlamScnr.GiantPalette);
+                //CollectScenarioObjects(BlamScnr.Giants, BlamScnr.GiantPalette); 
                 CollectScenarioObjects(BlamScnr.EffectScenery, BlamScnr.EffectSceneryPalette);
                 CollectScenarioObjects(BlamScnr.LightVolumes, BlamScnr.LightVolumePalette);
                 CollectScenarioObjects(BlamScnr.Crates, BlamScnr.CratePalette);
@@ -795,12 +994,18 @@ namespace TagTool.Commands.Porting
                 if (objects == null || palette == null)
                     return;
 
-                foreach (var obj in objects.Where(x => DesiredBsps.HasFlag((BspFlags)(1 << (x.OriginBspIndex))) && x.PaletteIndex != -1))
+                foreach (var obj in objects)
                 {
+                    // check if the object object should be spawned in any of the desired bsps
+                    if (((uint)obj.AllowedZoneSets & (int)DesiredBsps) == 0)
+                        continue;
+                    // check the palette index is valid
                     if (obj.PaletteIndex < 0 || obj.PaletteIndex >= palette.Count)
                         continue;
 
                     var paletteEntry = palette[obj.PaletteIndex];
+
+                    // check the palette entry tag instance is valid and add it to the list of tags to be ported
                     if (paletteEntry.Object != null)
                         Add(palette[obj.PaletteIndex].Object);
                 }
@@ -810,16 +1015,20 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var flock in BlamScnr.Flocks.Where(x => DesiredBsps.HasFlag((BspFlags)(1 << (x.BspIndex)))))
                 {
+                    // check the flock palette index is valid
                     if (flock.FlockPaletteIndex >= 0 && flock.FlockPaletteIndex < BlamScnr.CreaturePalette.Count)
                     {
                         var flockTag = BlamScnr.FlockPalette[flock.FlockPaletteIndex];
+                        // check the flock palette entry tag instance is valid and add it to the list of tags to be ported
                         if (flockTag != null && flockTag.Instance != null)
                             Add(flockTag.Instance);
                     }
 
+                    // check the create palette index is valid
                     if (flock.CreaturePaletteIndex >= 0 && flock.CreaturePaletteIndex < BlamScnr.CreaturePalette.Count)
                     {
                         var creatureTag = BlamScnr.CreaturePalette[flock.CreaturePaletteIndex];
+                        // check the create palette entry tag instance is valid and add it to the list of tags to be ported
                         if (creatureTag != null && creatureTag.Object != null)
                             Add(creatureTag.Object);
                     }
@@ -828,25 +1037,36 @@ namespace TagTool.Commands.Porting
 
             private void CollectDecals(Stream blamStream)
             {
+                //
+                // iterate through the decal adding any any decal systems that have decals that are within the bsp world bounds
+                // to the list of the tags to be ported
+                //
+
                 var visitedPaletteEntries = new HashSet<int>();
                 for (int i = 0; i < BlamScnr.StructureBsps.Count; i++)
                 {
                     var sbspRef = BlamScnr.StructureBsps[i];
+
+                    // only check bsps we are interested in
                     if (((BspFlags)(1 << i) & DesiredBsps) == 0)
                         continue;
 
-                    GameCache blamCache = BlamCache;
+                    // deserialize the structure bsp or the given index
                     var sbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamStream, sbspRef.StructureBsp);
                     
                     for (int j = 0; j < BlamScnr.Decals.Count; j++)
                     {
                         var decal = BlamScnr.Decals[j];
+
+                        // check the decal palette index is valid
                         if (decal.DecalPaletteIndex == -1)
                             continue;
-
+                        // check we haven't already added this decal system
                         if (visitedPaletteEntries.Contains(decal.DecalPaletteIndex))
                             continue;
 
+                        // if the deal position is inside the world bounds AABB, add it to the list of tags to be ported
+                        // and mark it as visited so we don't check it again
                         if (decal.Position.X >= sbsp.WorldBoundsX.Lower && decal.Position.X <= sbsp.WorldBoundsX.Upper &&
                             decal.Position.Y >= sbsp.WorldBoundsY.Lower && decal.Position.Y <= sbsp.WorldBoundsY.Upper &&
                             decal.Position.Z >= sbsp.WorldBoundsZ.Lower && decal.Position.Z <= sbsp.WorldBoundsZ.Upper)
