@@ -177,8 +177,11 @@ namespace TagTool.Commands.Porting
                 foreach (var bA in bmBoolConstants)
                     if (eA == bA)
                     {
-                        newShaderProperty.BooleanConstants &= ~(uint)(1 << bmBoolConstants.IndexOf(bA));
-                        newShaderProperty.BooleanConstants |= (uint)(1 << edBoolConstants.IndexOf(eA));
+                        if ((newShaderProperty.BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) != 0)
+                        {
+                            newShaderProperty.BooleanConstants &= ~(1u << bmBoolConstants.IndexOf(bA));
+                            newShaderProperty.BooleanConstants |= (1u << edBoolConstants.IndexOf(eA));
+                        }
                     }
                        
             // Remove some tagblocks
