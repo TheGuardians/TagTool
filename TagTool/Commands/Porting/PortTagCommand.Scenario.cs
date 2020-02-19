@@ -872,7 +872,7 @@ namespace TagTool.Commands.Porting
                         ConvertScriptTagReferenceExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
 
-                    case HsType.HaloOnlineValue.AiLine:
+                    case HsType.HaloOnlineValue.AiLine when BitConverter.ToInt32(expr.Data, 0) != -1:
                     case HsType.HaloOnlineValue.StringId:
                         ConvertScriptStringIdExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
