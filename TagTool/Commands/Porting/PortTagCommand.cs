@@ -774,6 +774,37 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
+            // yucky hack-fix for some particles taking over the screen
+            foreach (var effectEvent in effe.Events)
+            {
+                foreach (var particleSystem in effectEvent.ParticleSystems)
+                {
+                    if (particleSystem.Particle != null)
+                    {
+                        var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
+                        if ((prt3Definition.Flags & (1 << 7)) != 0) // flag bit is always 7 -- this is a post porting fixup
+                        {
+                            foreach (var attachment in prt3Definition.Attachments)
+                            {
+                                if (attachment.Type != null && attachment.Type.Group.Tag == "effe")
+                                {
+                                    var attachmentEffe = CacheContext.Deserialize<Effect>(cacheStream, attachment.Type);
+                                    foreach (var attEvent in attachmentEffe.Events)
+                                    {
+                                        if (attEvent.ParticleSystems.Count > 0)
+                                        {
+                                            // this prevents the particles attached effect from rendering at random sizes
+                                            particleSystem.Emitters[0].EmitterFlags &= ~Effect.Event.ParticleSystem.Emitter.FlagsValue.ClampParticleVelocities;
+                                            particleSystem.Emitters[0].EmitterFlags |= Effect.Event.ParticleSystem.Emitter.FlagsValue.ParticleEmittedInsideShape;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return effe;
         }
 
