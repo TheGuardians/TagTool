@@ -463,10 +463,10 @@ namespace TagTool.Commands.Porting
                 //
                 Scnr.BspAtlas.Clear();
                 Scnr.CampaignPlayers.Clear();
-                Scnr.SoftCeilings.Clear();
+                //Scnr.SoftCeilings.Clear();
                 Scnr.PlayerStartingProfile.Clear();
                 Scnr.PlayerStartingLocations.Clear();
-                Scnr.TriggerVolumes.Clear();
+                //Scnr.TriggerVolumes.Clear();
                 Scnr.RecordedAnimations.Clear();
                 Scnr.ZonesetSwitchTriggerVolumes.Clear();
                 Scnr.Unknown32.Clear();
@@ -496,8 +496,8 @@ namespace TagTool.Commands.Porting
                 Scnr.CustomObjectNameStrings = null;
                 Scnr.ChapterTitleStrings = null;
                 Scnr.UnitSeatsMapping.Clear();
-                Scnr.ScenarioKillTriggers.Clear();
-                Scnr.ScenarioSafeTriggers.Clear();
+                //Scnr.ScenarioKillTriggers.Clear();
+                //Scnr.ScenarioSafeTriggers.Clear();
                 Scnr.ScriptExpressions.Clear();
                 Scnr.SubtitleStrings = null;
                 Scnr.MissionDialogue.Clear();
@@ -520,7 +520,7 @@ namespace TagTool.Commands.Porting
                     AddRespawnPoint(spawnPoint, new RealEulerAngles3d());
 
                 // add the prematch camera
-                AddPrematchCamera(spawnPoint, new RealEulerAngles3d());
+                AddPrematchCamera(spawnPoint + new RealPoint3d(0,0,0.62f), new RealEulerAngles3d());
 
                 // add a starting profile (can't remember if this is actually needed. i'm going to say no, it's not)
                 Scnr.PlayerStartingProfile = new List<PlayerStartingProfileBlock>
@@ -541,23 +541,154 @@ namespace TagTool.Commands.Porting
 
             private RealPoint3d FindPointToPlaceRespawnPoint()
             {
-                // get the list of all potential objects we can use for a position
-                var targetInstance = Scnr.Weapons.Cast<Scenario.ScenarioInstance>()
-                    .Concat(Scnr.Vehicles)
-                    .Concat(Scnr.Crates)
-                    .Concat(Scnr.Scenery)
-                    .Where(x => ((uint)x.AllowedZoneSets & (uint)DesiredBsps) != 0)
-                    .FirstOrDefault();
+                //
+                // tries to find a safe place to place a respawn point where the player won't be killed instantly
+                // not the smartest way to do it but will work for now. Note: this assumes that other fixups have
+                // already been performed such as culling the structure bsp block.
+                //
 
-                // if we found one, move it up just a bit so we're not clipped into it hopefully
-                if (targetInstance != null)
+                foreach (var scriptingDatum in Scnr.ScriptingData)
                 {
-                    var position = targetInstance.Position;
-                    position.Z += 0.4f;
-                    return position;
+                    foreach (var pointSet in scriptingDatum.PointSets)
+                    {
+                        if (!DesiredBsps.HasFlag((BspFlags)(1 << pointSet.BspIndex)))
+                            continue;
+
+                        foreach (var point in pointSet.Points)
+                        {
+                            if (point.BspIndex != pointSet.BspIndex)
+                                continue;
+                            if (point.SurfaceIndex == -1)
+                                continue;
+                            if (IsSafePointToSpawn(point.Position))
+                                return point.Position;
+                        }
+                    }
                 }
 
-                return new RealPoint3d() { X = 0, Y = 0, Z = 0 };
+                foreach (var zone in Scnr.Zones)
+                {
+                    foreach (var firingPosition in zone.FiringPositions)
+                    {
+                        if (!DesiredBsps.HasFlag((BspFlags)(1 << firingPosition.BspIndex)))
+                            continue;
+
+                        if (firingPosition.ReferenceFrame != -1) continue;
+
+                        return firingPosition.Position;
+                    }
+                }
+
+                // get the list of all potential objects we can use for a position
+                var potentialScenarioObjects =
+                    Scnr.Weapons.Cast<ScenarioInstance>()
+                    .Concat(Scnr.Equipment)
+                    .Concat(Scnr.Vehicles)
+                    .Concat(Scnr.Crates)
+                    .Concat(Scnr.Scenery);
+
+                // check each object
+                foreach (var obj in potentialScenarioObjects)
+                {
+                    if (obj.ParentNameIndex != -1 || obj.PaletteIndex < 0)
+                        continue;
+
+                    if (IsSafePointToSpawn(obj.Position))
+                    {
+                        var palette = GetPaletteBlock(obj);
+                        if (palette[obj.PaletteIndex].Object == null)
+                            continue;
+
+                        var objectDef = CacheContext.Deserialize<GameObject>(CacheStream, palette[obj.PaletteIndex].Object);
+
+                        // move it up just a bit so we're not clipped into it hopefully
+                        RealPoint3d point = obj.Position;
+                        point.Z += objectDef.BoundingRadius;
+                        return point;
+                    }
+                }
+
+                //
+                // for each bsp check if any safe zones are within the world bounds
+                //
+
+                var bspWorldCenterPoints = new List<RealPoint3d>();
+                for (int i = 0; i < Scnr.StructureBsps.Count; i++)
+                {
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(CacheStream, Scnr.StructureBsps[i].StructureBsp);
+
+                    foreach (var safeTrigger in Scnr.ScenarioSafeTriggers)
+                    {
+                        var volume = Scnr.TriggerVolumes[safeTrigger.TriggerVolume];
+
+                        // add the world center point as a fallback if we can't find a safe volume
+                        var worldCenterPoint = new RealPoint3d()
+                        {
+                            X = (sbsp.WorldBoundsX.Lower + sbsp.WorldBoundsX.Upper) * 0.5f,
+                            Y = (sbsp.WorldBoundsY.Lower + sbsp.WorldBoundsY.Upper) * 0.5f,
+                            Z = (sbsp.WorldBoundsZ.Lower + sbsp.WorldBoundsZ.Upper) * 0.5f
+                        };
+                        bspWorldCenterPoints.Add(worldCenterPoint);
+
+                        // check the volume position is within the bsp world bounds
+                        if (volume.Position.X >= sbsp.WorldBoundsX.Lower && volume.Position.X <= sbsp.WorldBoundsX.Upper &&
+                            volume.Position.Y >= sbsp.WorldBoundsY.Lower && volume.Position.Y <= sbsp.WorldBoundsY.Upper &&
+                            volume.Position.Z >= sbsp.WorldBoundsZ.Lower && volume.Position.Z <= sbsp.WorldBoundsZ.Upper)
+                        {
+                            return volume.Position;
+                        }
+                    }
+                }
+
+                // as a final fallback use one of the bsp world center points we stored
+                if (bspWorldCenterPoints.Count > 0)
+                    return bspWorldCenterPoints[0];
+
+                return new RealPoint3d(0, 0, 0);
+            }
+
+            private List<Scenario.ScenarioPaletteEntry> GetPaletteBlock(ScenarioInstance instance)
+            {
+                switch(instance)
+                {
+                    case BipedInstance _: return Scnr.BipedPalette;
+                    case VehicleInstance _: return Scnr.VehiclePalette;
+                    case WeaponInstance _: return Scnr.WeaponPalette;
+                    case EquipmentInstance _: return Scnr.EquipmentPalette;
+                    case ControlInstance _: return Scnr.ControlPalette;
+                    case TerminalInstance _: return Scnr.TerminalPalette;
+                    case MachineInstance _: return Scnr.MachinePalette;
+                    case CrateInstance _: return Scnr.CratePalette;
+                    case SceneryInstance _: return Scnr.SceneryPalette;
+                    case SoundSceneryInstance _: return Scnr.SoundSceneryPalette;
+                    case EffectSceneryInstance _:return Scnr.EffectSceneryPalette;
+                    case LightVolumeInstance _: return Scnr.LightVolumePalette;
+                    case GiantInstance _: return Scnr.GiantPalette;
+                    default: throw new NotSupportedException();
+                }
+            }
+
+            private bool IsSafePointToSpawn(RealPoint3d point)
+            {
+                foreach (var killTrigger in Scnr.ScenarioKillTriggers)
+                {
+                    if (killTrigger.TriggerVolume != -1 && TriggerVolumeTestPoint(killTrigger.TriggerVolume, point))
+                        return false;
+                }
+
+                return true;
+            }
+
+            private bool TriggerVolumeTestPoint(int index, RealPoint3d point)
+            {
+                var volume = Scnr.TriggerVolumes[index];
+                // get the vector from the volume center to the point
+                var delta = point - volume.Position;
+                // check the vector head is within the extents
+                return 
+                    Math.Abs(delta.X) < volume.Extents.X &&
+                    Math.Abs(delta.Y) < volume.Extents.Y &&
+                    Math.Abs(delta.Z) < volume.Extents.Z;
             }
 
             private void FixupSkies()
@@ -800,8 +931,6 @@ namespace TagTool.Commands.Porting
                     return;
                 }
 
-                var visitedPaletteObjects = new HashSet<CachedTag>();
-                var newPalette = new List<ScenarioPaletteEntry>();
                 var newPlacements = new List<T>();
                 var keepPaletteIndices = new HashSet<int>();
 
@@ -841,6 +970,8 @@ namespace TagTool.Commands.Porting
 
                     // fixup the allowed bsps
                     placement.AllowedZoneSets = (ushort)NewBsps;
+                    // tell it to always spawn
+                    placement.PlacementFlags &= ~ObjectPlacementFlags.NotAutomatically;
 
                     // add the placement to the new list
                     newPlacements.Add(placement);
@@ -875,14 +1006,18 @@ namespace TagTool.Commands.Porting
                 var instance = new SceneryInstance();
                 instance.PaletteIndex = (short)Scnr.SceneryPalette.Count;
                 instance.NameIndex = -1;
+                instance.EditorFolderIndex = -1;
+                instance.ParentNameIndex = -1;
                 instance.Position = position;
                 instance.Rotation = rotation;
                 instance.ObjectType = new ScenarioObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
                 instance.Source = ScenarioInstance.SourceValue.Editor;
                 instance.BspPolicy = ScenarioInstance.BspPolicyValue.Default;
+                instance.UniqueHandle = new DatumHandle(0xffffffff);
                 instance.OriginBspIndex = -1;
                 instance.AllowedZoneSets = (ushort)NewBsps;
                 instance.Multiplayer = new MultiplayerObjectProperties();
+                instance.Multiplayer.AttachedNameIndex = -1;
                 instance.Multiplayer.Team = MultiplayerObjectProperties.TeamValue.Neutral;
                 Scnr.Scenery.Add(instance);
 
