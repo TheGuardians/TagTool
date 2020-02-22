@@ -58,7 +58,7 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                short temp = (short)(data[i] | (data[i + 1] << 8));
+                short temp = (short)(data[i + 1] | (data[i] << 8));
                 buffer[i * 2] = (byte)(temp & 0x1F);
                 buffer[i * 2 + 1] = (byte)((temp >> 5) & 0x3F);
                 buffer[i * 2 + 2] = (byte)((temp >> 11) & 0x1F);
@@ -72,10 +72,10 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                buffer[i * 2 + 0] = (byte)((data[i] & 0x0F) << 4);
-                buffer[i * 2 + 1] = (byte)(data[i] & 0xF0);
-                buffer[i * 2 + 2] = (byte)((data[i + 1] & 0x0F) << 4);
-                buffer[i * 2 + 3] = (byte)(data[i + 1] & 0xF0);
+                buffer[i * 2 + 0] = (byte)((data[i + 1] & 0x0F) << 4);
+                buffer[i * 2 + 1] = (byte)(data[i + 1] & 0xF0);
+                buffer[i * 2 + 2] = (byte)((data[i + 0] & 0x0F) << 4);
+                buffer[i * 2 + 3] = (byte)(data[i + 0] & 0xF0);
             }
             return buffer;
         }
@@ -97,7 +97,6 @@ namespace TagTool.Bitmaps
 
         private static byte[] EncodeA8(byte[] data, int width, int height)
         {
-            //Data is organized a R G B A and A8 is 1 byte of alpha per pixel, we populate the buffer array which contains height/width pixels
             byte[] buffer = new byte[height * width];
             for (int i = 0; i < (buffer.Length); i++)
             {
@@ -112,17 +111,16 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[height * width * 4];
             for (int i = 0; i < (height * width * 2); i += 2)
             {
-                buffer[i * 2] = data[i + 1];
+                buffer[i * 2] = data[i];
                 buffer[i * 2 + 1] = data[i + 1];
                 buffer[i * 2 + 2] = data[i + 1];
-                buffer[i * 2 + 3] = data[i];
+                buffer[i * 2 + 3] = data[i + 1];
             }
             return buffer;
         }
 
         private static byte[] EncodeA8Y8(byte[] data, int width, int height)
         {
-            //Create an array of height*width pixels of 2 bytes each, 1 byte alpha, 1 byte monochrome color. Assuming the original data byte[] is already grayscale (i.e. converting from dxn mono alpha, dtx1,3,5 mono alpha)
             byte[] buffer = new byte[height * width * 2];
             for (int i = 0; i < height * width * 2; i += 2)
             {
@@ -136,7 +134,7 @@ namespace TagTool.Bitmaps
         public static byte[] ConvertAY8ToA8Y8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 2];
-            for(int i =0; i<height*width*2; i += 2)
+            for(int i =0; i < height*width * 2; i += 2)
             {
                 int index = i / 2;
                 buffer[i] = data[index];
@@ -159,6 +157,7 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        // TODO: fix/refactor
         private static byte[] DecodeCtx1(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[width * height * 4];
@@ -215,7 +214,7 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
-
+        // TODO: fix/refactor
         private static byte[] DecodeDxn(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 4];
@@ -588,7 +587,7 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
-
+        // TODO: fix/refactor
         private static byte[] DecodeDxt1(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[(width * height) * 4];
@@ -672,7 +671,7 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
-
+        // TODO: fix/refactor
         private static byte[] DecodeDxt3(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[width * height * 4];
@@ -832,7 +831,7 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
-
+        // TODO: fix/refactor
         private static byte[] DecodeDxt5(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[width * height * 4];
@@ -1052,7 +1051,7 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                short temp = (short)(data[i] | (data[i + 1] << 8));
+                short temp = (short)(data[i + 1] | (data[i] << 8));
                 buffer[i * 2] = (byte)((byte)(temp & 0x1F)<<3);
                 buffer[(i * 2) + 1] = (byte)((byte)((temp >> 5) & 0x3F)<<2);
                 buffer[(i * 2) + 2] = (byte)((byte)((temp >> 11) & 0x1F)<<3);
@@ -1067,17 +1066,16 @@ namespace TagTool.Bitmaps
             for (int i = 0; i < (height * width); i++)
             {
                 int index = i * 4;
-                buffer[index] = data[i];
+                buffer[index] = 0xFF;
                 buffer[index + 1] = data[i];
                 buffer[index + 2] = data[i];
-                buffer[index + 3] = 0xFF;
+                buffer[index + 3] = data[i];
             }
             return buffer;
         }
 
         private static byte[] EncodeY8(byte[] data, int width, int height)
         {
-            //Convert grayscale uncompressed image to Y8, monochrome 1 byte per pixel.
             byte[] buffer = new byte[height * width];
             for (int i = 0; i < (height * width); i++)
             {
