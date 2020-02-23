@@ -396,7 +396,7 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level)
+        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level, int firstLevelOffset = -1)
         {
             uint unknownType = GetXboxBitmapD3DTextureType(bitmapResource);
 
@@ -427,8 +427,7 @@ namespace TagTool.Bitmaps
 
             uint rowPitch = 0;
             uint offset = 0;
-            uint tailLevelOffset = 0;
-            uint levelSizeBytes = 0;
+            uint levelSizeBytes;
 
             if (unknownType == 2)
             {
@@ -438,38 +437,6 @@ namespace TagTool.Bitmaps
 
             if (Level > 0 || (isPacked && (levelWidth <= 16 || levelHeight <= 16)))
             {
-
-                uint widthAdjustment = 0;
-                if ((width - borderSize) >> Level <= 1)
-                    widthAdjustment = 1;
-                else
-                    widthAdjustment = (width - borderSize) >> Level;
-
-                width = borderSize + widthAdjustment;
-
-                uint heightAdjustment = 0;
-                if ((height - borderSize) >> Level <= 1)
-                    heightAdjustment = 1;
-                else
-                    heightAdjustment = (height - borderSize) >> Level;
-
-                height = borderSize + heightAdjustment;
-
-                if (unknownType == 2)
-                {
-                    uint depthAjustment = 0;
-                    if ((depth - borderSize) >> Level <= 1)
-                        depthAjustment = 1;
-                    else
-                        depthAjustment = (depth - borderSize) >> Level;
-
-                    depth = depthAjustment;
-                }
-                else
-                {
-                    depth = 1;
-                }
-
                 uint arrayStride = 1;
                 if (bitmapResource.BitmapType == BitmapType.CubeMap || bitmapResource.BitmapType == BitmapType.Array)
                 {
@@ -505,9 +472,6 @@ namespace TagTool.Bitmaps
                     levelHeight = 1u << logHeight;
                     levelDepth = 1u << logDepth;
 
-                    levelWidth = (uint)bitmapResource.Width >> (Level - LevelIndex);
-                    levelHeight = (uint)bitmapResource.Height >> (Level - LevelIndex);
-                    //levelDepth = (uint)bitmapResource.Depth >> (Level - LevelIndex);
                     uint tempWidth = levelWidth;
                     uint tempHeight = levelHeight;
                     Direct3D.D3D9x.D3D.AlignTextureDimensions(ref levelWidth, ref levelHeight, ref levelDepth, bitsPerPixel, format, unknownType, isTiled);
@@ -525,12 +489,19 @@ namespace TagTool.Bitmaps
                     levelSizeBytes = 0;
                     if (LevelIndex > 0)
                     {
-                        if (unknownType == 2)
-                            levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * levelDepth * rowPitch, 4096);
+                        if(LevelIndex == Level && firstLevelOffset != -1)
+                        {
+                            offset += (uint)firstLevelOffset;
+                        }
                         else
-                            levelSizeBytes = levelDepth * Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
+                        {
+                            if (unknownType == 2)
+                                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * levelDepth * rowPitch, 4096);
+                            else
+                                levelSizeBytes = levelDepth * Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
 
-                        offset += arrayStride * levelSizeBytes;
+                            offset += arrayStride * levelSizeBytes;
+                        } 
                     }
                 }
                 while (--LevelIndex > 0);
