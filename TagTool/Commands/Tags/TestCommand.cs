@@ -75,10 +75,8 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); 
                 //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\monitor_shield_meter", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\elite_shield_flash_bleed", "bitm"); 
+                bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\elite_shield_flash_bleed", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\energy_meter_left", "bitm");
-                //levels\multi\guardian\bitmaps\guardian_manconnon_bump
-                //fx\decals\ground_marks\_bitmaps\generic_foot_bump
                 //bitmapTag = cache.TagCache.GetTag(@"levels\shared\bitmaps\nature\water\water_ripples", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\bitmaps\guardian_manconnon_bump", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\ground_marks\_bitmaps\generic_foot_bump", "bitm");
@@ -90,8 +88,10 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"objects\characters\masterchief\bitmaps\mp_markv_zbump", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\sky\bitmaps\guardian_canopy_leaves", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"objects\halograms\bitmaps\forerunner_holo_shapes", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"objects\halograms\070lc_waypoint_reveal\main_halogram\bitmaps\galaxy_middle", "bitm"); 
-
+                //bitmapTag = cache.TagCache.GetTag(@"objects\halograms\070lc_waypoint_reveal\main_halogram\bitmaps\galaxy_middle", "bitm"); 
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
+                
                 //TestConvertAllBitmaps(cache, stream);
                 TestConvertBitmap(cache, stream, bitmapTag, 0);
             }
@@ -246,9 +246,8 @@ namespace TagTool.Commands
 
             XboxGraphics.XGGetBlockDimensions(gpuFormat, out blockWidth, out blockHeight);
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
-            uint mipOffset = 0;
             if (definition.MipmapCount > 1)
-                mipOffset = XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
+                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
 
             // use the point to extract the right rectangle out of the texture
             Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
@@ -284,10 +283,7 @@ namespace TagTool.Commands
             uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
 
             // documentation says that each packed mip level should be aligned to 4KB, required to make untiling work smoothly
-            if(level > 0)
-            {
-                size = (uint)((size + 0xFFF) & ~0xFFF);
-            }
+            size = (uint)((size + 0xFFF) & ~0xFFF);
 
             uint tileSize = 32 * 32 * blockWidth * blockHeight * bitsPerPixel / 8;
 
@@ -303,21 +299,26 @@ namespace TagTool.Commands
 
             if (level == 0 && definition.HighResInSecondaryResource > 0)
             {
-                levelOffset = 0;
-                data = secondaryData;
+                levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
+                uint alignedSecondaryLength = (uint)((secondaryData.Length + 0xFFF) & ~0xFFF);
+                data = new byte[alignedSecondaryLength];
+                Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
             }
             else
             {
                 if(definition.HighResInSecondaryResource > 0)
                 {
-                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, secondaryData.Length);
-                    levelOffset -= (uint)secondaryData.Length;
+                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
+                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0xFFF) & ~0xFFF);
+                    levelOffset -= alignedSecondaryLength;
                 }
                 else
                 {
-                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, -1);
+                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
                 }
-                data = primaryData;
+                uint alignedPrimaryLength = (uint)((primaryData.Length + 0xFFF) & ~0xFFF);
+                data = new byte[alignedPrimaryLength];
+                Array.Copy(primaryData, 0, data, 0, primaryData.Length);
             }
                 
             
@@ -325,18 +326,15 @@ namespace TagTool.Commands
 
             tileOffset += (int)levelOffset;
 
-            if (tileOffset > 0)
-            {
-                byte[] result = new byte[size];
+            byte[] tempResult = new byte[size];
 
-                // check if data has enough memory for the requested, size, sometimes it does not (truncated to save memory)
-                uint copySize = size;
-                if (size + tileOffset >= data.Length)
-                    copySize = (uint)(data.Length - tileOffset);
+            // check if data has enough memory for the requested, size, sometimes it does not (truncated to save memory)
+            uint copySize = size;
+            if (size + tileOffset >= data.Length)
+                copySize = (uint)(data.Length - tileOffset);
 
-                Array.Copy(data, tileOffset, result, 0, copySize);
-                data = result;
-            }
+            Array.Copy(data, tileOffset, tempResult, 0, copySize);
+            data = tempResult;
 
             uint nBlockWidth;
             uint nBlockHeight;

@@ -396,10 +396,10 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level, int firstLevelOffset = -1)
+        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level)
         {
             uint blockWidth, blockHeight;
-            uint rowPitch;
+            uint layerSize;
             uint offset = 0;
             uint levelSizeBytes;
 
@@ -431,25 +431,26 @@ namespace TagTool.Bitmaps
                     arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
                 }
 
-                for(int i = 0; i < Level; i++)
-                {
-                    uint alignedWidth = levelWidth >> i;
-                    uint alignedHeight = levelHeight >> i;
+                uint alignedWidth = 0;
+                uint alignedHeight = 0;
 
-                    if (alignedWidth < 1) alignedWidth = 1;
-                    if (alignedHeight < 1) alignedHeight = 1;
+                for (int i = 0; i < Level; i++)
+                {
+                    levelWidth = width >> i;
+                    levelHeight = height >> i;
+
+                    if (levelWidth < 1) levelWidth = 1;
+                    if (levelHeight < 1) levelHeight = 1;
 
                     uint alignedDepth = levelDepth;
+                    alignedWidth = levelWidth;
+                    alignedHeight = levelHeight;
 
-                    if ((alignedHeight <= 16 || alignedWidth <= 16) && isPacked)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
+                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
 
-                        // align to next power of two (could also be the next tile dimension?)
+                    // if not first mip level, align to next power of two
+                    if(i > 0)
+                    {
                         if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedWidth))
                         {
                             alignedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedWidth);
@@ -463,30 +464,30 @@ namespace TagTool.Bitmaps
                             if (alignedHeight < 0) alignedHeight = 0;
                             alignedHeight = 1u << (int)alignedHeight;
                         }
-
-                        rowPitch = (bitsPerPixel * alignedWidth) / 8;
-
-                        if (i == 0 && firstLevelOffset != -1)
-                        {
-                            offset += (uint)firstLevelOffset;
-                        }
-                        else
-                        {
-                            if (unknownType == 2)
-                                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(alignedHeight * alignedDepth * rowPitch, 4096);
-                            else
-                                levelSizeBytes = alignedDepth * Direct3D.D3D9x.D3D.NextMultipleOf(alignedHeight * rowPitch, 4096);
-
-                            offset += arrayStride * levelSizeBytes;
-                        }
-
-                        if (ArrayIndex > 0)
-                        {
-                            uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
-                            uint nextLevelSize = Direct3D.D3D9x.D3D.NextMultipleOf(size, 4096);
-                            offset += (uint)(ArrayIndex * nextLevelSize);
-                        }
                     }
+                    
+                    layerSize = (bitsPerPixel * alignedWidth * alignedHeight) / 8;
+
+                    if ((levelWidth <= 16 || levelHeight <= 16) && isPacked)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if (unknownType == 2)
+                            levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(alignedDepth * layerSize, 0x1000);
+                        else
+                            levelSizeBytes = alignedDepth * Direct3D.D3D9x.D3D.NextMultipleOf(layerSize, 0x1000);
+
+                        offset += arrayStride * levelSizeBytes;
+                    }
+                }
+                // when array index is > 0, we need to add an offset into the right array layer, outside of the loop since the loop computes the offset for all layers
+                if (ArrayIndex > 0)
+                {
+                    uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
+                    uint nextLevelSize = Direct3D.D3D9x.D3D.NextMultipleOf(size, 0x1000);
+                    offset += (uint)(ArrayIndex * nextLevelSize);
                 }
             }
             else
@@ -508,9 +509,9 @@ namespace TagTool.Bitmaps
                     levelHeight = Direct3D.D3D9x.D3D.NextMultipleOf(height, blockHeight);
                 }
 
-                rowPitch = bitsPerPixel * levelWidth >> 3;
+                layerSize = (bitsPerPixel * levelWidth * levelHeight) >> 3;
 
-                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
+                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(layerSize, 0x1000);
                 offset += levelSizeBytes * (uint)ArrayIndex;
             }
 
