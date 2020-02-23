@@ -398,42 +398,28 @@ namespace TagTool.Bitmaps
 
         public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level, int firstLevelOffset = -1)
         {
-            uint unknownType = GetXboxBitmapD3DTextureType(bitmapResource);
+            uint blockWidth, blockHeight;
+            uint rowPitch;
+            uint offset = 0;
+            uint levelSizeBytes;
 
+            uint unknownType = GetXboxBitmapD3DTextureType(bitmapResource);
             var format = XboxGraphics.XGGetGpuFormat(bitmapResource.D3DFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
+            bool isTiled = Direct3D.D3D9x.D3D.IsTiled(bitmapResource.D3DFormat);
+            XboxGraphics.XGGetBlockDimensions(format, out blockWidth, out blockHeight);
 
-            int levels = bitmapResource.MipmapCount;
-            if (levels == 0)
-                levels = Direct3D.D3D9x.D3D.GetMaxMipLevels(bitmapResource.Width, bitmapResource.Height, bitmapResource.Depth, 0);
+            int levels = bitmapResource.MipmapCount == 0 ? Direct3D.D3D9x.D3D.GetMaxMipLevels(bitmapResource.Width, bitmapResource.Height, bitmapResource.Depth, 0) : bitmapResource.MipmapCount;
 
             bool isPacked = levels > 1;
-
-            bool isTiled = Direct3D.D3D9x.D3D.IsTiled(bitmapResource.D3DFormat);
-            int hasBorder = 0;
 
             uint width = (uint)bitmapResource.Width;
             uint height = (uint)bitmapResource.Height;
             uint depth = (uint)bitmapResource.Depth;
 
-            uint borderSize = (uint)hasBorder * 2;
-            uint logAdjustedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(width - borderSize));
-            uint logAdjustedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)(height - borderSize));
-            uint logAdjustedDepth = 1;
-
-            uint levelWidth = 1u << (int)(hasBorder + logAdjustedWidth);
-            uint levelHeight = 1u << (int)(hasBorder + logAdjustedHeight);
-            uint levelDepth = 1;
-
-            uint rowPitch = 0;
-            uint offset = 0;
-            uint levelSizeBytes;
-
-            if (unknownType == 2)
-            {
-                logAdjustedDepth = Direct3D.D3D9x.D3D.Log2Ceiling((int)(depth - borderSize));
-                levelDepth = 1u << (int)(hasBorder + logAdjustedDepth);
-            }
+            uint levelWidth = width;
+            uint levelHeight = height;
+            uint levelDepth = depth;
 
             if (Level > 0 || (isPacked && (levelWidth <= 16 || levelHeight <= 16)))
             {
@@ -445,77 +431,62 @@ namespace TagTool.Bitmaps
                     arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
                 }
 
-                int logWidth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)levelWidth);
-                int logHeight = (int)Direct3D.D3D9x.D3D.Log2Floor((int)levelHeight);
-                int logDepth = (int)Direct3D.D3D9x.D3D.Log2Floor((int)levelDepth);
-
-                int levelIndex = Level;
-                if (isPacked && (levelWidth <= 16 || levelHeight <= 16))
+                for(int i = 0; i < Level; i++)
                 {
-                    ++logWidth;
-                    ++logHeight;
-                    ++logDepth;
-                }
-                else
-                {
-                    levelIndex = Level - 1;
-                }
+                    uint alignedWidth = levelWidth >> i;
+                    uint alignedHeight = levelHeight >> i;
 
-                int LevelIndex = Level;
-                do
-                {
-                    if (logWidth > 0) --logWidth;
-                    if (logHeight > 0) --logHeight;
-                    if (logDepth > 0) --logDepth;
+                    if (alignedWidth < 1) alignedWidth = 1;
+                    if (alignedHeight < 1) alignedHeight = 1;
 
-                    levelWidth = 1u << logWidth;
-                    levelHeight = 1u << logHeight;
-                    levelDepth = 1u << logDepth;
+                    uint alignedDepth = levelDepth;
 
-                    uint tempWidth = levelWidth;
-                    uint tempHeight = levelHeight;
-                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref levelWidth, ref levelHeight, ref levelDepth, bitsPerPixel, format, unknownType, isTiled);
-
-                    rowPitch = (bitsPerPixel * levelWidth) / 8;
-
-                    if ((tempWidth <= 16 || tempHeight <= 16) && isPacked)
+                    if ((alignedHeight <= 16 || alignedWidth <= 16) && isPacked)
                     {
-                        if (isPacked)
-                        {
-                            break;
-                        }
+                        break;
                     }
-
-                    levelSizeBytes = 0;
-                    if (LevelIndex > 0)
+                    else
                     {
-                        if(LevelIndex == Level && firstLevelOffset != -1)
+                        Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
+
+                        // align to next power of two (could also be the next tile dimension?)
+                        if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedWidth))
+                        {
+                            alignedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedWidth);
+                            if (alignedWidth < 0) alignedWidth = 0;
+                            alignedWidth = 1u << (int)alignedWidth;
+                        }
+
+                        if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedHeight))
+                        {
+                            alignedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedHeight);
+                            if (alignedHeight < 0) alignedHeight = 0;
+                            alignedHeight = 1u << (int)alignedHeight;
+                        }
+
+                        rowPitch = (bitsPerPixel * alignedWidth) / 8;
+
+                        if (i == 0 && firstLevelOffset != -1)
                         {
                             offset += (uint)firstLevelOffset;
                         }
                         else
                         {
                             if (unknownType == 2)
-                                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * levelDepth * rowPitch, 4096);
+                                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(alignedHeight * alignedDepth * rowPitch, 4096);
                             else
-                                levelSizeBytes = levelDepth * Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
+                                levelSizeBytes = alignedDepth * Direct3D.D3D9x.D3D.NextMultipleOf(alignedHeight * rowPitch, 4096);
 
                             offset += arrayStride * levelSizeBytes;
-                        } 
+                        }
+
+                        if (ArrayIndex > 0)
+                        {
+                            uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
+                            uint nextLevelSize = Direct3D.D3D9x.D3D.NextMultipleOf(size, 4096);
+                            offset += (uint)(ArrayIndex * nextLevelSize);
+                        }
                     }
-                }
-                while (--LevelIndex > 0);
-
-                // btz hack
-
-                // compute level size when the loop stopped
-
-                if (ArrayIndex > 0)
-                {
-                    // level dimensions are already aligned, just compute the level size and add it, must be 4kb aligned
-                    uint nextLevelSize = levelWidth * levelHeight * bitsPerPixel >> 3;
-                    nextLevelSize = Direct3D.D3D9x.D3D.NextMultipleOf(nextLevelSize, 4096);
-                    offset += (uint)(ArrayIndex * nextLevelSize);
                 }
             }
             else
@@ -531,18 +502,13 @@ namespace TagTool.Bitmaps
                   && !(bitmapResource.BitmapType == BitmapType.Array)
                   && !(isPacked)
                   && unknownType == 1
-                  && bitmapResource.MipmapCount < 1
-                  && hasBorder == 0)
+                  && bitmapResource.MipmapCount < 1)
                 {
-                    uint blockWidth, blockHeight;
-                    XboxGraphics.XGGetBlockDimensions(format, out blockWidth, out blockHeight);
+                    
                     levelHeight = Direct3D.D3D9x.D3D.NextMultipleOf(height, blockHeight);
                 }
 
-                if (unknownType > 0)
-                    rowPitch = bitsPerPixel * levelWidth >> 3; // btz hack
-                else
-                    rowPitch = bitsPerPixel * levelWidth >> 3;
+                rowPitch = bitsPerPixel * levelWidth >> 3;
 
                 levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(levelHeight * rowPitch, 4096);
                 offset += levelSizeBytes * (uint)ArrayIndex;
