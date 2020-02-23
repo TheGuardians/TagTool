@@ -40,24 +40,24 @@ namespace TagTool.Bitmaps.DDS
 
         public DDSHeader(BitmapTextureInteropDefinition definition)
         {
-            CreateHeaderFromType(definition.Height, definition.Width, definition.Depth, definition.MipmapCount, definition.Format, definition.BitmapType, definition.Flags);
+            CreateHeaderFromType(definition.Height, definition.Width, definition.Depth, definition.MipmapCount, definition.Format, definition.BitmapType);
         }
 
         public DDSHeader(Bitmap.Image image)
         {
             var mipMapCount = image.MipmapCount != 0 ? (1 + image.MipmapCount) : 0;
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type, image.Flags);
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type);
         }
 
         public DDSHeader(BaseBitmap image)
         {
             var mipMapCount = image.MipMapCount != 0 ? (1 + image.MipMapCount) : 0;
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type, image.Flags);
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type);
         }
 
-        public DDSHeader(uint width, uint height, uint depth, uint mipmapCount, BitmapFormat format, BitmapType type, BitmapFlags flags)
+        public DDSHeader(uint width, uint height, uint depth, uint mipmapCount, BitmapFormat format, BitmapType type)
         {
-            CreateHeaderFromType((int)height, (int)width, (int)depth, (int)mipmapCount, format, type, flags);
+            CreateHeaderFromType((int)height, (int)width, (int)depth, (int)mipmapCount, format, type);
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace TagTool.Bitmaps.DDS
 
         }
 
-        private void CreateHeaderFromType(int height, int width, int depth, int mipMapCount, BitmapFormat format, BitmapType type, BitmapFlags flags)
+        private void CreateHeaderFromType(int height, int width, int depth, int mipMapCount, BitmapFormat format, BitmapType type)
         {
             Height = height;
             Width = width;
@@ -131,15 +131,15 @@ namespace TagTool.Bitmaps.DDS
             switch (type)
             {
                 case BitmapType.Texture2D:
-                    CreateHeaderTexture2D(mipMapCount, format, flags);
+                    CreateHeaderTexture2D(mipMapCount, format);
                     break;
                 case BitmapType.Texture3D:
                 case BitmapType.Array:
-                    CreateHeaderVolume(mipMapCount, depth, format, flags);
+                    CreateHeaderVolume(mipMapCount, depth, format);
                     break;
 
                 case BitmapType.CubeMap:
-                    CreateHeaderCubemap(mipMapCount, format, flags);
+                    CreateHeaderCubemap(mipMapCount, format);
                     break;
 
             }
@@ -147,7 +147,7 @@ namespace TagTool.Bitmaps.DDS
             return;
         }
 
-        private void CreateHeaderTexture2D(int mipMapCount, BitmapFormat format, BitmapFlags flags)
+        private void CreateHeaderTexture2D(int mipMapCount, BitmapFormat format)
         {
             Depth = 0;
 
@@ -160,27 +160,27 @@ namespace TagTool.Bitmaps.DDS
             else
                 MipMapCount = 0;
 
-            SetTextureFormat(mipMapCount, format, flags);
+            SetTextureFormat(mipMapCount, format);
         }
 
-        private void CreateHeaderVolume(int mipMapCount, int depth, BitmapFormat format, BitmapFlags flags)
+        private void CreateHeaderVolume(int mipMapCount, int depth, BitmapFormat format)
         {
             Flags |= DDSFlags.Depth;
             Caps |= DDSComplexityFlags.Complex;
             Caps2 |= DDSSurfaceInfoFlags.Volume;
             Depth = depth;
-            SetTextureFormat(mipMapCount, format, flags);
+            SetTextureFormat(mipMapCount, format);
         }
 
-        private void CreateHeaderCubemap(int mipMapCount, BitmapFormat format, BitmapFlags flags)
+        private void CreateHeaderCubemap(int mipMapCount, BitmapFormat format)
         {
             Caps |= DDSComplexityFlags.Complex;
             Caps2 |= DDSSurfaceInfoFlags.CubeMapAllFaces;
 
-            SetTextureFormat(mipMapCount, format, flags);
+            SetTextureFormat(mipMapCount, format);
         }
 
-        private void SetTextureFormat(int mipMapCount, BitmapFormat format, BitmapFlags flags)
+        private void SetTextureFormat(int mipMapCount, BitmapFormat format)
         {
             if (mipMapCount > 0)
             {
@@ -190,7 +190,7 @@ namespace TagTool.Bitmaps.DDS
             else
                 MipMapCount = 0;
 
-            if (flags.HasFlag(BitmapFlags.Compressed))
+            if (BitmapUtils.IsCompressedFormat(format))
             {
                 Flags |= DDSFlags.LinearSize;
                 int blockSize = BitmapFormatUtils.GetBlockSize(format);
@@ -206,7 +206,7 @@ namespace TagTool.Bitmaps.DDS
                 PitchOrLinearSize = (Width * bitsPerPixel + 7) / 8;
             }
 
-            PixelFormat = new PixelFormat(format, flags);
+            PixelFormat = new PixelFormat(format);
         }
     }   
 
@@ -223,14 +223,14 @@ namespace TagTool.Bitmaps.DDS
 
         public PixelFormat() { }
 
-        public PixelFormat(BitmapFormat format, BitmapFlags flags)
+        public PixelFormat(BitmapFormat format)
         {
-            SetTextureFormat(format, flags);
+            SetTextureFormat(format);
         }
 
-        public void SetTextureFormat(BitmapFormat format, BitmapFlags flags)
+        public void SetTextureFormat(BitmapFormat format)
         {
-            if (flags.HasFlag(BitmapFlags.Compressed))
+            if (BitmapUtils.IsCompressedFormat(format))
             {
                 Flags |= DDSPixelFormatFlags.Compressed;
                 switch (format)

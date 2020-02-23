@@ -396,7 +396,7 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level)
+        public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level, bool hasHighResData = false)
         {
             uint blockWidth, blockHeight;
             uint layerSize;
@@ -468,10 +468,12 @@ namespace TagTool.Bitmaps
                     
                     layerSize = (bitsPerPixel * alignedWidth * alignedHeight) / 8;
 
+                    // if the bitmap uses the high resolution buffer, the first level is stored there so no need to add it to the running offset
+                    if (hasHighResData && i == 0)
+                        continue;
+
                     if ((levelWidth <= 16 || levelHeight <= 16) && isPacked)
-                    {
                         break;
-                    }
                     else
                     {
                         if (unknownType == 2)

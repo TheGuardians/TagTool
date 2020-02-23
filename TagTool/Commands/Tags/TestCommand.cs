@@ -72,10 +72,10 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\_bitmaps\sword_impact_medium_bump", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\decals\breakable_surfaces\glass_crack", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\multi\snowbound\bitmaps\cube_icecave_a_cubemap", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"fx\contrails\_bitmaps\wispy_trail", "bitm"); 
                 //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\monitor_shield_meter", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\elite_shield_flash_bleed", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\elite_shield_flash_bleed", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"ui\chud\bitmaps\energy_meter_left", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\shared\bitmaps\nature\water\water_ripples", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\bitmaps\guardian_manconnon_bump", "bitm");
@@ -90,10 +90,12 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"objects\halograms\bitmaps\forerunner_holo_shapes", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"objects\halograms\070lc_waypoint_reveal\main_halogram\bitmaps\galaxy_middle", "bitm"); 
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
-                
-                //TestConvertAllBitmaps(cache, stream);
-                TestConvertBitmap(cache, stream, bitmapTag, 0);
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_black_alpha_black", "bitm");
+
+                TestConvertAllBitmaps(cache, stream);
+                //TestConvertBitmap(cache, stream, bitmapTag);
             }
             return true;
         }
@@ -101,46 +103,51 @@ namespace TagTool.Commands
         private void TestConvertAllBitmaps(GameCache cache, Stream stream)
         {
             foreach(var bitmapTag in cache.TagCache.NonNull().Where(tag => tag.IsInGroup("bitm")))
-                TestConvertBitmap(cache, stream, bitmapTag, 0);
+            {
+                TestConvertBitmap(cache, stream, bitmapTag);
+            }
+                
         }
 
-        private void TestConvertBitmap(GameCache cache, Stream stream, CachedTag bitmapTag, int imageIndex)
+        private void TestConvertBitmap(GameCache cache, Stream stream, CachedTag bitmapTag)
         {
             var bitmap = cache.Deserialize<Bitmap>(stream, bitmapTag);
 
-            if (bitmap.Images.Count > 1)
-                imageIndex = 1;
-
-            var image = bitmap.Images[imageIndex];
-
-            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+            for(int im = 0; im < bitmap.Images.Count; im++)
             {
-                BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
-                if (resource == null)
-                    return;
+                var image = bitmap.Images[im];
 
-                BitmapTextureInteropDefinition definition;
-
-                int pairIndex = 0;
-
-                if (image.InterleavedTextureIndex2 > 0)
+                if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {
-                    definition = resource.Texture.Definition.Bitmap2;
-                    pairIndex = 1;
+                    continue;
+                    BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                    if (resource == null)
+                        return;
+
+                    BitmapTextureInteropDefinition definition;
+
+                    int pairIndex = 0;
+
+                    if (image.InterleavedTextureIndex2 > 0)
+                    {
+                        definition = resource.Texture.Definition.Bitmap2;
+                        pairIndex = 1;
+                    }
+                    else
+                    {
+                        definition = resource.Texture.Definition.Bitmap1;
+                    }
+                    TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, im, true, pairIndex);
                 }
                 else
                 {
-                    definition = resource.Texture.Definition.Bitmap1;
-                }
-                TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, true, pairIndex);
-            }
-            else
-            {
-                BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
-                if (resource == null)
-                    return;
+                    
+                    BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[im]);
+                    if (resource == null)
+                        return;
 
-                TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, false, 0);
+                    TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, im, false, 0);
+                }
             }
         }
 
@@ -179,7 +186,7 @@ namespace TagTool.Commands
             using(var stream = file.Create())
             using(var writer = new EndianWriter(stream))
             {
-                DDSHeader header = new DDSHeader(width, height, depth, mipmapCount, image.Format, image.Type, image.Flags);
+                DDSHeader header = new DDSHeader(width, height, depth, mipmapCount, image.Format, image.Type);
                 DDSFile ddsFile = new DDSFile(header, data);
                 ddsFile.Write(writer);
             }
@@ -219,7 +226,11 @@ namespace TagTool.Commands
                 if (!BitmapUtils.IsCompressedFormat(newFormat))
                     bitmap.Images[0].Flags &= ~BitmapFlags.Compressed;
 
-                DumpBitmapDDS($"{tag.Name.Replace("\\", "_")}", resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)definition.MipmapCount, bitmap.Images[imageIndex]);
+                var fileName = $"{tag.Name.Replace("\\", "_")}";
+                if (imageIndex > 0)
+                    fileName += $"_{imageIndex}";
+
+                DumpBitmapDDS(fileName, resultData, (uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)definition.MipmapCount, bitmap.Images[imageIndex]);
             }
         }
 
@@ -296,27 +307,18 @@ namespace TagTool.Commands
                     tileOffset = (int)tileSize / 2; // hacks? perhaps should be 1kb
                 }
             }
-
-            if (level == 0 && definition.HighResInSecondaryResource > 0)
+            bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
+            if (level == 0 && useHighResBuffer)
             {
                 levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
-                uint alignedSecondaryLength = (uint)((secondaryData.Length + 0xFFF) & ~0xFFF);
+                uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
                 data = new byte[alignedSecondaryLength];
                 Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
             }
             else
             {
-                if(definition.HighResInSecondaryResource > 0)
-                {
-                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
-                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0xFFF) & ~0xFFF);
-                    levelOffset -= alignedSecondaryLength;
-                }
-                else
-                {
-                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
-                }
-                uint alignedPrimaryLength = (uint)((primaryData.Length + 0xFFF) & ~0xFFF);
+                levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, useHighResBuffer);
+                uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
                 data = new byte[alignedPrimaryLength];
                 Array.Copy(primaryData, 0, data, 0, primaryData.Length);
             }
