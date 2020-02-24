@@ -396,74 +396,6 @@ namespace TagTool.Bitmaps
             }
         }
 
-        private static uint GetInterleavedPackedOffset(BitmapTextureInteropDefinition bitmap, bool hasHighResData = false)
-        {
-            uint layerSize;
-            uint offset = 0;
-            uint levelSizeBytes;
-            uint alignedDimension;
-            uint alignedDepth;
-            uint levelDimension;
-
-            uint unknownType = GetXboxBitmapD3DTextureType(bitmap);
-            var format = XboxGraphics.XGGetGpuFormat(bitmap.D3DFormat);
-            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
-            bool isTiled = Direct3D.D3D9x.D3D.IsTiled(bitmap.D3DFormat);
-            XboxGraphics.XGGetBlockDimensions(format, out uint blockWidth, out blockWidth);
-
-            uint dimension = (uint)bitmap.Width;
-            uint depth = bitmap.Depth;
-            
-            uint levelDepth = depth;
-
-            uint arrayStride = 1;
-            if (bitmap.BitmapType == BitmapType.CubeMap || bitmap.BitmapType == BitmapType.Array)
-            {
-                int arrayFactor = bitmap.BitmapType == BitmapType.Array ? 2 : 0;
-                uint actualDepth = (uint)(bitmap.BitmapType == BitmapType.CubeMap ? 6 : bitmap.Depth);
-                arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
-            }
-
-            for (int i = 0; i < bitmap.MipmapCount; i++)
-            {
-                levelDimension = dimension >> i;
-
-                if (levelDimension < 1) levelDimension = 1;
-                alignedDimension = levelDimension;
-                alignedDepth = levelDepth;
-
-                Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedDimension, ref alignedDimension, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
-
-                if (i > 0)
-                {
-                    if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedDimension))
-                    {
-                        alignedDimension = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedDimension);
-                        if (alignedDimension < 0) alignedDimension = 0;
-                        alignedDimension = 1u << (int)alignedDimension;
-                    }
-                }
-
-                layerSize = (bitsPerPixel * alignedDimension * alignedDimension) / 8;
-
-                if (hasHighResData && i == 0)
-                    continue;
-
-                if (levelDimension <= 8 * blockWidth)   // if less than or equal to 64x64, the levels are now mixed together
-                    break;
-                else
-                {
-                    if (unknownType == 2)
-                        levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(alignedDepth * layerSize, 0x1000);
-                    else
-                        levelSizeBytes = alignedDepth * Direct3D.D3D9x.D3D.NextMultipleOf(layerSize, 0x1000);
-
-                    offset += arrayStride * levelSizeBytes;
-                }
-            }
-            return offset;
-        }
-
         public static uint GetXboxInterleavedBitmapOffset(BitmapTextureInteropDefinition bitmap1, BitmapTextureInteropDefinition bitmap2, int arrayIndex, int level, int currentBitmapIndex, bool mipFlag1, bool mipFlag2, bool hasHighResData = false)
         {
             /*
@@ -479,6 +411,7 @@ namespace TagTool.Bitmaps
             XboxGraphics.XGGetBlockDimensions(format, out uint blockWidth, out blockWidth);
             BitmapTextureInteropDefinition currentBitmap = currentBitmapIndex == 0 ? bitmap1 : bitmap2;
             BitmapTextureInteropDefinition otherBitmap = currentBitmapIndex == 0 ? bitmap2 : bitmap1;
+            bool currentMipFlag = currentBitmapIndex == 0 ? mipFlag1 : mipFlag2;
 
             uint dimension = (uint)currentBitmap.Width;
             uint depth = (uint)currentBitmap.Depth;
@@ -492,7 +425,7 @@ namespace TagTool.Bitmaps
             uint otherWidth = (uint)otherBitmap.Width;
             bool useInterleavedOffset;
             if (currentBitmap.Width == otherBitmap.Width)
-                useInterleavedOffset = currentBitmapIndex == 0;
+                useInterleavedOffset = currentBitmapIndex != 0;
             else
                 useInterleavedOffset = currentBitmap.Width < otherBitmap.Width;
             if (useInterleavedOffset)
@@ -522,22 +455,26 @@ namespace TagTool.Bitmaps
                 }
             }
             else */
-            if (otherWidth >= currentWidth)
+            if (currentMipFlag)
             {
-                // find level to get currentWidth1 -> currentWidth2
-                int targetLevel = 0;
-                uint tempWidth = otherWidth;
-                do
+                if (otherWidth > currentWidth)
                 {
-                    targetLevel++;
-                    tempWidth >>= 1;
-                    if (tempWidth < 1) tempWidth = 1;
-                }
-                while (tempWidth != currentWidth && targetLevel <= otherBitmap.MipmapCount);
+                    // find level to get currentWidth1 -> currentWidth2
+                    int targetLevel = 0;
+                    uint tempWidth = otherWidth;
+                    do
+                    {
+                        targetLevel++;
+                        tempWidth >>= 1;
+                        if (tempWidth < 1) tempWidth = 1;
+                    }
+                    while (tempWidth != currentWidth && targetLevel <= otherBitmap.MipmapCount);
 
-                if (targetLevel > 0)
-                    offset += GetXboxBitmapLevelOffset(otherBitmap, 0, targetLevel, otherBitmap.HighResInSecondaryResource > 0);
+                    if (targetLevel > 0)
+                        offset += GetXboxBitmapLevelOffset(otherBitmap, 0, targetLevel, otherBitmap.HighResInSecondaryResource > 0);
+                }
             }
+            
 
             offset += GetXboxBitmapLevelOffset(currentBitmap, arrayIndex, level, hasHighResData);
 

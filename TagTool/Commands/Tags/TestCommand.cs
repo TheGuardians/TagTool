@@ -48,7 +48,7 @@ namespace TagTool.Commands
             //
 
 
-            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"docks.map"));
+            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"sidewinder.map"));
 
             var cache = GameCache.Open(file);
 
@@ -92,9 +92,9 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\guardian_guardian_cubemaps", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\docks\docks_docks_cubemaps", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\guardian_guardian_cubemaps", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"levels\dlc\docks\docks_docks_cubemaps", "bitm");
                 //TestConvertAllBitmaps(cache, stream);
                 TestConvertBitmap(cache, stream, bitmapTag);
             }
@@ -118,7 +118,7 @@ namespace TagTool.Commands
             {
                 var image = bitmap.Images[im];
 
-                if (im != 0  && im != 1)
+                if (im != 58  && im != 59)
                     continue;
 
                 if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
