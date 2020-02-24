@@ -48,7 +48,7 @@ namespace TagTool.Commands
             //
 
 
-            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"sidewinder.map"));
+            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"docks.map"));
 
             var cache = GameCache.Open(file);
 
@@ -92,8 +92,9 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
-
+                //bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\guardian_guardian_cubemaps", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\docks\docks_docks_cubemaps", "bitm");
                 //TestConvertAllBitmaps(cache, stream);
                 TestConvertBitmap(cache, stream, bitmapTag);
             }
@@ -117,6 +118,9 @@ namespace TagTool.Commands
             {
                 var image = bitmap.Images[im];
 
+                if (im != 0  && im != 1)
+                    continue;
+
                 if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {
                     BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
@@ -124,19 +128,21 @@ namespace TagTool.Commands
                         return;
 
                     BitmapTextureInteropDefinition definition;
-
+                    BitmapTextureInteropDefinition otherDefinition;
                     int pairIndex = 0;
 
                     if (image.InterleavedTextureIndex2 > 0)
                     {
                         definition = resource.Texture.Definition.Bitmap2;
+                        otherDefinition = resource.Texture.Definition.Bitmap1;
                         pairIndex = 1;
                     }
                     else
                     {
                         definition = resource.Texture.Definition.Bitmap1;
+                        otherDefinition = resource.Texture.Definition.Bitmap2;
                     }
-                    TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, im, true, pairIndex);
+                    TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, im, true, pairIndex, otherDefinition);
                 }
                 else
                 {
@@ -145,7 +151,7 @@ namespace TagTool.Commands
                     if (resource == null)
                         return;
 
-                    TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, im, false, 0);
+                    TestBitmapConverter2(bitmapTag, resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, im, false, 0, null);
                 }
             }
         }
@@ -191,7 +197,7 @@ namespace TagTool.Commands
             }
         }
 
-        public void TestBitmapConverter2(CachedTag tag, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex)
+        public void TestBitmapConverter2(CachedTag tag, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition)
         {
             if (primaryData == null && secondaryData == null)
                 return;
@@ -212,7 +218,7 @@ namespace TagTool.Commands
                 {
                     for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
                     {
-                        ConvertBitmapTest(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex);
+                        ConvertBitmapTest(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition);
                     }
                 }
 
@@ -233,7 +239,7 @@ namespace TagTool.Commands
             }
         }
 
-        public void ConvertBitmapTest(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex)
+        public void ConvertBitmapTest(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition)
         {
             byte[] data;
             uint levelOffset;
@@ -295,34 +301,47 @@ namespace TagTool.Commands
             // documentation says that each packed mip level should be aligned to 4KB, required to make untiling work smoothly
             size = (uint)((size + 0xFFF) & ~0xFFF);
 
-            uint tileSize = 32 * 32 * blockWidth * blockHeight * bitsPerPixel / 8;
-
             int tileOffset = 0;
 
-            if (isPaired)
+            if (!isPaired)
             {
-                if (pairIndex > 0)
+                bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
+                if (level == 0 && useHighResBuffer)
                 {
-                    tileOffset = 0x1000;    // 1 KB offset for second bitmap
+                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
+                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedSecondaryLength];
+                    Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
                 }
-            }
-            bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
-            if (level == 0 && useHighResBuffer)
-            {
-                levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
-                uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
-                data = new byte[alignedSecondaryLength];
-                Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
+                else
+                {
+                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, useHighResBuffer);
+                    uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedPrimaryLength];
+                    Array.Copy(primaryData, 0, data, 0, primaryData.Length);
+                }
             }
             else
             {
-                levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, useHighResBuffer);
-                uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
-                data = new byte[alignedPrimaryLength];
-                Array.Copy(primaryData, 0, data, 0, primaryData.Length);
+                bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
+                var bitmap1 = pairIndex == 0 ? definition : otherDefinition;
+                var bitmap2 = pairIndex == 0 ? otherDefinition : definition;
+                if (level == 0 && useHighResBuffer)
+                {
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex);
+                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedSecondaryLength];
+                    Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
+                }
+                else
+                {
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, useHighResBuffer);
+                    uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedPrimaryLength];
+                    Array.Copy(primaryData, 0, data, 0, primaryData.Length);
+                }
             }
-                
-            
+
             Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
 
             tileOffset += (int)levelOffset;
@@ -406,7 +425,7 @@ namespace TagTool.Commands
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
             XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
-            //DumpBitmapDDS($"bitmap_untiled_{level}", data, (uint)alignedWidth, (uint)alignedHeight, definition.Depth, 1, bitmap.Images[imageIndex]);
+            DumpBitmapDDS($"bitmap_untiled_{level}", data, (uint)alignedWidth, (uint)alignedHeight, definition.Depth, 1, bitmap.Images[imageIndex]);
             uint actualWidth = (uint)definition.Width >> level;
             uint actualHeight = (uint)definition.Height >> level;
 
