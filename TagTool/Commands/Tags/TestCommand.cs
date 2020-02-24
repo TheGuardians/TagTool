@@ -91,10 +91,11 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"objects\halograms\070lc_waypoint_reveal\main_halogram\bitmaps\galaxy_middle", "bitm"); 
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
+                
                 bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\guardian_guardian_cubemaps", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"levels\dlc\docks\docks_docks_cubemaps", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
                 //TestConvertAllBitmaps(cache, stream);
                 TestConvertBitmap(cache, stream, bitmapTag);
             }
@@ -118,7 +119,7 @@ namespace TagTool.Commands
             {
                 var image = bitmap.Images[im];
                 /*
-                if (im != 0  && im != 1)
+                if (im != 18 && im != 19)
                     continue;
                 */
                 if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
@@ -266,7 +267,7 @@ namespace TagTool.Commands
                 XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
 
             // use the point to extract the right rectangle out of the texture
-            Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
+            //Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
 
             var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
             Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
@@ -326,29 +327,24 @@ namespace TagTool.Commands
                 bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
                 var bitmap1 = pairIndex == 0 ? definition : otherDefinition;
                 var bitmap2 = pairIndex == 0 ? otherDefinition : definition;
-                int imageIndex1 = pairIndex == 0 ? imageIndex : imageIndex - 1;
-                int imageIndex2 = pairIndex == 0 ? imageIndex + 1 : imageIndex;
-                var image1 = bitmap.Images[imageIndex1];
-                var image2 = bitmap.Images[imageIndex2];
-                bool hasMipUnknownFlag1 = image1.XboxFlags.HasFlag(BitmapFlagsXbox.UnknownMipFlag);
-                bool hasMipUnknownFlag2 = image2.XboxFlags.HasFlag(BitmapFlagsXbox.UnknownMipFlag);
+
                 if (level == 0 && useHighResBuffer)
                 {
-                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, hasMipUnknownFlag1, hasMipUnknownFlag2);
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex);
                     uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
                     data = new byte[alignedSecondaryLength];
                     Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
                 }
                 else
                 {
-                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, hasMipUnknownFlag1, hasMipUnknownFlag2, useHighResBuffer);
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, useHighResBuffer);
                     uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
                     data = new byte[alignedPrimaryLength];
                     Array.Copy(primaryData, 0, data, 0, primaryData.Length);
                 }
             }
 
-            Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
+            //Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
 
             tileOffset += (int)levelOffset;
 

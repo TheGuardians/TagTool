@@ -396,7 +396,7 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static uint GetXboxInterleavedBitmapOffset(BitmapTextureInteropDefinition bitmap1, BitmapTextureInteropDefinition bitmap2, int arrayIndex, int level, int currentBitmapIndex, bool mipFlag1, bool mipFlag2, bool hasHighResData = false)
+        public static uint GetXboxInterleavedBitmapOffset(BitmapTextureInteropDefinition bitmap1, BitmapTextureInteropDefinition bitmap2, int arrayIndex, int level, int currentBitmapIndex, bool hasHighResData = false)
         {
             /*
              * Block size, bits per pixel, tiling and formats are the same, also texture must be square.
@@ -411,7 +411,6 @@ namespace TagTool.Bitmaps
             XboxGraphics.XGGetBlockDimensions(format, out uint blockWidth, out blockWidth);
             BitmapTextureInteropDefinition currentBitmap = currentBitmapIndex == 0 ? bitmap1 : bitmap2;
             BitmapTextureInteropDefinition otherBitmap = currentBitmapIndex == 0 ? bitmap2 : bitmap1;
-            bool currentMipFlag = currentBitmapIndex == 0 ? mipFlag1 : mipFlag2;
 
             uint dimension = (uint)currentBitmap.Width;
             uint depth = (uint)currentBitmap.Depth;
@@ -419,11 +418,19 @@ namespace TagTool.Bitmaps
             uint levelDepth = depth;
             uint tileSize = (blockWidth * blockWidth * 32 * 32 * bitsPerPixel) >> 3;
 
+            uint arrayStride = 1;
+            if (currentBitmap.BitmapType == BitmapType.CubeMap || currentBitmap.BitmapType == BitmapType.Array)
+            {
+                int arrayFactor = currentBitmap.BitmapType == BitmapType.Array ? 2 : 0;
+                uint actualDepth = (uint)(currentBitmap.BitmapType == BitmapType.CubeMap ? 6 : currentBitmap.Depth);
+                arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
+            }
+
+
             // assume power of two for now
 
-            uint currentWidth = (uint)currentBitmap.Width;
-            uint otherWidth = (uint)otherBitmap.Width;
             bool useInterleavedOffset;
+
             if (currentBitmap.Width == otherBitmap.Width)
                 useInterleavedOffset = currentBitmapIndex != 0;
             else
@@ -431,7 +438,7 @@ namespace TagTool.Bitmaps
 
             if (useInterleavedOffset)
             {
-                if (levelDimension <= 16 * blockWidth)
+                if ((levelDimension >> level) <= 64)
                 {
                     offset += tileSize / 2;
                 }
@@ -442,39 +449,44 @@ namespace TagTool.Bitmaps
                 if (useInterleavedOffset)
                 {
                     offset += 0; // guardian cubemaps image 1
+                    Console.WriteLine("Type 1");
                 }
                 else
                 {
                     offset = 0; // guardian cubemaps image 0
+                    Console.WriteLine("Type 2");
                 }
                 
             }
             else if(bitmap1.Width == bitmap2.Width)
             {
-                if (useInterleavedOffset && bitmap1.Width > 64)
-                    offset += tileSize;
+                if (bitmap1.Width > 64 && level == 0 && useInterleavedOffset)
+                    offset += arrayStride * tileSize;
             }
             else
             {
                 if (useInterleavedOffset)
                 {
-                    // sidewinder cubemaps 58
+                    // sidewinder cubemaps 58, docks 2
                     int targetLevel = 0;
-                    uint tempWidth = currentWidth;
+                    uint tempWidth = (uint)bitmap2.Width;
                     do
                     {
                         targetLevel++;
                         tempWidth >>= 1;
                         if (tempWidth < 1) tempWidth = 1;
                     }
-                    while (tempWidth != otherWidth && targetLevel <= currentBitmap.MipmapCount);
+                    while (tempWidth != bitmap1.Width && targetLevel <= bitmap1.MipmapCount);
 
                     if (targetLevel > 0)
-                        offset += GetXboxBitmapLevelOffset(otherBitmap, 0, targetLevel, otherBitmap.HighResInSecondaryResource > 0);
+                        offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
+
+                    Console.WriteLine("Type 3");
                 }
                 else
                 {
                     // sidewinder cubemaps 59
+                    Console.WriteLine("Type 4");
                     offset = 0;
                 }
             }
