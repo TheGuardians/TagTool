@@ -326,16 +326,22 @@ namespace TagTool.Commands
                 bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
                 var bitmap1 = pairIndex == 0 ? definition : otherDefinition;
                 var bitmap2 = pairIndex == 0 ? otherDefinition : definition;
+                int imageIndex1 = pairIndex == 0 ? imageIndex : imageIndex - 1;
+                int imageIndex2 = pairIndex == 0 ? imageIndex + 1 : imageIndex;
+                var image1 = bitmap.Images[imageIndex1];
+                var image2 = bitmap.Images[imageIndex2];
+                bool hasMipUnknownFlag1 = image1.XboxFlags.HasFlag(BitmapFlagsXbox.UnknownMipFlag);
+                bool hasMipUnknownFlag2 = image2.XboxFlags.HasFlag(BitmapFlagsXbox.UnknownMipFlag);
                 if (level == 0 && useHighResBuffer)
                 {
-                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex);
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, hasMipUnknownFlag1, hasMipUnknownFlag2);
                     uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
                     data = new byte[alignedSecondaryLength];
                     Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
                 }
                 else
                 {
-                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, useHighResBuffer);
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, hasMipUnknownFlag1, hasMipUnknownFlag2, useHighResBuffer);
                     uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
                     data = new byte[alignedPrimaryLength];
                     Array.Copy(primaryData, 0, data, 0, primaryData.Length);

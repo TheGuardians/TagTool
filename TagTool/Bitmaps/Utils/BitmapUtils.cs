@@ -464,7 +464,7 @@ namespace TagTool.Bitmaps
             return offset;
         }
 
-        public static uint GetXboxInterleavedBitmapOffset(BitmapTextureInteropDefinition bitmap1, BitmapTextureInteropDefinition bitmap2, int arrayIndex, int level, int currentBitmapIndex, bool hasHighResData = false)
+        public static uint GetXboxInterleavedBitmapOffset(BitmapTextureInteropDefinition bitmap1, BitmapTextureInteropDefinition bitmap2, int arrayIndex, int level, int currentBitmapIndex, bool mipFlag1, bool mipFlag2, bool hasHighResData = false)
         {
             /*
              * Block size, bits per pixel, tiling and formats are the same, also texture must be square.
