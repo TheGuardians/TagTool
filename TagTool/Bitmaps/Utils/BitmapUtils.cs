@@ -428,6 +428,7 @@ namespace TagTool.Bitmaps
                 useInterleavedOffset = currentBitmapIndex != 0;
             else
                 useInterleavedOffset = currentBitmap.Width < otherBitmap.Width;
+
             if (useInterleavedOffset)
             {
                 if (levelDimension <= 16 * blockWidth)
@@ -436,45 +437,47 @@ namespace TagTool.Bitmaps
                 }
             }
 
-            //
-            // Compute the offset from the start of the array to the desired level OR the first packed level
-            //
-            /*
-            if (currentWidth1 == currentWidth2)
+            if (bitmap1.Width > bitmap2.Width)
             {
-                if (currentWidth1 <= 64)
+                if (useInterleavedOffset)
                 {
-                    // both are 64x64, packed together, no extra offset required
-                    offset = 0;
+                    offset += 0; // guardian cubemaps image 1
                 }
                 else
                 {
-                    // must be 128x128 (up to a a power of two align), specs of interleaved bitmaps
-                    if (useInterleavedOffset)
-                        offset += tileSize;
+                    offset = 0; // guardian cubemaps image 0
                 }
+                
             }
-            else */
-            if (currentMipFlag)
+            else if(bitmap1.Width == bitmap2.Width)
             {
-                if (otherWidth > currentWidth)
+                if (useInterleavedOffset && bitmap1.Width > 64)
+                    offset += tileSize;
+            }
+            else
+            {
+                if (useInterleavedOffset)
                 {
-                    // find level to get currentWidth1 -> currentWidth2
+                    // sidewinder cubemaps 58
                     int targetLevel = 0;
-                    uint tempWidth = otherWidth;
+                    uint tempWidth = currentWidth;
                     do
                     {
                         targetLevel++;
                         tempWidth >>= 1;
                         if (tempWidth < 1) tempWidth = 1;
                     }
-                    while (tempWidth != currentWidth && targetLevel <= otherBitmap.MipmapCount);
+                    while (tempWidth != otherWidth && targetLevel <= currentBitmap.MipmapCount);
 
                     if (targetLevel > 0)
                         offset += GetXboxBitmapLevelOffset(otherBitmap, 0, targetLevel, otherBitmap.HighResInSecondaryResource > 0);
                 }
+                else
+                {
+                    // sidewinder cubemaps 59
+                    offset = 0;
+                }
             }
-            
 
             offset += GetXboxBitmapLevelOffset(currentBitmap, arrayIndex, level, hasHighResData);
 
