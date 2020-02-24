@@ -48,7 +48,7 @@ namespace TagTool.Commands
             //
 
 
-            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"guardian.map"));
+            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"sidewinder.map"));
 
             var cache = GameCache.Open(file);
 
@@ -92,10 +92,10 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\gray_50_percent", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
-                //bitmapTag = cache.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\color_black_alpha_black", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
 
-                TestConvertAllBitmaps(cache, stream);
-                //TestConvertBitmap(cache, stream, bitmapTag);
+                //TestConvertAllBitmaps(cache, stream);
+                TestConvertBitmap(cache, stream, bitmapTag);
             }
             return true;
         }
@@ -119,7 +119,6 @@ namespace TagTool.Commands
 
                 if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {
-                    continue;
                     BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
                     if (resource == null)
                         return;
@@ -141,7 +140,7 @@ namespace TagTool.Commands
                 }
                 else
                 {
-                    
+                    continue;
                     BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[im]);
                     if (resource == null)
                         return;
@@ -304,7 +303,7 @@ namespace TagTool.Commands
             {
                 if (pairIndex > 0)
                 {
-                    tileOffset = (int)tileSize / 2; // hacks? perhaps should be 1kb
+                    tileOffset = 0x1000;    // 1 KB offset for second bitmap
                 }
             }
             bool useHighResBuffer = definition.HighResInSecondaryResource > 0;

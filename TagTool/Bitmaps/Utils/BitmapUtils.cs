@@ -396,6 +396,108 @@ namespace TagTool.Bitmaps
             }
         }
 
+        public static uint GetXboxInterleavedBitmapOffset(BitmapTextureInteropDefinition bitmap1, BitmapTextureInteropDefinition bitmap2, int arrayIndex, int level, int currentBitmapIndex, bool hasHighResData = false)
+        {
+            /*
+             * Block size, bits per pixel, tiling and formats are the same, also texture must be square.
+             */
+            uint blockWidth;
+            uint layerSize;
+            uint offset = 0;
+            uint levelSizeBytes;
+            bool isPacked = true;
+
+            uint unknownType = GetXboxBitmapD3DTextureType(bitmap1);
+            var format = XboxGraphics.XGGetGpuFormat(bitmap1.D3DFormat);
+            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
+            bool isTiled = Direct3D.D3D9x.D3D.IsTiled(bitmap1.D3DFormat);
+            XboxGraphics.XGGetBlockDimensions(format, out blockWidth, out blockWidth);
+            BitmapTextureInteropDefinition currentBitmap = currentBitmapIndex == 0 ? bitmap1 : bitmap2;
+
+            int levels = currentBitmap.MipmapCount == 0 ? Direct3D.D3D9x.D3D.GetMaxMipLevels(currentBitmap.Width, currentBitmap.Height, currentBitmap.Depth, 0) : currentBitmap.MipmapCount;
+
+            uint dimension = (uint)bitmap1.Width;
+            uint depth = (uint)currentBitmap.Depth;
+            uint levelDimension = dimension;
+            uint levelDepth = depth;
+
+            if (level > 0 || (isPacked && levelDimension <= 16))
+            {
+                uint arrayStride = 1;
+                if (currentBitmap.BitmapType == BitmapType.CubeMap || currentBitmap.BitmapType == BitmapType.Array)
+                {
+                    int arrayFactor = currentBitmap.BitmapType == BitmapType.Array ? 2 : 0;
+                    uint actualDepth = (uint)(currentBitmap.BitmapType == BitmapType.CubeMap ? 6 : currentBitmap.Depth);
+                    arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
+                }
+
+                uint alignedDimension = 0;
+                uint alignedDepth = 0;
+
+                for (int i = 0; i < level; i++)
+                {
+                    levelDimension = dimension >> i;
+
+                    if (levelDimension < 1) levelDimension = 1;
+                    alignedDimension = levelDimension;
+                    alignedDepth = levelDepth;
+
+                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedDimension, ref alignedDimension, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
+
+                    // if not first mip level, align to next power of two
+                    if (i > 0)
+                    {
+                        if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedDimension))
+                        {
+                            alignedDimension = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedDimension);
+                            if (alignedDimension < 0) alignedDimension = 0;
+                            alignedDimension = 1u << (int)alignedDimension;
+                        }
+                    }
+
+                    layerSize = (bitsPerPixel * alignedDimension * alignedDimension) / 8;
+
+                    // if the bitmap uses the high resolution buffer, the first level is stored there so no need to add it to the running offset
+                    if (hasHighResData && i == 0)
+                        continue;
+
+                    if ((alignedDimension <= 16) && isPacked)
+                        break;
+                    else
+                    {
+                        if (unknownType == 2)
+                            levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(alignedDepth * layerSize, 0x1000);
+                        else
+                            levelSizeBytes = alignedDepth * Direct3D.D3D9x.D3D.NextMultipleOf(layerSize, 0x1000);
+
+                        offset += arrayStride * levelSizeBytes;
+                    }
+                }
+                // when array index is > 0, we need to add an offset into the right array layer, outside of the loop since the loop computes the offset for all layers
+                if (arrayIndex > 0)
+                {
+                    uint size = alignedDimension * alignedDimension * bitsPerPixel / 8;
+                    uint nextLevelSize = Direct3D.D3D9x.D3D.NextMultipleOf(size, 0x1000);
+                    offset += (uint)(arrayIndex * nextLevelSize);
+                }
+            }
+            else
+            {
+                levelDimension = dimension;
+                levelDepth = depth;
+
+                Direct3D.D3D9x.D3D.AlignTextureDimensions(
+                    ref levelDimension, ref levelDimension, ref levelDepth, bitsPerPixel, format, unknownType, isTiled);
+
+                layerSize = (bitsPerPixel * levelDimension * levelDimension) >> 3;
+
+                levelSizeBytes = Direct3D.D3D9x.D3D.NextMultipleOf(layerSize, 0x1000);
+                offset += levelSizeBytes * (uint)arrayIndex;
+            }
+
+            return offset;
+        }
+
         public static uint GetXboxBitmapLevelOffset(BitmapTextureInteropDefinition bitmapResource, int ArrayIndex, int Level, bool hasHighResData = false)
         {
             uint blockWidth, blockHeight;
