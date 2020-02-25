@@ -7,6 +7,7 @@ using TagTool.Commands.Strings;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Porting;
 using TagTool.Commands.Modding;
+using TagTool.Commands.Bitmaps;
 
 namespace TagTool.Commands.Tags
 {
@@ -42,6 +43,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
             context.AddCommand(new ListUnnamedTagsCommand(cache));
+            context.AddCommand(new ExtractBitmapsCommand(cache));
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)

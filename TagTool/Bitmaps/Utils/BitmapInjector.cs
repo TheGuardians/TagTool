@@ -14,6 +14,7 @@ namespace TagTool.Bitmaps
 
             if (cache is GameCacheHaloOnlineBase)
             {
+                // TODO: for cubemaps, fix mipmap order to d3d9 expected order
                 result.Texture.Definition.PrimaryResourceData = new TagData(file.BitmapData);
                 result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header);
             }
