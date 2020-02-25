@@ -136,7 +136,15 @@ namespace TagTool.Bitmaps.Utils
                 // Update resource definition/image, truncate DXN to level 4x4
                 //
 
-                if(newFormat == BitmapFormat.Dxn)
+                resultBitmap.Data = resultData;
+                
+                if(newFormat == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 8x8
+                {
+                    GenerateCompressedMipMaps(resultBitmap);
+                }
+
+                /*
+                if (newFormat == BitmapFormat.Dxn)
                 {
                     int dataSize = BitmapUtils.RoundSize(definition.Width, 4) * BitmapUtils.RoundSize(definition.Height, 4);
                     int mipMapCount = mipLevelCount - 1;
@@ -148,12 +156,17 @@ namespace TagTool.Bitmaps.Utils
                         dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
 
                         mipMapCount = 0;
-                        while ((width >= 8) && (height >= 8) && mipMapCount < mipLevelCount - 1)
+
+                        // if bitmap has power of two dimensions, add mipmaps up to 4x4
+                        if(Direct3D.D3D9x.D3D.IsPowerOfTwo(definition.Width) && Direct3D.D3D9x.D3D.IsPowerOfTwo(definition.Height))
                         {
-                            width /= 2;
-                            height /= 2;
-                            dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-                            mipMapCount++;
+                            while ((width >= 8) && (height >= 8) && mipMapCount < mipLevelCount - 1)
+                            {
+                                width /= 2;
+                                height /= 2;
+                                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+                                mipMapCount++;
+                            }
                         }
                     }
                     resultBitmap.MipMapCount = mipMapCount;
@@ -165,7 +178,7 @@ namespace TagTool.Bitmaps.Utils
                 {
                     resultBitmap.Data = resultData;
                 }
-
+                */
                 if (resultBitmap.Type == BitmapType.Array) // for HO, arrays use the index of Texture3D
                     resultBitmap.Type = BitmapType.Texture3D;
 
@@ -198,9 +211,6 @@ namespace TagTool.Bitmaps.Utils
             XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
             if (definition.MipmapCount > 1)
                 XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
-
-            // use the point to extract the right rectangle out of the texture
-            //Console.WriteLine($"Texture position in tile x:{point.X}, y:{point.Y}");
 
             var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
             Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
@@ -276,8 +286,6 @@ namespace TagTool.Bitmaps.Utils
                     Array.Copy(primaryData, 0, data, 0, primaryData.Length);
                 }
             }
-
-            Console.WriteLine($"Level: {level}, Side: {layerIndex} Offset: 0x{levelOffset:X04}");
 
             tileOffset += (int)levelOffset;
 
