@@ -148,7 +148,7 @@ namespace TagTool.Bitmaps.Utils
                         dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
 
                         mipMapCount = 0;
-                        while ((width >= 8) && (height >= 8))
+                        while ((width >= 8) && (height >= 8) && mipMapCount < mipLevelCount - 1)
                         {
                             width /= 2;
                             height /= 2;
