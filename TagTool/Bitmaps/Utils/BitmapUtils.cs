@@ -672,30 +672,30 @@ namespace TagTool.Bitmaps
                 // when array index is > 0, we need to add an offset into the right array layer, outside of the loop since the loop computes the offset for all layers
                 if (ArrayIndex > 0)
                 {
-                    // temp  hack if the loop above doesn't run
-                    if (alignedHeight == 0 && alignedWidth == 0 && alignedDepth == 0)
+                    alignedDepth = depth;
+                    alignedWidth = width >> Level;
+                    alignedHeight = height >> Level;
+
+                    if (alignedWidth < 1) alignedWidth = 1;
+                    if (alignedHeight < 1) alignedHeight = 1;
+
+                    Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
+
+                    // if not first mip level, align to next power of two
+                    if (Level > 0)
                     {
-                        alignedDepth = depth;
-                        alignedWidth = width;
-                        alignedHeight = height;
-                        Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
-
-                        // if not first mip level, align to next power of two
-                        if (Level > 0)
+                        if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedWidth))
                         {
-                            if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedWidth))
-                            {
-                                alignedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedWidth);
-                                if (alignedWidth < 0) alignedWidth = 0;
-                                alignedWidth = 1u << (int)alignedWidth;
-                            }
+                            alignedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedWidth);
+                            if (alignedWidth < 0) alignedWidth = 0;
+                            alignedWidth = 1u << (int)alignedWidth;
+                        }
 
-                            if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedHeight))
-                            {
-                                alignedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedHeight);
-                                if (alignedHeight < 0) alignedHeight = 0;
-                                alignedHeight = 1u << (int)alignedHeight;
-                            }
+                        if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedHeight))
+                        {
+                            alignedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedHeight);
+                            if (alignedHeight < 0) alignedHeight = 0;
+                            alignedHeight = 1u << (int)alignedHeight;
                         }
                     }
 
