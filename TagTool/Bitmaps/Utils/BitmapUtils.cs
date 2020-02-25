@@ -404,7 +404,6 @@ namespace TagTool.Bitmaps
 
             uint offset = 0;
 
-            uint unknownType = GetXboxBitmapD3DTextureType(bitmap1);
             var format = XboxGraphics.XGGetGpuFormat(bitmap1.D3DFormat);
             uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(format);
             bool isTiled = Direct3D.D3D9x.D3D.IsTiled(bitmap1.D3DFormat);
@@ -425,7 +424,6 @@ namespace TagTool.Bitmaps
                 uint actualDepth = (uint)(currentBitmap.BitmapType == BitmapType.CubeMap ? 6 : currentBitmap.Depth);
                 arrayStride = Direct3D.D3D9x.D3D.NextMultipleOf(actualDepth, 1u << arrayFactor);
             }
-
 
             // assume power of two for now
 
@@ -448,8 +446,6 @@ namespace TagTool.Bitmaps
             {
                 if (useInterleavedOffset)
                 {
-                    offset += 0; // guardian cubemaps image 1
-
                     // compute used data from the other image
                     if(currentBitmap.HighResInSecondaryResource > 0)
                     {
@@ -476,27 +472,27 @@ namespace TagTool.Bitmaps
                     }
                     else
                     {
-                        // compute first level that can fit mips
-                        int targetLevel = 0;
-                        uint tempWidth = (uint)bitmap1.Width;
-                        do
+                        if (bitmap2.Width >> level <= 64)
                         {
-                            targetLevel++;
-                            tempWidth >>= 1;
-                            if (tempWidth < 1) tempWidth = 1;
+                            // compute first level that can fit mips
+                            int targetLevel = 0;
+                            uint tempWidth = (uint)bitmap1.Width;
+                            do
+                            {
+                                targetLevel++;
+                                tempWidth >>= 1;
+                                if (tempWidth < 1) tempWidth = 1;
+                            }
+                            while (tempWidth > (bitmap2.Width >> level) && targetLevel <= bitmap1.MipmapCount);
+
+                            if (targetLevel > 0)
+                                offset += GetXboxBitmapLevelOffset(bitmap1, 0, targetLevel, bitmap1.HighResInSecondaryResource > 0);
                         }
-                        while (tempWidth > (bitmap2.Width >> level) && targetLevel <= bitmap1.MipmapCount);
-
-                        if (targetLevel > 0)
-                            offset += GetXboxBitmapLevelOffset(bitmap1, 0, targetLevel, bitmap1.HighResInSecondaryResource > 0);
                     }
-
-                    Console.WriteLine("Type 1");
                 }
                 else
                 {
-                    offset = 0; // guardian cubemaps image 0
-                    Console.WriteLine("Type 2");
+                    offset = 0;
                 }
                 
             }
@@ -512,9 +508,6 @@ namespace TagTool.Bitmaps
             {
                 if (useInterleavedOffset)
                 {
-                    // sidewinder cubemaps 58, docks 2, bunker 32
-
-
                     // compute used data from the other image
                     if (currentBitmap.HighResInSecondaryResource > 0)
                     {
@@ -541,41 +534,26 @@ namespace TagTool.Bitmaps
                     }
                     else
                     {
-                        // compute first level that can fit mips
-                        int targetLevel = 0;
-                        uint tempWidth = (uint)bitmap2.Width;
-                        do
+                        if(bitmap1.Width >> level <= 64)
                         {
-                            targetLevel++;
-                            tempWidth >>= 1;
-                            if (tempWidth < 1) tempWidth = 1;
+                            // compute first level that can fit mips
+                            int targetLevel = 0;
+                            uint tempWidth = (uint)bitmap2.Width;
+                            do
+                            {
+                                targetLevel++;
+                                tempWidth >>= 1;
+                                if (tempWidth < 1) tempWidth = 1;
+                            }
+                            while (tempWidth > (bitmap1.Width >> level) && targetLevel <= bitmap2.MipmapCount);
+
+                            if (targetLevel > 0)
+                                offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
                         }
-                        while (tempWidth > (bitmap1.Width >> level) && targetLevel <= bitmap2.MipmapCount);
-
-                        if (targetLevel > 0)
-                            offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
                     }
-
-                    /*
-                    int targetLevel = 0;
-                    uint tempWidth = (uint)bitmap2.Width;
-                    do
-                    {
-                        targetLevel++;
-                        tempWidth >>= 1;
-                        if (tempWidth < 1) tempWidth = 1;
-                    }
-                    while (tempWidth != bitmap1.Width && targetLevel <= bitmap1.MipmapCount);
-
-                    if (targetLevel > 0)
-                        offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
-                        */
-                    Console.WriteLine("Type 3");
                 }
                 else
                 {
-                    // sidewinder cubemaps 59
-                    Console.WriteLine("Type 4");
                     offset = 0;
                 }
             }
