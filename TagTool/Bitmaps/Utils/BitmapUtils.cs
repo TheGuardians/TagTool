@@ -460,6 +460,7 @@ namespace TagTool.Bitmaps
                     if(currentBitmap.Width >> level <= 64)
                     {
                         // compute first level that can fit mips
+                        int lowerBound = currentBitmap.Width > 16 ? 64 : 16;
                         int targetLevel = 0;
                         uint tempWidth = (uint)bitmap1.Width;
                         do
@@ -468,7 +469,7 @@ namespace TagTool.Bitmaps
                             tempWidth >>= 1;
                             if (tempWidth < 1) tempWidth = 1;
                         }
-                        while (tempWidth > 64 && targetLevel <= bitmap1.MipmapCount);
+                        while (tempWidth > lowerBound && targetLevel <= bitmap1.MipmapCount);
 
                         if (targetLevel > 0)
                             offset += GetXboxBitmapLevelOffset(bitmap1, 0, targetLevel, bitmap1.HighResInSecondaryResource > 0);
@@ -524,6 +525,7 @@ namespace TagTool.Bitmaps
                     if (currentBitmap.Width >> level <= 64)
                     {
                         // compute first level that can fit mips
+                        int lowerBound = currentBitmap.Width > 16 ? 64 : 16;
                         int targetLevel = 0;
                         uint tempWidth = (uint)bitmap2.Width;
                         do
@@ -532,7 +534,7 @@ namespace TagTool.Bitmaps
                             tempWidth >>= 1;
                             if (tempWidth < 1) tempWidth = 1;
                         }
-                        while (tempWidth > 64 && targetLevel <= bitmap2.MipmapCount);
+                        while (tempWidth > lowerBound && targetLevel <= bitmap2.MipmapCount);
 
                         if (targetLevel > 0)
                             offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
