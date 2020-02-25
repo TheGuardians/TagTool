@@ -449,6 +449,47 @@ namespace TagTool.Bitmaps
                 if (useInterleavedOffset)
                 {
                     offset += 0; // guardian cubemaps image 1
+
+                    // compute used data from the other image
+                    if(currentBitmap.HighResInSecondaryResource > 0)
+                    {
+                        if(level == 0)
+                            offset += (uint)(arrayStride * otherBitmap.Width * otherBitmap.Width * bitsPerPixel) / 8;
+                    }
+
+                    if(currentBitmap.Width >> level <= 64)
+                    {
+                        // compute first level that can fit mips
+                        int targetLevel = 0;
+                        uint tempWidth = (uint)bitmap1.Width;
+                        do
+                        {
+                            targetLevel++;
+                            tempWidth >>= 1;
+                            if (tempWidth < 1) tempWidth = 1;
+                        }
+                        while (tempWidth > 64 && targetLevel <= bitmap1.MipmapCount);
+
+                        if (targetLevel > 0)
+                            offset += GetXboxBitmapLevelOffset(bitmap1, 0, targetLevel, bitmap1.HighResInSecondaryResource > 0);
+                    }
+                    else
+                    {
+                        // compute first level that can fit mips
+                        int targetLevel = 0;
+                        uint tempWidth = (uint)bitmap1.Width;
+                        do
+                        {
+                            targetLevel++;
+                            tempWidth >>= 1;
+                            if (tempWidth < 1) tempWidth = 1;
+                        }
+                        while (tempWidth > (bitmap2.Width >> level) && targetLevel <= bitmap1.MipmapCount);
+
+                        if (targetLevel > 0)
+                            offset += GetXboxBitmapLevelOffset(bitmap1, 0, targetLevel, bitmap1.HighResInSecondaryResource > 0);
+                    }
+
                     Console.WriteLine("Type 1");
                 }
                 else
@@ -462,12 +503,58 @@ namespace TagTool.Bitmaps
             {
                 if (bitmap1.Width > 64 && level == 0 && useInterleavedOffset)
                     offset += arrayStride * tileSize;
+
+                if (bitmap1.Width > 128)
+                    throw new Exception("FIX ME");
             }
             else
             {
                 if (useInterleavedOffset)
                 {
-                    // sidewinder cubemaps 58, docks 2
+                    // sidewinder cubemaps 58, docks 2, bunker 32
+
+
+                    // compute used data from the other image
+                    if (currentBitmap.HighResInSecondaryResource > 0)
+                    {
+                        if (level == 0)
+                            offset += (uint)(arrayStride * otherBitmap.Width * otherBitmap.Width * bitsPerPixel) / 8;
+                    }
+
+                    if (currentBitmap.Width >> level <= 64)
+                    {
+                        // compute first level that can fit mips
+                        int targetLevel = 0;
+                        uint tempWidth = (uint)bitmap2.Width;
+                        do
+                        {
+                            targetLevel++;
+                            tempWidth >>= 1;
+                            if (tempWidth < 1) tempWidth = 1;
+                        }
+                        while (tempWidth > 64 && targetLevel <= bitmap2.MipmapCount);
+
+                        if (targetLevel > 0)
+                            offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
+                    }
+                    else
+                    {
+                        // compute first level that can fit mips
+                        int targetLevel = 0;
+                        uint tempWidth = (uint)bitmap2.Width;
+                        do
+                        {
+                            targetLevel++;
+                            tempWidth >>= 1;
+                            if (tempWidth < 1) tempWidth = 1;
+                        }
+                        while (tempWidth > (bitmap1.Width >> level) && targetLevel <= bitmap2.MipmapCount);
+
+                        if (targetLevel > 0)
+                            offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
+                    }
+
+                    /*
                     int targetLevel = 0;
                     uint tempWidth = (uint)bitmap2.Width;
                     do
@@ -480,7 +567,7 @@ namespace TagTool.Bitmaps
 
                     if (targetLevel > 0)
                         offset += GetXboxBitmapLevelOffset(bitmap2, 0, targetLevel, bitmap2.HighResInSecondaryResource > 0);
-
+                        */
                     Console.WriteLine("Type 3");
                 }
                 else
@@ -571,7 +658,24 @@ namespace TagTool.Bitmaps
 
                     // if the bitmap uses the high resolution buffer, the first level is stored there so no need to add it to the running offset
                     if (hasHighResData && i == 0)
+                    {
+                        if(Level == 1)
+                        {
+                            levelWidth = width >> 1;
+                            levelHeight = height >> 1;
+
+                            if (levelWidth < 1) levelWidth = 1;
+                            if (levelHeight < 1) levelHeight = 1;
+
+                            alignedDepth = levelDepth;
+                            alignedWidth = levelWidth;
+                            alignedHeight = levelHeight;
+
+                            Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, format, unknownType, isTiled);
+                        }
                         continue;
+                    }
+                        
 
                     if ((levelWidth <= 16 || levelHeight <= 16) && isPacked)
                         break;

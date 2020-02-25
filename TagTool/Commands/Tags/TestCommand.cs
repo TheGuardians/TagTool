@@ -96,6 +96,8 @@ namespace TagTool.Commands
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\guardian_guardian_cubemaps", "bitm");
                 bitmapTag = cache.TagCache.GetTag(@"levels\dlc\docks\docks_docks_cubemaps", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
+                //bitmapTag = cache.TagCache.GetTag(@"levels\dlc\bunkerworld\bunkerworld_bunkerworld_cubemaps", "bitm");
+                
                 //TestConvertAllBitmaps(cache, stream);
                 TestConvertBitmap(cache, stream, bitmapTag);
             }
@@ -118,10 +120,10 @@ namespace TagTool.Commands
             for(int im = 0; im < bitmap.Images.Count; im++)
             {
                 var image = bitmap.Images[im];
-                /*
-                if (im != 18 && im != 19)
+                
+                if (im != 56 && im != 57)
                     continue;
-                */
+                
                 if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {
                     BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
@@ -344,7 +346,7 @@ namespace TagTool.Commands
                 }
             }
 
-            //Console.WriteLine($"Level: {level}, Offset: 0x{levelOffset:X04}");
+            Console.WriteLine($"Level: {level}, Side: {layerIndex} Offset: 0x{levelOffset:X04}");
 
             tileOffset += (int)levelOffset;
 
@@ -426,8 +428,8 @@ namespace TagTool.Commands
             }
 
             XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
-            XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
-            DumpBitmapDDS($"bitmap_untiled_{level}", data, (uint)alignedWidth, (uint)alignedHeight, definition.Depth, 1, bitmap.Images[imageIndex]);
+            //XboxGraphics.XGEndianSwapSurface(d3dFormat, data);
+            //DumpBitmapDDS($"bitmap_untiled_{level}", data, (uint)alignedWidth, (uint)alignedHeight, definition.Depth, 1, bitmap.Images[imageIndex]);
             uint actualWidth = (uint)definition.Width >> level;
             uint actualHeight = (uint)definition.Height >> level;
 
