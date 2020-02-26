@@ -140,8 +140,10 @@ namespace TagTool.Geometry
         /// <param name="resourceDefinition"></param>
         public void SetResourceBuffers(RenderGeometryApiResourceDefinition resourceDefinition)
         {
+            bool[] convertedVertexBuffers = new bool[resourceDefinition.VertexBuffers.Count];
+            bool[] convertedIndexBuffers = new bool[resourceDefinition.IndexBuffers.Count];
 
-            foreach(var mesh in Meshes)
+            foreach (var mesh in Meshes)
             {
                 mesh.ResourceVertexBuffers =  new VertexBufferDefinition[8];
                 mesh.ResourceIndexBuffers =  new IndexBufferDefinition[2];
@@ -152,7 +154,18 @@ namespace TagTool.Geometry
                     if (vertexBufferIndex != -1)
                     {
                         if (vertexBufferIndex < resourceDefinition.VertexBuffers.Count)
-                            mesh.ResourceVertexBuffers[i] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+                        {
+                            if(convertedVertexBuffers[vertexBufferIndex] == false)
+                            {
+                                convertedVertexBuffers[vertexBufferIndex] = true;
+                                mesh.ResourceVertexBuffers[i] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+                            }
+                            else
+                            {
+                                throw new System.Exception("Sharing vertex buffers is not supported");
+                            }
+                        }
+                            
                         else
                             mesh.ResourceVertexBuffers[i] = null; // happens on sbsp
                     }
@@ -164,7 +177,19 @@ namespace TagTool.Geometry
                     if (indexBufferIndex != -1)
                     {
                         if (indexBufferIndex < resourceDefinition.IndexBuffers.Count)
-                            mesh.ResourceIndexBuffers[i] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+                        {
+                            if(convertedIndexBuffers[indexBufferIndex] == false)
+                            {
+                                mesh.ResourceIndexBuffers[i] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+                                convertedIndexBuffers[indexBufferIndex] = true;
+                            }
+                            else
+                            {
+                                mesh.IndexBufferIndices[i] = -1;
+                                System.Console.WriteLine("Sharing index buffers not supported, ignoring it.");
+                            }
+
+                        }
                         else
                             mesh.ResourceIndexBuffers[i] = null; // this happens when loading particle model from gen3, the index buffers are empty but indices are set to 0
                     }
