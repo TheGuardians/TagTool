@@ -66,11 +66,12 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ApplyModPackageCommand(hoCache));
                 context.AddCommand(new CreateCharacterType(cache));
                 context.AddCommand(new ExportModPackageCommand(hoCache));
+
+                context.AddCommand(new UpdateMapFilesCommand(cache));
             }
 
             // porting related
             context.AddCommand(new UseAudioCacheCommand());
-            context.AddCommand(new UpdateMapFilesCommand(cache));
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
         }
     }
