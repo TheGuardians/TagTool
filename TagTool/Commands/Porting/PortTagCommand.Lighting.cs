@@ -188,6 +188,9 @@ namespace TagTool.Commands.Porting
         {
             var lightmapResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
 
+            if (lightmapResourceDefinition == null)
+                return Lbsp;
+
             var converter = new RenderGeometryConverter(CacheContext, BlamCache);
             var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
 
