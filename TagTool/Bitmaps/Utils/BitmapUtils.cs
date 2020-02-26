@@ -215,36 +215,14 @@ namespace TagTool.Bitmaps
             {
                 Width = (short)header.Width,
                 Height = (short)header.Height,
-                Depth = (byte)header.Depth,
-                MipmapCount = (byte)header.MipMapCount,
+                Depth = (byte)Math.Max(1, header.Depth),
+                MipmapCount = (byte)Math.Max(1, header.MipMapCount),
                 HighResInSecondaryResource = 0,
             };
 
             result.BitmapType = BitmapDdsFormatDetection.DetectType(header);
             result.Format = BitmapDdsFormatDetection.DetectFormat(header);
-
-            switch (result.Format)
-            {
-                case BitmapFormat.Dxt1:
-                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT1;
-                    result.Flags |= BitmapFlags.Compressed;
-                    break;
-                case BitmapFormat.Dxt3:
-                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT3;
-                    result.Flags |= BitmapFlags.Compressed;
-                    break;
-                case BitmapFormat.Dxt5:
-                    result.D3DFormat = (int)D3DFormat.D3DFMT_DXT5;
-                    result.Flags |= BitmapFlags.Compressed;
-                    break;
-                case BitmapFormat.Dxn:
-                    result.D3DFormat = (int)D3DFormat.D3DFMT_ATI2;
-                    result.Flags |= BitmapFlags.Compressed;
-                    break;
-                default:
-                    result.D3DFormat = (int)D3DFormat.D3DFMT_UNKNOWN;
-                    break;
-            }
+            result.D3DFormat = (int)header.PixelFormat.FourCC;
 
             result.Curve = BitmapImageCurve.xRGB; // find a way to properly determine that
 
