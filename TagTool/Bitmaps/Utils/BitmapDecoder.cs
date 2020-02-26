@@ -380,15 +380,16 @@ namespace TagTool.Bitmaps
             XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_CTX1, out blockWidth, out blockHeight);
             uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
             uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
-            uint DXNBpp = XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            uint DXNbpp = XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN);
             uint CTXbpp = XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_CTX1);
             int CTX1TexelPitch = (int)(blockWidth * blockHeight * CTXbpp) >> 3;
-            int DXNTexelPitch = (int)(blockWidth * blockHeight * DXNBpp);
+            int ctx1ImageSize = (int)(alignedWidth * alignedHeight * CTXbpp) >> 3;
+            int DXNTexelPitch = (int)(blockWidth * blockHeight * DXNbpp) >> 3;
 
-            byte[] buffer = new byte[alignedWidth * alignedHeight * DXNBpp];
+            byte[] buffer = new byte[(alignedWidth * alignedHeight * DXNbpp) >> 3];
 
             int b = 0;  // buffer block index (dxn)
-            for(int i =0; i< width * height / 2; i += CTX1TexelPitch, b += DXNTexelPitch)
+            for(int i =0; i < ctx1ImageSize; i += CTX1TexelPitch, b += DXNTexelPitch)
             {
                 // convert X,Y min and max components (swap X and Y at the same time)
                 byte minX = data[i + 0];
@@ -577,7 +578,7 @@ namespace TagTool.Bitmaps
                         RGBAColor color;
                         color.B = color.G = color.R = monoTable[mIndices[(j * sizeh) + k]];
                         color.A = alphaTable[aIndices[(j * sizeh) + k]];
-                        temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
+                        temp = (((((yPos * 4) + j) * (int)alignedWidth) + (xPos * 4)) + k) * 4;
                         buffer[temp] = (byte)color.B;
                         buffer[temp + 1] = (byte)color.G;
                         buffer[temp + 2] = (byte)color.R;
@@ -776,12 +777,12 @@ namespace TagTool.Bitmaps
         private static byte[] DecodeDxt3A(byte[] data, int width, int height)
         {
             uint blockWidth, blockHeight;
-            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN, out blockWidth, out blockHeight);
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT3A, out blockWidth, out blockHeight);
             uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
             uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
-            int BppDXN = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            int bppDXT3A = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT3A);
             int BppResult = 4;
-            int imageSize = (int)(alignedWidth * alignedHeight * BppDXN);
+            int imageSize = (int)(alignedWidth * alignedHeight * bppDXT3A) / 8;
             byte[] buffer = new byte[alignedHeight * alignedWidth * BppResult];
 
             int nBlockWidth = (int)(alignedWidth / blockWidth);
@@ -817,7 +818,7 @@ namespace TagTool.Bitmaps
                         j = k ^ 1;
                         for (i = 0; i < 4; i++)
                         {
-                            int pixDataStart = ((width * ((y * 4) + j)) * 4) + (((x * 4) + i) * 4);
+                            int pixDataStart = (((int)alignedWidth * ((y * 4) + j)) * 4) + (((x * 4) + i) * 4);
 
                             buffer[pixDataStart] = alpha[i, j];
                             buffer[pixDataStart + 1] = alpha[i, j];
@@ -967,18 +968,18 @@ namespace TagTool.Bitmaps
         private static byte[] DecodeDxt5A(byte[] data, int width, int height)
         {
             uint blockWidth, blockHeight;
-            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN, out blockWidth, out blockHeight);
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT5A, out blockWidth, out blockHeight);
             uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
             uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
-            int BppDXN = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXN) >> 3;
+            int bppDXT5A = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT5A);
             int BppResult = 4;
-            int imageSize = (int)(alignedWidth * alignedHeight * BppDXN);
+            int imageSize = (int)(alignedWidth * alignedHeight * bppDXT5A) / 8;
             byte[] buffer = new byte[alignedHeight * alignedWidth * BppResult];
 
             int nBlockWidth = (int)(alignedWidth / blockWidth);
             int nBlockHeight = (int)(alignedHeight / blockWidth);
 
-            for (int i = 0; i < (width * height / 2); i += 8)
+            for (int i = 0; i < imageSize; i += 8)
             {
                 byte mMin = data[i + 1];
                 byte mMax = data[i + 0];
@@ -1035,7 +1036,7 @@ namespace TagTool.Bitmaps
                     {
                         RGBAColor color;
                         color.R = color.G = color.B = color.A = monoTable[rIndices[(j * sizeh) + k]];
-                        temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
+                        temp = (((((yPos * 4) + j) * (int)alignedWidth) + (xPos * 4)) + k) * 4;
                         buffer[temp] = (byte)color.B;
                         buffer[temp + 1] = (byte)color.G;
                         buffer[temp + 2] = (byte)color.R;
