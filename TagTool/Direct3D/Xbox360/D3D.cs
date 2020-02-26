@@ -305,14 +305,11 @@ namespace TagTool.Direct3D.D3D9x
 
             if (!isTiled)
             {
-                uint blockSize = blockHeight * blockWidth * bitsPerPixel >> 3;
-                if (blockSize > 0)
+                uint texelPitch = blockHeight * blockWidth * bitsPerPixel >> 3;
+                if (texelPitch > 0)
                 {
-                    if (tileWidth <= 256 / blockSize)
-                    {
-                        width = 256 / blockSize;
-                        tileWidth = width;
-                    }
+                    if (tileWidth <= 0x100 / texelPitch)
+                        tileWidth = 0x100 / texelPitch;
                 }
             }
             tileWidth *= blockWidth;

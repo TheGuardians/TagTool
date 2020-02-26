@@ -250,7 +250,7 @@ namespace TagTool.Bitmaps.Utils
             if (!isPaired)
             {
                 bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
-                if (level == 0 && useHighResBuffer)
+                if ((level == 0 && useHighResBuffer) || primaryData == null)
                 {
                     levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
                     uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
