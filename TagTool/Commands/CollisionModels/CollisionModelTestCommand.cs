@@ -10,9 +10,9 @@ namespace TagTool.Commands.CollisionModels
 {
     class CollisionModelTestCommand : Command
     {
-        private GameCache Cache { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
 
-        public CollisionModelTestCommand(GameCache cache)
+        public CollisionModelTestCommand(GameCacheHaloOnlineBase cache)
             : base(false,
                   
                   "CollisionModelTest",
@@ -37,25 +37,22 @@ namespace TagTool.Commands.CollisionModels
                 return false;
             }
 
-            CachedTag tag = null;
-            bool b_duplicate;
+            CachedTag tag;
 
             // optional argument: forces overwriting of tags that are not type: coll
             var b_force = (args.Count >= 3 && args[2].ToLower().Equals("force"));
 
             if (args[1].ToLower().Equals("new"))
             {
-                b_duplicate = true;
+                tag = Cache.TagCacheGenHO.AllocateTag(new TagTool.Tags.TagGroup("coll", null, null, Cache.StringTable.GetStringId("collision_model")));
             }
             else
             {
                 if (!Cache.TryGetTag(args[1], out tag))
                     return false;
-
-                b_duplicate = false;
             }
 
-            if (!b_force && !b_duplicate && !tag.IsInGroup("coll"))
+            if (!b_force && !tag.IsInGroup("coll"))
             {
                 Console.WriteLine("Tag to override was not of class- 'coll'. Use third argument- 'force' to inject into this tag.");
                 return false;
@@ -117,20 +114,8 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
 
-            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
-
-                if (b_duplicate)
-                {
-                    //duplicate an existing tag, trashcan phmo
-                    tag = Cache.TagCache.DuplicateTag(stream, CacheContext.TagCache.Index[0x4436]);
-                    if (tag == null)
-                    {
-                        Console.WriteLine("Failed tag duplication.");
-                        return false;
-                    }
-                }
-
                 Cache.Serialize(stream, tag, coll);
             }
 

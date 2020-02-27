@@ -8,6 +8,8 @@ using TagTool.Commands.Sounds;
 using TagTool.Commands.Porting;
 using TagTool.Commands.Modding;
 using TagTool.Commands.Bitmaps;
+using TagTool.Commands.PhysicsModels;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Commands.Tags
 {
@@ -68,6 +70,9 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ExportModPackageCommand(hoCache));
 
                 context.AddCommand(new UpdateMapFilesCommand(cache));
+
+                context.AddCommand(new PhysicsModelTestCommand(cache));
+                context.AddCommand(new CollisionModelTestCommand(hoCache));
             }
 
             // porting related
