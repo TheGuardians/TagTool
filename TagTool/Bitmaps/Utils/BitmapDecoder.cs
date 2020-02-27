@@ -601,7 +601,7 @@ namespace TagTool.Bitmaps
                     int index = ((i * xBlocks) + j) * 8;
                     uint colour0 = (uint)((data[index + 1] << 8) + data[index + 0]);
                     uint colour1 = (uint)((data[index + 3] << 8) + data[index + 2]);
-                    uint code = (uint)((data[index + 6] << 24) + (data[index + 7] << 16) + (data[index + 8 + 4] << 8) + (data[index + 5] << 0));
+                    uint code = (uint)((data[index + 7] << 24) + (data[index + 6] << 16) + (data[index + 5] << 8) + (data[index + 4] << 0));
 
                     ushort r0 = 0, g0 = 0, b0 = 0, r1 = 0, g1 = 0, b1 = 0;
 
@@ -615,10 +615,9 @@ namespace TagTool.Bitmaps
 
                     for (int k = 0; k < 4; k++)
                     {
-                        int x = k ^ 1;
                         for (int m = 0; m < 4; m++)
                         {
-                            int dataStart = ((width * ((i * 4) + x)) * 4) + (((j * 4) + m) * 4);
+                            int dataStart = ((width * ((i * 4) + k)) * 4) + (((j * 4) + m) * 4);
                             switch (code & 3)
                             {
                                 case 0:
