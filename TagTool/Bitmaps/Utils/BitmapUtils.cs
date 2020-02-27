@@ -226,7 +226,7 @@ namespace TagTool.Bitmaps
 
             result.Curve = BitmapImageCurve.xRGB; // find a way to properly determine that
 
-            if (header.PixelFormat.Flags.HasFlag(DDSPixelFormatFlags.Compressed))
+            if (IsCompressedFormat(result.Format))
                 result.Flags |= BitmapFlags.Compressed;
 
             if (IsPowerOfTwo(header.Width) && IsPowerOfTwo(header.Height))
