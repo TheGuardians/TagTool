@@ -280,5 +280,75 @@ namespace TagTool.Geometry
 
             return result;
         }
+
+        /// <summary>
+        /// Generate a valid RenderGeometryApiResourceDefinition from the mesh blocks and sets the values in IndexBufferIndices, VertexBufferIndices
+        /// </summary>
+        /// <returns></returns>
+        public RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(int meshindex)
+        {
+            RenderGeometryApiResourceDefinition result = new RenderGeometryApiResourceDefinition
+            {
+                IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(),
+                VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>()
+            };
+
+            // valid for gen3, InteropLocations should also point to the definition.
+            result.IndexBuffers.AddressType = CacheAddressType.Definition;
+            result.VertexBuffers.AddressType = CacheAddressType.Definition;
+
+            var mesh = Meshes[meshindex];
+
+            for (int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
+            {
+                var vertexBuffer = mesh.ResourceVertexBuffers[i];
+                if (vertexBuffer != null)
+                {
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = vertexBuffer;
+                    result.VertexBuffers.Add(d3dPointer);
+                    mesh.VertexBufferIndices[i] = (short)(result.VertexBuffers.Elements.Count - 1);
+                }
+                else
+                    mesh.VertexBufferIndices[i] = -1;
+            }
+
+            for (int i = 0; i < mesh.ResourceIndexBuffers.Length; i++)
+            {
+                var indexBuffer = mesh.ResourceIndexBuffers[i];
+                if (indexBuffer != null)
+                {
+                    var d3dPointer = new D3DStructure<IndexBufferDefinition>();
+                    d3dPointer.Definition = indexBuffer;
+                    result.IndexBuffers.Add(d3dPointer);
+                    mesh.IndexBufferIndices[i] = (short)(result.IndexBuffers.Elements.Count - 1);
+                }
+                else
+                    mesh.IndexBufferIndices[i] = -1;
+            }
+
+            // if the mesh is unindexed the index in the index buffer should be 0, but the buffer is empty. Copying what h3\ho does.
+            if (mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
+            {
+                mesh.IndexBufferIndices[0] = 0;
+                mesh.IndexBufferIndices[1] = 0;
+            }
+
+            for (int i = 0; i < InstancedGeometryPerPixelLighting.Count; i++)
+            {
+                var perPixel = InstancedGeometryPerPixelLighting[i];
+                if (perPixel.VertexBuffer != null)
+                {
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = perPixel.VertexBuffer;
+                    result.VertexBuffers.Add(d3dPointer);
+                    perPixel.VertexBufferIndex = (short)(result.VertexBuffers.Elements.Count - 1);
+                }
+                else
+                    perPixel.VertexBufferIndex = -1;
+            }
+
+            return result;
+        }
     }
 }

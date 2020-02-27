@@ -280,6 +280,7 @@
     <Compile Include="Commands\RenderModels\ReplaceRenderGeometryCommand.cs" />
     <Compile Include="Commands\RenderModels\SpecifyShadersCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\ConvertInstancedGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractPathfindingGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />

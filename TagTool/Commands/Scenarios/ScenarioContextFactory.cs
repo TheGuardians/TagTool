@@ -24,11 +24,8 @@ namespace TagTool.Commands.Scenarios
             context.AddCommand(new DumpScriptsCommand(cache, scenario));
             context.AddCommand(new CompileScriptsCommand(cache, scenario));
             context.AddCommand(new ListScriptsCommand(cache, tag, scenario));
-
-            if (cache.Version > CacheVersion.Halo3Retail)
-            {
-                context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario));
-            }
+            context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario));
+            context.AddCommand(new ConvertInstancedGeometryCommand(cache, scenario));
         }
     }
 }
