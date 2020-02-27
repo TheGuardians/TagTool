@@ -48,7 +48,7 @@ namespace TagTool.Commands
             //
 
 
-            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"docks.map"));
+            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"deadlock.map"));
 
             var cache = GameCache.Open(file);
 
@@ -149,7 +149,7 @@ namespace TagTool.Commands
                 }
                 else
                 {
-                    continue;
+
                     BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[im]);
                     if (resource == null)
                         return;
@@ -438,7 +438,8 @@ namespace TagTool.Commands
             if (actualHeight < 1)
                 actualHeight = 1;
 
-            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format);
+            bool requireDecompression = BitmapUtils.RequiresDecompression(BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format), (uint)definition.Width, (uint)definition.Height);
+            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, requireDecompression);
 
             resultStream.Write(finalData, 0, finalData.Length);
         }

@@ -127,7 +127,12 @@ namespace TagTool.Bitmaps.Utils
                 var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
                 resultBitmap.UpdateFormat(newFormat);
 
-                if (!BitmapUtils.IsCompressedFormat(newFormat))
+                if(BitmapUtils.RequiresDecompression(resultBitmap.Format, (uint)resultBitmap.Width, (uint)resultBitmap.Height))
+                {
+                    resultBitmap.Format = BitmapFormat.A8R8G8B8;
+                }
+
+                if (!BitmapUtils.IsCompressedFormat(resultBitmap.Format))
                     resultBitmap.Flags &= ~BitmapFlags.Compressed;
                 else
                     resultBitmap.Flags |= BitmapFlags.Compressed;
@@ -138,47 +143,12 @@ namespace TagTool.Bitmaps.Utils
 
                 resultBitmap.Data = resultData;
                 
-                if(newFormat == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 8x8
+                if(resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 8x8
                 {
                     GenerateCompressedMipMaps(resultBitmap);
                 }
 
-                /*
-                if (newFormat == BitmapFormat.Dxn)
-                {
-                    int dataSize = BitmapUtils.RoundSize(definition.Width, 4) * BitmapUtils.RoundSize(definition.Height, 4);
-                    int mipMapCount = mipLevelCount - 1;
-                    if (mipMapCount > 0)
-                    {
-                        var width = definition.Width;
-                        var height = definition.Height;
-
-                        dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-
-                        mipMapCount = 0;
-
-                        // if bitmap has power of two dimensions, add mipmaps up to 4x4
-                        if(Direct3D.D3D9x.D3D.IsPowerOfTwo(definition.Width) && Direct3D.D3D9x.D3D.IsPowerOfTwo(definition.Height))
-                        {
-                            while ((width >= 8) && (height >= 8) && mipMapCount < mipLevelCount - 1)
-                            {
-                                width /= 2;
-                                height /= 2;
-                                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-                                mipMapCount++;
-                            }
-                        }
-                    }
-                    resultBitmap.MipMapCount = mipMapCount;
-                    byte[] truncatedData = new byte[dataSize];
-                    Array.Copy(resultData, 0, truncatedData, 0, dataSize);
-                    resultBitmap.Data = truncatedData;
-                }
-                else
-                {
-                    resultBitmap.Data = resultData;
-                }
-                */
+                
                 if (resultBitmap.Type == BitmapType.Array) // for HO, arrays use the index of Texture3D
                     resultBitmap.Type = BitmapType.Texture3D;
 
@@ -375,8 +345,8 @@ namespace TagTool.Bitmaps.Utils
                 actualWidth = 1;
             if (actualHeight < 1)
                 actualHeight = 1;
-
-            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format);
+            bool requireDecompression = BitmapUtils.RequiresDecompression(BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format), (uint)definition.Width, (uint)definition.Height);
+            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, requireDecompression);
 
             resultStream.Write(finalData, 0, finalData.Length);
         }

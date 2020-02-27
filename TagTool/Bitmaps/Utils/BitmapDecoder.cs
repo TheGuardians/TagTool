@@ -599,9 +599,9 @@ namespace TagTool.Bitmaps
                 for (int j = 0; j < xBlocks; j++)
                 {
                     int index = ((i * xBlocks) + j) * 8;
-                    uint colour0 = (uint)((data[index] << 8) + data[index + 1]);
-                    uint colour1 = (uint)((data[index + 2] << 8) + data[index + 3]);
-                    uint code = BitConverter.ToUInt32(data, index + 4);
+                    uint colour0 = (uint)((data[index + 1] << 8) + data[index + 0]);
+                    uint colour1 = (uint)((data[index + 3] << 8) + data[index + 2]);
+                    uint code = (uint)((data[index + 6] << 24) + (data[index + 7] << 16) + (data[index + 8 + 4] << 8) + (data[index + 5] << 0));
 
                     ushort r0 = 0, g0 = 0, b0 = 0, r1 = 0, g1 = 0, b1 = 0;
 
@@ -685,10 +685,10 @@ namespace TagTool.Bitmaps
                     int blockDataStart = ((y * xBlocks) + x) * 16;
                     ushort[] alphaData = new ushort[4];
 
-                    alphaData[0] = (ushort)((data[blockDataStart + 0] << 8) + data[blockDataStart + 1]);
-                    alphaData[1] = (ushort)((data[blockDataStart + 2] << 8) + data[blockDataStart + 3]);
-                    alphaData[2] = (ushort)((data[blockDataStart + 4] << 8) + data[blockDataStart + 5]);
-                    alphaData[3] = (ushort)((data[blockDataStart + 6] << 8) + data[blockDataStart + 7]);
+                    alphaData[0] = (ushort)((data[blockDataStart + 1] << 8) + data[blockDataStart + 0]);
+                    alphaData[1] = (ushort)((data[blockDataStart + 3] << 8) + data[blockDataStart + 2]);
+                    alphaData[2] = (ushort)((data[blockDataStart + 5] << 8) + data[blockDataStart + 4]);
+                    alphaData[3] = (ushort)((data[blockDataStart + 7] << 8) + data[blockDataStart + 6]);
 
                     byte[,] alpha = new byte[4, 4];
                     for (int j = 0; j < 4; j++)
@@ -703,7 +703,7 @@ namespace TagTool.Bitmaps
                     ushort color0 = (ushort)((data[blockDataStart + 8] << 8) + data[blockDataStart + 9]);
                     ushort color1 = (ushort)((data[blockDataStart + 10] << 8) + data[blockDataStart + 11]);
 
-                    uint code = BitConverter.ToUInt32(data, blockDataStart + 8 + 4);
+                    uint code = (uint)((data[blockDataStart + 8 + 6] << 24) + (data[blockDataStart + 8 + 7] << 16) + (data[blockDataStart + 8 + 4] << 8) + (data[blockDataStart + 8 + 5] << 0));
 
                     ushort r0 = 0, g0 = 0, b0 = 0, r1 = 0, g1 = 0, b1 = 0;
                     r0 = (ushort)(8 * (color0 & 31));
@@ -846,20 +846,20 @@ namespace TagTool.Bitmaps
                     uint[] alphas = new uint[8];
                     ulong alphaMask = 0;
 
-                    alphas[0] = data[blockDataStart + 1];
-                    alphas[1] = data[blockDataStart + 0];
+                    alphas[0] = data[blockDataStart + 0];
+                    alphas[1] = data[blockDataStart + 1];
 
-                    alphaMask |= data[blockDataStart + 6];
-                    alphaMask <<= 8;
                     alphaMask |= data[blockDataStart + 7];
                     alphaMask <<= 8;
-                    alphaMask |= data[blockDataStart + 4];
+                    alphaMask |= data[blockDataStart + 6];
                     alphaMask <<= 8;
                     alphaMask |= data[blockDataStart + 5];
                     alphaMask <<= 8;
-                    alphaMask |= data[blockDataStart + 2];
+                    alphaMask |= data[blockDataStart + 4];
                     alphaMask <<= 8;
                     alphaMask |= data[blockDataStart + 3];
+                    alphaMask <<= 8;
+                    alphaMask |= data[blockDataStart + 2];
 
                     if (alphas[0] > alphas[1])
                     {
@@ -891,11 +891,10 @@ namespace TagTool.Bitmaps
                         }
                     }
 
-                    ushort color0 = (ushort)((data[blockDataStart + 8] << 8) + data[blockDataStart + 9]);
-                    ushort color1 = (ushort)((data[blockDataStart + 10] << 8) + data[blockDataStart + 11]);
+                    ushort color0 = (ushort)((data[blockDataStart + 9] << 8) + data[blockDataStart + 8]);
+                    ushort color1 = (ushort)((data[blockDataStart + 11] << 8) + data[blockDataStart + 10]);
 
-                    uint code = BitConverter.ToUInt32(data, blockDataStart + 8 + 4);
-
+                    uint code = (uint)((data[blockDataStart + 8 + 6] << 24) + (data[blockDataStart + 8 + 7] << 16) + (data[blockDataStart + 8 + 4] << 8) + (data[blockDataStart + 8 + 5] << 0));
                     ushort r0 = 0, g0 = 0, b0 = 0, r1 = 0, g1 = 0, b1 = 0;
                     r0 = (ushort)(8 * (color0 & 31));
                     g0 = (ushort)(4 * ((color0 >> 5) & 63));

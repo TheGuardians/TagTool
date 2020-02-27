@@ -748,37 +748,52 @@ namespace TagTool.Bitmaps
                     return format;
             }
         }
+        public static bool RequiresDecompression(BitmapFormat format, uint width, uint height) => IsCompressedFormat(format) && (width % 4 != 0 || height % 4 != 0);
 
-        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format)
+        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, bool requireDecompression)
         {
             BitmapFormat destinationFormat = GetEquivalentBitmapFormat(format);
-
-            if(format == BitmapFormat.Dxn)
+            
+            if (format == BitmapFormat.Dxn)
             {
                 // flip x and y channels
                 data = BitmapDecoder.SwapXYDxn(data, (int)width, (int)height);
             }
 
-
-            if (destinationFormat == format)
+            if (destinationFormat == format && !requireDecompression)
                 return data;
 
             if(format == BitmapFormat.Ctx1)
             {
                 data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
             }
-            else
+            else if(format != destinationFormat)
             {
-                //
-                // BitmapDecoder needs to be updated to use the aligned height and width. look at DXN mono alpha or CTX1 to DXN for example
-                //
                 byte[] uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
 
                 uncompressedData = TrimAlignedBitmap(format, destinationFormat, (int)width, (int)height, uncompressedData);
 
                 data = BitmapDecoder.EncodeBitmap(uncompressedData, destinationFormat, (int)width, (int)height);
             }
+
+            if (requireDecompression)
+                data = ConvertNonMultipleBlockSizeBitmap(data, width, height, format);
+
             return data;
+        }
+
+        public static byte[] ConvertNonMultipleBlockSizeBitmap(byte[] data, uint width, uint height, BitmapFormat format)
+        {
+            // assume block size 4 because that's all we deal with in tag data
+
+            if (!IsCompressedFormat(format))
+                return data;
+
+            uint alignedWidth = width % 4 != 0 ? width + 4 - width % 4 : width;
+            uint alignedHeight = height % 4 != 0 ? height + 4 - height % 4 : height;
+
+            byte[] uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)alignedWidth, (int)alignedHeight);
+            return TrimAlignedBitmap(format, BitmapFormat.A8R8G8B8, (int)width, (int)height, uncompressedData);
         }
 
         private static byte[] TrimAlignedBitmap(BitmapFormat originalFormat, BitmapFormat destinationFormat, int width, int height, byte[] data)
@@ -794,6 +809,10 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt5aMono:
                 case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
                     blockSize = 4;
                     break;
                 case BitmapFormat.AY8:
