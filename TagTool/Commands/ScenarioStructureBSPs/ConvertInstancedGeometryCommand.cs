@@ -8,6 +8,7 @@ using TagTool.Tags.Definitions;
 using TagTool.Geometry;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Scenarios
 {
@@ -39,6 +40,10 @@ namespace TagTool.Commands.Scenarios
                     var Sbsp = (ScenarioStructureBsp)CacheContext.Deserialize(stream, Scnr.StructureBsps[sbspindex].StructureBsp);
                     var sLdT = (ScenarioLightmap)CacheContext.Deserialize(stream, Scnr.Lightmap);
                     var Lbsp = (ScenarioLightmapBspData)CacheContext.Deserialize(stream, sLdT.LightmapDataReferences[sbspindex]);
+
+                    //set resource definition
+                    var resourceDefinition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
+                    Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
 
                     foreach (ScenarioStructureBsp.InstancedGeometryInstance InstancedGeometryBlock in Sbsp.InstancedGeometryInstances)
                     {
@@ -77,10 +82,11 @@ namespace TagTool.Commands.Scenarios
                         //copy block elements and resources from sbsp for new mode
                         RenderModel editedmode = (RenderModel)CacheContext.Deserialize(stream, newmode);
 
-                        //set resource definition
-                        var resourceDefinition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
-                        Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
-                        var newResourceDefinition = Lbsp.Geometry.GetSingleMeshResourceDefinition(InstancedGeometryBlock.MeshIndex);
+                        //
+                        // warning: this relies on GetSingleMeshResourceDefinition updating the vertex/index buffer indices in the Lbsp, not safe
+                        //
+
+                        var newResourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, InstancedGeometryBlock.MeshIndex);
                         editedmode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newResourceDefinition);
 
                         //copy meshes tagblock
@@ -130,6 +136,58 @@ namespace TagTool.Commands.Scenarios
             Console.WriteLine("Done!");
 
             return true;
+        }
+
+        private RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex)
+        {
+            RenderGeometryApiResourceDefinition result = new RenderGeometryApiResourceDefinition
+            {
+                IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(),
+                VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>()
+            };
+
+            // valid for gen3, InteropLocations should also point to the definition.
+            result.IndexBuffers.AddressType = CacheAddressType.Definition;
+            result.VertexBuffers.AddressType = CacheAddressType.Definition;
+
+            var mesh = renderGeometry.Meshes[meshindex];
+
+            for (int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
+            {
+                var vertexBuffer = mesh.ResourceVertexBuffers[i];
+                if (vertexBuffer != null)
+                {
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = vertexBuffer;
+                    result.VertexBuffers.Add(d3dPointer);
+                    mesh.VertexBufferIndices[i] = (short)(result.VertexBuffers.Elements.Count - 1);
+                }
+                else
+                    mesh.VertexBufferIndices[i] = -1;
+            }
+
+            for (int i = 0; i < mesh.ResourceIndexBuffers.Length; i++)
+            {
+                var indexBuffer = mesh.ResourceIndexBuffers[i];
+                if (indexBuffer != null)
+                {
+                    var d3dPointer = new D3DStructure<IndexBufferDefinition>();
+                    d3dPointer.Definition = indexBuffer;
+                    result.IndexBuffers.Add(d3dPointer);
+                    mesh.IndexBufferIndices[i] = (short)(result.IndexBuffers.Elements.Count - 1);
+                }
+                else
+                    mesh.IndexBufferIndices[i] = -1;
+            }
+
+            // if the mesh is unindexed the index in the index buffer should be 0, but the buffer is empty. Copying what h3\ho does.
+            if (mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
+            {
+                mesh.IndexBufferIndices[0] = 0;
+                mesh.IndexBufferIndices[1] = 0;
+            }
+
+            return result;
         }
     }
 }
