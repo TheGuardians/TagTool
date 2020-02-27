@@ -33,7 +33,7 @@ namespace TagTool.Commands.Common
 
             using (var stream = File.OpenText(args[0]))
             {
-               for(string line; (line = stream.ReadLine()) != null;)
+               for(string line; (line = stream.ReadLine()) != null && !commandRunner.EOF;)
                     commandRunner.RunCommand(line);
             }
 
