@@ -29,16 +29,16 @@ namespace TagTool.Commands.Shaders
 
         private static void ResetRMT2(RenderMethodTemplate Definition)
         {
-            Definition.DrawModeBitmask = 0;
-            Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+            Definition.ValidEntryPoints = 0;
+            Definition.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
 
-            Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
-            Definition.RegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
+            Definition.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
+            Definition.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
 
-            Definition.VectorArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.IntegerArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.BooleanArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.SamplerArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.BooleanParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.TextureParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
 
         }
 
@@ -95,7 +95,7 @@ namespace TagTool.Commands.Shaders
 
                             Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
 
-                            Definition.DrawModeBitmask |= RenderMethodTemplate.ShaderModeBitmask.Albedo;
+                            Definition.ValidEntryPoints |= RenderMethodTemplate.EntryPointBitMask.Albedo;
                         }
                     }
                     break;
@@ -124,7 +124,7 @@ namespace TagTool.Commands.Shaders
 
                             Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
 
-                            Definition.DrawModeBitmask |= RenderMethodTemplate.ShaderModeBitmask.Default;
+                            Definition.ValidEntryPoints |= RenderMethodTemplate.EntryPointBitMask.Default;
                         }
 
                         //TODO: Extract shader parameters

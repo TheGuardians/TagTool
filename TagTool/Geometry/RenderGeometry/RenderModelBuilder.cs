@@ -438,7 +438,8 @@ namespace TagTool.Geometry
                 VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(),
                 IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>()
             };
-
+            definition.IndexBuffers.AddressType = CacheAddressType.Definition;
+            definition.VertexBuffers.AddressType = CacheAddressType.Definition;
             foreach (var mesh in Meshes)
             {
                 // Serialize the mesh's vertex buffer
@@ -452,7 +453,7 @@ namespace TagTool.Geometry
 
                 // Add a definition for it
                 mesh.Mesh.VertexBufferIndices[0] = (short)definition.VertexBuffers.Count;
-                definition.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
+                definition.VertexBuffers.Add(new D3DStructure<VertexBufferDefinition>
                 {
                     Definition = new VertexBufferDefinition
                     {
@@ -475,7 +476,7 @@ namespace TagTool.Geometry
 
                 // Add a definition for it
                 mesh.Mesh.IndexBufferIndices[0] = (short)definition.IndexBuffers.Count;
-                definition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
+                definition.IndexBuffers.Add(new D3DStructure<IndexBufferDefinition>
                 {
                     Definition = new IndexBufferDefinition
                     {

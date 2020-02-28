@@ -38,11 +38,11 @@ namespace TagTool.Commands.RenderMethods
                 using (var cacheStream = Cache.OpenCacheRead())
                     template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                for (var i = 0; i < template.SamplerArguments.Count; i++)
+                for (var i = 0; i < template.TextureParameterNames.Count; i++)
                 {
-                    var mapTemplate = template.SamplerArguments[i];
+                    var mapTemplate = template.TextureParameterNames[i];
 
-                    Console.WriteLine($"Bitmap {i} ({Cache.StringTable.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4}");
+                    Console.WriteLine($"Bitmap {i} ({Cache.StringTable.GetString(mapTemplate.Name)}): {property.TextureConstants[i].Bitmap.Group.Tag} 0x{property.TextureConstants[i].Bitmap.Index:X4}");
                 }
             }
 

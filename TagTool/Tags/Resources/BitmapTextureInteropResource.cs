@@ -34,15 +34,7 @@ namespace TagTool.Tags.Resources
         public BitmapType BitmapType;
         public byte HighResInSecondaryResource;
 
-        // D3D flags
-        public byte Unknown3; // could be flags, 0x10 = hasMipMaps
-        public byte Unknown4;
-        public byte Unknown5;
-        [TagField(Gen = CacheGeneration.Third)]
-        public D3DFormatXbox D3DFormatXbox;
-
-        [TagField(Gen = CacheGeneration.HaloOnline)]
-        public D3DFormat D3DFormat;
+        public int D3DFormat;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public BitmapFormat Format;

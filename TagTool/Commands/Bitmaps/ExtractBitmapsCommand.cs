@@ -64,6 +64,8 @@ namespace TagTool.Commands.Bitmaps
                         {
                             var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : tag.Index.ToString("X8")) + ".dds");
                             var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, i);
+                            if (ddsFile == null)
+                                continue;
                             using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                             using (var writer = new EndianWriter(outStream, EndianFormat.LittleEndian))
                             {

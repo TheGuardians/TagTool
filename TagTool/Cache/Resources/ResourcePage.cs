@@ -1,13 +1,13 @@
 using System;
 using TagTool.Tags;
 
-namespace TagTool.Cache
+namespace TagTool.Cache.Resources
 {
     [TagStructure(Size = 0x58, Align = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x58, Align = 0x8, MinVersion = CacheVersion.HaloReach)]
     [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
-    public class RawPage : TagStructure
+    public class ResourcePage : TagStructure
 	{
         public short Salt;
 

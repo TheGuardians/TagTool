@@ -767,7 +767,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown2;
             public ushort OldManualBspFlagsNowZoneSets;
             public StringId UniqueName;
-            public DatumIndex UniqueHandle;
+            public DatumHandle UniqueHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public SourceValue Source; // sbyte
@@ -2913,7 +2913,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class ReferenceFrame : TagStructure
 		{
-            public DatumIndex ObjectHandle;
+            public DatumHandle ObjectHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public ScenarioInstance.SourceValue Source;

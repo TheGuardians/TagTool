@@ -46,5 +46,10 @@ namespace TagTool.Tags
 		/// Can be <see cref="CacheVersion.Unknown"/> (default) if unbounded.
 		/// </summary>
 		public CacheVersion MaxVersion { get; set; } = CacheVersion.Unknown;
+
+		/// <summary>
+		/// The platforms that the structure is available on.
+		/// </summary>
+		public CachePlatform Platform { get; set; } = CachePlatform.All;
 	}
 }

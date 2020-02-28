@@ -13,7 +13,7 @@ namespace TagTool.Scripting
         public string ScriptName;
         public HsScriptType Type;
         public HsType ReturnType;
-        public DatumIndex RootExpressionHandle;
+        public DatumHandle RootExpressionHandle;
         public List<HsScriptParameter> Parameters;
     }
 }

@@ -195,10 +195,10 @@ namespace TagTool.Tags.Definitions
                 public class Emitter : TagStructure
 				{
                     public StringId Name;
-                    public byte Version;
+
                     public EmissionShapeValue EmissionShape;
-                    public byte Unknown1; // ???
                     public FlagsValue EmitterFlags;
+                    public short Unknown1;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public float Unknown2;

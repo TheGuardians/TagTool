@@ -239,9 +239,9 @@ namespace TagTool.Commands.Porting
 					return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
 				// Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Xbox360:
 					//return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
-				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Xbox360:
 					//Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
 					//return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
 			}
@@ -677,18 +677,18 @@ namespace TagTool.Commands.Porting
                     {
                         // Fix citadel glass
                         case @"levels\dlc\fortress\shaders\floor_glass":
-                            rmsh.ShaderProperties[0].Transparency = 1;
+                            rmsh.ShaderProperties[0].AlphaBlendMode = 1;
                             break;
 
                         // Fix avalanche trees
                         case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
-                            rmsh.ShaderProperties[0].BlendMode = 1;
+                            rmsh.ShaderProperties[0].BlendFlags = 1;
                             break;
 
                         // Fix citadel panel wall alcove
                         case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
-                            rmsh.ShaderProperties[0].ShaderMaps[0].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove.bitmap")[0]);
-                            rmsh.ShaderProperties[0].ShaderMaps[2].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump.bitmap")[0]);
+                            rmsh.ShaderProperties[0].TextureConstants[0].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove.bitmap")[0]);
+                            rmsh.ShaderProperties[0].TextureConstants[2].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump.bitmap")[0]);
                             break;
                     }
                     break;
@@ -774,6 +774,37 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
+            // yucky hack-fix for some particles taking over the screen
+            foreach (var effectEvent in effe.Events)
+            {
+                foreach (var particleSystem in effectEvent.ParticleSystems)
+                {
+                    if (particleSystem.Particle != null)
+                    {
+                        var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
+                        if ((prt3Definition.Flags & (1 << 7)) != 0) // flag bit is always 7 -- this is a post porting fixup
+                        {
+                            foreach (var attachment in prt3Definition.Attachments)
+                            {
+                                if (attachment.Type != null && attachment.Type.Group.Tag == "effe")
+                                {
+                                    var attachmentEffe = CacheContext.Deserialize<Effect>(cacheStream, attachment.Type);
+                                    foreach (var attEvent in attachmentEffe.Events)
+                                    {
+                                        if (attEvent.ParticleSystems.Count > 0)
+                                        {
+                                            // this prevents the particles attached effect from rendering at random sizes
+                                            particleSystem.Emitters[0].EmitterFlags &= ~Effect.Event.ParticleSystem.Emitter.FlagsValue.ClampParticleVelocities;
+                                            particleSystem.Emitters[0].EmitterFlags |= Effect.Event.ParticleSystem.Emitter.FlagsValue.ParticleEmittedInsideShape;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return effe;
         }
 
@@ -857,7 +888,7 @@ namespace TagTool.Commands.Porting
 					return propertyType;
 
 				case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders):
-					ConvertCollection(cacheStream, blamCacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
+					ConvertCollection(cacheStream, blamCacheStream, resourceStreams, renderMethod.ShaderProperties[0].TextureConstants, renderMethod.ShaderProperties[0].TextureConstants, blamTagName);
 					return ConvertRenderMethod(cacheStream, blamCacheStream, resourceStreams, renderMethod, blamTagName);
 
 				case ScenarioObjectType scenarioObjectType:

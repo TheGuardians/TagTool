@@ -100,8 +100,8 @@ namespace System.IO
         public static StringId ReadStringId(this BinaryReader reader) =>
             new StringId(reader.ReadUInt32());
 
-        public static DatumIndex ReadDatumIndex(this BinaryReader reader) =>
-            new DatumIndex(reader.ReadUInt32());
+        public static DatumHandle ReadDatumIndex(this BinaryReader reader) =>
+            new DatumHandle(reader.ReadUInt32());
 
         public static T ReadEnum<T>(this BinaryReader reader)
             where T : struct, IConvertible

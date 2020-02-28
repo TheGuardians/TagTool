@@ -5,6 +5,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Cache
 {

@@ -1,6 +1,8 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,52 +10,67 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "game_progression", Tag = "gpdt", Size = 0x44, MinVersion = CacheVersion.HaloOnline106708)]
     public class GameProgression : TagStructure
 	{
-        public List<UnknownBlock> Unknown;
-        public List<UnknownBlock2> Unknown2;
-        public List<UnknownBlock3> Unknown3;
-        public List<UnknownBlock4> Unknown4;
-        public List<UnknownBlock5> Unknown5;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown6;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown7;
+        public List<ProgressionVariable> IntegerProgressionValue;
+        public List<ProgressionVariable> BooleanProgressionValue;
+
+        // There are hardcoded boolean regions, this block defines where they are in the above tagblock
+        // index: 0 = terminals, 1 = arg slots, 2 = training
+        public List<BooleanProgressionRegion> BooleanProgressionRegions;
+
+        public List<IntegerProgressionUnknownBlock> IntegerProgressionUnknown;
+        public List<MapProgressionDataBlock> MapProgressionData;
+
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        public byte[] Unused;
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock : TagStructure
+        public class ProgressionVariable : TagStructure
 		{
-            public StringId Unknown;
+            public StringId Variable;
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock2 : TagStructure
+        public class BooleanProgressionRegion : TagStructure
 		{
-            public StringId Unknown;
+            public short StartIndex;
+            public short EndIndex;
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock3 : TagStructure
+        public class IntegerProgressionUnknownBlock : TagStructure
 		{
-            public short Unknown;
-            public short Unknown2;
-        }
+            public short IntegerProgressionIndex;
 
-        [TagStructure(Size = 0x4)]
-        public class UnknownBlock4 : TagStructure
-		{
-            public short Unknown;
-            public short Unknown2;
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused;
         }
 
         [TagStructure(Size = 0x124)]
-        public class UnknownBlock5 : TagStructure
+        public class MapProgressionDataBlock : TagStructure
 		{
-            public StringId MapName;
-            public int Unknown;
-            public int Unknown2;
-            public CachedTag Unknown3;
+            public StringId InternalMapName;
+            public MapProgressionFlags Flags;
+            public MapProgression MapProgressionType;
+            public CachedTag ScenarioUnused; // unused, ODST had the group tags set to 'scnr'
             public int MapId;
-            public int Unknown4;
-            [TagField(Length = 256)] public string MapScenarioPath;
+            public int CampaignId;
+            [TagField(Length = 256)] 
+            public string ScenarioPath;
+
+            [Flags]
+            public enum MapProgressionFlags : int
+            {
+                None = 0,
+                Bit0 = 1 << 0, // achievement related
+                Bit1 = 1 << 1
+            }
+
+            public enum MapProgression : int
+            {
+                Default,
+                IsHub,
+                ReturnsToHub
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using static TagTool.Tags.Definitions.RenderMethodTemplate;
 
 namespace TagTool.Tags.Definitions
 {
@@ -26,7 +27,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class AnimationPropertiesBlock : TagStructure
+        public class ShaderFunction : TagStructure
         {
             // TODO: determine if this is an enum or an index
             public int Type;
@@ -58,51 +59,42 @@ namespace TagTool.Tags.Definitions
             public short Unknown8;
             public short Unknown9;
             public uint Unknown10;
-            public List<AnimationPropertiesBlock> AnimationProperties;
+            public List<ShaderFunction> Functions;
         }
 
         [TagStructure(Size = 0x84)]
         public class ShaderProperty : TagStructure
         {
             public CachedTag Template;
-            public List<ShaderMap> ShaderMaps;
-            public List<Argument> Arguments;
-            public List<UnknownBlock1> Unknown;
-            public ushort DisableBooleanArg;
-            public short Unknown2;
-            public List<RenderMethodTemplate.DrawMode> DrawModes;
-            public List<UnknownBlock3> Unknown3;
-            public List<ArgumentMapping> ArgumentMappings;
-            public List<AnimationPropertiesBlock> AnimationProperties;
-            public int Transparency;
-            public int BlendMode;
-            public uint Unknown8;
-            public short Unknown9;
-            public short Unknown10;
-            public short Unknown11;
-            public short Unknown12;
-            public short Unknown13;
-            public short Unknown14;
-            public short Unknown15;
-            public short Unknown16;
+            public List<TextureConstant> TextureConstants;
+            public List<RealConstant> RealConstants;
+            public List<uint> IntegerConstants;
+            public uint BooleanConstants; // Each bit indicates true/false. SourceIndex = bit index
+            public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables
+            public List<ParameterTable> ParameterTables; // Ranges of Parameters by usage
+            public List<ParameterMapping> Parameters; // Mapping of constants functions, and registers
+            public List<ShaderFunction> Functions; // Functions for animated parameters
+            public int AlphaBlendMode;
+            public uint BlendFlags;
+            public uint Unknown8; // unused?
+            [TagField(Length = 8)]
+            public short[] QueryableProperties; // Indices of constants. TODO: create an enum
 
             [TagStructure(Size = 0x18)]
-            public class ShaderMap : TagStructure
+            public class TextureConstant : TagStructure
             {
                 [TagField(Flags = Label)]
                 public CachedTag Bitmap;
-                public sbyte Unknown;
-                public sbyte BitmapIndex;
-                public sbyte Unknown2;
-                public byte BitmapFlags;
-                public sbyte UnknownBitmapIndexEnable;
+                public short BitmapIndex;
+                public sbyte SamplerFlags;
+                public sbyte SamplerFilterMode;
+                public sbyte ExternMode;
                 public sbyte XFormArgumentIndex;
-                public sbyte Unknown3;
-                public sbyte Unknown4;
+                public PackedInteger_10_6 Functions = new PackedInteger_10_6(); // Range of Functions
             }
 
             [TagStructure(Size = 0x10)]
-            public class Argument : TagStructure
+            public class RealConstant : TagStructure
             {
                 [TagField(Length = 4)]
                 public float[] Values;
@@ -122,22 +114,16 @@ namespace TagTool.Tags.Definitions
                 public float Arg3 { get => _Values[3]; set => _Values[3] = value; }
             }
 
-            [TagStructure(Size = 0x4)]
-            public class UnknownBlock1 : TagStructure
-            {
-                public uint Unknown;
-            }
-
             [TagStructure(Size = 0x6)]
-            public class UnknownBlock3 : TagStructure
+            public class ParameterTable : TagStructure
             {
-                public short DataHandleSampler;
-                public short DataHandleUnknown;
-                public short DataHandleVector;
+                public PackedInteger_10_6 Texture = new PackedInteger_10_6();
+                public PackedInteger_10_6 RealVertex = new PackedInteger_10_6();
+                public PackedInteger_10_6 RealPixel = new PackedInteger_10_6();
             }
 
             [TagStructure(Size = 0x4)]
-            public class ArgumentMapping : TagStructure
+            public class ParameterMapping : TagStructure
             {
                 public enum RenderMethodExternalValue : byte
                 {
@@ -195,13 +181,13 @@ namespace TagTool.Tags.Definitions
                 }
                 public RenderMethodExternalValue RenderMethodExternal
                 {
-                    get => (RenderMethodExternalValue)ArgumentIndex;
-                    set => ArgumentIndex = (byte)value;
+                    get => (RenderMethodExternalValue)SourceIndex;
+                    set => SourceIndex = (byte)value;
                 }
 
                 public short RegisterIndex;
                 public byte FunctionIndex;
-                public byte ArgumentIndex;
+                public byte SourceIndex;
             }
         }
     }

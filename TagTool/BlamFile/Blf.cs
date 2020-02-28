@@ -18,18 +18,18 @@ namespace TagTool.BlamFile
         public BlfFileContentFlags ContentFlags;
         public BlfAuthenticationType AuthenticationType;
 
-        BlfChunkStartOfFile StartOfFile;
-        BlfEndOfFileCRC EndOfFileCRC;
-        BlfEndOfFileRSA EndOfFileRSA;
-        BlfEndOfFileSHA1 EndOfFileSHA1;
-        BlfChunkEndOfFile EndOfFile;
-        BlfCampaign Campaign;
-        BlfScenario Scenario;
-        BlfModPackageReference ModReference;
-        BlfMapVariantTagNames MapVariantTagNames;
-        BlfMapVariant MapVariant;
-        BlfGameVariant GameVariant;
-        BlfContentHeader ContentHeader;
+        public BlfChunkStartOfFile StartOfFile;
+        public BlfEndOfFileCRC EndOfFileCRC;
+        public BlfEndOfFileRSA EndOfFileRSA;
+        public BlfEndOfFileSHA1 EndOfFileSHA1;
+        public BlfChunkEndOfFile EndOfFile;
+        public BlfCampaign Campaign;
+        public BlfScenario Scenario;
+        public BlfModPackageReference ModReference;
+        public BlfMapVariantTagNames MapVariantTagNames;
+        public BlfMapVariant MapVariant;
+        public BlfGameVariant GameVariant;
+        public BlfContentHeader ContentHeader;
 
         public Blf(CacheVersion version)
         {
@@ -545,5 +545,4 @@ namespace TagTool.BlamFile
         [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x40, Align = 0x1)]
         public string Name;
     }
-
 }

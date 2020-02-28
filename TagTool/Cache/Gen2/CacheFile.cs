@@ -5,7 +5,6 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache
 {
@@ -28,9 +27,6 @@ namespace TagTool.Cache
         public StringTable Strings;
         public List<LocaleTable> LocaleTables;
         public StringIdResolver Resolver;
-
-        public CacheFileResourceGestalt ResourceGestalt;
-        public CacheFileResourceLayoutTable ResourceLayoutTable;
 
         public abstract string LocalesKey {get;}
         public abstract string StringsKey {get;}
@@ -72,8 +68,8 @@ namespace TagTool.Cache
             public int TagGroupsOffset;
             public int TagGroupCount;
             public int TagsOffset;
-            public DatumIndex ScenarioHandle;
-            public DatumIndex GlobalsHandle;
+            public DatumHandle ScenarioHandle;
+            public DatumHandle GlobalsHandle;
             public int CRC;
             public int TagCount;
             public int TagInfoHeaderCount;
@@ -416,8 +412,6 @@ namespace TagTool.Cache
             LocaleTables.Clear();
             Strings.Clear();
             IndexItems.Clear();
-            ResourceLayoutTable = null;
-            ResourceGestalt = null;
             Header = null;
             IndexHeader = null;
         }
@@ -429,27 +423,27 @@ namespace TagTool.Cache
             return IndexItems.GetItemByID(id);
         }
 
-        public byte[] GetRawFromID(DatumIndex ID)
+        public byte[] GetRawFromID(DatumHandle ID)
         {
             return GetRawFromID(ID, -1);
         }
 
-        public virtual byte[] GetRawFromID(DatumIndex ID, int DataLength)
+        public virtual byte[] GetRawFromID(DatumHandle ID, int DataLength)
         {
             throw new NotImplementedException();
         }
 
-        public virtual byte[] GetSoundRaw(DatumIndex ID, int size)
+        public virtual byte[] GetSoundRaw(DatumHandle ID, int size)
         {
             throw new NotImplementedException();
         }
 
-        public virtual byte[] GetPrimaryResource(DatumIndex ID, int dataLength, int offset=0, bool padding = false)
+        public virtual byte[] GetPrimaryResource(DatumHandle ID, int dataLength, int offset=0, bool padding = false)
         {
             throw new NotImplementedException();
         }
 
-        public virtual byte[] GetSecondaryResource(DatumIndex ID, int dataLength, int offset = 0, bool padding = false)
+        public virtual byte[] GetSecondaryResource(DatumHandle ID, int dataLength, int offset = 0, bool padding = false)
         {
             throw new NotImplementedException();
         }

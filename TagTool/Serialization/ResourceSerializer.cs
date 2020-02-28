@@ -8,6 +8,7 @@ using static TagTool.Tags.Resources.BitmapTextureInterleavedInteropResource;
 using TagTool.Tags.Resources;
 using static TagTool.Tags.Resources.BitmapTextureInteropResource;
 using TagTool.Geometry;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Serialization
 {
@@ -47,16 +48,16 @@ namespace TagTool.Serialization
             var mainOffset = resourceContext.MainStructOffset.Offset;
 
             // move over the remaining fixups to the context
-            foreach (var fixup in structBlock.ResourceFixups)
+            foreach (var fixup in structBlock.FixupLocations)
             {
                 fixup.BlockOffset += (uint)mainOffset;
-                resourceContext.ResourceFixups.Add(fixup);
+                resourceContext.FixupLocations.Add(fixup);
             }
 
-            foreach (var d3dfixup in structBlock.D3DFixups)
+            foreach (var location in structBlock.InteropLocations)
             {
-                d3dfixup.Address = new CacheAddress(d3dfixup.Address.Type, (int)(d3dfixup.Address.Offset + mainOffset));
-                resourceContext.D3DFixups.Add(d3dfixup);
+                location.Address = new CacheAddress(location.Address.Type, (int)(location.Address.Offset + mainOffset));
+                resourceContext.InteropLocations.Add(location);
             }
         }
 
@@ -108,12 +109,12 @@ namespace TagTool.Serialization
 
             var dataAddress = new CacheAddress(addressType, dataOffset);
 
-            var dataFixup = new TagResourceGen3.ResourceFixup
+            var dataFixup = new ResourceFixupLocation
             {
                 BlockOffset = blockOffset,
                 Address = dataAddress
             };
-            resourceBlock.ResourceFixups.Add(dataFixup);
+            resourceBlock.FixupLocations.Add(dataFixup);
 
             // this fixup will need to be adjusted when we move the block
 
@@ -175,25 +176,25 @@ namespace TagTool.Serialization
             //var blockOffset = addressTypeStream.Position;               // no need to fix that particular fixup later
             var address = new CacheAddress(addressType, (int)offset);
 
-            var resourceFixup = new TagResourceGen3.ResourceFixup
+            var resourceFixup = new ResourceFixupLocation
             {
                 Address = address,
                 BlockOffset = (uint)writer.BaseStream.Position + 0x4
             };
 
-            foreach (var fixup in resourceBlock2.ResourceFixups)
+            foreach (var fixup in resourceBlock2.FixupLocations)
             {
                 fixup.BlockOffset += offset;
-                resourceContext.ResourceFixups.Add(fixup);
+                resourceContext.FixupLocations.Add(fixup);
             }
                 
-            foreach (var d3dfixup in resourceBlock2.D3DFixups)
+            foreach (var location in resourceBlock2.InteropLocations)
             {
-                d3dfixup.Address = new CacheAddress(d3dfixup.Address.Type, (int)(d3dfixup.Address.Offset + offset));
-                resourceContext.D3DFixups.Add(d3dfixup);
+                location.Address = new CacheAddress(location.Address.Type, (int)(location.Address.Offset + offset));
+                resourceContext.InteropLocations.Add(location);
             }
                 
-            resourceBlock.ResourceFixups.Add(resourceFixup);
+            resourceBlock.FixupLocations.Add(resourceFixup);
 
             writer.Write(count);
             writer.Write(address.Value);    // write address as 0, we use the fixups
@@ -253,26 +254,26 @@ namespace TagTool.Serialization
             else
                 throw new Exception();
 
-            var d3dFixup = new TagResourceGen3.D3DFixup
+            var interopLocation = new ResourceInteropLocation
             {
                 ResourceStructureTypeIndex = structureTypeIndex,
                 Address = address
             };
 
-            var resourceFixup = new TagResourceGen3.ResourceFixup
+            var fixupLocation = new ResourceFixupLocation
             {
                 Address = new CacheAddress(addressType, offset),
                 BlockOffset = (uint)blockOffset
             };
 
-            foreach (var fixup in resourceBlock2.ResourceFixups)
+            foreach (var fixup in resourceBlock2.FixupLocations)
             {
                 fixup.BlockOffset += (uint)offset;
-                resourceContext.ResourceFixups.Add(fixup);
+                resourceContext.FixupLocations.Add(fixup);
             }
                 
-            resourceBlock.ResourceFixups.Add(resourceFixup);
-            resourceBlock.D3DFixups.Add(d3dFixup);
+            resourceBlock.FixupLocations.Add(fixupLocation);
+            resourceBlock.InteropLocations.Add(interopLocation);
 
             writer.Write(address.Value);
             writer.Write(0);

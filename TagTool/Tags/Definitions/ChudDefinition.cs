@@ -1240,8 +1240,8 @@ namespace TagTool.Tags.Definitions
                     LocalB,
                     LocalC,
                     LocalD,
-                    Unknown4,
-                    Unknown5,
+                    Unused1, //just returns 0 for the color
+                    Unused2, //just returns 0 for the color
                     ScoreboardFriendly,
                     ScoreboardEnemy,
                     ArmingTeam,
@@ -1249,7 +1249,7 @@ namespace TagTool.Tags.Definitions
                     MetagamePlayer2,
                     MetagamePlayer3,
                     MetagamePlayer4,
-                    Unknown14,
+                    GameTimeRemaining, //returns LocalA if there is more than 60 seconds left, or LocalB if there is less
                     GlobalDynamic0,
                     GlobalDynamic1,
                     GlobalDynamic2,

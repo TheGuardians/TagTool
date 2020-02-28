@@ -7,7 +7,7 @@ namespace TagTool.BlamFile
     [TagStructure(Size = 0xF8)]
     public class ContentItemMetadata
     {
-        public ulong Id;
+        public ulong Identifier;
 
         [TagField(CharSet = Unicode, Length = 16)]
         public string Name = string.Empty;

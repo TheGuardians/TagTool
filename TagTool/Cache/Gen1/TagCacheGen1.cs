@@ -12,30 +12,26 @@ using TagTool.Tags;
 namespace TagTool.Cache.Gen1
 {
     [TagStructure(MaxVersion = CacheVersion.HaloXbox, Size = 0x24)]
-    [TagStructure(MinVersion = CacheVersion.HaloPC, MaxVersion = CacheVersion.HaloPC, Size = 0x28)]
+    [TagStructure(MinVersion = CacheVersion.HaloPC, MaxVersion = CacheVersion.HaloCustomEdition, Size = 0x28)]
     public class TagCacheGen1Header : TagStructure
     {
         public uint CachedTagArrayAddress;
         public uint ScenarioTagID;
-        public uint Unused;
+        public uint MapID;
         public uint TagCount;
 
-        public uint ModelPartCount; // looks like vertex and index buffer to me
-        [TagField(MinVersion = CacheVersion.HaloPC)]
-        public uint ModelDataFileOffset;
+        public uint VertexPartsCount;
+        public uint ModelDataOffset;
+        public uint IndexPartsCount;
         [TagField(MaxVersion = CacheVersion.HaloXbox)]
-        public uint UnknownAddress;
-
-        public uint ModelPartCount2;
-        [TagField(MinVersion = CacheVersion.HaloPC)]
-        public uint ModelVertexSize;
-        [TagField(MaxVersion = CacheVersion.HaloXbox)]
-        public uint UnknownAddress2;
+        public uint IndexPartsOffset;
 
         [TagField(MinVersion = CacheVersion.HaloPC)]
-        public uint ModelDataSize;
+        public uint VertexDataSize;
+        [TagField(MinVersion = CacheVersion.HaloPC)]
+        public uint ModelDataSize; // (size of vertices + indices)
 
-        public Tag TagsTag;
+        public Tag Tags;
     }
 
     public class TagCacheGen1 : TagCache
@@ -46,21 +42,24 @@ namespace TagTool.Cache.Gen1
 
         public TagCacheGen1(EndianReader reader, MapFile mapFile)
         {
-            var tagDataSectionOffset = mapFile.Header.TagDataOffset;
+            var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
             var deserializer = new TagDeserializer(mapFile.Version);
             Header = deserializer.Deserialize<TagCacheGen1Header>(dataContext);
-            BaseTagAddress = Header.CachedTagArrayAddress & 0xFFFF0000;
 
+            if (mapFile.Version == CacheVersion.HaloXbox)
+                BaseTagAddress = 0x803A6000;
+            else
+                BaseTagAddress = 0x40440000;
+            
             //
             // Read all tags offsets are all broken, need some proper look
             //
 
             reader.SeekTo(Header.CachedTagArrayAddress - BaseTagAddress + tagDataSectionOffset);
             
-
             for (int i = 0; i < Header.TagCount; i++)
             {
                 var group = new TagGroup()

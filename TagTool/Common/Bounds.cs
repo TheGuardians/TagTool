@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Editing;
 
 namespace TagTool.Common
 {
@@ -40,7 +41,7 @@ namespace TagTool.Common
         /// <param name="value">The value to check.</param>
         /// <returns><c>true</c> if the value is inside the range.</returns>
         public bool Contains(T value) => (value.CompareTo(Lower) >= 0) && (value.CompareTo(Upper) <= 0);
-        
+
         public bool Equals(Bounds<T> other) => Lower.Equals(other.Lower) && Upper.Equals(other.Upper);
 
         public override bool Equals(object obj) => obj is Bounds<T> ? Equals((Bounds<T>)obj) : false;
@@ -53,7 +54,35 @@ namespace TagTool.Common
 
         public override string ToString() => $"{{ Lower: {Lower}, Upper: {Upper} }}";
 
+        public bool TryParse(GameCache cache, List<string> args, out IBounds result, out string error)
+        {
+            result = null;
+            error = null;
+
+            var argType = GetType().GenericTypeArguments[0];
+            var argCount = SetFieldCommand.RangeArgCount(argType);
+
+            if (argCount * 2 != args.Count)
+            {
+                error = $"{args.Count} arguments supplied; should be {argCount * 2}";
+                return false;
+            }
+
+            var min = SetFieldCommand.ParseArgs(cache, argType, null, args.Take(argCount).ToList());
+            var max = SetFieldCommand.ParseArgs(cache, argType, null, args.Skip(argCount).Take(argCount).ToList());
+            if (min.Equals(false) || max.Equals(false))
+            {
+                error = $"Invalid value parsed.";
+                return false;
+            }
+
+            result = Activator.CreateInstance(this.GetType(), new object[] { min, max }) as IBounds;
+            return true;
+        }
     }
 
-	public interface IBounds { }
+	public interface IBounds 
+    {
+        bool TryParse(GameCache cache, List<string> args, out IBounds result, out string error);
+    }
 }

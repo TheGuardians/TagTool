@@ -11,7 +11,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x608, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline571627)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x7A8, MinVersion = CacheVersion.HaloReachMCC0824)]
     public class Globals : TagStructure
 	{
         [TagField(Flags = Padding, Length = 172)]
@@ -1561,11 +1562,19 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x44)]
+        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x50, MinVersion = CacheVersion.HaloReachMCC0824)]
         public class LocaleGlobalsBlock : TagStructure
-		{
+        {
+            [TagField(MaxVersion = CacheVersion.HaloReach)]
             public uint Unknown1;
+            [TagField(MaxVersion = CacheVersion.HaloReach)]
             public uint Unknown2;
+
+            [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+            public ulong Unknown1_64;
+            [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+            public ulong Unknown2_64;
 
             public int StringCount;
             public int LocaleTableSize;
@@ -1579,6 +1588,9 @@ namespace TagTool.Tags.Definitions
             public byte[] StringDataHash;
 
             public uint Unknown3;
+
+            [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+            public uint Unknown4;
         }
 
         [TagStructure(Size = 0x54)]

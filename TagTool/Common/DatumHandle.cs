@@ -4,9 +4,9 @@ using TagTool.Cache;
 
 namespace TagTool.Common
 {
-    public struct DatumIndex : IEquatable<DatumIndex>, IComparable<DatumIndex>, IBlamType
+    public struct DatumHandle : IEquatable<DatumHandle>, IComparable<DatumHandle>, IBlamType
     {
-        public static DatumIndex None { get; } = new DatumIndex(uint.MaxValue);
+        public static DatumHandle None { get; } = new DatumHandle(uint.MaxValue);
 
         public uint Value;
 
@@ -30,33 +30,33 @@ namespace TagTool.Common
             }
         }
 
-        public DatumIndex(uint value)
+        public DatumHandle(uint value)
         {
             Value = value;
         }
 
-        public DatumIndex(ushort salt, ushort index) :
+        public DatumHandle(ushort salt, ushort index) :
             this(0)
         {
             Salt = salt;
             Index = index;
         }
 
-        public bool Equals(DatumIndex other) =>
+        public bool Equals(DatumHandle other) =>
             Value.Equals(other.Value);
 
         public override bool Equals(object obj) =>
-            obj is DatumIndex datumIndex ?
+            obj is DatumHandle datumIndex ?
                 Equals(datumIndex) :
                 false;
 
-        public static bool operator ==(DatumIndex lhs, DatumIndex rhs) =>
+        public static bool operator ==(DatumHandle lhs, DatumHandle rhs) =>
             lhs.Equals(rhs);
 
-        public static bool operator !=(DatumIndex lhs, DatumIndex rhs) =>
+        public static bool operator !=(DatumHandle lhs, DatumHandle rhs) =>
             !(lhs == rhs);
 
-        public int CompareTo(DatumIndex other) =>
+        public int CompareTo(DatumHandle other) =>
             Index.CompareTo(other.Index);
 
         public override int GetHashCode() =>
@@ -86,7 +86,7 @@ namespace TagTool.Common
             }
             else
             {
-                result = new DatumIndex(salt, index);
+                result = new DatumHandle(salt, index);
                 error = null;
                 return true;
             }

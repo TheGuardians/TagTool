@@ -50,9 +50,9 @@ namespace TagTool.Commands.Porting
             List<string> bmArgs = new List<string>();
 
             // Get a simple list of H3 bitmaps and arguments names
-            foreach (var a in bmRmt2.SamplerArguments)
+            foreach (var a in bmRmt2.TextureParameterNames)
                 bmMaps.Add(BlamCache.StringTable.GetString(a.Name));
-            foreach (var a in bmRmt2.VectorArguments)
+            foreach (var a in bmRmt2.RealParameterNames)
                 bmArgs.Add(BlamCache.StringTable.GetString(a.Name));
 
             string result = null;

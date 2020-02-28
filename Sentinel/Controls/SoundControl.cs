@@ -20,7 +20,7 @@ namespace Sentinel.Controls
     public partial class SoundControl : UserControl
     {
         public GameCache Cache { get; }
-        public CachedTag Tag { get; }
+        public CachedTag Instance { get; }
         public Sound Sound { get; }
         public FileInfo SoundFile { get; }
         public WindowsMediaPlayer Player { get; private set; }
@@ -34,9 +34,9 @@ namespace Sentinel.Controls
             this()
         {
             Cache = cache;
-            Tag = tag;
+            Instance = tag;
             Sound = sound;
-            SoundFile = new FileInfo(Path.Combine(Application.StartupPath, "temp", $"{Tag.Index:X4}.mp3"));
+            SoundFile = new FileInfo(Path.Combine(Application.StartupPath, "temp", $"{Instance.Index:X4}.mp3"));
         }
 
         protected override void OnLoad(EventArgs e)

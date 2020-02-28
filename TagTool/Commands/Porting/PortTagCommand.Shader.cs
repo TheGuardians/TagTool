@@ -7,6 +7,8 @@ using TagTool.Serialization;
 using TagTool.Shaders.ShaderMatching;
 using System;
 using System.Linq;
+using static TagTool.Tags.Definitions.RenderMethod;
+using static TagTool.Tags.Definitions.RenderMethod.ShaderProperty;
 
 namespace TagTool.Commands.Porting
 {
@@ -42,9 +44,13 @@ namespace TagTool.Commands.Porting
 
             // TODO hardcode shader values such as argument changes for specific shaders
             var bmMaps = new List<string>();
-            var bmArgs = new List<string>();
+            var bmRealConstants = new List<string>();
+            var bmIntConstants = new List<string>();
+            var bmBoolConstants = new List<string>();
             var edMaps = new List<string>();
-            var edArgs = new List<string>();
+            var edRealConstants = new List<string>();
+            var edIntConstants = new List<string>();
+            var edBoolConstants = new List<string>();
 
             // Reset rmt2 preset
             var pRmt2 = 0;
@@ -52,8 +58,9 @@ namespace TagTool.Commands.Porting
             // Make a template of ShaderProperty, with the correct bitmaps and arguments counts. 
             var newShaderProperty = new RenderMethod.ShaderProperty
             {
-                ShaderMaps = new List<RenderMethod.ShaderProperty.ShaderMap>(),
-                Arguments = new List<RenderMethod.ShaderProperty.Argument>()
+                TextureConstants = new List<RenderMethod.ShaderProperty.TextureConstant>(),
+                RealConstants = new List<RenderMethod.ShaderProperty.RealConstant>(),
+                IntegerConstants = new List<uint>()
             };
 
             // Get a simple list of bitmaps and arguments names
@@ -61,19 +68,23 @@ namespace TagTool.Commands.Porting
             var bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, bmRmt2Instance);
 
             // Get a simple list of H3 bitmaps and arguments names
-            foreach (var a in bmRmt2.SamplerArguments)
+            foreach (var a in bmRmt2.TextureParameterNames)
                 bmMaps.Add(BlamCache.StringTable.GetString(a.Name));
-            foreach (var a in bmRmt2.VectorArguments)
-                bmArgs.Add(BlamCache.StringTable.GetString(a.Name));
+            foreach (var a in bmRmt2.RealParameterNames)
+                bmRealConstants.Add(BlamCache.StringTable.GetString(a.Name));
+            foreach (var a in bmRmt2.IntegerParameterNames)
+                bmIntConstants.Add(BlamCache.StringTable.GetString(a.Name));
+            foreach (var a in bmRmt2.BooleanParameterNames)
+                bmBoolConstants.Add(BlamCache.StringTable.GetString(a.Name));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
+            var edRmt2Instance = Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmRealConstants);
 
             if (edRmt2Instance == null)
             {
                 throw new Exception($"Failed to find HO rmt2 for this RenderMethod instance");
             }
-                
+
 
             var edRmt2Tagname = edRmt2Instance.Name ?? $"0x{edRmt2Instance.Index:X4}";
 
@@ -91,19 +102,24 @@ namespace TagTool.Commands.Porting
             var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Instance);
 
             // fixup for no use_material_texture vector arg in ms23
-            for (int index = 0; index < edRmt2.BooleanArguments.Count; index++)
-            {
-                if (CacheContext.StringTable.GetString(edRmt2.BooleanArguments[index].Name) == "use_material_texture")
-                {
-                    finalRm.ShaderProperties[0].DisableBooleanArg = (ushort)(index + 1);
-                    break;
-                }
-            }
+           //for (int index = 0; index < edRmt2.BooleanArguments.Count; index++)
+           //{
+           //    if (CacheContext.StringTable.GetString(edRmt2.BooleanArguments[index].Name) == "use_material_texture")
+           //    {
+           //        finalRm.ShaderProperties[0].BooleanArguments = (ushort)(index + 1);
+           //        break;
+           //    }
+           //}
 
-            foreach (var a in edRmt2.SamplerArguments)
+            foreach (var a in edRmt2.TextureParameterNames)
                 edMaps.Add(CacheContext.StringTable.GetString(a.Name));
-            foreach (var a in edRmt2.VectorArguments)
-                edArgs.Add(CacheContext.StringTable.GetString(a.Name));
+            foreach (var a in edRmt2.RealParameterNames)
+                edRealConstants.Add(CacheContext.StringTable.GetString(a.Name));
+            foreach (var a in edRmt2.IntegerParameterNames)
+                edIntConstants.Add(CacheContext.StringTable.GetString(a.Name));
+            foreach (var a in edRmt2.BooleanParameterNames)
+                edBoolConstants.Add(CacheContext.StringTable.GetString(a.Name));
+
 
             // The bitmaps are default textures.
             // Arguments are probably default values. I took the values that appeared the most frequently, assuming they are the default value.
@@ -125,46 +141,100 @@ namespace TagTool.Commands.Porting
                     bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag($"{newBitmap}.bitm")[0]);
                 }
 
-                newShaderProperty.ShaderMaps.Add(
-                    new RenderMethod.ShaderProperty.ShaderMap
+                newShaderProperty.TextureConstants.Add(
+                    new RenderMethod.ShaderProperty.TextureConstant
                     {
                         Bitmap = bitmap
                     });
             }
 
-            foreach (var a in edArgs)
-                newShaderProperty.Arguments.Add(Matcher.DefaultArgumentsValues(a));
+            foreach (var a in edRealConstants)
+                newShaderProperty.RealConstants.Add(Matcher.DefaultArgumentsValues(a));
+
+            foreach (var a in edIntConstants)
+                newShaderProperty.IntegerConstants.Add(Matcher.DefaultIntegerArgumentsValues(a));
 
             // Reorder blam bitmaps to match the HO rmt2 order
-            // Reorder blam arguments to match the HO rmt2 order
+            // Reorder blam real constants to match the HO rmt2 order
+            // Reorder blam int constants to match the HO rmt2 order
+            // Reorder blam bool constants to match the HO rmt2 order
             foreach (var eM in edMaps)
                 foreach (var bM in bmMaps)
                     if (eM == bM)
-                        newShaderProperty.ShaderMaps[edMaps.IndexOf(eM)] = finalRm.ShaderProperties[0].ShaderMaps[bmMaps.IndexOf(bM)];
+                        newShaderProperty.TextureConstants[edMaps.IndexOf(eM)] = finalRm.ShaderProperties[0].TextureConstants[bmMaps.IndexOf(bM)];
 
-            foreach (var eA in edArgs)
-                foreach (var bA in bmArgs)
+            foreach (var eA in edRealConstants)
+                foreach (var bA in bmRealConstants)
                     if (eA == bA)
-                        newShaderProperty.Arguments[edArgs.IndexOf(eA)] = finalRm.ShaderProperties[0].Arguments[bmArgs.IndexOf(bA)];
+                        newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].RealConstants[bmRealConstants.IndexOf(bA)];
 
+            foreach (var eA in edIntConstants)
+                foreach (var bA in bmIntConstants)
+                    if (eA == bA)
+                        newShaderProperty.IntegerConstants[edIntConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].IntegerConstants[bmIntConstants.IndexOf(bA)];
+
+            foreach (var eA in edBoolConstants)
+                foreach (var bA in bmBoolConstants)
+                    if (eA == bA)
+                    {
+                        if ((newShaderProperty.BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) != 0)
+                        {
+                            newShaderProperty.BooleanConstants &= ~(1u << bmBoolConstants.IndexOf(bA));
+                            newShaderProperty.BooleanConstants |= (1u << edBoolConstants.IndexOf(eA));
+                        }
+                    }
+                       
             // Remove some tagblocks
             // finalRm.Unknown = new List<RenderMethod.UnknownBlock>(); // hopefully not used; this gives rmt2's name. They correspond to the first tagblocks in rmdf, they tell what the shader does
             finalRm.ImportData = new List<RenderMethod.ImportDatum>(); // most likely not used
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
-            finalRm.ShaderProperties[0].ShaderMaps = newShaderProperty.ShaderMaps;
-            finalRm.ShaderProperties[0].Arguments = newShaderProperty.Arguments;
+            finalRm.ShaderProperties[0].TextureConstants = newShaderProperty.TextureConstants;
+            finalRm.ShaderProperties[0].RealConstants = newShaderProperty.RealConstants;
+            finalRm.ShaderProperties[0].IntegerConstants = newShaderProperty.IntegerConstants;
+            finalRm.ShaderProperties[0].BooleanConstants = newShaderProperty.BooleanConstants;
+
+            // fixup runtime queryable properties
+            for (int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
+            {
+                if (finalRm.ShaderProperties[0].QueryableProperties[i] == -1)
+                    continue;
+
+                switch(i)
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 5:
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edMaps.IndexOf(bmMaps[finalRm.ShaderProperties[0].QueryableProperties[i]]);
+                        break;
+                    case 4:
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edRealConstants.IndexOf(bmRealConstants[finalRm.ShaderProperties[0].QueryableProperties[i]]);
+                        break;
+                    default:
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
+                        break;
+                } 
+            }
+
+            // fixup xform arguments;
+            foreach(var tex in finalRm.ShaderProperties[0].TextureConstants)
+            {
+                if(tex.XFormArgumentIndex != -1)
+                    tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
+            }
 
             Matcher.FixRmdfTagRef(finalRm);
 
             FixAnimationProperties(cacheStream, blamCacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
 
             // Fix any null bitmaps, caused by bitm port failure
-            foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
+            foreach (var a in finalRm.ShaderProperties[0].TextureConstants)
             {
                 if (a.Bitmap != null)
                     continue;
 
-                var defaultBitmap = Matcher.GetDefaultBitmapTag(edMaps[finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]);
+                var defaultBitmap = Matcher.GetDefaultBitmapTag(edMaps[finalRm.ShaderProperties[0].TextureConstants.IndexOf(a)]);
 
                 try
                 {
@@ -176,47 +246,37 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (Matcher.RmhgUnknownTemplates.Contains(edRmt2Instance.Name))
-                if (finalRm.ShaderProperties[0].Unknown.Count == 0)
-                    finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>
-                    {
-                        new RenderMethod.ShaderProperty.UnknownBlock1
-                        {
-                            Unknown = 1
-                        }
-                    };
-
             switch (blamTagName)
             {
                 case @"levels\dlc\chillout\shaders\chillout_flood_godrays" when finalRm is ShaderHalogram:
                     {
                         // Fixup bitmaps
-                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                         {
-                            if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
+                            if (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "overlay_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_flood_godrays.bitmap")[0]);
+                                finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_flood_godrays.bitmap")[0]);
                                 break;
                             }
                         }
 
                         // Fixup arguments
-                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         {
-                            var templateArg = edRmt2.VectorArguments[i];
+                            var templateArg = edRmt2.RealParameterNames[i];
 
                             switch (CacheContext.StringTable.GetString(templateArg.Name))
                             {
                                 case "overlay_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 0f, 0f };
                                     break;
 
                                 case "overlay_tint":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.3764706f, 0.7254902f, 0.9215687f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.3764706f, 0.7254902f, 0.9215687f, 1f };
                                     break;
 
                                 case "overlay_intensity":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1.25f, 1.25f, 1.25f, 1.25f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1.25f, 1.25f, 1.25f, 1.25f };
                                     break;
                             }
                         }
@@ -226,32 +286,32 @@ namespace TagTool.Commands.Porting
                 case @"levels\dlc\chillout\shaders\chillout_invis_godrays" when finalRm is ShaderHalogram:
                     {
                         // Fixup bitmaps
-                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                         {
-                            if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
+                            if (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "overlay_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_invis_godrays.bitmap")[0]);
+                                finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_invis_godrays.bitmap")[0]);
                                 break;
                             }
                         }
 
                         // Fixup arguments
-                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         {
-                            var templateArg = edRmt2.VectorArguments[i];
+                            var templateArg = edRmt2.RealParameterNames[i];
 
                             switch (CacheContext.StringTable.GetString(templateArg.Name))
                             {
                                 case "overlay_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 0f, 0f };
                                     break;
 
                                 case "overlay_tint":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.3058824f, 0.7098039f, 0.937255f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.3058824f, 0.7098039f, 0.937255f, 1f };
                                     break;
 
                                 case "overlay_intensity":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 1f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 1f, 1f };
                                     break;
                             }
                         }
@@ -261,32 +321,32 @@ namespace TagTool.Commands.Porting
                 case @"levels\solo\020_base\lights\light_volume_hatlight" when finalRm is ShaderHalogram:
                     {
                         // Fixup bitmaps
-                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                         {
-                            if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
+                            if (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "overlay_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\020_base\bitmaps\light_volume_hatlight.bitmap")[0]);
+                                finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\020_base\bitmaps\light_volume_hatlight.bitmap")[0]);
                                 break;
                             }
                         }
 
                         // Fixup arguments
-                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         {
-                            var templateArg = edRmt2.VectorArguments[i];
+                            var templateArg = edRmt2.RealParameterNames[i];
 
                             switch (CacheContext.StringTable.GetString(templateArg.Name))
                             {
                                 case "overlay_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 2f, 1f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 2f, 1f, 0f, 0f };
                                     break;
 
                                 case "overlay_tint":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.9960785f, 1f, 0.8039216f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.9960785f, 1f, 0.8039216f, 1f };
                                     break;
 
                                 case "overlay_intensity":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 1f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 1f, 1f };
                                     break;
                             }
                         }
@@ -302,11 +362,11 @@ namespace TagTool.Commands.Porting
                 case @"levels\dlc\armory\shaders\concrete_floor_smooth" when finalRm is Shader:
                     {
                         // Fixup bitmaps
-                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                         {
-                            if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "bump_map")
+                            if (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "bump_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\armory\bitmaps\concrete_floor_bump.bitmap")[0]);
+                                finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\armory\bitmaps\concrete_floor_bump.bitmap")[0]);
                                 break;
                             }
                         }
@@ -314,26 +374,26 @@ namespace TagTool.Commands.Porting
                     }
 
                 case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow" when finalRm is Shader:
-                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                    for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                     {
-                        var templateArg = edRmt2.VectorArguments[i];
+                        var templateArg = edRmt2.RealParameterNames[i];
 
                         if (CacheContext.StringTable.GetString(templateArg.Name) == "env_tint_color")
                         {
-                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0f, 0f, 0f, 0f };
+                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0f, 0f, 0f, 0f };
                             break;
                         }
                     }
                     break;
 
                 case @"levels\multi\isolation\sky\shaders\skydome" when finalRm is Shader:
-                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                    for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                     {
-                        var templateArg = edRmt2.VectorArguments[i];
+                        var templateArg = edRmt2.RealParameterNames[i];
 
                         if (CacheContext.StringTable.GetString(templateArg.Name) == "albedo_color")
                         {
-                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.447059f, 0.376471f, 0.898039f, 1.0f };
+                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.447059f, 0.376471f, 0.898039f, 1.0f };
                             break;
                         }
                     }
@@ -342,14 +402,14 @@ namespace TagTool.Commands.Porting
                 case @"levels\multi\snowbound\shaders\cov_grey_icy" when finalRm is Shader:
                     {
                         // Fixup bitmaps
-                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                         {
-                            switch (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name))
+                            switch (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name))
                             {
                                 case "base_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_dif.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_dif.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -357,7 +417,7 @@ namespace TagTool.Commands.Porting
                                 case "detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -365,7 +425,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_platebump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_platebump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -373,7 +433,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_bump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_bump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -381,58 +441,58 @@ namespace TagTool.Commands.Porting
                         }
 
                         // Fixup arguments
-                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         {
-                            var templateArg = edRmt2.VectorArguments[i];
+                            var templateArg = edRmt2.RealParameterNames[i];
 
                             switch (CacheContext.StringTable.GetString(templateArg.Name))
                             {
                                 case "base_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 0f, 0f };
                                     break;
 
                                 case "detail_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1.5f, 1.5f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1.5f, 1.5f, 0f, 0f };
                                     break;
 
                                 case "albedo_color":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.554902f, 0.5588236f, 0.5921569f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.554902f, 0.5588236f, 0.5921569f, 1f };
                                     break;
 
                                 case "bump_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 0f, 0f };
                                     break;
 
                                 case "bump_detail_map":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 2f, 2f, 0f, 0f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 2f, 2f, 0f, 0f };
                                     break;
 
                                 case "diffuse_coefficient":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.4f, 0.4f, 0.4f, 0.4f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.4f, 0.4f, 0.4f, 0.4f };
                                     break;
 
                                 case "specular_coefficient":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 1f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 1f, 1f };
                                     break;
 
                                 case "roughness":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.2f, 0.2f, 0.2f, 0.2f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.2f, 0.2f, 0.2f, 0.2f };
                                     break;
 
                                 case "analytical_specular_contribution":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.2f, 0.2f, 0.2f, 0.2f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.2f, 0.2f, 0.2f, 0.2f };
                                     break;
 
                                 case "area_specular_contribution":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.1f, 0.1f, 0.1f, 0.1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.1f, 0.1f, 0.1f, 0.1f };
                                     break;
 
                                 case "environment_map_specular_contribution":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.15f, 0.15f, 0.15f, 0.15f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.15f, 0.15f, 0.15f, 0.15f };
                                     break;
 
                                 case "specular_tint":
-                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.8431373f, 0.8470589f, 0.8117648f, 1f };
+                                    finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0.8431373f, 0.8470589f, 0.8117648f, 1f };
                                     break;
                             }
                         }
@@ -444,14 +504,14 @@ namespace TagTool.Commands.Porting
                 case @"levels\multi\snowbound\shaders\rock_rocky_icy" when finalRm is Shader:
                     {
                         // Fixup bitmaps
-                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                         {
-                            switch (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name))
+                            switch (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name))
                             {
                                 case "base_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -459,7 +519,7 @@ namespace TagTool.Commands.Porting
                                 case "detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_detail.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_detail.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -470,11 +530,11 @@ namespace TagTool.Commands.Porting
                                         switch (blamTagName)
                                         {
                                             case @"levels\multi\snowbound\shaders\rock_rocky_icy":
-                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_icy_blend.bitmap")[0]);
+                                                finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_icy_blend.bitmap")[0]);
                                                 break;
 
                                             default:
-                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_cliff_dif.bitmap")[0]);
+                                                finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_cliff_dif.bitmap")[0]);
                                                 break;
                                         }
                                     }
@@ -484,7 +544,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_bump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_bump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -492,7 +552,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_bump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_bump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -500,7 +560,7 @@ namespace TagTool.Commands.Porting
                                 case "height_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_parallax.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_parallax.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -508,7 +568,7 @@ namespace TagTool.Commands.Porting
                                 case "environment_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"shaders\default_bitmaps\bitmaps\color_white.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"shaders\default_bitmaps\bitmaps\color_white.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -516,9 +576,9 @@ namespace TagTool.Commands.Porting
                         }
 
                         // Fixup arguments
-                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         {
-                            var templateArg = edRmt2.VectorArguments[i];
+                            var templateArg = edRmt2.RealParameterNames[i];
 
                             switch (CacheContext.StringTable.GetString(templateArg.Name))
                             {
@@ -526,7 +586,7 @@ namespace TagTool.Commands.Porting
                                     switch (blamTagName)
                                     {
                                         case @"levels\multi\snowbound\shaders\rock_cliffs":
-                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 16f, 2f, 0f, 0.5f };
+                                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 16f, 2f, 0f, 0.5f };
                                             break;
                                     }
                                     break;
@@ -536,7 +596,7 @@ namespace TagTool.Commands.Porting
                                     {
                                         case @"levels\multi\snowbound\shaders\rock_cliffs":
                                         case @"levels\multi\snowbound\shaders\rock_rocky":
-                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 320f, 20f, 0f, 0f };
+                                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 320f, 20f, 0f, 0f };
                                             break;
                                     }
                                     break;
@@ -545,7 +605,7 @@ namespace TagTool.Commands.Porting
                                     switch (blamTagName)
                                     {
                                         case @"levels\multi\snowbound\shaders\rock_cliffs":
-                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1f, 1f, 0f, 0f };
                                             break;
                                     }
                                     break;
@@ -555,7 +615,7 @@ namespace TagTool.Commands.Porting
                                     {
                                         case @"levels\multi\snowbound\shaders\rock_cliffs":
                                         case @"levels\multi\snowbound\shaders\rock_rocky":
-                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 320f, 20f, 0f, 0f };
+                                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 320f, 20f, 0f, 0f };
                                             break;
                                     }
                                     break;
@@ -564,7 +624,7 @@ namespace TagTool.Commands.Porting
                                     switch (blamTagName)
                                     {
                                         case @"levels\multi\snowbound\shaders\rock_rocky_icy":
-                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1.2f, 1.2f, 1.2f, 1.2f };
+                                            finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 1.2f, 1.2f, 1.2f, 1.2f };
                                             break;
                                     }
                                     break;
@@ -575,14 +635,14 @@ namespace TagTool.Commands.Porting
 
                 case @"levels\multi\snowbound\shaders\cov_metalplates_icy" when finalRm is Shader:
                     // Fixup bitmaps
-                    for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                    for (var i = 0; i < edRmt2.TextureParameterNames.Count; i++)
                     {
-                        switch (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name))
+                        switch (CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name))
                         {
                             case "detail_map":
                                 try
                                 {
-                                    finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy4");
+                                    finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy4");
                                 }
                                 catch { }
                                 break;
@@ -590,7 +650,7 @@ namespace TagTool.Commands.Porting
                             case "detail_map2":
                                 try
                                 {
-                                    finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy3");
+                                    finalRm.ShaderProperties[0].TextureConstants[i].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy3");
                                 }
                                 catch { }
                                 break;
@@ -600,14 +660,14 @@ namespace TagTool.Commands.Porting
 
                 case @"levels\multi\snowbound\shaders\invis_col_glass" when finalRm is Shader:
                     // Fixup arguments
-                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                    for (var i = 0; i < edRmt2.RealParameterNames.Count; i++)
                     {
-                        var templateArg = edRmt2.VectorArguments[i];
+                        var templateArg = edRmt2.RealParameterNames[i];
 
                         switch (CacheContext.StringTable.GetString(templateArg.Name))
                         {
                             case "albedo_color":
-                                finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0f, 0f, 0f, 0f };
+                                finalRm.ShaderProperties[0].RealConstants[i].Values = new float[] { 0f, 0f, 0f, 0f };
                                 break;
                         }
                     }
@@ -620,10 +680,10 @@ namespace TagTool.Commands.Porting
         private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, GameCache blamCache, GameCacheHaloOnlineBase CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
-            if (finalRm.ShaderProperties[0].AnimationProperties.Count == 0)
+            if (finalRm.ShaderProperties[0].Functions.Count == 0)
                 return finalRm;
 
-            foreach (var properties in finalRm.ShaderProperties[0].AnimationProperties)
+            foreach (var properties in finalRm.ShaderProperties[0].Functions)
             {
                 properties.InputName = ConvertStringId(properties.InputName);
                 properties.RangeName = ConvertStringId(properties.RangeName);
@@ -634,7 +694,6 @@ namespace TagTool.Commands.Porting
             var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);
             var edPixl = (PixelShader)pixlTag;
             var bmPixl = BlamCache.Deserialize<PixelShader>(blamCacheStream, bmRmt2.PixelShader);
-            
 
             // Make a collection of drawmodes and their DrawModeItem's
             // DrawModeItem are has info about all registers modified by functions for each drawmode.
@@ -648,7 +707,7 @@ namespace TagTool.Commands.Porting
 
             var RegistersList = new Dictionary<int, string>();
 
-            foreach (var a in finalRm.ShaderProperties[0].ArgumentMappings)
+            foreach (var a in finalRm.ShaderProperties[0].Parameters)
                 if (!RegistersList.ContainsKey(a.RegisterIndex))
                     RegistersList.Add(a.RegisterIndex, "");
 
@@ -679,7 +738,7 @@ namespace TagTool.Commands.Porting
             // rm side
             var bmDrawmodesFunctions = new Dictionary<int, Unknown3Tagblock>(); // key is shader index
             DrawModeIndex = -1;
-            foreach (var a in finalRm.ShaderProperties[0].DrawModes)
+            foreach (var a in finalRm.ShaderProperties[0].EntryPoints)
             {
                 DrawModeIndex++;
 
@@ -690,20 +749,20 @@ namespace TagTool.Commands.Porting
                 var drawmodeRegisterCount = (int)a.Count;
 
 
-                var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler;
-                var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler >> 8;
-                var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown;
-                var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown >> 8;
-                var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector;
-                var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector >> 8;
+                var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].Texture.Offset;
+                var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].Texture.Count;
+                var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealVertex.Offset;
+                var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealVertex.Count;
+                var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealPixel.Offset;
+                var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].ParameterTables[drawmodeRegisterOffset].RealPixel.Count;
                 var ArgumentMappings = new List<ArgumentMapping>();
 
-                for (int j = 0; j < ArgumentMappingsCountSampler / 4; j++)
+                for (int j = 0; j < ArgumentMappingsCountSampler; j++)
                 {
                     ArgumentMappings.Add(new ArgumentMapping
                     {
-                        RegisterIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexSampler + j].RegisterIndex,
-                        ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexSampler + j].ArgumentIndex, // i don't think i can use it to match stuf
+                        RegisterIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexSampler + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexSampler + j].SourceIndex, // i don't think i can use it to match stuf
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexSampler + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Sampler,
                         ShaderIndex = drawmodeRegisterOffset,
@@ -712,12 +771,12 @@ namespace TagTool.Commands.Porting
                     });
                 }
 
-                for (int j = 0; j < ArgumentMappingsCountUnknown / 4; j++)
+                for (int j = 0; j < ArgumentMappingsCountUnknown; j++)
                 {
                     ArgumentMappings.Add(new ArgumentMapping
                     {
-                        RegisterIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexUnknown + j].RegisterIndex,
-                        ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexUnknown + j].ArgumentIndex,
+                        RegisterIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexUnknown + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexUnknown + j].SourceIndex,
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexUnknown + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
                         ShaderIndex = drawmodeRegisterOffset,
@@ -726,12 +785,12 @@ namespace TagTool.Commands.Porting
                     });
                 }
 
-                for (int j = 0; j < ArgumentMappingsCountVector / 4; j++)
+                for (int j = 0; j < ArgumentMappingsCountVector; j++)
                 {
                     ArgumentMappings.Add(new ArgumentMapping
                     {
-                        RegisterIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexVector + j].RegisterIndex,
-                        ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexVector + j].ArgumentIndex,
+                        RegisterIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexVector + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].Parameters[ArgumentMappingsIndexVector + j].SourceIndex,
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexVector + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
                         ShaderIndex = drawmodeRegisterOffset,
@@ -806,7 +865,9 @@ namespace TagTool.Commands.Porting
                     continue;
 
                 foreach (var b in a.Value.ArgumentMappings)
-                    finalRm.ShaderProperties[0].ArgumentMappings[b.ArgumentMappingsTagblockIndex].RegisterIndex = (short)b.EDRegisterIndex;
+                {
+                    finalRm.ShaderProperties[0].Parameters[b.ArgumentMappingsTagblockIndex].RegisterIndex = (short)b.EDRegisterIndex;
+                }
             }
 
             // one final check
@@ -819,21 +880,19 @@ namespace TagTool.Commands.Porting
                     if (!validEDRegisters.Contains(b.RegisterIndex))
                         validEDRegisters.Add(b.RegisterIndex);
 
-            foreach (var a in finalRm.ShaderProperties[0].ArgumentMappings)
+            foreach (var a in finalRm.ShaderProperties[0].Parameters)
             {
                 if (!validEDRegisters.Contains((a.RegisterIndex)))
                 {
                     // Display a warning
                     // Console.WriteLine($"INVALID REGISTERS IN TAG {blamTagName}!");
 
-                    // Abort, disable functions
-                    finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>(); // no idea what it does, but it crashes sometimes if it's null. on Shrine, it's the shader loop effect
-                    finalRm.ShaderProperties[0].AnimationProperties = new List<RenderMethod.AnimationPropertiesBlock>();
-                    finalRm.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
-                    finalRm.ShaderProperties[0].Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
-                    foreach (var b in edRmt2.RegisterOffsets) // stops crashing for some shaders if the drawmodes count is still the same
-                        finalRm.ShaderProperties[0].Unknown3.Add(new RenderMethod.ShaderProperty.UnknownBlock3());
-
+                    finalRm.ShaderProperties[0].EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
+                    finalRm.ShaderProperties[0].ParameterTables = new List<ParameterTable>();
+                    finalRm.ShaderProperties[0].Parameters = new List<ParameterMapping>();
+                    finalRm.ShaderProperties[0].Functions = new List<ShaderFunction>();
+                    foreach (var map in finalRm.ShaderProperties[0].TextureConstants)
+                        map.Functions.Integer = 0;
                     return finalRm;
                 }
             }

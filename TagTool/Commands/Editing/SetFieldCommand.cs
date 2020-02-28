@@ -526,16 +526,28 @@ namespace TagTool.Commands.Editing
                 }
                 else throw new NotImplementedException();
             }
+            else if (typeof(IBounds).IsAssignableFrom(type))
+            {
+                if (type.IsGenericType)
+                {
+                    var tDefinition = type.GetGenericTypeDefinition();
+                    var tArguments = type.GetGenericArguments();
+                    type = tDefinition.MakeGenericType(tArguments);
+                }
+
+                var boundsType = Activator.CreateInstance(type) as IBounds;
+                if (!boundsType.TryParse(cache, args, out boundsType, out string error))
+                    Console.WriteLine(error);
+                return boundsType;
+            }
             else
             {
-                Console.WriteLine($"ERROR: Not Implemented.");
-                return false;
-                // throw new NotImplementedException();
+                throw new NotImplementedException();
             }
 
             return output;
         }
-        
+
         public static int RangeArgCount(Type type)
         {
             if (type.IsEnum ||

@@ -10,138 +10,35 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708)]
     public class CameraFxSettings : TagStructure
 	{
-        #region exposure
-        public FlagsValue Flags;
+        public ExposureBlock Exposure;
 
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused1 = new byte[2];
+        public CameraFxValue AutoExposureSensitivity;
+        public CameraFxValue ExposureCompensation;
 
-        public float OverexposureAmount;
-        public float OverexposureUnknown;
-        public float OverexposureUnknown2;
-        public float BrightnessAmount;
-        public float BrightnessUnknown;
-        public float BrightnessUnknown2;
-        public float BrightnessUnknown3;
-        #endregion
+        public CameraFxStrength HighlightBloom;
+        public CameraFxStrength InherentBloom;
+        public CameraFxStrength LightingBloom;
 
-        #region auto-exposure sensitivity
-        public FlagsValue Flags2;
+        public CameraFxColor HighlightBloomTint;
+        public CameraFxColor InherentBloomTint;
+        public CameraFxColor LightingBloomTint;
 
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused2 = new byte[2];
+        public CameraFxStrength UnknownStrength1;
+        public CameraFxStrength UnknownStrength2;
 
-        public float Unknown3;
-        #endregion
+        public UnknownBlock Unknown;
 
-        #region exposure compensation
-        public FlagsValue Flags3;
-
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused3 = new byte[2];
-
-        public float Unknown5;
-        #endregion
-
-        #region bloom point
-        public FlagsValue Flags4;
-
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused4 = new byte[2];
-
-        public float Base;
-        public float Min;
-        public float Max;
-        #endregion
-
-        #region inherent bloom
-        public FlagsValue Flags5;
-        public short Unknown7;
-        public float Base2;
-        public float Min2;
-        public float Max2;
-        #endregion
-
-        public FlagsValue Flags6;
-        public short Unknown8;
-        public float Base3;
-        public float Min3;
-        public float Max3;
-
-        public FlagsValue Flags7;
-        public short Unknown9;
-        public float Red;
-        public float Green;
-        public float Blue;
-
-        public FlagsValue Flags8;
-        public short Unknown10;
-        public float Red2;
-        public float Green2;
-        public float Blue2;
-
-        public FlagsValue Flags9;
-        public short Unknown11;
-        public float Red3;
-        public float Green3;
-        public float Blue3;
-
-        public FlagsValue Flags10;
-        public short Unknown12;
-        public float Unknown13;
-        public float Unknown14;
-        public float Unknown15;
-
-        public FlagsValue Flags11;
-        public short Unknown16;
-        public float Unknown17;
-        public float Unknown18;
-        public float Unknown19;
-
-        public FlagsValue Flags12;
-        public short Unknown20;
-        public float Unknown21;
-        public float Unknown22;
-        public float Unknown23;
-        public short Unknown24_1;
-        public short Unknown24_2;
-
-        public FlagsValue Flags13;
-        public short Unknown25;
-        public float Base4;
-        public float Min4;
-        public float Max4;
-
-        public FlagsValue Flags14;
-        public short Unknown26;
-        public float Base5;
-        public float Min5;
-        public float Max5;
-
-        //
-        // SSAO
-        //
+        public CameraFxStrength ConstantLight;
+        public CameraFxStrength DynamicLight;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public FlagsValue Flags15;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public short Unknown27;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown28;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown29;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown30;
+        public SsaoPropertiesBlock SsaoProperties;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public FlagsValue Flags16;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public short Unknown31;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown32;
+        public CameraFxValue UnknownIntensity1;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<UnknownBlock> Unknown33;
+        public List<UnknownBlock1> Unknown33;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<UnknownBlock2> Unknown34;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -169,8 +66,71 @@ namespace TagTool.Tags.Definitions
             Fixed2 = 1 << 6
         }
 
+        [TagStructure(Size = 0x10)]
+        public class CameraFxStrength : TagStructure
+        {
+            public FlagsValue Flags;
+
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+
+            public float Strength;
+            public float MaximumChange;
+            public float BlendSpeed;
+        }
+
+        [TagStructure(Size = 0x8)]
+        public class CameraFxValue : TagStructure
+        {
+            public FlagsValue Flags;
+
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+
+            public float Value;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class CameraFxColor : TagStructure
+        {
+            public FlagsValue Flags;
+
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+
+            public RealRgbColor Color;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class ExposureBlock : CameraFxStrength
+        {
+            public Bounds<float> ExposureRange; // the absolute target exposure is clamped to this range
+            public float AutoBrightness; // [0.0001 - 1]
+            public float AutoBrightnessDelay; // [0.1 - 1]
+        }
+
+        [TagStructure(Size = 0x4)]
+        public class UnknownBlock : CameraFxStrength
+        {
+            public short Unknown24;
+            public short Unknown25;
+        }
+
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        public class SsaoPropertiesBlock : TagStructure
+        {
+            public FlagsValue Flags;
+
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+
+            public float SsaoRadius;
+            public float SsaoBlurRadius;
+            public float SsaoBackDropStrength;
+        }
+
         [TagStructure(Size = 0x58)]
-        public class UnknownBlock : TagStructure
+        public class UnknownBlock1 : TagStructure
 		{
             public float Unknown;
             public int Unknown2;

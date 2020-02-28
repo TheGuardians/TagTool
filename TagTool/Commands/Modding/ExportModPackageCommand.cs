@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Commands.Modding
 {
@@ -402,7 +403,7 @@ namespace TagTool.Commands.Modding
 
                                 pageable = resourceIndices[resourceLocation][resourceIndex] = new PageableResource
                                 {
-                                    Page = new RawPage
+                                    Page = new ResourcePage
                                     {
                                         OldFlags = OldRawPageFlags.InMods,
                                         Index = newResourceIndex
@@ -452,7 +453,7 @@ namespace TagTool.Commands.Modding
                     MapFile map = new MapFile();
                     map.Read(reader);
                     // TODO: specify cache per map
-                    ModPackage.AddMap(cacheStream, ((MapFileHeader)map.Header).MapId , 0);
+                    ModPackage.AddMap(cacheStream, ((CacheFileHeader)map.Header).MapId , 0);
 
                 }
             }

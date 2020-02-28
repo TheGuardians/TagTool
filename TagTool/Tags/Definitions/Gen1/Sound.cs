@@ -9,7 +9,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions.Gen1
 {
-    [TagStructure(Name = "sound", Tag = "snd!", Size = 0xA4, MaxVersion = CacheVersion.HaloPC)]
+    [TagStructure(Name = "sound", Tag = "snd!", Size = 0xA4, MaxVersion = CacheVersion.HaloCustomEdition)]
     public class Sound : TagStructure
     {
         public int Flags;

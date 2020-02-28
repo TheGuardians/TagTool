@@ -48,12 +48,14 @@ namespace TagTool.Cache
             {
                 var reader = cache.Reader;
                 
-                reader.SeekTo(cache.Header.TagIndexOffset);
+                reader.SeekTo(cache.Header.TagsHeaderAddress32);
 
                 TagGroupsOffset = reader.ReadInt32();
-                cache.Header.Magic = TagGroupsOffset - (cache.Header.TagIndexOffset + 32);
                 TagGroupCount = reader.ReadInt32();
-                TagsOffset = reader.ReadInt32() - cache.Header.Magic;
+
+                var addressMask = (int)(TagGroupsOffset - (cache.Header.TagsHeaderAddress32 + 32));
+
+                TagsOffset = reader.ReadInt32() - addressMask;
                 ScenarioHandle = reader.ReadDatumIndex();
                 GlobalsHandle = reader.ReadDatumIndex();
                 CRC = reader.ReadInt32();
@@ -61,7 +63,7 @@ namespace TagTool.Cache
                 reader.ReadTag(); // 'tags'
 
                 reader.SeekTo(TagsOffset + 8);
-                cache.Magic = reader.ReadInt32() - (cache.Header.TagIndexOffset + cache.Header.MemoryBufferOffset);
+                cache.Magic = (int)(reader.ReadInt32() - (cache.Header.TagsHeaderAddress32 + cache.Header.MemoryBufferOffset));
             }
         }
 
@@ -144,7 +146,7 @@ namespace TagTool.Cache
 
                 #region Read Indices
 
-                reader.SeekTo(CH.TagNamesIndicesOffset);
+                reader.SeekTo(CH.TagNameIndicesOffset);
                 var offsets = new int[IH.TagCount];
                 for (int i = 0; i < IH.TagCount; i++)
                     offsets[i] = reader.ReadInt32();
@@ -175,7 +177,7 @@ namespace TagTool.Cache
             }
         }
 
-        public override byte[] GetRawFromID(DatumIndex ID, int DataLength)
+        public override byte[] GetRawFromID(DatumHandle ID, int DataLength)
         {
             EndianReader er;
             string fName = "";

@@ -12,457 +12,343 @@ namespace TagTool.Bitmaps.Utils
 {
     public static class BitmapConverter
     {
-        public static BaseBitmap ConvertGen3Bitmap(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static BaseBitmap ConvertGen3Bitmap(GameCache cache, Bitmap bitmap, int imageIndex, bool forDDS = false)
         {
             var image = bitmap.Images[imageIndex];
 
-            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
-                return ConvertGen3InterleavedBitmap(cache, bitmap, imageIndex);
-            else
-                return ConvertGen3RegularBitmap(cache, bitmap, imageIndex);
-        }
-
-        private static BaseBitmap ConvertGen3InterleavedBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
-        {
-            var image = bitmap.Images[imageIndex];
-
-            var resourceReference = bitmap.InterleavedResources[image.InterleavedTextureIndex1];
-            var resourceDefinition = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(resourceReference);
-
-            if (resourceDefinition == null)
-                return null;
-
-            BitmapTextureInteropDefinition bitmapTextureInteropDef;
-
-            if(image.InterleavedTextureIndex2 == 0)
-                bitmapTextureInteropDef = resourceDefinition.Texture.Definition.Bitmap1;
-            else
-                bitmapTextureInteropDef = resourceDefinition.Texture.Definition.Bitmap2;
-
-            return ConvertGen3BitmapInternal(bitmapTextureInteropDef, resourceDefinition.Texture.Definition.PrimaryResourceData.Data, resourceDefinition.Texture.Definition.SecondaryResourceData.Data, bitmap, imageIndex);
-        }
-
-        private static BaseBitmap ConvertGen3RegularBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
-        {
-            var image = bitmap.Images[imageIndex];
-
-            var resourceReference = bitmap.Resources[imageIndex];
-            var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
-
-            if (resourceDefinition == null)
-                return null;
-
-            BitmapTextureInteropDefinition bitmapTextureInteropDef = resourceDefinition.Texture.Definition.Bitmap;
-
-            return ConvertGen3BitmapInternal(bitmapTextureInteropDef, resourceDefinition.Texture.Definition.PrimaryResourceData.Data, resourceDefinition.Texture.Definition.SecondaryResourceData.Data, bitmap, imageIndex);
-        }
-
-
-        private static BaseBitmap ConvertGen3BitmapInternal(BitmapTextureInteropDefinition bitmapTextureInteropDefinition, byte[] primaryData, byte[] secondaryData, Bitmap bitmapDefinition, int imageIndex)
-        {
-            var image = bitmapDefinition.Images[imageIndex];
-            var xboxBitmap = new XboxBitmap(bitmapTextureInteropDefinition, image);
-            var bitmapSize = BitmapUtils.GetXboxImageSize(xboxBitmap);
-
-            byte[] imageData = new byte[bitmapSize];
-            var copySize = bitmapSize;
-
-            bool ignoreData = false;
             if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
             {
-                if (xboxBitmap.Type == BitmapType.CubeMap)
+                BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                if (resource == null)
+                    return null;
+
+                BitmapTextureInteropDefinition definition;
+                BitmapTextureInteropDefinition otherDefinition;
+                int pairIndex = 0;
+
+                if (image.InterleavedTextureIndex2 > 0)
                 {
-                    XboxBitmap firstBitmap = null;
-                    XboxBitmap secondBitmap = null;
-                    bool isFirst = image.InterleavedTextureIndex2 == 0;
-                    if (isFirst)
-                    {
-                        firstBitmap = xboxBitmap;
-                        if (bitmapDefinition.Images.Count > imageIndex + 1)
-                            secondBitmap = new XboxBitmap(bitmapDefinition.Images[imageIndex + 1]);
-                    }
-                    else
-                    {
-                        firstBitmap = new XboxBitmap(bitmapDefinition.Images[imageIndex - 1]);
-                        secondBitmap = xboxBitmap;
-                    }
+                    definition = resource.Texture.Definition.Bitmap2;
+                    otherDefinition = resource.Texture.Definition.Bitmap1;
+                    pairIndex = 1;
+                }
+                else
+                {
+                    definition = resource.Texture.Definition.Bitmap1;
+                    otherDefinition = resource.Texture.Definition.Bitmap2;
+                }
+                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, true, pairIndex, otherDefinition, forDDS);
+            }
+            else
+            {
+                BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
+                if (resource == null)
+                    return null;
 
-                    bool changeOrder = false;
-                    if (secondBitmap != null && firstBitmap.Height < secondBitmap.Height)
-                        changeOrder = true;
+                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, false, 0, null, forDDS);
+            }
+        }
 
-                    switch (xboxBitmap.Height)
+        private static BaseBitmap ConvertGen3Bitmap(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, bool forDDS)
+        {
+            if (primaryData == null && secondaryData == null)
+                return null;
+
+            using (var result = new MemoryStream())
+            {
+                int mipLevelCount = definition.MipmapCount;
+                int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
+
+                if (definition.BitmapType == BitmapType.Array && mipLevelCount > 1)
+                {
+                    mipLevelCount = 1;
+                    definition.MipmapCount = 1;
+                }
+
+                if (!forDDS)
+                {
+                    // order for d3d9, all faces first, then mipmaps
+                    for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
                     {
-                        case 16:
-                            xboxBitmap.Offset += 2 * (int)(xboxBitmap.Width * xboxBitmap.Height / xboxBitmap.CompressionFactor); // skip mipmaps
-                            if (secondBitmap != null && (firstBitmap.Height == 64 || secondBitmap.Height == 32 || firstBitmap.Height == 32 || secondBitmap.Height == 32))
+                        for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                        {
+                            if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
                             {
-                                // I don't fucking know
-                                ignoreData = true;
+                                if (layerIndex == 2)
+                                    layerIndex = 3;
+                                else if (layerIndex == 3)
+                                    layerIndex = 2;
                             }
-                            break;
-                        case 32:
-                            if (secondBitmap != null && (firstBitmap.Height == 64 || secondBitmap.Height == 64))
-                                xboxBitmap.Offset += (int)(0x2000 / xboxBitmap.CompressionFactor);
-                            break;
-                        default:
-                            break;
-                    }
 
-                    if (changeOrder)
-                    {
-                        if (isFirst)
-                        {
-                            if (!xboxBitmap.InTile)
-                                xboxBitmap.Offset += (int)(secondBitmap.VirtualHeight * secondBitmap.VirtualWidth / secondBitmap.CompressionFactor);
-                            else
-                                xboxBitmap.Offset += (int)(0.5f * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
-                        }
-                        else
-                            xboxBitmap.Offset += 0;
-                    }
-                    else
-                    {
-                        if (isFirst)
-                            xboxBitmap.Offset += 0;
-                        else
-                        {
-                            if (!xboxBitmap.InTile)
-                                xboxBitmap.Offset += (int)(firstBitmap.VirtualHeight * firstBitmap.VirtualWidth / firstBitmap.CompressionFactor);
-                            else
-                                xboxBitmap.Offset += (int)(0.5f * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+                            ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition);
+
+                            if (definition.BitmapType == BitmapType.CubeMap)
+                            {
+                                if (layerIndex == 3)
+                                    layerIndex = 2;
+                                else if (layerIndex == 2)
+                                    layerIndex = 3;
+                            }
                         }
                     }
-                        
                 }
-                else if (image.InterleavedTextureIndex2 == 0)
-                    xboxBitmap.Offset = 0;
                 else
                 {
-                    var previousImage = new XboxBitmap(bitmapDefinition.Images[imageIndex - 1]);
+                    for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                    {
+                        if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
+                        {
+                            if (layerIndex == 2)
+                                layerIndex = 3;
+                            else if (layerIndex == 3)
+                                layerIndex = 2;
+                        }
 
-                    if (!xboxBitmap.InTile)
-                        xboxBitmap.Offset = (int)(previousImage.VirtualHeight * previousImage.VirtualWidth / previousImage.CompressionFactor);
-                    else
-                        xboxBitmap.Offset = (int)(0.5f * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+                        for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                        {
+                            ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition);
+                        }
+                        
+                        if (definition.BitmapType == BitmapType.CubeMap)
+                        {
+                            if (layerIndex == 3)
+                                layerIndex = 2;
+                            else if (layerIndex == 2)
+                                layerIndex = 3;
+                        }
+                    }
+                }
+
+                var resultData = result.ToArray();
+
+                BaseBitmap resultBitmap = new BaseBitmap(bitmap.Images[imageIndex]);
+                
+
+                var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
+                resultBitmap.UpdateFormat(newFormat);
+
+                if(BitmapUtils.RequiresDecompression(resultBitmap.Format, (uint)resultBitmap.Width, (uint)resultBitmap.Height))
+                {
+                    resultBitmap.Format = BitmapFormat.A8R8G8B8;
+                }
+
+                if (!BitmapUtils.IsCompressedFormat(resultBitmap.Format))
+                    resultBitmap.Flags &= ~BitmapFlags.Compressed;
+                else
+                    resultBitmap.Flags |= BitmapFlags.Compressed;
+
+                //
+                // Update resource definition/image, truncate DXN to level 4x4
+                //
+
+                resultBitmap.Data = resultData;
+                
+                if(resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 8x8
+                {
+                    GenerateCompressedMipMaps(resultBitmap);
+                }
+
+                
+                if (resultBitmap.Type == BitmapType.Array) // for HO, arrays use the index of Texture3D
+                    resultBitmap.Type = BitmapType.Texture3D;
+
+                return resultBitmap;
+            }
+        }
+
+        private static void ConvertGen3BitmapData(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition)
+        {
+            byte[] data;
+            uint levelOffset;
+
+            var d3dFormat = definition.D3DFormat;
+            var isTiled = Direct3D.D3D9x.D3D.IsTiled(d3dFormat);
+
+            uint blockWidth;
+            uint blockHeight;
+
+            uint alignedWidth = (uint)definition.Width >> level;
+            uint alignedHeight = (uint)definition.Height >> level;
+
+            if (alignedWidth < 1) alignedWidth = 1;
+            if (alignedHeight < 1) alignedHeight = 1;
+
+            uint alignedDepth = definition.Depth;
+            var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
+            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
+
+            XboxGraphics.XGGetBlockDimensions(gpuFormat, out blockWidth, out blockHeight);
+            XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
+            if (definition.MipmapCount > 1)
+                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
+
+            var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
+            Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
+
+            if (level > 0)
+            {
+                // align to next power of two
+                if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedWidth))
+                {
+                    alignedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedWidth);
+                    if (alignedWidth < 0) alignedWidth = 0;
+                    alignedWidth = 1u << (int)alignedWidth;
+                }
+
+                if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedHeight))
+                {
+                    alignedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedHeight);
+                    if (alignedHeight < 0) alignedHeight = 0;
+                    alignedHeight = 1u << (int)alignedHeight;
                 }
             }
 
-            if (bitmapTextureInteropDefinition.HighResInSecondaryResource == 1)
+            // hacks when the point is outside of the first aligned texture, compute how many tiles you need and extract them (non-square only)
+            if (point.X >= 32)
+                alignedWidth *= (uint)(1 + point.X / 32);
+            if (point.Y >= 32)
+                alignedHeight *= (uint)(1 + point.Y / 32);
+
+            uint texelPitch = blockWidth * blockHeight * bitsPerPixel / 8;
+            uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
+
+            // documentation says that each packed mip level should be aligned to 4KB, required to make untiling work smoothly
+            size = (uint)((size + 0xFFF) & ~0xFFF);
+
+            int tileOffset = 0;
+
+            if (!isPaired)
             {
-                if (secondaryData == null)
-                    return null;
-
-                if (bitmapSize + xboxBitmap.Offset > secondaryData.Length)
-                    copySize = secondaryData.Length - xboxBitmap.Offset;
-
-                if(!ignoreData)
-                    Array.Copy(secondaryData, xboxBitmap.Offset, imageData, 0, copySize);
-
+                bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
+                if ((level == 0 && useHighResBuffer) || primaryData == null)
+                {
+                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
+                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedSecondaryLength];
+                    Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
+                }
+                else
+                {
+                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, useHighResBuffer);
+                    uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedPrimaryLength];
+                    Array.Copy(primaryData, 0, data, 0, primaryData.Length);
+                }
             }
             else
             {
-                if (primaryData == null)
-                    return null;
+                bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
+                var bitmap1 = pairIndex == 0 ? definition : otherDefinition;
+                var bitmap2 = pairIndex == 0 ? otherDefinition : definition;
 
-                if(secondaryData != null)
+                if (level == 0 && useHighResBuffer)
                 {
-                    var temp = new byte[primaryData.Length + secondaryData.Length];
-                    Array.Copy(primaryData, 0, temp, 0, primaryData.Length);
-                    Array.Copy(secondaryData, 0, temp, primaryData.Length, secondaryData.Length);
-                    primaryData = temp;
-                }
-
-                 if (bitmapSize + xboxBitmap.Offset > primaryData.Length)
-                    copySize = primaryData.Length - xboxBitmap.Offset;
-
-                if (!ignoreData)
-                    Array.Copy(primaryData, xboxBitmap.Offset, imageData, 0, copySize);
-            }
-
-            xboxBitmap.Offset = 0;
-
-            List<XboxBitmap> xboxBitmaps = ParseImages(xboxBitmap, image, imageData, bitmapSize);
-            bool flipImage;
-            // rearrange cubemaps order
-            if (xboxBitmap.Type == BitmapType.CubeMap)
-            {
-                XboxBitmap temp = xboxBitmaps[1];
-                xboxBitmaps[1] = xboxBitmaps[2];
-                xboxBitmaps[2] = temp;
-
-            }
-
-            List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
-            foreach (var bitmap in xboxBitmaps)
-            {
-                // extract bitmap from padded image
-                BaseBitmap finalBitmap = ExtractImage(bitmap);
-                // convert to PC format
-                flipImage = ConvertImage(finalBitmap);
-                // flip data if required
-                if (flipImage)
-                    FlipImage(finalBitmap, image);
-                // until I write code to move mipmaps at the end of the file, remove cubemap mipmaps
-                if (xboxBitmap.Type == BitmapType.CubeMap)
-                {
-                    finalBitmap.MipMapCount = 0;
-                }
-                // generate mipmaps for uncompressed textures
-                if (!finalBitmap.Flags.HasFlag(BitmapFlags.Compressed) && finalBitmap.MipMapCount > 0)
-                    GenerateUncompressedMipMaps(finalBitmap);
-
-                finalBitmaps.Add(finalBitmap);
-            }
-            // build and return the final bitmap
-            return RebuildBitmap(finalBitmaps);
-        }
-
-
-        private static List<XboxBitmap> ParseImages(XboxBitmap xboxBitmap, Bitmap.Image image, byte[] imageData, int bitmapSize)
-        {
-            List<XboxBitmap> xboxBitmaps = new List<XboxBitmap>();
-            switch (image.Type)
-            {
-                case BitmapType.Texture2D:
-                    xboxBitmap.Data = imageData;
-                    xboxBitmaps.Add(xboxBitmap);
-                    if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                        xboxBitmap.Data = BitmapDecoder.ConvertToLinearTexture(xboxBitmap.Data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-                    break;
-                case BitmapType.Texture3D:
-                case BitmapType.Array:
-                    var count = xboxBitmap.Depth;
-                    var size = bitmapSize / count;
-                    for (int i = 0; i < count; i++)
-                    {
-                        byte[] data = new byte[size];
-                        Array.Copy(imageData, i * size, data, 0, size);
-                        XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
-
-                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-
-                        newXboxBitmap.Data = data;
-                        xboxBitmaps.Add(newXboxBitmap);
-                    }
-                    break;
-                case BitmapType.CubeMap:
-                    count = 6;
-                    size = bitmapSize / count;
-                    for (int i = 0; i < count; i++)
-                    {
-                        byte[] data = new byte[size];
-                        Array.Copy(imageData, i * size, data, 0, size);
-                        XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
-
-                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-
-                        newXboxBitmap.Data = data;
-                        xboxBitmaps.Add(newXboxBitmap);
-                    }
-                    break;
-            }
-            return xboxBitmaps;
-        }
-
-        private static BaseBitmap ExtractImage(XboxBitmap bitmap)
-        {
-            if (bitmap.NotExact)
-            {
-                int dataHeight;
-
-                if (!bitmap.MultipleOfBlockDimension)
-                {
-                    dataHeight = bitmap.NearestHeight;
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex);
+                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedSecondaryLength];
+                    Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
                 }
                 else
                 {
-                    dataHeight = bitmap.Height;
+                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, useHighResBuffer);
+                    uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
+                    data = new byte[alignedPrimaryLength];
+                    Array.Copy(primaryData, 0, data, 0, primaryData.Length);
                 }
+            }
 
-                byte[] data = new byte[BitmapUtils.GetImageSize(bitmap)];
-                int numberOfPass = dataHeight / bitmap.BlockDimension;
-                for (int i = 0; i < numberOfPass; i++)
+            tileOffset += (int)levelOffset;
+
+            byte[] tempResult = new byte[size];
+
+            // check if data has enough memory for the requested, size, sometimes it does not (truncated to save memory)
+            uint copySize = size;
+            if (size + tileOffset >= data.Length)
+                copySize = (uint)(data.Length - tileOffset);
+
+            Array.Copy(data, tileOffset, tempResult, 0, copySize);
+            data = tempResult;
+
+            uint nBlockWidth;
+            uint nBlockHeight;
+            if (isTiled)
+            {
+                //
+                // Untile texture
+                //
+
+                byte[] result = new byte[size];
+
+                nBlockWidth = alignedWidth / blockWidth;
+                nBlockHeight = alignedHeight / blockHeight;
+                for (int i = 0; i < nBlockHeight; i++)
                 {
-                    Array.Copy(bitmap.Data, i * bitmap.TilePitch , data, i * bitmap.Pitch, bitmap.Pitch); //+ bitmap.Offset
-                }
-                bitmap.Data = data;
-            }
-            return bitmap;
-        }
-
-        private static bool ConvertImage(BaseBitmap bitmap)
-        {
-            BitmapFormat targetFormat = bitmap.Format;
-            var data = bitmap.Data;
-            bool DXTFlip = false;
-            switch (bitmap.Format)
-            {
-                case BitmapFormat.Dxt5aMono:
-                case BitmapFormat.Dxt3aMono:
-                    targetFormat = BitmapFormat.Y8;
-                    bitmap.Flags &= ~BitmapFlags.Compressed;
-                    break;
-
-                case BitmapFormat.Dxt3aAlpha:
-                case BitmapFormat.Dxt5aAlpha:
-                    targetFormat = BitmapFormat.A8;
-                    bitmap.Flags &= ~BitmapFlags.Compressed;
-                    break;
-
-                case BitmapFormat.DxnMonoAlpha:
-                case BitmapFormat.Dxt5a:
-                case BitmapFormat.AY8:
-                    targetFormat = BitmapFormat.A8Y8; ;
-                    bitmap.Flags &= ~BitmapFlags.Compressed;
-                    break;
-
-                case BitmapFormat.A4R4G4B4:
-                case BitmapFormat.R5G6B5:
-                    targetFormat = BitmapFormat.A8R8G8B8;
-                    break;
-
-                case BitmapFormat.A8Y8:
-                case BitmapFormat.Y8:
-                case BitmapFormat.A8:
-                case BitmapFormat.A8R8G8B8:
-                case BitmapFormat.X8R8G8B8:
-                case BitmapFormat.A16B16G16R16F:
-                case BitmapFormat.A32B32G32R32F:
-                case BitmapFormat.V8U8:
-                    break;
-
-                case BitmapFormat.Dxt1:
-                case BitmapFormat.Dxt3:
-                case BitmapFormat.Dxt5:
-                case BitmapFormat.Dxn:
-                    if (bitmap.Height != bitmap.NearestHeight || bitmap.Width != bitmap.NearestWidth)
+                    for (int j = 0; j < nBlockWidth; j++)
                     {
-                        targetFormat = BitmapFormat.A8R8G8B8;
-                        bitmap.Flags &= ~BitmapFlags.Compressed;
-                        DXTFlip = true;
+                        int destinationIndex = (int)(i * nBlockWidth + j);  // offset in terms block
+                        int destinationOffset = (int)(destinationIndex * texelPitch);
+                        uint tiledIndex = XboxGraphics.XGAddress2DTiledOffset((uint)j, (uint)i, nBlockWidth, texelPitch); // returns offset in terms of block
+                        uint tiledOffset = tiledIndex * texelPitch;
+                        Array.Copy(data, tiledOffset, result, destinationOffset, texelPitch);
                     }
-                    break;
-
-                case BitmapFormat.Ctx1:
-                    bitmap.UpdateFormat(BitmapFormat.Dxn);
-                    data = BitmapDecoder.Ctx1ToDxn(data, bitmap.NearestWidth, bitmap.NearestHeight);
-                    targetFormat = BitmapFormat.Dxn;
-                    break;
-
-                default:
-                    throw new Exception($"Unsupported bitmap format {bitmap.Format}");
+                }
+                data = result;
             }
 
-            if (targetFormat != bitmap.Format)
+            // find level size aligned to block size
+
+            int levelWidth = definition.Width >> level;
+            int levelHeight = definition.Height >> level;
+
+            if (levelWidth < 1)
+                levelWidth = 1;
+            if (levelHeight < 1)
+                levelHeight = 1;
+
+            if (levelWidth % blockWidth != 0)
+                levelWidth = (int)(levelWidth + blockWidth - levelWidth % blockWidth);
+
+            if (levelHeight % blockHeight != 0)
+                levelHeight = (int)(levelHeight + blockHeight - levelHeight % blockHeight);
+
+            byte[] finalData = new byte[levelWidth * levelHeight * bitsPerPixel >> 3];
+
+            nBlockWidth = (uint)(levelWidth / blockWidth);
+            nBlockHeight = (uint)(levelHeight / blockHeight);
+
+            uint sliceBlockWidth = alignedWidth / blockWidth;
+
+            // skip these loops if the bitmap is already the proper format
+            if (point.X != 0 || point.Y != 0 || finalData.Length != data.Length)
             {
-                data = BitmapDecoder.DecodeBitmap(data, bitmap.Format, bitmap.NearestWidth, bitmap.NearestHeight);
-                data = BitmapDecoder.EncodeBitmap(data, targetFormat, bitmap.NearestWidth, bitmap.NearestHeight);
-
-                bool reformat = false;
-
-                if (bitmap.NearestHeight != bitmap.Height || bitmap.NearestWidth != bitmap.Width)
-                    reformat = true;
-
-                if (reformat)
+                for (int i = 0; i < nBlockHeight; i++)
                 {
-                    var compressionFactor = BitmapFormatUtils.GetCompressionFactor(targetFormat);
-                    int fixedSize = (int)(bitmap.Width * bitmap.Height / compressionFactor);
-                    int tilePitch = (int)(bitmap.NearestWidth / compressionFactor);
-                    int pitch = (int)(bitmap.Width / compressionFactor);
-
-                    byte[] fixedData = new byte[fixedSize];
-                    int numberOfPass = bitmap.Height;   // encode does not give back block compressed data.
-                    for (int i = 0; i < numberOfPass; i++)  // may need to compute an offset for special bitmaps
+                    for (int j = 0; j < nBlockWidth; j++)
                     {
-                        Array.Copy(data, i * tilePitch, fixedData, i * pitch, pitch);
+                        uint offset = (uint)(((i + point.Y) * sliceBlockWidth) + j + point.X) * texelPitch;
+                        uint destOffset = (uint)((i * nBlockWidth) + j) * texelPitch;
+                        Array.Copy(data, offset, finalData, destOffset, texelPitch);
                     }
-                    data = fixedData;
                 }
-
-                bitmap.UpdateFormat(targetFormat);
-                bitmap.Data = data;
             }
-
-            bitmap.Data = data;
-
-            if (DXTFlip)
-                return false;
-
-            return true;
-        }
-
-        private static void FlipImage(BaseBitmap bitmap, Bitmap.Image image)
-        {
-            switch (image.Format)
+            else
             {
-                case BitmapFormat.Dxt1:
-                case BitmapFormat.Dxt3:
-                case BitmapFormat.Dxt5:
-                case BitmapFormat.Dxn:
-                    for (int j = 0; j < bitmap.Data.Length; j += 2)
-                        Array.Reverse(bitmap.Data, j, 2);
-                    break;
-
-                case BitmapFormat.AY8:
-                case BitmapFormat.Y8:
-                case BitmapFormat.A8:
-                case BitmapFormat.Dxt5aMono:
-                case BitmapFormat.Dxt3aMono:
-                case BitmapFormat.Dxt3aAlpha:
-                case BitmapFormat.Dxt5aAlpha:
-                case BitmapFormat.Ctx1:
-                case BitmapFormat.DxnMonoAlpha:
-                case BitmapFormat.Dxt5a:
-                case BitmapFormat.R5G6B5:
-                case BitmapFormat.A4R4G4B4:
-                    break;
-
-                case BitmapFormat.A8R8G8B8:
-                case BitmapFormat.X8R8G8B8:
-                    for (int j = 0; j < bitmap.Data.Length; j += 4)
-                        Array.Reverse(bitmap.Data, j, 4);
-                    break;
-
-                case BitmapFormat.A16B16G16R16F:
-                case BitmapFormat.A8Y8:
-                case BitmapFormat.V8U8:
-                    for (int j = 0; j < bitmap.Data.Length; j += 2)
-                        Array.Reverse(bitmap.Data, j, 2);
-                    break;
-
-                default:
-                    throw new Exception($"Unsupported format {image.Format} flipping");
+                Array.Copy(data, 0, finalData, 0, data.Length);
             }
 
-            if (bitmap.Format == BitmapFormat.Dxn)
-                bitmap.Data = BitmapDecoder.SwapXYDxn(bitmap.Data, bitmap.Width, bitmap.Height);
+            XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
 
-        }
+            uint actualWidth = (uint)definition.Width >> level;
+            uint actualHeight = (uint)definition.Height >> level;
 
-        private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)
-        {
-            int totalSize = 0;
-            foreach (var b in bitmaps)
-                totalSize += b.Data.Length;
+            if (actualWidth < 1)
+                actualWidth = 1;
+            if (actualHeight < 1)
+                actualHeight = 1;
+            bool requireDecompression = BitmapUtils.RequiresDecompression(BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format), (uint)definition.Width, (uint)definition.Height);
+            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, requireDecompression);
 
-            byte[] totalData = new byte[totalSize];
-            int currentPos = 0;
-
-            for (int i = 0; i < bitmaps.Count; i++)
-            {
-                var bitmap = bitmaps[i];
-                Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
-                currentPos += bitmap.Data.Length;
-            }
-            var finalBitmap = bitmaps[0];
-            finalBitmap.Data = totalData;
-
-            if (finalBitmap.Flags.HasFlag(BitmapFlags.Compressed) && finalBitmap.MipMapCount > 0)
-                GenerateCompressedMipMaps(finalBitmap);
-            return finalBitmap;
+            resultStream.Write(finalData, 0, finalData.Length);
         }
 
         private static void GenerateMipMaps(BaseBitmap bitmap)

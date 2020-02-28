@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen1;
+using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -34,7 +36,7 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = BaseMapFile.EndianFormat;
-            DisplayName = mapFile.Header.HaloName + ".map";
+            DisplayName = mapFile.Header.NameOld + ".map";
             Directory = file.Directory;
 
             using (var cacheStream = OpenCacheRead())
@@ -60,7 +62,7 @@ namespace TagTool.Cache
                 throw new Exception($"Try to serialize a {instance.GetType()} into a Gen 3 Game Cache");
         }
 
-        //TODO: Implement serialization for gen3
+        //TODO: Implement serialization for gen1
         public void Serialize(Stream stream, CachedTagGen1 instance, object definition)
         {
             throw new NotImplementedException();
@@ -89,7 +91,32 @@ namespace TagTool.Cache
         #endregion
 
 
-        public override Stream OpenCacheRead() => CacheFile.OpenRead();
+        public override Stream OpenCacheRead()
+        {
+            if (Version == CacheVersion.HaloXbox)
+            {
+                var resultStream = new MemoryStream();
+                using (var cacheStream = CacheFile.OpenRead())
+                using (var compressedStream = new MemoryStream())
+                using (var uncompressedStream = new MemoryStream())
+                {
+                    var compressedSize = cacheStream.Length - 0x800 - 0x2; // remove zlib header
+                    StreamUtil.Copy(cacheStream, resultStream, 0x800);
+                    cacheStream.Position = 0x800 + 0x2;
+                    StreamUtil.Copy(cacheStream, compressedStream, compressedSize);
+                    compressedStream.Position = 0;
+                    using (var decompressionStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
+                    {
+                        decompressionStream.CopyTo(uncompressedStream);
+                        uncompressedStream.Position = 0;
+                        StreamUtil.Copy(uncompressedStream, resultStream, uncompressedStream.Length);
+                    }
+                }
+                return resultStream;
+            }
+            else
+                return CacheFile.OpenRead(); 
+        }
 
         public override Stream OpenCacheReadWrite()
         {
@@ -106,18 +133,6 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-    }
-
-    public class StringTableGen1 : StringTable
-    {
-        public StringTableGen1()
-        {
-            
-        }
-        public override StringId AddString(string newString)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }

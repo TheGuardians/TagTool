@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.BlamFile;
+using TagTool.Cache.Gen3;
+using TagTool.Cache.Resources;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Cache.Gen3;
-using TagTool.BlamFile;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache
@@ -37,7 +38,18 @@ namespace TagTool.Cache
         /// </summary>
         public readonly int PageAlign = 0x800;
 
-        public uint TagAddressToOffset(uint address) => address - (BaseMapFile.Header.TagBaseAddress - BaseMapFile.Header.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)); 
+        public uint TagAddressToOffset(uint address)
+        {
+            var baseAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                BaseMapFile.Header.VirtualBaseAddress64 :
+                (ulong)BaseMapFile.Header.VirtualBaseAddress32;
+
+            var unpackedAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                (((ulong)address << 2) + 0x50000000) :
+                (ulong)address;
+
+            return (uint)(unpackedAddress - (baseAddress - (ulong)BaseMapFile.Header.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
+        }
 
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
 
@@ -62,17 +74,16 @@ namespace TagTool.Cache
                 TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3);
                 ResourceCacheGen3 = new ResourceCacheGen3(this);
 
-                if(TagCacheGen3.Tags.Count > 0)
+                if(TagCacheGen3.Instances.Count > 0)
                 {
                     if (BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
                         LocaleTables = new List<LocaleTable>();
                     else
                     {
-                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.HardcodedTags["matg"]);
+                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
                         LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
                     }
                 }
-                
             }
 
             // unused but kept for future uses

@@ -49,12 +49,13 @@ namespace TagTool.Cache
         {
             switch (buildName)
             {
-                
                 case "01.09.25.2247":
                 case "01.10.12.2276":
                     return CacheVersion.HaloXbox;
                 case "01.00.00.0564":
                     return CacheVersion.HaloPC;
+                case "01.00.00.0609":
+                    return CacheVersion.HaloCustomEdition;
                 case "02.09.27.09809":
                     return CacheVersion.Halo2Xbox;
                 case "11081.07.04.30.0934.main":
@@ -98,8 +99,14 @@ namespace TagTool.Cache
                     return CacheVersion.HaloOnline700123;
                 case "11860.10.07.24.0147.omaha_relea":
                     return CacheVersion.HaloReach;
-                //case "Jun 24 2019 00:36:03":
-                //    return CacheVersion.HaloReachMCC824;
+                case "May 29 2019 00:44:52":
+                    return CacheVersion.HaloReachMCC0824;
+                case "Jun 24 2019 00:36:03":
+                    return CacheVersion.HaloReachMCC0887;
+                case "Jul 30 2019 14:17:16":
+                    return CacheVersion.HaloReachMCC1035;
+                case "Oct 24 2019 15:56:32":
+                    return CacheVersion.HaloReachMCC1211;
                 default:
                     return CacheVersion.Unknown;
             }
@@ -114,6 +121,12 @@ namespace TagTool.Cache
         {
             switch (version)
             {
+                case CacheVersion.HaloXbox:
+                    return "01.10.12.2276";
+                case CacheVersion.HaloPC:
+                    return "01.00.00.0564";
+                case CacheVersion.HaloCustomEdition:
+                    return "01.00.00.0609";
                 case CacheVersion.Halo2Xbox:
                     return "02.09.27.09809";
                 case CacheVersion.Halo2Vista:
@@ -154,12 +167,14 @@ namespace TagTool.Cache
                     return "12.1.700123 cert_ms30_oct19";
                 case CacheVersion.HaloReach:
                     return "11860.10.07.24.0147.omaha_relea";
-                case CacheVersion.HaloReachMCC824:
+                case CacheVersion.HaloReachMCC0824:
                     return "May 29 2019 00:44:52";
-                case CacheVersion.HaloReachMCC887:
+                case CacheVersion.HaloReachMCC0887:
                     return "Jun 24 2019 00:36:03";
-                //case CacheVersion.HaloReachMCC1035:
-                //    return "Jul 30 2019 14:17:16";
+                case CacheVersion.HaloReachMCC1035:
+                    return "Jul 30 2019 14:17:16";
+                case CacheVersion.HaloReachMCC1211:
+                    return "Oct 24 2019 15:56:32";
                 default:
                     return version.ToString();
             }
@@ -178,6 +193,10 @@ namespace TagTool.Cache
 				case CacheVersion.Halo3ODST:
 				case CacheVersion.HaloReach:
 					return false;
+
+                case CacheVersion.HaloXbox:
+                case CacheVersion.HaloPC:
+                case CacheVersion.HaloCustomEdition:
 				case CacheVersion.Halo2Xbox:
 				case CacheVersion.Halo2Vista:
 				case CacheVersion.HaloOnline106708:
@@ -195,8 +214,12 @@ namespace TagTool.Cache
 				case CacheVersion.HaloOnline554482:
 				case CacheVersion.HaloOnline571627:
 				case CacheVersion.HaloOnline700123:
-                case CacheVersion.HaloReachMCC824:
+                case CacheVersion.HaloReachMCC0824:
+                case CacheVersion.HaloReachMCC0887:
+                case CacheVersion.HaloReachMCC1035:
+                case CacheVersion.HaloReachMCC1211:
                     return true;
+
 				default:
 					throw new NotImplementedException(version.ToString());
 			}
@@ -210,26 +233,23 @@ namespace TagTool.Cache
         /// <returns></returns>
         public static bool AttributeInCacheVersion(TagFieldAttribute attr, CacheVersion compare)
         {
-            if(attr.Version != CacheVersion.Unknown)
-            {
-                // has a specific version specified.
-                return attr.Version == compare;
-            }
-            else if(attr.Gen != CacheGeneration.Unknown)
-            {
-                // Has a generation specified
-                return IsInGen(attr.Gen, compare);
-            }
-            else if(attr.MinVersion != CacheVersion.Unknown || attr.MaxVersion != CacheVersion.Unknown)
-            {
-                // Has a min or a max or both specified.
-                return IsBetween(compare, attr.MinVersion, attr.MaxVersion);
-            }
-            else
-            {
-                // has no version attribute therefore it's valid in all cache versions
-                return true;
-            }
+            if (attr.Version != CacheVersion.Unknown)
+                if (attr.Version != compare)
+                    return false;
+
+            if (attr.Gen != CacheGeneration.Unknown)
+                if (!IsInGen(attr.Gen, compare))
+                    return false;
+
+            if (attr.Platform != CachePlatform.All)
+                if (!IsInPlatform(attr.Platform, compare))
+                    return false;
+
+            if (attr.MinVersion != CacheVersion.Unknown || attr.MaxVersion != CacheVersion.Unknown)
+                if (!IsBetween(compare, attr.MinVersion, attr.MaxVersion))
+                    return false;
+
+            return true;
         }
 
 		/// <summary>
@@ -255,8 +275,10 @@ namespace TagTool.Cache
         {
             if (compare == CacheVersion.Unknown)
                 return true;
+
             if (min != CacheVersion.Unknown && Compare(compare, min) < 0)
                 return false;
+
             return (max == CacheVersion.Unknown || Compare(compare, max) <= 0);
         }
 
@@ -279,26 +301,83 @@ namespace TagTool.Cache
             }
         }
 
+        public static bool IsInPlatform(CachePlatform platform, CacheVersion version)
+        {
+            if (version == CacheVersion.Unknown || platform == CachePlatform.All)
+                return true;
+
+            switch (version)
+            {
+                case CacheVersion.HaloXbox:
+                case CacheVersion.Halo2Xbox:
+                    return platform.HasFlag(CachePlatform.Xbox);
+
+                case CacheVersion.Halo3Beta:
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloReach:
+                    return platform.HasFlag(CachePlatform.Xbox360);
+
+                case CacheVersion.HaloPC:
+                case CacheVersion.HaloCustomEdition:
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.HaloOnline106708:
+                case CacheVersion.HaloOnline235640:
+                case CacheVersion.HaloOnline301003:
+                case CacheVersion.HaloOnline327043:
+                case CacheVersion.HaloOnline372731:
+                case CacheVersion.HaloOnline416097:
+                case CacheVersion.HaloOnline430475:
+                case CacheVersion.HaloOnline454665:
+                case CacheVersion.HaloOnline449175:
+                case CacheVersion.HaloOnline498295:
+                case CacheVersion.HaloOnline530605:
+                case CacheVersion.HaloOnline532911:
+                case CacheVersion.HaloOnline554482:
+                case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline700123:
+                    return platform.HasFlag(CachePlatform.PC32Bit);
+
+                case CacheVersion.HaloReachMCC0824:
+                case CacheVersion.HaloReachMCC0887:
+                case CacheVersion.HaloReachMCC1035:
+                case CacheVersion.HaloReachMCC1211:
+                    var result = platform.HasFlag(CachePlatform.PC64Bit);
+                    return result;
+
+                default:
+                    return false;
+            }
+        }
+
         /// <summary>
         /// Get CacheGeneration from CacheVersion
         /// </summary>
         /// <param name="version"></param>
         /// <returns></returns>
-        public static CacheGeneration GetGeneration(CacheVersion version)
+        public static CacheGeneration GetGeneration(this CacheVersion version)
         {
             switch (version)
             {
                 case CacheVersion.HaloXbox:
                 case CacheVersion.HaloPC:
+                case CacheVersion.HaloCustomEdition:
                     return CacheGeneration.First;
+
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
                     return CacheGeneration.Second;
+
                 case CacheVersion.Halo3Beta:
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReachMCC0824:
+                case CacheVersion.HaloReachMCC0887:
+                case CacheVersion.HaloReachMCC1035:
+                case CacheVersion.HaloReachMCC1211:
                     return CacheGeneration.Third;
+
                 case CacheVersion.HaloOnline106708:
                 case CacheVersion.HaloOnline235640:
                 case CacheVersion.HaloOnline301003:
@@ -316,9 +395,6 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline700123:
                     return CacheGeneration.HaloOnline;
 
-                case CacheVersion.HaloReachMCC824:
-                    return CacheGeneration.MCC;
-
                 default:
                     return CacheGeneration.Unknown;
             }
@@ -332,6 +408,7 @@ namespace TagTool.Cache
         {
             -1, // Halo Xbox
             -1, // Halo PC
+            -1, // Halo Custom Edition
             -1, // Halo2Xbox
             -1, // Halo2Vista
             -1, // Halo3Beta
@@ -352,10 +429,11 @@ namespace TagTool.Cache
             130879952719550501, // V11_1_554482_Live
             130881889330693956, // HaloOnline571627
             130930071628935939, // HaloOnline700123
-            -1, // HaloReach
+            -1, // HaloReachXbox360
             -1, // HaloReachMCC824
             -1, // HaloReachMCC887
-            //-1, // HaloReachMCC1035
+            -1, // HaloReachMCC1035
+            -1, // HaloReachMCC1211
         };
     }
 
@@ -364,6 +442,7 @@ namespace TagTool.Cache
         Unknown = -1,
         HaloXbox,
         HaloPC,
+        HaloCustomEdition,
         Halo2Xbox,
         Halo2Vista,
         Halo3Beta,
@@ -385,9 +464,10 @@ namespace TagTool.Cache
         HaloOnline571627,
         HaloOnline700123,
         HaloReach,
-        HaloReachMCC824,
-        HaloReachMCC887,
+        HaloReachMCC0824,
+        HaloReachMCC0887,
         HaloReachMCC1035,
+        HaloReachMCC1211
     }
 
     public enum CacheGeneration : int
@@ -396,7 +476,20 @@ namespace TagTool.Cache
         First = 1,
         Second = 2,
         Third = 3,
-        HaloOnline = 4,
-        MCC = 5
+        HaloOnline = 4
+    }
+
+    [Flags]
+    public enum CachePlatform : uint
+    {
+        Xbox = 1 << 0,
+        Xbox360 = 1 << 1,
+        PC32Bit = 1 << 2,
+        PC64Bit = 1 << 3,
+        OnlyXbox = Xbox | Xbox360,
+        OnlyPC = PC32Bit | PC64Bit,
+        Only32Bit = Xbox | Xbox360 | PC32Bit,
+        Only64Bit = PC64Bit,
+        All = Xbox | Xbox360 | PC32Bit | PC64Bit
     }
 }

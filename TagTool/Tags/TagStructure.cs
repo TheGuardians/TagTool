@@ -93,27 +93,34 @@ namespace TagTool.Tags
 
             public TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
             {
-                if (!TagStructureAttributes.TryGetValue(type, out TagStructureAttribute attribute))
-                    lock (TagStructureAttributes)
-                    {
-                        if (!TagStructureAttributes.TryGetValue(type, out attribute))
-                            TagStructureAttributes[type] = attribute = GetStructureAttribute();
-                    }
-                return attribute;
-
                 TagStructureAttribute GetStructureAttribute()
                 {
                     // First match against any TagStructureAttributes that have version restrictions
                     var attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
                         .Cast<TagStructureAttribute>()
-                        .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
+                        .Where(a => CacheVersionDetection.IsInPlatform(a.Platform, version))
                         .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
+
+                    if (attrib == null)
+                        attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
+                            .Cast<TagStructureAttribute>()
+                            .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
+                            .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
 
                     // If nothing was found, find the first attribute without any version restrictions
                     return attrib ?? type.GetCustomAttributes(typeof(TagStructureAttribute), false)
                         .Cast<TagStructureAttribute>()
                         .FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown);
                 }
+
+                if (!TagStructureAttributes.TryGetValue(type, out TagStructureAttribute attribute))
+                    lock (TagStructureAttributes)
+                    {
+                        if (!TagStructureAttributes.TryGetValue(type, out attribute))
+                            TagStructureAttributes[type] = attribute = GetStructureAttribute();
+                    }
+
+                return attribute;
             }
 
             public TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version = CacheVersion.Unknown)

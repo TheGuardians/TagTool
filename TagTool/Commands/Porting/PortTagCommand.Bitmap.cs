@@ -64,9 +64,6 @@ namespace TagTool.Commands.Porting
             if (baseBitmap == null)
                 return null;
 
-            if (baseBitmap.Type == BitmapType.Array)
-                baseBitmap.Type = BitmapType.Texture3D;
-
             BitmapUtils.SetBitmapImageData(baseBitmap, bitmap.Images[imageIndex]);
             var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(baseBitmap);
             var resourceReference = CacheContext.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);

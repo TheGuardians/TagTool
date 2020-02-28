@@ -1,6 +1,6 @@
-﻿using TagTool.Common;
+﻿using System;
+using TagTool.Common;
 using TagTool.Tags;
-using System;
 
 namespace TagTool.BlamFile
 {
@@ -21,12 +21,16 @@ namespace TagTool.BlamFile
         public byte DirtyFlag;
         public short Pad;
         public uint MapChecksum;
+
         [TagField(Length = 640)]
         public MapVariantPlacement[] Placements;
+
         [TagField(Length = 0x10)]
         public short[] ScenarioDatumIndices;
+
         [TagField(Length = 0x100)]
         public MapVariantPaletteItem[] Palette;
+
         [TagField(Length = 80)]
         public int[] SimulationEntities;
     }
@@ -181,5 +185,4 @@ namespace TagTool.BlamFile
         public float Top;
         public float Bottom;
     }
-
 }

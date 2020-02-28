@@ -129,7 +129,7 @@ namespace TagTool.Commands.RenderModels
 							try
 							{
 								uv = mesh.TextureCoordinateChannels[0][i];
-							}
+                            }
 							catch
 							{
 								Console.WriteLine($"WARNING: Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
@@ -181,7 +181,7 @@ namespace TagTool.Commands.RenderModels
 								skinnedVertices.Add(new SkinnedVertex
 								{
 									Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
-									Texcoord = new RealVector2d(uv.X, -uv.Y),
+									Texcoord = new RealVector2d(uv.X, 1.0f - uv.Y),
 									Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
 									Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
 									Binormal = new RealVector3d(bitangent.X, bitangent.Y, bitangent.Z),
@@ -194,7 +194,7 @@ namespace TagTool.Commands.RenderModels
 								rigidVertices.Add(new RigidVertex
 								{
 									Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
-									Texcoord = new RealVector2d(uv.X, -uv.Y),
+									Texcoord = new RealVector2d(uv.X, 1.0f - uv.Y),
 									Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
 									Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
 									Binormal = new RealVector3d(bitangent.X, bitangent.Y, bitangent.Z),

@@ -5,7 +5,8 @@ using System.IO;
 using TagTool.Tags;
 using System.Collections;
 using System.Collections.Generic;
-using static TagTool.Tags.TagResourceGen3;
+using static TagTool.Cache.Resources.ResourceData;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Serialization
 {
@@ -20,8 +21,8 @@ namespace TagTool.Serialization
 
         public CacheAddressType InitialAddressType { get; }
         public CacheAddress MainStructOffset;
-        public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
-        public List<D3DFixup> D3DFixups = new List<D3DFixup>();
+        public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
+        public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
 
         public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianWriter dataWriter, EndianReader secondaryDataReader, EndianWriter secondaryDataWriter, EndianReader definitionReader, EndianWriter definitionWriter, CacheAddressType initialAddressType)
         {
@@ -141,8 +142,8 @@ namespace TagTool.Serialization
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
 
-            public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
-            public List<D3DFixup> D3DFixups = new List<D3DFixup>();
+            public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
+            public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
             public CacheAddressType BlockType;
 
             public ResourceDefinitionDataBlock()

@@ -872,7 +872,7 @@ namespace TagTool.Commands.Porting
                         ConvertScriptTagReferenceExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
 
-                    case HsType.HaloOnlineValue.AiLine:
+                    case HsType.HaloOnlineValue.AiLine when BitConverter.ToInt32(expr.Data, 0) != -1:
                     case HsType.HaloOnlineValue.StringId:
                         ConvertScriptStringIdExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
@@ -1300,6 +1300,9 @@ namespace TagTool.Commands.Porting
             seatMappingExpr.Opcode = 0x00C; // -> unit_seat_mapping
             seatMappingExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.UnitSeatMapping;
             seatMappingExpr.Data = BitConverter.GetBytes((seatMappingIndex & ushort.MaxValue) | (1 << 16)).Reverse().ToArray();
+            //all four bytes need to be FF for the argument to be "none"
+            if (seatMappingStringId == StringId.Invalid)
+                seatMappingExpr.Data = BitConverter.GetBytes(-1);
         }
 
         public void AdjustScripts(Scenario scnr, string tagName)
@@ -1325,7 +1328,7 @@ namespace TagTool.Commands.Porting
                 byte.TryParse(items[4].Substring(4, 2), NumberStyles.HexNumber, null, out byte data2);
                 byte.TryParse(items[4].Substring(6, 2), NumberStyles.HexNumber, null, out byte data3);
 
-                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = new DatumIndex(NextExpressionHandle);
+                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = new DatumHandle(NextExpressionHandle);
                 scnr.ScriptExpressions[scriptIndex].Opcode = Opcode;
                 scnr.ScriptExpressions[scriptIndex].Data[0] = data0;
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;

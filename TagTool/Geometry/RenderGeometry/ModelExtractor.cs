@@ -214,7 +214,10 @@ namespace TagTool.Geometry
                     mesh.Normals.Add(vertex.Normal);
 
                 if (vertex.TexCoords != null)
+                {
                     mesh.TextureCoordinateChannels[textureCoordinateIndex].Add(vertex.TexCoords);
+                }
+                    
 
                 if (vertex.Tangents != null)
                     mesh.Tangents.Add(vertex.Tangents);
@@ -228,9 +231,9 @@ namespace TagTool.Geometry
                     {
                         var index = vertex.Indices[j];
                         var bone = mesh.Bones[index];
-                        Matrix4x4 inverseTransform = new Matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+                        Matrix4x4 inverseTransform = Matrix4x4.Identity;
 
-
+                        
                         var currentNode = BoneNodes[index];
                         while (currentNode!=null)
                         {
@@ -427,7 +430,7 @@ namespace TagTool.Geometry
             foreach (var vertex in vertices)
             {
                 vertex.Position = ToVector3D(compressor.DecompressPosition(new RealQuaternion(vertex.Position.X, vertex.Position.Y, vertex.Position.Z, 1)));
-                vertex.TexCoords = ToVector3D(compressor.DecompressUv(new RealVector2d(vertex.TexCoords.X, vertex.TexCoords.Y)));
+                vertex.TexCoords = ToVector3D(compressor.DecompressUv(new RealVector2d(vertex.TexCoords.X, 1.0f - vertex.TexCoords.Y)));
             }
         }
 

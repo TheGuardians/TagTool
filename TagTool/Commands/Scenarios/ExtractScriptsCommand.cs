@@ -1,5 +1,6 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
+using TagTool.IO;
 using TagTool.Scripting;
 using TagTool.Tags.Definitions;
 using System;
@@ -43,52 +44,52 @@ namespace TagTool.Commands.Scenarios
         {
             string result = "unk_op";
 
-            if (ScriptInfo.Scripts[CacheVersion.Halo3ODST].ContainsKey(Opcode))
-                result = ScriptInfo.Scripts[CacheVersion.Halo3ODST][Opcode].Name;
+            if (ScriptInfo.Scripts[Cache.Version].ContainsKey(Opcode))
+                result = ScriptInfo.Scripts[Cache.Version][Opcode].Name;
 
             return result;
         }
 
         private void WriteValueExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
         {
-            var valueType = (HsType.Halo3ODSTValue)Enum.Parse(typeof(HsType.Halo3ODSTValue), expr.ValueType.HaloOnline.ToString());
+            var valueType = GetHsTypeAsString(Cache.Version, expr.ValueType);
 
             switch (valueType)
             {
-                case HsType.Halo3ODSTValue.FunctionName:
+                case "FunctionName":
                     scriptWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress)); 
                     break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
-                case HsType.Halo3ODSTValue.Boolean:
+                case "Boolean":
                     scriptWriter.Write(expr.Data[0] == 0 ? "false" : "true");
                     break;
 
-                case HsType.Halo3ODSTValue.Real:
-                    scriptWriter.Write(BitConverter.ToSingle(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0));
+                case "Real":
+                    scriptWriter.Write(BitConverter.ToSingle(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
                     break;
 
-                case HsType.Halo3ODSTValue.Short:
-                    scriptWriter.Write(BitConverter.ToInt16(new[] { expr.Data[0], expr.Data[1], }, 0));
+                case "Short":
+                    scriptWriter.Write(BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0));
                     break;
 
-                case HsType.Halo3ODSTValue.Long:
-                    scriptWriter.Write(BitConverter.ToInt32(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0));
+                case "Long":
+                    scriptWriter.Write(BitConverter.ToInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
                     break;
 
-                case HsType.Halo3ODSTValue.String:
+                case "String":
                     scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
-                case HsType.Halo3ODSTValue.Script:
-                    scriptWriter.Write(Definition.Scripts[BitConverter.ToInt16(new[] { expr.Data[0], expr.Data[1] }, 0)].ScriptName);
+                case "Script":
+                    scriptWriter.Write(Definition.Scripts[BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0)].ScriptName);
                     break;
 
-                case HsType.Halo3ODSTValue.StringId:
-                    scriptWriter.Write(Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0))));
+                case "StringId":
+                    scriptWriter.Write(Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0))));
                     break;
 
-                case HsType.Halo3ODSTValue.GameDifficulty:
-                    switch (BitConverter.ToInt16(new[] { expr.Data[0], expr.Data[1] }, 0))
+                case "GameDifficulty":
+                    switch (BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0))
                     {
                         case 0: scriptWriter.Write("easy"); break;
                         case 1: scriptWriter.Write("normal"); break;
@@ -98,18 +99,18 @@ namespace TagTool.Commands.Scenarios
                     }
                     break;
 
-                case HsType.Halo3ODSTValue.Object:
-                case HsType.Halo3ODSTValue.Device:
-                case HsType.Halo3ODSTValue.CutsceneCameraPoint:
-                case HsType.Halo3ODSTValue.TriggerVolume:
-                case HsType.Halo3ODSTValue.UnitSeatMapping:
-                case HsType.Halo3ODSTValue.Vehicle:
-                case HsType.Halo3ODSTValue.VehicleName:
+                case "Object":
+                case "Device":
+                case "CutsceneCameraPoint":
+                case "TriggerVolume":
+                case "UnitSeatMapping":
+                case "Vehicle":
+                case "VehicleName":
                     scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
                 default:
-                    scriptWriter.Write($"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {expr.ValueType.ToString()}>");
+                    scriptWriter.Write($"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {valueType}>");
                     break;
             }
         }
@@ -118,11 +119,11 @@ namespace TagTool.Commands.Scenarios
         {
             scriptWriter.Write('(');
 
-            for (var exprIndex = Definition.ScriptExpressions.IndexOf(expr) + 1; Definition.ScriptExpressions[exprIndex].ValueType.HaloOnline != HsType.HaloOnlineValue.Invalid; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
+            for (var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr) + 1); GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[exprIndex].ValueType) != "Invalid"; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
             {
                 WriteExpression(Definition.ScriptExpressions[exprIndex], stringReader, scriptWriter);
 
-                if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue)
+                if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue || Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index + 1 > Definition.ScriptExpressions.Count)
                     break;
 
                 scriptWriter.Write(' ');
@@ -149,7 +150,7 @@ namespace TagTool.Commands.Scenarios
                     break;
 
                 default:
-                    scriptWriter.Write($"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {expr.ValueType.ToString()}>");
+                    scriptWriter.Write($"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {GetHsTypeAsString(Cache.Version, expr.ValueType)}>");
                     break;
             }
         }
@@ -172,7 +173,7 @@ namespace TagTool.Commands.Scenarios
 
                 foreach (var scriptGlobal in Definition.Globals)
                 {
-                    scriptWriter.Write($"(global {scriptGlobal.Type.ToString().ToSnakeCase()} {scriptGlobal.Name} ");
+                    scriptWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToSnakeCase()} {scriptGlobal.Name} ");
 
                     WriteExpression(Definition.ScriptExpressions[scriptGlobal.InitializationExpressionHandle.Index], scriptStringReader, scriptWriter);
 
@@ -187,7 +188,7 @@ namespace TagTool.Commands.Scenarios
 
                 foreach (var script in Definition.Scripts)
                 {
-                    scriptWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {script.ReturnType.HaloOnline.ToString().ToSnakeCase()} ");
+                    scriptWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
 
                     if (script.Parameters.Count == 0)
                     {
@@ -199,7 +200,7 @@ namespace TagTool.Commands.Scenarios
 
                         foreach (var parameter in script.Parameters)
                         {
-                            scriptWriter.Write($" ({parameter.Type.ToString().ToSnakeCase()} {parameter.Name})");
+                            scriptWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
                         }
 
                         scriptWriter.WriteLine(')');
@@ -214,6 +215,41 @@ namespace TagTool.Commands.Scenarios
             }
 
             return true;
+        }
+
+        private string GetHsTypeAsString(CacheVersion version, HsType type)
+        {
+            switch (version)
+            {
+                case CacheVersion.Halo3Retail:
+                    return type.Halo3Retail.ToString();
+
+                case CacheVersion.Halo3ODST:
+                    return type.Halo3ODST.ToString();
+
+                case CacheVersion.HaloOnline106708:
+                    return type.HaloOnline.ToString();
+
+                default:
+                    Console.WriteLine($"WARNING: No HsType found for cache \"{version}\". Defaulting to HaloOnline");
+                    return type.HaloOnline.ToString();
+            }
+        }
+
+        private byte[] SortExpressionDataArray(EndianFormat format, byte[] data, int dataLength)
+        {
+            if (format == EndianFormat.BigEndian)
+            {
+                byte[] newData = new byte[dataLength];
+
+                // reverse the data array, but only to the specified length
+                for (int i = 0; i < dataLength; i++)
+                    newData[i] = data[(dataLength - 1) - i];
+
+                return newData;
+            }
+
+            return data;
         }
     }
 }

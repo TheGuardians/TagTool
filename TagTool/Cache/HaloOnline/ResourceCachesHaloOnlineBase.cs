@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -204,14 +204,14 @@ namespace TagTool.Cache.HaloOnline
             return true;
         }
 
-        private void ApplyResourceDefinitionFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData)
+        private void ApplyResourceDefinitionFixups(ResourceData tagResource, byte[] resourceDefinitionData)
         {
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
             using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.LittleEndian))
             {
-                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                for (int i = 0; i < tagResource.FixupLocations.Count; i++)
                 {
-                    var fixup = tagResource.ResourceFixups[i];
+                    var fixup = tagResource.FixupLocations[i];
                     fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
                     fixupWriter.Write(fixup.Address.Value);
                 }
@@ -310,8 +310,8 @@ namespace TagTool.Cache.HaloOnline
             var resourceReference = new TagResourceReference();
             var pageableResource = new PageableResource();
 
-            pageableResource.Page = new RawPage();
-            pageableResource.Resource = new TagResourceGen3();
+            pageableResource.Page = new ResourcePage();
+            pageableResource.Resource = new ResourceData();
             pageableResource.ChangeLocation(location);
             pageableResource.Resource.Unknown2 = 1;
             pageableResource.Resource.ResourceType = resourceType;
@@ -339,9 +339,9 @@ namespace TagTool.Cache.HaloOnline
 
                 // add resource definition and fixups
                 pageableResource.Resource.DefinitionData = definitionData;
-                pageableResource.Resource.ResourceFixups = context.ResourceFixups;
+                pageableResource.Resource.FixupLocations = context.FixupLocations;
                 pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
-                pageableResource.Resource.D3DFixups = context.D3DFixups;
+                pageableResource.Resource.InteropLocations = context.InteropLocations;
             }
             return resourceReference;
         }

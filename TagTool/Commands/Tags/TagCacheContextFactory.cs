@@ -7,6 +7,9 @@ using TagTool.Commands.Strings;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Porting;
 using TagTool.Commands.Modding;
+using TagTool.Commands.Bitmaps;
+using TagTool.Commands.PhysicsModels;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Commands.Tags
 {
@@ -24,6 +27,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new TestCommand(cache));
 
             context.AddCommand(new DumpLogCommand());
+            context.AddCommand(new RunCommands(contextStack));
             context.AddCommand(new ClearCommand());
             context.AddCommand(new EchoCommand());
             context.AddCommand(new HelpCommand(contextStack));
@@ -42,6 +46,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
             context.AddCommand(new ListUnnamedTagsCommand(cache));
+            context.AddCommand(new ExtractBitmapsCommand(cache));
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)
@@ -64,11 +69,15 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ApplyModPackageCommand(hoCache));
                 context.AddCommand(new CreateCharacterType(cache));
                 context.AddCommand(new ExportModPackageCommand(hoCache));
+
+                context.AddCommand(new UpdateMapFilesCommand(cache));
+
+                context.AddCommand(new PhysicsModelTestCommand(cache));
+                context.AddCommand(new CollisionModelTestCommand(hoCache));
             }
 
             // porting related
             context.AddCommand(new UseAudioCacheCommand());
-            context.AddCommand(new UpdateMapFilesCommand(cache));
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
         }
     }

@@ -21,14 +21,14 @@ namespace Sentinel.Controls
     public partial class StructMultiControl : UserControl, IFieldControl
     {
         public GameCache Cache { get; } = null;
-        public CachedTag Tag { get; } = null;
+        public CachedTag Instance { get; } = null;
         public object Definition { get; } = null;
         public bool Loading { get; private set; } = false;
         
         public CacheForm Form { get; } = null;
         public Dictionary<string, IFieldControl> FieldControls { get; set; } = new Dictionary<string, IFieldControl>();
 
-        public string TagName => Tag.Name;
+        public string TagName => Instance.Name;
 
         public StructMultiControl()
         {
@@ -40,7 +40,7 @@ namespace Sentinel.Controls
         {
             Form = form;
             Cache = cache;
-            Tag = tag;
+            Instance = tag;
             Definition = definition;
         }
 

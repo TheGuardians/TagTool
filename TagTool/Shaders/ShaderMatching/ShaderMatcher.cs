@@ -340,9 +340,18 @@ namespace TagTool.Shaders.ShaderMatching
             return CacheContext.TagCache.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
         }
 
-        public RenderMethod.ShaderProperty.Argument DefaultArgumentsValues(string arg)
+        public uint DefaultIntegerArgumentsValues(string arg)
         {
-            var res = new RenderMethod.ShaderProperty.Argument();
+            switch(arg)
+            {
+                case "layers_of_4": return 4;
+                default: return 0;
+            }
+        }
+
+        public RenderMethod.ShaderProperty.RealConstant DefaultArgumentsValues(string arg)
+        {
+            var res = new RenderMethod.ShaderProperty.RealConstant();
             var val = new float[4];
             switch (arg)
             {

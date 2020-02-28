@@ -247,7 +247,7 @@ namespace TagTool.Tags.Definitions
             public int Unknown20;
             public int MipMapOffset;
             public int Unknown28;
-            public int Unknown2C;
+            public int RuntimeAddress;
         }
 
     }

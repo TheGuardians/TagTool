@@ -27,7 +27,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             commandContext.AddCommand(new ExtractCollisionGeometryCommand(cache, bsp));
             commandContext.AddCommand(new ExtractPathfindingGeometryCommand(cache, bsp));
             commandContext.AddCommand(new ExtractRenderGeometryCommand(cache, bsp));
-            
         }
     }
 }

@@ -12,6 +12,7 @@ using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Commands.Modding
 {

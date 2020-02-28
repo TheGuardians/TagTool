@@ -10,7 +10,7 @@ namespace TagTool.Tags
         /// ID is an index in ResourceGestalt.TagResources
         /// </summary>
         [TagField(Gen = CacheGeneration.Third)]
-        public DatumIndex Gen3ResourceID;
+        public DatumHandle Gen3ResourceID;
 
         /// <summary>
         /// PageableResource structure (as a pointer)

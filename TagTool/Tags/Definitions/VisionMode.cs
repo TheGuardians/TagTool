@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
     public class VisionMode : TagStructure
     {
-        public sbyte Unknown;
+        public sbyte Unknown1;
         public sbyte Unknown2;
         public sbyte Flags;
         public sbyte Unknown3;
@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public RenderDataBlock ChildRenderData;
         public RenderDataBlock TheaterRenderData;
 
-        public CachedTag Unknown4;
+        public CachedTag AnimationSound;
 
         public OutlineDataBlock WeaponOutlineData;
         public OutlineDataBlock AllyOutlineData;

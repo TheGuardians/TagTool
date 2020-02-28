@@ -354,7 +354,7 @@ namespace TagTool.Scripting.Compiler
                 ScriptName = scriptName,
                 Type = scriptType,
                 ReturnType = scriptReturnType,
-                RootExpressionHandle = DatumIndex.None,
+                RootExpressionHandle = DatumHandle.None,
                 Parameters = scriptParams
             };
 
@@ -548,7 +548,7 @@ namespace TagTool.Scripting.Compiler
             CurrentScript = null;
         }
 
-        private DatumIndex CompileExpression(HsType.Halo3ODSTValue type, IScriptSyntax node)
+        private DatumHandle CompileExpression(HsType.Halo3ODSTValue type, IScriptSyntax node)
         {
             if (node is ScriptGroup group)
                 return CompileGroupExpression(type, group);
@@ -1059,7 +1059,7 @@ namespace TagTool.Scripting.Compiler
             throw new NotImplementedException(type.ToString());
         }
 
-        private DatumIndex AllocateExpression(HsType.Halo3ODSTValue valueType, HsSyntaxNodeFlags expressionType, ushort? opcode = null, short? line = null)
+        private DatumHandle AllocateExpression(HsType.Halo3ODSTValue valueType, HsSyntaxNodeFlags expressionType, ushort? opcode = null, short? line = null)
         {
             ushort identifier = NextIdentifier;
 
@@ -1076,7 +1076,7 @@ namespace TagTool.Scripting.Compiler
                 Opcode = opcode ?? (ushort)valueType,
                 ValueType = new HsType { Halo3ODST = valueType },
                 Flags = expressionType,
-                NextExpressionHandle = DatumIndex.None,
+                NextExpressionHandle = DatumHandle.None,
                 StringAddress = stringAddress,
                 Data = BitConverter.GetBytes(-1),
                 LineNumber = line.HasValue ? line.Value : (short)-1
@@ -1090,10 +1090,10 @@ namespace TagTool.Scripting.Compiler
 
             ScriptExpressions.Add(expression);
 
-            return new DatumIndex(identifier, (ushort)ScriptExpressions.IndexOf(expression));
+            return new DatumHandle(identifier, (ushort)ScriptExpressions.IndexOf(expression));
         }
 
-        private DatumIndex CompileGroupExpression(HsType.Halo3ODSTValue type, ScriptGroup group)
+        private DatumHandle CompileGroupExpression(HsType.Halo3ODSTValue type, ScriptGroup group)
         {
             if (!(group.Head is ScriptSymbol functionNameSymbol))
                 throw new FormatException(group.Head.ToString());
@@ -1112,7 +1112,7 @@ namespace TagTool.Scripting.Compiler
                     {
                         var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
-                        var firstHandle = DatumIndex.None;
+                        var firstHandle = DatumHandle.None;
                         HsSyntaxNode prevExpr = null;
 
                         for (IScriptSyntax current = group.Tail;
@@ -1121,7 +1121,7 @@ namespace TagTool.Scripting.Compiler
                         {
                             var currentHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, currentGroup.Head);
 
-                            if (firstHandle == DatumIndex.None)
+                            if (firstHandle == DatumHandle.None)
                                 firstHandle = currentHandle;
 
                             if (prevExpr != null)
@@ -1350,7 +1350,7 @@ namespace TagTool.Scripting.Compiler
                             if (!(currentGroup.Tail is ScriptGroup) && !(currentGroup.Tail is ScriptInvalid))
                                 throw new FormatException(group.ToString());
 
-                            var currentHandle = DatumIndex.None;
+                            var currentHandle = DatumHandle.None;
 
                             switch (currentGroup.Head)
                             {
@@ -1638,7 +1638,7 @@ namespace TagTool.Scripting.Compiler
             throw new KeyNotFoundException(functionNameSymbol.Value);
         }
 
-        private DatumIndex CompileGlobalReference(ScriptSymbol symbol, HsGlobal global)
+        private DatumHandle CompileGlobalReference(ScriptSymbol symbol, HsGlobal global)
         {
             var handle = AllocateExpression(global.Type.Halo3ODST, HsSyntaxNodeFlags.GlobalsReference, line: (short)symbol.Line);
 
@@ -1649,7 +1649,7 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileGlobalReference(ScriptSymbol symbol, HsType.Halo3ODSTValue type, string name, ushort opcode)
+        private DatumHandle CompileGlobalReference(ScriptSymbol symbol, HsType.Halo3ODSTValue type, string name, ushort opcode)
         {
             var handle = AllocateExpression(type, HsSyntaxNodeFlags.GlobalsReference, line: (short)symbol.Line);
 
@@ -1660,7 +1660,7 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileParameterReference(ScriptSymbol symbol, HsScriptParameter parameter)
+        private DatumHandle CompileParameterReference(ScriptSymbol symbol, HsScriptParameter parameter)
         {
             var handle = AllocateExpression(parameter.Type.Halo3ODST, HsSyntaxNodeFlags.ParameterReference, line: (short)symbol.Line);
 
@@ -1671,11 +1671,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileBooleanExpression(ScriptBoolean boolValue)
+        private DatumHandle CompileBooleanExpression(ScriptBoolean boolValue)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Boolean, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)boolValue.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(boolValue.Value.ToString().ToLower());
@@ -1685,41 +1685,41 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileRealExpression(ScriptReal realValue)
+        private DatumHandle CompileRealExpression(ScriptReal realValue)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Real, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)realValue.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
                 Array.Copy(BitConverter.GetBytes((float)realValue.Value), ScriptExpressions[handle.Index].Data, 4);
 
             return handle;
         }
 
-        private DatumIndex CompileShortExpression(ScriptInteger shortValue)
+        private DatumHandle CompileShortExpression(ScriptInteger shortValue)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Short, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)shortValue.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
                 Array.Copy(BitConverter.GetBytes((short)shortValue.Value), ScriptExpressions[handle.Index].Data, 2);
 
             return handle;
         }
 
-        private DatumIndex CompileLongExpression(ScriptInteger longValue)
+        private DatumHandle CompileLongExpression(ScriptInteger longValue)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Long, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)longValue.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
                 Array.Copy(BitConverter.GetBytes((int)longValue.Value), ScriptExpressions[handle.Index].Data, 4);
 
             return handle;
         }
 
-        private DatumIndex CompileStringExpression(ScriptString stringValue)
+        private DatumHandle CompileStringExpression(ScriptString stringValue)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.String, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)stringValue.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(stringValue.Value);
@@ -1729,11 +1729,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileScriptExpression(ScriptSymbol scriptSymbol)
+        private DatumHandle CompileScriptExpression(ScriptSymbol scriptSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Script, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)scriptSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var scriptIndex = Scripts.FindIndex(s => s.ScriptName == scriptSymbol.Value);
 
@@ -1748,11 +1748,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileStringIdExpression(ScriptString stringIdString)
+        private DatumHandle CompileStringIdExpression(ScriptString stringIdString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.StringId, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)stringIdString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var stringId = Cache.StringTable.GetStringId(stringIdString.Value);
 
@@ -1764,11 +1764,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileUnitSeatMappingExpression(ScriptString unitSeatMappingString)
+        private DatumHandle CompileUnitSeatMappingExpression(ScriptString unitSeatMappingString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitSeatMapping, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)unitSeatMappingString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(unitSeatMappingString.Value);
 
@@ -1782,11 +1782,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileTriggerVolumeExpression(ScriptString triggerVolumeString)
+        private DatumHandle CompileTriggerVolumeExpression(ScriptString triggerVolumeString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.TriggerVolume, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)triggerVolumeString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeString.Value == Cache.StringTable.GetString(tv.Name));
 
@@ -1801,11 +1801,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCutsceneFlagExpression(ScriptString cutsceneFlagString)
+        private DatumHandle CompileCutsceneFlagExpression(ScriptString cutsceneFlagString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneFlag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneFlagString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagString.Value == Cache.StringTable.GetString(cf.Name));
 
@@ -1820,11 +1820,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCutsceneCameraPointExpression(ScriptString cutsceneCameraPointString)
+        private DatumHandle CompileCutsceneCameraPointExpression(ScriptString cutsceneCameraPointString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneCameraPoint, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneCameraPointString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var cutsceneCameraPointIndex = Definition.CutsceneCameraPoints.FindIndex(ccp => cutsceneCameraPointString.Value == ccp.Name);
 
@@ -1839,11 +1839,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleSymbol)
+        private DatumHandle CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneTitle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneTitleSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var cutsceneTitleIndex = Definition.CutsceneTitles.FindIndex(ct => cutsceneTitleSymbol.Value == Cache.StringTable.GetString(ct.Name));
 
@@ -1858,14 +1858,14 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingString) =>
+        private DatumHandle CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileDeviceGroupExpression(ScriptString deviceGroupString)
+        private DatumHandle CompileDeviceGroupExpression(ScriptString deviceGroupString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.DeviceGroup, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)deviceGroupString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var deviceGroupIndex = Definition.DeviceGroups.FindIndex(dg => dg.Name == deviceGroupString.Value);
 
@@ -1880,11 +1880,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAiExpression(ScriptString aiString)
+        private DatumHandle CompileAiExpression(ScriptString aiString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Ai, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)aiString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var tokens = aiString.Value.Split('/');
                 var value = 0;
@@ -2006,26 +2006,26 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAiCommandListExpression(ScriptString aiCommandListString) =>
+        private DatumHandle CompileAiCommandListExpression(ScriptString aiCommandListString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileAiCommandScriptExpression(ScriptString aiCommandScriptString) =>
+        private DatumHandle CompileAiCommandScriptExpression(ScriptString aiCommandScriptString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileAiBehaviorExpression(ScriptString aiBehaviorString) =>
+        private DatumHandle CompileAiBehaviorExpression(ScriptString aiBehaviorString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileAiOrdersExpression(ScriptString aiOrdersString) =>
+        private DatumHandle CompileAiOrdersExpression(ScriptString aiOrdersString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileAiLineExpression(ScriptString aiLineString) =>
+        private DatumHandle CompileAiLineExpression(ScriptString aiLineString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileStartingProfileExpression(ScriptString startingProfileString)
+        private DatumHandle CompileStartingProfileExpression(ScriptString startingProfileString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.StartingProfile, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)startingProfileString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var startingProfileIndex = Definition.PlayerStartingProfile.FindIndex(sp => sp.Name == startingProfileString.Value);
 
@@ -2040,14 +2040,14 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileConversationExpression(ScriptString conversationString) =>
+        private DatumHandle CompileConversationExpression(ScriptString conversationString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileZoneSetExpression(ScriptString zoneSetString)
+        private DatumHandle CompileZoneSetExpression(ScriptString zoneSetString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ZoneSet, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)zoneSetString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var zoneSetIndex = Definition.ZoneSets.FindIndex(zs => zoneSetString.Value == Cache.StringTable.GetString(zs.Name));
 
@@ -2062,11 +2062,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileDesignerZoneExpression(ScriptString designerZoneString)
+        private DatumHandle CompileDesignerZoneExpression(ScriptString designerZoneString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ZoneSet, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)designerZoneString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var designerZoneIndex = Definition.DesignerZoneSets.FindIndex(dz => designerZoneString.Value == Cache.StringTable.GetString(dz.Name));
 
@@ -2081,11 +2081,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompilePointReferenceExpression(ScriptString pointReferenceString)
+        private DatumHandle CompilePointReferenceExpression(ScriptString pointReferenceString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.PointReference, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)pointReferenceString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var tokens = pointReferenceString.Value.Split('/');
 
@@ -2110,17 +2110,17 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileStyleExpression(ScriptString styleString) =>
+        private DatumHandle CompileStyleExpression(ScriptString styleString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileObjectListExpression(ScriptString objectListString) =>
+        private DatumHandle CompileObjectListExpression(ScriptString objectListString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileFolderExpression(ScriptString folderString)
+        private DatumHandle CompileFolderExpression(ScriptString folderString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Folder, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)folderString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var folderIndex = folderString.Value == "none" ? -1 : Definition.EditorFolders.FindIndex(ef => ef.Name == folderString.Value);
 
@@ -2135,11 +2135,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileSoundExpression(ScriptString soundString)
+        private DatumHandle CompileSoundExpression(ScriptString soundString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Sound, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)soundString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<Sound>(soundString.Value, out var instance))
                     throw new FormatException(soundString.Value);
@@ -2152,11 +2152,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileEffectExpression(ScriptString effectString)
+        private DatumHandle CompileEffectExpression(ScriptString effectString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Effect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)effectString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<Effect>(effectString.Value, out var instance))
                     throw new FormatException(effectString.Value);
@@ -2169,11 +2169,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileDamageExpression(ScriptString damageString)
+        private DatumHandle CompileDamageExpression(ScriptString damageString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Damage, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)damageString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<DamageEffect>(damageString.Value, out var instance))
                     throw new FormatException(damageString.Value);
@@ -2186,11 +2186,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileLoopingSoundExpression(ScriptString loopingSoundString)
+        private DatumHandle CompileLoopingSoundExpression(ScriptString loopingSoundString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.LoopingSound, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)loopingSoundString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
                     throw new FormatException(loopingSoundString.Value);
@@ -2203,11 +2203,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAnimationGraphExpression(ScriptString animationGraphString)
+        private DatumHandle CompileAnimationGraphExpression(ScriptString animationGraphString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.AnimationGraph, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)animationGraphString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
                     throw new FormatException(animationGraphString.Value);
@@ -2220,11 +2220,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileDamageEffectExpression(ScriptString damageEffectString)
+        private DatumHandle CompileDamageEffectExpression(ScriptString damageEffectString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.DamageEffect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)damageEffectString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
                     throw new FormatException(damageEffectString.Value);
@@ -2237,11 +2237,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileObjectDefinitionExpression(ScriptString objectDefinitionString)
+        private DatumHandle CompileObjectDefinitionExpression(ScriptString objectDefinitionString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ObjectDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectDefinitionString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag(objectDefinitionString.Value, out var instance) ||
                     !instance.IsInGroup("obje"))
@@ -2257,11 +2257,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileBitmapExpression(ScriptString bitmapString)
+        private DatumHandle CompileBitmapExpression(ScriptString bitmapString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Bitmap, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)bitmapString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
                     throw new FormatException(bitmapString.Value);
@@ -2274,11 +2274,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileShaderExpression(ScriptString shaderString)
+        private DatumHandle CompileShaderExpression(ScriptString shaderString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Shader, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)shaderString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
                     throw new FormatException(shaderString.Value);
@@ -2291,11 +2291,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileRenderModelExpression(ScriptString renderModelString)
+        private DatumHandle CompileRenderModelExpression(ScriptString renderModelString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.RenderModel, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)renderModelString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
                 {
@@ -2310,11 +2310,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileStructureDefinitionExpression(ScriptString structureDefinitionString)
+        private DatumHandle CompileStructureDefinitionExpression(ScriptString structureDefinitionString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.StructureDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)structureDefinitionString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
                     throw new FormatException(structureDefinitionString.Value);
@@ -2327,14 +2327,14 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileLightmapDefinitionExpression(ScriptString lightmapDefinitionString) =>
+        private DatumHandle CompileLightmapDefinitionExpression(ScriptString lightmapDefinitionString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileCinematicDefinitionExpression(ScriptString cinematicDefinitionString)
+        private DatumHandle CompileCinematicDefinitionExpression(ScriptString cinematicDefinitionString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cinematicDefinitionString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicDefinitionString.Value);
@@ -2347,11 +2347,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCinematicSceneDefinitionExpression(ScriptString cinematicSceneDefinitionString)
+        private DatumHandle CompileCinematicSceneDefinitionExpression(ScriptString cinematicSceneDefinitionString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicSceneDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cinematicSceneDefinitionString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicSceneDefinitionString.Value);
@@ -2364,11 +2364,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileBinkDefinitionExpression(ScriptString binkDefinitionString)
+        private DatumHandle CompileBinkDefinitionExpression(ScriptString binkDefinitionString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.BinkDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)binkDefinitionString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
                     throw new FormatException(binkDefinitionString.Value);
@@ -2381,11 +2381,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAnyTagExpression(ScriptString anyTagString)
+        private DatumHandle CompileAnyTagExpression(ScriptString anyTagString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.AnyTag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)anyTagString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag(anyTagString.Value, out var instance))
                     throw new FormatException(anyTagString.Value);
@@ -2398,11 +2398,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAnyTagNotResolvingExpression(ScriptString anyTagNotResolvingString)
+        private DatumHandle CompileAnyTagNotResolvingExpression(ScriptString anyTagNotResolvingString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.AnyTagNotResolving, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)anyTagNotResolvingString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Cache.TryGetTag(anyTagNotResolvingString.Value, out var instance))
                     throw new FormatException(anyTagNotResolvingString.Value);
@@ -2415,11 +2415,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol)
+        private DatumHandle CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.GameDifficulty, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)gameDifficultySymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameDifficulty>(gameDifficultySymbol.Value, true, out var difficulty))
                     throw new FormatException(gameDifficultySymbol.Value);
@@ -2432,11 +2432,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileTeamExpression(ScriptSymbol teamSymbol)
+        private DatumHandle CompileTeamExpression(ScriptSymbol teamSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Team, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)teamSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameTeam>(teamSymbol.Value, true, out var team))
                     throw new FormatException(teamSymbol.Value);
@@ -2449,11 +2449,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileMpTeamExpression(ScriptSymbol mpTeamSymbol)
+        private DatumHandle CompileMpTeamExpression(ScriptSymbol mpTeamSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.MpTeam, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)mpTeamSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameMultiplayerTeam>(mpTeamSymbol.Value, true, out var mpTeam))
                     throw new FormatException(mpTeamSymbol.Value);
@@ -2466,11 +2466,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileControllerExpression(ScriptSymbol controllerSymbol)
+        private DatumHandle CompileControllerExpression(ScriptSymbol controllerSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Controller, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)controllerSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameController>(controllerSymbol.Value, true, out var controller))
                     throw new FormatException(controllerSymbol.Value);
@@ -2483,11 +2483,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileButtonPresetExpression(ScriptSymbol buttonPresetSymbol)
+        private DatumHandle CompileButtonPresetExpression(ScriptSymbol buttonPresetSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ButtonPreset, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)buttonPresetSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameControllerButtonPreset>(buttonPresetSymbol.Value, true, out var buttonPreset))
                     throw new FormatException(buttonPresetSymbol.Value);
@@ -2500,11 +2500,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileJoystickPresetExpression(ScriptSymbol joystickPresetSymbol)
+        private DatumHandle CompileJoystickPresetExpression(ScriptSymbol joystickPresetSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.JoystickPreset, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)joystickPresetSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameControllerJoystickPreset>(joystickPresetSymbol.Value, true, out var joystickPreset))
                     throw new FormatException(joystickPresetSymbol.Value);
@@ -2517,14 +2517,14 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompilePlayerColorExpression(ScriptSymbol playerColorSymbol) =>
+        private DatumHandle CompilePlayerColorExpression(ScriptSymbol playerColorSymbol) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompilePlayerCharacterTypeExpression(ScriptSymbol playerCharacterTypeSymbol)
+        private DatumHandle CompilePlayerCharacterTypeExpression(ScriptSymbol playerCharacterTypeSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.PlayerCharacterType, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)playerCharacterTypeSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GamePlayerCharacterType>(playerCharacterTypeSymbol.Value, true, out var playerCharacterType))
                     throw new FormatException(playerCharacterTypeSymbol.Value);
@@ -2537,11 +2537,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileVoiceOutputSettingExpression(ScriptSymbol voiceOutputSettingSymbol)
+        private DatumHandle CompileVoiceOutputSettingExpression(ScriptSymbol voiceOutputSettingSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.VoiceOutputSetting, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)voiceOutputSettingSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameVoiceOutputSetting>(voiceOutputSettingSymbol.Value, true, out var voiceOutputSetting))
                     throw new FormatException(voiceOutputSettingSymbol.Value);
@@ -2554,11 +2554,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileVoiceMaskExpression(ScriptSymbol voiceMaskSymbol)
+        private DatumHandle CompileVoiceMaskExpression(ScriptSymbol voiceMaskSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.VoiceMask, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)voiceMaskSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameVoiceMask>(voiceMaskSymbol.Value, true, out var voiceMask))
                     throw new FormatException(voiceMaskSymbol.Value);
@@ -2571,11 +2571,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileSubtitleSettingExpression(ScriptSymbol subtitleSettingSymbol)
+        private DatumHandle CompileSubtitleSettingExpression(ScriptSymbol subtitleSettingSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.SubtitleSetting, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)subtitleSettingSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameSubtitleSetting>(subtitleSettingSymbol.Value, true, out var subtitleSetting))
                     throw new FormatException(subtitleSettingSymbol.Value);
@@ -2588,11 +2588,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileActorTypeExpression(ScriptSymbol actorTypeSymbol)
+        private DatumHandle CompileActorTypeExpression(ScriptSymbol actorTypeSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ActorType, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)actorTypeSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<AiActorType>(actorTypeSymbol.Value, true, out var actorType))
                     throw new FormatException(actorTypeSymbol.Value);
@@ -2605,11 +2605,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileModelStateExpression(ScriptSymbol modelStateSymbol)
+        private DatumHandle CompileModelStateExpression(ScriptSymbol modelStateSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ModelState, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)modelStateSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameModelState>(modelStateSymbol.Value, true, out var modelState))
                     throw new FormatException(modelStateSymbol.Value);
@@ -2622,11 +2622,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileEventExpression(ScriptSymbol eventSymbol)
+        private DatumHandle CompileEventExpression(ScriptSymbol eventSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Event, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)eventSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameEventType>(eventSymbol.Value, true, out var eventType))
                     throw new FormatException(eventSymbol.Value);
@@ -2639,11 +2639,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCharacterPhysicsExpression(ScriptSymbol characterPhysicsSymbol)
+        private DatumHandle CompileCharacterPhysicsExpression(ScriptSymbol characterPhysicsSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CharacterPhysics, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)characterPhysicsSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameCharacterPhysics>(characterPhysicsSymbol.Value, true, out var characterPhysics))
                     throw new FormatException(characterPhysicsSymbol.Value);
@@ -2656,11 +2656,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompilePrimarySkullExpression(ScriptSymbol primarySkullSymbol)
+        private DatumHandle CompilePrimarySkullExpression(ScriptSymbol primarySkullSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.PrimarySkull, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)primarySkullSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GamePrimarySkull>(primarySkullSymbol.Value, true, out var primarySkull))
                     throw new FormatException(primarySkullSymbol.Value);
@@ -2673,11 +2673,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileSecondarySkullExpression(ScriptSymbol secondarySkullSymbol)
+        private DatumHandle CompileSecondarySkullExpression(ScriptSymbol secondarySkullSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.SecondarySkull, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)secondarySkullSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 if (!Enum.TryParse<GameSecondarySkull>(secondarySkullSymbol.Value, true, out var secondarySkull))
                     throw new FormatException(secondarySkullSymbol.Value);
@@ -2690,11 +2690,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileObjectExpression(ScriptString objectString)
+        private DatumHandle CompileObjectExpression(ScriptString objectString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Object, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectIndex = objectString.Value == "none" ? -1 :
                     Definition.ObjectNames.Find(on => on.Name == objectString.Value).PlacementIndex;
@@ -2710,11 +2710,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileUnitExpression(ScriptString unitString)
+        private DatumHandle CompileUnitExpression(ScriptString unitString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Unit, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)unitString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var unitIndex = unitString.Value == "none" ? -1 :
                     Definition.ObjectNames.Find(on => on.Name == unitString.Value).PlacementIndex;
@@ -2730,11 +2730,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileVehicleExpression(ScriptString vehicleString)
+        private DatumHandle CompileVehicleExpression(ScriptString vehicleString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Vehicle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)vehicleString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 
                 var vehicleIndex = vehicleString.Value == "none" ? -1 :
@@ -2751,11 +2751,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileWeaponExpression(ScriptString weaponString)
+        private DatumHandle CompileWeaponExpression(ScriptString weaponString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Weapon, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)weaponString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var weaponIndex = weaponString.Value == "none" ? -1 :
                     Definition.ObjectNames.Find(on => on.Name == weaponString.Value).PlacementIndex;
@@ -2771,11 +2771,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileDeviceExpression(ScriptString deviceString)
+        private DatumHandle CompileDeviceExpression(ScriptString deviceString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Device, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)deviceString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var deviceIndex = deviceString.Value == "none" ? -1 :
                     Definition.ObjectNames.Find(on => on.Name == deviceString.Value).PlacementIndex;
@@ -2791,11 +2791,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileSceneryExpression(ScriptString sceneryString)
+        private DatumHandle CompileSceneryExpression(ScriptString sceneryString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.Scenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)sceneryString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var sceneryIndex = sceneryString.Value == "none" ? -1 :
                     Definition.ObjectNames.Find(on => on.Name == sceneryString.Value).PlacementIndex;
@@ -2811,11 +2811,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileEffectSceneryExpression(ScriptString effectSceneryString)
+        private DatumHandle CompileEffectSceneryExpression(ScriptString effectSceneryString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.EffectScenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)effectSceneryString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var effectSceneryIndex = effectSceneryString.Value == "none" ? -1 :
                     Definition.ObjectNames.Find(on => on.Name == effectSceneryString.Value).PlacementIndex;
@@ -2831,11 +2831,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileObjectNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileObjectNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.ObjectName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2850,11 +2850,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileUnitNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileUnitNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2876,11 +2876,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileVehicleNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileVehicleNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.VehicleName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2898,11 +2898,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileWeaponNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileWeaponNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.WeaponName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2920,11 +2920,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileDeviceNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileDeviceNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.DeviceName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2946,11 +2946,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileSceneryNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileSceneryNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.SceneryName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2968,11 +2968,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileEffectSceneryNameExpression(ScriptString objectNameString)
+        private DatumHandle CompileEffectSceneryNameExpression(ScriptString objectNameString)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.EffectSceneryName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
@@ -2990,11 +2990,11 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCinematicLightprobeExpression(ScriptSymbol cinematicLightprobeSymbol)
+        private DatumHandle CompileCinematicLightprobeExpression(ScriptSymbol cinematicLightprobeSymbol)
         {
             var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicLightprobe, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cinematicLightprobeSymbol.Line);
 
-            if (handle != DatumIndex.None)
+            if (handle != DatumHandle.None)
             {
                 var cinematicLightprobeIndex = Definition.CinematicLighting.FindIndex(cl => cinematicLightprobeSymbol.Value == Cache.StringTable.GetString(cl.Name));
 
@@ -3009,13 +3009,13 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAnimationBudgetReferenceExpression(ScriptString animationBudgetReferenceString) =>
+        private DatumHandle CompileAnimationBudgetReferenceExpression(ScriptString animationBudgetReferenceString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileLoopingSoundBudgetReferenceExpression(ScriptString loopingSoundBudgetReferenceString) =>
+        private DatumHandle CompileLoopingSoundBudgetReferenceExpression(ScriptString loopingSoundBudgetReferenceString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileSoundBudgetReferenceExpression(ScriptString soundBudgetReferenceString) =>
+        private DatumHandle CompileSoundBudgetReferenceExpression(ScriptString soundBudgetReferenceString) =>
             throw new NotImplementedException();
     }
 }

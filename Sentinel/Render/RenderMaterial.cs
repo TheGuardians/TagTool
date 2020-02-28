@@ -27,14 +27,14 @@ namespace Sentinel.Render
 
                 Textures = new Dictionary<string, RenderTexture>();
 
-                for (var shaderMapIndex = 0; shaderMapIndex < renderMethod.ShaderProperties[0].ShaderMaps.Count; shaderMapIndex++)
+                for (var shaderMapIndex = 0; shaderMapIndex < renderMethod.ShaderProperties[0].TextureConstants.Count; shaderMapIndex++)
                 {
-                    var shaderMapName = cache.StringTable.GetString(template.SamplerArguments[shaderMapIndex].Name);
+                    var shaderMapName = cache.StringTable.GetString(template.TextureParameterNames[shaderMapIndex].Name);
 
                     if (Textures.ContainsKey(shaderMapName))
                         continue;
 
-                    var shaderMap = renderMethod.ShaderProperties[0].ShaderMaps[shaderMapIndex];
+                    var shaderMap = renderMethod.ShaderProperties[0].TextureConstants[shaderMapIndex];
                     var shaderMapDefinition = cache.Deserialize<Bitmap>(cacheStream, shaderMap.Bitmap);
 
                     Textures[shaderMapName] = new RenderTexture(device, cache, shaderMapDefinition, shaderMap.BitmapIndex);

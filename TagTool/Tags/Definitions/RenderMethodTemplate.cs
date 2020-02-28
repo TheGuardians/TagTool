@@ -10,14 +10,14 @@ namespace TagTool.Tags.Definitions
 	{
         public CachedTag VertexShader;
         public CachedTag PixelShader;
-        public ShaderModeBitmask DrawModeBitmask;
-        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
-        public List<DrawModeRegisterOffsetBlock> RegisterOffsets;
-        public List<ArgumentMapping> ArgumentMappings;
-        public List<ShaderArgument> VectorArguments;
-        public List<ShaderArgument> IntegerArguments;
-        public List<ShaderArgument> BooleanArguments;
-        public List<ShaderArgument> SamplerArguments;
+        public EntryPointBitMask ValidEntryPoints;
+        public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables by usage
+        public List<ParameterTable> ParameterTables; // Ranges of Parameters
+        public List<ParameterMapping> Parameters; 
+        public List<ShaderArgument> RealParameterNames;
+        public List<ShaderArgument> IntegerParameterNames;
+        public List<ShaderArgument> BooleanParameterNames;
+        public List<ShaderArgument> TextureParameterNames;
 
         [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused;
@@ -77,7 +77,7 @@ namespace TagTool.Tags.Definitions
             emblem_clan_chest_texture,
         }
 
-        public enum ShaderMode : sbyte
+        public enum EntryPoint : sbyte
         {
             Default,
             Albedo,
@@ -101,7 +101,7 @@ namespace TagTool.Tags.Definitions
             Sfx_Distort
         }
 
-        public enum ShaderModeBitmask : uint
+        public enum EntryPointBitMask : uint
         {
             Default = 1 << 0,
             Albedo = 1 << 1,
@@ -153,124 +153,43 @@ namespace TagTool.Tags.Definitions
             public ushort Integer;
         }
 
-        // getters and setters put in here as this value is endian dependant
-        [TagStructure(Size = 0x0)]
-        public class DrawMode : PackedInteger_10_6
-		{
-
+        public enum ParameterUsage
+        {
+            Texture,
+            VS_Real,
+            VS_Integer,
+            VS_Boolean,
+            PS_Real,
+            PS_Integer,
+            PS_Boolean,
+            TextureExtern,
+            VS_RealExtern,
+            VS_IntegerExtern,
+            PS_RealExtern,
+            PS_IntegerExtern,
+            Unused1,
+            Unused2,
+            Count
         }
 
         [TagStructure(Size = 0x1C)]
-        public class DrawModeRegisterOffsetBlock : TagStructure
+        public class ParameterTable : TagStructure
 		{
-            public enum DrawModeRegisterOffsetType
-            {
-                SamplerArguments,
-                WaterVectorArguments,
-                Unknown1,
-                Unknown2,
-                VectorArguments,
-                IntegerArguments,
-                GlobalArguments,
-                RenderMethodExternArguments,
-                Unknown4,
-                Unknown5,
-                DebugVectorRegisters,
-                Unknown6,
-                Unknown7,
-                Unknown8,
-                DrawModeRegisterOffsetType_Count
-            }
+            [TagField(Length = (int)ParameterUsage.Count)]
+            public PackedInteger_10_6[] Values;
 
-            public enum DrawModeRegisterOffsetTypeBits
+            public PackedInteger_10_6 this[ParameterUsage usage]
             {
-                ShaderMapSamplerRegisters = 1 << 0,
-                UnknownVectorRegisters = 1 << 1,
-                Unknown1 = 1 << 2,
-                Unknown2 = 1 << 3,
-                ArgumentsVectorRegisters = 1 << 4,
-                Unknown3 = 1 << 5,
-                GlobalArgumentsVectorRegisters = 1 << 6,
-                RenderBufferSamplerRegisters = 1 << 7,
-                Unknown4 = 1 << 8,
-                Unknown5 = 1 << 9,
-                DebugVectorRegisters = 1 << 10,
-                Unknown6 = 1 << 11,
-                Unknown7 = 1 << 12,
-                Unknown8 = 1 << 13
+                get { return Values[(int)usage]; }
+                set { Values[(int)usage] = value; }
             }
-
-            public ushort SamplerArguments_Offset { get => GetOffset(DrawModeRegisterOffsetType.SamplerArguments); set => SetOffset(DrawModeRegisterOffsetType.SamplerArguments, value); }
-            public ushort WaterVectorArguments_Offset { get => GetOffset(DrawModeRegisterOffsetType.WaterVectorArguments); set => SetOffset(DrawModeRegisterOffsetType.WaterVectorArguments, value); }
-            public ushort Unknown1_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown1); set => SetOffset(DrawModeRegisterOffsetType.Unknown1, value); }
-            public ushort Unknown2_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown2); set => SetOffset(DrawModeRegisterOffsetType.Unknown2, value); }
-            public ushort VectorArguments_Offset { get => GetOffset(DrawModeRegisterOffsetType.VectorArguments); set => SetOffset(DrawModeRegisterOffsetType.VectorArguments, value); }
-            public ushort IntegerArguments_Offset { get => GetOffset(DrawModeRegisterOffsetType.IntegerArguments); set => SetOffset(DrawModeRegisterOffsetType.IntegerArguments, value); }
-            public ushort GlobalArguments_Offset { get => GetOffset(DrawModeRegisterOffsetType.GlobalArguments); set => SetOffset(DrawModeRegisterOffsetType.GlobalArguments, value); }
-            public ushort RenderMethodExternArguments_Offset { get => GetOffset(DrawModeRegisterOffsetType.RenderMethodExternArguments); set => SetOffset(DrawModeRegisterOffsetType.RenderMethodExternArguments, value); }
-            public ushort Unknown4_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown4); set => SetOffset(DrawModeRegisterOffsetType.Unknown4, value); }
-            public ushort Unknown5_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown5); set => SetOffset(DrawModeRegisterOffsetType.Unknown5, value); }
-            public ushort DebugVectorRegisters_Offset { get => GetOffset(DrawModeRegisterOffsetType.DebugVectorRegisters); set => SetOffset(DrawModeRegisterOffsetType.DebugVectorRegisters, value); }
-            public ushort Unknown6_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown6); set => SetOffset(DrawModeRegisterOffsetType.Unknown6, value); }
-            public ushort Unknown7_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown7); set => SetOffset(DrawModeRegisterOffsetType.Unknown7, value); }
-            public ushort Unknown8_Offset { get => GetOffset(DrawModeRegisterOffsetType.Unknown8); set => SetOffset(DrawModeRegisterOffsetType.Unknown8, value); }
-            public ushort SamplerArguments_Count { get => GetCount(DrawModeRegisterOffsetType.SamplerArguments); set => SetCount(DrawModeRegisterOffsetType.SamplerArguments, value); }
-            public ushort WaterVectorArguments_Count { get => GetCount(DrawModeRegisterOffsetType.WaterVectorArguments); set => SetCount(DrawModeRegisterOffsetType.WaterVectorArguments, value); }
-            public ushort Unknown1_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown1); set => SetCount(DrawModeRegisterOffsetType.Unknown1, value); }
-            public ushort Unknown2_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown2); set => SetCount(DrawModeRegisterOffsetType.Unknown2, value); }
-            public ushort VectorArguments_Count { get => GetCount(DrawModeRegisterOffsetType.VectorArguments); set => SetCount(DrawModeRegisterOffsetType.VectorArguments, value); }
-            public ushort IntegerArguments_Count { get => GetCount(DrawModeRegisterOffsetType.IntegerArguments); set => SetCount(DrawModeRegisterOffsetType.IntegerArguments, value); }
-            public ushort GlobalArguments_Count { get => GetCount(DrawModeRegisterOffsetType.GlobalArguments); set => SetCount(DrawModeRegisterOffsetType.GlobalArguments, value); }
-            public ushort RenderMethodExternArguments_Count { get => GetCount(DrawModeRegisterOffsetType.RenderMethodExternArguments); set => SetCount(DrawModeRegisterOffsetType.RenderMethodExternArguments, value); }
-            public ushort Unknown4_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown4); set => SetCount(DrawModeRegisterOffsetType.Unknown4, value); }
-            public ushort Unknown5_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown5); set => SetCount(DrawModeRegisterOffsetType.Unknown5, value); }
-            public ushort DebugVectorRegisters_Count { get => GetCount(DrawModeRegisterOffsetType.DebugVectorRegisters); set => SetCount(DrawModeRegisterOffsetType.DebugVectorRegisters, value); }
-            public ushort Unknown6_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown6); set => SetCount(DrawModeRegisterOffsetType.Unknown6, value); }
-            public ushort Unknown7_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown7); set => SetCount(DrawModeRegisterOffsetType.Unknown7, value); }
-            public ushort Unknown8_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown8); set => SetCount(DrawModeRegisterOffsetType.Unknown8, value); }
-
-            private ushort GetValue(DrawModeRegisterOffsetType offset) => (ushort)GetType().GetField($"RegisterMapping{(int)offset}").GetValue(this);
-            private void SetValue(DrawModeRegisterOffsetType offset, ushort value) => GetType().GetField($"RegisterMapping{(int)offset}").SetValue(this, value);
-            public ushort GetCount(DrawModeRegisterOffsetType offset) => (ushort)(GetValue(offset) >> 10);
-            public ushort GetOffset(DrawModeRegisterOffsetType offset) => (ushort)(GetValue(offset) & 0x3FFu);
-            public void SetCount(DrawModeRegisterOffsetType offset, ushort count)
-            {
-                if (count > 0x3Fu) throw new System.Exception("Out of range");
-                var a = GetOffset(offset);
-                var b = (count & 0x3F) << 10;
-                var value = (ushort)(a | b);
-                SetValue(offset, value);
-            }
-            public void SetOffset(DrawModeRegisterOffsetType offset, ushort _offset)
-            {
-                if (_offset > 0x3FFu) throw new System.Exception("Out of range");
-                var a = (_offset & 0x3FF);
-                var b = (GetCount(offset) & 0x3F) << 10;
-                var value = (ushort)(a | b);
-                SetValue(offset, value);
-            }
-
-            public ushort RegisterMapping0;
-            public ushort RegisterMapping1;
-            public ushort RegisterMapping2;
-            public ushort RegisterMapping3;
-            public ushort RegisterMapping4;
-            public ushort RegisterMapping5;
-            public ushort RegisterMapping6;
-            public ushort RegisterMapping7;
-            public ushort RegisterMapping8;
-            public ushort RegisterMapping9;
-            public ushort RegisterMapping10;
-            public ushort RegisterMapping11;
-            public ushort RegisterMapping12;
-            public ushort RegisterMapping13;
         }
 
         /// <summary>
         /// Binds an argument in the render method tag to a pixel shader constant.
         /// </summary>
         [TagStructure(Size = 0x4)]
-        public class ArgumentMapping : TagStructure
+        public class ParameterMapping : TagStructure
 		{
             /// <summary>
             /// The GPU register to bind the argument to.

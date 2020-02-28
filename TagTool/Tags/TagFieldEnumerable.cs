@@ -93,6 +93,10 @@ namespace TagTool.Tags
 		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, ref uint offset)
 		{
 			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion);
+
+			if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
+				throw new InvalidOperationException();
+
 			var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
 			TagFieldInfos.Add(tagFieldInfo);
 			offset += fieldSize;

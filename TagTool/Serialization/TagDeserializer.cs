@@ -297,8 +297,8 @@ namespace TagTool.Serialization
             if (valueType == typeof(Angle))
                 return Angle.FromRadians(reader.ReadSingle(compression));
 
-            if (valueType == typeof(DatumIndex))
-                return new DatumIndex(reader.ReadUInt32());
+            if (valueType == typeof(DatumHandle))
+                return new DatumHandle(reader.ReadUInt32());
 
             // Non-byte array = Inline array
             // TODO: Define more clearly in general what constitutes a data reference and what doesn't
@@ -345,8 +345,8 @@ namespace TagTool.Serialization
             // Read count and offset
             var startOffset = reader.BaseStream.Position;
             var count = reader.ReadInt32();
-            
             var pointer = new CacheAddress(reader.ReadUInt32());
+            
             if (count == 0)
             {
                 // Null tag block

@@ -1,5 +1,6 @@
 using System;
 using TagTool.Cache;
+using TagTool.Cache.Resources;
 using TagTool.Tags;
 using TagTool.Tags.Resources;
 
@@ -16,21 +17,21 @@ namespace TagTool.Common
     public class PageableResource : TagStructure
 	{
         /// <summary>
-        /// The <see cref="RawPage"/> of the <see cref="PageableResource"/>.
+        /// The <see cref="ResourcePage"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public RawPage Page = new RawPage
+        public ResourcePage Page = new ResourcePage
         {
             Index = -1
         };
 
         /// <summary>
-        /// The <see cref="TagResourceGen3"/> of the <see cref="PageableResource"/>.
+        /// The <see cref="ResourceData"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public TagResourceGen3 Resource = new TagResourceGen3
+        public ResourceData Resource = new ResourceData
         {
             ResourceType = TagResourceTypeGen3.None,
-            ResourceFixups = new System.Collections.Generic.List<TagResourceGen3.ResourceFixup>(),
-            D3DFixups = new System.Collections.Generic.List<TagResourceGen3.D3DFixup>()
+            FixupLocations = new System.Collections.Generic.List<ResourceFixupLocation>(),
+            InteropLocations = new System.Collections.Generic.List<ResourceInteropLocation>()
         };
 
         public PageableResource() { }

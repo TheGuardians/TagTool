@@ -194,15 +194,43 @@
     <Compile Include="Audio\SoundConverter.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
+    <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="Cache\CachedTag.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileVersion.cs" />
+    <Compile Include="Cache\Codecs\CodecDefinition.cs" />
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
     <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
+    <Compile Include="Cache\Gen2\CachedTagGen2.cs" />
+    <Compile Include="Cache\Gen2\StringTableGen2.cs" />
+    <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
+    <Compile Include="Cache\Gen2\TagCacheGen2.cs" />
+    <Compile Include="Cache\Interops\InteropDefinition.cs" />
+    <Compile Include="Cache\Resources\CharacterUsage.cs" />
+    <Compile Include="Cache\Resources\ModelVariantUsage.cs" />
+    <Compile Include="Cache\Resources\PredictionAtom.cs" />
+    <Compile Include="Cache\Resources\PredictionMolecule.cs" />
+    <Compile Include="Cache\Resources\PredictionMoleculeAtom.cs" />
+    <Compile Include="Cache\Resources\PredictionMoleculeKey.cs" />
+    <Compile Include="Cache\Resources\PredictionQuantum.cs" />
+    <Compile Include="Cache\Resources\ResourceDefinition.cs" />
+    <Compile Include="Cache\Resources\ResourceFixupLocation.cs" />
+    <Compile Include="Cache\Resources\ResourceInteropLocation.cs" />
+    <Compile Include="Cache\Resources\ResourceLayoutTable.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHaloReachMCC.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
     <Compile Include="Cache\ModPackages\ResourceCachesModPackage.cs" />
-    <Compile Include="Cache\ResourceCache.cs" />
+    <Compile Include="Cache\Resources\ResourceCache.cs" />
+    <Compile Include="Cache\Resources\ResourceSection.cs" />
+    <Compile Include="Cache\Resources\ResourceSharedFile.cs" />
+    <Compile Include="Cache\Resources\ResourceSubpage.cs" />
+    <Compile Include="Cache\Resources\ResourceSubpageTable.cs" />
+    <Compile Include="Cache\Resources\ZoneManifest.cs" />
+    <Compile Include="Cache\Resources\ZoneResourceUsage.cs" />
+    <Compile Include="Cache\Resources\ZoneResourceVisitNode.cs" />
+    <Compile Include="Cache\Resources\ZoneSetZoneUsage.cs" />
     <Compile Include="Cache\StringTable.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\Gen3\CachedTagGen3.cs" />
@@ -216,6 +244,9 @@
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
+    <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
+    <Compile Include="Commands\Common\CommandRunner.cs" />
+    <Compile Include="Commands\Common\RunCommands.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
@@ -249,6 +280,7 @@
     <Compile Include="Commands\RenderModels\ReplaceRenderGeometryCommand.cs" />
     <Compile Include="Commands\RenderModels\SpecifyShadersCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\ConvertInstancedGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractPathfindingGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
@@ -280,6 +312,7 @@
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
     <Compile Include="Common\SphericalHarmonics.cs" />
+    <Compile Include="Direct3D\D3D9\D3D9Types.cs" />
     <Compile Include="Direct3D\D3DObjectType.cs" />
     <Compile Include="Bitmaps\Utils\BitmapConverter.cs" />
     <Compile Include="Bitmaps\Utils\BitmapDdsFormatDetection.cs" />
@@ -298,7 +331,7 @@
     <Compile Include="Direct3D\D3D10\D3D10MiscFlags.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Utils.cs" />
     <Compile Include="Direct3D\D3D9\D3DFormat.cs" />
-    <Compile Include="Direct3D\Xbox360\D3DFormatXbox.cs" />
+    <Compile Include="Direct3D\Xbox360\D3D.cs" />
     <Compile Include="Bitmaps\DDS\DDSComplexityFlags.cs" />
     <Compile Include="Bitmaps\DDS\DDSFile.cs" />
     <Compile Include="Bitmaps\DDS\DDSFlags.cs" />
@@ -314,7 +347,6 @@
     <Compile Include="Cache\CacheFile\CacheAddress.cs" />
     <Compile Include="Cache\CacheFile\CacheAddressType.cs" />
     <Compile Include="Cache\HaloOnline\CachedTagData.cs" />
-    <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="Cache\CacheFile\CacheFilePartition.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSection.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSharedType.cs" />
@@ -325,11 +357,11 @@
     <Compile Include="Cache\GameCache.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnlineBase.cs" />
     <Compile Include="BlamFile\MapFile.cs" />
-    <Compile Include="BlamFile\MapFileHeader.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="BlamFile\MapVariant.cs" />
     <Compile Include="Cache\ModPackages\ModPackage.cs" />
     <Compile Include="Cache\ModPackages\ModPackageHeader.cs" />
-    <Compile Include="Cache\CacheFile\RawPage.cs" />
+    <Compile Include="Cache\Resources\ResourcePage.cs" />
     <Compile Include="Cache\StringIdResolver.cs" />
     <Compile Include="Cache\Gen3\StringIdResolverHalo3.cs" />
     <Compile Include="Cache\Gen3\StringIdResolverHaloReach.cs" />
@@ -420,7 +452,7 @@
     <Compile Include="Commands\Video\ExtractBinkFileCommand.cs" />
     <Compile Include="Commands\Video\VideoContextFactory.cs" />
     <Compile Include="Common\Crc32.cs" />
-    <Compile Include="Common\DatumIndex.cs" />
+    <Compile Include="Common\DatumHandle.cs" />
     <Compile Include="Common\GameCharacterPhysics.cs" />
     <Compile Include="Common\GameController.cs" />
     <Compile Include="Common\GameControllerButtonPreset.cs" />
@@ -437,6 +469,7 @@
     <Compile Include="Common\GameVoiceMask.cs" />
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
     <Compile Include="Common\RealRectangle3d.cs" />
+    <Compile Include="Direct3D\Xbox360\D3DTexture9.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\BreakableSurface.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\InstancedGeometry.cs" />
@@ -472,6 +505,7 @@
     <Compile Include="Scripting\HsScriptParameter.cs" />
     <Compile Include="Scripting\HsScriptType.cs" />
     <Compile Include="Scripting\HsType.cs" />
+    <Compile Include="Serialization\Gen2SerializationContext.cs" />
     <Compile Include="Serialization\Gen1SerializationContext.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Serialization\ResourceDefinitionSerializationContext.cs" />
@@ -496,9 +530,10 @@
     <Compile Include="Tags\Resources\RenderGeometryApiResourceDefinition.cs" />
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResources.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
+    <Compile Include="Tags\TagBlockBitVector.cs" />
     <Compile Include="Tags\TagFile.cs" />
     <Compile Include="Tags\TagReference.cs" />
-    <Compile Include="Tags\TagResourceGen3.cs" />
+    <Compile Include="Cache\Resources\ResourceData.cs" />
     <Compile Include="Tags\TagResourceReference.cs" />
     <Compile Include="Tags\TagResourceTypeGen3.cs" />
     <Compile Include="Commands\ArgumentParser.cs" />
@@ -577,7 +612,6 @@
     <Compile Include="Audio\Encoding.cs" />
     <Compile Include="Audio\PlatformCodec.cs" />
     <Compile Include="Audio\PlaybackParameter.cs" />
-    <Compile Include="Tags\Definitions\CacheFileResourceLayoutTable.cs" />
     <Compile Include="Tags\Definitions\ForgeGlobalsDefinition.cs" />
     <Compile Include="Tags\TagBlock.cs" />
     <Compile Include="Common\TagCacheMap.cs" />
@@ -678,7 +712,7 @@
     <Compile Include="Tags\Definitions\Bitmap.cs" />
     <Compile Include="Tags\Definitions\BreakableSurface.cs" />
     <Compile Include="Tags\Definitions\CacheFileGlobalTags.cs" />
-    <Compile Include="Tags\Definitions\CacheFileResourceGestalt.cs" />
+    <Compile Include="Cache\Resources\ResourceGestalt.cs" />
     <Compile Include="Tags\Definitions\CameraFxSettings.cs" />
     <Compile Include="Tags\Definitions\CameraGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\CameraTrack.cs" />
@@ -873,7 +907,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cache\MCC\" />
     <Folder Include="Geometry\Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
