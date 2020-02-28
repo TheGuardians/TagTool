@@ -48,7 +48,7 @@ namespace TagTool.Commands
             //
 
 
-            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"deadlock.map"));
+            var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"descent.map"));
 
             var cache = GameCache.Open(file);
 
@@ -94,7 +94,7 @@ namespace TagTool.Commands
                 
                 bitmapTag = cache.TagCache.GetTag(@"levels\dlc\sidewinder\sidewinder_sidewinder_cubemaps", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\multi\guardian\guardian_guardian_cubemaps", "bitm");
-                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\docks\docks_docks_cubemaps", "bitm");
+                bitmapTag = cache.TagCache.GetTag(@"levels\dlc\descent\bitmaps\d_cov_floor_up_zbump", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\bitmaps\compass", "bitm");
                 //bitmapTag = cache.TagCache.GetTag(@"levels\dlc\bunkerworld\bunkerworld_bunkerworld_cubemaps", "bitm");
                 
@@ -120,9 +120,6 @@ namespace TagTool.Commands
             for(int im = 0; im < bitmap.Images.Count; im++)
             {
                 var image = bitmap.Images[im];
-                
-                if (im != 56 && im != 57)
-                    continue;
                 
                 if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {

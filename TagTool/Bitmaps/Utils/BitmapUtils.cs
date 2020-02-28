@@ -766,6 +766,7 @@ namespace TagTool.Bitmaps
             if(format == BitmapFormat.Ctx1)
             {
                 data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
+                format = BitmapFormat.Dxn;
             }
             else if(format != destinationFormat)
             {
@@ -774,10 +775,17 @@ namespace TagTool.Bitmaps
                 uncompressedData = TrimAlignedBitmap(format, destinationFormat, (int)width, (int)height, uncompressedData);
 
                 data = BitmapDecoder.EncodeBitmap(uncompressedData, destinationFormat, (int)width, (int)height);
+                format = destinationFormat;
             }
 
             if (requireDecompression)
+            {
                 data = ConvertNonMultipleBlockSizeBitmap(data, width, height, format);
+                if (format == BitmapFormat.Dxn)
+                    data = BitmapDecoder.EncodeBitmap(data, BitmapFormat.V8U8, (int)width, (int)height);
+
+            }
+                
 
             return data;
         }

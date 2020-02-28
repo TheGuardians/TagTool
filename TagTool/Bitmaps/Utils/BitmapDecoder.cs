@@ -131,6 +131,18 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        private static byte[] EncodeV8U8(byte[] data, int width, int height)
+        {
+            byte[] buffer = new byte[height * width * 2];
+            for (int i = 0; i < height * width * 2; i += 2)
+            {
+                int index = 2 * i;
+                buffer[i] = data[index + 2]; // V 
+                buffer[i + 1] = data[index + 1]; // U
+            }
+            return buffer;
+        }
+
         public static byte[] ConvertAY8ToA8Y8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 2];
@@ -225,10 +237,10 @@ namespace TagTool.Bitmaps
 
             for (int i = 0; i < (width * height); i += 16)
             {
-                byte rMin = data[i + 1];
-                byte rMax = data[i];
+                byte rMin = data[i + 0];
+                byte rMax = data[i + 1];
                 byte[] rIndices = new byte[16];
-                int temp = ((data[i + 5] << 16) | (data[i + 2] << 8)) | data[i + 3];
+                int temp = ((data[i + 4] << 16) | (data[i + 3] << 8)) | data[i + 2];
                 int indices = 0;
                 while (indices < 8)
                 {
@@ -236,17 +248,17 @@ namespace TagTool.Bitmaps
                     temp = temp >> 3;
                     indices++;
                 }
-                temp = ((data[i + 6] << 16) | (data[i + 7] << 8)) | data[i + 4];
+                temp = ((data[i + 7] << 16) | (data[i + 6] << 8)) | data[i + 5];
                 while (indices < 16)
                 {
                     rIndices[indices] = (byte)(temp & 7);
                     temp = temp >> 3;
                     indices++;
                 }
-                byte gMin = data[i + 9];
-                byte gMax = data[i + 8];
+                byte gMin = data[i + 8];
+                byte gMax = data[i + 9];
                 byte[] gIndices = new byte[16];
-                temp = ((data[i + 13] << 16) | (data[i + 10] << 8)) | data[i + 11];
+                temp = ((data[i + 12] << 16) | (data[i + 11] << 8)) | data[i + 10];
                 indices = 0;
                 while (indices < 8)
                 {
@@ -254,7 +266,7 @@ namespace TagTool.Bitmaps
                     temp = temp >> 3;
                     indices++;
                 }
-                temp = ((data[i + 14] << 16) | (data[i + 15] << 8)) | data[i + 12];
+                temp = ((data[i + 15] << 16) | (data[i + 14] << 8)) | data[i + 13];
                 while (indices < 16)
                 {
                     gIndices[indices] = (byte)(temp & 7);
@@ -313,8 +325,8 @@ namespace TagTool.Bitmaps
                     for (int k = 0; k < sizew; k++)
                     {
                         RGBAColor color;
-                        color.R = redTable[rIndices[(j * sizeh) + k]];
-                        color.G = grnTable[gIndices[(j * sizeh) + k]];
+                        color.G = redTable[rIndices[(j * sizeh) + k]];
+                        color.R = grnTable[gIndices[(j * sizeh) + k]];
                         float x = ((((float)color.R) / 255f) * 2f) - 1f;
                         float y = ((((float)color.G) / 255f) * 2f) - 1f;
                         float z = (float)Math.Sqrt((double)Math.Max(0f, Math.Min(1f, (1f - (x * x)) - (y * y))));
@@ -491,7 +503,7 @@ namespace TagTool.Bitmaps
                 byte mMin = data[i + 0];
                 byte mMax = data[i + 1];
                 byte[] mIndices = new byte[16];
-                int temp = ((data[i + 4] << 0x10) | (data[i + 3] << 8)) | data[i + 2];
+                int temp = ((data[i + 4] << 16) | (data[i + 3] << 8)) | data[i + 2];
                 int indices = 0;
                 while (indices < 8)
                 {
@@ -1189,6 +1201,9 @@ namespace TagTool.Bitmaps
                     data = EncodeA8R8G8B8(bitm, virtualWidth, virtualHeight);
                     break;
 
+                case BitmapFormat.V8U8:
+                    data = EncodeV8U8(bitm, virtualWidth, virtualHeight);
+                    break;
 
                 default:
                     throw new NotSupportedException($"Unsupported bitmap format for encoding {format}.");
