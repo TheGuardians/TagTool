@@ -20,11 +20,11 @@ namespace TagTool.Commands.Common
 
         public void RunCommand(string commandLine, bool printInput)
         {
-            if (printInput)
-                Console.WriteLine(commandLine);
-
             if (commandLine == null || commandLine == "")
                 return;
+
+            if (printInput)
+                Console.WriteLine(commandLine);
 
             var commandArgs = ArgumentParser.ParseCommand(commandLine, out string redirectFile);
             if (commandArgs.Count == 0)
