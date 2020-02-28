@@ -146,7 +146,6 @@ namespace TagTool.Commands.Scenarios
                         var tmphlmt = (Model)CacheContext.Deserialize(stream, newhlmt);
                         tmphlmt.RenderModel = newmode;
                         tmphlmt.CollisionModel = newcoll;
-                        tmphlmt.PhysicsModel = null;
                         tmphlmt.ReduceToL1SuperLow = 300.0f;
                         tmphlmt.ReduceToL2Low = 280.0f;
                         tmphlmt.ReduceToL4High = 18.0f;
