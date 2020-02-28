@@ -20,8 +20,11 @@ namespace TagTool.Commands.Common
 
         public void RunCommand(string commandLine, bool printInput)
         {
-            if (commandLine == null || commandLine == "")
+            if (commandLine == null)
+            {
+                EOF = true;
                 return;
+            }
 
             if (printInput)
                 Console.WriteLine(commandLine);
