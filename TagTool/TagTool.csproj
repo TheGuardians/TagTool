@@ -859,7 +859,7 @@
     <Compile Include="Tags\Resources\BinkResource.cs" />
     <Compile Include="Tags\Resources\SoundResourceDefinition.cs" />
     <Compile Include="Havok\BipedPhysicsFlags.cs" />
-    <Compile Include="Tools\Tool.cs" />
+    <Compile Include="Tools\Geometry\HaloGeometryFormat.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TagTool.ico" />
