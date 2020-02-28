@@ -19,7 +19,7 @@ namespace TagTool.Commands.Files
             : base(false,
 
                   "GenerateAssemblyPlugins",
-                  "Converts BlamCore tag definitions to Assembly Plugin files..",
+                  "Converts tag definitions to Assembly Plugin files..",
 
                   "GenerateAssemblyPlugins [path]",
 
@@ -966,7 +966,7 @@ namespace TagTool.Commands.Files
                 {
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
-                    if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
+                    if (!CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion))
                         continue;
 
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
@@ -976,12 +976,8 @@ namespace TagTool.Commands.Files
                 {
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
-                    if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
+                    if (!CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion))
                         continue;
-
-                    if (tagFieldAttribute.Version != CacheVersion.Unknown)
-                        if (tagFieldAttribute.Version != cacheVersion)
-                            continue;
 
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
                 }
@@ -1053,7 +1049,7 @@ namespace TagTool.Commands.Files
                 "<plugin game=\"" + gameName + "\" baseSize=\"0x" + size.ToString("X") + "\">",
                 "	<!-- Automatically generated plugin -->",
                 "	<revisions>",
-                "		<revision author=\"TagTool\" version=\"1\">Generated plugin from BlamCore definitions.</revision>",
+                "		<revision author=\"TagTool\" version=\"1\">Generated plugin from TagTool definitions.</revision>",
                 "	</revisions>"
             };
 
