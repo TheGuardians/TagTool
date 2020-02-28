@@ -781,9 +781,6 @@ namespace TagTool.Bitmaps
             if (requireDecompression)
             {
                 data = ConvertNonMultipleBlockSizeBitmap(data, width, height, format);
-                if (format == BitmapFormat.Dxn)
-                    data = BitmapDecoder.EncodeBitmap(data, BitmapFormat.V8U8, (int)width, (int)height);
-
             }
                 
 

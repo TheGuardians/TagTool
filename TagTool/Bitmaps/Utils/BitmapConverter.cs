@@ -129,10 +129,7 @@ namespace TagTool.Bitmaps.Utils
 
                 if(BitmapUtils.RequiresDecompression(resultBitmap.Format, (uint)resultBitmap.Width, (uint)resultBitmap.Height))
                 {
-                    if (resultBitmap.Format == BitmapFormat.Dxn)
-                        resultBitmap.Format = BitmapFormat.V8U8;
-                    else
-                        resultBitmap.Format = BitmapFormat.A8R8G8B8;
+                    resultBitmap.Format = BitmapFormat.A8R8G8B8;
                 }
 
                 if (!BitmapUtils.IsCompressedFormat(resultBitmap.Format))
