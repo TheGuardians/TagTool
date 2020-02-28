@@ -38,6 +38,7 @@ namespace TagTool.Commands.Scenarios
                 for (var sbspindex = 0; sbspindex < Scnr.StructureBsps.Count; sbspindex++)
                 {
                     var Sbsp = (ScenarioStructureBsp)CacheContext.Deserialize(stream, Scnr.StructureBsps[sbspindex].StructureBsp);
+                    var bspresource = CacheContext.ResourceCache.GetStructureBspTagResources(Sbsp.CollisionBspResource);
                     var sLdT = (ScenarioLightmap)CacheContext.Deserialize(stream, Scnr.Lightmap);
                     var Lbsp = (ScenarioLightmapBspData)CacheContext.Deserialize(stream, sLdT.LightmapDataReferences[sbspindex]);
 
@@ -46,21 +47,24 @@ namespace TagTool.Commands.Scenarios
                     Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
 
                     var meshlist = new List<short>();
-                    foreach (ScenarioStructureBsp.InstancedGeometryInstance InstancedGeometryBlock in Sbsp.InstancedGeometryInstances)
+                    for (int InstancedGeometryIndex = 0; InstancedGeometryIndex < bspresource.InstancedGeometry.Count; InstancedGeometryIndex++)
                     {
-                        short currentmeshindex = (short)(InstancedGeometryBlock.MeshIndex);
+                        var InstancedGeometryBlock = bspresource.InstancedGeometry[InstancedGeometryIndex];
 
-                        if (currentmeshindex < 0 || meshlist.Contains(currentmeshindex))
+                        short currentmeshindex = (short)(InstancedGeometryBlock.MeshIndex);
+                        short currentcompressionindex = (short)(InstancedGeometryBlock.CompressionIndex);
+
+                        if (currentmeshindex < 0 || meshlist.Contains(currentmeshindex) || currentmeshindex > Lbsp.Geometry.Meshes.Count)
                             continue;
 
                         meshlist.Add(currentmeshindex);
 
                         //strip digits from the end of the instancedgeometry name
-                        string instancedgeoname = CacheContext.StringTable.GetString(InstancedGeometryBlock.Name);
+                        //string instancedgeoname = CacheContext.StringTable.GetString(InstancedGeometryBlock.Name);
                         //var digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
                         //var instancedgeoname = tempname.TrimEnd(digits);
 
-                        string NewName = $"objects\\reforge\\instanced_geometry\\{instancedgeoname}";
+                        string NewName = $"objects\\reforge\\instanced_geometry\\{currentmeshindex}";
                         
                         //if the tag we are trying to create already exists, continue
                         if (CacheContext.TryGetTag<Crate>(NewName, out var unused))
@@ -86,7 +90,14 @@ namespace TagTool.Commands.Scenarios
                         newmode.Name = NewName;
                         var originalmode = CacheContext.Deserialize(stream, originalmodetag);
                         CacheContext.Serialize(stream, newmode, originalmode);
-                        
+
+                        //duplicate traffic cone collision model
+                        CachedTag originalcolltag = CacheContext.GetTag<CollisionModel>(@"objects\gear\human\industrial\street_cone\street_cone");
+                        var newcoll = CacheContext.TagCache.AllocateTag(originalcolltag.Group, NewName);
+                        newcoll.Name = NewName;
+                        var originalcoll = CacheContext.Deserialize(stream, originalcolltag);
+                        CacheContext.Serialize(stream, newcoll, originalcoll);
+
                         //copy block elements and resources from sbsp for new mode
                         RenderModel editedmode = (RenderModel)CacheContext.Deserialize(stream, originalmodetag);
 
@@ -106,7 +117,7 @@ namespace TagTool.Commands.Scenarios
                         //copy compression tagblock
                         editedmode.Geometry.Compression = new List<RenderGeometryCompression>
                             {
-                                Lbsp.Geometry.Compression[currentmeshindex]
+                                Lbsp.Geometry.Compression[currentcompressionindex]
                             };
 
                         //copy over materials block, and reindex mesh part materials
@@ -116,17 +127,29 @@ namespace TagTool.Commands.Scenarios
                             newmaterials.Add(Sbsp.Materials[editedmode.Geometry.Meshes[0].Parts[i].MaterialIndex]);
                             editedmode.Geometry.Meshes[0].Parts[i].MaterialIndex = (short)i;
                         }
-                        editedmode.Materials = newmaterials;
-                        
+                        editedmode.Materials = newmaterials;                     
                         CacheContext.Serialize(stream, originalmodetag, editedmode);
-                        
+
+                        //fixup coll data
+                        var tmpcoll = (CollisionModel)CacheContext.Deserialize(stream, newcoll);
+                        //copy collision geometry
+                        tmpcoll.Regions[0].Permutations[0].Bsps[0].Geometry = InstancedGeometryBlock.CollisionInfo;
+                        //copy over mopps if they exist
+                        if (InstancedGeometryBlock.CollisionMoppCodes.Count > 0)
+                        {
+                            tmpcoll.Regions[0].Permutations[0].BspMoppCodes = new List<Havok.TagHkpMoppCode>();
+                            tmpcoll.Regions[0].Permutations[0].BspMoppCodes.Add(InstancedGeometryBlock.CollisionMoppCodes[0]);
+                        }
+                        CacheContext.Serialize(stream, newcoll, tmpcoll);
+
                         //fixup hlmt references
                         var tmphlmt = (Model)CacheContext.Deserialize(stream, newhlmt);
                         tmphlmt.RenderModel = newmode;
+                        tmphlmt.CollisionModel = newcoll;
+                        tmphlmt.PhysicsModel = null;
                         tmphlmt.ReduceToL1SuperLow = 300.0f;
                         tmphlmt.ReduceToL2Low = 280.0f;
-                        tmphlmt.ModelObjectData[0].Offset = InstancedGeometryBlock.WorldBoundingSphereCenter;
-                        tmphlmt.ModelObjectData[0].Radius = InstancedGeometryBlock.BoundingSphereRadiusBounds.Lower;
+                        tmphlmt.ReduceToL4High = 18.0f;
                         CacheContext.Serialize(stream, newhlmt, tmphlmt);
 
                         //fixup bloc references
@@ -139,7 +162,7 @@ namespace TagTool.Commands.Scenarios
                         var tmpforg = (ForgeGlobalsDefinition)CacheContext.Deserialize(stream, forgeglobal);
                         tmpforg.Palette.Add(new ForgeGlobalsDefinition.PaletteItem
                         {
-                            Name = instancedgeoname,
+                            Name = NewName,
                             Type = ForgeGlobalsDefinition.PaletteItemType.Structure,
                             CategoryIndex = 64,
                             DescriptionIndex = -1,
