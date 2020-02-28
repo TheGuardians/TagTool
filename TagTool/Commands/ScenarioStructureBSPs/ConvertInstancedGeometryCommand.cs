@@ -45,18 +45,23 @@ namespace TagTool.Commands.Scenarios
                     var resourceDefinition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
                     Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
 
+                    var meshlist = new List<short>();
                     foreach (ScenarioStructureBsp.InstancedGeometryInstance InstancedGeometryBlock in Sbsp.InstancedGeometryInstances)
                     {
-                        if (InstancedGeometryBlock.MeshIndex < 0)
+                        short currentmeshindex = (short)(InstancedGeometryBlock.MeshIndex);
+
+                        if (currentmeshindex < 0 || meshlist.Contains(currentmeshindex))
                             continue;
 
+                        meshlist.Add(currentmeshindex);
+
                         //strip digits from the end of the instancedgeometry name
-                        string tempname = CacheContext.StringTable.GetString(InstancedGeometryBlock.Name);
-                        var digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-                        var instancedgeoname = tempname.TrimEnd(digits);
+                        string instancedgeoname = CacheContext.StringTable.GetString(InstancedGeometryBlock.Name);
+                        //var digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+                        //var instancedgeoname = tempname.TrimEnd(digits);
 
                         string NewName = $"objects\\reforge\\instanced_geometry\\{instancedgeoname}";
-
+                        
                         //if the tag we are trying to create already exists, continue
                         if (CacheContext.TryGetTag<Crate>(NewName, out var unused))
                             continue;
@@ -64,35 +69,44 @@ namespace TagTool.Commands.Scenarios
                         //duplicate traffic cone bloc
                         CachedTag originalbloctag = CacheContext.GetTag<Crate>(@"objects\gear\human\industrial\street_cone\street_cone");
                         var newbloc = CacheContext.TagCache.AllocateTag(originalbloctag.Group, NewName);
+                        newbloc.Name = NewName;
                         var originalbloc = CacheContext.Deserialize(stream, originalbloctag);
                         CacheContext.Serialize(stream, newbloc, originalbloc);
 
                         //duplicate traffic cone hlmt
                         CachedTag originalhlmttag = CacheContext.GetTag<Model>(@"objects\gear\human\industrial\street_cone\street_cone");
                         var newhlmt = CacheContext.TagCache.AllocateTag(originalhlmttag.Group, NewName);
+                        newhlmt.Name = NewName;
                         var originalhlmt = CacheContext.Deserialize(stream, originalhlmttag);
                         CacheContext.Serialize(stream, newhlmt, originalhlmt);
-
+                        
                         //duplicate traffic cone render model
                         CachedTag originalmodetag = CacheContext.GetTag<RenderModel>(@"objects\gear\human\industrial\street_cone\street_cone");
                         var newmode = CacheContext.TagCache.AllocateTag(originalmodetag.Group, NewName);
+                        newmode.Name = NewName;
                         var originalmode = CacheContext.Deserialize(stream, originalmodetag);
                         CacheContext.Serialize(stream, newmode, originalmode);
-
+                        
                         //copy block elements and resources from sbsp for new mode
-                        RenderModel editedmode = (RenderModel)CacheContext.Deserialize(stream, newmode);
+                        RenderModel editedmode = (RenderModel)CacheContext.Deserialize(stream, originalmodetag);
 
                         //
                         // warning: this relies on GetSingleMeshResourceDefinition updating the vertex/index buffer indices in the Lbsp, not safe
                         //
 
-                        var newResourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, InstancedGeometryBlock.MeshIndex);
+                        var newResourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, currentmeshindex);
                         editedmode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newResourceDefinition);
-
+                        
                         //copy meshes tagblock
                         editedmode.Geometry.Meshes = new List<Mesh>
                             {
-                                Lbsp.Geometry.Meshes[InstancedGeometryBlock.MeshIndex]
+                                Lbsp.Geometry.Meshes[currentmeshindex]
+                            };
+
+                        //copy compression tagblock
+                        editedmode.Geometry.Compression = new List<RenderGeometryCompression>
+                            {
+                                Lbsp.Geometry.Compression[currentmeshindex]
                             };
 
                         //copy over materials block, and reindex mesh part materials
@@ -103,12 +117,16 @@ namespace TagTool.Commands.Scenarios
                             editedmode.Geometry.Meshes[0].Parts[i].MaterialIndex = (short)i;
                         }
                         editedmode.Materials = newmaterials;
-
-                        CacheContext.Serialize(stream, newmode, editedmode);
-
+                        
+                        CacheContext.Serialize(stream, originalmodetag, editedmode);
+                        
                         //fixup hlmt references
                         var tmphlmt = (Model)CacheContext.Deserialize(stream, newhlmt);
                         tmphlmt.RenderModel = newmode;
+                        tmphlmt.ReduceToL1SuperLow = 300.0f;
+                        tmphlmt.ReduceToL2Low = 280.0f;
+                        tmphlmt.ModelObjectData[0].Offset = InstancedGeometryBlock.WorldBoundingSphereCenter;
+                        tmphlmt.ModelObjectData[0].Radius = InstancedGeometryBlock.BoundingSphereRadiusBounds.Lower;
                         CacheContext.Serialize(stream, newhlmt, tmphlmt);
 
                         //fixup bloc references
@@ -123,12 +141,12 @@ namespace TagTool.Commands.Scenarios
                         {
                             Name = instancedgeoname,
                             Type = ForgeGlobalsDefinition.PaletteItemType.Structure,
-                            CategoryIndex = 12,
+                            CategoryIndex = 64,
                             DescriptionIndex = -1,
                             MaxAllowed = 0,
                             Object = newbloc
                         });
-                        CacheContext.Serialize(stream, forgeglobal, tmpforg);
+                        CacheContext.Serialize(stream, forgeglobal, tmpforg);                        
                     }
                 }
             }
