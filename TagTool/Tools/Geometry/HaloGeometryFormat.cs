@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Geometry;
+using TagTool.Tags.Definitions;
+using TagTool.Cache;
 
 namespace TagTool.Tools.Geometry
 {
@@ -62,7 +64,193 @@ namespace TagTool.Tools.Geometry
         public List<GeometryNode> Nodes;
         public List<GeometryMesh> Meshes;
         public SHLightingOrder3 DefaultLighting;
+        public List<GeometryLightProbes> LightProbes;
         public List<RenderGeometry.BoundingSphere> BoundingSpheres;
+
+
+        public RenderModel GetGen3RenderModel(GameCache cache)
+        {
+            RenderModel mode = new RenderModel();
+
+            mode.Name = AddStringId(cache, Name);
+
+            // set materials
+            mode.Materials = new List<RenderMaterial>();
+            for(int i = 0; i < Materials.Count; i++)
+            {
+                mode.Materials.Add(new RenderMaterial());
+                Console.WriteLine($"Render material {i} is {Materials[i].Name}");
+            }
+
+            // set nodes
+            mode.Nodes = new List<RenderModel.Node>();
+            mode.RuntimeNodeOrientations = new List<RenderModel.RuntimeNodeOrientation>();
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                var node = Nodes[i];
+                var quat = node.Rotation.Normalize();
+
+                float sqw = quat.W * quat.W;
+                float sqx = quat.I * quat.I;
+                float sqy = quat.J * quat.J;
+                float sqz = quat.K * quat.K;
+                // use quaternion -> rotation matrix instead later on
+                RealVector3d inverseForward = new RealVector3d((sqx - sqy - sqz + sqw), 2.0f * (quat.I * quat.J - quat.K * quat.W), 2.0f * (quat.I * quat.K + quat.J * quat.W));
+                RealVector3d inverseLeft = new RealVector3d(2.0f * (quat.I * quat.J + quat.K * quat.W), (-sqx + sqy - sqz + sqw), 2.0f * (quat.J * quat.K - quat.I * quat.W));
+                RealVector3d inverseUp = new RealVector3d(2.0f * (quat.I * quat.K - quat.J * quat.W), 2.0f * (quat.J * quat.K + quat.I * quat.W), (-sqx - sqy + sqz + sqw));
+
+                mode.Nodes.Add(new RenderModel.Node
+                {
+                    Name = AddStringId(cache, node.Name),
+                    ParentNode = node.ParentNode,
+                    FirstChildNode = node.FirstChildNode,
+                    NextSiblingNode = node.NextSiblingNode,
+                    Flags = RenderModel.NodeFlags.None,
+                    DefaultTranslation = node.Translation,
+                    DefaultRotation = node.Rotation,
+                    DefaultScale = node.Scale,
+
+                    InverseForward = inverseForward,
+                    InverseLeft = inverseLeft,
+                    InverseUp = inverseUp,
+                    InversePosition = -1 * node.Translation,
+
+                    DistanceFromParent =  i == 0 ? 0.0f : RealPoint3d.Distance(node.Translation - Nodes[node.ParentNode].Translation)
+                });
+
+                
+
+                mode.RuntimeNodeOrientations.Add(new RenderModel.RuntimeNodeOrientation
+                {
+                    Rotation = node.Rotation,
+                    Scale = node.Scale,
+                    Translation = node.Translation
+                });
+            }
+
+            // set lighting
+
+            mode.UnknownSHProbes = new List<RenderModel.UnknownSHProbe>();
+            mode.SHBlue = DefaultLighting.SHBlue;
+            mode.SHRed = DefaultLighting.SHRed;
+            mode.SHGreen = DefaultLighting.SHGreen;
+            foreach(var lightProbe in LightProbes)
+            {
+                mode.UnknownSHProbes.Add(new RenderModel.UnknownSHProbe
+                {
+                    Position = lightProbe.Position,
+                    Coefficients = lightProbe.Coefficients
+                });
+            }
+
+            // set permutations\region\meshes\markers
+
+
+
+            return mode;
+        }
+
+        private static StringId AddStringId(GameCache cache, string str)
+        {
+            var stringId = cache.StringTable.GetStringId(str);
+
+            if (stringId == StringId.Invalid)
+            {
+                stringId = cache.StringTable.AddString(str);
+                cache.SaveStrings();
+            }
+
+            return stringId;
+        }
+
+        public bool InitGen3(GameCache cache, RenderModel mode)
+        {
+            Name = cache.StringTable.GetString(mode.Name);
+
+            Dictionary<int, string> meshNames = new Dictionary<int, string>();
+
+            // build mesh index -> name mapping
+            foreach (var region in mode.Regions)
+            {
+                var regionName = cache.StringTable.GetString(region.Name);
+                foreach (var permutation in region.Permutations)
+                {
+                    var permutationName = cache.StringTable.GetString(permutation.Name);
+
+                    if (permutation.MeshCount > 1)
+                    {
+                        Console.WriteLine("Multi mesh per permutation not supported yet");
+                        return false;
+                    }
+
+                    var name = $"{regionName}:{permutationName}";
+                    if (!meshNames.ContainsKey(permutation.MeshIndex))
+                        meshNames[permutation.MeshIndex] = name;
+                    else
+                    {
+                        Console.WriteLine("Mesh is used twice for different permutations, not supported");
+                        return false;
+                    }
+                }
+            }
+
+            // build list of nodes
+            Nodes = new List<GeometryNode>();
+            foreach (var node in mode.Nodes)
+            {
+                var geometryNode = new GeometryNode
+                {
+                    Name = cache.StringTable.GetString(node.Name),
+                    ParentNode = node.ParentNode,
+                    NextSiblingNode = node.NextSiblingNode,
+                    FirstChildNode = node.FirstChildNode,
+                    Unused = 0,
+                    Translation = node.DefaultTranslation,
+                    Rotation = node.DefaultRotation,
+                    Scale = node.DefaultScale
+                };
+                Nodes.Add(geometryNode);
+            }
+
+            // build list of materials
+            Materials = new List<GeometryMaterial>();
+            for (int i = 0; i < mode.Materials.Count; i++)
+            {
+                var material = mode.Materials[i];
+                string name = $"material_{i}";
+                if (material.RenderMethod.Name != null)
+                    name = material.RenderMethod.Name.Split('\\').Last();
+
+                Materials.Add(new GeometryMaterial { Name = name });
+
+            }
+
+            // set SH coefficients
+            DefaultLighting = new SHLightingOrder3
+            {
+                SHRed = mode.SHRed,
+                SHBlue = mode.SHBlue,
+                SHGreen = mode.SHGreen
+            };
+
+            LightProbes = new List<GeometryLightProbes>();
+
+            foreach (var lightProbe in mode.UnknownSHProbes)
+            {
+                LightProbes.Add(new GeometryLightProbes
+                {
+                    Position = lightProbe.Position,
+                    Coefficients = lightProbe.Coefficients
+                });
+            }
+        
+            BoundingSpheres = mode.Geometry.BoundingSpheres;
+
+
+
+            return true;
+        }
     }
 
     [TagStructure(Size = 0xC0)]
@@ -152,5 +340,14 @@ namespace TagTool.Tools.Geometry
         public IndexBufferFormat Format;
         public int FaceCount;
         public byte[] Data; // custom index buffer with material index for each face perhaps
+    }
+
+
+    [TagStructure(Size = 0x150)]
+    public class GeometryLightProbes
+    {
+        public RealPoint3d Position;
+        [TagField(Length = 81)]
+        public float[] Coefficients = new float[81];
     }
 }
