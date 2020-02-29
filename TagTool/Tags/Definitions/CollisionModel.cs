@@ -64,7 +64,7 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
 
                 public List<Bsp> Bsps;
-                public List<BspPhysicsBlock> BspPhysics;
+                public List<CollisionBspPhysicsDefinition> BspPhysics;
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public List<TagHkpMoppCode> BspMoppCodes;
@@ -80,14 +80,6 @@ namespace TagTool.Tags.Definitions
                     public byte[] Unused = new byte[2];
 
                     public CollisionGeometry Geometry;
-                }
-
-                [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail)]
-                [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST)]
-                public class BspPhysicsBlock : TagStructure
-				{
-                    public CollisionGeometryShape GeometryShape;
-                    public HkpBvMoppTreeShape MoppBvTreeShape;
                 }
             }
         }

@@ -21,7 +21,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public uint CollisionBspAddress; // runtime
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint LargeCollisionBspAddress; // runtime
-        public byte Unknown1;
+        public sbyte BspIndex;
         public byte CollisionGeometryShapeType;
         public ushort CollisionGeometryShapeKey; // runtime
         public uint RuntimeData1; // runtime

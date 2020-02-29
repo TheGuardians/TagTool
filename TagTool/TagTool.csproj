@@ -472,6 +472,7 @@
     <Compile Include="Direct3D\Xbox360\D3DTexture9.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\BreakableSurface.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\CollisionBspPhysics.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\CollisionGeometryShape.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\InstancedGeometry.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\LargeCollisionGeometry.cs" />
