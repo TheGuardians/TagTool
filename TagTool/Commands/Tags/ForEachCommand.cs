@@ -125,62 +125,67 @@ namespace TagTool.Commands.Tags
                 commandsToExecute.Add(args);
             }
 
-            IEnumerable<CachedTag> tags = null;
+            List<CachedTag> tags = null;
 
             // if a file is given use that as the source for tags
             if (!string.IsNullOrWhiteSpace(filename))
             {
                 var tagsList = new List<CachedTag>();
                 foreach (var line in File.ReadAllLines(filename))
-                    tagsList.Add(Cache.GetTag(line));
+                    tags.Add(Cache.GetTag(line));
 
                 tags = tagsList;
             }
             else
             {
-                tags = Cache.TagCache.NonNull();
+                tags = Cache.TagCache.NonNull().ToList();
             }
 
             var rootContext = ContextStack.Context;
 
-            using (var stream = Cache.OpenCacheReadWrite())
+
+            foreach (var instance in tags)
             {
-                foreach (var instance in tags)
+                if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
+                    continue;
+
+                var tagName = instance.Name ?? $"0x{instance.Index:X4}";
+
+                try
                 {
-                    if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
+                    if (pattern != null && !Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
                         continue;
+                }
+                catch
+                {
+                    continue;
+                }
 
-                    var tagName = instance.Name ?? $"0x{instance.Index:X4}";
+                if (!tagName.StartsWith(startFilter) || !tagName.Contains(filter) || !tagName.EndsWith(endFilter))
+                    continue;
 
-                    try
-                    {
-                        if (pattern != null && !Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
-                            continue;
-                    }
-                    catch
-                    {
-                        continue;
-                    }
+                object definition = null;
+                using (var stream = Cache.OpenCacheRead())
+                    definition = Cache.Deserialize(stream, instance);
 
-                    if (!tagName.StartsWith(startFilter) || !tagName.Contains(filter) || !tagName.EndsWith(endFilter))
-                        continue;
 
-                    var definition = Cache.Deserialize(stream, instance);
-                    ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
+                ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
 
-                    Console.WriteLine();
-                    Console.WriteLine($"{tagName}.{Cache.StringTable.GetString(instance.Group.Name)}:");
-                    ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
+                Console.WriteLine();
+                Console.WriteLine($"{tagName}.{Cache.StringTable.GetString(instance.Group.Name)}:");
+                ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
 
-                    while (ContextStack.Context != rootContext) ContextStack.Pop();
+                while (ContextStack.Context != rootContext) ContextStack.Pop();
 
-                    if (!isConst)
+                if (!isConst)
+                {
+                    using (var stream = Cache.OpenCacheWrite())
                         Cache.Serialize(stream, instance, definition);
                 }
 
-                Console.WriteLine();
             }
 
+            Console.WriteLine();
             return true;
         }
     }
