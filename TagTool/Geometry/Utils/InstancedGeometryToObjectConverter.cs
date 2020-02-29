@@ -94,7 +94,7 @@ namespace TagTool.Geometry.Utils
             var renderModel = GenerateRenderModel(instancedGeometryInstance.MeshIndex);
             var collisionModel = GenerateCollisionModel(modelTag, instanceIndex);
             var model = GenerateModel(renderModel, collisionModel, instanceIndex);
-            var gameObject = GenerateObject(instanceIndex);
+            var gameObject = GenerateObject(instanceIndex, ComputeRenderModelEnclosingRadius(renderModel));
 
             // fixcup tag refs
             model.CollisionModel = collisionModelTag;
@@ -110,23 +110,20 @@ namespace TagTool.Geometry.Utils
             return scenTag;
         }
 
-        private GameObject GenerateObject(int instancedGeometryInstanceIndex)
+        private GameObject GenerateObject(int instancedGeometryInstanceIndex, float boundingSphere)
         {
-            var instancedGometryIndex = StructureBsp.InstancedGeometryInstances[instancedGeometryInstanceIndex].MeshIndex;
-
             var scenery = new Scenery()
             {
                 ObjectType = new GameObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery }, // TODO: generic object type
-                BoundingRadius = Math.Min(1, StructureBspResources.InstancedGeometry[instancedGometryIndex].BoundingSphereRadius) * 4.0f,
+                BoundingRadius = boundingSphere,
                 AccelerationScale = 1.0f,
-                SweetenerSize = GameObject.SweetenerSizeValue.Large
-            };
-
-            // add multiplayer object properties
-            scenery.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>()
+                SweetenerSize = GameObject.SweetenerSizeValue.Large,
+                MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>()
                 {
                     new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 60 }
-                };
+                },
+                SceneryFlags = Scenery.SceneryFlagBits.PhysicallySimulates // static/dynamic lighting updates
+            };
 
             return scenery;
         }
@@ -139,27 +136,51 @@ namespace TagTool.Geometry.Utils
 
             // add the collision regions/permutations
             model.CollisionRegions = new List<Model.CollisionRegion>();
-            for (var regionIndex = 0; regionIndex < collisionModel.Regions.Count; regionIndex++)
+            if (collisionModel.Regions != null && collisionModel.Regions.Count > 0)
             {
-                var collisionRegion = collisionModel.Regions[regionIndex];
-                var modelRegion = new Model.CollisionRegion()
+                for (var regionIndex = 0; regionIndex < collisionModel.Regions.Count; regionIndex++)
                 {
-                    Name = collisionRegion.Name,
-                    Permutations = new List<Model.CollisionRegion.Permutation>()
-                };
-
-                for (var permIndex = 0; permIndex < collisionRegion.Permutations.Count; permIndex++)
-                {
-                    var collisionPermutation = collisionRegion.Permutations[permIndex];
-                    modelRegion.Permutations.Add(new Model.CollisionRegion.Permutation()
+                    var collisionRegion = collisionModel.Regions[regionIndex];
+                    var modelRegion = new Model.CollisionRegion()
                     {
-                        Name = collisionPermutation.Name,
-                        CollisionPermutationIndex = (sbyte)permIndex,
-                        PhysicsPermutationIndex = (sbyte)permIndex
-                    });
-                }
+                        Name = collisionRegion.Name,
+                        Permutations = new List<Model.CollisionRegion.Permutation>()
+                    };
 
-                model.CollisionRegions.Add(modelRegion);
+                    for (var permIndex = 0; permIndex < collisionRegion.Permutations.Count; permIndex++)
+                    {
+                        var collisionPermutation = collisionRegion.Permutations[permIndex];
+                        modelRegion.Permutations.Add(new Model.CollisionRegion.Permutation()
+                        {
+                            Name = collisionPermutation.Name,
+                            CollisionPermutationIndex = (sbyte)permIndex,
+                            PhysicsPermutationIndex = (sbyte)permIndex
+                        });
+                    }
+
+                    model.CollisionRegions.Add(modelRegion);
+                }
+            }
+            else
+            {
+                model.CollisionRegions = new List<Model.CollisionRegion>()
+                {
+                    new Model.CollisionRegion()
+                    {
+                        Name = DestCache.StringTable.GetStringId("default"),
+                        CollisionRegionIndex = -1,
+                        PhysicsRegionIndex = 0,
+                        Permutations = new List<Model.CollisionRegion.Permutation>()
+                        {
+                            new Model.CollisionRegion.Permutation()
+                            {
+                                Name = DestCache.StringTable.GetStringId("default"),
+                                CollisionPermutationIndex = -1,
+                                PhysicsPermutationIndex = 0
+                            }
+                        }
+                    }
+                };
             }
 
             // add the collision materials to the model
@@ -210,18 +231,22 @@ namespace TagTool.Geometry.Utils
         private CollisionModel GenerateCollisionModel(CachedTag modelTag, int instancedGeometryInstanceIndex)
         {
             var collisionModel = new CollisionModel();
+            collisionModel.Regions = new List<CollisionModel.Region>();
+
             var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[instancedGeometryInstanceIndex];
             var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.MeshIndex];
 
-            var permutation = new CollisionModel.Region.Permutation()
+            if (instancedGeometryInstance.BspPhysics.Count > 0)
             {
-                Name = DestCache.StringTable.GetStringId("default"),
-                BspPhysics = new List<CollisionBspPhysicsDefinition>(),
-                BspMoppCodes = new List<TagTool.Havok.TagHkpMoppCode>(),
-                Bsps = new List<CollisionModel.Region.Permutation.Bsp>()
-            };
+                var permutation = new CollisionModel.Region.Permutation()
+                {
+                    Name = DestCache.StringTable.GetStringId("default"),
+                    BspPhysics = new List<CollisionBspPhysicsDefinition>(),
+                    BspMoppCodes = new List<TagTool.Havok.TagHkpMoppCode>(),
+                    Bsps = new List<CollisionModel.Region.Permutation.Bsp>()
+                };
 
-            collisionModel.Regions = new List<CollisionModel.Region>()
+                collisionModel.Regions = new List<CollisionModel.Region>()
             {
                 new CollisionModel.Region()
                 {
@@ -230,42 +255,43 @@ namespace TagTool.Geometry.Utils
                 }
             };
 
-            // copy over and fixup bsp physics blocks
-            foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
-            {
-                bspPhysics.GeometryShape.Model = modelTag;
-                bspPhysics.GeometryShape.BspIndex = -1;
-                bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
-                bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
-                permutation.BspPhysics.Add(bspPhysics);
+                // copy over and fixup bsp physics blocks
+                foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
+                {
+                    bspPhysics.GeometryShape.Model = modelTag;
+                    bspPhysics.GeometryShape.BspIndex = -1;
+                    bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
+                    bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
+                    permutation.BspPhysics.Add(bspPhysics);
+                }
+
+                foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
+                    permutation.BspMoppCodes.Add(mopp);
+
+
+                // fixup surfaces materials block
+                // build a mapping of surface material indices to collision materials
+                var newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
+
+                foreach (var surface in newCollisionGeometry.Surfaces)
+                {
+                    if (surface.MaterialIndex == -1)
+                        continue;
+
+                    short modelMaterialIndex;
+                    if (!CollisionMaterialMapping.TryGetValue(surface.MaterialIndex, out modelMaterialIndex))
+                        CollisionMaterialMapping.Add(surface.MaterialIndex, modelMaterialIndex);
+
+                    surface.MaterialIndex = modelMaterialIndex;
+                }
+
+                // add the collision geometry
+                permutation.Bsps.Add(new CollisionModel.Region.Permutation.Bsp()
+                {
+                    NodeIndex = 0,
+                    Geometry = newCollisionGeometry
+                });
             }
-
-            foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
-                permutation.BspMoppCodes.Add(mopp);
-
-
-            // fixup surfaces materials block
-            // build a mapping of surface material indices to collision materials
-            var newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
-
-            foreach (var surface in newCollisionGeometry.Surfaces)
-            {
-                if (surface.MaterialIndex == -1)
-                    continue;
-
-                short modelMaterialIndex;
-                if (!CollisionMaterialMapping.TryGetValue(surface.MaterialIndex, out modelMaterialIndex))
-                    CollisionMaterialMapping.Add(surface.MaterialIndex, modelMaterialIndex);
-
-                surface.MaterialIndex = modelMaterialIndex;
-            }
-
-            // add the collision geometry
-            permutation.Bsps.Add(new CollisionModel.Region.Permutation.Bsp()
-            {
-                NodeIndex = 0,
-                Geometry = newCollisionGeometry
-            });
 
             return collisionModel;
         }
@@ -332,6 +358,8 @@ namespace TagTool.Geometry.Utils
                 {
                     Lbsp.Geometry.Compression[instancedGeometryDef.CompressionIndex]
                 };
+            renderModel.Compression = renderModel.Geometry.Compression;
+
 
             //copy over materials block, and reindex mesh part materials
 
@@ -355,6 +383,24 @@ namespace TagTool.Geometry.Utils
             }
 
             renderModel.Materials = newmaterials;
+
+            //copy over "bounding spheres" block, and reindex
+            var newBoundingSpheres = new List<RenderGeometry.BoundingSphere>();
+            for (int i = 0; i < renderModel.Geometry.Meshes.Count; i++)
+            {
+                var mesh = renderModel.Geometry.Meshes[i];
+                for (int j = 0; j < mesh.Parts.Count; j++)
+                {
+                    var part = mesh.Parts[j];
+                    if (part.TransparentSortingIndex == -1)
+                        continue;
+
+                    var newIndex = (short)newBoundingSpheres.Count;
+                    newBoundingSpheres.Add(Lbsp.Geometry.BoundingSpheres[part.TransparentSortingIndex]);
+                    part.TransparentSortingIndex = newIndex;
+                }
+            }
+            renderModel.Geometry.BoundingSpheres = newBoundingSpheres;
 
             return renderModel;
         }
@@ -409,6 +455,14 @@ namespace TagTool.Geometry.Utils
             }
 
             return result;
+        }
+
+        private static float ComputeRenderModelEnclosingRadius(RenderModel model)
+        {
+            var compressionInfo = model.Geometry.Compression[0];
+            return Math.Max(compressionInfo.X.Length, 
+                compressionInfo.Y.Length > compressionInfo.Z.Length ?
+                compressionInfo.Y.Length : compressionInfo.Z.Length) * 2.0f;
         }
     }
 }
