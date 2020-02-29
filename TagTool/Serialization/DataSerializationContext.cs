@@ -12,6 +12,7 @@ namespace TagTool.Serialization
         public EndianReader Reader { get; }
         public EndianWriter Writer { get; }
         public CacheAddressType AddressType { get; }
+        public uint MainStructOffset;
 
         public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
         {
@@ -57,6 +58,7 @@ namespace TagTool.Serialization
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
         {
             Writer.Write(data);
+            MainStructOffset = mainStructOffset;
         }
 
         public CachedTag GetTagByIndex(int index)

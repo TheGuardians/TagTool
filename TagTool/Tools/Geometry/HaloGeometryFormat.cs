@@ -8,25 +8,28 @@ using TagTool.Tags;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
+using System.IO;
+using TagTool.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Tools.Geometry
 {
-
     /// <summary>
     /// Generic render geometry class for interfacing with other tools. Based on gen3 formats but should support any halo engine. Names\file extension temporary
     /// </summary>
-    [TagStructure(Size = 0x10)]
-    public class HaloGeometryFormatHeader
+    [TagStructure()]
+    public class HaloGeometryFormatHeader : TagStructure
     {
         public Tag Signature = new Tag("hgf!"); // hgf! : halo geometry format!
         public GeometryFormatVersion Version;
         public GeometryFormatFlags Flags;
         public GeometryContentFlags ContentFlags;
+        public int Offset;
     }
 
     public static class HaloGeometryConstants
     {
-        public const int StringLength = 0x80;
+        public const int StringLength = 0x40;
     }
 
     public enum GeometryFormatVersion : int
@@ -54,11 +57,11 @@ namespace TagTool.Tools.Geometry
     /// <summary>
     /// TODO: parsing code to handle permutation/regions, per face material, marker groups/markers, vertex/index buffer handling
     /// </summary>
-    [TagStructure(Size = 0xB4)]
-    public class HaloGeometryFormat : HaloGeometryFormatHeader
+    [TagStructure()]
+    public class HaloGeometryFormat : TagStructure
     {
-        [TagField(Length = HaloGeometryConstants.StringLength)]
-        public string Name;
+        [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated =  true)]
+        public string Name = "default";
 
         public List<GeometryMaterial> Materials;
         public List<GeometryNode> Nodes;
@@ -67,6 +70,19 @@ namespace TagTool.Tools.Geometry
         public List<GeometryLightProbes> LightProbes;
         public List<RenderGeometry.BoundingSphere> BoundingSpheres;
 
+
+        public static void SerializeToFile(EndianWriter writer, HaloGeometryFormatHeader header, HaloGeometryFormat format)
+        {
+            var context = new DataSerializationContext(writer);
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+
+            writer.BaseStream.Position = 0x14;
+
+            serializer.Serialize(context, format);
+            header.Offset = (int)context.MainStructOffset + 0x14;
+            writer.BaseStream.Position = 0x0;
+            serializer.Serialize(context, header);
+        }
 
         public RenderModel GetGen3RenderModel(GameCache cache)
         {
@@ -194,7 +210,7 @@ namespace TagTool.Tools.Geometry
                     }
                 }
             }
-
+            /*
             // build list of nodes
             Nodes = new List<GeometryNode>();
             foreach (var node in mode.Nodes)
@@ -212,7 +228,7 @@ namespace TagTool.Tools.Geometry
                 };
                 Nodes.Add(geometryNode);
             }
-
+            */
             // build list of materials
             Materials = new List<GeometryMaterial>();
             for (int i = 0; i < mode.Materials.Count; i++)
@@ -233,7 +249,7 @@ namespace TagTool.Tools.Geometry
                 SHBlue = mode.SHBlue,
                 SHGreen = mode.SHGreen
             };
-
+            /*
             LightProbes = new List<GeometryLightProbes>();
 
             foreach (var lightProbe in mode.UnknownSHProbes)
@@ -247,7 +263,7 @@ namespace TagTool.Tools.Geometry
         
             BoundingSpheres = mode.Geometry.BoundingSpheres;
 
-
+            */
 
             return true;
         }
@@ -267,14 +283,14 @@ namespace TagTool.Tools.Geometry
     [TagStructure(Size = 0x80)]
     public class GeometryMaterial
     {
-        [TagField(Length = HaloGeometryConstants.StringLength)]
+        [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
     }
 
     [TagStructure(Size = 0xA8)]
     public class GeometryNode
     {
-        [TagField(Length = HaloGeometryConstants.StringLength)]
+        [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
 
         public short ParentNode;
@@ -290,7 +306,7 @@ namespace TagTool.Tools.Geometry
     [TagStructure(Size = 0xA4)]
     public class GeometryMarker
     {
-        [TagField(Length = HaloGeometryConstants.StringLength)]
+        [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
 
         public sbyte RegionIndex;
@@ -305,7 +321,7 @@ namespace TagTool.Tools.Geometry
     [TagStructure(Size = 0x140)]
     public class GeometryMesh
     {
-        [TagField(Length = HaloGeometryConstants.StringLength)]
+        [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
 
         public sbyte RigidNodeIndex; // when type == rigid this is the node that the mesh is attached to
