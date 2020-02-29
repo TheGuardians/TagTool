@@ -488,6 +488,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\IndexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
+    <Compile Include="Geometry\Utils\InstancedGeometryToObjectConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
@@ -909,9 +910,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Geometry\Utils\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
