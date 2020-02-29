@@ -17,7 +17,7 @@ namespace TagTool.Commands.Common
                   "RunCommands",
                   "Run commands from a file.",
 
-                  "RunCommands <file>",
+                  "RunCommands <file> [print]",
 
                   "Run commands from a file.")
         {
@@ -34,7 +34,7 @@ namespace TagTool.Commands.Common
             using (var stream = File.OpenText(args[0]))
             {
                for(string line; (line = stream.ReadLine()) != null && !commandRunner.EOF;)
-                    commandRunner.RunCommand(line);
+                    commandRunner.RunCommand(line, (args.Count >= 2 && args[1].ToLower() == "print"));
             }
 
             return true;

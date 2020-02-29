@@ -18,8 +18,17 @@ namespace TagTool.Commands.Common
             ContextStack = contextStack;
         }
 
-        public void RunCommand(string commandLine)
+        public void RunCommand(string commandLine, bool printInput)
         {
+            if (commandLine == null)
+            {
+                EOF = true;
+                return;
+            }
+
+            if (printInput)
+                Console.WriteLine(commandLine);
+
             var commandArgs = ArgumentParser.ParseCommand(commandLine, out string redirectFile);
             if (commandArgs.Count == 0)
                 return;

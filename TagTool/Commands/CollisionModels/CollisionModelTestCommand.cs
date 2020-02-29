@@ -4,6 +4,7 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Geometry;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.CollisionModels
@@ -42,9 +43,9 @@ namespace TagTool.Commands.CollisionModels
             // optional argument: forces overwriting of tags that are not type: coll
             var b_force = (args.Count >= 3 && args[2].ToLower().Equals("force"));
 
-            if (args[1].ToLower().Equals("new"))
+            if (args[1].ToLower().Equals("new") && TagGroup.Instances.TryGetValue("coll", out var collGroup))
             {
-                tag = Cache.TagCacheGenHO.AllocateTag(new TagTool.Tags.TagGroup("coll", null, null, Cache.StringTable.GetStringId("collision_model")));
+                tag = Cache.TagCacheGenHO.AllocateTag(collGroup);
             }
             else
             {

@@ -95,7 +95,7 @@ namespace TagTool.Commands
             // If autoexecuting a command, just run it and return
             if (autoexecCommand != null)
             {
-                commandRunner.RunCommand(string.Join(" ", autoexecCommand));
+                commandRunner.RunCommand(string.Join(" ", autoexecCommand), false);
                 goto end;
             }           
 
@@ -107,7 +107,7 @@ namespace TagTool.Commands
                 Console.Write("{0}> ", contextStack.GetPath());
                 Console.Title = $"TagTool {contextStack.GetPath()}>";
 
-                commandRunner.RunCommand(Console.ReadLine());
+                commandRunner.RunCommand(Console.ReadLine(), false);
             }
 
             end: return;
