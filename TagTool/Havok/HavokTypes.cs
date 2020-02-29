@@ -102,6 +102,15 @@ namespace TagTool.Havok
         public short Index;
     }
 
+    [TagStructure(Size = 0x10)]
+    public class HkpShapeCollection : HkpShape
+    {
+        public HkpShapeContainer Container;
+        public bool DisableWelding;
+        [TagField(Length = 11)]
+        public byte[] Padding;
+    }
+
     [TagStructure(Size = 0xC)]
     public class HkArrayBase : TagStructure
     {
