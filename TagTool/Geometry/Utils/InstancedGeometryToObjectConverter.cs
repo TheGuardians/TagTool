@@ -122,7 +122,7 @@ namespace TagTool.Geometry.Utils
                 {
                     new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 60 }
                 },
-                SceneryFlags = Scenery.SceneryFlagBits.PhysicallySimulates // static/dynamic lighting updates
+                // SceneryFlags = Scenery.SceneryFlagBits.PhysicallySimulates // static lighting updates (breaks player collision :/)
             };
 
             return scenery;
