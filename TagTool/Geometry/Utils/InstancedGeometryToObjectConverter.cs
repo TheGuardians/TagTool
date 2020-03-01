@@ -81,6 +81,10 @@ namespace TagTool.Geometry.Utils
 
         public CachedTag ConvertInstance(int instanceIndex)
         {
+            //return null tag and skip to next bsp if bsp resources is null
+            if (StructureBspResources == null)
+                return null;
+
             var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[instanceIndex];
 
             string instanceName = "";

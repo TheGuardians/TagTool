@@ -58,6 +58,10 @@ namespace TagTool.Commands.Scenarios
 
                         var objectTag = converter.ConvertInstance(instanceIndex);
 
+                        //if sbsp resource is null this tag will return null, and we skip to the next bsp
+                        if (objectTag == null)
+                            break;
+
                         var instanceName = "";
                         if (instance.Name != StringId.Invalid)
                             instanceName = CacheContext.StringTable.GetString(instance.Name);
