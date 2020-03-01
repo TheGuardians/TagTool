@@ -68,13 +68,28 @@ struct halo_geometry_format_header
     )
 )
 
+struct halo_material
+(
+	name = "",
+	
+	fn read stream = 
+	(
+		name = ReadFixedLengthString stream
+	),
+	
+	fn write stream =
+	(
+		
+	)
+)
+
 struct halo_geometry_format
 (
 	header = halo_geometry_format_header(),
 	name = "",
-    materials = tag_block(),
-    nodes = tag_block(),
-    meshes = tag_block(),
+    materials =#(),
+    nodes = #(),
+    meshes = #(),
     sh_order_3_red = #(),
     sh_order_3_green = #(),
     sh_order_3_blue = #(),
@@ -89,14 +104,31 @@ struct halo_geometry_format
 		fseek stream header.offset #seek_set
 		
 		name = ReadFixedLengthString stream
-        materials.read(stream)
-        nodes.read(stream)
-        meshes.read(stream)
+		
+		material_block = tag_block()
+		nodes_block = tag_block()
+		meshes_block = tag_block()
+		
+        material_block.read(stream)
+        nodes_block.read(stream)
+        meshes_block.read(stream)
+
         for i = 1 to 16 do sh_order_3_red[i] = ReadFloat stream
         for i = 1 to 16 do sh_order_3_green[i] = ReadFloat stream
         for i = 1 to 16 do sh_order_3_blue[i] = ReadFloat stream
         light_probes.read(stream)
         bounding_spheres.read(stream)
+		
+		fseek stream material_block.offset #seek_set
+
+		for i = 1 to material_block.count do
+		(
+			geometry_material = halo_material()
+			geometry_material.read(stream)
+			new_material = StandardMaterial()
+			new_material.name = geometry_material.name
+			materials[i] = new_material
+		)
     )
 
 )

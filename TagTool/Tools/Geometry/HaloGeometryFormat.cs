@@ -17,7 +17,7 @@ namespace TagTool.Tools.Geometry
     /// <summary>
     /// Generic render geometry class for interfacing with other tools. Based on gen3 formats but should support any halo engine. Names\file extension temporary
     /// </summary>
-    [TagStructure()]
+    [TagStructure(Size = 0x14)]
     public class HaloGeometryFormatHeader : TagStructure
     {
         public Tag Signature = new Tag("hgf!"); // hgf! : halo geometry format!
@@ -27,6 +27,7 @@ namespace TagTool.Tools.Geometry
         public int Offset;
     }
 
+    [TagStructure(Size = 0x40)]
     public static class HaloGeometryConstants
     {
         public const int StringLength = 0x40;
@@ -57,7 +58,7 @@ namespace TagTool.Tools.Geometry
     /// <summary>
     /// TODO: parsing code to handle permutation/regions, per face material, marker groups/markers, vertex/index buffer handling
     /// </summary>
-    [TagStructure()]
+    [TagStructure(Size = 0x13C)]
     public class HaloGeometryFormat : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated =  true)]
@@ -77,7 +78,7 @@ namespace TagTool.Tools.Geometry
             var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
 
             writer.BaseStream.Position = 0x14;
-
+            context.PointerOffset = 0x14;
             serializer.Serialize(context, format);
             header.Offset = (int)context.MainStructOffset + 0x14;
             writer.BaseStream.Position = 0x0;
@@ -270,7 +271,7 @@ namespace TagTool.Tools.Geometry
     }
 
     [TagStructure(Size = 0xC0)]
-    public class SHLightingOrder3
+    public class SHLightingOrder3 : TagStructure
     {
         [TagField(Length = 16)]
         public float[] SHRed = new float[SphericalHarmonics.Order3Count];
@@ -280,15 +281,15 @@ namespace TagTool.Tools.Geometry
         public float[] SHBlue = new float[SphericalHarmonics.Order3Count];
     }
 
-    [TagStructure(Size = 0x80)]
-    public class GeometryMaterial
+    [TagStructure(Size = 0x40)]
+    public class GeometryMaterial : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
     }
 
     [TagStructure(Size = 0xA8)]
-    public class GeometryNode
+    public class GeometryNode : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
@@ -304,7 +305,7 @@ namespace TagTool.Tools.Geometry
     }
 
     [TagStructure(Size = 0xA4)]
-    public class GeometryMarker
+    public class GeometryMarker : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
@@ -319,7 +320,7 @@ namespace TagTool.Tools.Geometry
     }
 
     [TagStructure(Size = 0x140)]
-    public class GeometryMesh
+    public class GeometryMesh : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
