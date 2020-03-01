@@ -251,7 +251,7 @@ namespace TagTool.Tools.Geometry
                 SHGreen = mode.SHGreen
             };
 
-            /*
+            
             LightProbes = new List<GeometryLightProbes>();
 
             foreach (var lightProbe in mode.UnknownSHProbes)
@@ -262,10 +262,11 @@ namespace TagTool.Tools.Geometry
                     Coefficients = lightProbe.Coefficients
                 });
             }
-        
-            BoundingSpheres = mode.Geometry.BoundingSpheres;
 
-            */
+            
+            BoundingSpheres = mode.Geometry.BoundingSpheres;
+            
+            
 
             return true;
         }

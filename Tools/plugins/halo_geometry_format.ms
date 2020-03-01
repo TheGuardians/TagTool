@@ -136,6 +136,67 @@ struct halo_node
 	)
 )
 
+struct light_probe
+(
+	probe_position = point3 0 0 0,
+	coefficients = #(),
+	
+	fn read stream =
+	(
+		probe_position	= point3 (ReadFloat stream) (ReadFloat stream) (ReadFloat stream)
+		for i = 1 to 81 do coefficients[i] = ReadFloat stream
+	),
+	
+	fn write stream =
+	(
+		WriteFloat stream probe_position.x
+		WriteFloat stream probe_position.y
+		WriteFloat stream probe_position.z
+		for i = 1 to 81 do  WriteFloat stream coefficients[i]
+	)
+)
+
+struct bounding_sphere
+(
+	plane_normal = point3 0 0 0,
+	plane_distance = 0.0,
+	sphere_position = point3 0 0 0,
+	radius = 1.0,
+	node_indices = #(),
+	node_weights = #(),
+	
+	fn read stream =
+	(
+		plane_normal	= point3 (ReadFloat stream) (ReadFloat stream) (ReadFloat stream)
+		plane_distance = ReadFloat stream
+		sphere_position	= point3 (ReadFloat stream) (ReadFloat stream) (ReadFloat stream)
+		radius = ReadFloat stream
+		
+		for i = 1 to 4 do node_indices[i] = ReadByte stream #signed
+		sum_weights = 0
+		for i = 1 to 3 do
+		(
+			node_weights[i] = ReadFloat stream
+			sum_weights += node_weights[i] 
+		)			
+		node_weights[4] = 1.0 - sum_weights
+	),
+	
+	fn write stream =
+	(
+		WriteFloat stream plane_normal.x
+		WriteFloat stream plane_normal.y
+		WriteFloat stream plane_normal.z
+		WriteFloat stream plane_distance
+		WriteFloat stream sphere_position.x
+		WriteFloat stream sphere_position.y
+		WriteFloat stream sphere_position.z
+		WriteFloat stream radius
+		for i = 1 to 4 do WriteByte stream node_indices[i] #signed
+		for i = 1 to 3 do WriteFloat stream node_weights[i] 
+	)
+)
+
 struct halo_geometry_format
 (
 	header = halo_geometry_format_header(),
@@ -146,8 +207,8 @@ struct halo_geometry_format
     sh_order_3_red = #(),
     sh_order_3_green = #(),
     sh_order_3_blue = #(),
-    light_probes = tag_block(),
-    bounding_spheres = tag_block(),
+    light_probes = #(),
+    bounding_spheres = #(),
 
     fn read stream =
     (
@@ -161,6 +222,8 @@ struct halo_geometry_format
 		material_block = tag_block()
 		nodes_block = tag_block()
 		meshes_block = tag_block()
+		light_probes_block = tag_block()
+		bounding_spheres_block = tag_block()
 		
         material_block.read(stream)
         nodes_block.read(stream)
@@ -169,9 +232,10 @@ struct halo_geometry_format
         for i = 1 to 16 do sh_order_3_red[i] = ReadFloat stream
         for i = 1 to 16 do sh_order_3_green[i] = ReadFloat stream
         for i = 1 to 16 do sh_order_3_blue[i] = ReadFloat stream
-        light_probes.read(stream)
-        bounding_spheres.read(stream)
-		
+			
+        light_probes_block.read(stream)
+        bounding_spheres_block.read(stream)
+		-- parse materials
 		fseek stream material_block.offset #seek_set
 
 		for i = 1 to material_block.count do
@@ -182,7 +246,7 @@ struct halo_geometry_format
 			new_material.name = geometry_material.name
 			materials[i] = new_material
 		)
-		
+		-- parse nodes
 		fseek stream nodes_block.offset #seek_set
 
 		for i = 1 to nodes_block.count do
@@ -215,6 +279,39 @@ struct halo_geometry_format
 			
 			nodes[i] = new_bone
 		)
+		
+		--parse light probes
+		
+		fseek stream light_probes_block.offset #seek_set
+		
+		for i = 1 to light_probes_block.count do
+		(
+			probe = light_probe()
+			probe.read(stream)
+			light_probes[i] = probe
+		)
+		
+		--parse bounding spheres
+		
+		fseek stream bounding_spheres_block.offset #seek_set
+		
+		for i = 1 to bounding_spheres_block.count do
+		(
+			bs = bounding_sphere()
+			bs.read(stream)
+
+			attached_node = nodes[bs.node_indices[1] + 1] -- base 0 to base 1 index
+			in coordsys attached_node
+			(
+				new_bs = sphere pos:bs.sphere_position
+				new_bs.radius = bs.radius
+				new_bs.radius *= import_scale_factor
+				new_bs.parent = attached_node
+				new_bs.name = "bounding_sphere_" + (i as string)
+				bounding_spheres[i] = new_bs
+			)
+		)
+		
     )
 
 )
