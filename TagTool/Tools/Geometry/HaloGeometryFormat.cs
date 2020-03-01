@@ -211,7 +211,7 @@ namespace TagTool.Tools.Geometry
                     }
                 }
             }
-            /*
+            
             // build list of nodes
             Nodes = new List<GeometryNode>();
             foreach (var node in mode.Nodes)
@@ -229,7 +229,7 @@ namespace TagTool.Tools.Geometry
                 };
                 Nodes.Add(geometryNode);
             }
-            */
+            
             // build list of materials
             Materials = new List<GeometryMaterial>();
             for (int i = 0; i < mode.Materials.Count; i++)
@@ -250,6 +250,7 @@ namespace TagTool.Tools.Geometry
                 SHBlue = mode.SHBlue,
                 SHGreen = mode.SHGreen
             };
+
             /*
             LightProbes = new List<GeometryLightProbes>();
 
@@ -288,7 +289,7 @@ namespace TagTool.Tools.Geometry
         public string Name;
     }
 
-    [TagStructure(Size = 0xA8)]
+    [TagStructure(Size = 0x68)]
     public class GeometryNode : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
@@ -304,7 +305,7 @@ namespace TagTool.Tools.Geometry
         public float Scale;
     }
 
-    [TagStructure(Size = 0xA4)]
+    [TagStructure(Size = 0x64)]
     public class GeometryMarker : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]

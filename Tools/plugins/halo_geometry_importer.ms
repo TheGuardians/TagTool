@@ -18,9 +18,10 @@ fn read_file filename =
 		
 		print("Model name: " + halo_model.name)
 
-		for item in halo_model.sh_order_3_red do print(item)
+		--for item in halo_model.sh_order_3_red do print(item)
 		
-		for item in halo_model.materials do print(item.name)
+		--for item in halo_model.materials do print(item.name)
+		-- for item in halo_model.nodes do print(item.name)
 		
 		format "Last Read @ 0x%\n" (bit.intAsHex((ftell f) as integer))
 		fclose f
