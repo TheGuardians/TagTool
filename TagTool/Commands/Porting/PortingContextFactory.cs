@@ -53,6 +53,7 @@ namespace TagTool.Commands.Porting
                 context.AddCommand(new PortMultiplayerEventsCommand(hoCache, portingCache));
                 context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand));
                 context.AddCommand(new MatchTemplateCommand(hoCache, portingCache));
+                context.AddCommand(new PortInstancedGeometryObjectCommand(hoCache, portingCache));
             }
         }
     }
