@@ -40,7 +40,7 @@ namespace TagTool.Commands.Scenarios
                 {
                     var sbsp = (ScenarioStructureBsp)CacheContext.Deserialize(stream, Scnr.StructureBsps[sbspindex].StructureBsp);
 
-                    var converter = new InstancedGeometryToObjectConverter(CacheContext, stream, CacheContext, stream, Scnr, sbspindex);
+                    var converter = new InstancedGeometryToObjectConverter((GameCacheHaloOnlineBase)CacheContext, stream, CacheContext, stream, Scnr, sbspindex);
                     
                     var converted = new HashSet<short>();
                     for (int instanceIndex = 0; instanceIndex  < sbsp.InstancedGeometryInstances.Count; instanceIndex++)

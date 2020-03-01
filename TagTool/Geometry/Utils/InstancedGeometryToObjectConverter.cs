@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Commands.Porting;
 using TagTool.Common;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags;
@@ -27,10 +28,10 @@ namespace TagTool.Geometry.Utils
         private ScenarioLightmapBspData Lbsp;
         private StructureBspTagResources StructureBspResources;
         private Dictionary<short, short> CollisionMaterialMapping;
-
+        public PortTagCommand PortTag { get; private set; }
 
         public InstancedGeometryToObjectConverter(
-            GameCache destCache, Stream destStream, GameCache sourceCache,
+            GameCacheHaloOnlineBase destCache, Stream destStream, GameCache sourceCache,
             Stream sourceStream, Scenario scenario, int structureBspIndex)
         {
             DestCache = destCache;
@@ -38,12 +39,23 @@ namespace TagTool.Geometry.Utils
             SourceCache = sourceCache;
             SourceStream = sourceStream;
             StructureBspIndex = structureBspIndex;
+            PortTag = new PortTagCommand(destCache, sourceCache);
+            PortTag.SetFlags(PortTagCommand.PortingFlags.Default);
 
             Scenario = scenario;
             StructureBspIndex = structureBspIndex;
             StructureBsp = SourceCache.Deserialize<ScenarioStructureBsp>(SourceStream, Scenario.StructureBsps[structureBspIndex].StructureBsp);
             sLdT = SourceCache.Deserialize<ScenarioLightmap>(SourceStream, Scenario.Lightmap);
-            Lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, sLdT.LightmapDataReferences[StructureBspIndex]);
+
+            if(SourceCache.Version >= CacheVersion.Halo3ODST)
+            {
+                Lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, sLdT.LightmapDataReferences[StructureBspIndex]);
+            }
+            else
+            {
+                Lbsp = sLdT.Lightmaps[StructureBspIndex];
+            }
+           
             var resourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
             Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
 
@@ -100,7 +112,7 @@ namespace TagTool.Geometry.Utils
             var modelTag = DestCache.TagCache.AllocateTag<Model>(tagName);
 
             // generate the definitions
-            var renderModel = GenerateRenderModel(instancedGeometryInstance.MeshIndex);
+            var renderModel = GenerateRenderModel(instanceIndex);
             var collisionModel = GenerateCollisionModel(modelTag, instanceIndex);
             var model = GenerateModel(renderModel, collisionModel, instanceIndex);
             var gameObject = GenerateObject(instanceIndex, ComputeRenderModelEnclosingRadius(renderModel));
@@ -256,28 +268,28 @@ namespace TagTool.Geometry.Utils
                 };
 
                 collisionModel.Regions = new List<CollisionModel.Region>()
-            {
-                new CollisionModel.Region()
                 {
-                    Name = DestCache.StringTable.GetStringId("default"),
-                    Permutations = new List<CollisionModel.Region.Permutation>() { permutation }
-                }
-            };
+                    new CollisionModel.Region()
+                    {
+                        Name = DestCache.StringTable.GetStringId("default"),
+                        Permutations = new List<CollisionModel.Region.Permutation>() { permutation }
+                    }
+                };
 
                 // copy over and fixup bsp physics blocks
                 foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
                 {
-                    bspPhysics.GeometryShape.Model = modelTag;
-                    bspPhysics.GeometryShape.BspIndex = -1;
-                    bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
-                    bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
-                    permutation.BspPhysics.Add(bspPhysics);
+                    var convertedBspPhysics = ConvertData(bspPhysics);
+                    convertedBspPhysics.GeometryShape.Model = modelTag;
+                    convertedBspPhysics.GeometryShape.BspIndex = -1;
+                    convertedBspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
+                    convertedBspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
+                    permutation.BspPhysics.Add(convertedBspPhysics);
                 }
 
                 foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
-                    permutation.BspMoppCodes.Add(mopp);
-
-
+                    permutation.BspMoppCodes.Add(ConvertData(mopp));
+                    
                 // fixup surfaces materials block
                 // build a mapping of surface material indices to collision materials
                 var newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
@@ -305,16 +317,11 @@ namespace TagTool.Geometry.Utils
             return collisionModel;
         }
 
-        private RenderModel GenerateRenderModel(int instancedGeometryIndex)
+        private RenderModel GenerateRenderModel(int instanceIndex)
         {
             var renderModel = new RenderModel();
+            renderModel.Geometry = ConvertInstanceRenderGeometry(instanceIndex);
             renderModel.InstanceStartingMeshIndex = -1;
-
-            var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryIndex];
-            var newResourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, instancedGeometryDef.MeshIndex);
-
-            renderModel.Geometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(newResourceDefinition);
-
             renderModel.Nodes = new List<RenderModel.Node>();
             renderModel.Nodes.Add(new RenderModel.Node()
             {
@@ -330,7 +337,6 @@ namespace TagTool.Geometry.Utils
                 InverseUp = new RealVector3d(0, 0, 1),
                 InversePosition = new RealPoint3d(0, 0, 0)
             });
-
             renderModel.Regions = new List<RenderModel.Region>();
             renderModel.Regions.Add(new RenderModel.Region()
             {
@@ -347,7 +353,6 @@ namespace TagTool.Geometry.Utils
                        }
                     }
             });
-
             renderModel.RuntimeNodeOrientations = new List<RenderModel.RuntimeNodeOrientation>();
             renderModel.RuntimeNodeOrientations.Add(new RenderModel.RuntimeNodeOrientation()
             {
@@ -356,36 +361,22 @@ namespace TagTool.Geometry.Utils
                 Scale = 1.0f
             });
 
-            // copy meshes tagblock
-            renderModel.Geometry.Meshes = new List<Mesh>
-                {
-                    Lbsp.Geometry.Meshes[instancedGeometryDef.MeshIndex]
-                };
-
-            //copy compression tagblock
-            renderModel.Geometry.Compression = new List<RenderGeometryCompression>
-                {
-                    Lbsp.Geometry.Compression[instancedGeometryDef.CompressionIndex]
-                };
             renderModel.Compression = renderModel.Geometry.Compression;
-
 
             //copy over materials block, and reindex mesh part materials
 
             var materialMapping = new Dictionary<short, short>();
             var newmaterials = new List<RenderMaterial>();
-            for(int i = 0; i < renderModel.Geometry.Meshes.Count; i++)
-            {
-                var mesh = renderModel.Geometry.Meshes[i];
-                for(int j = 0; j < mesh.Parts.Count; j++)
-                {
-                    var part = mesh.Parts[j];
 
-                    short newMateiralIndex = -1;
-                    if(!materialMapping.TryGetValue(part.MaterialIndex, out newMateiralIndex))
+            foreach (var mesh in renderModel.Geometry.Meshes)
+            {
+                foreach (var part in mesh.Parts)
+                {
+                    short newMateiralIndex;
+                    if (!materialMapping.TryGetValue(part.MaterialIndex, out newMateiralIndex))
                     {
                         newMateiralIndex = (short)newmaterials.Count;
-                        newmaterials.Add(StructureBsp.Materials[part.MaterialIndex]);
+                        newmaterials.Add(ConvertData(StructureBsp.Materials[part.MaterialIndex]));
                     }
                     part.MaterialIndex = newMateiralIndex;
                 }
@@ -405,13 +396,80 @@ namespace TagTool.Geometry.Utils
                         continue;
 
                     var newIndex = (short)newBoundingSpheres.Count;
-                    newBoundingSpheres.Add(Lbsp.Geometry.BoundingSpheres[part.TransparentSortingIndex]);
+                    var datum = ConvertData(Lbsp.Geometry.BoundingSpheres[part.TransparentSortingIndex]);
+                    newBoundingSpheres.Add(datum);
                     part.TransparentSortingIndex = newIndex;
                 }
             }
             renderModel.Geometry.BoundingSpheres = newBoundingSpheres;
 
             return renderModel;
+        }
+
+        private RenderGeometry ConvertInstanceRenderGeometry(int instanceIndex)
+        {
+            var instance = StructureBsp.InstancedGeometryInstances[instanceIndex];
+            var instanceDef = StructureBspResources.InstancedGeometry[instance.MeshIndex];
+            var mesh = Lbsp.Geometry.Meshes[instanceDef.MeshIndex];
+
+            var resourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, instanceDef.MeshIndex);
+
+            var renderGeometry = new RenderGeometry();
+
+            renderGeometry.Unknown2 = new List<RenderGeometry.UnknownBlock>();
+            renderGeometry.Meshes = new List<Mesh>()
+            {
+                mesh
+            };
+            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>()
+            {
+                Lbsp.Geometry.MeshClusterVisibility[instance.MeshIndex]
+            };
+            renderGeometry.Compression = new List<RenderGeometryCompression>
+            {
+                Lbsp.Geometry.Compression[instanceDef.CompressionIndex]
+            };
+            renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
+
+            if (instance.LodDataIndex != -1)
+                renderGeometry.InstancedGeometryPerPixelLighting.Add(
+                    Lbsp.Geometry.InstancedGeometryPerPixelLighting[instance.LodDataIndex]);
+
+            if (SourceCache.Version != DestCache.Version)
+            {
+                var renderGeometryConverter = new RenderGeometryConverter(DestCache, SourceCache);
+                resourceDefinition = renderGeometryConverter.Convert(renderGeometry, resourceDefinition);
+
+                var staticPerVertexLighting = Lbsp.StaticPerVertexLightingBuffers[mesh.VertexBufferIndices[0]];
+                if (staticPerVertexLighting.VertexBufferIndex != -1)
+                {
+                    var blamResourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
+                    staticPerVertexLighting.VertexBuffer = blamResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
+                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, staticPerVertexLighting.VertexBuffer);
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
+                    resourceDefinition.VertexBuffers.Add(d3dPointer);
+                    // set the new buffer index
+                    staticPerVertexLighting.VertexBufferIndex = (short)(resourceDefinition.VertexBuffers.Elements.Count - 1);
+                }
+            }
+
+            renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
+
+            return renderGeometry;
+        }
+
+        private T ConvertData<T>(T data)
+        {
+            if (SourceCache.Version == DestCache.Version)
+                return data;
+
+            var resourceStreams = new Dictionary<ResourceLocation, Stream>();
+            data = (T)PortTag.ConvertData(DestStream, SourceStream, resourceStreams, data, null, "");
+            foreach (var stream in resourceStreams)
+                stream.Value.Close();
+
+            return data;
         }
 
         private static RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex)
