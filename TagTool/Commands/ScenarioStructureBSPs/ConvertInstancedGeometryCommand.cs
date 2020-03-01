@@ -58,7 +58,13 @@ namespace TagTool.Commands.Scenarios
 
                         var objectTag = converter.ConvertInstance(instanceIndex);
 
-                        Console.WriteLine($"Converting instance '{CacheContext.StringTable.GetString(instance.Name)}'...");
+                        var instanceName = "";
+                        if (instance.Name != StringId.Invalid)
+                            instanceName = CacheContext.StringTable.GetString(instance.Name);
+                        else
+                            instanceName = $"instance_{instanceIndex:000}";
+
+                        Console.WriteLine($"Converting instance '{instanceName}'...");
 
                         //add new object to forge globals
                         CachedTag forgeglobal = CacheContext.GetTag<ForgeGlobalsDefinition>(@"multiplayer\forge_globals");

@@ -71,8 +71,17 @@ namespace TagTool.Geometry.Utils
         {
             var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[instanceIndex];
 
-            var instanceName = SourceCache.StringTable.GetString(instancedGeometryInstance.Name);
-            instanceName = Regex.Replace(instanceName, @"[^a-zA-Z0-9_]", string.Empty);
+            string instanceName = "";
+            if (instancedGeometryInstance.Name == StringId.Invalid)
+            {
+                instanceName = $"instance_{instanceIndex:000}";
+            }
+            else
+            {
+                instanceName = SourceCache.StringTable.GetString(instancedGeometryInstance.Name);
+                instanceName = Regex.Replace(instanceName, @"[^a-zA-Z0-9_]", string.Empty);
+            }
+
             var scenarioFolder = Path.GetDirectoryName(Scenario.StructureBsps[StructureBspIndex].StructureBsp.Name);
             var tagName = $"objects\\{scenarioFolder}\\instanced\\{StructureBspIndex:00}_{instanceName}";
 
