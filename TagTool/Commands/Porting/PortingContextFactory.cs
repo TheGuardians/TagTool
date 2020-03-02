@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
                 Populate(contextStack, context, currentCache, portingCache);
 
             // add tags command to the new cache
-            TagCacheContextFactory.Populate(contextStack, context, portingCache);
+            TagCacheContextFactory.Populate(contextStack, context, currentCache);
 
             return context;
         }
