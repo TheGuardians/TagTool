@@ -763,6 +763,7 @@ namespace TagTool.Tags.Definitions
             public uint SeamBitVector;
             public RealPoint3d WorldBoundingSphereCenter;
             public Bounds<float> BoundingSphereRadiusBounds;
+            [TagField(Flags = Label)]
             public StringId Name;
             public Scenery.PathfindingPolicyValue PathfindingPolicy;
             public Scenery.LightmappingPolicyValue LightmappingPolicy;

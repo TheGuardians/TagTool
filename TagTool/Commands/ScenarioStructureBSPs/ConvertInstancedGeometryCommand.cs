@@ -40,7 +40,7 @@ namespace TagTool.Commands.Scenarios
                 {
                     var sbsp = (ScenarioStructureBsp)CacheContext.Deserialize(stream, Scnr.StructureBsps[sbspindex].StructureBsp);
 
-                    var converter = new InstancedGeometryToObjectConverter(CacheContext, stream, CacheContext, stream, Scnr, sbspindex);
+                    var converter = new InstancedGeometryToObjectConverter((GameCacheHaloOnlineBase)CacheContext, stream, CacheContext, stream, Scnr, sbspindex);
                     
                     var converted = new HashSet<short>();
                     for (int instanceIndex = 0; instanceIndex  < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
@@ -57,6 +57,10 @@ namespace TagTool.Commands.Scenarios
                         //string NewName = $"objects\\reforge\\instanced_geometry\\{currentmeshindex}";
 
                         var objectTag = converter.ConvertInstance(instanceIndex);
+
+                        //if sbsp resource is null this tag will return null, and we skip to the next bsp
+                        if (objectTag == null)
+                            break;
 
                         var instanceName = "";
                         if (instance.Name != StringId.Invalid)
