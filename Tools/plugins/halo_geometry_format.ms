@@ -5,10 +5,12 @@
 -- Halo Geometry Format Definitions
 --
 
+include "halo_vertex_formats.ms"
+
 global string_length = 0x40
 global import_scale_factor = 100.0
 global export_scale_factor = 1.0 / import_scale_factor
-
+global display_bounding_spheres = false
 --
 -- Helper functions to parse the file
 --
@@ -45,6 +47,30 @@ struct tag_block
     fn write stream =
     (
         WriteLong stream count
+        WriteLong stream offset
+        WriteLong stream 0
+    )
+)
+
+struct tag_data
+(
+	data_length = 0,
+	offset = 0,
+	
+	fn read stream =
+    (
+        data_length = ReadLong stream
+		ReadLong stream
+		ReadLong stream
+        offset = ReadLong stream
+        ReadLong stream
+    ),
+
+    fn write stream =
+    (
+        WriteLong stream data_length
+		WriteLong stream 0
+		WriteLong stream 0
         WriteLong stream offset
         WriteLong stream 0
     )
@@ -197,6 +223,170 @@ struct bounding_sphere
 	)
 )
 
+struct halo_vertex_buffer
+(
+	vertex_format = 0,
+	vertex_size = 0,
+	vertex_count = 0,
+	data_reference = tag_data(),
+	vertices = #(),
+	
+	vertex_positions = #(),
+	vertex_texcoords = #(),
+	vertex_normals = #(),
+	
+	
+	fn read stream =
+	(
+		vertex_format = ReadShort stream
+		vertex_size = ReadShort stream
+		vertex_count = ReadLong stream
+		data_reference.read(stream)
+		
+		stream_position = ftell stream
+		fseek stream data_reference.offset #seek_set
+		
+		for i = 1 to vertex_count do
+		(
+			new_vertex = undefined
+			if vertex_format == 2 then
+			(
+				new_vertex = rigid_vertex()
+				
+			)
+			else if vertex_format == 3 then
+			(
+				new_vertex = skinned_vertex()
+			)
+			vertices[i] = new_vertex.read(stream)
+			vertex_positions[i] = new_vertex.vertex_position * import_scale_factor
+			vertex_texcoords[i] = new_vertex.vertex_texcoord
+			vertex_normals[i] = new_vertex.vertex_normal
+		)
+		
+		fseek stream stream_position #seek_set
+	),
+	
+	fn write stream =
+	(
+		WriteShort vertex_format
+		WriteShort vertex_size
+		WriteLong vertex_count
+		data_reference.write(stream)
+		-- finish implementing later
+	)
+)
+
+struct halo_face
+(
+	indices = point3 0 0 0,
+	material_index = 0,
+	
+	fn read stream =
+	(
+		indices = point3 (ReadShort stream #unsigned) (ReadShort stream #unsigned) (ReadShort stream #unsigned)
+		material_index = ReadShort stream
+	),
+	
+	fn write stream =
+	(
+		WriteShort indices.x #unsigned
+		WriteShort indices.y #unsigned
+		WriteShort indices.z #unsigned
+		WriteShort material_index 
+	)
+)
+
+struct halo_face_buffer
+(
+	face_count = 0,
+	data_reference = tag_data(),
+	
+	faces = #(),
+	materials = #(),
+	
+	fn read stream =
+	(
+		face_count = ReadLong stream
+		data_reference.read(stream)
+		
+		stream_position = ftell stream
+		fseek stream data_reference.offset #seek_set
+		
+		for i = 1 to face_count do
+		(
+			new_face = halo_face()
+			new_face.read(stream)
+			faces[i] = new_face.indices + 1
+			materials[i] = new_face.material_index + 1
+		)
+		
+		fseek stream stream_position #seek_set
+	),
+	
+	fn write stream =
+	(
+		WriteLong face_count
+		data_reference.write(stream)
+		-- finish later
+	)
+)
+
+struct halo_mesh
+(
+	mesh_name = "",
+	rigid_node_index = -1,
+	vertex_type = 0,
+	prt_type = -1,
+	markers = tag_block(),
+	mesh_vertex_buffer = halo_vertex_buffer(),
+	bsp_mesh_vertex_buffer = halo_vertex_buffer(),
+	prt_vertex_buffer  = halo_vertex_buffer(),
+	water_mesh_vertex_buffer = halo_vertex_buffer(),
+	water_weights_vertex_buffer = halo_vertex_buffer(),
+	
+	face_buffer_1 = halo_face_buffer(),
+	face_buffer_2 = halo_face_buffer(),
+	
+	fn read stream =
+	(
+		mesh_name = ReadFixedLengthString stream
+		
+		rigid_node_index = ReadByte stream
+		vertex_type = ReadByte stream
+		prt_type = ReadByte stream
+		ReadByte stream
+		
+		markers.read(stream)
+		mesh_vertex_buffer.read(stream)
+		bsp_mesh_vertex_buffer.read(stream)
+		prt_vertex_buffer.read(stream)
+		water_mesh_vertex_buffer.read(stream)
+		water_weights_vertex_buffer.read(stream)
+		face_buffer_1.read(stream)
+		face_buffer_2.read(stream)
+	),
+	
+	fn write stream =
+	(
+		WriteFixedLengthString stream mesh_name
+		
+		WriteByte rigid_node_index
+		WriteByte vertex_type		
+		WriteByte prt_type
+		WriteByte 0
+		
+		markers.write(stream)
+		mesh_vertex_buffer.write(stream)
+		bsp_mesh_vertex_buffer.write(stream)
+		prt_vertex_buffer.write(stream)
+		water_mesh_vertex_buffer.write(stream)
+		water_weights_vertex_buffer.write(stream)
+		face_buffer_1.write(stream)
+		face_buffer_2.write(stream)
+	)
+)
+
 struct halo_geometry_format
 (
 	header = halo_geometry_format_header(),
@@ -292,18 +482,22 @@ struct halo_geometry_format
 		)
 		
 		--parse bounding spheres
-		
-		fseek stream bounding_spheres_block.offset #seek_set
-		
-		for i = 1 to bounding_spheres_block.count do
+		if(display_bounding_spheres) then
 		(
-			bs = bounding_sphere()
-			bs.read(stream)
-
-			attached_node = nodes[bs.node_indices[1] + 1] -- base 0 to base 1 index
-			in coordsys attached_node
+			fseek stream bounding_spheres_block.offset #seek_set
+		
+			for i = 1 to bounding_spheres_block.count do
 			(
+				bs = bounding_sphere()
+				bs.read(stream)
+				print(bs)
+				attached_node = nodes[bs.node_indices[1] + 1] -- base 0 to base 1 index
+				in coordsys attached_node
+				(
+					
+				)
 				new_bs = sphere pos:bs.sphere_position
+				new_bs.position *= import_scale_factor
 				new_bs.radius = bs.radius
 				new_bs.radius *= import_scale_factor
 				new_bs.parent = attached_node
@@ -311,6 +505,28 @@ struct halo_geometry_format
 				bounding_spheres[i] = new_bs
 			)
 		)
+		
+		fseek stream meshes_block.offset #seek_set
+		
+		for i = 1 to meshes_block.count do
+		(
+			new_halo_mesh = halo_mesh()
+			new_halo_mesh.read(stream)
+			
+			-- convert to max mesh
+
+			max_mesh = mesh vertices:new_halo_mesh.mesh_vertex_buffer.vertex_positions faces:new_halo_mesh.face_buffer_1.faces materialIDs:new_halo_mesh.face_buffer_1.materials  tverts:new_halo_mesh.mesh_vertex_buffer.vertex_texcoords
+			max_mesh.name = new_halo_mesh.mesh_name
+			
+			for j = 1 to new_halo_mesh.mesh_vertex_buffer.vertex_count do
+			(
+				setNormal max_mesh j new_halo_mesh.mesh_vertex_buffer.vertex_normals[j]
+			)
+			
+			meshes[i] = max_mesh
+			update max_mesh
+		)
+		
 		
     )
 

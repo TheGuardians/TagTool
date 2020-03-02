@@ -265,9 +265,131 @@ namespace TagTool.Tools.Geometry
 
             
             BoundingSpheres = mode.Geometry.BoundingSpheres;
-            
-            
 
+            Meshes = new List<GeometryMesh>();
+            for(int i = 0; i < mode.Geometry.Meshes.Count; i++)
+            {
+                var mesh = mode.Geometry.Meshes[i];
+                var geometryMesh = new GeometryMesh()
+                {
+                    Name = meshNames[i],
+                    RigidNodeIndex = mesh.RigidNodeIndex,
+                    Type = mesh.Type,
+                    PrtType = mesh.PrtType,
+                    IndexBufferType = mesh.IndexBufferType,
+                    Markers = new List<GeometryMarker>()
+                };
+
+                //
+                // Build index buffers
+                //
+
+                // material type -> index mapping
+
+                Dictionary<int, int> indexMaterialMapping = new Dictionary<int, int>();
+                int faceCount = 0;
+                int vertexCount = 0;
+
+                if (mesh.ResourceIndexBuffers[0] != null)
+                {
+                    var indexBuffer = mesh.ResourceIndexBuffers[0];
+                    geometryMesh.IndexBuffer1 = new GeometryIndexBuffer();
+                    using (var faceStream = new MemoryStream())
+                    using (var indexDataStream = new MemoryStream(indexBuffer.Data.Data))
+                    using(var writer = new EndianWriter(faceStream, EndianFormat.LittleEndian))
+                    {
+                        var indexStream = new IndexBufferStream(indexDataStream, cache.Endianness);
+
+                        foreach (var part in mesh.Parts)
+                        {
+                            indexStream.Position = part.FirstIndexOld;
+                            ushort[] indices = new ushort[0];
+
+                            switch (indexBuffer.Format)
+                            {
+                                case IndexBufferFormat.TriangleList:
+                                    indices = indexStream.ReadIndices(part.IndexCountOld);
+                                    break;
+                                case IndexBufferFormat.TriangleStrip:
+                                    indices = indexStream.ReadTriangleStrip(part.IndexCountOld);
+                                    break;
+                                default:
+                                    throw new InvalidOperationException("Unsupported index buffer type: " + indexBuffer.Format);
+                            }
+
+                            for(int j = 0; j < indices.Length; j += 3)
+                            {
+                                writer.Write(indices[j]);
+                                writer.Write(indices[j + 1]);
+                                writer.Write(indices[j + 2]);
+                                writer.Write((ushort)(part.MaterialIndex));
+                                faceCount++;
+                            }
+
+
+                            vertexCount += part.VertexCount;
+                        }
+                        geometryMesh.IndexBuffer1.Data = faceStream.ToArray();
+                        geometryMesh.IndexBuffer1.FaceCount = faceCount;
+                    }
+                }
+                else
+                    geometryMesh.IndexBuffer1 = null;
+
+                geometryMesh.IndexBuffer2 = null;
+
+
+                if (mesh.ResourceVertexBuffers[0] != null)
+                {
+                    var vertexBuffer = mesh.ResourceVertexBuffers[0];
+                    geometryMesh.MeshVertexBuffer = new GeometryVertexBuffer();
+                    var vertexCompressor = new VertexCompressor(mode.Geometry.Compression[0]);
+                    
+                    using (var newVertexStream = new MemoryStream())
+                    using (var vertexDataStream = new MemoryStream(vertexBuffer.Data.Data))
+                    {
+                        var vertexStream = VertexStreamFactory.Create(cache.Version, vertexDataStream);
+                        var outVertexStream = new VertexStreamInterop(newVertexStream);
+
+                        for(int j = 0; j < vertexCount; j++)
+                        {
+                            switch (vertexBuffer.Format)
+                            {
+                                case VertexBufferFormat.Rigid:
+                                    var rigid = vertexStream.ReadRigidVertex();
+
+                                    rigid.Position = vertexCompressor.DecompressPosition(rigid.Position);
+                                    rigid.Texcoord = vertexCompressor.DecompressUv(rigid.Texcoord);
+                                    outVertexStream.WriteRigidVertex(rigid);
+                                    break;
+
+                                case VertexBufferFormat.Skinned:
+                                    var world = vertexStream.ReadSkinnedVertex();
+
+                                    world.Position = vertexCompressor.DecompressPosition(world.Position);
+                                    world.Texcoord = vertexCompressor.DecompressUv(world.Texcoord);
+                                    outVertexStream.WriteSkinnedVertex(world);
+                                    break;
+                                default:
+                                    throw new InvalidOperationException("Unsupported vertex buffer type: " + vertexBuffer.Format);
+                            }
+                        }
+
+                        geometryMesh.MeshVertexBuffer.Data = newVertexStream.ToArray();
+                        geometryMesh.MeshVertexBuffer.VertexSize = (short)outVertexStream.GetVertexSize(vertexBuffer.Format);
+                        geometryMesh.MeshVertexBuffer.Format = vertexBuffer.Format;
+                        geometryMesh.MeshVertexBuffer.VertexCount = vertexCount;
+                    }
+                }
+                else
+                    geometryMesh.IndexBuffer1 = null;
+
+
+
+
+                Meshes.Add(geometryMesh);
+            }
+            
             return true;
         }
     }
@@ -288,6 +410,8 @@ namespace TagTool.Tools.Geometry
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
         public string Name;
+
+        // add if has alpha testing, this will set values in the parts block and compute bounding spheres for the parts
     }
 
     [TagStructure(Size = 0x68)]
@@ -321,7 +445,7 @@ namespace TagTool.Tools.Geometry
         public float Scale;
     }
 
-    [TagStructure(Size = 0x140)]
+    [TagStructure(Size = 0x10C)]
     public class GeometryMesh : TagStructure
     {
         [TagField(Length = HaloGeometryConstants.StringLength, ForceNullTerminated = true)]
@@ -345,20 +469,20 @@ namespace TagTool.Tools.Geometry
         public GeometryIndexBuffer IndexBuffer2;
     }
 
-    [TagStructure(Size = 0x18)]
+    [TagStructure(Size = 0x1C)]
     public class GeometryVertexBuffer
     {
         public VertexBufferFormat Format;
         public short VertexSize;
+        public int VertexCount;
         public byte[] Data;
     }
 
-    [TagStructure(Size = 0x1C)]
+    [TagStructure(Size = 0x18)]
     public class GeometryIndexBuffer
     {
-        public IndexBufferFormat Format;
         public int FaceCount;
-        public byte[] Data; // custom index buffer with material index for each face perhaps
+        public byte[] Data;
     }
 
 

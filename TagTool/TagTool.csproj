@@ -488,6 +488,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\IndexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamInterop.cs" />
     <Compile Include="Geometry\Utils\InstancedGeometryToObjectConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />

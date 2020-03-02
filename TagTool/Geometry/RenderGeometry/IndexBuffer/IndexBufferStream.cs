@@ -1,6 +1,7 @@
 using TagTool.IO;
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace TagTool.Geometry
 {
@@ -93,7 +94,6 @@ namespace TagTool.Geometry
 
         /// <summary>
         /// Reads a triangle strip and converts it into a triangle list.
-        /// Degenerate triangles will be included and must be discarded manually.
         /// </summary>
         /// <param name="indexCount">The number of indices in the strip. Cannot be 1 or 2.</param>
         /// <returns>The triangle strip converted into a triangle list.</returns>
@@ -104,10 +104,13 @@ namespace TagTool.Geometry
             if (indexCount < 3)
                 throw new InvalidOperationException("Invalid triangle strip index buffer");
 
-            var triangleCount = indexCount - 2;
-            var result = new ushort[triangleCount * 3];
+            var result = new List<ushort>();
+
+            ushort[] tempTriangle = new ushort[3];
+
             var previous = ReadIndices(2);
-            for (var i = 0; i < triangleCount; i++)
+
+            for (var i = 0; i < indexCount - 2; i++)
             {
                 var index = ReadIndex();
 
@@ -115,20 +118,28 @@ namespace TagTool.Geometry
                 // in order to preserve the winding order
                 if (i % 2 == 0)
                 {
-                    result[i * 3] = previous[0];
-                    result[i * 3 + 1] = previous[1];
+                    tempTriangle[0] = previous[0];
+                    tempTriangle[1] = previous[1];
                 }
                 else
                 {
-                    result[i * 3] = previous[1];
-                    result[i * 3 + 1] = previous[0];
+                    tempTriangle[0] = previous[1];
+                    tempTriangle[1] = previous[0];
                 }
 
-                result[i * 3 + 2] = index;
+                tempTriangle[2] = index;
+
+                if(tempTriangle[0] != tempTriangle[1] && tempTriangle[1] != tempTriangle[2] && tempTriangle[2] != tempTriangle[0])
+                {
+                    result.Add(tempTriangle[0]);
+                    result.Add(tempTriangle[1]);
+                    result.Add(tempTriangle[2]);
+                }
+
                 previous[0] = previous[1];
                 previous[1] = index;
             }
-            return result;
+            return result.ToArray();
         }
     }
 }
