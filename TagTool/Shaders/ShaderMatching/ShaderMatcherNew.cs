@@ -161,7 +161,6 @@ namespace TagTool.Shaders.ShaderMatching
             return template;
         }
 
-
         class Rmt2Pairing
         {
             public Rmt2ParameterMatch RealParams;
@@ -235,5 +234,70 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
+
+        private List<string> GetRenderMethodDefinitionMethods(RenderMethodDefinition rmdf, GameCache cache)
+        {
+            var result = new List<string>();
+            foreach(var method in rmdf.Methods)
+            {
+                var str = cache.StringTable.GetString(method.Type);
+                result.Add(str);
+            }
+            return result;
+        }
+
+        private List<string> GetMethodOptions(RenderMethodDefinition rmdf, int methodIndex, GameCache cache)
+        {
+            var result = new List<string>();
+            var method = rmdf.Methods[methodIndex];
+            foreach(var option in method.ShaderOptions)
+            {
+                result.Add(cache.StringTable.GetString(option.Type));
+            }
+            return result;
+        }
+
+        private void FindClosestShaderTemplate(CachedTag sourceRmt2)
+        {
+            // somehow build a list of rmt2 of the same type
+            List<CachedTag> candidateTemplates = new List<CachedTag>();
+
+            // defined method search order, ignore last method from ms30
+            List<int> methodOrder = new List<int> {0, 2, 3, 1, 6, 4, 5, 7, 8, 9, 10};
+
+            Dictionary<CachedTag, int> matchLevelDictionary = new Dictionary<CachedTag, int>();
+            Rmt2Descriptor sourceRmt2Desc;
+            if (!Rmt2Descriptor.TryParse(sourceRmt2.Name, out sourceRmt2Desc))
+                return;
+
+            while (candidateTemplates.Count != 0)
+            {
+                var template = candidateTemplates.Last();
+                Rmt2Descriptor destRmt2Desc;
+                if (!Rmt2Descriptor.TryParse(template.Name, out destRmt2Desc))
+                {
+                    candidateTemplates.Remove(template);
+                    matchLevelDictionary[template] = 0;
+                }
+                else
+                {
+                    var matchLevel = 0;
+                    for(int i = 0; i < methodOrder.Count; i++)
+                    {
+                        var methodIndex = methodOrder[i];
+                        // we need to define a ordering on the method options, so that there is a single best rmt2
+                        if (sourceRmt2Desc.Options[methodIndex] == destRmt2Desc.Options[methodIndex])
+                            matchLevel++;
+                        else
+                            break;
+                    }
+                    matchLevelDictionary[template] = matchLevel;
+                } 
+            }
+
+            CachedTag bestRmt2 = null;
+            var bestScore = -1;
+
+        }
     }
 }
