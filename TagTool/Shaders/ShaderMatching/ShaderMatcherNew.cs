@@ -75,7 +75,13 @@ namespace TagTool.Shaders.ShaderMatching
 
                 // if we found an exact match, return it
                 if (commonOptions == sourceRmt2Desc.Options.Length)
+                {
+                    Console.WriteLine("Found perfect rmt2 match:");
+                    Console.WriteLine(sourceRmt2Tag.Name);
+                    Console.WriteLine(rmt2Tag.Name);
                     return rmt2Tag;
+                }
+                    
 
                 // add it to the list to be considered
                 relevantRmt2s.Add(new Rmt2Pairing()
@@ -89,7 +95,7 @@ namespace TagTool.Shaders.ShaderMatching
             // if we've reached here, we haven't found an extract match.
             // now we need to consider other factors such as which options they have, which parameters are missing etc..
             // whatever can be used to narrow it down.
-
+            Console.WriteLine($"No rmt2 match found for {sourceRmt2Tag.Name}");
             return null; // testing exact matches first
 
             foreach (var pairing in relevantRmt2s)

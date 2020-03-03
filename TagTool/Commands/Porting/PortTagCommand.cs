@@ -194,20 +194,7 @@ namespace TagTool.Commands.Porting
 
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
-                /*
-                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
-                    return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
-				case "rmcs": // there are no rmcs tags in ms23, disable completely for now
-                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                case "rmbk": // sometimes pure black, or they can have patterns??? use basic shader for now
-                    if (CacheContext.TryGetTag<Shader>(blamTag.Name, out var rmshInstance) && !FlagIsSet(PortingFlags.Replace))
-                        return rmshInstance;
-                    if (CacheContext.TryGetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black", out var zBlackInstance))
-                        return zBlackInstance;
-					return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                */
-				//TODO: Someday we might be able to generate these, but for now lets just use the standard vertex shaders
 				case "glvs":
 					return CacheContext.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
@@ -230,67 +217,12 @@ namespace TagTool.Commands.Porting
 							return null; // This will be generated in the shader post
 						}
 					}
-                    else
-                    {
-                        // match rmt2 with current ones available, else return null
-                        // TODO:
-                    }
-					// unsupported shaders use default behavior
-					break;
-                /*
-				case "rmhg" when !FlagIsSet(PortingFlags.Rmhg): // rmhg have register indexing issues currently
-					if (CacheContext.TryGetTag<ShaderHalogram>(blamTag.Name, out var rmhgInstance))
-						return rmhgInstance;
-					return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
-                */
-				// Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Xbox360:
-					//return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
-				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Xbox360:
-					//Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
-					//return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
-			}
 
-			//
-			// Handle shader tags when not porting or matching shaders
-			//
+                    // match rmt2 with current ones available, else return null
+                    return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
 
-            // TODO: move this into specific default tags for shaders
-			if (!FlagsAnySet(/*PortingFlags.ShaderTest | */PortingFlags.MatchShaders) &&
-				(RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)))
-			{
-				switch (groupTag.ToString())
-				{
-					case "beam":
-						return CacheContext.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
-
-					case "cntl":
-						return CacheContext.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
-
-					case "decs":
-						return CacheContext.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
-
-					case "ltvl":
-						return CacheContext.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
-
-					case "prt3":
-						return CacheContext.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
-
-					case "rmd ":
-						return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
-
-					case "rmfl":
-						return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
-
-					case "rmtr":
-						return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
-
-					case "rmrd":
-					case "rmsh":
-					case "rmss":
-						return CacheContext.GetTag<Shader>(@"shaders\invalid");
-				}
-			}
+                    break;
+			} 
 
 			//
 			// Check to see if the ElDorado tag exists
@@ -677,7 +609,6 @@ namespace TagTool.Commands.Porting
                     Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
                     break;
 
-
                 case ShaderFoliage rmfl:
                 case ShaderBlack rmbk:
                 case ShaderTerrain rmtr:
@@ -694,16 +625,13 @@ namespace TagTool.Commands.Porting
                 case DecalSystem decs:
                 case BeamSystem beam:
                     if (!FlagIsSet(PortingFlags.MatchShaders))
+                        return GetDefaultShader(blamTag.Group.Tag);
+                    else
                     {
-                        if (DefaultTags.ContainsKey(blamTag.Group.Tag))
-                            return DefaultTags[blamTag.Group.Tag];
-                        else
-                        {
-                            blamDefinition = null;
-                            break;
-                        }
+                        blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag.Group.Tag);
+                        if (blamDefinition == null) // convert shader failed
+                            return GetDefaultShader(blamTag.Group.Tag);
                     }
-                    blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag.Group.Tag);
                     break;
 
                 case ShaderCortana rmct:

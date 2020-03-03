@@ -14,7 +14,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        public ShaderMatcher Matcher = new ShaderMatcher();
+        public ShaderMatcherNew Matcher = new ShaderMatcherNew();
 
         private RasterizerGlobals ConvertRasterizerGlobals(RasterizerGlobals rasg)
         {
@@ -32,42 +32,157 @@ namespace TagTool.Commands.Porting
         private object ConvertShader(Stream cacheStream, Stream blamCacheStream, object blamDefinition, Tag groupTag)
         {
             // add check for default shaders here, return default tag by name depending on type
+            ShaderProperty shaderProperty;
+            RenderMethod renderMethod;
             switch (blamDefinition)
             {
                 case ShaderFoliage rmfl:
-                case ShaderBlack rmbk:
                 case ShaderTerrain rmtr:
                 case ShaderCustom rmcs:
                 case ShaderDecal rmd:
                 case ShaderHalogram rmhg:
                 case Shader rmsh:
-                case ShaderScreen rmss:
                 case ShaderWater rmw:
-                case ShaderZonly rmzo:
-                case ShaderCortana rmct:
-                    // insert conversion code here
+
+                    renderMethod = (RenderMethod)blamDefinition;
+                    shaderProperty = renderMethod.ShaderProperties[0];
+
+                    if (shaderProperty.Template == null)
+                        return null;
                     break;
 
 
                 case ContrailSystem cntl:
+                    foreach(var contrail in cntl.Contrail)
+                    {
+                        shaderProperty = contrail.RenderMethod.ShaderProperties[0];
+                        if (shaderProperty.Template == null)
+                            return null;
+                    }
+                    break;
+
                 case Particle prt3:
+                    shaderProperty = prt3.RenderMethod.ShaderProperties[0];
+                    if(shaderProperty.Template == null)
+                        return null;
+                    break;
+
+                case LightVolumeSystem ltvl:
+                    foreach(var volume in ltvl.LightVolume)
+                    {
+                        shaderProperty = volume.RenderMethod.ShaderProperties[0];
+                        if (shaderProperty.Template == null)
+                            return null;
+                    }
+                    break;
+                case DecalSystem decs:
+                    foreach (var decal in decs.Decal)
+                    {
+                        shaderProperty = decal.RenderMethod.ShaderProperties[0];
+                        if (shaderProperty.Template == null)
+                            return null;
+                    }
+                    break;
+                case BeamSystem beamSystem:
+                    foreach (var beam in beamSystem.Beam)
+                    {
+                        shaderProperty = beam.RenderMethod.ShaderProperties[0];
+                        if (shaderProperty.Template == null)
+                            return null;
+                    }
+                    break;
+
+                case ShaderScreen rmss:
+                case ShaderZonly rmzo:
+                case ShaderBlack rmbk:
+                case ShaderCortana rmct:
+                    return null;
+            }
+            return null;
+        }
+
+        private RenderMethod GetShaderSystemRenderMethod(object blamDefinition, int index)
+        {
+            switch (blamDefinition)
+            {
+
+                case ContrailSystem cntl:
+                    return cntl.Contrail[index].RenderMethod;
+                case Particle prt3:
+                    return prt3.RenderMethod;
                 case LightVolumeSystem ltvl:
                 case DecalSystem decs:
                 case BeamSystem beam:
                     // insert conversion code here
                     break;
+
+               
             }
-            return blamDefinition;
+            return null;
+        }
+
+        private CachedTag GetDefaultShader(Tag groupTag)
+        {
+            switch (groupTag.ToString())
+            {
+                case "beam":
+                    return CacheContext.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
+
+                case "cntl":
+                    return CacheContext.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
+
+                case "decs":
+                    return CacheContext.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
+
+                case "ltvl":
+                    return CacheContext.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
+
+                case "prt3":
+                    return CacheContext.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
+
+                case "rmd ":
+                    return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
+
+                case "rmfl":
+                    return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
+
+                case "rmtr":
+                    return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+
+                case "rmw ":
+                    return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
+
+                case "rmhg":
+                    return CacheContext.GetTag<ShaderWater>(@"objects\multi\shaders\green_plasma_receiver");
+
+                case "rmbk":
+                    return CacheContext.GetTag<ShaderWater>(@"levels\dlc\bunkerworld\shaders\z_black");
+
+                case "rmrd":
+                case "rmsh":
+                case "rmss":
+                case "rmcs":
+                case "rmzo":
+                case "rmct":
+                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
+            }
+            return CacheContext.GetTag<Shader>(@"shaders\invalid");
+        }
+
+        private CachedTag FindClosestRmt2(Stream cacheStream, Stream blamCacheStream, CachedTag blamRmt2)
+        {
+            if (!Matcher.IsInitialized)
+                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30));
+
+            return Matcher.FindClosestTemplate(blamRmt2, BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, blamRmt2));
         }
 
         private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, RenderMethod finalRm, string blamTagName)
         {
             // Verify that the ShaderMatcher is ready to use
-            if (!Matcher.IsInitialized())
-                Matcher.Init(cacheStream, CacheContext, BlamCache);
+            if (!Matcher.IsInitialized)
+                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30));
 
-            // Set flags
-            Matcher.SetMS30Flag(cacheStream, FlagIsSet(PortingFlags.Ms30));
 
             // finalRm.ShaderProperties[0].ShaderMaps are all ported bitmaps
             // finalRm.BaseRenderMethod is a H3 tag
@@ -109,7 +224,7 @@ namespace TagTool.Commands.Porting
                 bmBoolConstants.Add(BlamCache.StringTable.GetString(a.Name));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmRealConstants);
+            CachedTag edRmt2Instance = null; // Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmRealConstants);
 
             if (edRmt2Instance == null)
             {
@@ -156,7 +271,7 @@ namespace TagTool.Commands.Porting
             // Arguments are probably default values. I took the values that appeared the most frequently, assuming they are the default value.
             foreach (var a in edMaps)
             {
-                var newBitmap = Matcher.GetDefaultBitmapTag(a);
+                string newBitmap = null;// Matcher.GetDefaultBitmapTag(a);
 
                 if (pRmt2 >= CacheContext.TagCache.Count || pRmt2 < 0)
                     newBitmap = @"shaders\default_bitmaps\bitmaps\default_detail"; // would only happen for removed shaders
@@ -180,10 +295,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var a in edRealConstants)
-                newShaderProperty.RealConstants.Add(Matcher.DefaultArgumentsValues(a));
+                newShaderProperty.RealConstants.Add(new RealConstant());
 
             foreach (var a in edIntConstants)
-                newShaderProperty.IntegerConstants.Add(Matcher.DefaultIntegerArgumentsValues(a));
+                newShaderProperty.IntegerConstants.Add(0);
 
             // Reorder blam bitmaps to match the HO rmt2 order
             // Reorder blam real constants to match the HO rmt2 order
@@ -255,7 +370,7 @@ namespace TagTool.Commands.Porting
                     tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
             }
 
-            Matcher.FixRmdfTagRef(finalRm);
+            //Matcher.FixRmdfTagRef(finalRm);
 
             FixAnimationProperties(cacheStream, blamCacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
 
@@ -265,7 +380,7 @@ namespace TagTool.Commands.Porting
                 if (a.Bitmap != null)
                     continue;
 
-                var defaultBitmap = Matcher.GetDefaultBitmapTag(edMaps[finalRm.ShaderProperties[0].TextureConstants.IndexOf(a)]);
+                string defaultBitmap = null; // Matcher.GetDefaultBitmapTag(edMaps[finalRm.ShaderProperties[0].TextureConstants.IndexOf(a)]);
 
                 try
                 {
