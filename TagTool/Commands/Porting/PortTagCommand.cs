@@ -194,7 +194,7 @@ namespace TagTool.Commands.Porting
 
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
-
+                /*
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
                     return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
@@ -206,7 +206,7 @@ namespace TagTool.Commands.Porting
                     if (CacheContext.TryGetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black", out var zBlackInstance))
                         return zBlackInstance;
 					return CacheContext.GetTag<Shader>(@"shaders\invalid");
-
+                */
 				//TODO: Someday we might be able to generate these, but for now lets just use the standard vertex shaders
 				case "glvs":
 					return CacheContext.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
@@ -230,14 +230,19 @@ namespace TagTool.Commands.Porting
 							return null; // This will be generated in the shader post
 						}
 					}
+                    else
+                    {
+                        // match rmt2 with current ones available, else return null
+                        // TODO:
+                    }
 					// unsupported shaders use default behavior
 					break;
-
+                /*
 				case "rmhg" when !FlagIsSet(PortingFlags.Rmhg): // rmhg have register indexing issues currently
 					if (CacheContext.TryGetTag<ShaderHalogram>(blamTag.Name, out var rmhgInstance))
 						return rmhgInstance;
 					return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
-
+                */
 				// Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
 				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Xbox360:
 					//return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
@@ -250,6 +255,7 @@ namespace TagTool.Commands.Porting
 			// Handle shader tags when not porting or matching shaders
 			//
 
+            // TODO: move this into specific default tags for shaders
 			if (!FlagsAnySet(/*PortingFlags.ShaderTest | */PortingFlags.MatchShaders) &&
 				(RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)))
 			{
@@ -671,47 +677,36 @@ namespace TagTool.Commands.Porting
                     Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
                     break;
 
-                case Shader rmsh:
-                    rmsh.Material = ConvertStringId(rmsh.Material);
-                    switch (blamTag.Name)
-                    {
-                        // Fix citadel glass
-                        case @"levels\dlc\fortress\shaders\floor_glass":
-                            rmsh.ShaderProperties[0].AlphaBlendMode = 1;
-                            break;
-
-                        // Fix avalanche trees
-                        case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
-                            rmsh.ShaderProperties[0].BlendFlags = 1;
-                            break;
-
-                        // Fix citadel panel wall alcove
-                        case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
-                            rmsh.ShaderProperties[0].TextureConstants[0].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove.bitmap")[0]);
-                            rmsh.ShaderProperties[0].TextureConstants[2].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump.bitmap")[0]);
-                            break;
-                    }
-                    break;
 
                 case ShaderFoliage rmfl:
-                    rmfl.Material = ConvertStringId(rmfl.Material);
-                    break;
-
                 case ShaderBlack rmbk:
-                    rmbk.Material = ConvertStringId(rmbk.Material);
-                    break;
-
                 case ShaderTerrain rmtr:
-                    for (var i = 0; i < rmtr.MaterialNames.Length; i++)
-                        rmtr.MaterialNames[i] = ConvertStringId(rmtr.MaterialNames[i]);
-                    break;
-
                 case ShaderCustom rmcs:
-                    rmcs.Material = ConvertStringId(rmcs.Material);
+                case ShaderDecal rmd:
+                case ShaderHalogram rmhg:
+                case Shader rmsh:
+                case ShaderScreen rmss:
+                case ShaderWater rmw:
+                case ShaderZonly rmzo:
+                case ContrailSystem cntl:
+                case Particle prt3:
+                case LightVolumeSystem ltvl:
+                case DecalSystem decs:
+                case BeamSystem beam:
+                    if (!FlagIsSet(PortingFlags.MatchShaders))
+                    {
+                        if (DefaultTags.ContainsKey(blamTag.Group.Tag))
+                            return DefaultTags[blamTag.Group.Tag];
+                        else
+                        {
+                            blamDefinition = null;
+                            break;
+                        }
+                    }
+                    blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag.Group.Tag);
                     break;
 
                 case ShaderCortana rmct:
-                    rmct.Material = ConvertStringId(rmct.Material);
                     ConvertShaderCortana(rmct, cacheStream, blamCacheStream, resourceStreams);
                     break;
                     
@@ -887,9 +882,8 @@ namespace TagTool.Commands.Porting
 						throw new NotSupportedException(propertyType.Halo2.ToString());
 					return propertyType;
 
-				case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders):
-					ConvertCollection(cacheStream, blamCacheStream, resourceStreams, renderMethod.ShaderProperties[0].TextureConstants, renderMethod.ShaderProperties[0].TextureConstants, blamTagName);
-					return ConvertRenderMethod(cacheStream, blamCacheStream, resourceStreams, renderMethod, blamTagName);
+				case RenderMethod renderMethod:
+                    return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderMethod, definition, blamTagName);
 
 				case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);

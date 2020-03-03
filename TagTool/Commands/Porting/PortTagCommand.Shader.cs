@@ -29,6 +29,37 @@ namespace TagTool.Commands.Porting
             return rasg;
         }
 
+        private object ConvertShader(Stream cacheStream, Stream blamCacheStream, object blamDefinition, Tag groupTag)
+        {
+            // add check for default shaders here, return default tag by name depending on type
+            switch (blamDefinition)
+            {
+                case ShaderFoliage rmfl:
+                case ShaderBlack rmbk:
+                case ShaderTerrain rmtr:
+                case ShaderCustom rmcs:
+                case ShaderDecal rmd:
+                case ShaderHalogram rmhg:
+                case Shader rmsh:
+                case ShaderScreen rmss:
+                case ShaderWater rmw:
+                case ShaderZonly rmzo:
+                case ShaderCortana rmct:
+                    // insert conversion code here
+                    break;
+
+
+                case ContrailSystem cntl:
+                case Particle prt3:
+                case LightVolumeSystem ltvl:
+                case DecalSystem decs:
+                case BeamSystem beam:
+                    // insert conversion code here
+                    break;
+            }
+            return blamDefinition;
+        }
+
         private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, RenderMethod finalRm, string blamTagName)
         {
             // Verify that the ShaderMatcher is ready to use

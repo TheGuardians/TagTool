@@ -23,18 +23,17 @@ namespace TagTool.Shaders.ShaderMatching
         public bool IsInitialized { get; private set; } = false;
         public bool UseMs30 { get; set; } = false;
 
-        public ShaderMatcherNew(GameCache baseCache,  GameCache portingCache, Stream baseCacheStream, Stream portingCacheStream, bool useMS30=false)
+        public ShaderMatcherNew()
+        {
+        }
+
+        public void Init(GameCache baseCache, GameCache portingCache, Stream baseCacheStream, Stream portingCacheStream, bool useMS30 = false)
         {
             UseMs30 = useMS30;
             BaseCache = baseCache;
             PortingCache = portingCache;
             BaseCacheStream = baseCacheStream;
             PortingCacheStream = portingCacheStream;
-            Init();
-        }
-
-        private void Init()
-        {
             _rmt2Cache = new Dictionary<CachedTag, RenderMethodTemplate>();
             IsInitialized = true;
         }
@@ -42,7 +41,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Find the closest template in the base cache to the input template.
         /// </summary>
-        private CachedTag FindClosestTemplate(CachedTag sourceRmt2Tag, RenderMethodTemplate sourceRmt2)
+        public CachedTag FindClosestTemplate(CachedTag sourceRmt2Tag, RenderMethodTemplate sourceRmt2)
         {
             Debug.Assert(IsInitialized);
 
@@ -90,6 +89,9 @@ namespace TagTool.Shaders.ShaderMatching
             // if we've reached here, we haven't found an extract match.
             // now we need to consider other factors such as which options they have, which parameters are missing etc..
             // whatever can be used to narrow it down.
+
+            return null; // testing exact matches first
+
             foreach (var pairing in relevantRmt2s)
             {
                 var rmt2 = GetTemplate(pairing.DestTag);
