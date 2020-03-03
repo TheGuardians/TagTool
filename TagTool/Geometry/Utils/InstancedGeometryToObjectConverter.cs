@@ -62,24 +62,24 @@ namespace TagTool.Geometry.Utils
             StructureBspResources = SourceCache.ResourceCache.GetStructureBspTagResources(StructureBsp.CollisionBspResource);
         }
 
-        public CachedTag Convert(string instanceName)
+        public CachedTag ConvertInstance(string instanceName, string desiredTagName = null)
         {
             var stringId = SourceCache.StringTable.GetStringId(instanceName);
-            return ConvertInstance(stringId);
+            return ConvertInstance(stringId, desiredTagName);
         }
 
-        public CachedTag ConvertInstance(StringId instanceName)
+        public CachedTag ConvertInstance(StringId instanceName, string desiredTagName = null)
         {
             for (int i = 0; i < StructureBsp.InstancedGeometryInstances.Count; i++)
             {
                 if (StructureBsp.InstancedGeometryInstances[i].Name == instanceName)
-                    return ConvertInstance(i);
+                    return ConvertInstance(i, desiredTagName);
             }
 
             return null;
         }
 
-        public CachedTag ConvertInstance(int instanceIndex)
+        public CachedTag ConvertInstance(int instanceIndex, string desiredTagName = null)
         {
             //return null tag and skip to next bsp if bsp resources is null
             if (StructureBspResources == null)
@@ -87,19 +87,12 @@ namespace TagTool.Geometry.Utils
 
             var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[instanceIndex];
 
-            string instanceName = "";
-            if (instancedGeometryInstance.Name == StringId.Invalid)
-            {
-                instanceName = $"instance_{instanceIndex:000}";
-            }
-            else
-            {
-                instanceName = SourceCache.StringTable.GetString(instancedGeometryInstance.Name);
-                instanceName = Regex.Replace(instanceName, @"[^a-zA-Z0-9_]", string.Empty);
-            }
-
             var scenarioFolder = Path.GetDirectoryName(Scenario.StructureBsps[StructureBspIndex].StructureBsp.Name);
-            var tagName = $"objects\\{scenarioFolder}\\instanced\\{StructureBspIndex:00}_{instanceName}";
+            var bspName = Path.GetFileName(Scenario.StructureBsps[StructureBspIndex].StructureBsp.Name);
+
+            var tagName = $"objects\\{scenarioFolder}\\instanced\\instance_{StructureBspIndex}_{instanceIndex}";
+            if (desiredTagName != null)
+                tagName = desiredTagName;
 
             // reset state
             CollisionMaterialMapping = new Dictionary<short, short>();
@@ -110,10 +103,10 @@ namespace TagTool.Geometry.Utils
                 return scenTag;
 
             // allocate tags
-            scenTag = DestCache.TagCache.AllocateTag<Scenery>(tagName);
-            var collisionModelTag = DestCache.TagCache.AllocateTag<CollisionModel>(tagName);
-            var renderModelTag = DestCache.TagCache.AllocateTag<RenderModel>(tagName);
             var modelTag = DestCache.TagCache.AllocateTag<Model>(tagName);
+            var renderModelTag = DestCache.TagCache.AllocateTag<RenderModel>(tagName);
+            var collisionModelTag = DestCache.TagCache.AllocateTag<CollisionModel>(tagName);
+            scenTag = DestCache.TagCache.AllocateTag<Scenery>(tagName);
 
             // generate the definitions
             var renderModel = GenerateRenderModel(instanceIndex);
@@ -127,10 +120,15 @@ namespace TagTool.Geometry.Utils
             gameObject.Model = modelTag;
 
             // finally serialize all the tags
+            DestCache.Serialize(DestStream, renderModelTag, renderModel);
             DestCache.Serialize(DestStream, collisionModelTag, collisionModel);
             DestCache.Serialize(DestStream, modelTag, model);
-            DestCache.Serialize(DestStream, renderModelTag, renderModel);
             DestCache.Serialize(DestStream, scenTag, gameObject);
+
+            Console.WriteLine($"['{renderModelTag.Group}', 0x{renderModelTag.Index:X04}] {renderModelTag.Name}");
+            Console.WriteLine($"['{collisionModelTag.Group}', 0x{collisionModelTag.Index:X04}] {collisionModelTag.Name}");
+            Console.WriteLine($"['{modelTag.Group}', 0x{modelTag.Index:X04}] {modelTag.Name}");
+            Console.WriteLine($"['{scenTag.Group}', 0x{scenTag.Index:X04}] {scenTag.Name}");
 
             return scenTag;
         }
@@ -324,6 +322,7 @@ namespace TagTool.Geometry.Utils
         private RenderModel GenerateRenderModel(int instanceIndex)
         {
             var renderModel = new RenderModel();
+
             renderModel.Geometry = ConvertInstanceRenderGeometry(instanceIndex);
             renderModel.InstanceStartingMeshIndex = -1;
             renderModel.Nodes = new List<RenderModel.Node>();
@@ -427,35 +426,22 @@ namespace TagTool.Geometry.Utils
             };
             renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>()
             {
-                Lbsp.Geometry.MeshClusterVisibility[instance.MeshIndex]
+                Lbsp.Geometry.MeshClusterVisibility[instance.MeshIndex].DeepClone()
             };
             renderGeometry.Compression = new List<RenderGeometryCompression>
             {
-                Lbsp.Geometry.Compression[instanceDef.CompressionIndex]
+                Lbsp.Geometry.Compression[instanceDef.CompressionIndex].DeepClone()
             };
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
 
             if (instance.LodDataIndex != -1)
                 renderGeometry.InstancedGeometryPerPixelLighting.Add(
-                    Lbsp.Geometry.InstancedGeometryPerPixelLighting[instance.LodDataIndex]);
+                    Lbsp.Geometry.InstancedGeometryPerPixelLighting[instance.LodDataIndex].DeepClone());
 
             if (SourceCache.Version != DestCache.Version)
             {
                 var renderGeometryConverter = new RenderGeometryConverter(DestCache, SourceCache);
                 resourceDefinition = renderGeometryConverter.Convert(renderGeometry, resourceDefinition);
-
-                var staticPerVertexLighting = Lbsp.StaticPerVertexLightingBuffers[mesh.VertexBufferIndices[0]];
-                if (staticPerVertexLighting.VertexBufferIndex != -1)
-                {
-                    var blamResourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
-                    staticPerVertexLighting.VertexBuffer = blamResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
-                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, staticPerVertexLighting.VertexBuffer);
-                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
-                    d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
-                    resourceDefinition.VertexBuffers.Add(d3dPointer);
-                    // set the new buffer index
-                    staticPerVertexLighting.VertexBufferIndex = (short)(resourceDefinition.VertexBuffers.Elements.Count - 1);
-                }
             }
 
             renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
@@ -467,6 +453,8 @@ namespace TagTool.Geometry.Utils
         {
             if (SourceCache.Version == DestCache.Version)
                 return data;
+
+            data = data.DeepClone();
 
             var resourceStreams = new Dictionary<ResourceLocation, Stream>();
             data = (T)PortTag.ConvertData(DestStream, SourceStream, resourceStreams, data, null, "");

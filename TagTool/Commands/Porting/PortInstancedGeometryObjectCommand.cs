@@ -20,10 +20,10 @@ namespace TagTool.Commands.Porting
             base(true,
 
                 "PortInstancedGeometryObject",
-                "Converts instanced geometry instances to objects.",
+                "Converts one or more instanced geometry instances to objects.",
 
-                "PortInstancedGeometryObject [PortingFlags] <BspIndex> <Instance>",
-                "Converts instanced geometry instances to objects")
+                "PortInstancedGeometryObject [PortingFlags] <BspIndex> [<Instance index or name> [New Tagname]]",
+                "Converts one or more instanced geometry instances to objects. Enter just the bsp index for a wizard.")
         {
             HoCache = cache;
             BlamCache = blamCache;
@@ -42,7 +42,6 @@ namespace TagTool.Commands.Porting
             }
 
             var sbspIndex = int.Parse(argStack.Pop());
-            var instanceIdentifier = argStack.Pop();
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())
             using (var hoCacheStream = HoCache.OpenCacheReadWrite())
@@ -50,26 +49,61 @@ namespace TagTool.Commands.Porting
                 var blamScnr = BlamCache.Deserialize<Scenario>(blamCacheStream, BlamCache.TagCache.FindFirstInGroup("scnr"));
                 var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, blamScnr.StructureBsps[sbspIndex].StructureBsp);
 
+                var desiredInstances = new Dictionary<int, string>();
+
+                if (argStack.Count > 0)
+                {
+                    var identifier = argStack.Pop();
+                    string desiredName = null;
+                    if (argStack.Count > 0)
+                    {
+                        desiredName = argStack.Pop();
+                    }
+
+                    var index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
+                    desiredInstances.Add(index, desiredName);
+                }
+                else
+                {
+                    Console.WriteLine("------------------------------------------------------------------");
+                    Console.WriteLine("Enter each instance with the format <Name or Index> [New tagname]");
+                    Console.WriteLine("Enter a blank line to finish.");
+                    Console.WriteLine("------------------------------------------------------------------");
+                    for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                    {
+                        var parts = line.Split(' ');
+                        var identifier = parts[0];
+                        var name = parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : null;
+
+                        var index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
+                        if (index == -1)
+                        {
+                            Console.WriteLine($"ERROR: Instance not found by identifier {identifier}!");
+                            return false;
+                        }
+
+                        desiredInstances.Add(index, name);
+                    }
+                }
+
+                if (desiredInstances.Count < 1)
+                    return true;
+
                 var converter = new InstancedGeometryToObjectConverter(HoCache, hoCacheStream, BlamCache, blamCacheStream, blamScnr, sbspIndex);
                 converter.PortTag.SetFlags(portingFlags);
 
-                var instanceIndex = FindBlockIndex(blamSbsp.InstancedGeometryInstances, instanceIdentifier);
-                if (instanceIndex == -1)
+                foreach (var kv in desiredInstances)
                 {
-                    Console.WriteLine($"Error: instance not found.");
-                    return false;
-                }
-
-                try
-                {
-                    var instance = blamSbsp.InstancedGeometryInstances[instanceIndex];
-                    var tag = converter.ConvertInstance(instanceIndex);
-                    Console.WriteLine($"object: {tag}");
-                }
-                finally
-                {
-                    HoCache.SaveStrings();
-                    HoCache.SaveTagNames();
+                    try
+                    {
+                        var instance = blamSbsp.InstancedGeometryInstances[kv.Key];
+                        var tag = converter.ConvertInstance(kv.Key, kv.Value);
+                    }
+                    finally
+                    {
+                        HoCache.SaveStrings();
+                        HoCache.SaveTagNames();
+                    }
                 }
             }
 
