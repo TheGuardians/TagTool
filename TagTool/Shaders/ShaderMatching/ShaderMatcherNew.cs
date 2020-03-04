@@ -235,7 +235,7 @@ namespace TagTool.Shaders.ShaderMatching
                 throw new ArgumentException($"Invalid rmt2 name '{matchedRmt2Tag.Name}'", nameof(matchedRmt2Tag));
 
             string prefix = matchedRmt2Tag.Name.StartsWith("ms30") ? "ms30\\" : "";
-            string type = rmt2Description.Type.Split('_')[0];
+            string type = rmt2Description.Type.Substring(0, rmt2Description.Type.Length - 10); // remove _templates
             string rmdfName = $"{prefix}shaders\\{type}";
 
             return BaseCache.TagCache.GetTag(rmdfName, "rmdf");

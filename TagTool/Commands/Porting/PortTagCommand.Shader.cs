@@ -47,12 +47,14 @@ namespace TagTool.Commands.Porting
                     for (int i = 0; i < cntl.Contrail.Count; i++)
                     {
                         cntl.Contrail[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, cntl.Contrail[i].RenderMethod, blamTag, blamCntl.Contrail[i].RenderMethod);
+                        if (cntl.Contrail[i].RenderMethod == null) return null;
                     }
                     return cntl;
 
                 case Particle prt3:
                     var blamPrt3 = (Particle)blamDefinition;
                     prt3.RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, prt3.RenderMethod, blamTag, blamPrt3.RenderMethod);
+                    if (prt3.RenderMethod == null) return null;
                     return prt3;
 
                 case LightVolumeSystem ltvl:
@@ -60,6 +62,7 @@ namespace TagTool.Commands.Porting
                     for (int i = 0; i < ltvl.LightVolume.Count; i++)
                     {
                         ltvl.LightVolume[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, ltvl.LightVolume[i].RenderMethod, blamTag, blamLtvl.LightVolume[i].RenderMethod);
+                        if (ltvl.LightVolume[i].RenderMethod == null) return null;
                     }
                     return ltvl;
                 case DecalSystem decs:
@@ -67,6 +70,7 @@ namespace TagTool.Commands.Porting
                     for (int i = 0; i < decs.Decal.Count; i++)
                     {
                         decs.Decal[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, decs.Decal[i].RenderMethod, blamTag, blamDecs.Decal[i].RenderMethod);
+                        if (decs.Decal[i].RenderMethod == null) return null;
                     }
                     return decs;
                 case BeamSystem beamSystem:
@@ -74,6 +78,7 @@ namespace TagTool.Commands.Porting
                     for (int i = 0; i < beamSystem.Beam.Count; i++)
                     {
                         beamSystem.Beam[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, beamSystem.Beam[i].RenderMethod, blamTag, blamBeam.Beam[i].RenderMethod);
+                        if (beamSystem.Beam[i].RenderMethod == null) return null;
                     }
                     return beamSystem;
 
@@ -130,10 +135,10 @@ namespace TagTool.Commands.Porting
                     return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
                 case "rmhg":
-                    return CacheContext.GetTag<ShaderWater>(@"objects\multi\shaders\green_plasma_receiver");
+                    return CacheContext.GetTag<ShaderHalogram>(@"objects\multi\shaders\koth_shield");
 
                 case "rmbk":
-                    return CacheContext.GetTag<ShaderWater>(@"levels\dlc\bunkerworld\shaders\z_black");
+                    return CacheContext.GetTag<ShaderBlack>(@"levels\dlc\bunkerworld\shaders\z_black");
 
                 case "rmrd":
                 case "rmsh":
