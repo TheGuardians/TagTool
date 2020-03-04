@@ -31,11 +31,6 @@ namespace TagTool.Commands.Porting
 
         private object ConvertShader(Stream cacheStream, Stream blamCacheStream, object definition, CachedTag blamTag, object blamDefinition)
         {
-            // add check for default shaders here, return default tag by name depending on type
-            ShaderProperty shaderProperty;
-            RenderMethod renderMethod;
-            RenderMethod blamRenderMethod;
-            ShaderProperty blamShaderProperty;
             switch (definition)
             {
                 case ShaderFoliage rmfl:
@@ -45,61 +40,42 @@ namespace TagTool.Commands.Porting
                 case ShaderHalogram rmhg:
                 case Shader rmsh:
                 case ShaderWater rmw:
-
-                    renderMethod = (RenderMethod)definition;
-                    shaderProperty = renderMethod.ShaderProperties[0];
-                    blamRenderMethod = (RenderMethod)blamDefinition;
-                    blamShaderProperty = blamRenderMethod.ShaderProperties[0];
-                    
-
-                    // in case of failed match
-                    if (shaderProperty.Template == null)
-                        return null;
-
-                    renderMethod = ConvertRenderMethod(cacheStream, blamCacheStream, renderMethod, blamShaderProperty.Template, blamTag.Name);
-                    break;
-
+                    return ConvertShaderInternal(cacheStream, blamCacheStream, (RenderMethod)definition, blamTag, (RenderMethod)blamDefinition);
 
                 case ContrailSystem cntl:
-                    foreach(var contrail in cntl.Contrail)
+                    var blamCntl = (ContrailSystem)blamDefinition;
+                    for (int i = 0; i < cntl.Contrail.Count; i++)
                     {
-                        renderMethod = contrail.RenderMethod;
-                        shaderProperty = renderMethod.ShaderProperties[0];
-                        if (shaderProperty.Template == null)
-                            return null;
+                        cntl.Contrail[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, cntl.Contrail[i].RenderMethod, blamTag, blamCntl.Contrail[i].RenderMethod);
                     }
-                    break;
+                    return cntl;
 
                 case Particle prt3:
-                    shaderProperty = prt3.RenderMethod.ShaderProperties[0];
-                    if(shaderProperty.Template == null)
-                        return null;
-                    break;
+                    var blamPrt3 = (Particle)blamDefinition;
+                    prt3.RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, prt3.RenderMethod, blamTag, blamPrt3.RenderMethod);
+                    return prt3;
 
                 case LightVolumeSystem ltvl:
-                    foreach(var volume in ltvl.LightVolume)
+                    var blamLtvl = (LightVolumeSystem)blamDefinition;
+                    for (int i = 0; i < ltvl.LightVolume.Count; i++)
                     {
-                        shaderProperty = volume.RenderMethod.ShaderProperties[0];
-                        if (shaderProperty.Template == null)
-                            return null;
+                        ltvl.LightVolume[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, ltvl.LightVolume[i].RenderMethod, blamTag, blamLtvl.LightVolume[i].RenderMethod);
                     }
-                    break;
+                    return ltvl;
                 case DecalSystem decs:
-                    foreach (var decal in decs.Decal)
+                    var blamDecs = (DecalSystem)blamDefinition;
+                    for (int i = 0; i < decs.Decal.Count; i++)
                     {
-                        shaderProperty = decal.RenderMethod.ShaderProperties[0];
-                        if (shaderProperty.Template == null)
-                            return null;
+                        decs.Decal[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, decs.Decal[i].RenderMethod, blamTag, blamDecs.Decal[i].RenderMethod);
                     }
-                    break;
+                    return decs;
                 case BeamSystem beamSystem:
-                    foreach (var beam in beamSystem.Beam)
+                    var blamBeam = (BeamSystem)blamDefinition;
+                    for (int i = 0; i < beamSystem.Beam.Count; i++)
                     {
-                        shaderProperty = beam.RenderMethod.ShaderProperties[0];
-                        if (shaderProperty.Template == null)
-                            return null;
+                        beamSystem.Beam[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, beamSystem.Beam[i].RenderMethod, blamTag, blamBeam.Beam[i].RenderMethod);
                     }
-                    break;
+                    return beamSystem;
 
                 case ShaderScreen rmss:
                 case ShaderZonly rmzo:
@@ -108,6 +84,18 @@ namespace TagTool.Commands.Porting
                     return null;
             }
             return null;
+        }
+
+        private RenderMethod ConvertShaderInternal(Stream cacheStream, Stream blamCacheStream, RenderMethod definition, CachedTag blamTag, RenderMethod blamDefinition)
+        {
+            var shaderProperty = definition.ShaderProperties[0];
+            var blamShaderProperty = blamDefinition.ShaderProperties[0];
+
+            // in case of failed match
+            if (shaderProperty.Template == null)
+                return null;
+
+            return ConvertRenderMethod(cacheStream, blamCacheStream, definition, blamShaderProperty.Template, blamTag.Name);
         }
 
         private CachedTag GetDefaultShader(Tag groupTag)
@@ -228,6 +216,11 @@ namespace TagTool.Commands.Porting
             foreach (var a in edIntConstants)
                 newShaderProperty.IntegerConstants.Add(0);
 
+            foreach (var a in edMaps)
+                newShaderProperty.TextureConstants.Add(new TextureConstant());
+
+            newShaderProperty.BooleanConstants = 0;
+
             // Reorder blam bitmaps to match the HO rmt2 order
             // Reorder blam real constants to match the HO rmt2 order
             // Reorder blam int constants to match the HO rmt2 order
@@ -312,14 +305,6 @@ namespace TagTool.Commands.Porting
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].Functions.Count == 0)
                 return finalRm;
-
-            foreach (var properties in finalRm.ShaderProperties[0].Functions)
-            {
-                properties.InputName = ConvertStringId(properties.InputName);
-                properties.RangeName = ConvertStringId(properties.RangeName);
-
-                ConvertTagFunction(properties.Function);
-            }
 
             var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);
             var edPixl = (PixelShader)pixlTag;
