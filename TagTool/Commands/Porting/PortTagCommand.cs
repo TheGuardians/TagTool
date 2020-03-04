@@ -628,7 +628,7 @@ namespace TagTool.Commands.Porting
                         return GetDefaultShader(blamTag.Group.Tag);
                     else
                     {
-                        blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag.Group.Tag);
+                        blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag, BlamCache.Deserialize(blamCacheStream, blamTag));
                         if (blamDefinition == null) // convert shader failed
                             return GetDefaultShader(blamTag.Group.Tag);
                     }

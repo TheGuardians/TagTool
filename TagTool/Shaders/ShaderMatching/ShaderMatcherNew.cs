@@ -130,20 +130,6 @@ namespace TagTool.Shaders.ShaderMatching
             return renderMethod;
         }
 
-        public RenderMethod MatchShader(RenderMethod renderMethod)
-        {
-            if (renderMethod.ShaderProperties.Count < 0)
-                return renderMethod;
-
-            var property = renderMethod.ShaderProperties[0];
-            var originalTemplate = PortingCache.Deserialize<RenderMethodTemplate>(PortingCacheStream, property.Template);
-            var matchedTemplateTag = FindClosestTemplate(property.Template, originalTemplate);
-            var matchedTemplate = BaseCache.Deserialize<RenderMethodTemplate>(BaseCacheStream, matchedTemplateTag);
-            renderMethod = MatchRenderMethods(renderMethod, matchedTemplate, originalTemplate);
-            // might require some special checks if match render method can fail
-            return renderMethod;
-        }
-
         private Rmt2ParameterMatch MatchParameterBlocks(List<ShaderArgument> sourceBlock, List<ShaderArgument> destBlock)
         {
             var result = new Rmt2ParameterMatch();
@@ -240,6 +226,19 @@ namespace TagTool.Shaders.ShaderMatching
 
                 return true;
             }
+        }
+
+        public CachedTag FindRmdf(CachedTag matchedRmt2Tag)
+        {
+            Rmt2Descriptor rmt2Description;
+            if (!Rmt2Descriptor.TryParse(matchedRmt2Tag.Name, out rmt2Description))
+                throw new ArgumentException($"Invalid rmt2 name '{matchedRmt2Tag.Name}'", nameof(matchedRmt2Tag));
+
+            string prefix = matchedRmt2Tag.Name.StartsWith("ms30") ? "ms30" : "";
+            string type = rmt2Description.Type.Split('_')[0];
+            string rmdfName = $"{prefix}\\shaders\\{type}";
+
+            return BaseCache.TagCache.GetTag(rmdfName, "rmdf");
         }
 
 
