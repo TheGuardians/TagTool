@@ -35,7 +35,7 @@ namespace TagTool.Commands.Scenarios
         public override object Execute(List<string> args)
         {
             bool iscluster = false;
-            if (args[0] == "cluster")
+            if (args.Count > 0 && args[0] == "cluster")
             {
                 iscluster = true;
             }
