@@ -153,18 +153,15 @@ namespace TagTool.Commands.Porting
 
         private CachedTag FindClosestRmt2(Stream cacheStream, Stream blamCacheStream, CachedTag blamRmt2)
         {
+            // Verify that the ShaderMatcher is ready to use
             if (!Matcher.IsInitialized)
-                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30));
+                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30), FlagIsSet(PortingFlags.PefectShaderMatchOnly));
 
             return Matcher.FindClosestTemplate(blamRmt2, BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, blamRmt2));
         }
 
-        private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, CachedTag sourceRmt2, string blamTagName)
+        private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, CachedTag blamRmt2, string blamTagName)
         {
-            // Verify that the ShaderMatcher is ready to use
-            if (!Matcher.IsInitialized)
-                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30));
-
             var bmMaps = new List<string>();
             var bmRealConstants = new List<string>();
             var bmIntConstants = new List<string>();
@@ -179,11 +176,12 @@ namespace TagTool.Commands.Porting
             {
                 TextureConstants = new List<TextureConstant>(),
                 RealConstants = new List<RealConstant>(),
-                IntegerConstants = new List<uint>()
+                IntegerConstants = new List<uint>(),
+                BooleanConstants = 0
             };
 
             // Get a simple list of bitmaps and arguments names
-            var bmRmt2Instance = sourceRmt2; 
+            var bmRmt2Instance = blamRmt2; 
             var bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, bmRmt2Instance);
 
             // Get a simple list of H3 bitmaps and arguments names
@@ -197,7 +195,7 @@ namespace TagTool.Commands.Porting
                 bmBoolConstants.Add(BlamCache.StringTable.GetString(a.Name));
 
             // Find a HO equivalent rmt2
-            CachedTag edRmt2Instance = finalRm.ShaderProperties[0].Template;
+            CachedTag edRmt2Instance = FindClosestRmt2(cacheStream, blamCacheStream, blamRmt2);
 
             if (edRmt2Instance == null)
             {
@@ -224,8 +222,6 @@ namespace TagTool.Commands.Porting
             foreach (var a in edMaps)
                 newShaderProperty.TextureConstants.Add(new TextureConstant());
 
-            newShaderProperty.BooleanConstants = 0;
-
             // Reorder blam bitmaps to match the HO rmt2 order
             // Reorder blam real constants to match the HO rmt2 order
             // Reorder blam int constants to match the HO rmt2 order
@@ -250,10 +246,7 @@ namespace TagTool.Commands.Porting
                     if (eA == bA)
                     {
                         if ((newShaderProperty.BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) != 0)
-                        {
-                            newShaderProperty.BooleanConstants &= ~(1u << bmBoolConstants.IndexOf(bA));
                             newShaderProperty.BooleanConstants |= (1u << edBoolConstants.IndexOf(eA));
-                        }
                     }
                        
 

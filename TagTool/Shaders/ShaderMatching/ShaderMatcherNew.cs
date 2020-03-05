@@ -22,14 +22,22 @@ namespace TagTool.Shaders.ShaderMatching
         public static string DefaultTemplate => @"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0.rmt2";
         public bool IsInitialized { get; private set; } = false;
         public bool UseMs30 { get; set; } = false;
+        public bool PerfectMatchesOnly { get; set; } = false;
+
+        static Dictionary<string, int[]> MethodWeights = new Dictionary<string, int[]>()
+        {
+           ["default"] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+           ["shader"] = new int[] { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }
+        };
 
         public ShaderMatcherNew()
         {
         }
 
-        public void Init(GameCache baseCache, GameCache portingCache, Stream baseCacheStream, Stream portingCacheStream, bool useMS30 = false)
+        public void Init(GameCache baseCache, GameCache portingCache, Stream baseCacheStream, Stream portingCacheStream, bool useMS30 = false, bool perfectMatchesOnly = false)
         {
             UseMs30 = useMS30;
+            PerfectMatchesOnly = perfectMatchesOnly;
             BaseCache = baseCache;
             PortingCache = portingCache;
             BaseCacheStream = baseCacheStream;
@@ -65,12 +73,20 @@ namespace TagTool.Shaders.ShaderMatching
                 if (destRmt2Desc.Type != sourceRmt2Desc.Type)
                     continue;
 
+                int[] weights;
+                if (!MethodWeights.TryGetValue(sourceRmt2Desc.Type, out weights))
+                    weights = MethodWeights["default"];
+
                 // match the options from the rmt2 tag names
                 int commonOptions = 0;
+                int score = 0;
                 for (int i = 0; i < sourceRmt2Desc.Options.Length; i++)
                 {
                     if (sourceRmt2Desc.Options[i] == destRmt2Desc.Options[i])
+                    {
+                        score += 1 + weights[i];
                         commonOptions++;
+                    }
                 }
 
                 // if we found an exact match, return it
@@ -86,6 +102,7 @@ namespace TagTool.Shaders.ShaderMatching
                 // add it to the list to be considered
                 relevantRmt2s.Add(new Rmt2Pairing()
                 {
+                    Score = score,
                     CommonOptions = commonOptions,
                     DestTag = rmt2Tag,
                     SourceTag = sourceRmt2Tag
@@ -96,7 +113,9 @@ namespace TagTool.Shaders.ShaderMatching
             // now we need to consider other factors such as which options they have, which parameters are missing etc..
             // whatever can be used to narrow it down.
             Console.WriteLine($"No rmt2 match found for {sourceRmt2Tag.Name}");
-            return null; // testing exact matches first
+
+            if (PerfectMatchesOnly)
+                return null;
 
             foreach (var pairing in relevantRmt2s)
             {
@@ -108,13 +127,18 @@ namespace TagTool.Shaders.ShaderMatching
             }
 
             // finally order by some criteria
-            var ordered = relevantRmt2s
-                .OrderBy(x => x.CommonOptions);
-            //.ThenByDescending(x => x.MissingFromDest);
 
+            /* var ordered = relevantRmt2s
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.CommonParameters);
+               var bestRmt2 = ordered.FirstOrDefault()?.DestTag;
+             */
+
+            // old shader matcher ordering
+            var bestRmt2 = relevantRmt2s.OrderBy(x => x.Score).LastOrDefault()?.DestTag;
 
             // return the best rmt2 or the default if one could not be found (only when a template type is not in the base cache)
-            var bestRmt2 = ordered.LastOrDefault()?.DestTag;
+
             if (bestRmt2 == null)
                 return BaseCache.GetTag(DefaultTemplate);
 
@@ -162,6 +186,7 @@ namespace TagTool.Shaders.ShaderMatching
             public Rmt2ParameterMatch BoolParams;
             public Rmt2ParameterMatch TextureParams;
             public int CommonOptions;
+            public int Score;
             public CachedTag DestTag;
             public CachedTag SourceTag;
 
@@ -221,7 +246,7 @@ namespace TagTool.Shaders.ShaderMatching
                 if (nameParts.Length < 2)
                     return false;
 
-                descriptor.Type = nameParts[0];
+                descriptor.Type = nameParts[0].Substring(0, nameParts[0].Length-10);
                 descriptor.Options = nameParts[1].Split('_').Skip(1).Select(x => byte.Parse(x)).ToArray();
 
                 return true;
@@ -235,7 +260,7 @@ namespace TagTool.Shaders.ShaderMatching
                 throw new ArgumentException($"Invalid rmt2 name '{matchedRmt2Tag.Name}'", nameof(matchedRmt2Tag));
 
             string prefix = matchedRmt2Tag.Name.StartsWith("ms30") ? "ms30\\" : "";
-            string type = rmt2Description.Type.Substring(0, rmt2Description.Type.Length - 10); // remove _templates
+            string type = rmt2Description.Type; // remove _templates
             string rmdfName = $"{prefix}shaders\\{type}";
 
             return BaseCache.TagCache.GetTag(rmdfName, "rmdf");
