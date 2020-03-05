@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using TagTool.Havok;
 
-namespace TagTool.BspCollisionGeometry
+namespace TagTool.Geometry.BspCollisionGeometry
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3Retail)]

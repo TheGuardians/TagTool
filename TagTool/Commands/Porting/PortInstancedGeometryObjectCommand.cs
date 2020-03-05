@@ -89,7 +89,7 @@ namespace TagTool.Commands.Porting
                 if (desiredInstances.Count < 1)
                     return true;
 
-                var converter = new InstancedGeometryToObjectConverter(HoCache, hoCacheStream, BlamCache, blamCacheStream, blamScnr, sbspIndex);
+                var converter = new GeometryToObjectConverter(HoCache, hoCacheStream, BlamCache, blamCacheStream, blamScnr, sbspIndex);
                 converter.PortTag.SetFlags(portingFlags);
 
                 foreach (var kv in desiredInstances)
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Porting
                     try
                     {
                         var instance = blamSbsp.InstancedGeometryInstances[kv.Key];
-                        var tag = converter.ConvertInstance(kv.Key, kv.Value);
+                        var tag = converter.ConvertGeometry(kv.Key, kv.Value);
                     }
                     finally
                     {
