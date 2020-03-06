@@ -254,6 +254,7 @@
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\MatchTemplateCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
+    <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
