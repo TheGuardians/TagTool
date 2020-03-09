@@ -462,8 +462,9 @@ namespace TagTool.Cache
                 if (tagNamesTableEntry.Size == 0)
                     throw new Exception("invalid tag name table entry size!");
 
+                reader.BaseStream.Position = tagNamesTableEntry.Offset + section.Offset;
                 var tagNamesHeader = new GenericSectionEntry(reader);
-                reader.BaseStream.Position = entry.TableOffset + tagNamesTableEntry.Offset + section.Offset;
+                reader.BaseStream.Position = tagNamesHeader.TableOffset + section.Offset;
 
                 for (int j = 0; j < tagNamesHeader.Count; j++)
                 {
