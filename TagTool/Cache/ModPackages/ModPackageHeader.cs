@@ -55,6 +55,7 @@ namespace TagTool.Cache
         Fonts,
         StringIds,
         Locales,
+        Files,
 
         SectionCount
     }
@@ -248,5 +249,17 @@ namespace TagTool.Cache
             writer.Write(CacheIndex);
             writer.Write(MapId);
         }
+    }
+
+
+    [TagStructure]
+    public class FileTableEntry
+    {
+        public uint Size;
+
+        public uint Offset;
+
+        [TagField(Length = 256)]
+        public string Path;
     }
 }

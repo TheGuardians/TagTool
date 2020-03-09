@@ -6,6 +6,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
@@ -39,6 +40,8 @@ namespace TagTool.Cache
 
         public Stream FontPackage;
 
+        public Dictionary<string, Stream> Files { get; set; }
+
         public ModPackage(FileInfo file = null)
         {
             if (file != null)
@@ -54,6 +57,7 @@ namespace TagTool.Cache
                 TagCaches = new List<TagCacheHaloOnline>();
                 TagCaches.Add(tags);
                 TagCacheNames.Add(names);
+                Files = new Dictionary<string, Stream>();
 
                 Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);
                 Header.SectionTable = new ModPackageSectionTable();
@@ -91,6 +95,7 @@ namespace TagTool.Cache
                 ReadCampaignFileSection(reader);
                 ReadStringIdSection(reader);
                 ReadFontSection(reader);
+                ReadFileEntries(reader, dataContext, deserializer);
 
                 int tagCacheCount = TagCachesStreams.Count;
 
@@ -217,6 +222,17 @@ namespace TagTool.Cache
                     WriteStringIdsSection(writer);
                     size = (uint)(writer.BaseStream.Position - offset);
                     WriteSectionEntry((int)ModPackageSection.StringIds, writer, size, offset);
+                }
+
+                //
+                // Write files section
+                // 
+                if (Files != null && Files.Count > 0)
+                {
+                    offset = (uint)writer.BaseStream.Position;
+                    WriteFileEntries(writer, dataContext, serializer);
+                    size = (uint)(writer.BaseStream.Position - offset);
+                    WriteSectionEntry((int)ModPackageSection.Files, writer, size, offset);
                 }
 
                 //
@@ -549,6 +565,62 @@ namespace TagTool.Cache
                 stream.Write(data, 0, size);
                 MapFileStreams.Add(stream);
 
+            }
+        }
+
+        private void ReadFileEntries(EndianReader reader, ISerializationContext context, TagDeserializer deserializer)
+        {
+            Files = new Dictionary<string, Stream>();
+
+            var section = GetSectionHeader(reader, ModPackageSection.Files);
+            if (!GoToSectionHeaderOffset(reader, section))
+                return;
+
+            var fileTable = new GenericSectionEntry(reader);
+
+            reader.BaseStream.Position = fileTable.TableOffset + section.Offset;
+            for(int i = 0; i < fileTable.Count; i++)
+            {         
+                var tableEntry = deserializer.Deserialize<FileTableEntry>(context);
+
+                var stream = new MemoryStream();
+                StreamUtil.Copy(reader.BaseStream, stream, tableEntry.Size);
+
+                Files.Add(tableEntry.Path, stream);
+            }
+        }
+
+        private void WriteFileEntries(EndianWriter writer, ISerializationContext context, TagSerializer serializer)
+        {
+            const int kFileTableEntrySize = 0x108;
+
+            uint sectionOffset = (uint)writer.BaseStream.Position;
+            GenericSectionEntry table = new GenericSectionEntry(Files.Count, 0x8);
+            table.Write(writer);
+
+            // make room for table
+            writer.BaseStream.Position = sectionOffset + table.TableOffset + Files.Count * kFileTableEntrySize;
+            var index = 0;
+            foreach (var fileEntry in Files)
+            {
+                StreamUtil.Align(writer.BaseStream, 0x10);
+                uint offset = (uint)(writer.BaseStream.Position - sectionOffset);
+                // write the contents
+                fileEntry.Value.CopyTo(writer.BaseStream);
+
+                // seek to the file table entry
+                writer.BaseStream.Position = sectionOffset + table.TableOffset + index * kFileTableEntrySize;
+                index++;
+
+                // write the table entry
+                var tableEntry = new FileTableEntry();
+                tableEntry.Path = fileEntry.Key;
+                tableEntry.Size = (uint)fileEntry.Value.Length;
+                tableEntry.Offset = offset;
+                serializer.Serialize(context, tableEntry);
+
+                // move back to where we were
+                writer.Seek(0, SeekOrigin.End);
             }
         }
 

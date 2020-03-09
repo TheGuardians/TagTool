@@ -8,6 +8,7 @@ using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
 using TagTool.Cache.Resources;
+using TagTool.Extensions;
 
 namespace TagTool.Commands.Modding
 {
@@ -72,6 +73,10 @@ namespace TagTool.Commands.Modding
                     case "fontpackage":
                     case "fontpackagefile":
                         Options |= ExportOptions.FontPackage;
+                        break;
+
+                    case "files":
+                        Options |= ExportOptions.Files;
                         break;
 
                     default:
@@ -230,6 +235,19 @@ namespace TagTool.Commands.Modding
                 AddFontPackage();
             }
 
+            if (Options.HasFlag(ExportOptions.Files))
+            {
+                Console.WriteLine("Please specify the directory containing the extra files to be added:");
+                var directory = new DirectoryInfo(Console.ReadLine());
+                if(!directory.Exists)
+                {
+                    Console.WriteLine($"ERROR: Directory does not exist.");
+                    return true;
+                }
+
+                AddFiles(directory);
+            }
+
             //
             // Use the tag list collected to create new mod package
             //
@@ -255,7 +273,8 @@ namespace TagTool.Commands.Modding
             TagBounds = 1 << 2,
             MapFiles = 1 << 3,
             CampaignFile = 1 << 4,
-            FontPackage = 1 << 5
+            FontPackage = 1 << 5,
+            Files
         }
 
         private void CreateDescription()
@@ -481,6 +500,15 @@ namespace TagTool.Commands.Modding
             {
                 ModPackage.FontPackage = new MemoryStream();
                 StreamUtil.Copy(stream, ModPackage.FontPackage, stream.Length);
+            }
+        }
+
+        private void AddFiles(DirectoryInfo directory)
+        {
+            foreach (var file in directory.GetFiles("*.*", SearchOption.AllDirectories))
+            {
+                string virtualPath = directory.GetRelativePath(file.FullName);
+                ModPackage.Files.Add(virtualPath, file.OpenRead());
             }
         }
     }
