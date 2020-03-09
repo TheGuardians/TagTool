@@ -274,7 +274,7 @@ namespace TagTool.Commands.Modding
             MapFiles = 1 << 3,
             CampaignFile = 1 << 4,
             FontPackage = 1 << 5,
-            Files
+            Files = 1 << 6
         }
 
         private void CreateDescription()
