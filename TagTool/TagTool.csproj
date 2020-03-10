@@ -254,6 +254,7 @@
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\MatchTemplateCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
+    <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
@@ -471,6 +472,7 @@
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
     <Compile Include="Common\RealRectangle3d.cs" />
     <Compile Include="Direct3D\Xbox360\D3DTexture9.cs" />
+    <Compile Include="Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\BreakableSurface.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\CollisionBspPhysics.cs" />

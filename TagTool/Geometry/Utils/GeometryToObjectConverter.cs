@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -261,7 +262,6 @@ namespace TagTool.Geometry.Utils
                 };
 
             // copy over and fixup bsp physics blocks
-            CollisionBspPhysicsDefinition convertedBspPhysics = new CollisionBspPhysicsDefinition();
             var newCollisionGeometry = new BspCollisionGeometry.CollisionGeometry();
 
             //instanced geometry 
@@ -270,10 +270,9 @@ namespace TagTool.Geometry.Utils
                 //bsp physics
                 var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[geometryIndex];
                 var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.MeshIndex];
-                if (instancedGeometryInstance.BspPhysics.Count > 0)
-                {
-                    convertedBspPhysics = ConvertData(instancedGeometryInstance.BspPhysics[0]);
-                }            
+
+                foreach (var bspPhysics  in instancedGeometryInstance.BspPhysics)
+                    permutation.BspPhysics.Add(ConvertData(bspPhysics));
                 
                 //mopps
                 foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
@@ -282,34 +281,43 @@ namespace TagTool.Geometry.Utils
                 //collision geometry
                 newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
             }
-
-            //bsp clusters
-            if (iscluster)
+            else
             {
                 var cluster = StructureBsp.Clusters[geometryIndex];
 
-                //bsp physics
-                convertedBspPhysics = new CollisionBspPhysicsDefinition
-                {
-                    GeometryShape = new CollisionGeometryShape(),
-                    MoppBvTreeShape = new Havok.HkpBvMoppTreeShape()
-                };
-
-                //mopps
+                // bsp physics & mopps
                 foreach (var mopp in cluster.CollisionMoppCodes)
+                {
                     permutation.BspMoppCodes.Add(ConvertData(mopp));
+
+                    var bspPhysics =  new CollisionBspPhysicsDefinition
+                    {
+                        GeometryShape = new CollisionGeometryShape()
+                        {
+                            // need to double check this
+                            AABB_Min = new RealQuaternion(cluster.BoundsX.Lower, cluster.BoundsY.Lower, cluster.BoundsZ.Lower, 0),
+                            AABB_Max = new RealQuaternion(cluster.BoundsX.Upper, cluster.BoundsY.Upper, cluster.BoundsZ.Upper, 0),
+                        },
+                        MoppBvTreeShape = new Havok.HkpBvMoppTreeShape()
+                    };
+                    permutation.BspPhysics.Add(bspPhysics);
+                }
 
                 // collision geometry
                 if (StructureBspResources.CollisionBsps.Count > 0)
                     newCollisionGeometry = StructureBspResources.CollisionBsps[0].DeepClone();
+
                 //TODO: cull unnecessary parts of bsp collision
             }
 
-            convertedBspPhysics.GeometryShape.Model = modelTag;
-            convertedBspPhysics.GeometryShape.BspIndex = -1;
-            convertedBspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
-            convertedBspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
-            permutation.BspPhysics.Add(convertedBspPhysics);
+            // fixup bsp fixups for collision model
+            foreach (var bspPhysics in permutation.BspPhysics)
+            {
+                bspPhysics.GeometryShape.Model = modelTag;
+                bspPhysics.GeometryShape.BspIndex = -1;
+                bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
+                bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
+            }
 
             // fixup surfaces materials block
             // build a mapping of surface material indices to collision materials
@@ -464,6 +472,7 @@ namespace TagTool.Geometry.Utils
             {
                 Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone()
             };
+
             //instanced geo has a compression index
             if (!iscluster)
             {
@@ -472,19 +481,7 @@ namespace TagTool.Geometry.Utils
                     Lbsp.Geometry.Compression[compressionindex].DeepClone()
                 };
             }
-            //there is no compression index for clusters, use the bounds from the clusters block
-            else
-            {
-                renderGeometry.Compression = new List<RenderGeometryCompression>
-                {
-                    new RenderGeometryCompression
-                    {
-                        X = StructureBsp.Clusters[geometryIndex].BoundsX,
-                        Y = StructureBsp.Clusters[geometryIndex].BoundsY,
-                        Z = StructureBsp.Clusters[geometryIndex].BoundsZ
-                    }
-                };
-            }
+            
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
 
             if (loddataindex != -1)
@@ -495,6 +492,16 @@ namespace TagTool.Geometry.Utils
             {
                 var renderGeometryConverter = new RenderGeometryConverter(DestCache, SourceCache);
                 resourceDefinition = renderGeometryConverter.Convert(renderGeometry, resourceDefinition);
+            }
+
+            // convert world to rigid (or else it can be dragged)
+            if (mesh.ResourceVertexBuffers[0].Format == VertexBufferFormat.World)
+            {
+                renderGeometry.Meshes[0].ResourceVertexBuffers[0].Format = VertexBufferFormat.Rigid;
+                renderGeometry.Meshes[0].Type = VertexType.Rigid;
+                renderGeometry.Meshes[0].RigidNodeIndex = 0;
+                var compressionInfo = CompressVertexBuffer(mesh.ResourceVertexBuffers[0]);
+                renderGeometry.Compression = new List<RenderGeometryCompression>() { compressionInfo };
             }
 
             renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
@@ -515,6 +522,60 @@ namespace TagTool.Geometry.Utils
                 stream.Value.Close();
 
             return data;
+        }
+
+        private RenderGeometryCompression CompressVertexBuffer(VertexBufferDefinition vertexBuffer)
+        {
+            Debug.Assert(vertexBuffer.Format == VertexBufferFormat.Rigid);
+
+            var compression = new RenderGeometryCompression();
+
+            var rigidVertices = new List<RigidVertex>();
+            using (var stream = new MemoryStream(vertexBuffer.Data.Data))
+            {
+                var vertexStream = VertexStreamFactory.Create(DestCache.Version, stream);
+                for (int i = 0; i < vertexBuffer.Count; i++)
+                {
+                    var vertex = vertexStream.ReadRigidVertex();
+                    rigidVertices.Add(vertex);
+                }
+            }
+
+            var positions = rigidVertices.Select(v => v.Position);
+            var texCoords = rigidVertices.Select(v => v.Texcoord);
+
+            if (positions != null && positions.Count() > 0)
+            {
+                compression.X.Lower = Math.Min(compression.X.Lower, positions.Min(v => v.I));
+                compression.Y.Lower = Math.Min(compression.Y.Lower, positions.Min(v => v.J));
+                compression.Z.Lower = Math.Min(compression.Z.Lower, positions.Min(v => v.K));
+                compression.X.Upper = Math.Max(compression.X.Upper, positions.Max(v => v.I));
+                compression.Y.Upper = Math.Max(compression.Y.Upper, positions.Max(v => v.J));
+                compression.Z.Upper = Math.Max(compression.Z.Upper, positions.Max(v => v.K));
+            }
+            if (texCoords != null && texCoords.Count() > 0)
+            {
+                compression.U.Lower = Math.Min(compression.U.Lower, texCoords.Min(v => v.I));
+                compression.V.Lower = Math.Min(compression.V.Lower, texCoords.Min(v => v.J));
+                compression.U.Upper = Math.Max(compression.U.Upper, texCoords.Max(v => v.I));
+                compression.V.Upper = Math.Max(compression.V.Upper, texCoords.Max(v => v.J));
+            }
+
+            var compressor = new VertexCompressor(compression);
+            using (var outStream = new MemoryStream())
+            {
+                var outVertexStream = VertexStreamFactory.Create(DestCache.Version, outStream);
+                foreach (var vertex in rigidVertices)
+                {
+                    vertex.Position = compressor.CompressPosition(vertex.Position);
+                    vertex.Texcoord = compressor.CompressUv(vertex.Texcoord);
+                    outVertexStream.WriteRigidVertex(vertex);
+                }
+
+                vertexBuffer.Data.Data = outStream.ToArray();
+            }
+
+            return compression;
         }
 
         private static RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex)
