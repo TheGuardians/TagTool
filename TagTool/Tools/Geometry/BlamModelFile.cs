@@ -209,13 +209,13 @@ namespace TagTool.Tools.Geometry
                     string name = "";
                     if (marker.RegionIndex == -1 || marker.PermutationIndex == -1)
                     {
-                        name = $"#:{groupName}";
+                        name = $"#{groupName}";
                     }
                     else
                     {
                         var regionName = cache.StringTable.GetString(mode.Regions[marker.RegionIndex].Name);
                         var permutationName = cache.StringTable.GetString(mode.Regions[marker.RegionIndex].Permutations[marker.PermutationIndex].Name);
-                        name = $"#:{groupName}:{regionName}:{permutationName}";
+                        name = $"#{groupName}:{regionName}:{permutationName}";
                     }
 
                     Markers.Add(new BMFMarkers
