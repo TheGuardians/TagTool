@@ -179,7 +179,7 @@ namespace TagTool.Commands.Tags
 
                 if (!isConst)
                 {
-                    using (var stream = Cache.OpenCacheWrite())
+                    using (var stream = Cache.OpenCacheReadWrite())
                         Cache.Serialize(stream, instance, definition);
                 }
 
