@@ -58,6 +58,7 @@ namespace TagTool.Commands
 
             using (var stream = Cache.OpenCacheRead())
             {
+                //objects\gear\human\industrial\toolbox_small\toolbox_small
                 var tag = Cache.TagCache.GetTag(@"objects\vehicles\warthog\warthog", "mode"); // objects\vehicles\warthog\warthog
                 var mode = Cache.Deserialize<RenderModel>(stream, tag);
                 var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource);

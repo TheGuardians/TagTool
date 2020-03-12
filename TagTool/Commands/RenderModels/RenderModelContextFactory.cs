@@ -25,7 +25,7 @@ namespace TagTool.Commands.RenderModels
             context.AddCommand(new ReplaceRenderGeometryCommand(cache, tag, renderModel));
             context.AddCommand(new ExtractModelCommand(cache, renderModel));
             context.AddCommand(new ExtractBitmapsCommand(cache, renderModel));
-            
+            context.AddCommand(new ExtractBMFCommand(cache, renderModel));
         }
     }
 }

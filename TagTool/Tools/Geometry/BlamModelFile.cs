@@ -397,8 +397,13 @@ namespace TagTool.Tools.Geometry
                             vertex.Tangent = rigid.Tangent.IJK;
                             vertex.Binormal = rigid.Binormal;
 
-                            vertex.NodeIndices[0] = rigidNodeIndex;
-                            vertex.Weights[0] = 1.0f;
+                            vertex.Weights[0] = new BMFVertexWeight { NodeIndex = rigidNodeIndex, Weight = 1.0f };
+
+                            for (int i = 1; i < 4; i++)
+                            {
+                                vertex.Weights[i] = new BMFVertexWeight();
+                            }
+                            
                             break;
 
                         case VertexBufferFormat.Skinned:
@@ -412,8 +417,7 @@ namespace TagTool.Tools.Geometry
 
                             for (int i = 0; i < 4; i++)
                             {
-                                vertex.Weights[i] = skinned.BlendWeights[i];
-                                vertex.NodeIndices[i] = skinned.BlendIndices[i];
+                                vertex.Weights[i] = new BMFVertexWeight { NodeIndex = skinned.BlendIndices[i], Weight = skinned.BlendWeights[i] };
                             }
                             break;
                         default:
@@ -531,9 +535,20 @@ namespace TagTool.Tools.Geometry
         public RealVector3d Binormal;
 
         [TagField(Length = 4)]
-        public int[] NodeIndices = new int[4];
-        [TagField(Length = 4)]
-        public float[] Weights = new float[4];
+        public BMFVertexWeight[] Weights = new BMFVertexWeight[4];
+    }
+
+    [TagStructure(Size = 0x8)]
+    public class BMFVertexWeight : TagStructure
+    {
+        public int NodeIndex;
+        public float Weight;
+
+        public BMFVertexWeight()
+        {
+            NodeIndex = 0;
+            Weight = 0.0f;
+        }
     }
 
     [TagStructure(Size = 0x28)]

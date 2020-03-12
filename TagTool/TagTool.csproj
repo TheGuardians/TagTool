@@ -276,6 +276,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
     <Compile Include="Commands\RenderModels\ExtractBitmapsCommand.cs" />
+    <Compile Include="Commands\RenderModels\ExtractBMFCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractModelCommand.cs" />
     <Compile Include="Commands\RenderModels\RenderModelContextFactory.cs" />
     <Compile Include="Commands\RenderModels\RenderModelTestCommand.cs" />
