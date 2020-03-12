@@ -39,8 +39,8 @@ namespace TagTool.Tags.Definitions
             public List<ColorBlock> Saturation;
             public List<ColorBlock> Hue;
             public List<ScalarBlock> Unknown4;
-            public List<ScalarBlock> Unknown5;
-            public List<ScalarBlock> Unknown6;
+            public List<ScalarBlock> HUDBrightness;
+            public List<ScalarBlock> HUDShakeAmount;
         }
 
         [TagStructure(Size = 0x30)]
