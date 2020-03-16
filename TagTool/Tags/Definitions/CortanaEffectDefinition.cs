@@ -62,7 +62,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum CortanaEffectFlags : byte
+        public enum CortanaEffectFlags : int
         {
             UseCosineInterpolation = 0
         }
@@ -71,8 +71,6 @@ namespace TagTool.Tags.Definitions
         public class ScalarBlock : TagStructure
         {
             public CortanaEffectFlags Flags;
-            public byte Unknown1;
-            public short Unknown2;
 
             public float Shaderargs1value1;
             public float Shaderargs1value2;
@@ -107,8 +105,6 @@ namespace TagTool.Tags.Definitions
         public class ColorBlock : TagStructure
         {
             public CortanaEffectFlags Flags;
-            public byte Unknown1;
-            public short Unknown2;
 
             public float Shaderargs1value1;
             public float Shaderargs1value2;
