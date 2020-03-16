@@ -64,7 +64,7 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum CortanaEffectFlags : int
         {
-            UseCosineInterpolation = 0
+            UseCosineInterpolation = 1 << 0
         }
 
         [TagStructure(Size = 0x30)]
