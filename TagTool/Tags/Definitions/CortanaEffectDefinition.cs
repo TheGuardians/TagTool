@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -36,9 +37,9 @@ namespace TagTool.Tags.Definitions
         public class PostprocessingBlock : TagStructure
         {
             public List<ScalarBlock> FOV;
-            public List<ColorBlock> Saturation;
-            public List<ColorBlock> Hue;
-            public List<ScalarBlock> Unknown4;
+            public List<ColorBlock> HueSaturation;
+            public List<ColorBlock> Colors;
+            public List<ScalarBlock> Rumble;
             public List<ScalarBlock> HUDBrightness;
             public List<ScalarBlock> HUDShakeAmount;
         }
@@ -57,13 +58,19 @@ namespace TagTool.Tags.Definitions
         {
             public List<ScalarBlock> Unknown1;
             public List<ColorBlock> Unknown2;
-            public List<ScalarBlock> Flicker;
+            public List<ScalarBlock> CortanaHue;
+        }
+
+        [Flags]
+        public enum CortanaEffectFlags : byte
+        {
+            UseCosineInterpolation = 0
         }
 
         [TagStructure(Size = 0x30)]
         public class ScalarBlock : TagStructure
         {
-            public byte Flags;
+            public CortanaEffectFlags Flags;
             public byte Unknown1;
             public short Unknown2;
 
@@ -99,7 +106,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34)]
         public class ColorBlock : TagStructure
         {
-            public byte Flags;
+            public CortanaEffectFlags Flags;
             public byte Unknown1;
             public short Unknown2;
 
