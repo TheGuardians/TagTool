@@ -499,6 +499,33 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
+                case CortanaEffectDefinition crte:
+                    foreach (var gravemindblock in crte.Gravemind)
+                    {
+                        foreach (var vignetteblock in gravemindblock.Vignette)
+                        {
+                            foreach (var dynamicvaluesblock in vignetteblock.DynamicValues)
+                            {
+                                foreach (var framesblock in dynamicvaluesblock.Frames)
+                                {
+                                    //fix inverted vignette
+                                    float temp = framesblock.Dynamicvalue1; 
+                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2;
+                                    framesblock.Dynamicvalue2 = temp;
+                                }
+                            }
+                        }
+                    }
+                    foreach (var postprocessblock in crte.PostProcessing)
+                    {
+                        foreach (var hueblock in postprocessblock.Hue)
+                        {
+                            //make red tentacles greenish brown
+                            hueblock.Basevalue1 = 55.0f;
+                        }
+                    }
+                    break;
+
 				case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
 					break;
