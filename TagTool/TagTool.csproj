@@ -296,6 +296,7 @@
     <Compile Include="Commands\Scenarios\ExtractZonesAreasModelCommand.cs" />
     <Compile Include="Commands\Scenarios\ListScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Shaders\UseXSDCommand.cs" />
     <Compile Include="Commands\Sounds\ExtractXMACommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortingContext.cs" />
