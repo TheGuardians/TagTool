@@ -37,8 +37,8 @@ namespace TagTool.Tags.Definitions
         public class PostprocessingBlock : TagStructure
         {
             public List<ScalarBlock> FOV;
-            public List<ColorBlock> Back_Colormix;
-            public List<ColorBlock> ColorUnknown;
+            public List<ColorBlock> Hue;
+            public List<ColorBlock> Saturation;
             public List<ScalarBlock> Rumble;
             public List<ScalarBlock> HUDBrightness;
             public List<ScalarBlock> HUDShakeAmount;
@@ -47,7 +47,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class GravemindBlock : TagStructure
         {
-            public List<ColorBlock> ColorUnknown2;
+            public List<ColorBlock> BackgroundColor;
             public List<ColorBlock> Unused;
             public List<ScalarBlock> TentaclesIn;
             public List<ColorBlock> Vignette;

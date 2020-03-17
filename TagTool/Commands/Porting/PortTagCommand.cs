@@ -518,7 +518,7 @@ namespace TagTool.Commands.Porting
                     }
                     foreach (var postprocessblock in crte.PostProcessing)
                     {
-                        foreach (var hueblock in postprocessblock.Back_Colormix)
+                        foreach (var hueblock in postprocessblock.Hue)
                         {
                             //make red tentacles greenish brown
                             hueblock.Basevalue1 = 55.0f;
