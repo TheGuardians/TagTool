@@ -37,8 +37,8 @@ namespace TagTool.Tags.Definitions
         public class PostprocessingBlock : TagStructure
         {
             public List<ScalarBlock> FOV;
-            public List<ColorBlock> Hue;
-            public List<ColorBlock> Saturation;
+            public List<ColorBlock> Back_Colormix;
+            public List<ColorBlock> ColorUnknown;
             public List<ScalarBlock> Rumble;
             public List<ScalarBlock> HUDBrightness;
             public List<ScalarBlock> HUDShakeAmount;
@@ -47,8 +47,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class GravemindBlock : TagStructure
         {
-            public List<ColorBlock> Luminance;
-            public List<ColorBlock> Unknown2;
+            public List<ColorBlock> ColorUnknown2;
+            public List<ColorBlock> Unused;
             public List<ScalarBlock> TentaclesIn;
             public List<ColorBlock> Vignette;
         }
@@ -56,8 +56,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class CortanaBlock : TagStructure
         {
-            public List<ScalarBlock> Unknown1;
-            public List<ColorBlock> Unknown2;
+            public List<ScalarBlock> Solarize;
+            public List<ColorBlock> Doubling;
             public List<ScalarBlock> Colorize;
         }
 
@@ -72,18 +72,18 @@ namespace TagTool.Tags.Definitions
         {
             public CortanaEffectFlags Flags;
 
-            public float Shaderargs1value1;
-            public float Shaderargs1value2;
-            public float Shaderargs1value3;
+            public float InmixValue1;
+            public float InmixValue2;
+            public float InmixValue3;
 
             public float Basevalue1;
             public float Basevalue2;
 
             public List<DynamicValue> DynamicValues;
 
-            public float Shaderargs2value1;
-            public float Shaderargs2value2;
-            public float Shaderargs2value3;
+            public float OutmixValue1;
+            public float OutmixValue2;
+            public float OutmixValue3;
 
             [TagStructure(Size = 0x20)]
             public class DynamicValue : TagStructure
@@ -106,9 +106,9 @@ namespace TagTool.Tags.Definitions
         {
             public CortanaEffectFlags Flags;
 
-            public float Shaderargs1value1;
-            public float Shaderargs1value2;
-            public float Shaderargs1value3;
+            public float InmixValue1;
+            public float InmixValue2;
+            public float InmixValue3;
 
             public float Basevalue1;
             public float Basevalue2;
@@ -116,9 +116,9 @@ namespace TagTool.Tags.Definitions
 
             public List<DynamicValue> DynamicValues;
 
-            public float Shaderargs2value1;
-            public float Shaderargs2value2;
-            public float Shaderargs2value3;
+            public float OutmixValue1;
+            public float OutmixValue2;
+            public float OutmixValue3;
 
             [TagStructure(Size = 0x20)]
             public class DynamicValue : TagStructure
