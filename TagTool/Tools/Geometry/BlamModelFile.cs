@@ -385,6 +385,7 @@ namespace TagTool.Tools.Geometry
                 for (int j = 0; j < vertexCount; j++)
                 {
                     var vertex = new BMFVertex();
+                    RealVector2d texcoordTemp;
 
                     switch (vertexBuffer.Format)
                     {
@@ -392,7 +393,8 @@ namespace TagTool.Tools.Geometry
                             var rigid = vertexStream.ReadRigidVertex();
 
                             vertex.Position = vertexCompressor.DecompressPosition(rigid.Position).IJK;
-                            vertex.Texcoord = vertexCompressor.DecompressUv(rigid.Texcoord);
+                            texcoordTemp = vertexCompressor.DecompressUv(rigid.Texcoord);
+                            vertex.Texcoord = new RealVector3d(texcoordTemp.I, texcoordTemp.J, 0.0f);
                             vertex.Normal = rigid.Normal;
                             vertex.Tangent = rigid.Tangent.IJK;
                             vertex.Binormal = rigid.Binormal;
@@ -410,7 +412,8 @@ namespace TagTool.Tools.Geometry
                             var skinned = vertexStream.ReadSkinnedVertex();
 
                             vertex.Position = vertexCompressor.DecompressPosition(skinned.Position).IJK;
-                            vertex.Texcoord = vertexCompressor.DecompressUv(skinned.Texcoord);
+                            texcoordTemp = vertexCompressor.DecompressUv(skinned.Texcoord);
+                            vertex.Texcoord = new RealVector3d(texcoordTemp.I, texcoordTemp.J, 0.0f);
                             vertex.Normal = skinned.Normal;
                             vertex.Tangent = skinned.Tangent.IJK;
                             vertex.Binormal = skinned.Binormal;
@@ -525,11 +528,11 @@ namespace TagTool.Tools.Geometry
         public ushort[] Indices;
     }
 
-    [TagStructure(Size = 0x58)]
+    [TagStructure(Size = 0x5C)]
     public class BMFVertex : TagStructure
     {
         public RealVector3d Position;
-        public RealVector2d Texcoord;
+        public RealVector3d Texcoord;
         public RealVector3d Normal;
         public RealVector3d Tangent;
         public RealVector3d Binormal;
