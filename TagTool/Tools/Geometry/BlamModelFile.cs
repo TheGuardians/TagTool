@@ -73,7 +73,9 @@ namespace TagTool.Tools.Geometry
             serializer.Serialize(context, Header);
         }
 
-        public RenderModel GetGen3RenderModel(GameCache cache)
+        
+
+        public RenderModel GenerateGen3RenderModel(GameCache cache)
         {
             RenderModel mode = new RenderModel();
 
@@ -150,8 +152,33 @@ namespace TagTool.Tools.Geometry
             }
 
             // set permutations\region\meshes\markers
+            mode.Regions = new List<RenderModel.Region>();
+            foreach(var bmfRegion in Regions)
+            {
+                var newRegion = new RenderModel.Region
+                {
+                    Name = AddStringId(cache, bmfRegion.Name),
+                    Permutations = new List<RenderModel.Region.Permutation>()
+                };
+                mode.Regions.Add(newRegion);
+            }
 
+            mode.Geometry = new RenderGeometry();
 
+            mode.Geometry.Meshes = new List<Mesh>();
+
+            foreach(var bmfMesh in Meshes)
+            {
+                Mesh newMesh = new Mesh();
+
+                // add new permutation
+                mode.Regions[bmfMesh.RegionIndex].Permutations.Append(new RenderModel.Region.Permutation
+                {
+                    Name = AddStringId(cache, bmfMesh.Name),
+                    MeshCount = 1,
+                    MeshIndex = (short)mode.Geometry.Meshes.Count
+                });
+            }
 
             return mode;
         }
