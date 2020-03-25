@@ -164,6 +164,12 @@ namespace TagTool.Cache.HaloOnline
                 data.ResourcePointerOffsets.Count * 4 +
                 data.TagReferenceOffsets.Count * 4);
 
+        public uint CalculateHeaderSize()
+        {
+            var size = (uint)(TagHeaderSize + Dependencies.Count * 4 + _pointerOffsets.Count * 4 + _resourceOffsets.Count * 4 + _tagReferenceOffsets.Count * 4);
+            return (uint)((size + 0xF) & ~0xF);  // align to 0x10
+        }
+
         /// <summary>
         /// Updates the tag instance's state from a block of tag data.
         /// </summary>

@@ -6,7 +6,6 @@ using System.IO;
 using TagTool.IO;
 using TagTool.Cache;
 using TagTool.Serialization;
-using TagTool.Tags;
 using System.Runtime.InteropServices;
 using TagTool.Cache.HaloOnline;
 
@@ -76,25 +75,20 @@ namespace TagTool.Commands.Editing
             using (var processStream = new ProcessMemoryStream(process))
             {
                 var address = GetTagAddress(processStream, Tag.Index);
-
-                var runtimeContext = new RuntimeSerializationContext(processStream, Cache, Tag, address);
-
-                var originalSize = Tag.TotalSize;
-
-                //pause the process during poking to prevent race conditions
-                process.Suspend();
-
-                Cache.Serializer.Serialize(runtimeContext, Value);
-
-                //resume the process
-                process.Resume();
-
-                if(processStream.Position > address + originalSize)
+                if(address != 0)
                 {
-                    Console.WriteLine("Warning: operation overwrote valid tag data!");
-                }
-                if (address != 0)
-                    Console.WriteLine("Tag 0x{0:X} is loaded at 0x{1:X8} in process 0x{2:X}.", Tag.Index, address, process.Id);
+                    var runtimeContext = new RuntimeSerializationContext(Cache, processStream, address, Tag.Offset, Tag.CalculateHeaderSize(), Tag.TotalSize);
+
+                    //pause the process during poking to prevent race conditions
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    process.Suspend();
+                    Cache.Serializer.Serialize(runtimeContext, Value);
+                    process.Resume();
+                    stopWatch.Stop();
+
+                    Console.WriteLine($"Poked tag at 0x{address.ToString("X8")} in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
+                }  
                 else
                     Console.Error.WriteLine("Tag 0x{0:X} is not loaded in process 0x{1:X}.", Tag.Index, process.Id);
             }
