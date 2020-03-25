@@ -27,6 +27,7 @@ namespace TagTool.Serialization
         /// </summary>
         public CachedTagHaloOnline Tag { get; }
         public long TagOffset { get; set; }
+        public uint AlignedHeaderSize { get; set; }
 
         /// <summary>
         /// Creates a tag serialization context which serializes data into a tag.
@@ -54,6 +55,9 @@ namespace TagTool.Serialization
                     name: (info.Structure.Name != null) ? Context.StringTable.GetStringId(info.Structure.Name) : StringId.Invalid
                 ),
             };
+            // Get header size
+            var headerSize = CachedTagHaloOnline.CalculateHeaderSize(Data);
+            AlignedHeaderSize = (uint)((headerSize + 0xF) & ~0xF);
         }
 
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
@@ -71,23 +75,13 @@ namespace TagTool.Serialization
             else if (Data.Data == null)
                 throw new ArgumentException("The tag data buffer is null");
 
-            // Ensure the data fits
-            var headerSize = CachedTagHaloOnline.CalculateHeaderSize(Data);
-            var alignedHeaderSize = (uint)((headerSize + 0xF) & ~0xF);
             var alignedLength = (Data.Data.Length + 0xF) & ~0xF;
 
-            // Write in the new header and data
+            // Write in the new data
             var writer = new EndianWriter(Stream, EndianFormat.LittleEndian);
-            Stream.Position = TagOffset + alignedHeaderSize;
+            Stream.Position = TagOffset + AlignedHeaderSize;
             Stream.Write(Data.Data, 0, Data.Data.Length);
             StreamUtil.Fill(Stream, 0, alignedLength - Data.Data.Length);
-
-            // Correct pointers
-            foreach (var fixup in Data.PointerFixups)
-            {
-                writer.BaseStream.Position = TagOffset + alignedHeaderSize + fixup.WriteOffset;
-                writer.Write(TagOffset + alignedHeaderSize + fixup.TargetOffset);
-            }
 
             Data = null;
         }
@@ -121,7 +115,7 @@ namespace TagTool.Serialization
 
         public IDataBlock CreateBlock()
         {
-            return new TagDataBlock(this);
+            return new TagDataBlock(this, TagOffset, AlignedHeaderSize);
         }
 
         public void AddResourceBlock(int count, CacheAddress address, IList block)
@@ -131,17 +125,16 @@ namespace TagTool.Serialization
 
         private class TagDataBlock : IDataBlock
         {
-            private readonly RuntimeSerializationContext _context;
-            private readonly List<CachedTagData.PointerFixup> _fixups = new List<CachedTagData.PointerFixup>();
-            private readonly List<uint> _resourceOffsets = new List<uint>();
-            private readonly List<uint> _tagReferenceOffsets = new List<uint>();
             private uint _align = DefaultBlockAlign;
+            private long TagOffset;
+            private uint HeaderSize;
             
-            public TagDataBlock(RuntimeSerializationContext context)
+            public TagDataBlock(RuntimeSerializationContext context, long offset, uint headersize)
             {
-                _context = context;
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
+                TagOffset = offset;
+                HeaderSize = headersize;
             }
 
             public MemoryStream Stream { get; private set; }
@@ -150,41 +143,12 @@ namespace TagTool.Serialization
 
             public void WritePointer(uint targetOffset, Type type)
             {
-                // Add a data fixup for the pointer
-                var fixup = MakeFixup(targetOffset);
-                _fixups.Add(fixup);
-
-                // Add a resource fixup if this is a resource reference
-                if (type == typeof(PageableResource))
-                    _resourceOffsets.Add(fixup.WriteOffset);
-
                 // Write the address
-                Writer.Write(_context.Tag.OffsetToPointer(targetOffset));
+                Writer.Write(TagOffset + HeaderSize + targetOffset);
             }
 
             public object PreSerialize(TagFieldAttribute info, object obj)
             {
-                if (obj == null)
-                    return null;
-
-                // Get the object type and make sure it's supported
-                var type = obj.GetType();
-                if (type == typeof(TagData) ||
-                    (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagStructureReference<>)))
-                    throw new InvalidOperationException(type + " cannot be serialized as tag data");
-
-                // HACK: If the object is a ResourceReference, fix the Owner property
-                if (obj is PageableResource resource)
-                    resource.Resource.ParentTag = _context.Tag;
-
-                if (type == typeof(CachedTag) || type.BaseType == typeof(CachedTag))
-                {
-                    // Object is a tag reference - add it as a dependency
-                    var referencedTag = (CachedTag)obj;
-                    if (referencedTag != _context.Tag)
-                        _context.Data.Dependencies.Add(referencedTag.Index);
-                }
-
                 return obj;
             }
 
@@ -201,11 +165,6 @@ namespace TagTool.Serialization
                 outStream.Write(Stream.GetBuffer(), 0, (int)Stream.Length);
                 StreamUtil.Align(outStream, DefaultBlockAlign);
 
-                // Adjust fixups and add them to the tag
-                _context.Data.PointerFixups.AddRange(_fixups.Select(f => FinalizeFixup(f, dataOffset)));
-                _context.Data.ResourcePointerOffsets.AddRange(_resourceOffsets.Select(o => o + dataOffset));
-                _context.Data.TagReferenceOffsets.AddRange(_tagReferenceOffsets.Select(o => o + dataOffset));
-
                 // Free the block data
                 Writer.Close();
                 Stream = null;
@@ -213,31 +172,9 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            private CachedTagData.PointerFixup MakeFixup(uint targetOffset)
-            {
-                return new CachedTagData.PointerFixup
-                {
-                    TargetOffset = targetOffset,
-                    WriteOffset = (uint)Stream.Position
-                };
-            }
-
-            private static CachedTagData.PointerFixup FinalizeFixup(CachedTagData.PointerFixup fixup, uint dataOffset)
-            {
-                return new CachedTagData.PointerFixup
-                {
-                    TargetOffset = fixup.TargetOffset,
-                    WriteOffset = dataOffset + fixup.WriteOffset
-                };
-            }
-
             // add position of tag index from tag references in definition
             public void AddTagReference(CachedTag referencedTag, bool isShort)
             {
-                if (isShort)
-                    _tagReferenceOffsets.Add((uint)Stream.Position);
-                else
-                    _tagReferenceOffsets.Add((uint)Stream.Position + 0xC);
             }
         }
     }
