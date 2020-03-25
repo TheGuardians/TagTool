@@ -7,16 +7,17 @@ using TagTool.IO;
 using TagTool.Cache;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Editing
 {
     class PokeTagChangesCommand : Command
     {
-        private GameCache Cache { get; }
-        private CachedTag Tag { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
+        private CachedTagHaloOnline Tag { get; }
         private object Value { get; }
 
-        public PokeTagChangesCommand(GameCache cache, CachedTag tag, object value)
+        public PokeTagChangesCommand(GameCacheHaloOnlineBase cache, CachedTagHaloOnline tag, object value)
             : base(true,
 
                   "PokeTagChanges",
@@ -35,7 +36,8 @@ namespace TagTool.Commands.Editing
         {
             if (args.Count > 1)
                 return false;
-            
+
+
             Process process;
 
             if (args.Count == 1)
@@ -77,7 +79,10 @@ namespace TagTool.Commands.Editing
                 var runtimeContext = new RuntimeSerializationContext(Cache, processStream);
                 processStream.Position = address + Tag.DefinitionOffset;
 
-                var definition = Cache.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag));
+                var definition = Cache.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag)); // this will leave the processStream.Position at the max value
+                var originalSize = Tag.TotalSize;
+                processStream.Position -= originalSize; // go to the beginning of the tag data
+                // hopefully the serializer will produce the same layout and the data around it will be preserved, very dangerous
                 Cache.Serializer.Serialize(runtimeContext, Value);
 
                 if (address != 0)
