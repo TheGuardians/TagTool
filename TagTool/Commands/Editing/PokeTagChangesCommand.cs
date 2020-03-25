@@ -7,6 +7,7 @@ using TagTool.IO;
 using TagTool.Cache;
 using TagTool.Serialization;
 using TagTool.Tags;
+using System.Runtime.InteropServices;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Editing
@@ -76,14 +77,18 @@ namespace TagTool.Commands.Editing
             {
                 var address = GetTagAddress(processStream, Tag.Index);
 
-                var runtimeContext = new RuntimeSerializationContext(Cache, processStream, address, Tag.DefinitionOffset);
-                processStream.Position = address + Tag.DefinitionOffset;
+                var runtimeContext = new RuntimeSerializationContext(processStream, Cache, Tag, address);
 
-                var definition = Cache.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag)); // this will leave the processStream.Position at the max value
                 var originalSize = Tag.TotalSize;
-                processStream.Position = address; // go to the beginning of the tag data
-                // hopefully the serializer will produce the same layout and the data around it will be preserved, very dangerous
+
+                //pause the process during poking to prevent race conditions
+                process.Suspend();
+
                 Cache.Serializer.Serialize(runtimeContext, Value);
+
+                //resume the process
+                process.Resume();
+
                 if(processStream.Position > address + originalSize)
                 {
                     Console.WriteLine("Warning: operation overwrote valid tag data!");
@@ -123,6 +128,55 @@ namespace TagTool.Commands.Editing
                 return 0;
             reader.BaseStream.Position = tagAddressTableAddress + addressIndex * 4;
             return reader.ReadUInt32();
+        }
+    }
+
+    public static class ProcessExtension
+    {
+        [Flags]
+        public enum ThreadAccess : int
+        {
+            TERMINATE = (0x0001),
+            SUSPEND_RESUME = (0x0002),
+            GET_CONTEXT = (0x0008),
+            SET_CONTEXT = (0x0010),
+            SET_INFORMATION = (0x0020),
+            QUERY_INFORMATION = (0x0040),
+            SET_THREAD_TOKEN = (0x0080),
+            IMPERSONATE = (0x0100),
+            DIRECT_IMPERSONATION = (0x0200)
+        }
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
+        [DllImport("kernel32.dll")]
+        static extern uint SuspendThread(IntPtr hThread);
+        [DllImport("kernel32.dll")]
+        static extern int ResumeThread(IntPtr hThread);
+
+        public static void Suspend(this Process process)
+        {
+            foreach (ProcessThread thread in process.Threads)
+            {
+                var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);
+                if (pOpenThread == IntPtr.Zero)
+                {
+                    break;
+                }
+                SuspendThread(pOpenThread);
+            }
+        }
+        public static void Resume(this Process process)
+        {
+            foreach (ProcessThread thread in process.Threads)
+            {
+                var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);
+                if (pOpenThread == IntPtr.Zero)
+                {
+                    break;
+                }
+                ResumeThread(pOpenThread);
+            }
         }
     }
 }
