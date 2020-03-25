@@ -76,15 +76,18 @@ namespace TagTool.Commands.Editing
             {
                 var address = GetTagAddress(processStream, Tag.Index);
 
-                var runtimeContext = new RuntimeSerializationContext(Cache, processStream);
+                var runtimeContext = new RuntimeSerializationContext(Cache, processStream, address, Tag.DefinitionOffset);
                 processStream.Position = address + Tag.DefinitionOffset;
 
                 var definition = Cache.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag)); // this will leave the processStream.Position at the max value
                 var originalSize = Tag.TotalSize;
-                processStream.Position -= originalSize; // go to the beginning of the tag data
+                processStream.Position = address; // go to the beginning of the tag data
                 // hopefully the serializer will produce the same layout and the data around it will be preserved, very dangerous
                 Cache.Serializer.Serialize(runtimeContext, Value);
-
+                if(processStream.Position > address + originalSize)
+                {
+                    Console.WriteLine("Warning: operation overwrote valid tag data!");
+                }
                 if (address != 0)
                     Console.WriteLine("Tag 0x{0:X} is loaded at 0x{1:X8} in process 0x{2:X}.", Tag.Index, address, process.Id);
                 else

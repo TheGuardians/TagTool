@@ -12,11 +12,15 @@ namespace TagTool.Serialization
     {
         private GameCache Cache { get; }
         private ProcessMemoryStream ProcessStream { get; }
+        private uint StartAddress;
+        private uint OriginalStructOffset;
 
-        public RuntimeSerializationContext(GameCache cache, ProcessMemoryStream processStream)
+        public RuntimeSerializationContext(GameCache cache, ProcessMemoryStream processStream, uint tagAddress, uint originalOffset)
         {
             Cache = cache;
             ProcessStream = processStream;
+            StartAddress = tagAddress;
+            OriginalStructOffset = originalOffset;
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
@@ -35,7 +39,7 @@ namespace TagTool.Serialization
 
         public IDataBlock CreateBlock()
         {
-            return new DataBlock();
+            return new DataBlock(StartAddress);
         }
 
         public void EndDeserialize(TagStructureInfo info, object obj)
@@ -44,7 +48,16 @@ namespace TagTool.Serialization
 
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
         {
-            ProcessStream.Write(data, 0, data.Length);
+            if(mainStructOffset <= OriginalStructOffset)
+            {
+                var hackOffset = OriginalStructOffset - mainStructOffset;
+                ProcessStream.Position += hackOffset;   // tihs won't work since it offsets the entire tag data and the block/tag data address will not line up anymore. Need smarter way
+                ProcessStream.Write(data, 0, data.Length);
+            }
+            else
+            {
+                Console.WriteLine("Too much data to write for poking tag.");
+            }
         }
 
         public CachedTag GetTagByIndex(int index)
@@ -66,16 +79,18 @@ namespace TagTool.Serialization
         {
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
+            private uint StartAddress;
 
-            public DataBlock()
+            public DataBlock(uint startAddress)
             {
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
+                StartAddress = startAddress;
             }
 
             public void WritePointer(uint targetOffset, Type type)
             {
-                Writer.Write(targetOffset);
+                Writer.Write(targetOffset + StartAddress);
             }
 
             public object PreSerialize(TagFieldAttribute info, object obj)
