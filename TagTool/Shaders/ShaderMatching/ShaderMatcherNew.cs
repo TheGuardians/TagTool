@@ -30,6 +30,8 @@ namespace TagTool.Shaders.ShaderMatching
            ["shader"] = new int[] { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }
         };
 
+        
+
         public ShaderMatcherNew()
         {
         }
@@ -58,6 +60,9 @@ namespace TagTool.Shaders.ShaderMatching
                 throw new ArgumentException($"Invalid rmt2 name '{sourceRmt2Tag.Name}'", nameof(sourceRmt2Tag));
 
             var relevantRmt2s = new List<Rmt2Pairing>();
+
+            Dictionary<CachedTag, long> ShaderTemplateValues = new Dictionary<CachedTag, long>();
+            ShaderSorter shaderTemplateSorter = new ShaderSorter();
 
             foreach (var rmt2Tag in BaseCache.TagCache.NonNull().Where(tag => tag.IsInGroup("rmt2")))
             {
@@ -107,6 +112,12 @@ namespace TagTool.Shaders.ShaderMatching
                     DestTag = rmt2Tag,
                     SourceTag = sourceRmt2Tag
                 });
+
+                if (sourceRmt2Desc.Type == "shader")
+                {
+                    ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                }
+                    
             }
 
             // if we've reached here, we haven't found an extract match.
@@ -117,32 +128,33 @@ namespace TagTool.Shaders.ShaderMatching
             if (PerfectMatchesOnly)
                 return null;
 
-            foreach (var pairing in relevantRmt2s)
+            // find closest rmt2
+
+            if(sourceRmt2Desc.Type == "shader")
             {
-                var rmt2 = GetTemplate(pairing.DestTag);
-                pairing.RealParams = MatchParameterBlocks(sourceRmt2.RealParameterNames, rmt2.RealParameterNames);
-                pairing.IntParams = MatchParameterBlocks(sourceRmt2.IntegerParameterNames, rmt2.IntegerParameterNames);
-                pairing.BoolParams = MatchParameterBlocks(sourceRmt2.BooleanParameterNames, rmt2.BooleanParameterNames);
-                pairing.TextureParams = MatchParameterBlocks(sourceRmt2.TextureParameterNames, rmt2.TextureParameterNames);
+                var targetValue = Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+                long bestValue = long.MaxValue;
+                CachedTag bestTag = null;
+
+                foreach (var pair in ShaderTemplateValues)
+                {
+                    if (Math.Abs(pair.Value - targetValue) < bestValue)
+                    {
+                        bestValue = Math.Abs(pair.Value - targetValue);
+                        bestTag = pair.Key;
+                    }
+                }
+
+                Console.WriteLine($"Closest tag to {sourceRmt2Tag.Name} with options and value {targetValue}");
+                shaderTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+                Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
+                shaderTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
+                return bestTag;
             }
-
-            // finally order by some criteria
-
-            /* var ordered = relevantRmt2s
-                .OrderByDescending(x => x.Score)
-                .ThenByDescending(x => x.CommonParameters);
-               var bestRmt2 = ordered.FirstOrDefault()?.DestTag;
-             */
-
-            // old shader matcher ordering
-            var bestRmt2 = relevantRmt2s.OrderBy(x => x.Score).LastOrDefault()?.DestTag;
-
-            // return the best rmt2 or the default if one could not be found (only when a template type is not in the base cache)
-
-            if (bestRmt2 == null)
-                return BaseCache.GetTag(DefaultTemplate);
-
-            return bestRmt2;
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
