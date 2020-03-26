@@ -134,9 +134,9 @@ namespace TagTool.Commands.Editing
                 var element = CopyBlockElementsCommand.Elements[i];
 
                 if (index == -1)
-                    blockValue.Add(element);
+                    blockValue.Add(element.DeepClone());
                 else
-                    blockValue.Insert(index + i, element);
+                    blockValue.Insert(index + i, element.DeepClone());
             }
 
             field.SetValue(Owner, blockValue);
