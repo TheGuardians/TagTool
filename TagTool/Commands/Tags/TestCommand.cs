@@ -19,6 +19,7 @@ using TagTool.Havok;
 using System.Linq;
 using System.IO.Compression;
 using TagTool.Tools.Geometry;
+using TagTool.Shaders.ShaderMatching;
 
 namespace TagTool.Commands
 {
@@ -53,6 +54,20 @@ namespace TagTool.Commands
 
             //var cache = GameCache.Open(file);
 
+            var tag = Cache.TagCache.GetTag(@"shaders\shader_templates\_0_1_0_0_1_0_1_0_1_0_0", "rmt2");
+
+            ShaderSorter test = new ShaderSorter();
+            List<int> options = new List<int>();
+
+            var optionStrings = tag.Name.Split('\\').ToList().Last().Split('_').ToList();
+            optionStrings.RemoveAt(0);
+            foreach(var optStr in optionStrings)
+            {
+                options.Add(int.Parse(optStr));
+            }
+            test.PrintOptions(options);
+
+            /*
             string filename = "test";
             HaloGeometryFormat geometryFormat = new HaloGeometryFormat();
             HaloGeometryFormatHeader header = new HaloGeometryFormatHeader();
@@ -71,7 +86,8 @@ namespace TagTool.Commands
                 {
                     HaloGeometryFormat.SerializeToFile(writer, header, geometryFormat);
                 }
-            }
+            }*/
+
             return true;
         }
 
