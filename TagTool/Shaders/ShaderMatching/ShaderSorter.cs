@@ -11,10 +11,21 @@ namespace TagTool.Shaders.ShaderMatching
     // The metric is then used to find rmt2 that has the minimal superior value to the target shader. If a perfect match exists this would return the exact rmt2.
     //
 
-    public class Sorter
+    public static class Sorter
     {
+        public static List<int> GetTemplateOptions(string name)
+        {
+            List<int> options = new List<int>();
+            var optionStrings = name.Split('\\').ToList().Last().Split('_').ToList();
+            optionStrings.RemoveAt(0);
+            foreach (var optStr in optionStrings)
+            {
+                options.Add(int.Parse(optStr));
+            }
+            return options;
+        }
         
-        public long GetValue(SortingInterface shaderInterface, List<int> current, List<int> target)
+        public static long GetValue(SortingInterface shaderInterface, List<int> current)
         {
             // assumes target and shaderInterface are from the same shader type
             int baseStepSize = 17; // max number of option + 1
@@ -22,16 +33,11 @@ namespace TagTool.Shaders.ShaderMatching
 
             for(int i = 0; i < shaderInterface.GetTypeCount(); i++)
             {
-                int typeScale = (int)Math.Pow(baseStepSize, shaderInterface.GetTypeIndex(i));
-                for (int j = 0; j < shaderInterface.GetOptionCount(i); j++)
-                {
-                    value += typeScale * shaderInterface.GetOptionIndex(i, current[j]);
-                }
+                long typeScale = (long)Math.Pow(baseStepSize, shaderInterface.GetTypeIndex(i));
+                value += typeScale * (shaderInterface.GetOptionIndex(i, current[i]) + 1);
             }
             return value;
         }
-
-        
     }
 
     public interface SortingInterface
