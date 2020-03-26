@@ -7,13 +7,38 @@ using System.Threading.Tasks;
 namespace TagTool.Shaders.ShaderMatching
 {
     //
-    // Sorter implementation for rmsh, TODO: find a better name
+    // Idea: create a distance metric between shaders. The input is the shader options and the output is a 1 dimensional coordinate. 
+    // The metric is then used to find rmt2 that has the minimal superior value to the target shader. If a perfect match exists this would return the exact rmt2.
     //
+
+    public class Sorter
+    {
+        
+        public long GetValue(SortingInterface shaderInterface, List<int> current, List<int> target)
+        {
+            // assumes target and shaderInterface are from the same shader type
+            int baseStepSize = 17; // max number of option + 1
+            long value = 0;
+
+            for(int i = 0; i < shaderInterface.GetTypeCount(); i++)
+            {
+                int typeScale = (int)Math.Pow(baseStepSize, shaderInterface.GetTypeIndex(i));
+                for (int j = 0; j < shaderInterface.GetOptionCount(i); j++)
+                {
+                    value += typeScale * shaderInterface.GetOptionIndex(i, current[j]);
+                }
+            }
+            return value;
+        }
+
+        
+    }
+
     public interface SortingInterface
     {
         int GetTypeCount();
         int GetTypeIndex(int typeIndex);
-        int GetOptionCount(int typeIndex, int optionIndex);
+        int GetOptionCount(int typeIndex);
         int GetOptionIndex(int typeIndex, int optionIndex);
         void PrintOptions(List<int> options);
         string ToString(List<int> options);
@@ -22,7 +47,9 @@ namespace TagTool.Shaders.ShaderMatching
     public class ShaderSorter : SortingInterface
     {
         //
-        // TODO: order the list for best matches
+        // TODO: order the list for best matches, the higher the index the higher the importance. (low -> high) (0 -> n). Options that can be easily adapted should have less importance
+        // than options that cannot be replaced, same for types (for example, material model is critial, therefore it should have a higher sorted position than other types because when
+        // it comes time to select a shader, the closest shader is more likely to have the same material model options.
         //
 
         // these private lists define the order of the types and options in a shader. The matcher will use these when no perfect match exists. 
@@ -135,7 +162,7 @@ namespace TagTool.Shaders.ShaderMatching
 
         public int GetTypeCount() => 10;
 
-        public int GetOptionCount(int typeIndex, int optionIndex)
+        public int GetOptionCount(int typeIndex)
         {
             switch ((ShaderOptionTypes)(typeIndex))
             {
