@@ -67,6 +67,8 @@ namespace TagTool.Shaders.ShaderMatching
             HalogramSorter halogramTemplateSorter = new HalogramSorter();
             TerrainSorter terrainTemplateSorter = new TerrainSorter();
             FoliageSorter foliageTemplateSorter = new FoliageSorter();
+            DecalSorter decalTemplateSorter = new DecalSorter();
+            ScreenSorter screenTemplateSorter = new ScreenSorter();
 
             foreach (var rmt2Tag in BaseCache.TagCache.NonNull().Where(tag => tag.IsInGroup("rmt2")))
             {
@@ -131,6 +133,12 @@ namespace TagTool.Shaders.ShaderMatching
                     case "foliage":
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(foliageTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
+                    case "decal":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(decalTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "screen":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(screenTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
                 }
             }
 
@@ -150,6 +158,8 @@ namespace TagTool.Shaders.ShaderMatching
                 case "halogram":    return GetBestTag(halogramTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
                 case "terrain":     return GetBestTag(terrainTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
                 case "foliage":     return GetBestTag(foliageTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "decal":       return GetBestTag(decalTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "screen":      return GetBestTag(screenTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
                 default:            return null;
             }
         }
