@@ -521,6 +521,7 @@
     <Compile Include="Serialization\ResourceSerializer.cs" />
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
+    <Compile Include="Shaders\ShaderMatching\HalogramSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Cache\HaloOnline\Strings.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcherNew.cs" />

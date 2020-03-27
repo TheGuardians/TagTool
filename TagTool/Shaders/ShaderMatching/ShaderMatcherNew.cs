@@ -63,6 +63,7 @@ namespace TagTool.Shaders.ShaderMatching
 
             Dictionary<CachedTag, long> ShaderTemplateValues = new Dictionary<CachedTag, long>();
             ShaderSorter shaderTemplateSorter = new ShaderSorter();
+            HalogramSorter halogramTemplateSorter = new HalogramSorter();
 
             foreach (var rmt2Tag in BaseCache.TagCache.NonNull().Where(tag => tag.IsInGroup("rmt2")))
             {
@@ -117,7 +118,10 @@ namespace TagTool.Shaders.ShaderMatching
                 {
                     ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                 }
-                    
+                else if (sourceRmt2Desc.Type == "halogram")
+                {
+                    ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(halogramTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                }
             }
 
             // if we've reached here, we haven't found an extract match.
@@ -130,7 +134,7 @@ namespace TagTool.Shaders.ShaderMatching
 
             // find closest rmt2
 
-            if(sourceRmt2Desc.Type == "shader")
+            if (sourceRmt2Desc.Type == "shader")
             {
                 var targetValue = Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
                 long bestValue = long.MaxValue;
@@ -149,6 +153,27 @@ namespace TagTool.Shaders.ShaderMatching
                 shaderTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
                 Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
                 shaderTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
+                return bestTag;
+            }
+            else if (sourceRmt2Desc.Type == "halogram")
+            {
+                var targetValue = Sorter.GetValue(halogramTemplateSorter, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+                long bestValue = long.MaxValue;
+                CachedTag bestTag = null;
+
+                foreach (var pair in ShaderTemplateValues)
+                {
+                    if (Math.Abs(pair.Value - targetValue) < bestValue)
+                    {
+                        bestValue = Math.Abs(pair.Value - targetValue);
+                        bestTag = pair.Key;
+                    }
+                }
+
+                Console.WriteLine($"Closest tag to {sourceRmt2Tag.Name} with options and value {targetValue}");
+                halogramTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+                Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
+                halogramTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
                 return bestTag;
             }
             else
