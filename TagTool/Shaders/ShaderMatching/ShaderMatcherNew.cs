@@ -62,13 +62,17 @@ namespace TagTool.Shaders.ShaderMatching
             var relevantRmt2s = new List<Rmt2Pairing>();
 
             Dictionary<CachedTag, long> ShaderTemplateValues = new Dictionary<CachedTag, long>();
-
+            ParticleSorter particleTemplateSorter = new ParticleSorter();
+            BeamSorter beamTemplateSorter = new BeamSorter();
+            ContrailSorter contrailTemplateSorter = new ContrailSorter();
+            LightVolumeSorter lightvolumeTemplateSorter = new LightVolumeSorter();
             ShaderSorter shaderTemplateSorter = new ShaderSorter();
             HalogramSorter halogramTemplateSorter = new HalogramSorter();
             TerrainSorter terrainTemplateSorter = new TerrainSorter();
             FoliageSorter foliageTemplateSorter = new FoliageSorter();
             DecalSorter decalTemplateSorter = new DecalSorter();
             ScreenSorter screenTemplateSorter = new ScreenSorter();
+            WaterSorter waterTemplateSorter = new WaterSorter();
 
             foreach (var rmt2Tag in BaseCache.TagCache.NonNull().Where(tag => tag.IsInGroup("rmt2")))
             {
@@ -121,6 +125,12 @@ namespace TagTool.Shaders.ShaderMatching
 
                 switch (sourceRmt2Desc.Type)
                 {
+                    case "beam":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(beamTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "contrail":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(contrailTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
                     case "shader":
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
@@ -130,6 +140,12 @@ namespace TagTool.Shaders.ShaderMatching
                     case "terrain":
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(terrainTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
+                    case "particle":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(particleTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "light_volume":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(lightvolumeTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
                     case "foliage":
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(foliageTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
@@ -138,6 +154,9 @@ namespace TagTool.Shaders.ShaderMatching
                         break;
                     case "screen":
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(screenTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "water":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(waterTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
                 }
             }
@@ -154,13 +173,20 @@ namespace TagTool.Shaders.ShaderMatching
 
             switch (sourceRmt2Desc.Type)
             {
-                case "shader":      return GetBestTag(shaderTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "halogram":    return GetBestTag(halogramTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "terrain":     return GetBestTag(terrainTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "foliage":     return GetBestTag(foliageTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "decal":       return GetBestTag(decalTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "screen":      return GetBestTag(screenTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                default:            return null;
+                case "beam":            return GetBestTag(beamTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "black":           return null;
+                case "custom":          return null;
+                case "contrail":        return GetBestTag(contrailTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "decal":           return GetBestTag(decalTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "foliage":         return GetBestTag(foliageTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "halogram":        return GetBestTag(halogramTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "light_volume":    return GetBestTag(lightvolumeTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "particle":        return GetBestTag(particleTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "screen":          return GetBestTag(screenTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "shader":          return GetBestTag(shaderTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "terrain":         return GetBestTag(terrainTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "water":           return GetBestTag(waterTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                default:                return null;
             }
         }
 

@@ -65,22 +65,22 @@ namespace TagTool.Commands
                 }
             }
 
-            var testTag = Cache.TagCache.GetTag(@"shaders\shader_templates\_0_1_0_0_1_0_1_0_1_0_0", "rmt2");
-            var targetValue = Sorter.GetValue(test, Sorter.GetTemplateOptions(testTag.Name));
+            var testValues = new List<int> { 1, 2, 0, 1, 7, 0, 0, 0, 2, 0 };
+            var targetValue = Sorter.GetValue(test, testValues);
             long bestValue = long.MaxValue;
             CachedTag bestTag = null;
 
             foreach(var pair in rmt2Values)
             {
-                if( Math.Abs(pair.Value - targetValue) < bestValue)
+                if( Math.Abs(pair.Value - targetValue) < bestValue && !pair.Key.Name.Contains("ms30"))
                 {
                     bestValue = Math.Abs(pair.Value - targetValue);
                     bestTag = pair.Key;
                 }
             }
 
-            Console.WriteLine($"Closest tag to {testTag.Name} with options and value {targetValue}");
-            test.PrintOptions(Sorter.GetTemplateOptions(testTag.Name));
+            Console.WriteLine($"Closest tag to jungle cliffs with options and value {targetValue}");
+            test.PrintOptions(testValues);
             Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
             test.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
 

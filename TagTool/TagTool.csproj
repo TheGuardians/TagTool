@@ -521,6 +521,11 @@
     <Compile Include="Serialization\ResourceSerializer.cs" />
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
+    <Compile Include="Shaders\ShaderMatching\ParticleSorter.cs" />
+    <Compile Include="Shaders\ShaderMatching\LightVolumeSorter.cs" />
+    <Compile Include="Shaders\ShaderMatching\ContrailSorter.cs" />
+    <Compile Include="Shaders\ShaderMatching\BeamSorter.cs" />
+    <Compile Include="Shaders\ShaderMatching\WaterSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\DecalSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\FoliageSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\HalogramSorter.cs" />

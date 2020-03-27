@@ -194,8 +194,8 @@ namespace TagTool.Commands.Porting
             foreach (var a in bmRmt2.BooleanParameterNames)
                 bmBoolConstants.Add(BlamCache.StringTable.GetString(a.Name));
 
-            // Find a HO equivalent rmt2
-            CachedTag edRmt2Instance = FindClosestRmt2(cacheStream, blamCacheStream, blamRmt2);
+            // get template previously matched from porttag rmt2
+            CachedTag edRmt2Instance = finalRm.ShaderProperties[0].Template;
 
             if (edRmt2Instance == null)
             {
