@@ -62,8 +62,11 @@ namespace TagTool.Shaders.ShaderMatching
             var relevantRmt2s = new List<Rmt2Pairing>();
 
             Dictionary<CachedTag, long> ShaderTemplateValues = new Dictionary<CachedTag, long>();
+
             ShaderSorter shaderTemplateSorter = new ShaderSorter();
             HalogramSorter halogramTemplateSorter = new HalogramSorter();
+            TerrainSorter terrainTemplateSorter = new TerrainSorter();
+            FoliageSorter foliageTemplateSorter = new FoliageSorter();
 
             foreach (var rmt2Tag in BaseCache.TagCache.NonNull().Where(tag => tag.IsInGroup("rmt2")))
             {
@@ -114,13 +117,20 @@ namespace TagTool.Shaders.ShaderMatching
                     SourceTag = sourceRmt2Tag
                 });
 
-                if (sourceRmt2Desc.Type == "shader")
+                switch (sourceRmt2Desc.Type)
                 {
-                    ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
-                }
-                else if (sourceRmt2Desc.Type == "halogram")
-                {
-                    ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(halogramTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                    case "shader":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "halogram":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(halogramTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "terrain":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(terrainTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
+                    case "foliage":
+                        ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(foliageTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
+                        break;
                 }
             }
 
@@ -134,52 +144,41 @@ namespace TagTool.Shaders.ShaderMatching
 
             // find closest rmt2
 
-            if (sourceRmt2Desc.Type == "shader")
+            switch (sourceRmt2Desc.Type)
             {
-                var targetValue = Sorter.GetValue(shaderTemplateSorter, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
-                long bestValue = long.MaxValue;
-                CachedTag bestTag = null;
+                case "shader":      return GetBestTag(shaderTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "halogram":    return GetBestTag(halogramTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "terrain":     return GetBestTag(terrainTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "foliage":     return GetBestTag(foliageTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                default:            return null;
+            }
+        }
 
-                foreach (var pair in ShaderTemplateValues)
+
+        /// <summary>
+        /// Returns the best render_method_template tag match using the given dictionary and source rmt2
+        /// </summary>
+        private CachedTag GetBestTag(SortingInterface sortingInterface, Dictionary<CachedTag, long> shaderTemplateValues, CachedTag sourceRmt2Tag)
+        {
+            long targetValue = Sorter.GetValue(sortingInterface, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+            long bestValue = long.MaxValue;
+            CachedTag bestTag = null;
+
+            foreach (var pair in shaderTemplateValues)
+            {
+                if (Math.Abs(pair.Value - targetValue) < bestValue)
                 {
-                    if (Math.Abs(pair.Value - targetValue) < bestValue)
-                    {
-                        bestValue = Math.Abs(pair.Value - targetValue);
-                        bestTag = pair.Key;
-                    }
+                    bestValue = Math.Abs(pair.Value - targetValue);
+                    bestTag = pair.Key;
                 }
-
-                Console.WriteLine($"Closest tag to {sourceRmt2Tag.Name} with options and value {targetValue}");
-                shaderTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
-                Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
-                shaderTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
-                return bestTag;
             }
-            else if (sourceRmt2Desc.Type == "halogram")
-            {
-                var targetValue = Sorter.GetValue(halogramTemplateSorter, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
-                long bestValue = long.MaxValue;
-                CachedTag bestTag = null;
 
-                foreach (var pair in ShaderTemplateValues)
-                {
-                    if (Math.Abs(pair.Value - targetValue) < bestValue)
-                    {
-                        bestValue = Math.Abs(pair.Value - targetValue);
-                        bestTag = pair.Key;
-                    }
-                }
+            Console.WriteLine($"Closest tag to {sourceRmt2Tag.Name} with options and value {targetValue}");
+            sortingInterface.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+            Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
+            sortingInterface.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
 
-                Console.WriteLine($"Closest tag to {sourceRmt2Tag.Name} with options and value {targetValue}");
-                halogramTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
-                Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
-                halogramTemplateSorter.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
-                return bestTag;
-            }
-            else
-            {
-                return null;
-            }
+            return bestTag;
         }
 
         /// <summary>

@@ -521,11 +521,13 @@
     <Compile Include="Serialization\ResourceSerializer.cs" />
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
+    <Compile Include="Shaders\ShaderMatching\FoliageSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\HalogramSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Cache\HaloOnline\Strings.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcherNew.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderSorter.cs" />
+    <Compile Include="Shaders\ShaderMatching\TerrainSorter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
     <Compile Include="Tags\Definitions\Gen1\Sound.cs" />
