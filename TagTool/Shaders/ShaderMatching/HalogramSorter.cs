@@ -3,14 +3,19 @@ using System.Collections.Generic;
 
 namespace TagTool.Shaders.ShaderMatching
 {
+    // TODO: fixup option indices where they changed from H3 -> HO
+
     public class HalogramSorter : SortingInterface
     {
         // these private lists define the order of the types and options in a shader. The matcher will use these when no perfect match exists. 
+        // TODO: revise these
+
         private static List<HalogramOptionTypes> TypeOrder = new List<HalogramOptionTypes> {
-            HalogramOptionTypes.overlay,
             HalogramOptionTypes.warp,
             HalogramOptionTypes.misc,
             HalogramOptionTypes.blend_mode,
+            HalogramOptionTypes.overlay,
+            HalogramOptionTypes.edge_fade,
             HalogramOptionTypes.self_illumination,
             HalogramOptionTypes.albedo
         };
