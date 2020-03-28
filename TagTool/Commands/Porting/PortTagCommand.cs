@@ -608,7 +608,28 @@ namespace TagTool.Commands.Porting
                 case TextValuePairDefinition sily:
                     Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
                     break;
+                    
+                case UserInterfaceSharedGlobalsDefinition wigl:
+                    if (BlamCache.Version == CacheVersion.Halo3Retail)
+                    {
+                        wigl.UiWidgetBipeds = new List<UserInterfaceSharedGlobalsDefinition.UiWidgetBiped>
+                        {
+                            new UserInterfaceSharedGlobalsDefinition.UiWidgetBiped
+                            {
+                                AppearanceBipedName = "chief",
+                                RosterPlayer1BipedName = "elite",
+                            }
+                        };
+                    }
+                    break;
+            }
 
+            //
+            // Shader conversion
+            //
+
+            switch (blamDefinition)
+            {
                 case ShaderFoliage rmfl:
                 case ShaderBlack rmbk:
                 case ShaderTerrain rmtr:
@@ -636,20 +657,6 @@ namespace TagTool.Commands.Porting
 
                 case ShaderCortana rmct:
                     ConvertShaderCortana(rmct, cacheStream, blamCacheStream, resourceStreams);
-                    break;
-                    
-                case UserInterfaceSharedGlobalsDefinition wigl:
-                    if (BlamCache.Version == CacheVersion.Halo3Retail)
-                    {
-                        wigl.UiWidgetBipeds = new List<UserInterfaceSharedGlobalsDefinition.UiWidgetBiped>
-                        {
-                            new UserInterfaceSharedGlobalsDefinition.UiWidgetBiped
-                            {
-                                AppearanceBipedName = "chief",
-                                RosterPlayer1BipedName = "elite",
-                            }
-                        };
-                    }
                     break;
             }
 
