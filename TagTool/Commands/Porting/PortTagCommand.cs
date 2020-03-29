@@ -125,6 +125,8 @@ namespace TagTool.Commands.Porting
 				entry.Value.Close();
 			}
 
+            Matcher.DeInit();
+
 			return true;
 		}
 
@@ -220,8 +222,6 @@ namespace TagTool.Commands.Porting
 
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
-
-                    break;
 			} 
 
 			//
@@ -649,6 +649,10 @@ namespace TagTool.Commands.Porting
                         return GetDefaultShader(blamTag.Group.Tag);
                     else
                     {
+                        // Verify that the ShaderMatcher is ready to use
+                        if (!Matcher.IsInitialized)
+                            Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30), FlagIsSet(PortingFlags.PefectShaderMatchOnly));
+
                         blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag, BlamCache.Deserialize(blamCacheStream, blamTag));
                         if (blamDefinition == null) // convert shader failed
                             return GetDefaultShader(blamTag.Group.Tag);

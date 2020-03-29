@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.Definitions.RenderMethodTemplate;
 
@@ -48,6 +47,17 @@ namespace TagTool.Shaders.ShaderMatching
             IsInitialized = true;
         }
 
+        public void DeInit()
+        {
+            UseMs30 = false;
+            PerfectMatchesOnly = false;
+            BaseCache = null;
+            PortingCache = null;
+            BaseCacheStream = null;
+            PortingCacheStream = null;
+            IsInitialized = false;
+        }
+
         /// <summary>
         /// Find the closest template in the base cache to the input template.
         /// </summary>
@@ -58,6 +68,9 @@ namespace TagTool.Shaders.ShaderMatching
             Rmt2Descriptor sourceRmt2Desc;
             if (!Rmt2Descriptor.TryParse(sourceRmt2Tag.Name, out sourceRmt2Desc))
                 throw new ArgumentException($"Invalid rmt2 name '{sourceRmt2Tag.Name}'", nameof(sourceRmt2Tag));
+
+            // rebuild options to match base cache
+            sourceRmt2Desc = RebuildRmt2Options(sourceRmt2Desc, BaseCacheStream, PortingCacheStream);
 
             var relevantRmt2s = new List<Rmt2Pairing>();
 
@@ -224,6 +237,59 @@ namespace TagTool.Shaders.ShaderMatching
         {
 
             return renderMethod;
+        }
+
+        /// <summary>
+        /// Rebuilds an rmt2's options in memory so indices match up with the base cache
+        /// </summary>
+        private Rmt2Descriptor RebuildRmt2Options(Rmt2Descriptor srcRmt2Descriptor, Stream baseStream, Stream portingStream)
+        {
+            // TODO: support reach
+
+            if (PortingCache.Version >= CacheVersion.Halo3Beta && PortingCache.Version <= CacheVersion.Halo3ODST)
+            { 
+                string rmdfName = $"shaders\\{srcRmt2Descriptor.Type}.rmdf";
+                if (UseMs30)
+                    rmdfName = "ms30\\" + rmdfName;
+
+                if (!BaseCache.TryGetTag(rmdfName, out var baseRmdfTag) || !PortingCache.TryGetTag(rmdfName, out var portingRmdfTag))
+                    return srcRmt2Descriptor;
+
+                var baseRmdfDefinition = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, baseRmdfTag);
+                var portingRmdfDefinition = PortingCache.Deserialize<RenderMethodDefinition>(PortingCacheStream, portingRmdfTag);
+
+                List<byte> newOptions = new List<byte>();
+
+                // turn options into strings
+                for (int i = 0; i < srcRmt2Descriptor.Options.Length; i++)
+                {
+                    StringId portingType = portingRmdfDefinition.Methods[i].ShaderOptions[srcRmt2Descriptor.Options[i]].Type;
+                    string portingTypeString = PortingCache.StringTable.GetString(portingType);
+
+                    bool optionFound = false;
+
+                    // match string with option in base cache
+                    for (int index = 0; index < baseRmdfDefinition.Methods[i].ShaderOptions.Count; index++)
+                    {
+                        StringId baseType = baseRmdfDefinition.Methods[i].ShaderOptions[index].Type;
+                        string baseTypeString = BaseCache.StringTable.GetString(baseType);
+
+                        if (portingTypeString == baseTypeString)
+                        {
+                            optionFound = true;
+                            newOptions.Add((byte)index);
+                            break;
+                        }
+                    }
+
+                    if (!optionFound) // some rmdf's have additional options, add a 0 if no match is found
+                        newOptions.Add(0);
+                }
+
+                srcRmt2Descriptor.Options = newOptions.ToArray();
+            }
+
+            return srcRmt2Descriptor;
         }
 
         private Rmt2ParameterMatch MatchParameterBlocks(List<ShaderArgument> sourceBlock, List<ShaderArgument> destBlock)
