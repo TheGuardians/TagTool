@@ -6,6 +6,7 @@ using TagTool.Shaders;
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Shaders
 {
@@ -69,7 +70,7 @@ namespace TagTool.Commands.Shaders
                     {
                         disassemblies.Add(DisassembleGen3Shader(shaderIndex));
                     }
-                    else if (Cache.GetType() == typeof(GameCacheHaloOnlineBase))
+                    else if (Cache.GetType() == typeof(GameCacheHaloOnline))
                     {
                         disassemblies.Add(DisassembleHaloOnlineShader(shaderIndex));
                     }
@@ -81,7 +82,7 @@ namespace TagTool.Commands.Shaders
             string filename = args.Count == 2 ? args[1] : "Shaders";
 
             for (var i = 0; i < disassemblies.Count; i++)
-                using (var writer = File.CreateText(Path.Combine(filename, $"{Tag.Name.Split('\\').Last()}_{i}.{Tag.Group}.txt")))
+                using (var writer = File.CreateText(Path.Combine(filename, $"{Tag.Name.Split('\\').Last()}_{indices[i]}.{Tag.Group}.txt")))
                 {
                     if (Cache.GetType() == typeof(GameCacheGen3))
                         GenerateGen3ShaderHeader(indices[i], writer);
