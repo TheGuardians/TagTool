@@ -48,7 +48,7 @@ namespace TagTool.Commands.Shaders
                     {
                         disassembly = DisassembleGen3Shader(i);
                     }
-                    else if (Cache.GetType() == typeof(GameCacheHaloOnlineBase))
+                    else if (Cache.GetType() == typeof(GameCacheHaloOnline))
                     {
                         disassembly = DisassembleHaloOnlineShader(i);
                     }
