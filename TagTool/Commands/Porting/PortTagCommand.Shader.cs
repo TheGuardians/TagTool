@@ -137,8 +137,8 @@ namespace TagTool.Commands.Porting
                 case "rmhg":
                     return CacheContext.GetTag<ShaderHalogram>(@"objects\multi\shaders\koth_shield");
 
-                case "rmbk":
-                    return CacheContext.GetTag<ShaderBlack>(@"levels\dlc\bunkerworld\shaders\z_black");
+                case "rmbk": // hackfix
+                    return CacheContext.GetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black");
 
                 case "rmrd":
                 case "rmsh":

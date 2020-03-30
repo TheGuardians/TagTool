@@ -246,7 +246,8 @@ namespace TagTool.Shaders.ShaderMatching
         {
             // TODO: support reach
 
-            if (PortingCache.Version >= CacheVersion.Halo3Beta && PortingCache.Version <= CacheVersion.Halo3ODST)
+            // ignore black, it has no options
+            if (srcRmt2Descriptor.Type != "black" && PortingCache.Version >= CacheVersion.Halo3Beta && PortingCache.Version <= CacheVersion.Halo3ODST)
             { 
                 string rmdfName = $"shaders\\{srcRmt2Descriptor.Type}.rmdf";
                 if (UseMs30)
