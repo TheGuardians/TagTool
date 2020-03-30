@@ -9,9 +9,12 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
 	{
         public PhysicsModelFlags Flags;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown;
         public float Mass;
         public float LowFrequencyDeactivationScale;
         public float HighFrequencyDeactivationScale;
@@ -293,6 +296,8 @@ namespace TagTool.Tags.Definitions
         public class PhantomType : TagStructure
 		{
             public PhantomTypeFlags Flags;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int Unknown;
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
@@ -441,9 +446,18 @@ namespace TagTool.Tags.Definitions
             public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
             public ushort Flags;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public MotionTypeValue MotionType;
             public short NoPhantomPowerAltRigidBody;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MotionTypeValue MotionType_Reach;
             public RigidBodySize Size;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknown3;
             public float InertiaTensorScale;
             public float LinearDampening;
             public float AngularDampening;
@@ -455,9 +469,13 @@ namespace TagTool.Tags.Definitions
             public uint Unknown6;
             public uint Unknown7;
             public uint Unknown8;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public uint Unknown9;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public BlamShapeType ShapeType;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public short ShapeIndex;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public float Mass;
             public RealVector3d CenterOfMass;
             public float CenterOfMassRadius;
@@ -468,10 +486,23 @@ namespace TagTool.Tags.Definitions
             public RealVector3d InertiaTensorZ;
             public float InertiaTensorZRadius;
             public float BoundingSpherePad;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public BlamShapeType ShapeType_Reach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short ShapeIndex_Reach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Mass_Reach;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public uint Unknown10;
             public uint Unknown11;
             public short Unknown12;
             public short Unknown13;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknown4;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknown5;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknown6;
 
             public enum MotionTypeValue : short
             {
@@ -496,6 +527,8 @@ namespace TagTool.Tags.Definitions
         public class Material : TagStructure
 		{
             public StringId Name;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown;
             public StringId MaterialName;
             public short PhantomType;
             public MaterialFlags Flags;
@@ -617,9 +650,17 @@ namespace TagTool.Tags.Definitions
             public uint FourVectorsCapacity;
             public int Unknown8;
             public uint Unknown9;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown1;
             public int PlaneEquationsSize;
             public uint PlaneEquationsCapacity;
             public uint Unknown10;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown3;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown4;
         }
 
         [TagStructure(Size = 0x30, Align = 0x10)]
@@ -668,6 +709,22 @@ namespace TagTool.Tags.Definitions
             public uint Unknown14;
             public uint Unknown15;
             public uint Unknown16;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown3;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown4;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown5;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown6;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown7;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ReachUnknown8;
         }
 
         [TagStructure(Size = 0x10)]
