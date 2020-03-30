@@ -13,10 +13,11 @@ namespace TagTool.Tags.Definitions
         public List<Attachment> Attachments;
         public AppearanceFlagsValue AppearanceFlags;
         public ParticleBillboardStyleValue ParticleBillboardStyle;
+        public short RuntimeMTextureArraySize;
         public short FirstSequenceIndex;
         public short SequenceCount;
         public float LowResolutionSwitchDistance;
-        public float CenterOffsetX; //not sure about this one
+        public float CenterOffsetX; //???
         public float Curvature;
         public float EdgeRange;
         public float EdgeCutoff;
@@ -91,7 +92,7 @@ namespace TagTool.Tags.Definitions
             RenderWithWater = 1 << 14
         }
 
-        public enum ParticleBillboardStyleValue : int
+        public enum ParticleBillboardStyleValue : short
         {
             ScreenFacing,
             CameraFacing,
