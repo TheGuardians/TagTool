@@ -780,24 +780,24 @@ namespace TagTool.Commands.Porting
             switch (blamTagName)
             {
                 case @"fx\scenery_fx\weather\snow\snow_snowbound\snow_snowbound":
-                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
+                    effe.Events[0].ParticleSystems[0].NearRange = 10000;
                     break;
 
                 case @"levels\dlc\chillout\fx\flood_tube\flood_tube":
-                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
-                    effe.Events[0].ParticleSystems[0].Unknown8 = 1;
-                    effe.Events[0].ParticleSystems[1].Unknown7 = 10000;
-                    effe.Events[0].ParticleSystems[1].Unknown8 = 1;
+                    effe.Events[0].ParticleSystems[0].NearRange = 10000;
+                    effe.Events[0].ParticleSystems[0].NearCutoff = 1;
+                    effe.Events[0].ParticleSystems[1].NearRange = 10000;
+                    effe.Events[0].ParticleSystems[1].NearCutoff = 1;
                     break;
 
                 case @"levels\dlc\chillout\fx\flood_tube\flood_twitch_bubbles":
-                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
-                    effe.Events[0].ParticleSystems[0].Unknown8 = 1;
+                    effe.Events[0].ParticleSystems[0].NearRange = 10000;
+                    effe.Events[0].ParticleSystems[0].NearCutoff = 1;
                     break;
 
                 case @"objects\levels\dlc\chillout\teleporter_reciever\fx\teleporter" when BlamCache.DisplayName.Contains("chillout"):
                 case @"objects\levels\dlc\chillout\teleporter_sender\fx\teleporter" when BlamCache.DisplayName.Contains("chillout"):
-                    effe.Events[1].ParticleSystems[0].Unknown7 = 0.898723f;
+                    effe.Events[1].ParticleSystems[0].NearRange = 0.898723f;
                     break;
             }
 
