@@ -777,36 +777,15 @@ namespace TagTool.Commands.Porting
 
         private Effect FixupEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
         {
-            switch (blamTagName)
-            {
-                case @"fx\scenery_fx\weather\snow\snow_snowbound\snow_snowbound":
-                    effe.Events[0].ParticleSystems[0].NearRange = 10000;
-                    break;
-
-                case @"levels\dlc\chillout\fx\flood_tube\flood_tube":
-                    effe.Events[0].ParticleSystems[0].NearRange = 10000;
-                    effe.Events[0].ParticleSystems[0].NearCutoff = 1;
-                    effe.Events[0].ParticleSystems[1].NearRange = 10000;
-                    effe.Events[0].ParticleSystems[1].NearCutoff = 1;
-                    break;
-
-                case @"levels\dlc\chillout\fx\flood_tube\flood_twitch_bubbles":
-                    effe.Events[0].ParticleSystems[0].NearRange = 10000;
-                    effe.Events[0].ParticleSystems[0].NearCutoff = 1;
-                    break;
-
-                case @"objects\levels\dlc\chillout\teleporter_reciever\fx\teleporter" when BlamCache.DisplayName.Contains("chillout"):
-                case @"objects\levels\dlc\chillout\teleporter_sender\fx\teleporter" when BlamCache.DisplayName.Contains("chillout"):
-                    effe.Events[1].ParticleSystems[0].NearRange = 0.898723f;
-                    break;
-            }
-
-            // yucky hack-fix for some particles taking over the screen
             foreach (var effectEvent in effe.Events)
             {
                 foreach (var particleSystem in effectEvent.ParticleSystems)
                 {
-                    if (particleSystem.Particle != null)
+                    if (BlamCache.Version < CacheVersion.Halo3ODST) //this value is inverted in ODST tags when compared to H3
+                    {
+                        particleSystem.NearRange = 1 / particleSystem.NearRange;
+                    }
+                    if (particleSystem.Particle != null)// yucky hack-fix for some particles taking over the screen
                     {
                         var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
                         if ((prt3Definition.Flags & (1 << 7)) != 0) // flag bit is always 7 -- this is a post porting fixup
