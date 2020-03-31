@@ -86,11 +86,11 @@ namespace TagTool.Commands
 
             /*
             string filename = "test";
-            HaloGeometryFormat geometryFormat = new HaloGeometryFormat();
-            HaloGeometryFormatHeader header = new HaloGeometryFormatHeader();
+            BlamModelFile geometryFormat = new BlamModelFile();
 
             using (var stream = Cache.OpenCacheRead())
             {
+                //objects\gear\human\industrial\toolbox_small\toolbox_small
                 var tag = Cache.TagCache.GetTag(@"objects\vehicles\warthog\warthog", "mode"); // objects\vehicles\warthog\warthog
                 var mode = Cache.Deserialize<RenderModel>(stream, tag);
                 var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource);
@@ -98,10 +98,10 @@ namespace TagTool.Commands
 
                 geometryFormat.InitGen3(Cache, mode);
 
-                using (var modelStream = new FileStream($"3dsmax/{filename}.hgf", FileMode.Create))
+                using (var modelStream = new FileStream($"3dsmax/{filename}.bmf", FileMode.Create))
                 using (var writer = new EndianWriter(modelStream))
                 {
-                    HaloGeometryFormat.SerializeToFile(writer, header, geometryFormat);
+                    geometryFormat.SerializeToFile(writer);
                 }
             }*/
 

@@ -25,8 +25,7 @@ namespace TagTool.Tags.Definitions
 
         public float OcclusionRadius;
 
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused1;
+        public UnknownFlagsValue UnknownFlags;
 
         public OcclusionOffsetDirectionValue OcclusionOffsetDirection;
 
@@ -75,6 +74,14 @@ namespace TagTool.Tags.Definitions
 
         public List<RotationBlock> TimeRotation;
         public List<RotationBlock> AgeRotation;
+
+        [Flags]
+        public enum UnknownFlagsValue : short
+        {
+            None = 0,
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1
+        }
 
         public enum OcclusionOffsetDirectionValue : short
         {

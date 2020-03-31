@@ -20,6 +20,7 @@ using TagTool.Commands.ScenarioLightmaps;
 using TagTool.Commands.Files;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Scenarios;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Editing
 {
@@ -147,8 +148,13 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new ForEachCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new SaveTagChangesCommand(cache, tag, definition));
-            commandContext.AddCommand(new PokeTagChangesCommand(cache, tag, definition));
+            
             commandContext.AddCommand(new ExitToCommand(contextStack));
+
+            if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, cache.Version))
+            {
+                commandContext.AddCommand(new PokeTagChangesCommand(cache as GameCacheHaloOnlineBase, tag as CachedTagHaloOnline, definition));
+            }
 
             return commandContext;
         }

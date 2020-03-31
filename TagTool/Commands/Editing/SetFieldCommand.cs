@@ -146,9 +146,9 @@ namespace TagTool.Commands.Editing
                     ResourceCacheHaloOnline oldCache = null;
 
                     if (pageable.GetLocation(out var oldLocation))
-                        oldCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(oldLocation));
+                        oldCache = haloOnlineGameCache.ResourceCaches.GetResourceCache(oldLocation);
 
-                    var newCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(newLocation));
+                    var newCache = haloOnlineGameCache.ResourceCaches.GetResourceCache(newLocation);
 
                     var data = File.ReadAllBytes(resourceFile.FullName);
 

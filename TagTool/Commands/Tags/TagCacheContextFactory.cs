@@ -10,6 +10,7 @@ using TagTool.Commands.Modding;
 using TagTool.Commands.Bitmaps;
 using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.CollisionModels;
+using TagTool.Commands.Shaders;
 
 namespace TagTool.Commands.Tags
 {
@@ -77,6 +78,7 @@ namespace TagTool.Commands.Tags
             }
 
             // porting related
+            context.AddCommand(new UseXSDCommand());
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
         }

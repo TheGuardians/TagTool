@@ -173,8 +173,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown19;
                 public float Unknown6;
-                public float Unknown7;
-                public float Unknown8;
+                public float NearRange;
+                public float NearCutoff;
                 public float Unknown9;
                 public uint Unknown10;
                 public float Unknown11;
@@ -211,8 +211,7 @@ namespace TagTool.Tags.Definitions
 
                     public uint Unknown3;
                     public uint Unknown4;
-                    public uint Unknown5;
-                    public uint Unknown6;
+                    public RealPoint2d UVScrollRate;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public uint Unknown7;

@@ -107,7 +107,10 @@ namespace TagTool.Commands
                 Console.Write("{0}> ", contextStack.GetPath());
                 Console.Title = $"TagTool {contextStack.GetPath()}>";
 
-                commandRunner.RunCommand(Console.ReadLine(), false);
+                var line = Console.ReadLine();
+                if (line == "restart")
+                    goto start;
+                commandRunner.RunCommand(line, false);
             }
 
             end: return;

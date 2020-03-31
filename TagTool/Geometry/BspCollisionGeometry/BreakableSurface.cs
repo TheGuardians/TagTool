@@ -1,6 +1,6 @@
 ﻿using TagTool.Tags;
 
-namespace TagTool.BspCollisionGeometry
+namespace TagTool.Geometry.BspCollisionGeometry
 {
     /// <summary>
     /// bit-vector of length 1024, convert as int/uint

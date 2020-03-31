@@ -254,6 +254,7 @@
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\MatchTemplateCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
+    <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
@@ -275,13 +276,14 @@
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
     <Compile Include="Commands\RenderModels\ExtractBitmapsCommand.cs" />
+    <Compile Include="Commands\RenderModels\ExtractBMFCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractModelCommand.cs" />
     <Compile Include="Commands\RenderModels\RenderModelContextFactory.cs" />
     <Compile Include="Commands\RenderModels\RenderModelTestCommand.cs" />
     <Compile Include="Commands\RenderModels\ReplaceRenderGeometryCommand.cs" />
     <Compile Include="Commands\RenderModels\SpecifyShadersCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
-    <Compile Include="Commands\ScenarioStructureBSPs\ConvertInstancedGeometryCommand.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\ConvertGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractPathfindingGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
@@ -294,6 +296,7 @@
     <Compile Include="Commands\Scenarios\ExtractZonesAreasModelCommand.cs" />
     <Compile Include="Commands\Scenarios\ListScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Shaders\UseXSDCommand.cs" />
     <Compile Include="Commands\Sounds\ExtractXMACommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortingContext.cs" />
@@ -471,6 +474,7 @@
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
     <Compile Include="Common\RealRectangle3d.cs" />
     <Compile Include="Direct3D\Xbox360\D3DTexture9.cs" />
+    <Compile Include="Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\BreakableSurface.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\CollisionBspPhysics.cs" />
@@ -490,7 +494,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamInterop.cs" />
-    <Compile Include="Geometry\Utils\InstancedGeometryToObjectConverter.cs" />
+    <Compile Include="Geometry\Utils\GeometryToObjectConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
@@ -537,6 +541,7 @@
     <Compile Include="Shaders\ShaderMatching\TerrainSorter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
+    <Compile Include="Tags\Definitions\Gen1\ModelAnimationGraph.cs" />
     <Compile Include="Tags\Definitions\Gen1\Sound.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
@@ -876,7 +881,7 @@
     <Compile Include="Tags\Resources\BinkResource.cs" />
     <Compile Include="Tags\Resources\SoundResourceDefinition.cs" />
     <Compile Include="Havok\BipedPhysicsFlags.cs" />
-    <Compile Include="Tools\Geometry\HaloGeometryFormat.cs" />
+    <Compile Include="Tools\Geometry\BlamModelFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TagTool.ico" />

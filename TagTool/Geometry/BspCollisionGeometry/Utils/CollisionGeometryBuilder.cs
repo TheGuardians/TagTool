@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 
 using BSP = TagTool.Tags.Definitions.CollisionModel.Region.Permutation.Bsp;
-using TagTool.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags;
 
 namespace TagTool.Geometry

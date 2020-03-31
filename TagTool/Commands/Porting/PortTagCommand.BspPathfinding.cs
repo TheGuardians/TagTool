@@ -2,7 +2,7 @@ using TagTool.Cache;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
-using TagTool.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Pathfinding;
 using TagTool.Pathfinding.Utils;
 

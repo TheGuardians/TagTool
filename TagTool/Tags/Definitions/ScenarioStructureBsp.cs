@@ -6,9 +6,8 @@ using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
-using TagTool.BspCollisionGeometry;
-using TagTool.Pathfinding;
 using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Pathfinding;
 
 namespace TagTool.Tags.Definitions
 {

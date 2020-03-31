@@ -1,4 +1,4 @@
-using TagTool.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Pathfinding;
 
 namespace TagTool.Tags.Resources

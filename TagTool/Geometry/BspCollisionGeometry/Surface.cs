@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Tags;
 
-namespace TagTool.BspCollisionGeometry
+namespace TagTool.Geometry.BspCollisionGeometry
 {
     /// <summary>
     /// Represents a list of planes that forms a relatively flat surface. Used in lighting code.

@@ -21,16 +21,16 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId Type;
             public List<ShaderOption> ShaderOptions;
-            public StringId Unknown;
-            public StringId Unknown2;
+            public StringId VertexShaderMethodMacroName;
+            public StringId PixelShaderMethodMacroName;
 
             [TagStructure(Size = 0x1C)]
             public class ShaderOption : TagStructure
 			{
                 public StringId Type;
                 public CachedTag Option;
-                public StringId Unknown;
-                public StringId Unknown2;
+                public StringId VertexShaderOptionMacroName;
+                public StringId PixelShaderOptionMacroName;
             }
         }
 
@@ -57,7 +57,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class UnknownBlock : TagStructure
 		{
-            public short Unknown1;
+            public short VertexType;
             public short Unknown2;
             public uint Unknown3;
             public uint Unknown4;

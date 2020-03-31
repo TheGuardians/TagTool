@@ -55,9 +55,6 @@ namespace Sentinel.Controls
 
             var bits = Convert.ToInt32(value);
 
-            if (bits == 0)
-                return;
-
             for (var i = 0; i < checkedListBox1.Items.Count; i++)
             {
                 var bit = (FlagsBit)checkedListBox1.Items[i];
@@ -65,6 +62,8 @@ namespace Sentinel.Controls
 
                 if ((bits & index) != 0)
                     checkedListBox1.SetItemChecked(i, true);
+                else
+                    checkedListBox1.SetItemChecked(i, false);
             }
 
             Loading = false;
