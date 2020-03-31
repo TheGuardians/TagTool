@@ -108,6 +108,11 @@ namespace TagTool.Common
             }
         }
 
+        public static float Distance(RealPoint3d a)
+        {
+            return (float)Math.Sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z);
+        }
+
         public float[] ToArray() => new[] { X, Y, Z };
     }
 }

@@ -331,6 +331,10 @@ namespace TagTool.Serialization
                 }
 
                 clampedLength = Math.Min(byteCount - charSize, bytes.Length);
+
+                if (valueInfo.ForceNullTerminated && clampedLength == valueInfo.Length)
+                    bytes[valueInfo.Length - 1] = 0;
+
                 writer.Write(bytes, 0, clampedLength);
             }
 

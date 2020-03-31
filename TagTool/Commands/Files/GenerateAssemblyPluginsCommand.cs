@@ -19,7 +19,7 @@ namespace TagTool.Commands.Files
             : base(false,
 
                   "GenerateAssemblyPlugins",
-                  "Converts BlamCore tag definitions to Assembly Plugin files..",
+                  "Converts tag definitions to Assembly Plugin files..",
 
                   "GenerateAssemblyPlugins [path]",
 
@@ -151,6 +151,7 @@ namespace TagTool.Commands.Files
                 dataRef,
                 reflexive,
                 raw,
+                comment,
                 shader, //unused, reflexive instead
                 uniclist //unused, reflexive instead
             }
@@ -223,7 +224,8 @@ namespace TagTool.Commands.Files
                 {AssemblyPluginFieldTypes.colourf, 12},
                 {AssemblyPluginFieldTypes.dataRef, 20},
                 {AssemblyPluginFieldTypes.reflexive, 12},
-                {AssemblyPluginFieldTypes.raw, 20}
+                {AssemblyPluginFieldTypes.raw, 20},
+                {AssemblyPluginFieldTypes.comment, 0 }
             };
 
             /// <summary>
@@ -632,6 +634,7 @@ namespace TagTool.Commands.Files
                     if (fieldType == typeof(RealArgbColor))
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset, new Dictionary<string, string>() { { "format", "argb" } }));
+                        offset += 4;    // argb float is 0x10
                     }
                     else if (fieldType == typeof(RealRgbColor))
                     {
@@ -784,11 +787,10 @@ namespace TagTool.Commands.Files
                         {
                             for (int i = 0; i < tagFieldAttribute.Length; i++)
                             {
-                                List<AssemblyPluginField> structureFields = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, fieldName, ref offset);
-
-                                foreach (AssemblyPluginField field in structureFields)
-                                    field.attributes["name"] = field.attributes["name"] + " " + i.ToString();
-
+                                List<AssemblyPluginField> structureFields = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, null, ref offset);
+                                var comment = new AssemblyPluginField(AssemblyPluginFieldTypes.comment, fieldName);
+                                comment.attributes["name"] = comment.attributes["name"] + " " + i.ToString();
+                                assemblyPluginFields.Add(comment);
                                 assemblyPluginFields.AddRange(structureFields);
                             }
                         }
@@ -796,7 +798,8 @@ namespace TagTool.Commands.Files
                     //Handles classes or structs.
                     else if ((fieldType.IsClass || (fieldType.IsValueType && !fieldType.IsEnum)) && !fieldType.IsGenericType)
                     {
-                        assemblyPluginFields.AddRange(CommonFieldTypes.ReferencedStructure(fieldType, cacheVersion, fieldName, ref offset));
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.comment, fieldName));
+                        assemblyPluginFields.AddRange(CommonFieldTypes.ReferencedStructure(fieldType, cacheVersion, null, ref offset));
                     }
                     else
                         throw new NotImplementedException($"Undefined field type \"{fieldType}\" not implemented.");
@@ -851,6 +854,9 @@ namespace TagTool.Commands.Files
             /// <returns><![CDATA[Returns the XML node of the field in the format <type name="{name}" offset="{offset}" {attributes}>{children}</type>]]></returns>
             public override string ToString()
             {
+
+                
+
                 attributes["name"] = ToSpaced(attributes["name"]);
 
                 string formattedAttributes = "";
@@ -877,6 +883,11 @@ namespace TagTool.Commands.Files
                     nodeFormat = "{4}<{0}{1}/>";
                 else
                     nodeFormat = "{4}<{0}{1}>{2}</{0}>";
+
+                if (type == AssemblyPluginFieldTypes.comment)
+                {
+                    return $"{indent}<comment title=\"{ToSpaced(attributes["name"])}\"></comment>{Environment.NewLine}";
+                }
 
                 return String.Format(nodeFormat, type, formattedAttributes, nodeContents, Environment.NewLine, indent);
             }
@@ -966,7 +977,7 @@ namespace TagTool.Commands.Files
                 {
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
-                    if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
+                    if (!CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) || tagFieldAttribute.Flags.HasFlag(Runtime))
                         continue;
 
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
@@ -976,12 +987,8 @@ namespace TagTool.Commands.Files
                 {
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
-                    if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
+                    if (!CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) || tagFieldAttribute.Flags.HasFlag(Runtime))
                         continue;
-
-                    if (tagFieldAttribute.Version != CacheVersion.Unknown)
-                        if (tagFieldAttribute.Version != cacheVersion)
-                            continue;
 
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
                 }
@@ -1053,7 +1060,7 @@ namespace TagTool.Commands.Files
                 "<plugin game=\"" + gameName + "\" baseSize=\"0x" + size.ToString("X") + "\">",
                 "	<!-- Automatically generated plugin -->",
                 "	<revisions>",
-                "		<revision author=\"TagTool\" version=\"1\">Generated plugin from BlamCore definitions.</revision>",
+                "		<revision author=\"TagTool\" version=\"1\">Generated plugin from TagTool definitions.</revision>",
                 "	</revisions>"
             };
 

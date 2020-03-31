@@ -1,5 +1,6 @@
 ﻿using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Cache;
 
 /*
  * Havok Structures required to deserialize tags and resources. Most havok structs are aligned at 0x10 which is why there is a lot of padding. 
@@ -75,6 +76,14 @@ namespace TagTool.Havok
         public HkpSingleShapeContainer Child;
         public uint ShapeCollectionAddress;
         public uint MoppCodeAddress;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown9;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown10;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown11;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown12;
     }
 
     [TagStructure(Size = 0x4)]
@@ -90,6 +99,22 @@ namespace TagTool.Havok
         public HkpReferencedObject ReferencedObject;
         public uint UserDataAddress;
         public uint Type;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown1;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown2;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown3;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown4;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown5;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown6;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown7;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown8;
     }
 
     /// <summary>
@@ -100,6 +125,15 @@ namespace TagTool.Havok
     {
         public BlamShapeType Type;
         public short Index;
+    }
+
+    [TagStructure(Size = 0x10)]
+    public class HkpShapeCollection : HkpShape
+    {
+        public HkpShapeContainer Container;
+        public bool DisableWelding;
+        [TagField(Length = 11)]
+        public byte[] Padding;
     }
 
     [TagStructure(Size = 0xC)]

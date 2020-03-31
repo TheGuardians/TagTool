@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
                 Populate(contextStack, context, currentCache, portingCache);
 
             // add tags command to the new cache
-            TagCacheContextFactory.Populate(contextStack, context, portingCache);
+            TagCacheContextFactory.Populate(contextStack, context, currentCache);
 
             return context;
         }
@@ -53,6 +53,8 @@ namespace TagTool.Commands.Porting
                 context.AddCommand(new PortMultiplayerEventsCommand(hoCache, portingCache));
                 context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand));
                 context.AddCommand(new MatchTemplateCommand(hoCache, portingCache));
+                context.AddCommand(new PortInstancedGeometryObjectCommand(hoCache, portingCache));
+                context.AddCommand(new PortClusterGeometryObjectCommand(hoCache, portingCache));
             }
         }
     }

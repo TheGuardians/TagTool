@@ -72,10 +72,10 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                buffer[i * 2 + 0] = (byte)((data[i + 1] & 0x0F) << 4);
-                buffer[i * 2 + 1] = (byte)(data[i + 1] & 0xF0);
-                buffer[i * 2 + 2] = (byte)((data[i + 0] & 0x0F) << 4);
-                buffer[i * 2 + 3] = (byte)(data[i + 0] & 0xF0);
+                buffer[i * 2 + 2] = (byte)((data[i + 1] & 0x0F) << 4);
+                buffer[i * 2 + 3] = (byte)(data[i + 1] & 0xF0);
+                buffer[i * 2 + 0] = (byte)((data[i + 0] & 0x0F) << 4);
+                buffer[i * 2 + 1] = (byte)(data[i + 0] & 0xF0);
             }
             return buffer;
         }

@@ -7,7 +7,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 
-namespace TagTool.BspCollisionGeometry
+namespace TagTool.Geometry.BspCollisionGeometry
 {
     [TagStructure(Size = 0x60)]
     public class LargeCollisionBspBlock : TagStructure

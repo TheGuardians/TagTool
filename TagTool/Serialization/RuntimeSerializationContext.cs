@@ -12,11 +12,19 @@ namespace TagTool.Serialization
     {
         private GameCache Cache { get; }
         private ProcessMemoryStream ProcessStream { get; }
+        private uint StartAddress;
+        private uint OriginalStructOffset;
+        private uint HeaderSize;
+        private uint OriginalSize;
 
-        public RuntimeSerializationContext(GameCache cache, ProcessMemoryStream processStream)
+        public RuntimeSerializationContext(GameCache cache, ProcessMemoryStream processStream, uint tagAddress, uint originalOffset, uint headerSize, uint originalSize)
         {
             Cache = cache;
             ProcessStream = processStream;
+            StartAddress = tagAddress;
+            OriginalStructOffset = originalOffset;
+            HeaderSize = headerSize;
+            OriginalSize = originalSize;
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
@@ -35,7 +43,7 @@ namespace TagTool.Serialization
 
         public IDataBlock CreateBlock()
         {
-            return new DataBlock();
+            return new DataBlock(StartAddress, HeaderSize);
         }
 
         public void EndDeserialize(TagStructureInfo info, object obj)
@@ -44,7 +52,20 @@ namespace TagTool.Serialization
 
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
         {
-            ProcessStream.Write(data, 0, data.Length);
+            if (mainStructOffset + HeaderSize == OriginalStructOffset && data.Length <= OriginalSize - HeaderSize)
+            {
+                ProcessStream.Seek(StartAddress + HeaderSize, SeekOrigin.Begin);
+                ProcessStream.Write(data, 0, data.Length);
+                ProcessStream.Flush();
+            }
+            else if(data.Length > OriginalSize - HeaderSize)
+            {
+                Console.WriteLine($"Cannot poke a tag larger than the tag currently in memory. Size: 0x{OriginalSize.ToString("X8")} Poking: 0x{data.Length.ToString("X8")}");
+            }
+            else if (mainStructOffset + HeaderSize != OriginalStructOffset)
+            {
+                Console.WriteLine($"Error: tag size changed or the serializer failed!");
+            }
         }
 
         public CachedTag GetTagByIndex(int index)
@@ -66,16 +87,20 @@ namespace TagTool.Serialization
         {
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
+            private uint StartAddress;
+            private uint HeaderSize;
 
-            public DataBlock()
+            public DataBlock(uint startAddress, uint headerSize)
             {
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
+                StartAddress = startAddress;
+                HeaderSize = headerSize;
             }
 
             public void WritePointer(uint targetOffset, Type type)
             {
-                Writer.Write(targetOffset);
+                Writer.Write(targetOffset + StartAddress + HeaderSize);
             }
 
             public object PreSerialize(TagFieldAttribute info, object obj)

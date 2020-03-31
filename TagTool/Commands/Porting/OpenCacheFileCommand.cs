@@ -54,9 +54,9 @@ namespace TagTool.Commands.Porting
                 
             Console.Write("Loading cache...");
 
-            GameCache cache = GameCache.Open(fileName);
+            GameCache blamCache = GameCache.Open(fileName);
 
-            ContextStack.Push(PortingContextFactory.Create(ContextStack, Cache, cache));
+            ContextStack.Push(PortingContextFactory.Create(ContextStack, Cache, blamCache));
 
             Console.WriteLine("done.");
 

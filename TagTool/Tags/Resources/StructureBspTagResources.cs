@@ -1,5 +1,5 @@
 using TagTool.Cache;
-using TagTool.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Havok;
 
 namespace TagTool.Tags.Resources

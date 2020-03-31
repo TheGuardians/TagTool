@@ -90,6 +90,11 @@ namespace TagTool.Tags
         /// If the field is a real number, the compression of the field.
         /// </summary>
         public TagFieldCompression Compression { get; set; } = TagFieldCompression.None;
+
+        /// <summary>
+        /// Used when the string written must absolutely be null terminated. For example Maxscript doesn't read fixed length strings
+        /// </summary>
+        public bool ForceNullTerminated = false;
     }
 
     [Flags]

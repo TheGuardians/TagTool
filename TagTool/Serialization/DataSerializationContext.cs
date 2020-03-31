@@ -12,6 +12,8 @@ namespace TagTool.Serialization
         public EndianReader Reader { get; }
         public EndianWriter Writer { get; }
         public CacheAddressType AddressType { get; }
+        public uint MainStructOffset;
+        public int PointerOffset = 0x0;
 
         public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
         {
@@ -47,7 +49,7 @@ namespace TagTool.Serialization
 
         public IDataBlock CreateBlock()
         {
-            return new GenericDataBlock();
+            return new GenericDataBlock(PointerOffset);
         }
 
         public void EndDeserialize(TagStructureInfo info, object obj)
@@ -57,6 +59,7 @@ namespace TagTool.Serialization
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
         {
             Writer.Write(data);
+            MainStructOffset = mainStructOffset;
         }
 
         public CachedTag GetTagByIndex(int index)
@@ -78,16 +81,18 @@ namespace TagTool.Serialization
         {
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
+            public int PointerOffset = 0x0;
 
-            public GenericDataBlock()
+            public GenericDataBlock(int offset)
             {
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
+                PointerOffset = offset;
             }
 
             public void WritePointer(uint targetOffset, Type type)
             {
-                Writer.Write(targetOffset);
+                Writer.Write((int)(targetOffset + PointerOffset));
             }
 
             public object PreSerialize(TagFieldAttribute info, object obj)

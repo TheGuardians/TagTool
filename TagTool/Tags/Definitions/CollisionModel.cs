@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using TagTool.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
@@ -63,7 +63,7 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
 
                 public List<Bsp> Bsps;
-                public List<BspPhysicsBlock> BspPhysics;
+                public List<CollisionBspPhysicsDefinition> BspPhysics;
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public List<TagHkpMoppCode> BspMoppCodes;
@@ -79,66 +79,6 @@ namespace TagTool.Tags.Definitions
                     public byte[] Unused = new byte[2];
 
                     public CollisionGeometry Geometry;
-                }
-
-                [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail)]
-                [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST)]
-                public class BspPhysicsBlock : TagStructure
-				{
-                    //
-                    // TODO: Update BspPhysicsBlock for reach
-                    //
-
-                    public int Unknown;
-                    public short Size;
-                    public short Count;
-                    public int Offset;
-                    public int Unknown2;
-                    public uint Unknown3;
-                    public uint Unknown4;
-                    public uint Unknown5;
-                    public uint Unknown6;
-                    public float Unknown7;
-                    public float Unknown8;
-                    public float Unknown9;
-                    public uint Unknown10;
-                    public float Unknown11;
-                    public float Unknown12;
-                    public float Unknown13;
-                    public uint Unknown14;
-
-                    [TagField(Flags = Short)]
-                    public CachedTag Model;
-
-                    public uint Unknown15;
-
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public uint Unknown16;
-
-                    public short Unknown17;
-                    public short Unknown18;
-
-                    public uint Unknown19;
-                    public uint Unknown20;
-
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public uint Unknown21;
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public uint Unknown22;
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public uint Unknown23;
-
-                    public short Size2;
-                    public short Count2;
-                    public int Offset2;
-                    public int Unknown27;
-
-                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-                    public uint Unknown28;
-
-                    public List<byte> MoppCodeData;
-
-                    public uint Unknown31;
                 }
             }
         }

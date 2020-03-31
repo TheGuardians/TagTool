@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Common;
 
 namespace TagTool.Cache.HaloOnline
@@ -33,13 +29,18 @@ namespace TagTool.Cache.HaloOnline
             Directory = Cache.Directory;
         }
 
-        public override Stream OpenCacheRead(ResourceLocation location) => LoadedResourceCaches[location].File.OpenRead();
+        public override Stream OpenCacheRead(ResourceLocation location) => LoadResourceCache(location).File.OpenRead();
 
-        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadedResourceCaches[location].File.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.ReadWrite);
 
-        public override Stream OpenCacheWrite(ResourceLocation location) => LoadedResourceCaches[location].File.OpenWrite();
+        public override Stream OpenCacheWrite(ResourceLocation location) => LoadResourceCache(location).File.OpenWrite();
 
         public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location)
+        {
+            return LoadResourceCache(location).Cache;
+        }
+
+        private LoadedResourceCache LoadResourceCache(ResourceLocation location)
         {
             if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
             {
@@ -58,8 +59,9 @@ namespace TagTool.Cache.HaloOnline
                     Cache = resourceCache
                 };
                 LoadedResourceCaches[location] = cache;
+
             }
-            return cache.Cache;
+            return cache;
         }
     }
 }

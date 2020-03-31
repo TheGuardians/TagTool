@@ -864,8 +864,8 @@ namespace TagTool.Commands.Porting
 
                     foreach (var instance in sbsp.InstancedGeometryInstances)
                     {
-                        foreach (var def in instance.CollisionDefinitions)
-                            def.BspIndex = (sbyte)i;
+                        foreach (var def in instance.BspPhysics)
+                            def.GeometryShape.BspIndex = (sbyte)i;
                     }
 
                     CacheContext.Serialize(CacheStream, sbspTag, sbsp);

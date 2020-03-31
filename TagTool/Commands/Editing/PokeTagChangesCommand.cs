@@ -6,17 +6,18 @@ using System.IO;
 using TagTool.IO;
 using TagTool.Cache;
 using TagTool.Serialization;
-using TagTool.Tags;
+using System.Runtime.InteropServices;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Editing
 {
     class PokeTagChangesCommand : Command
     {
-        private GameCache Cache { get; }
-        private CachedTag Tag { get; }
+        private GameCacheHaloOnlineBase Cache { get; }
+        private CachedTagHaloOnline Tag { get; }
         private object Value { get; }
 
-        public PokeTagChangesCommand(GameCache cache, CachedTag tag, object value)
+        public PokeTagChangesCommand(GameCacheHaloOnlineBase cache, CachedTagHaloOnline tag, object value)
             : base(true,
 
                   "PokeTagChanges",
@@ -35,7 +36,8 @@ namespace TagTool.Commands.Editing
         {
             if (args.Count > 1)
                 return false;
-            
+
+
             Process process;
 
             if (args.Count == 1)
@@ -73,15 +75,20 @@ namespace TagTool.Commands.Editing
             using (var processStream = new ProcessMemoryStream(process))
             {
                 var address = GetTagAddress(processStream, Tag.Index);
+                if(address != 0)
+                {
+                    var runtimeContext = new RuntimeSerializationContext(Cache, processStream, address, Tag.Offset, Tag.CalculateHeaderSize(), Tag.TotalSize);
 
-                var runtimeContext = new RuntimeSerializationContext(Cache, processStream);
-                processStream.Position = address + Tag.DefinitionOffset;
+                    //pause the process during poking to prevent race conditions
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    process.Suspend();
+                    Cache.Serializer.Serialize(runtimeContext, Value);
+                    process.Resume();
+                    stopWatch.Stop();
 
-                var definition = Cache.Deserializer.Deserialize(runtimeContext, TagDefinition.Find(Tag.Group.Tag));
-                Cache.Serializer.Serialize(runtimeContext, Value);
-
-                if (address != 0)
-                    Console.WriteLine("Tag 0x{0:X} is loaded at 0x{1:X8} in process 0x{2:X}.", Tag.Index, address, process.Id);
+                    Console.WriteLine($"Poked tag at 0x{address.ToString("X8")} in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
+                }  
                 else
                     Console.Error.WriteLine("Tag 0x{0:X} is not loaded in process 0x{1:X}.", Tag.Index, process.Id);
             }
@@ -115,6 +122,55 @@ namespace TagTool.Commands.Editing
                 return 0;
             reader.BaseStream.Position = tagAddressTableAddress + addressIndex * 4;
             return reader.ReadUInt32();
+        }
+    }
+
+    public static class ProcessExtension
+    {
+        [Flags]
+        public enum ThreadAccess : int
+        {
+            TERMINATE = (0x0001),
+            SUSPEND_RESUME = (0x0002),
+            GET_CONTEXT = (0x0008),
+            SET_CONTEXT = (0x0010),
+            SET_INFORMATION = (0x0020),
+            QUERY_INFORMATION = (0x0040),
+            SET_THREAD_TOKEN = (0x0080),
+            IMPERSONATE = (0x0100),
+            DIRECT_IMPERSONATION = (0x0200)
+        }
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
+        [DllImport("kernel32.dll")]
+        static extern uint SuspendThread(IntPtr hThread);
+        [DllImport("kernel32.dll")]
+        static extern int ResumeThread(IntPtr hThread);
+
+        public static void Suspend(this Process process)
+        {
+            foreach (ProcessThread thread in process.Threads)
+            {
+                var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);
+                if (pOpenThread == IntPtr.Zero)
+                {
+                    break;
+                }
+                SuspendThread(pOpenThread);
+            }
+        }
+        public static void Resume(this Process process)
+        {
+            foreach (ProcessThread thread in process.Threads)
+            {
+                var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);
+                if (pOpenThread == IntPtr.Zero)
+                {
+                    break;
+                }
+                ResumeThread(pOpenThread);
+            }
         }
     }
 }

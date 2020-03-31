@@ -1352,6 +1352,11 @@ namespace TagTool.Commands.Porting
                 "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin, //default:E9790606",
             },
 
+            ["sc100"] = new List<string>
+            {
+                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,"// E9770604 prevent cinematic skipping,
+            },
+
             ["sc110"] = new List<string>
             {
                 "00002188,EBFF088C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EBE1086E disable pda_breadcrumbs",
@@ -1587,6 +1592,11 @@ namespace TagTool.Commands.Porting
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604 prevent cinematic from looping; to fix properly",
                 "00001555,E9860613,FFFFFFFF,0376,140687E9,Group,Void,cinematic_skip_stop_internal,// E9880615 prevent cinematic from looping; to fix properly",
                 "00015667,A0A73D33,A0A23D2E,0000,00000000,Expression,FunctionName,begin,// A0933D1F // test: force cop to teleport to open the hatch",
+            },
+
+            ["sc130"] = new List<string>
+            {
+                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,"// E9770604 prevent cinematic skipping,
             },
 
             ["l300"] = new List<string>

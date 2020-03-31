@@ -17,9 +17,10 @@ namespace TagTool.Tags.Definitions
         public short FirstSequenceIndex;
         public short SequenceCount;
         public float LowResolutionSwitchDistance;
-        public RealPoint2d CenterOffset;
+        public float CenterOffsetX; //???
         public float Curvature;
-        public float AngleFadeRange;
+        public float EdgeRange;
+        public float EdgeCutoff;
         public float MotionBlurTranslationScale;
         public float MotionBlurRotationScale;
         public float MotionBlurAspectScale;

@@ -499,6 +499,33 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
+                case CortanaEffectDefinition crte:
+                    foreach (var gravemindblock in crte.Gravemind)
+                    {
+                        foreach (var vignetteblock in gravemindblock.Vignette)
+                        {
+                            foreach (var dynamicvaluesblock in vignetteblock.DynamicValues)
+                            {
+                                foreach (var framesblock in dynamicvaluesblock.Frames)
+                                {
+                                    //fix inverted vignette
+                                    float temp = framesblock.Dynamicvalue1; 
+                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2;
+                                    framesblock.Dynamicvalue2 = temp;
+                                }
+                            }
+                        }
+                    }
+                    foreach (var postprocessblock in crte.PostProcessing)
+                    {
+                        foreach (var hueblock in postprocessblock.Hue)
+                        {
+                            //make red tentacles greenish brown
+                            hueblock.Basevalue1 = 55.0f;
+                        }
+                    }
+                    break;
+
 				case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
 					break;
@@ -750,36 +777,15 @@ namespace TagTool.Commands.Porting
 
         private Effect FixupEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
         {
-            switch (blamTagName)
-            {
-                case @"fx\scenery_fx\weather\snow\snow_snowbound\snow_snowbound":
-                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
-                    break;
-
-                case @"levels\dlc\chillout\fx\flood_tube\flood_tube":
-                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
-                    effe.Events[0].ParticleSystems[0].Unknown8 = 1;
-                    effe.Events[0].ParticleSystems[1].Unknown7 = 10000;
-                    effe.Events[0].ParticleSystems[1].Unknown8 = 1;
-                    break;
-
-                case @"levels\dlc\chillout\fx\flood_tube\flood_twitch_bubbles":
-                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
-                    effe.Events[0].ParticleSystems[0].Unknown8 = 1;
-                    break;
-
-                case @"objects\levels\dlc\chillout\teleporter_reciever\fx\teleporter" when BlamCache.DisplayName.Contains("chillout"):
-                case @"objects\levels\dlc\chillout\teleporter_sender\fx\teleporter" when BlamCache.DisplayName.Contains("chillout"):
-                    effe.Events[1].ParticleSystems[0].Unknown7 = 0.898723f;
-                    break;
-            }
-
-            // yucky hack-fix for some particles taking over the screen
             foreach (var effectEvent in effe.Events)
             {
                 foreach (var particleSystem in effectEvent.ParticleSystems)
                 {
-                    if (particleSystem.Particle != null)
+                    if (BlamCache.Version < CacheVersion.Halo3ODST) //this value is inverted in ODST tags when compared to H3
+                    {
+                        particleSystem.NearRange = 1 / particleSystem.NearRange;
+                    }
+                    if (particleSystem.Particle != null)// yucky hack-fix for some particles taking over the screen
                     {
                         var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
                         if ((prt3Definition.Flags & (1 << 7)) != 0) // flag bit is always 7 -- this is a post porting fixup

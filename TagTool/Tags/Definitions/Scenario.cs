@@ -2222,7 +2222,9 @@ namespace TagTool.Tags.Definitions
                 public short ReferenceUnknown3;
                 public short ReferenceFrame3;
 
-                [TagField(Flags = Padding, Length = 4)]
+                public short Unknown1;
+
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused;
             }
 

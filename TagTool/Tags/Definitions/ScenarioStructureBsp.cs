@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
-using TagTool.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Pathfinding;
 
 namespace TagTool.Tags.Definitions
@@ -762,11 +762,12 @@ namespace TagTool.Tags.Definitions
             public uint SeamBitVector;
             public RealPoint3d WorldBoundingSphereCenter;
             public Bounds<float> BoundingSphereRadiusBounds;
+            [TagField(Flags = Label)]
             public StringId Name;
             public Scenery.PathfindingPolicyValue PathfindingPolicy;
             public Scenery.LightmappingPolicyValue LightmappingPolicy;
             public float LightmapResolutionScale;
-            public List<CollisionDefinition> CollisionDefinitions;
+            public List<CollisionBspPhysicsDefinition> BspPhysics;
             public short GroupIndex;
             public short GroupListIndex;
             public MeshFlags MeshOverrideFlags;
@@ -796,52 +797,6 @@ namespace TagTool.Tags.Definitions
                 DisableFX = 1 << 13,
                 DisablePlayCollision = 1 << 14,
                 DisableBulletCollision = 1 << 15
-            }
-
-            [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail, Align = 0x10)]
-            [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST, Align = 0x10)]
-            public class CollisionDefinition : TagStructure
-            {
-                public int Unknown;
-                public short Size;
-                public short Count;
-                public int Address;
-                public int Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float Unknown9;
-                public uint Unknown10;
-                public float Unknown11;
-                public float Unknown12;
-                public float Unknown13;
-                public uint Unknown14;
-                public int Unknown15;
-                public uint Unknown16;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown17;
-                public sbyte BspIndex;
-                public sbyte Unknown18;
-                public short InstancedGeometryIndex;
-                public float Unknown19;
-                public uint Unknown20;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown21;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown22;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown23;
-                public short Size2;
-                public short Count2;
-                public int Address2;
-                public int Unknown24;
-                public uint Unknown25;
-                public uint Unknown26;
-                public uint Unknown27;
-                public float Unknown28;
             }
         }
 

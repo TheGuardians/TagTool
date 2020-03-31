@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -17,13 +18,13 @@ namespace TagTool.Tags.Definitions
         public CachedTag CinematicScene;
         public StringId AnchorName;
 
-        public List<UnknownBlock1> Unknown2;
+        public List<PostprocessingBlock> PostProcessing;
 
-        public List<PassBlock> Pass;
+        public List<GravemindBlock> Gravemind;
 
-        public List<UnknownBlock2> Unknown3;
+        public List<CortanaBlock> Unused;
 
-        public List<UnknownBlock2> Unknown4;
+        public List<CortanaBlock> Cortana;
 
         [TagStructure(Size = 0x14)]
         public class SoundBlock : TagStructure
@@ -33,52 +34,56 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x48)]
-        public class UnknownBlock1 : TagStructure
+        public class PostprocessingBlock : TagStructure
         {
-            public List<UnknownStandardBlock1> Unknown1;
-            public List<UnknownStandardBlock2> Unknown2;
-            public List<UnknownStandardBlock2> Unknown3;
-            public List<UnknownStandardBlock1> Unknown4;
-            public List<UnknownStandardBlock1> Unknown5;
-            public List<UnknownStandardBlock1> Unknown6;
+            public List<ScalarBlock> FOV;
+            public List<ColorBlock> Hue;
+            public List<ColorBlock> Saturation;
+            public List<ScalarBlock> Rumble;
+            public List<ScalarBlock> HUDBrightness;
+            public List<ScalarBlock> HUDShakeAmount;
         }
 
         [TagStructure(Size = 0x30)]
-        public class PassBlock : TagStructure
+        public class GravemindBlock : TagStructure
         {
-            public List<UnknownStandardBlock2> Unknown1;
-            public List<UnknownStandardBlock2> Unknown2;
-            public List<UnknownStandardBlock1> Unknown3;
-            public List<UnknownStandardBlock2> Unknown4;
+            public List<ColorBlock> BackgroundColor;
+            public List<ColorBlock> Unused;
+            public List<ScalarBlock> TentaclesIn;
+            public List<ColorBlock> Vignette;
         }
 
         [TagStructure(Size = 0x24)]
-        public class UnknownBlock2 : TagStructure
+        public class CortanaBlock : TagStructure
         {
-            public List<UnknownStandardBlock1> Unknown1;
-            public List<UnknownStandardBlock2> Unknown2;
-            public List<UnknownStandardBlock1> Unknown3;
+            public List<ScalarBlock> Solarize;
+            public List<ColorBlock> Doubling;
+            public List<ScalarBlock> Colorize;
+        }
+
+        [Flags]
+        public enum CortanaEffectFlags : int
+        {
+            UseCosineInterpolation = 1 << 0
         }
 
         [TagStructure(Size = 0x30)]
-        public class UnknownStandardBlock1 : TagStructure
+        public class ScalarBlock : TagStructure
         {
-            public byte Flags;
-            public byte Unknown1;
-            public short Unknown2;
+            public CortanaEffectFlags Flags;
 
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
+            public float InmixValue1;
+            public float InmixValue2;
+            public float InmixValue3;
 
-            public float Value1;
-            public float Value2;
+            public float Basevalue1;
+            public float Basevalue2;
 
             public List<DynamicValue> DynamicValues;
 
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
+            public float OutmixValue1;
+            public float OutmixValue2;
+            public float OutmixValue3;
 
             [TagStructure(Size = 0x20)]
             public class DynamicValue : TagStructure
@@ -90,32 +95,30 @@ namespace TagTool.Tags.Definitions
                 public class FrameBlock : TagStructure
                 {
                     public int Frame;
-                    public float Value1;
-                    public float Value2;
+                    public float Dynamicvalue1;
+                    public float Dynamicvalue2;
                 }
             }
         }
 
         [TagStructure(Size = 0x34)]
-        public class UnknownStandardBlock2 : TagStructure
+        public class ColorBlock : TagStructure
         {
-            public byte Flags;
-            public byte Unknown1;
-            public short Unknown2;
+            public CortanaEffectFlags Flags;
 
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
+            public float InmixValue1;
+            public float InmixValue2;
+            public float InmixValue3;
 
-            public float Value1;
-            public float Value2;
-            public float Value3;
+            public float Basevalue1;
+            public float Basevalue2;
+            public float Basevalue3;
 
             public List<DynamicValue> DynamicValues;
 
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
+            public float OutmixValue1;
+            public float OutmixValue2;
+            public float OutmixValue3;
 
             [TagStructure(Size = 0x20)]
             public class DynamicValue : TagStructure
@@ -127,9 +130,9 @@ namespace TagTool.Tags.Definitions
                 public class FrameBlock : TagStructure
                 {
                     public int Frame;
-                    public float Value1;
-                    public float Value2;
-                    public float Value3;
+                    public float Dynamicvalue1;
+                    public float Dynamicvalue2;
+                    public float Dynamicvalue3;
                 }
             }
         }
