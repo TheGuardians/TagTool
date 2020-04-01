@@ -474,11 +474,12 @@ namespace TagTool.Commands.Porting
                             screenEffect.Name = ConvertStringId(screenEffect.InputVariable);
 
                             //fixup for vision mode saved film sefc always displaying
-                            if (CacheContext.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.Name)
+
+                            if (BlamCache.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.InputVariable)
                                 screenEffect.Name = CacheContext.StringTable.GetStringId("flashlight_intensity");
 
                             screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.FlagBits.UseNameAsStringIDInput;
-                            if (screenEffect.RangeVariable != null && screenEffect.InputVariable != StringId.Invalid)
+                            if (screenEffect.RangeVariable != null && screenEffect.RangeVariable != StringId.Invalid)
                             {
                                 screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.FlagBits.InvertStringIDInput;
                             }
