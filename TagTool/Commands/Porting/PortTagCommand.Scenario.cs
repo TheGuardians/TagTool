@@ -1377,6 +1377,11 @@ namespace TagTool.Commands.Porting
                 "00023201,BE155AA1,BE1B5AA7,0014,A25A16BE,Group,Void,// BE185AA4 was pointing at BE185AA4",
             },
 
+            ["sc120"] = new List<string>
+            {
+                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,"// E9770604 prevent cinematic skipping,
+            },
+
             ["c100"] = new List<string>
             {
                 "00000293,E4980125,E48E011B,0000,00000000,Expression,FunctionName,begin,// E4860113",
