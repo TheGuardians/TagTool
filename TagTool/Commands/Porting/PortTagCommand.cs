@@ -466,6 +466,26 @@ namespace TagTool.Commands.Porting
                         sefc.ScreenEffects[0].Duration = 1E+19f;
                         sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
                     }
+                    //restore ODST stringid input variables using name field to store values
+                    foreach (var screenEffect in sefc.ScreenEffects)
+                    {
+                        if (screenEffect.InputVariable != null && screenEffect.InputVariable != StringId.Invalid)
+                        {
+                            screenEffect.Name = ConvertStringId(screenEffect.InputVariable);
+
+                            //fixup for vision mode saved film sefc always displaying
+                            if (CacheContext.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.Name)
+                                screenEffect.Name = CacheContext.StringTable.GetStringId("flashlight_intensity");
+
+                            screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.FlagBits.UseNameAsStringIDInput;
+                            if (screenEffect.RangeVariable != null && screenEffect.InputVariable != StringId.Invalid)
+                            {
+                                screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.FlagBits.InvertStringIDInput;
+                            }
+
+                        }
+                    }
+                    
                     break;
 
 				case Bitmap bitm:

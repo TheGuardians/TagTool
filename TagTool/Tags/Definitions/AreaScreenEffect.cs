@@ -167,7 +167,9 @@ namespace TagTool.Tags.Definitions
                 DisableCinematicCameraFalloffs = 1 << 5,
                 OnlyAffectsAttachedObject = 1 << 6,
                 DrawPreciselyOne = 1 << 7,
-                UsePlayerTravelDirection = 1 << 8
+                UsePlayerTravelDirection = 1 << 8,
+                UseNameAsStringIDInput = 1 << 9, //these last two are custom flags to allow for stringid control of sefc
+                InvertStringIDInput = 1 << 10
             }
         }
     }
