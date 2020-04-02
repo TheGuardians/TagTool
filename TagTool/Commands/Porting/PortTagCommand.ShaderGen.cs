@@ -104,7 +104,7 @@ namespace TagTool.Commands.Porting
                         if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
                         if (deafult_option.Name != name) continue;
 
-                        shaderSamplerArgument.Bitmap = deafult_option.Bitmap;
+                        shaderSamplerArgument.Bitmap = deafult_option.DefaultSamplerBitmap;
 
                         goto datafound;
                     }

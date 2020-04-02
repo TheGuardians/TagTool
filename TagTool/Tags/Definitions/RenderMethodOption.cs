@@ -17,10 +17,10 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId Name;
             public OptionDataType Type;
-            public uint Unknown2;
-            public CachedTag Bitmap;
+            public uint Unknown2; // is set when g_sampler_cc0236 or similar are used
+            public CachedTag DefaultSamplerBitmap;
 
-            public float Unknown3;
+            public float DefaultFloatArgument;
 
             public uint Unknown4;
             public short Unknown5;
@@ -31,7 +31,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown8;
             public short Unknown9;
             
-            public float Unknown10;
+            public float DetailMapTilingFactor;
 
             public uint Unknown11;
             public uint Unknown12;
