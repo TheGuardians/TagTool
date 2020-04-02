@@ -202,6 +202,10 @@ namespace TagTool.Commands.Porting
                 throw new Exception($"Failed to find HO rmt2 for this RenderMethod instance");
             }
 
+            // create rmt2 descriptor
+            ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor;
+            ShaderMatcherNew.Rmt2Descriptor.TryParse(edRmt2Instance.Name, out rmt2Descriptor);
+
             var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Instance);
 
             foreach (var a in edRmt2.TextureParameterNames)
@@ -213,14 +217,28 @@ namespace TagTool.Commands.Porting
             foreach (var a in edRmt2.BooleanParameterNames)
                 edBoolConstants.Add(CacheContext.StringTable.GetString(a.Name));
 
+            // get relevant rmdf
+            CachedTag rmdfInstance = Matcher.FindRmdf(edRmt2Instance);
+            if (rmdfInstance == null) // shader matching will fail without an rmdf -- throw an exception
+                throw new Exception($"Unable to find valid \"{rmt2Descriptor.Type}\" rmdf for rmt2");
+            RenderMethodDefinition renderMethodDefinition = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfInstance);
+
+            // dictionaries for fast lookup
+            var optionParameters = Matcher.GetOptionParameters(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
+            var optionBitmaps = Matcher.GetOptionBitmaps(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
+
             foreach (var a in edRealConstants)
-                newShaderProperty.RealConstants.Add(new RealConstant());
+                newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, rmt2Descriptor.Type, optionParameters));
 
             foreach (var a in edIntConstants)
                 newShaderProperty.IntegerConstants.Add(0);
 
             foreach (var a in edMaps)
-                newShaderProperty.TextureConstants.Add(new TextureConstant());
+                newShaderProperty.TextureConstants.Add(GetDefaultTextureConstant(a, rmt2Descriptor, optionBitmaps));
+
+            // if we have bits enabled by default, this actually disables boolean args. fixes a few visual issues
+            for (int a = 0; a < edRmt2.BooleanParameterNames.Count; a++)
+                newShaderProperty.BooleanConstants |= (1u << a);
 
             // Reorder blam bitmaps to match the HO rmt2 order
             // Reorder blam real constants to match the HO rmt2 order
@@ -245,8 +263,8 @@ namespace TagTool.Commands.Porting
                 foreach (var bA in bmBoolConstants)
                     if (eA == bA)
                     {
-                        if ((newShaderProperty.BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) != 0)
-                            newShaderProperty.BooleanConstants |= (1u << edBoolConstants.IndexOf(eA));
+                        if ((finalRm.ShaderProperties[0].BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) == 0)
+                            newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
                     }
                        
 
@@ -288,10 +306,7 @@ namespace TagTool.Commands.Porting
                     tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
             }
 
-            finalRm.BaseRenderMethod = Matcher.FindRmdf(edRmt2Instance);
-
-            if (finalRm.BaseRenderMethod == null)
-                throw new Exception("Unable to find valid rmdf for rmt2");
+            finalRm.BaseRenderMethod = rmdfInstance;
 
             FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
 
@@ -511,6 +526,69 @@ namespace TagTool.Commands.Porting
             }
 
             return finalRm;
+        }
+
+        private TextureConstant GetDefaultTextureConstant(string parameter, ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, Dictionary<StringId, CachedTag> optionBitmaps)
+        {
+            TextureConstant textureConstant = new TextureConstant();
+
+            if (rmt2Descriptor.Type == "particle") // not sure what this is but all prt3 have it
+                textureConstant.SamplerFlags = 17;
+
+            // hardcoded because the default bitmaps for these parameters produces bad results
+            switch (parameter)
+            {
+                case "alpha_test_map": // the default bitmap for this puts a transparent "ALPHA" all over the shader
+                    if (rmt2Descriptor.IsMs30)
+                        textureConstant.Bitmap = CacheContext.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                    else
+                        textureConstant.Bitmap = CacheContext.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                    return textureConstant;
+            }
+
+            // get default bitmap from dictionary
+            if (!optionBitmaps.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out textureConstant.Bitmap) || textureConstant.Bitmap == null)
+            {
+                // fallback
+                Console.WriteLine($"WARNING: Sampler parameter \"{parameter}\" has no default bitmap");
+
+                // null bitmap causes bad rendering, use default_detail in these cases
+                if (rmt2Descriptor.IsMs30)
+                    textureConstant.Bitmap = CacheContext.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                else
+                    textureConstant.Bitmap = CacheContext.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
+            }
+
+            return textureConstant;
+        }
+
+        private RealConstant GetDefaultRealConstant(string parameter, string type, Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType> optionParameters)
+        {
+            // TODO: verify these warnings -- some parameters are method names???
+            if (!optionParameters.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out var optionDataType))
+                Console.WriteLine($"WARNING: No type found for parameter \"{parameter}\"");
+
+            // TODO: add parameter convention cases
+            // eg. if (parameter.EndsWith("_power")), args = 0.0f
+
+            // these are fallbacks - if no convention case is found, this is used
+            switch (optionDataType)
+            {
+                case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                    return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+
+                case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                    return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+
+                case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                    return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+
+                case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                    return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 0.0f };
+
+                default:
+                    return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 1.0f };
+            }
         }
     }
 }

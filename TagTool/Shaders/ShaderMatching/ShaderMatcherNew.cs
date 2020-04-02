@@ -58,6 +58,42 @@ namespace TagTool.Shaders.ShaderMatching
             IsInitialized = false;
         }
 
+        public Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType> GetOptionParameters(List<byte> options, RenderMethodDefinition rmdf)
+        {
+            Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType> optionParameters = new Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType>();
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (rmdf.Methods[i].ShaderOptions[options[i]].Option != null)
+                {
+                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
+                    foreach (var parameter in rmop.Options)
+                        if (!optionParameters.ContainsKey(parameter.Name))
+                            optionParameters.Add(parameter.Name, parameter.Type);
+                }
+            }
+
+            return optionParameters;
+        }
+
+        public Dictionary<StringId, CachedTag> GetOptionBitmaps(List<byte> options, RenderMethodDefinition rmdf)
+        {
+            Dictionary<StringId, CachedTag> optionBitmaps = new Dictionary<StringId, CachedTag>();
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (rmdf.Methods[i].ShaderOptions[options[i]].Option != null)
+                {
+                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
+                    foreach (var parameter in rmop.Options)
+                        if (parameter.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler && parameter.Bitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
+                            optionBitmaps.Add(parameter.Name, parameter.Bitmap);
+                }
+            }
+
+            return optionBitmaps;
+        }
+
         /// <summary>
         /// Find the closest template in the base cache to the input template.
         /// </summary>
