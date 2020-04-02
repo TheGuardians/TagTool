@@ -225,7 +225,8 @@ namespace TagTool.Commands.Files
                 {AssemblyPluginFieldTypes.dataRef, 20},
                 {AssemblyPluginFieldTypes.reflexive, 12},
                 {AssemblyPluginFieldTypes.raw, 20},
-                {AssemblyPluginFieldTypes.comment, 0 }
+                {AssemblyPluginFieldTypes.comment, 0 },
+                {AssemblyPluginFieldTypes.shader, 4}
             };
 
             /// <summary>
