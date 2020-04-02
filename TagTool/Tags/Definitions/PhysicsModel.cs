@@ -445,7 +445,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown;
             public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
-            public ushort Flags;
+            public RigidBodyFlags Flags;
             [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public MotionTypeValue MotionType;
             public short NoPhantomPowerAltRigidBody;
@@ -503,6 +503,18 @@ namespace TagTool.Tags.Definitions
             public float ReachUnknown5;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float ReachUnknown6;
+
+            [Flags]
+            public enum RigidBodyFlags : short
+            {
+                None = 0,
+                NoCollisionsWithSelf = 1 << 0,
+                OnlyCollideWithEnvironment = 1 << 1,
+                DisableEffects = 1 << 2, //this rigid body will not generate impact effects unless it hits another dynamic rigid body that does
+                DoesNotInteractWithEnvironment = 1 << 3, //set this flag if this rigid bodies won't touch the environment, this allows us to open up some optimizations
+                BestEarlyMoverBody = 1 << 4, //if you have either of the early mover flags set in the object definitoin this body will be choosen as the one to make every thing local to, otherwise I pick :-
+                HasNoPhantomPowerVersion = 1 << 5 //don't check this flag without talking to eamon
+            }
 
             public enum MotionTypeValue : short
             {

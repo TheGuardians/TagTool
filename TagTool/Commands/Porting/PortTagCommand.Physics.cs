@@ -14,6 +14,14 @@ namespace TagTool.Commands.Porting
         private PhysicsModel ConvertPhysicsModel(CachedTag instance, PhysicsModel phmo)
         {
             phmo.MoppData = HavokConverter.ConvertHkpMoppData(BlamCache.Version, CacheContext.Version, phmo.MoppData);
+
+            //fix for ODST phantoms getting stuck on environment
+            if (instance.Name == @"objects\vehicles\phantom\phantom" && BlamCache.Version == CacheVersion.Halo3ODST)
+            {
+                phmo.RigidBodies[0].Flags |= PhysicsModel.RigidBody.RigidBodyFlags.DoesNotInteractWithEnvironment;
+                phmo.RigidBodies[1].Flags |= PhysicsModel.RigidBody.RigidBodyFlags.DoesNotInteractWithEnvironment;
+            }
+
             if (BlamCache.Version == CacheVersion.HaloReach)
             {
                 foreach (var rigidbody in phmo.RigidBodies)
