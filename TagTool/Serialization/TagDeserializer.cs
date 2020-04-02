@@ -239,7 +239,7 @@ namespace TagTool.Serialization
             else if (valueType == typeof(RealArgbColor))
                 return new RealArgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(ArgbColor))
-                return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+                return new ArgbColor(reader.ReadUInt32());
 
             if (valueType == typeof(Point2d))
                 return new Point2d(reader.ReadInt16(), reader.ReadInt16());

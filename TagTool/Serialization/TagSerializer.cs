@@ -231,8 +231,6 @@ namespace TagTool.Serialization
                 SerializeColor(block, (RealArgbColor)value);
             else if (valueType == typeof(ArgbColor))
                 SerializeColor(block, (ArgbColor)value);
-            else if (valueType == typeof(ArgbColor))
-                SerializeColor(block, (ArgbColor)value);
             else if (value is RealBoundingBox boundingBox)
             {
                 SerializeRange(version, context, tagStream, block, boundingBox.XBounds);
@@ -621,10 +619,7 @@ namespace TagTool.Serialization
 
         private void SerializeColor(IDataBlock block, ArgbColor color)
         {
-            block.Writer.Write(color.Alpha);
-            block.Writer.Write(color.Red);
-            block.Writer.Write(color.Green);
-            block.Writer.Write(color.Blue);
+            block.Writer.Write(color.GetValue());
         }
 
         private void SerializeEulerAngles(IDataBlock block, RealEulerAngles2d angles)

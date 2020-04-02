@@ -53,11 +53,6 @@ namespace TagTool.Commands.Porting
                 default:
                     break;
             }
-
-            renderData.LocalColorA = ConvertColor(renderData.LocalColorA);
-            renderData.LocalColorB = ConvertColor(renderData.LocalColorB);
-            renderData.LocalColorC = ConvertColor(renderData.LocalColorC);
-            renderData.LocalColorD = ConvertColor(renderData.LocalColorD);
             renderData.OutputColorA_HO = GetEquivalentValue(renderData.OutputColorA_HO, renderData.OutputColorA);
             renderData.OutputColorB_HO = GetEquivalentValue(renderData.OutputColorB_HO, renderData.OutputColorB);
             renderData.OutputColorC_HO = GetEquivalentValue(renderData.OutputColorC_HO, renderData.OutputColorC);
@@ -246,37 +241,6 @@ namespace TagTool.Commands.Porting
             {
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
 
-                //Color Conversion
-                H3globs.HUDDisabled = ConvertColor(H3globs.HUDDisabled);
-                H3globs.HUDPrimary = ConvertColor(H3globs.HUDPrimary);
-                H3globs.HUDForeground = ConvertColor(H3globs.HUDForeground);
-                H3globs.HUDWarning = ConvertColor(H3globs.HUDWarning);
-                H3globs.NeutralReticule = ConvertColor(H3globs.NeutralReticule);
-                H3globs.HostileReticule = ConvertColor(H3globs.HostileReticule);
-                H3globs.FriendlyReticule = ConvertColor(H3globs.FriendlyReticule);
-                H3globs.GlobalDynamic7_UnknownBlip = ConvertColor(H3globs.GlobalDynamic7_UnknownBlip);
-                H3globs.NeutralBlip = ConvertColor(H3globs.NeutralBlip);
-                H3globs.HostileBlip = ConvertColor(H3globs.HostileBlip);
-                H3globs.FriendlyPlayerBlip = ConvertColor(H3globs.FriendlyPlayerBlip);
-                H3globs.FriendlyAIBlip = ConvertColor(H3globs.FriendlyAIBlip);
-                H3globs.GlobalDynamic12 = ConvertColor(H3globs.GlobalDynamic12);
-                H3globs.WaypointBlip = ConvertColor(H3globs.WaypointBlip);
-                H3globs.DistantWaypointBlip = ConvertColor(H3globs.DistantWaypointBlip);
-                H3globs.FriendlyWaypoint = ConvertColor(H3globs.FriendlyWaypoint);
-                H3globs.GlobalDynamic16 = ConvertColor(H3globs.GlobalDynamic16);
-                H3globs.GlobalDynamic17 = ConvertColor(H3globs.GlobalDynamic17);
-                H3globs.GlobalDynamic18 = ConvertColor(H3globs.GlobalDynamic18);
-                H3globs.GlobalDynamic19 = ConvertColor(H3globs.GlobalDynamic19);
-                H3globs.GlobalDynamic20 = ConvertColor(H3globs.GlobalDynamic20);
-                H3globs.GlobalDynamic21 = ConvertColor(H3globs.GlobalDynamic21);
-                H3globs.GlobalDynamic22 = ConvertColor(H3globs.GlobalDynamic22);
-                H3globs.GlobalDynamic23 = ConvertColor(H3globs.GlobalDynamic23);
-                H3globs.GlobalDynamic24 = ConvertColor(H3globs.GlobalDynamic24);
-                H3globs.GlobalDynamic25 = ConvertColor(H3globs.GlobalDynamic25);
-                H3globs.GlobalDynamic26 = ConvertColor(H3globs.GlobalDynamic26);
-                H3globs.GlobalDynamic27 = ConvertColor(H3globs.GlobalDynamic27);
-
-
                 //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
 
@@ -399,18 +363,6 @@ namespace TagTool.Commands.Porting
             H3Definition.AchievementDisplayTime = 3.0f;
 
             return H3Definition;
-        }
-
-        private ArgbColor ConvertColor(ArgbColor oldcolor)
-        {
-            var newcolor = new ArgbColor()
-            {
-                Alpha = ((ArgbColor)oldcolor).Blue,
-                Red = ((ArgbColor)oldcolor).Green,
-                Green = ((ArgbColor)oldcolor).Red,
-                Blue = ((ArgbColor)oldcolor).Alpha
-            };
-            return newcolor;
         }
 
         /// <summary>
