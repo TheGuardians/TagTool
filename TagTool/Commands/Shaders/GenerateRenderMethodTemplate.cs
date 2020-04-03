@@ -95,7 +95,7 @@ namespace TagTool.Commands.Shaders
 
                             Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
 
-                            Definition.ValidEntryPoints |= RenderMethodTemplate.EntryPointBitMask.Albedo;
+                            Definition.ValidEntryPoints |= EntryPointBitMask.Albedo;
                         }
                     }
                     break;
@@ -124,7 +124,7 @@ namespace TagTool.Commands.Shaders
 
                             Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
 
-                            Definition.ValidEntryPoints |= RenderMethodTemplate.EntryPointBitMask.Default;
+                            Definition.ValidEntryPoints |= EntryPointBitMask.Default;
                         }
 
                         //TODO: Extract shader parameters

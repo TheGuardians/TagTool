@@ -524,6 +524,9 @@
     <Compile Include="Serialization\ResourceDeserializer.cs" />
     <Compile Include="Serialization\ResourceSerializer.cs" />
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
+    <Compile Include="Shaders\ParameterUsage.cs" />
+    <Compile Include="Shaders\RenderMethodExtern.cs" />
+    <Compile Include="Shaders\EntryPoint.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Cache\HaloOnline\Strings.cs" />

@@ -321,7 +321,7 @@ namespace TagTool.Commands.Porting
             rmt2.PixelShader = newPIXLInstance;
             rmt2.VertexShader = newVTSHInstance;
 
-            rmt2.ValidEntryPoints |= RenderMethodTemplate.EntryPointBitMask.Active_Camo;
+            rmt2.ValidEntryPoints |= EntryPointBitMask.Active_Camo;
 
             rmt2.RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
@@ -333,7 +333,7 @@ namespace TagTool.Commands.Porting
             pixl.Shaders = new List<PixelShaderBlock>();
             pixl.DrawModes = new List<ShaderDrawMode>();
             rmt2.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
-            foreach (RenderMethodTemplate.EntryPoint mode in Enum.GetValues(typeof(RenderMethodTemplate.EntryPoint)))
+            foreach (EntryPoint mode in Enum.GetValues(typeof(EntryPoint)))
             {
                 var pixelShaderDrawmode = new ShaderDrawMode();
                 pixl.DrawModes.Add(pixelShaderDrawmode);
@@ -359,7 +359,7 @@ namespace TagTool.Commands.Porting
                 var registerOffsets = new RenderMethodTemplate.ParameterTable();
                 rmt2.ParameterTables.Add(registerOffsets);
 
-                registerOffsets[RenderMethodTemplate.ParameterUsage.TextureExtern].Offset = (ushort)rmt2.Parameters.Count;
+                registerOffsets[ParameterUsage.TextureExtern].Offset = (ushort)rmt2.Parameters.Count;
                 var srcRenderMethodExternArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.RenderMethodExtern_Arguments);
                 foreach (var src_arg in srcRenderMethodExternArguments)
                 {
@@ -368,7 +368,7 @@ namespace TagTool.Commands.Porting
                         RegisterIndex = (ushort)src_arg.Register
                     };
 
-                    foreach (var _enum in Enum.GetValues(typeof(RenderMethodTemplate.RenderMethodExtern)))
+                    foreach (var _enum in Enum.GetValues(typeof(RenderMethodExtern)))
                     {
                         if (_enum.ToString().ToLower() == src_arg.Name)
                         {
@@ -378,17 +378,17 @@ namespace TagTool.Commands.Porting
                     }
 
                     rmt2.Parameters.Add(argument_mapping);
-                    registerOffsets[RenderMethodTemplate.ParameterUsage.TextureExtern].Count++;
+                    registerOffsets[ParameterUsage.TextureExtern].Count++;
                 }
 
-                registerOffsets[RenderMethodTemplate.ParameterUsage.Texture].Offset = (ushort)rmt2.Parameters.Count;
+                registerOffsets[ParameterUsage.Texture].Offset = (ushort)rmt2.Parameters.Count;
                 var srcSamplerArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.TextureSampler_Arguments);
                 foreach (var samplerRegister in srcSamplerArguments)
                 {
                     var argumentMapping = new RenderMethodTemplate.ParameterMapping
                     {
                         RegisterIndex = (ushort)samplerRegister.Register,
-                        ArgumentIndex = (byte)registerOffsets[RenderMethodTemplate.ParameterUsage.Texture].Count++
+                        ArgumentIndex = (byte)registerOffsets[ParameterUsage.Texture].Count++
                     };
 
                     rmt2.Parameters.Add(argumentMapping);
@@ -401,7 +401,7 @@ namespace TagTool.Commands.Porting
 
                 }
 
-                registerOffsets[RenderMethodTemplate.ParameterUsage.PS_Real].Offset = (ushort)rmt2.Parameters.Count;
+                registerOffsets[ParameterUsage.PS_Real].Offset = (ushort)rmt2.Parameters.Count;
                 // add xform args
                 foreach (var samplerRegister in srcSamplerArguments)
                 {
@@ -431,7 +431,7 @@ namespace TagTool.Commands.Porting
                     };
                     rmt2.RealParameterNames.Add(shaderArgument);
 
-                    registerOffsets[RenderMethodTemplate.ParameterUsage.PS_Real].Count++;
+                    registerOffsets[ParameterUsage.PS_Real].Count++;
                 }
 
                 var srcVectorArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.Vector_Arguments);
@@ -451,7 +451,7 @@ namespace TagTool.Commands.Porting
                     };
                     rmt2.RealParameterNames.Add(shaderArgument);
 
-                    registerOffsets[RenderMethodTemplate.ParameterUsage.PS_Real].Count++;
+                    registerOffsets[ParameterUsage.PS_Real].Count++;
                 }
             }
 

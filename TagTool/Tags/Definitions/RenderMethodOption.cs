@@ -1,7 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
-using static TagTool.Tags.TagFieldFlags;
+using TagTool.Shaders;
 
 namespace TagTool.Tags.Definitions
 {
@@ -17,7 +17,7 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId Name;
             public OptionDataType Type;
-            public uint Unknown2; // is set when g_sampler_cc0236 or similar are used
+            public RenderMethodExtern RenderMethodExtern; 
             public CachedTag DefaultSamplerBitmap;
 
             public float DefaultFloatArgument;
