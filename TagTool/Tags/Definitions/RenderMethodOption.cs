@@ -22,15 +22,14 @@ namespace TagTool.Tags.Definitions
 
             public float DefaultFloatArgument;
 
-            public uint Unknown4;
+            public int LayerCount;      // 0, 1, or 4 (found by listing all rmop with value >0 and noticed layers_of_4 had this value as 4)
             public short Unknown5;
-            public short Unknown5_2;
+            public short UnknownDepthRelated;
 
-            public short Unknown6;
-            public short Unknown7;
-            public short Unknown8;
-            public short Unknown9;
-            
+            public short Unknown6;      // 0, 1 or 3, probably an enum, confirmed short value
+            public short Unknown6_1;    //always 0
+            public ArgbColor DefaultColor;
+
             public float DetailMapTilingFactor;
 
             public uint Unknown11;
