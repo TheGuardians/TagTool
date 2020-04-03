@@ -218,23 +218,28 @@ namespace TagTool.Shaders.ShaderMatching
             if (PerfectMatchesOnly)
                 return null;
 
+            // rebuild source rmt2 tagname using updated indices
+            string srcRmt2Tagname = $"shaders\\{sourceRmt2Desc.Type}_templates\\";
+            foreach (var option in sourceRmt2Desc.Options)
+                srcRmt2Tagname += $"_{option.ToString()}";
+
             // find closest rmt2
 
             switch (sourceRmt2Desc.Type)
             {
-                case "beam":            return GetBestTag(beamTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "beam":            return GetBestTag(beamTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
                 case "black":           return null;
                 case "custom":          return null;
-                case "contrail":        return GetBestTag(contrailTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "decal":           return GetBestTag(decalTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "foliage":         return GetBestTag(foliageTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "halogram":        return GetBestTag(halogramTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "light_volume":    return GetBestTag(lightvolumeTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "particle":        return GetBestTag(particleTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "screen":          return GetBestTag(screenTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "shader":          return GetBestTag(shaderTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "terrain":         return GetBestTag(terrainTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
-                case "water":           return GetBestTag(waterTemplateSorter, ShaderTemplateValues, sourceRmt2Tag);
+                case "contrail":        return GetBestTag(contrailTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "decal":           return GetBestTag(decalTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "foliage":         return GetBestTag(foliageTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "halogram":        return GetBestTag(halogramTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "light_volume":    return GetBestTag(lightvolumeTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "particle":        return GetBestTag(particleTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "screen":          return GetBestTag(screenTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "shader":          return GetBestTag(shaderTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "terrain":         return GetBestTag(terrainTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
+                case "water":           return GetBestTag(waterTemplateSorter, ShaderTemplateValues, srcRmt2Tagname, sourceRmt2Tag.Name);
                 default:                return null;
             }
         }
@@ -243,9 +248,9 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Returns the best render_method_template tag match using the given dictionary and source rmt2
         /// </summary>
-        private CachedTag GetBestTag(SortingInterface sortingInterface, Dictionary<CachedTag, long> shaderTemplateValues, CachedTag sourceRmt2Tag)
+        private CachedTag GetBestTag(SortingInterface sortingInterface, Dictionary<CachedTag, long> shaderTemplateValues, string newTagName, string srcTagName)
         {
-            long targetValue = Sorter.GetValue(sortingInterface, Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+            long targetValue = Sorter.GetValue(sortingInterface, Sorter.GetTemplateOptions(newTagName));
             long bestValue = long.MaxValue;
             CachedTag bestTag = null;
 
@@ -258,8 +263,8 @@ namespace TagTool.Shaders.ShaderMatching
                 }
             }
 
-            Console.WriteLine($"Closest tag to {sourceRmt2Tag.Name} with options and value {targetValue}");
-            sortingInterface.PrintOptions(Sorter.GetTemplateOptions(sourceRmt2Tag.Name));
+            Console.WriteLine($"Closest tag to {srcTagName} with options and value {targetValue}");
+            sortingInterface.PrintOptions(Sorter.GetTemplateOptions(newTagName));
             Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
             sortingInterface.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
 

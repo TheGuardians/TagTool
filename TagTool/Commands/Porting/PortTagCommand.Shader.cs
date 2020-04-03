@@ -339,6 +339,9 @@ namespace TagTool.Commands.Porting
 
             FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
 
+            // build new rm option indices
+            finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(rmt2Descriptor);
+
             return finalRm;
         }
 
@@ -619,6 +622,20 @@ namespace TagTool.Commands.Porting
                 default:
                     return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 1.0f };
             }
+        }
+
+        private List<RenderMethodDefinitionOptionIndex> BuildRenderMethodOptionIndices(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor)
+        {
+            List<RenderMethodDefinitionOptionIndex> newRmIndices = new List<RenderMethodDefinitionOptionIndex>();
+
+            foreach (var option in rmt2Descriptor.Options)
+            {
+                RenderMethodDefinitionOptionIndex optionIndex = new RenderMethodDefinitionOptionIndex();
+                optionIndex.OptionIndex = option;
+                newRmIndices.Add(optionIndex);
+            }
+
+            return newRmIndices;
         }
     }
 }
