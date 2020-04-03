@@ -82,13 +82,42 @@ namespace TagTool.Commands.Porting
                     }
                     return beamSystem;
 
+                case ShaderBlack rmbk:
+                    return CreateShaderBlack(cacheStream, blamCacheStream, rmbk, blamTag, (RenderMethod)blamDefinition);
+
                 case ShaderScreen rmss:
                 case ShaderZonly rmzo:
-                case ShaderBlack rmbk:
                 case ShaderCortana rmct:
                     return null;
             }
             return null;
+        }
+
+        // temp until generation is possible
+        private RenderMethod CreateShaderBlack(Stream cacheStream, Stream blamCacheStream, ShaderBlack rmbk, CachedTag blamTag, RenderMethod blamDefinition)
+        {
+            // use default template - we only need albedo_color for this to work
+            CachedTag defaultTemplateInstance = CacheContext.GetTag(ShaderMatcherNew.DefaultTemplate);
+            rmbk.BaseRenderMethod = Matcher.FindRmdf(defaultTemplateInstance);
+
+            rmbk.ShaderProperties[0].Template = defaultTemplateInstance;
+
+            // reset rm options
+            rmbk.RenderMethodDefinitionOptionIndices.Clear();
+            for (int i = 0; i < 11; i++)
+                rmbk.RenderMethodDefinitionOptionIndices.Add(new RenderMethodDefinitionOptionIndex());
+
+            // setup default values
+            RenderMethod result = ConvertShaderInternal(cacheStream, blamCacheStream, rmbk, blamTag, blamDefinition);
+
+            // set albedo_color to black
+            result.ShaderProperties[0].RealConstants[2].Arg0 = 0.0f;
+            result.ShaderProperties[0].RealConstants[2].Arg1 = 0.0f;
+            result.ShaderProperties[0].RealConstants[2].Arg2 = 0.0f;
+            // enable dynamic lights
+            result.ShaderProperties[0].BooleanConstants = 0;
+
+            return result;
         }
 
         private RenderMethod ConvertShaderInternal(Stream cacheStream, Stream blamCacheStream, RenderMethod definition, CachedTag blamTag, RenderMethod blamDefinition)
@@ -531,6 +560,7 @@ namespace TagTool.Commands.Porting
         private TextureConstant GetDefaultTextureConstant(string parameter, ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, Dictionary<StringId, CachedTag> optionBitmaps)
         {
             TextureConstant textureConstant = new TextureConstant();
+            textureConstant.XFormArgumentIndex = -1;
 
             if (rmt2Descriptor.Type == "particle") // not sure what this is but all prt3 have it
                 textureConstant.SamplerFlags = 17;
