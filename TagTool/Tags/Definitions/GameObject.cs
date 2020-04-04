@@ -537,14 +537,15 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
+    // todo: properly fix
     [TagStructure(Size = 0x2)]
     public class GameObjectType : TagStructure
 	{
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public GameObjectTypeHalo2 Halo2;
 
-        [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
-        public byte[] Unused1;
+        [TagField(Platform = CachePlatform.Xbox360)]
+        public sbyte Unknown1;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public GameObjectTypeHalo3Retail Halo3Retail;
@@ -555,8 +556,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public GameObjectTypeHaloOnline HaloOnline;
 
-        [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused2;
+        [TagField(Platform = CachePlatform.OnlyPC | CachePlatform.Xbox)]
+        public sbyte Unknown2;
     }
 
     [Flags]
