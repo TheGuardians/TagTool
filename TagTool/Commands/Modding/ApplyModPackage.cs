@@ -220,7 +220,7 @@ namespace TagTool.Commands.Modding
         private object ConvertData(ModPackage modPack, object data)
         {
 
-            var type = data.GetType();
+            //var type = data.GetType();
 
             switch (data)
             {
