@@ -22,6 +22,7 @@ namespace TagTool.Commands.Porting
 
                 case CacheVersion.Halo3ODST:
                     stateData.EngineFlags = GetEquivalentFlags(stateData.EngineFlags, stateData.EngineFlags_ODST);
+                    stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_ODST);
                     break;
             }
 

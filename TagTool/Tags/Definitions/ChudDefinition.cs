@@ -77,8 +77,10 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public MultiplayerEvents MultiplayerEventsFlags;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public UnitBase UnitBaseFlags;
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                public UnitBase_ODST UnitBaseFlags_ODST;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public UnitBase_H3 UnitBaseFlags_H3;
 
@@ -311,7 +313,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum UnitBase : uint
+                public enum UnitBase_ODST : uint
                 {
                     None,
                     TextureCamEnabled = 1 << 0,
@@ -325,11 +327,33 @@ namespace TagTool.Tags.Definitions
                     UserWaypointEnabled = 1 << 8,
                     Bit9 = 1 << 9,
                     Achievement1 = 1 << 10,
-					Achievement2 = 1 << 11,
-					Achievement3 = 1 << 12,
-					Achievement4 = 1 << 13,
-					Achievement5 = 1 << 14,
+                    Achievement2 = 1 << 11,
+                    Achievement3 = 1 << 12,
+                    Achievement4 = 1 << 13,
+                    Achievement5 = 1 << 14,
                     ARGEnabled = 1 << 15,
+                }
+
+                [Flags]
+                public enum UnitBase : uint
+                {
+                    None,
+                    TextureCamEnabled = 1 << 0,
+                    BinocularsTargeted = 1 << 1,
+                    Bit2 = 1 << 2, //unused
+                    Bit3 = 1 << 3, //unused
+                    TrainingPrompt = 1 << 4,
+                    ObjectivePrompt = 1 << 5,
+                    SurvivalState = 1 << 6,
+                    Bit7 = 1 << 7, //unused
+                    Achievement1 = 1 << 8,
+					Achievement2 = 1 << 9,
+					Achievement3 = 1 << 10,
+					Achievement4 = 1 << 11,
+					Achievement5 = 1 << 12,
+                    GameTimeUnknown = 1 << 13,
+                    Bit14 = 1 << 14, //unused
+                    ARGEnabled = 1 << 15, //unused, but kept this here so it ports right
                 }
 
                 [Flags]
