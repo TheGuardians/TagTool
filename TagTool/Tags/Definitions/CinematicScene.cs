@@ -83,13 +83,9 @@ namespace TagTool.Tags.Definitions
             public List<CortanaEffectBlock> CortanaEffects;
             public List<ImportScriptBlock> ImportScripts;
 
-            //Might be an extra unused block
+            //Used in C100 - ODST intro sequence
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown5;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown6;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown7;
+            public List<UserInputConstraintsBlock> UserInputConstraints;
 
             public byte[] ImportScript1;
             public int LoadedFrameCount;
@@ -106,6 +102,18 @@ namespace TagTool.Tags.Definitions
                 public CachedTag CinematicLight;
                 public int OwnerPuppetIndex;
                 public StringId Marker;
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class UserInputConstraintsBlock : TagStructure
+            {
+                public short Unknown1;
+                public short Unknown2;
+                public int Unknown3;
+                public float Unknown4;
+                public float Unknown5;
+                public float Unknown6;
+                public float Unknown7;
             }
 
             [TagStructure(Size = 0x2C)]
