@@ -76,6 +76,24 @@ namespace TagTool.Shaders.ShaderMatching
             return optionParameters;
         }
 
+        public Dictionary<StringId, RenderMethodOption.OptionBlock> GetOptionBlocks(List<byte> options, RenderMethodDefinition rmdf)
+        {
+            Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks = new Dictionary<StringId, RenderMethodOption.OptionBlock>();
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (rmdf.Methods[i].ShaderOptions[options[i]].Option != null)
+                {
+                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
+                    foreach (var parameter in rmop.Options)
+                        if (!optionBlocks.ContainsKey(parameter.Name))
+                            optionBlocks.Add(parameter.Name, parameter);
+                }
+            }
+
+            return optionBlocks;
+        }
+
         public Dictionary<StringId, CachedTag> GetOptionBitmaps(List<byte> options, RenderMethodDefinition rmdf)
         {
             Dictionary<StringId, CachedTag> optionBitmaps = new Dictionary<StringId, CachedTag>();
@@ -86,8 +104,8 @@ namespace TagTool.Shaders.ShaderMatching
                 {
                     var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
                     foreach (var parameter in rmop.Options)
-                        if (parameter.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler && parameter.Bitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
-                            optionBitmaps.Add(parameter.Name, parameter.Bitmap);
+                        if (parameter.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler && parameter.DefaultSamplerBitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
+                            optionBitmaps.Add(parameter.Name, parameter.DefaultSamplerBitmap);
                 }
             }
 

@@ -1,37 +1,37 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
-using static TagTool.Tags.TagFieldFlags;
+using TagTool.Shaders;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method_option", Tag = "rmop", Size = 0xC)]
     public class RenderMethodOption : TagStructure
-	{
+    {
         public List<OptionBlock> Options;
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
         public class OptionBlock : TagStructure
-		{
+        {
             public StringId Name;
             public OptionDataType Type;
-            public uint Unknown2;
-            public CachedTag Bitmap;
+            //public RenderMethodExtern RenderMethodExtern;
+            public int RenderMethodExtern;
+            public CachedTag DefaultSamplerBitmap;
 
-            public float Unknown3;
+            public float DefaultFloatArgument;
 
-            public uint Unknown4;
+            public int LayerCount;      // 0, 1, or 4 (found by listing all rmop with value >0 and noticed layers_of_4 had this value as 4)
             public short Unknown5;
-            public short Unknown5_2;
+            public short UnknownDepthRelated;
 
-            public short Unknown6;
-            public short Unknown7;
-            public short Unknown8;
-            public short Unknown9;
-            
-            public float Unknown10;
+            public short Unknown6;      // 0, 1 or 3, probably an enum, confirmed short value
+            public short Unknown6_1;    //always 0
+            public ArgbColor DefaultColor;
+
+            public float DetailMapTilingFactor;
 
             public uint Unknown11;
             public uint Unknown12;

@@ -210,7 +210,7 @@ namespace TagTool.Commands.Porting
             };
 
             // Get a simple list of bitmaps and arguments names
-            var bmRmt2Instance = blamRmt2; 
+            var bmRmt2Instance = blamRmt2;
             var bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, bmRmt2Instance);
 
             // Get a simple list of H3 bitmaps and arguments names
@@ -253,11 +253,12 @@ namespace TagTool.Commands.Porting
             RenderMethodDefinition renderMethodDefinition = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfInstance);
 
             // dictionaries for fast lookup
-            var optionParameters = Matcher.GetOptionParameters(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
+            //var optionParameters = Matcher.GetOptionParameters(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
+            var optionBlocks = Matcher.GetOptionBlocks(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
             var optionBitmaps = Matcher.GetOptionBitmaps(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
 
             foreach (var a in edRealConstants)
-                newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, rmt2Descriptor.Type, optionParameters));
+                newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, rmt2Descriptor.Type, optionBlocks));
 
             foreach (var a in edIntConstants)
                 newShaderProperty.IntegerConstants.Add(0);
@@ -295,7 +296,7 @@ namespace TagTool.Commands.Porting
                         if ((finalRm.ShaderProperties[0].BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) == 0)
                             newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
                     }
-                       
+
 
             finalRm.ImportData = new List<ImportDatum>(); // most likely not used
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
@@ -310,7 +311,7 @@ namespace TagTool.Commands.Porting
                 if (finalRm.ShaderProperties[0].QueryableProperties[i] == -1)
                     continue;
 
-                switch(i)
+                switch (i)
                 {
                     case 0:
                     case 1:
@@ -325,13 +326,13 @@ namespace TagTool.Commands.Porting
                     default:
                         finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
                         break;
-                } 
+                }
             }
 
             // fixup xform arguments;
-            foreach(var tex in finalRm.ShaderProperties[0].TextureConstants)
+            foreach (var tex in finalRm.ShaderProperties[0].TextureConstants)
             {
-                if(tex.XFormArgumentIndex != -1)
+                if (tex.XFormArgumentIndex != -1)
                     tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
             }
 
@@ -595,32 +596,36 @@ namespace TagTool.Commands.Porting
             return textureConstant;
         }
 
-        private RealConstant GetDefaultRealConstant(string parameter, string type, Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType> optionParameters)
+        private RealConstant GetDefaultRealConstant(string parameter, string type, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
         {
             // TODO: verify these warnings -- some parameters are method names???
-            if (!optionParameters.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out var optionDataType))
+            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out var optionBlock))
+            {
                 Console.WriteLine($"WARNING: No type found for parameter \"{parameter}\"");
 
-            // TODO: add parameter convention cases
-            // eg. if (parameter.EndsWith("_power")), args = 0.0f
+                // just 1.0f for now, if this is reached then parameters need to be fixed (see above)
+                optionBlock = new RenderMethodOption.OptionBlock
+                {
+                    Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
+                    DefaultFloatArgument = 1.0f
+                };
+            }
 
-            // these are fallbacks - if no convention case is found, this is used
-            switch (optionDataType)
+            switch (optionBlock.Type)
             {
                 case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
                     return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 0.0f, Arg3 = 0.0f };
 
                 case RenderMethodOption.OptionBlock.OptionDataType.Float:
-                    return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                    return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = optionBlock.DefaultFloatArgument, Arg3 = optionBlock.DefaultFloatArgument };
 
+                // convert ARGB to RealRGBA
                 case RenderMethodOption.OptionBlock.OptionDataType.Float4:
-                    return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
-
                 case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
-                    return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 0.0f };
+                    return new RealConstant { Arg0 = optionBlock.DefaultColor.Red / 255.0f, Arg1 = optionBlock.DefaultColor.Blue / 255.0f, Arg2 = optionBlock.DefaultColor.Green / 255.0f, Arg3 = optionBlock.DefaultColor.Alpha / 255.0f };
 
                 default:
-                    return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 1.0f };
+                    return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
             }
         }
 
