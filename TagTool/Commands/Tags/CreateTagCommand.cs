@@ -38,6 +38,9 @@ namespace TagTool.Commands.Tags
                 return true;
             }
 
+            while (groupTagString.Length < 4)
+                groupTagString += " ";
+
             if (!Cache.TryParseGroupTag(groupTagString, out var groupTag))
             {
                 var chars = new char[] { ' ', ' ', ' ', ' ' };
