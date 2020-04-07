@@ -338,7 +338,7 @@ namespace TagTool.Commands.Porting
 
             finalRm.BaseRenderMethod = rmdfInstance;
 
-            FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
+            FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName, rmt2Descriptor.IsMs30);
 
             // build new rm option indices
             finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(rmt2Descriptor);
@@ -346,7 +346,7 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, GameCacheHaloOnlineBase CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
+        private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, GameCacheHaloOnlineBase CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName, bool isMs30)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].Functions.Count == 0)
@@ -366,11 +366,66 @@ namespace TagTool.Commands.Porting
             // Each parameter has a registerIndex, a registerType, and a registerName.
             // We'll use this to know which function acts on what shader and which registers
 
-            var RegistersList = new Dictionary<int, string>();
+            var RegistersList = new Dictionary<int, int>();
 
-            foreach (var a in finalRm.ShaderProperties[0].Parameters)
-                if (!RegistersList.ContainsKey(a.RegisterIndex))
-                    RegistersList.Add(a.RegisterIndex, "");
+            // match pixl registers
+            foreach (var xboxShader in bmPixl.Shaders)
+                foreach (var xboxParameter in xboxShader.XboxParameters)
+                {
+                    if (RegistersList.Keys.Contains(xboxParameter.RegisterIndex))
+                        continue;
+
+                    var xboxParameterName = BlamCache.StringTable.GetString(xboxParameter.ParameterName);
+
+                    // loop pc params, find and match register
+                    foreach (var pcShader in edPixl.Shaders)
+                        foreach (var pcParameter in pcShader.PCParameters)
+                        {
+                            var pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
+
+                            if (pcParameterName == xboxParameterName && xboxParameter.RegisterType == pcParameter.RegisterType && !RegistersList.ContainsKey(xboxParameter.RegisterIndex))
+                                RegistersList.Add(xboxParameter.RegisterIndex, pcParameter.RegisterIndex);
+                        }
+                }
+
+            // match glvs registers
+            CachedTag blamRmdfTag = null;
+            CachedTag edRmdfTag = null;
+
+            string blamRmdfName = finalRm.BaseRenderMethod.Name;
+            if (isMs30) // remove "ms30\\" from the name
+                blamRmdfName = finalRm.BaseRenderMethod.Name.Remove(0, 5);
+
+            if (BlamCache.TryGetTag(blamRmdfName + ".rmdf", out blamRmdfTag) && CacheContext.TryGetTag(finalRm.BaseRenderMethod.Name + ".rmdf", out edRmdfTag))
+            {
+                var bmRmdf = BlamCache.Deserialize<RenderMethodDefinition>(blamCacheStream, blamRmdfTag);
+                var edRmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, edRmdfTag);
+
+                if (bmRmdf.GlobalVertexShader != null && edRmdf.GlobalVertexShader != null)
+                {
+                    var bmGlvs = BlamCache.Deserialize<GlobalVertexShader>(blamCacheStream, bmRmdf.GlobalVertexShader);
+                    var edGlvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, edRmdf.GlobalVertexShader);
+
+                    foreach (var xboxShader in bmGlvs.Shaders)
+                        foreach (var xboxParameter in xboxShader.XboxParameters)
+                        {
+                            if (RegistersList.Keys.Contains(xboxParameter.RegisterIndex))
+                                continue;
+
+                            var xboxParameterName = BlamCache.StringTable.GetString(xboxParameter.ParameterName);
+
+                            // loop pc params, find and match register
+                            foreach (var pcShader in edGlvs.Shaders)
+                                foreach (var pcParameter in pcShader.PCParameters)
+                                {
+                                    var pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
+
+                                    if (pcParameterName == xboxParameterName && xboxParameter.RegisterType == pcParameter.RegisterType && !RegistersList.ContainsKey(xboxParameter.RegisterIndex))
+                                        RegistersList.Add(xboxParameter.RegisterIndex, pcParameter.RegisterIndex);
+                                }
+                        }
+                }
+            }
 
             var DrawModeIndex = -1;
             foreach (var a in bmPixl.DrawModes)
@@ -492,8 +547,8 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            // // Now that we know which register is what for each drawmode, find its halo online equivalent register indexes based on register name.
-            // // This is where it gets tricky because drawmodes count changed in HO. 
+            // Now that we know which register is what for each drawmode, find its halo online equivalent register indexes based on register name.
+            // This is where it gets tricky because drawmodes count changed in HO. 
             foreach (var a in bmDrawmodesFunctions)
             {
                 if (a.Value.Unknown3Count == 0)
@@ -507,10 +562,8 @@ namespace TagTool.Commands.Porting
 
                         if (ParameterName == b.ParameterName && b.RegisterType == c.RegisterType)
                         {
-                            if (RegistersList[b.RegisterIndex] == "")
-                                RegistersList[b.RegisterIndex] = $"{c.RegisterIndex}";
-                            else
-                                RegistersList[b.RegisterIndex] = $"{RegistersList[b.RegisterIndex]},{c.RegisterIndex}";
+                            if (!RegistersList.ContainsKey(b.RegisterIndex))
+                                RegistersList.Add(b.RegisterIndex, c.RegisterIndex);
 
                             b.EDRegisterIndex = c.RegisterIndex;
                         }
@@ -518,8 +571,12 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            // DEBUG draw registers
-            // DEBUG check for invalid registers
+            // Store registers, in case they are set to -1 and are lost
+            List<short> priorRegisters = new List<short>();
+            foreach (var parameter in finalRm.ShaderProperties[0].Parameters)
+                priorRegisters.Add(parameter.RegisterIndex);
+
+            // Set new registers
             foreach (var a in bmDrawmodesFunctions)
             {
                 if (a.Value.Unknown3Count == 0)
@@ -531,30 +588,68 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            // one final check
-            // Gather all register indexes from pixl tag. Then check against all the converted register indexes. 
-            // It should detect registers that are invalid and would crash, but it does not verify if the register is valid.
-            var validEDRegisters = new List<int>();
+            // replace bm registers with ed registers if the above failed
+            // TODO: properly fix the above code so this isnt needed (this will work fine for now tho)
+            for (int i = 0; i < finalRm.ShaderProperties[0].Parameters.Count; i++)
+            {
+                if (finalRm.ShaderProperties[0].Parameters[i].RegisterIndex == -1)
+                {
+                    int bmRegister = (int)priorRegisters[i];
+
+                    if (!RegistersList.TryGetValue(bmRegister, out int newRegister))
+                    {
+                        Console.WriteLine($"WARNING: Could not match blam register \"{bmRegister}\"");
+                    }
+                    else
+                        finalRm.ShaderProperties[0].Parameters[i].RegisterIndex = (short)newRegister;
+                }
+            }
+
+            //
+            // Gather all register indices from relevant pixl and glvs
+            //
+
+            var validEdRegisters = new List<int>();
 
             foreach (var a in edPixl.Shaders)
                 foreach (var b in a.PCParameters)
-                    if (!validEDRegisters.Contains(b.RegisterIndex))
-                        validEDRegisters.Add(b.RegisterIndex);
+                    if (!validEdRegisters.Contains(b.RegisterIndex))
+                        validEdRegisters.Add(b.RegisterIndex);
+
+            if (edRmdfTag != null)
+            {
+                var edRmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, edRmdfTag);
+                if (edRmdf.GlobalVertexShader != null)
+                {
+                    var edGlvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, edRmdf.GlobalVertexShader);
+
+                    foreach (var pcShader in edGlvs.Shaders)
+                        foreach (var pcParameter in pcShader.PCParameters)
+                            if (!validEdRegisters.Contains(pcParameter.RegisterIndex))
+                                validEdRegisters.Add(pcParameter.RegisterIndex);
+                }
+            }
+
+            //
+            // Check that all register indices are valid 
+            //
 
             foreach (var a in finalRm.ShaderProperties[0].Parameters)
             {
-                if (!validEDRegisters.Contains((a.RegisterIndex)))
+                if (!validEdRegisters.Contains(a.RegisterIndex))
                 {
-                    // Display a warning
-                    // Console.WriteLine($"INVALID REGISTERS IN TAG {blamTagName}!");
+                    //Console.WriteLine($"INVALID REGISTER \"{a.RegisterIndex}\" IN TAG {blamTagName}!");
+
+                    // this code is only reached if an invalid register was found - this throws off the indices for other animations
+                    // TODO: add system to preserve other animations
 
                     finalRm.ShaderProperties[0].EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
                     finalRm.ShaderProperties[0].ParameterTables = new List<ParameterTable>();
                     finalRm.ShaderProperties[0].Parameters = new List<ParameterMapping>();
                     finalRm.ShaderProperties[0].Functions = new List<ShaderFunction>();
-                    foreach (var map in finalRm.ShaderProperties[0].TextureConstants)
-                        map.Functions.Integer = 0;
-                    return finalRm;
+                    foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                        textureConstant.Functions.Integer = 0;
+                    break;
                 }
             }
 
