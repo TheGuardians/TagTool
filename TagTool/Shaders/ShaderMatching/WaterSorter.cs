@@ -8,12 +8,12 @@ namespace TagTool.Shaders.ShaderMatching
         private static List<WaterOptionTypes> TypeOrder = new List<WaterOptionTypes> {
            WaterOptionTypes.appearance,
            WaterOptionTypes.waveshape,
-           WaterOptionTypes.watercolor,
            WaterOptionTypes.reflection,
            WaterOptionTypes.refraction,
-           WaterOptionTypes.bankalpha,
+           WaterOptionTypes.watercolor,
            WaterOptionTypes.global_shape,
-           WaterOptionTypes.foam
+           WaterOptionTypes.foam,
+           WaterOptionTypes.bankalpha,
         };
 
         private static List<WaveshapeOptions> WaveshapeOrder = new List<WaveshapeOptions> {
