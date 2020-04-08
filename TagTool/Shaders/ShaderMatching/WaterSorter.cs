@@ -10,9 +10,9 @@ namespace TagTool.Shaders.ShaderMatching
            WaterOptionTypes.waveshape,
            WaterOptionTypes.reflection,
            WaterOptionTypes.refraction,
-           WaterOptionTypes.watercolor,
            WaterOptionTypes.global_shape,
            WaterOptionTypes.foam,
+           WaterOptionTypes.watercolor,
            WaterOptionTypes.bankalpha,
         };
 
