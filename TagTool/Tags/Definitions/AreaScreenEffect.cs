@@ -49,6 +49,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public ushort Unknown;
 
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public FlagBits_HO Flags_HO;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public FlagBits Flags;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -156,6 +159,23 @@ namespace TagTool.Tags.Definitions
             public CachedTag ScreenShader; ///#applies this shader to the entire screen
 
             [Flags]
+            public enum FlagBits_HO : ushort
+            {
+                None = 0,
+                DebugDisable = 1 << 0,
+                AllowEffectOutsideRadius = 1 << 1,
+                FirstPersonOnly = 1 << 2,
+                ThirdPersonOnly = 1 << 3,
+                DisableCinematicCameraFalloffs = 1 << 4,
+                OnlyAffectsAttachedObject = 1 << 5,
+                DrawPreciselyOne = 1 << 6,
+                UsePlayerTravelDirection = 1 << 7,
+                Bit8 = 1 << 8,
+                UseNameAsStringIDInput = 1 << 9, //these last two are custom flags to allow for stringid control of sefc
+                InvertStringIDInput = 1 << 10
+            }
+
+            [Flags]
             public enum FlagBits : ushort
             {
                 None = 0,
@@ -168,8 +188,6 @@ namespace TagTool.Tags.Definitions
                 OnlyAffectsAttachedObject = 1 << 6,
                 DrawPreciselyOne = 1 << 7,
                 UsePlayerTravelDirection = 1 << 8,
-                UseNameAsStringIDInput = 1 << 9, //these last two are custom flags to allow for stringid control of sefc
-                InvertStringIDInput = 1 << 10
             }
         }
     }

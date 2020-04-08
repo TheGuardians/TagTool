@@ -466,24 +466,25 @@ namespace TagTool.Commands.Porting
                         sefc.ScreenEffects[0].Duration = 1E+19f;
                         sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
                     }
-                    //restore ODST stringid input variables using name field to store values
                     foreach (var screenEffect in sefc.ScreenEffects)
                     {
+                        //convert flags
+                        Enum.TryParse(screenEffect.Flags.ToString(), out screenEffect.Flags_HO);
+
                         if (screenEffect.InputVariable != null && screenEffect.InputVariable != StringId.Invalid)
                         {
+                            //restore ODST stringid input variables using name field to store values
                             screenEffect.Name = ConvertStringId(screenEffect.InputVariable);
 
-                            //fixup for vision mode saved film sefc always displaying
-
-                            if (BlamCache.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.InputVariable)
-                                screenEffect.Name = CacheContext.StringTable.GetStringId("flashlight_intensity");
-
-                            screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.FlagBits.UseNameAsStringIDInput;
+                            screenEffect.Flags_HO |= AreaScreenEffect.ScreenEffectBlock.FlagBits_HO.UseNameAsStringIDInput;
                             if (screenEffect.RangeVariable != null && screenEffect.RangeVariable != StringId.Invalid)
                             {
-                                screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.FlagBits.InvertStringIDInput;
+                                screenEffect.Flags_HO |= AreaScreenEffect.ScreenEffectBlock.FlagBits_HO.InvertStringIDInput;
                             }
 
+                            //fixup for vision mode saved film sefc always displaying
+                            if (BlamCache.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.InputVariable)
+                                screenEffect.Name = CacheContext.StringTable.GetStringId("flashlight_intensity");
                         }
                     }
                     
