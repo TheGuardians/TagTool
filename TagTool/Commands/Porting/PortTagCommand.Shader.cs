@@ -231,9 +231,10 @@ namespace TagTool.Commands.Porting
                 throw new Exception($"Failed to find HO rmt2 for this RenderMethod instance");
             }
 
-            // create rmt2 descriptor
-            ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor;
-            ShaderMatcherNew.Rmt2Descriptor.TryParse(edRmt2Instance.Name, out rmt2Descriptor);
+            // create blam rmt2 descriptor
+            ShaderMatcherNew.Rmt2Descriptor.TryParse(bmRmt2Instance.Name, out ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor);
+            // create ed rmt2 descriptor
+            ShaderMatcherNew.Rmt2Descriptor.TryParse(edRmt2Instance.Name, out ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor);
 
             var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Instance);
 
@@ -249,22 +250,29 @@ namespace TagTool.Commands.Porting
             // get relevant rmdf
             CachedTag rmdfInstance = Matcher.FindRmdf(edRmt2Instance);
             if (rmdfInstance == null) // shader matching will fail without an rmdf -- throw an exception
-                throw new Exception($"Unable to find valid \"{rmt2Descriptor.Type}\" rmdf for rmt2");
+                throw new Exception($"Unable to find valid \"{edRmt2Descriptor.Type}\" rmdf for rmt2");
             RenderMethodDefinition renderMethodDefinition = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfInstance);
 
             // dictionaries for fast lookup
             //var optionParameters = Matcher.GetOptionParameters(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
-            var optionBlocks = Matcher.GetOptionBlocks(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
-            var optionBitmaps = Matcher.GetOptionBitmaps(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
+            var optionBlocks = Matcher.GetOptionBlocks(edRmt2Descriptor.Options.ToList(), renderMethodDefinition);
+            var optionBitmaps = Matcher.GetOptionBitmaps(edRmt2Descriptor.Options.ToList(), renderMethodDefinition);
+
+            List<string> methodNames = new List<string>();
+            foreach (var method in renderMethodDefinition.Methods)
+                methodNames.Add(CacheContext.StringTable.GetString(method.Type));
 
             foreach (var a in edRealConstants)
-                newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, rmt2Descriptor.Type, optionBlocks));
+                newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, edRmt2Descriptor.Type, methodNames, optionBlocks));
+
+            // apply option->option conversion where applicable
+            ApplyOptionFixups(newShaderProperty.RealConstants, blamRmt2Descriptor, edRmt2Descriptor, edRmt2, renderMethodDefinition);
 
             foreach (var a in edIntConstants)
                 newShaderProperty.IntegerConstants.Add(0);
 
             foreach (var a in edMaps)
-                newShaderProperty.TextureConstants.Add(GetDefaultTextureConstant(a, rmt2Descriptor, optionBitmaps));
+                newShaderProperty.TextureConstants.Add(GetDefaultTextureConstant(a, edRmt2Descriptor, optionBitmaps));
 
             // if we have bits enabled by default, this actually disables boolean args. fixes a few visual issues
             for (int a = 0; a < edRmt2.BooleanParameterNames.Count; a++)
@@ -338,10 +346,10 @@ namespace TagTool.Commands.Porting
 
             finalRm.BaseRenderMethod = rmdfInstance;
 
-            FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName, rmt2Descriptor.IsMs30);
+            FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName, edRmt2Descriptor.IsMs30);
 
             // build new rm option indices
-            finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(rmt2Descriptor);
+            finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(edRmt2Descriptor);
 
             return finalRm;
         }
@@ -658,8 +666,7 @@ namespace TagTool.Commands.Porting
 
         private TextureConstant GetDefaultTextureConstant(string parameter, ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, Dictionary<StringId, CachedTag> optionBitmaps)
         {
-            TextureConstant textureConstant = new TextureConstant();
-            textureConstant.XFormArgumentIndex = -1;
+            TextureConstant textureConstant = new TextureConstant { XFormArgumentIndex = -1 };
 
             if (rmt2Descriptor.Type == "particle") // not sure what this is but all prt3 have it
                 textureConstant.SamplerFlags = 17;
@@ -691,14 +698,15 @@ namespace TagTool.Commands.Porting
             return textureConstant;
         }
 
-        private RealConstant GetDefaultRealConstant(string parameter, string type, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
+        private RealConstant GetDefaultRealConstant(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
         {
-            // TODO: verify these warnings -- some parameters are method names???
             if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out var optionBlock))
             {
-                Console.WriteLine($"WARNING: No type found for parameter \"{parameter}\"");
+                // TODO: verify these -- some parameters are method names???
+                if (!methodNames.Contains(parameter))
+                    Console.WriteLine($"WARNING: No type found for {type} parameter \"{parameter}\"");
 
-                // just 1.0f for now, if this is reached then parameters need to be fixed (see above)
+                // just 1.0f for now (see above)
                 optionBlock = new RenderMethodOption.OptionBlock
                 {
                     Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
@@ -736,6 +744,79 @@ namespace TagTool.Commands.Porting
             }
 
             return newRmIndices;
+        }
+
+        private bool OptionChanged(string rmt2Type, string methodName, out int edOptionIndex, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodDefinition rmdf)
+        {
+            //
+            // This compares the original rmt2 with the matched rmt2 from the matching process and checks if the specified option has changed.
+            //
+
+            edOptionIndex = -1;
+
+            if (edRmt2Descriptor.Type == rmt2Type)
+            {
+                for (int i = 0; i < rmdf.Methods.Count; i++)
+                {
+                    // find name, and compare the options at that index. maybe need to loop blam rmdf too?
+                    if (CacheContext.StringTable.GetString(rmdf.Methods[i].Type) == methodName && blamRmt2Descriptor.Options[i] != edRmt2Descriptor.Options[i])
+                    {
+                        edOptionIndex = i;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void ApplyOptionFixups(List<RealConstant> realConstants, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodDefinition rmdf)
+        {
+            //
+            // This applies manual option->option fixups for matching. This concept should not be used for rm creation/generation.
+            //
+
+            int optionIndex = -1;
+
+            if (OptionChanged("halogram", "overlay", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if overlay is new to the shader, set its intensity to 0
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "overlay_intensity")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                            break;
+                        }
+                }
+            }
+            if (OptionChanged("water", "bankalpha", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if the water shader uses bankalpha.depth when it didnt previously, set the depth to 0 to prevent transparent puddles
+                if (blamRmt2Descriptor.Options[optionIndex] != 1 && edRmt2Descriptor.Options[optionIndex] == 1)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "bankalpha_infuence_depth")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                            break;
+                        }
+                }
+            }
+            if (OptionChanged("shader", "parallax", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if parallax is new to the shader, set height map scale to 0
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "height_scale")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                            break;
+                        }
+                }
+            }
         }
     }
 }

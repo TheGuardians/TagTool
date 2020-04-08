@@ -687,7 +687,10 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case ShaderCortana rmct:
-                    ConvertShaderCortana(rmct, cacheStream, blamCacheStream, resourceStreams);
+                    if (!FlagIsSet(PortingFlags.MatchShaders))
+                        ConvertShaderCortana(rmct, cacheStream, blamCacheStream, resourceStreams);
+                    else // invalid for now, TODO: fix this up, rmct shouldnt be a special case
+                        return GetDefaultShader(blamTag.Group.Tag);
                     break;
             }
 
