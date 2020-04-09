@@ -285,7 +285,7 @@ namespace TagTool.Commands
 
                 pageable.ChangeLocation(newLocation);
                 
-                dstResCache.AddRaw(DestionationResourceStreams[newLocation], data);
+                pageable.Page.Index = dstResCache.AddRaw(DestionationResourceStreams[newLocation], data);
 
                 CopiedResources[location][index] = pageable;
             }
