@@ -33,14 +33,14 @@ namespace TagTool.Commands
         Dictionary<ResourceLocation, Dictionary<int, PageableResource>> CopiedResources;
 
         Dictionary<ResourceLocation, Stream> SourceResourceStreams;
-        Dictionary<ResourceLocation, Stream> DestionationResourceStreams;
+        Dictionary<ResourceLocation, Stream> DestinationResourceStreams;
 
         public RebuildCacheFileCommand(GameCacheHaloOnline cache) : base(false, "RebuildCacheFile", "Create new cache files from the current cache.", "RebuildCacheFile [dir]", "")
         {
             Cache = cache;
             ConvertedTags = new Dictionary<int, CachedTagHaloOnline>();
             CopiedResources = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>();
-            DestionationResourceStreams = new Dictionary<ResourceLocation, Stream>();
+            DestinationResourceStreams = new Dictionary<ResourceLocation, Stream>();
             SourceResourceStreams = new Dictionary<ResourceLocation, Stream>();
         }
 
@@ -60,7 +60,6 @@ namespace TagTool.Commands
                 dir.Delete(true);
             dir.Create();
 
-
             var destStringIdPath = Path.Combine(dir.FullName, Cache.StringIdCacheFile.Name);
 
             var destCacheContext = new GameCacheHaloOnline(dir);
@@ -75,7 +74,7 @@ namespace TagTool.Commands
 
                 CopiedResources[location] = new Dictionary<int, PageableResource>();
                 SourceResourceStreams[location] = Cache.ResourceCaches.OpenCacheReadWrite(location);
-                DestionationResourceStreams[location] = destCacheContext.ResourceCaches.OpenCacheReadWrite(location);
+                DestinationResourceStreams[location] = destCacheContext.ResourceCaches.OpenCacheReadWrite(location);
 
             }
 
@@ -117,7 +116,7 @@ namespace TagTool.Commands
             foreach(var entry in SourceResourceStreams)
                 entry.Value.Close();
 
-            foreach (var entry in DestionationResourceStreams)
+            foreach (var entry in DestinationResourceStreams)
                 entry.Value.Close();
 
             return true;
@@ -285,7 +284,7 @@ namespace TagTool.Commands
 
                 pageable.ChangeLocation(newLocation);
                 
-                pageable.Page.Index = dstResCache.AddRaw(DestionationResourceStreams[newLocation], data);
+                pageable.Page.Index = dstResCache.AddRaw(DestinationResourceStreams[newLocation], data);
 
                 CopiedResources[location][index] = pageable;
             }
