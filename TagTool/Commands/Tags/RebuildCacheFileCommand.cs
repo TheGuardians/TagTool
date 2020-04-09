@@ -63,19 +63,8 @@ namespace TagTool.Commands
 
             var destStringIdPath = Path.Combine(dir.FullName, Cache.StringIdCacheFile.Name);
 
-
-
-            // create empty caches
-            Cache.StringIdCacheFile.CopyTo(destStringIdPath);
-
-            //File.Create(Path.Combine(destinationDirectory, "tags.dat")).Close();
-            //File.Create(Path.Combine(destinationDirectory, "resources.dat")).Close();
-            //File.Create(Path.Combine(destinationDirectory, "textures.dat")).Close();
-            //File.Create(Path.Combine(destinationDirectory, "textures_b.dat")).Close();
-            //File.Create(Path.Combine(destinationDirectory, "audio.dat")).Close();
-            //File.Create(Path.Combine(destinationDirectory, "resources_b.dat")).Close();
-
             var destCacheContext = new GameCacheHaloOnline(dir);
+            Cache.StringIdCacheFile.CopyTo(destStringIdPath, true);
 
             foreach (var value in Enum.GetValues(typeof(ResourceLocation)))
             {
