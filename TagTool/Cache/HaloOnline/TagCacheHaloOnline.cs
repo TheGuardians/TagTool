@@ -50,6 +50,7 @@ namespace TagTool.Cache.HaloOnline
             var dataContext = new DataSerializationContext(writer);
             var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
             serializer.Serialize(dataContext, header);
+            Header = header;
             stream.Position = 0;
         }
 

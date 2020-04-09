@@ -32,13 +32,13 @@ namespace TagTool.Cache.HaloOnline
 
             var names = TagCacheHaloOnline.LoadTagNames(TagNamesFile.FullName);
 
-            using (var stream = TagsFile.OpenRead())
+            using (var stream = TagsFile.Open(FileMode.OpenOrCreate))
                 TagCacheGenHO = new TagCacheHaloOnline(stream, names);
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
 
-            using (var stream = StringIdCacheFile.OpenRead())
+            using (var stream = StringIdCacheFile.Open(FileMode.OpenOrCreate))
                 StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
 
             DisplayName = Version.ToString();

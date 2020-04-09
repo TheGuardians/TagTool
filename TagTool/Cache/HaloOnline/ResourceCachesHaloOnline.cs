@@ -8,7 +8,7 @@ namespace TagTool.Cache.HaloOnline
     {
         public DirectoryInfo Directory;
 
-        public Dictionary<ResourceLocation, string> ResourceCacheNames { get; } = new Dictionary<ResourceLocation, string>()
+        public static Dictionary<ResourceLocation, string> ResourceCacheNames { get; } = new Dictionary<ResourceLocation, string>()
         {
             { ResourceLocation.Resources, "resources.dat" },
             { ResourceLocation.Textures, "textures.dat" },
@@ -48,7 +48,7 @@ namespace TagTool.Cache.HaloOnline
 
                 var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
 
-                using (var stream = file.OpenRead())
+                using (var stream = file.Open(FileMode.OpenOrCreate))
                 {
                     resourceCache = new ResourceCacheHaloOnline(Cache.Version, stream);
                 }

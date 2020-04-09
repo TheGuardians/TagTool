@@ -110,7 +110,7 @@ namespace TagTool.Cache
                 TagTableOffset = 0x20,
                 CreationTime = 0x01D0631BCC791704
             };
-
+            
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
             var dataContext = new DataSerializationContext(writer);

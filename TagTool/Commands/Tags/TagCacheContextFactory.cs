@@ -11,6 +11,7 @@ using TagTool.Commands.Bitmaps;
 using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Shaders;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
@@ -75,6 +76,13 @@ namespace TagTool.Commands.Tags
 
                 context.AddCommand(new PhysicsModelTestCommand(cache));
                 context.AddCommand(new CollisionModelTestCommand(hoCache));
+                
+            }
+
+            if(cache is GameCacheHaloOnline)
+            {
+                var hoCache = cache as GameCacheHaloOnline;
+                context.AddCommand(new RebuildCacheFileCommand(hoCache));
             }
 
             // porting related
