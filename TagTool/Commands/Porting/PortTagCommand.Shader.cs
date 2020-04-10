@@ -776,6 +776,12 @@ namespace TagTool.Commands.Porting
             // This applies manual option->option fixups for matching. This concept should not be used for rm creation/generation.
             //
 
+            // special case, has no options.
+            if (blamRmt2Descriptor.Type == "black" || edRmt2Descriptor.Type == "black")
+                return;
+
+            // TODO: cleaner way of doing this
+
             int optionIndex = -1;
 
             if (OptionChanged("halogram", "overlay", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
@@ -811,6 +817,19 @@ namespace TagTool.Commands.Porting
                 {
                     for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "height_scale")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                            break;
+                        }
+                }
+            }
+            if (OptionChanged("shader", "self_illumination", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if self_illumination is new to the shader, set self_illum_intensity to 0
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "self_illum_intensity")
                         {
                             realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
                             break;
