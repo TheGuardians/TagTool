@@ -167,12 +167,17 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
                     blockDimension = 4;
                     break;
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
                 case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
                     blockDimension = 4;
                     break;
                 case BitmapFormat.AY8:
@@ -212,6 +217,10 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt5aMono:
                 case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
                     compressionFactor = 2;
                     break;
                 case BitmapFormat.A8:
@@ -222,6 +231,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxn:
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.A4R4G4B4Font:
+                case BitmapFormat.ReachDxnMonoAlpha:
                     compressionFactor = 1;
                     break;
                 case BitmapFormat.A4R4G4B4:
@@ -282,6 +292,11 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
                 case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
                     minimalSize = 128;
                     break;
                 default:

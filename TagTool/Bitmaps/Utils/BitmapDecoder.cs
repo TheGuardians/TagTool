@@ -1148,15 +1148,20 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt5aAlpha:
                 case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.ReachDxt5aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
                     bitmRaw = DecodeDxt5A(bitmRaw, virtualWidth, virtualHeight);
                     break;
 
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt3aAlpha:
                     bitmRaw = DecodeDxt3A(bitmRaw, virtualWidth, virtualHeight);
                     break;
 
                 case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
                     bitmRaw = DecodeDxnMA(bitmRaw, virtualWidth, virtualHeight);
                     break;
 

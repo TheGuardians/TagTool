@@ -728,16 +728,21 @@ namespace TagTool.Bitmaps
                     return BitmapFormat.Dxn;
 
                 case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.AY8:
                     return BitmapFormat.A8Y8;
 
                 case BitmapFormat.Dxt5aAlpha:
                 case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt5aAlpha:
                     return BitmapFormat.A8;
 
                 case BitmapFormat.Dxt5aMono:
                 case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aMono:
                     return BitmapFormat.Y8;
 
                 case BitmapFormat.A4R4G4B4:
@@ -750,8 +755,15 @@ namespace TagTool.Bitmaps
         }
         public static bool RequiresDecompression(BitmapFormat format, uint width, uint height) => IsCompressedFormat(format) && (width % 4 != 0 || height % 4 != 0);
 
-        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, bool requireDecompression)
+        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, bool requireDecompression, CacheVersion version)
         {
+            // fix enum from reach
+            if (version == CacheVersion.HaloReach) 
+            {
+                if (format >= (BitmapFormat)38)
+                    format -= 5;
+            }
+
             BitmapFormat destinationFormat = GetEquivalentBitmapFormat(format);
             
             if (format == BitmapFormat.Dxn)
@@ -818,6 +830,11 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
+                case BitmapFormat.ReachDxnMonoAlpha:
                     blockSize = 4;
                     break;
                 case BitmapFormat.AY8:

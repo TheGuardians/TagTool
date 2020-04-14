@@ -37,7 +37,7 @@ namespace TagTool.Bitmaps.Utils
                     definition = resource.Texture.Definition.Bitmap1;
                     otherDefinition = resource.Texture.Definition.Bitmap2;
                 }
-                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, true, pairIndex, otherDefinition, forDDS);
+                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, true, pairIndex, otherDefinition, forDDS, cache.Version);
             }
             else
             {
@@ -45,11 +45,11 @@ namespace TagTool.Bitmaps.Utils
                 if (resource == null)
                     return null;
 
-                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, false, 0, null, forDDS);
+                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, false, 0, null, forDDS, cache.Version);
             }
         }
 
-        private static BaseBitmap ConvertGen3Bitmap(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, bool forDDS)
+        private static BaseBitmap ConvertGen3Bitmap(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, bool forDDS, CacheVersion version)
         {
             if (primaryData == null && secondaryData == null)
                 return null;
@@ -80,7 +80,7 @@ namespace TagTool.Bitmaps.Utils
                                     layerIndex = 2;
                             }
 
-                            ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition);
+                            ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
 
                             if (definition.BitmapType == BitmapType.CubeMap)
                             {
@@ -106,7 +106,7 @@ namespace TagTool.Bitmaps.Utils
 
                         for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
                         {
-                            ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition);
+                            ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
                         }
                         
                         if (definition.BitmapType == BitmapType.CubeMap)
@@ -121,9 +121,15 @@ namespace TagTool.Bitmaps.Utils
 
                 var resultData = result.ToArray();
 
+                // fix enum from reach
+                if (version == CacheVersion.HaloReach)
+                {
+                    if (bitmap.Images[imageIndex].Format >= (BitmapFormat)38)
+                        bitmap.Images[imageIndex].Format -= 5;
+                }
+
                 BaseBitmap resultBitmap = new BaseBitmap(bitmap.Images[imageIndex]);
                 
-
                 var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
                 resultBitmap.UpdateFormat(newFormat);
 
@@ -156,7 +162,7 @@ namespace TagTool.Bitmaps.Utils
             }
         }
 
-        private static void ConvertGen3BitmapData(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition)
+        private static void ConvertGen3BitmapData(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
         {
             byte[] data;
             uint levelOffset;
@@ -346,7 +352,7 @@ namespace TagTool.Bitmaps.Utils
             if (actualHeight < 1)
                 actualHeight = 1;
             bool requireDecompression = BitmapUtils.RequiresDecompression(BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format), (uint)definition.Width, (uint)definition.Height);
-            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, requireDecompression);
+            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, requireDecompression, version);
 
             resultStream.Write(finalData, 0, finalData.Length);
         }
