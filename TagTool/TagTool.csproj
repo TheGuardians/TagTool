@@ -529,6 +529,7 @@
     <Compile Include="Shaders\ShaderMatching\LightVolumeSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\ContrailSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\BeamSorter.cs" />
+    <Compile Include="Shaders\ShaderMatching\RegisterID.cs" />
     <Compile Include="Shaders\ShaderMatching\WaterSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\DecalSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\FoliageSorter.cs" />

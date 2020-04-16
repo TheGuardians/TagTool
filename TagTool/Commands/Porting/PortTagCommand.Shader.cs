@@ -3,7 +3,7 @@ using TagTool.Common;
 using TagTool.Tags.Definitions;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Serialization;
+using TagTool.Shaders;
 using TagTool.Shaders.ShaderMatching;
 using System;
 using System.Linq;
@@ -346,12 +346,523 @@ namespace TagTool.Commands.Porting
 
             finalRm.BaseRenderMethod = rmdfInstance;
 
-            FixAnimationProperties(cacheStream, blamCacheStream, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName, edRmt2Descriptor.IsMs30);
+            // fixup rm animations
+            if (finalRm.ShaderProperties[0].Functions.Count > 0)
+                BuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, blamTagName, edRmt2Descriptor.IsMs30);
 
             // build new rm option indices
             finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(edRmt2Descriptor);
 
             return finalRm;
+        }
+
+        private ShaderParameter.RType GetRegisterType(RenderMethodTemplate.ParameterUsage parameterUsage)
+        {
+            switch (parameterUsage)
+            {
+                case RenderMethodTemplate.ParameterUsage.Texture:
+                case RenderMethodTemplate.ParameterUsage.TextureExtern:
+                    return ShaderParameter.RType.Sampler;
+                case RenderMethodTemplate.ParameterUsage.PS_Boolean:
+                case RenderMethodTemplate.ParameterUsage.VS_Boolean:
+                    return ShaderParameter.RType.Boolean;
+                case RenderMethodTemplate.ParameterUsage.PS_Real:
+                case RenderMethodTemplate.ParameterUsage.PS_RealExtern:
+                case RenderMethodTemplate.ParameterUsage.VS_Real:
+                case RenderMethodTemplate.ParameterUsage.VS_RealExtern:
+                    return ShaderParameter.RType.Vector;
+                case RenderMethodTemplate.ParameterUsage.PS_Integer:
+                case RenderMethodTemplate.ParameterUsage.PS_IntegerExtern:
+                case RenderMethodTemplate.ParameterUsage.VS_Integer:
+                case RenderMethodTemplate.ParameterUsage.VS_IntegerExtern:
+                    return ShaderParameter.RType.Integer;
+                default:
+                    return ShaderParameter.RType.Vector;
+            }
+        }
+
+        // Populates RM animations then remaps the original animations.
+        private void BuildRenderMethodAnimations(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName, bool isMs30)
+        {
+            //
+            // Store shader definitions
+            //
+
+            PixelShader blamPixl = BlamCache.Deserialize<PixelShader>(blamCacheStream, bmRmt2.PixelShader);
+            PixelShader basePixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
+            GlobalVertexShader blamGlvs = null;
+            GlobalVertexShader baseGlvs = null;
+
+            List<short> SupportedVertexTypes = new List<short>();
+
+            string blamRmdfName = finalRm.BaseRenderMethod.Name;
+            if (isMs30 && blamRmdfName.StartsWith("ms30\\")) // remove "ms30\\" from the name
+                blamRmdfName = finalRm.BaseRenderMethod.Name.Remove(0, 5);
+            if (BlamCache.TryGetTag(blamRmdfName + ".rmdf", out CachedTag blamRmdfTag) && CacheContext.TryGetTag(finalRm.BaseRenderMethod.Name + ".rmdf", out CachedTag baseRmdfTag))
+            {
+                var blamRmdf = BlamCache.Deserialize<RenderMethodDefinition>(blamCacheStream, blamRmdfTag);
+                var baseRmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, baseRmdfTag);
+
+                // while rmdf is deserialized, get vertex type indices
+                foreach (var vertexUnknown in baseRmdf.Unknown)
+                    SupportedVertexTypes.Add(vertexUnknown.VertexType);
+
+                if (blamRmdf.GlobalVertexShader != null && baseRmdf.GlobalVertexShader != null)
+                {
+                    baseGlvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, baseRmdf.GlobalVertexShader);
+                    blamGlvs = BlamCache.Deserialize<GlobalVertexShader>(blamCacheStream, blamRmdf.GlobalVertexShader);
+                }
+            }
+            // a glvs is required. there should be no instance where this code is reached but gotta be sure.
+            if (blamGlvs == null || baseGlvs == null)
+            {
+                Console.WriteLine("ERROR: no global vertex shader found. Shader animations will not be converted.");
+                finalRm.ShaderProperties[0].EntryPoints.Clear();
+                finalRm.ShaderProperties[0].ParameterTables.Clear();
+                finalRm.ShaderProperties[0].Parameters.Clear();
+                finalRm.ShaderProperties[0].Functions.Clear();
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.Functions.Integer = 0;
+                return;
+            }
+
+            // get entry point indices
+            List<int> validEntryPoints = new List<int>();
+            for (int i = 0; i < 18; i++) // ignore z_only and sfx_distort, we dont need to match their registers
+            {
+                uint val = (uint)edRmt2.ValidEntryPoints >> i;
+                if ((val & 1) > 0)
+                    validEntryPoints.Add(i);
+            }
+
+            //
+            // Identify registers and map them portingcache->basecache
+            //
+
+            // loop entry points, they point to a parameter table
+            // "entryPointIndex" is the entrypoint index in pixl/glvs
+            // to get the correct glvs shaders, we need the supported vertex types (collected from rmdf above)
+            // the purpose of this monstrous loop is to get the correct registers -- previous code just collected everything which turned out problematic
+
+            List<Dictionary<RegisterID, int>> edEntryPointPixelRegisters = new List<Dictionary<RegisterID, int>>();
+            List<Dictionary<RegisterID, int>> edEntryPointVertexRegisters = new List<Dictionary<RegisterID, int>>();
+            List<Dictionary<RegisterID, int>> blamEntryPointPixelRegisters = new List<Dictionary<RegisterID, int>>();
+            List<Dictionary<RegisterID, int>> blamEntryPointVertexRegisters = new List<Dictionary<RegisterID, int>>();
+            // store tableindex : entrypoint
+            Dictionary<int, int> tableEntryPoints = new Dictionary<int, int>();
+
+            // entry points should be the same in both rmt2 so we can use the same loop -- if not, animations cannot be ported anyway
+            for (int entryPointIndex = 0; entryPointIndex < validEntryPoints.Count; entryPointIndex++)
+            {
+                // register info : register index
+                Dictionary<RegisterID, int> edPixelRegisters = new Dictionary<RegisterID, int>();
+                Dictionary<RegisterID, int> edVertexRegisters = new Dictionary<RegisterID, int>();
+                Dictionary<RegisterID, int> blamPixelRegisters = new Dictionary<RegisterID, int>();
+                Dictionary<RegisterID, int> blamVertexRegisters = new Dictionary<RegisterID, int>();
+
+                var edEntryPoint = edRmt2.EntryPoints[validEntryPoints[entryPointIndex]];
+                var blamEntryPoint = bmRmt2.EntryPoints[validEntryPoints[entryPointIndex]];
+
+                // get ed parameters
+                int tableEndOffset = edEntryPoint.Offset + edEntryPoint.Count;
+                for (int edTableIndex = edEntryPoint.Offset; edTableIndex < tableEndOffset; edTableIndex++)
+                {
+                    // store
+                    tableEntryPoints.Add(edTableIndex, entryPointIndex);
+
+                    var rmt2Table = edRmt2.ParameterTables[edTableIndex];
+
+                    // loop through parameter table values
+                    for (int parameterUsageIndex = 0; parameterUsageIndex < (int)RenderMethodTemplate.ParameterUsage.Count; parameterUsageIndex++)
+                    {
+                        var value = rmt2Table.Values[parameterUsageIndex];
+                        if (value.Count < 1)
+                            continue;
+
+                        // if its a vertex value, we need to access glvs instead of pixl
+                        bool isVertex = parameterUsageIndex > (int)RenderMethodTemplate.ParameterUsage.Texture && parameterUsageIndex < (int)RenderMethodTemplate.ParameterUsage.PS_Real;
+
+                        // loop parameters from parameter table value
+                        int parameterEndOffset = value.Offset + value.Count;
+                        for (int parameterIndex = value.Offset; parameterIndex < parameterEndOffset; parameterIndex++)
+                        {
+                            var parameter = edRmt2.Parameters[parameterIndex];
+
+                            // get register type from ParameterUsage index
+                            var parameterType = GetRegisterType((RenderMethodTemplate.ParameterUsage)parameterUsageIndex);
+
+                            // from here we access the shaders to get the register name
+
+                            if (isVertex) // vertex register
+                            {
+                                // loop supported vertex types -- registers should be the same across them, but just to be sure
+                                foreach (var supportedVertexType in SupportedVertexTypes)
+                                {
+                                    var vertexType = baseGlvs.VertexTypes[supportedVertexType];
+                                    // get shader index from entry point block
+                                    int shaderIndex = vertexType.DrawModes[validEntryPoints[entryPointIndex]].ShaderIndex;
+
+                                    if (shaderIndex > -1)
+                                    {
+                                        foreach (var pcParameter in baseGlvs.Shaders[shaderIndex].PCParameters)
+                                        {
+                                            var registerId = new RegisterID(CacheContext.StringTable.GetString(pcParameter.ParameterName), parameterType);
+                                            if (pcParameter.RegisterIndex == parameter.RegisterIndex && pcParameter.RegisterType == parameterType && !edVertexRegisters.ContainsKey(registerId))
+                                            {
+                                                edVertexRegisters.Add(registerId, pcParameter.RegisterIndex);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else // pixel register
+                            {
+                                // get shader index from entry point block
+                                int shaderIndex = basePixl.DrawModes[validEntryPoints[entryPointIndex]].Offset;
+
+                                if (shaderIndex > -1)
+                                {
+                                    foreach (var pcParameter in basePixl.Shaders[shaderIndex].PCParameters)
+                                    {
+                                        var registerId = new RegisterID(CacheContext.StringTable.GetString(pcParameter.ParameterName), parameterType);
+                                        if (pcParameter.RegisterIndex == parameter.RegisterIndex && pcParameter.RegisterType == parameterType && !edPixelRegisters.ContainsKey(registerId))
+                                        {
+                                            edPixelRegisters.Add(registerId, pcParameter.RegisterIndex);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // get blam parameters
+                int blamTableEndOffset = blamEntryPoint.Offset + blamEntryPoint.Count;
+                for (int blamTableIndex = blamEntryPoint.Offset; blamTableIndex < blamTableEndOffset; blamTableIndex++)
+                {
+                    var rmt2Table = bmRmt2.ParameterTables[blamTableIndex];
+
+                    for (int parameterUsageIndex = 0; parameterUsageIndex < (int)RenderMethodTemplate.ParameterUsage.Count; parameterUsageIndex++)
+                    {
+                        var value = rmt2Table.Values[parameterUsageIndex];
+                        if (value.Count < 1)
+                            continue;
+
+                        // if its a vertex value, we need to access glvs instead of pixl
+                        bool isVertex = parameterUsageIndex > (int)RenderMethodTemplate.ParameterUsage.Texture && parameterUsageIndex < (int)RenderMethodTemplate.ParameterUsage.PS_Real;
+
+                        // loop parameters from parameter table value
+                        int parameterEndOffset = value.Offset + value.Count;
+                        for (int parameterIndex = value.Offset; parameterIndex < parameterEndOffset; parameterIndex++)
+                        {
+                            var parameter = bmRmt2.Parameters[parameterIndex];
+
+                            // get register type from ParameterUsage index
+                            var parameterType = GetRegisterType((RenderMethodTemplate.ParameterUsage)parameterUsageIndex);
+
+                            // from here we access the shaders to get the register name
+
+                            if (isVertex) // vertex register
+                            {
+                                // loop supported vertex types -- registers should be the same across them, but just to be sure
+                                foreach (var supportedVertexType in SupportedVertexTypes)
+                                {
+                                    var vertexType = blamGlvs.VertexTypes[supportedVertexType];
+                                    // get shader index from entry point block
+                                    int shaderIndex = vertexType.DrawModes[validEntryPoints[entryPointIndex]].ShaderIndex;
+
+                                    if (shaderIndex > -1)
+                                    {
+                                        foreach (var xboxParameter in blamGlvs.Shaders[shaderIndex].XboxParameters)
+                                        {
+                                            var registerId = new RegisterID(BlamCache.StringTable.GetString(xboxParameter.ParameterName), parameterType);
+                                            if (xboxParameter.RegisterIndex == parameter.RegisterIndex && xboxParameter.RegisterType == parameterType && !blamVertexRegisters.ContainsKey(registerId))
+                                            {
+                                                blamVertexRegisters.Add(registerId, xboxParameter.RegisterIndex);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else // pixel register
+                            {
+                                // get shader index from entry point block
+                                int shaderIndex = blamPixl.DrawModes[validEntryPoints[entryPointIndex]].Offset;
+
+                                if (shaderIndex > -1)
+                                {
+                                    foreach (var xboxParameter in blamPixl.Shaders[shaderIndex].XboxParameters)
+                                    {
+                                        var registerId = new RegisterID(BlamCache.StringTable.GetString(xboxParameter.ParameterName), parameterType);
+                                        if (xboxParameter.RegisterIndex == parameter.RegisterIndex && xboxParameter.RegisterType == parameterType && !blamPixelRegisters.ContainsKey(registerId))
+                                        {
+                                            blamPixelRegisters.Add(registerId, xboxParameter.RegisterIndex);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                edEntryPointPixelRegisters.Add(edPixelRegisters);
+                edEntryPointVertexRegisters.Add(edVertexRegisters);
+                blamEntryPointPixelRegisters.Add(blamPixelRegisters);
+                blamEntryPointVertexRegisters.Add(blamVertexRegisters);
+            }
+
+            // now we do the rm side of things
+            // the idea is the same - follow entrypoint->table->Paramters
+            // however this time, we are matching parameter registers then rewriting them all to the rm.
+            // if a register cannot be found, that parameter will no longer be used.
+
+            // fix table counts before doing parameter table stuff
+            for (int entryPointIndex = 0; entryPointIndex < validEntryPoints.Count; entryPointIndex++)
+            {
+                var entryPoint = edRmt2.EntryPoints[validEntryPoints[entryPointIndex]];
+                var rmEntryPoint = finalRm.ShaderProperties[0].EntryPoints[validEntryPoints[entryPointIndex]];
+
+                int cutoffIndex = entryPoint.Offset + rmEntryPoint.Count;
+
+                // fix table counts
+                if (entryPoint.Count > rmEntryPoint.Count)
+                {
+                    int amount = entryPoint.Count - rmEntryPoint.Count;
+
+                    for (int i = 0; i < amount; i++)
+                    {
+                        if (finalRm.ShaderProperties[0].ParameterTables.Count <= cutoffIndex)
+                            finalRm.ShaderProperties[0].ParameterTables.Add(new ParameterTable());
+                        else
+                            finalRm.ShaderProperties[0].ParameterTables.Insert(cutoffIndex, new ParameterTable());
+                    }
+                }
+            }
+            finalRm.ShaderProperties[0].EntryPoints = edRmt2.EntryPoints;
+
+            // table<parameters>
+            List<List<ParameterMapping>> parameterTablesTextureParameters = new List<List<ParameterMapping>>();
+            List<List<ParameterMapping>> parameterTablesPixelParameters = new List<List<ParameterMapping>>();
+            List<List<ParameterMapping>> parameterTablesVertexParameters = new List<List<ParameterMapping>>();
+            // for index preservation
+            List<int> parameterTableIndices = new List<int>();
+
+            for (int entryPointIndex = 0; entryPointIndex < validEntryPoints.Count; entryPointIndex++)
+            {
+                var entryPoint = edRmt2.EntryPoints[validEntryPoints[entryPointIndex]];
+
+                int tableEndOffset = entryPoint.Offset + entryPoint.Count;
+                for (int tableIndex = entryPoint.Offset; tableIndex < tableEndOffset; tableIndex++)
+                {
+                    var table = finalRm.ShaderProperties[0].ParameterTables[tableIndex];
+
+                    // Add table parameters to a list
+
+                    List<ParameterMapping> textureParameters = new List<ParameterMapping>();
+                    List<ParameterMapping> pixelParameters = new List<ParameterMapping>();
+                    List<ParameterMapping> vertexParameters = new List<ParameterMapping>();
+
+                    int textureEndOffset = table.Texture.Offset + table.Texture.Count;
+                    for (int textureIndex = table.Texture.Offset; textureIndex < textureEndOffset; textureIndex++)
+                        textureParameters.Add(finalRm.ShaderProperties[0].Parameters[textureIndex]);
+                    int vertexEndOffset = table.RealVertex.Offset + table.RealVertex.Count;
+                    for (int vertexIndex = table.RealVertex.Offset; vertexIndex < vertexEndOffset; vertexIndex++)
+                        vertexParameters.Add(finalRm.ShaderProperties[0].Parameters[vertexIndex]);
+                    int pixelEndOffset = table.RealPixel.Offset + table.RealPixel.Count;
+                    for (int pixelIndex = table.RealPixel.Offset; pixelIndex < pixelEndOffset; pixelIndex++)
+                        pixelParameters.Add(finalRm.ShaderProperties[0].Parameters[pixelIndex]);
+
+                    parameterTableIndices.Add(tableIndex);
+                    parameterTablesTextureParameters.Add(textureParameters);
+                    parameterTablesPixelParameters.Add(pixelParameters);
+                    parameterTablesVertexParameters.Add(vertexParameters);
+                }
+            }
+
+            // reorder table block indices to match rmt2 (this order gets lost with the entrypoints loop)
+            List<List<ParameterMapping>> tempTable1 = new List<List<ParameterMapping>>();
+            List<List<ParameterMapping>> tempTable2 = new List<List<ParameterMapping>>();
+            List<List<ParameterMapping>> tempTable3 = new List<List<ParameterMapping>>();
+            while (tempTable1.Count != parameterTablesTextureParameters.Count)
+            {
+                tempTable1.Add(new List<ParameterMapping>()); // make up count
+                tempTable2.Add(new List<ParameterMapping>()); // make up count
+                tempTable3.Add(new List<ParameterMapping>()); // make up count
+            }
+            for (int i = 0; i < parameterTablesTextureParameters.Count; i++)
+            {
+                tempTable1[parameterTableIndices[i]] = parameterTablesTextureParameters[i];
+                tempTable2[parameterTableIndices[i]] = parameterTablesPixelParameters[i];
+                tempTable3[parameterTableIndices[i]] = parameterTablesVertexParameters[i];
+            }
+            parameterTablesTextureParameters = tempTable1;
+            parameterTablesPixelParameters = tempTable2;
+            parameterTablesVertexParameters = tempTable3;
+
+            // now that we have a collection of all the used registers in both templates with an identifier, we can remap them from blam->ms23
+
+            // TODO: entry point -> table -> register dictionary
+            // looping through all is causing issues
+
+            // tableindex : entrypoint tableEntryPoints
+
+            for (int tableIndex = 0; tableIndex < parameterTablesTextureParameters.Count; tableIndex++)
+            {
+                int registerListIndex = tableEntryPoints[tableIndex];
+
+                foreach (var parameter in parameterTablesTextureParameters[tableIndex])
+                {
+                    short newRegister = -1;
+
+                    var blamPixelRegisters = blamEntryPointPixelRegisters[registerListIndex];
+                    var edPixelRegisters = edEntryPointPixelRegisters[registerListIndex];
+
+                    foreach (var registerId in blamPixelRegisters.Keys)
+                        if (registerId.Type == ShaderParameter.RType.Sampler && blamPixelRegisters[registerId] == parameter.RegisterIndex && edPixelRegisters.ContainsKey(registerId))
+                            newRegister = (short)edPixelRegisters[registerId];
+
+                    parameter.RegisterIndex = newRegister;
+                }
+                foreach (var parameter in parameterTablesPixelParameters[tableIndex])
+                {
+                    short newRegister = -1;
+
+                    var blamPixelRegisters = blamEntryPointPixelRegisters[registerListIndex];
+                    var edPixelRegisters = edEntryPointPixelRegisters[registerListIndex];
+
+                    foreach (var registerId in blamPixelRegisters.Keys)
+                        if (registerId.Type == ShaderParameter.RType.Vector && blamPixelRegisters[registerId] == parameter.RegisterIndex && edPixelRegisters.ContainsKey(registerId))
+                            newRegister = (short)edPixelRegisters[registerId];
+
+                    parameter.RegisterIndex = newRegister;
+                }
+                foreach (var parameter in parameterTablesVertexParameters[tableIndex])
+                {
+                    short newRegister = -1;
+
+                    var blamVertexRegisters = blamEntryPointVertexRegisters[registerListIndex];
+                    var edVertexRegisters = edEntryPointVertexRegisters[registerListIndex];
+
+                    foreach (var registerId in blamVertexRegisters.Keys)
+                        if (registerId.Type == ShaderParameter.RType.Vector && blamVertexRegisters[registerId] == parameter.RegisterIndex && edVertexRegisters.ContainsKey(registerId))
+                            newRegister = (short)edVertexRegisters[registerId];
+
+                    parameter.RegisterIndex = newRegister;
+                }
+            }
+
+            //
+            // Build and write to rm
+            //
+
+            // clear current rm data
+            finalRm.ShaderProperties[0].ParameterTables.Clear();
+            finalRm.ShaderProperties[0].Parameters.Clear();
+
+            List<ParameterTable> newParameterTables = new List<ParameterTable>();
+            List<ParameterMapping> newParameters = new List<ParameterMapping>();
+
+            // count is the same for all 3
+            int parameterTableCount = parameterTablesTextureParameters.Count;
+            for (int i = 0; i < parameterTableCount; i++)
+            {
+                ParameterTable newParameterTable = new ParameterTable();
+
+                // use variables to keep track of blocks for the table's indices
+
+                ushort offset = (ushort)newParameters.Count;
+                ushort currentCount = 0;
+                foreach (var textureParameter in parameterTablesTextureParameters[i])
+                {
+                    if (textureParameter.RegisterIndex == -1)
+                        continue; // this means the original animation isnt possible with this shader.
+
+                    newParameters.Add(textureParameter);
+                    currentCount++;
+                }
+                // write indices into table
+                newParameterTable.Texture.Count = currentCount;
+                if (newParameterTable.Texture.Count > 0)
+                    newParameterTable.Texture.Offset = offset;
+
+                offset = (ushort)newParameters.Count;
+                currentCount = 0;
+                foreach (var pixelParameter in parameterTablesPixelParameters[i])
+                {
+                    if (pixelParameter.RegisterIndex == -1)
+                        continue; // this means the original animation isnt possible with this shader.
+
+                    newParameters.Add(pixelParameter);
+                    currentCount++;
+                }
+                // write indices into table
+                newParameterTable.RealPixel.Count = currentCount;
+                if (newParameterTable.RealPixel.Count > 0)
+                    newParameterTable.RealPixel.Offset = offset;
+
+                offset = (ushort)newParameters.Count;
+                currentCount = 0;
+                foreach (var vertexParameter in parameterTablesVertexParameters[i])
+                {
+                    if (vertexParameter.RegisterIndex == -1)
+                        continue; // this means the original animation isnt possible with this shader.
+
+                    newParameters.Add(vertexParameter);
+                    currentCount++;
+                }
+                // write indices into table
+                newParameterTable.RealVertex.Count = currentCount;
+                if (newParameterTable.RealVertex.Count > 0)
+                    newParameterTable.RealVertex.Offset = offset;
+
+                newParameterTables.Add(newParameterTable);
+            }
+
+            // add new blocks to rm
+            finalRm.ShaderProperties[0].ParameterTables = newParameterTables;
+            finalRm.ShaderProperties[0].Parameters = newParameters;
+
+            // remap argument indices within parameters to match new rmt2 (pixel and vertex only)
+
+            foreach (var parameterTable in finalRm.ShaderProperties[0].ParameterTables)
+            {
+                int pixelEndOffset = parameterTable.RealPixel.Offset + parameterTable.RealPixel.Count;
+                for (int i = parameterTable.RealPixel.Offset; i < pixelEndOffset; i++)
+                {
+                    string blamArgName = BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[finalRm.ShaderProperties[0].Parameters[i].SourceIndex].Name);
+
+                    for (int realIndex = 0; realIndex < edRmt2.RealParameterNames.Count; realIndex++)
+                    {
+                        string edArgName = CacheContext.StringTable.GetString(edRmt2.RealParameterNames[realIndex].Name);
+
+                        if (blamArgName == edArgName)
+                        {
+                            finalRm.ShaderProperties[0].Parameters[i].SourceIndex = (byte)realIndex;
+                            break;
+                        }
+                    }
+                }
+                int vertexEndOffset = parameterTable.RealVertex.Offset + parameterTable.RealVertex.Count;
+                for (int i = parameterTable.RealVertex.Offset; i < vertexEndOffset; i++)
+                {
+                    string blamArgName = BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[finalRm.ShaderProperties[0].Parameters[i].SourceIndex].Name);
+
+                    for (int realIndex = 0; realIndex < edRmt2.RealParameterNames.Count; realIndex++)
+                    {
+                        string edArgName = CacheContext.StringTable.GetString(edRmt2.RealParameterNames[realIndex].Name);
+
+                        if (blamArgName == edArgName)
+                        {
+                            finalRm.ShaderProperties[0].Parameters[i].SourceIndex = (byte)realIndex;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, GameCacheHaloOnlineBase CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName, bool isMs30)
