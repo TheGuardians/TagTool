@@ -357,6 +357,8 @@ namespace TagTool.Commands.Porting
                 pixl.Shaders.Add(pixelShaderBlock);
 
                 var registerOffsets = new RenderMethodTemplate.ParameterTable();
+                for(int i = 0; i < registerOffsets.Values.Length; i++)
+                    registerOffsets.Values[i] = new RenderMethodTemplate.PackedInteger_10_6();
                 rmt2.ParameterTables.Add(registerOffsets);
 
                 registerOffsets[ParameterUsage.TextureExtern].Offset = (ushort)rmt2.Parameters.Count;

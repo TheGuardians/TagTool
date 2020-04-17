@@ -56,7 +56,7 @@ namespace TagTool.Tags.Definitions
         public class ParameterTable : TagStructure
 		{
             [TagField(Length = (int)ParameterUsage.Count)]
-            public PackedInteger_10_6[] Values;
+            public PackedInteger_10_6[] Values = new PackedInteger_10_6[(int)ParameterUsage.Count];
 
             public PackedInteger_10_6 this[ParameterUsage usage]
             {

@@ -85,43 +85,49 @@ namespace TagTool.Commands.Porting
 			MatchShaders = 1 << 10,
 
 			/// <summary>
+			/// Only use templates that have the exact same render method options
+			/// </summary>
+			[PortingFlagDescription("Only use templates that have the exact same render method options")]
+			PefectShaderMatchOnly = 1 << 11,
+
+			/// <summary>
 			/// Keep cache in memory during porting.
 			/// </summary>
 			[PortingFlagDescription("Keep cache in memory during porting.")]
-			Memory = 1 << 11,
+			Memory = 1 << 12,
 
 			/// <summary>
 			/// Include <see cref="ShaderHalogram"/> (rmhg) tags.
 			/// </summary>
 			[PortingFlagDescription("Include 'ShaderHalogram' (rmhg) tags.")]
-			Rmhg = 1 << 12,
+			Rmhg = 1 << 13,
 
 			/// <summary>
 			/// Allow using existing tags from Ms30.
 			/// </summary>
 			[PortingFlagDescription("Allow using existing tags from Ms30.")]
-			Ms30 = 1 << 13,
+			Ms30 = 1 << 14,
 
 			/// <summary>
 			/// Allow writing output to the console.
 			/// </summary>
 			[PortingFlagDescription("Allow writing output to the console.")]
-			Print = 1 << 14,
+			Print = 1 << 15,
 
             /// <summary>
             /// Merges new data if tags exist.
             /// </summary>
             [PortingFlagDescription("Merges new data if tags exist.")]
-            Merge = 1 << 15,
+            Merge = 1 << 16,
 
             /// <summary>
             /// Use a regular expression to determine target tags.
             /// </summary>
             [PortingFlagDescription("Use a regular expression to determine target tags")]
-            Regex = 1 << 16,
+            Regex = 1 << 17,
 
             // No [PortingFlagDescription] here means we'll flag names as the description.
-            Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print | Merge
+            Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Print | Merge
 		}
 
 		/// <summary>

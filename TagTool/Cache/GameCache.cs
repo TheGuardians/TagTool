@@ -206,6 +206,9 @@ namespace TagTool.Cache
 
         public bool TryParseGroupTag(string name, out Tag result)
         {
+            while (name.Length < 4)
+                name += " ";
+
             if (TagDefinition.TryFind(name, out var type))
             {
                 var attribute = TagStructure.GetTagStructureAttribute(type);
