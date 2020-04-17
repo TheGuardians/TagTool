@@ -510,7 +510,7 @@ namespace TagTool.Cache.HaloOnline
         {
             foreach (var tag in Tags)
             {
-                if (groupTag == tag.Group.Tag && name == tag.Name)
+                if (tag != null && groupTag == tag.Group.Tag && name == tag.Name)
                     return tag;
             }
             return null;

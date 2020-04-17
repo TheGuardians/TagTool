@@ -86,7 +86,7 @@ namespace TagTool.Cache.Gen3
         {
             foreach (var tag in Instances)
             {
-                if (groupTag == tag.Group.Tag && name == tag.Name)
+                if (tag != null && groupTag == tag.Group.Tag && name == tag.Name)
                     return tag;
             }
             return null;
