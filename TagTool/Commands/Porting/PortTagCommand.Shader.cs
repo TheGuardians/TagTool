@@ -209,6 +209,8 @@ namespace TagTool.Commands.Porting
                 BooleanConstants = 0
             };
 
+            RenderMethod originalRm = finalRm;
+
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = blamRmt2;
             var bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, bmRmt2Instance);
@@ -265,9 +267,6 @@ namespace TagTool.Commands.Porting
             foreach (var a in edRealConstants)
                 newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, edRmt2Descriptor.Type, methodNames, optionBlocks));
 
-            // apply option->option conversion where applicable
-            ApplyOptionFixups(newShaderProperty.RealConstants, blamRmt2Descriptor, edRmt2Descriptor, edRmt2, renderMethodDefinition);
-
             foreach (var a in edIntConstants)
                 newShaderProperty.IntegerConstants.Add(0);
 
@@ -277,6 +276,9 @@ namespace TagTool.Commands.Porting
             // if we have bits enabled by default, this actually disables boolean args. fixes a few visual issues
             for (int a = 0; a < edRmt2.BooleanParameterNames.Count; a++)
                 newShaderProperty.BooleanConstants |= (1u << a);
+
+            // apply option->option conversion where applicable
+            ApplyDefaultOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
 
             // Reorder blam bitmaps to match the HO rmt2 order
             // Reorder blam real constants to match the HO rmt2 order
@@ -305,6 +307,8 @@ namespace TagTool.Commands.Porting
                             newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
                     }
 
+            // apply post option->options fixups
+            ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
 
             finalRm.ImportData = new List<ImportDatum>(); // most likely not used
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
@@ -1225,6 +1229,9 @@ namespace TagTool.Commands.Porting
                 };
             }
 
+            if (type == "terrain" && parameter.StartsWith("specular_tint_m_")) // prevent purple terrain
+                return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+
             switch (optionBlock.Type)
             {
                 case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
@@ -1281,7 +1288,7 @@ namespace TagTool.Commands.Porting
             return false;
         }
 
-        private void ApplyOptionFixups(List<RealConstant> realConstants, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodDefinition rmdf)
+        private void ApplyDefaultOptionFixups(ShaderProperty edShaderProperty, ShaderProperty bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
         {
             //
             // This applies manual option->option fixups for matching. This concept should not be used for rm creation/generation.
@@ -1292,6 +1299,11 @@ namespace TagTool.Commands.Porting
                 return;
 
             // TODO: cleaner way of doing this
+
+            var realConstants = edShaderProperty.RealConstants;
+            var textureConstants = edShaderProperty.TextureConstants;
+            var bmRealConstants = bmShaderProperty.RealConstants;
+            var bmTextureConstants = bmShaderProperty.TextureConstants;
 
             int optionIndex = -1;
 
@@ -1304,6 +1316,26 @@ namespace TagTool.Commands.Porting
                         if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "overlay_intensity")
                         {
                             realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                            break;
+                        }
+                }
+                // overlay_detail_map to 0
+                for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                    if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "overlay_detail_map")
+                    {
+                        realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                        break;
+                    }
+            }
+            if (OptionChanged("halogram", "edge_fade", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // prevent purple edge_fade
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] == 1)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "edge_fade_center_tint")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 1.0f };
                             break;
                         }
                 }
@@ -1341,6 +1373,88 @@ namespace TagTool.Commands.Porting
                 {
                     for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "self_illum_intensity")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                            break;
+                        }
+                }
+            }
+            if (OptionChanged("terrain", "material_3", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if the third material is new, set its bitmaps to be that of the second
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
+                {
+                    bool baseIsSet = false, detailIsSet = false, bumpIsSet = false, detailBumpIsSet = false;
+
+                    for (int i = 0; i < edRmt2.TextureParameterNames.Count; i++)
+                    {
+                        if (!baseIsSet && CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "base_map_m_3")
+                            for (int j = 0; j < bmRmt2.TextureParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "base_map_m_0")
+                                {
+                                    baseIsSet = true;
+                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
+                                    break;
+                                }
+                        if (!detailIsSet && CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "detail_map_m_3")
+                            for (int j = 0; j < bmRmt2.TextureParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "detail_map_m_0")
+                                {
+                                    detailIsSet = true;
+                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
+                                    break;
+                                }
+                        if (!bumpIsSet && CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "bump_map_m_3")
+                            for (int j = 0; j < bmRmt2.TextureParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "bump_map_m_0")
+                                {
+                                    bumpIsSet = true;
+                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
+                                    break;
+                                }
+                        if (!detailBumpIsSet && CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name) == "detail_bump_m_3")
+                            for (int j = 0; j < bmRmt2.TextureParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "detail_bump_m_0")
+                                {
+                                    detailBumpIsSet = true;
+                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
+                                    break;
+                                }
+                    }
+                }
+            }
+        }
+
+        private void ApplyPostOptionFixups(ShaderProperty edShaderProperty, ShaderProperty bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
+        {
+            //
+            // This applies manual option->option fixups for matching. This concept should not be used for rm creation/generation.
+            //
+
+            // special case, has no options.
+            if (blamRmt2Descriptor.Type == "black" || edRmt2Descriptor.Type == "black")
+                return;
+
+            // TODO: cleaner way of doing this
+
+            var realConstants = edShaderProperty.RealConstants;
+            var textureConstants = edShaderProperty.TextureConstants;
+            var bmRealConstants = bmShaderProperty.RealConstants;
+            var bmTextureConstants = bmShaderProperty.TextureConstants;
+
+            int optionIndex = -1;
+
+            if (OptionChanged("shader", "specular_mask", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if specular mask/texture is no longer used, 0 the specular coefficients (prevents blinding/bad env reflections)
+                if (blamRmt2Descriptor.Options[optionIndex] > 1 && edRmt2Descriptor.Options[optionIndex] == 0)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "specular_coefficient")
                         {
                             realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
                             break;

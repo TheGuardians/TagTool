@@ -60,14 +60,14 @@ namespace TagTool.Shaders.ShaderMatching
 
         // these private lists define the order of the types and options in a shader. The matcher will use these when no perfect match exists. 
         private static List<ShaderOptionTypes> TypeOrder = new List<ShaderOptionTypes> {
-            ShaderOptionTypes.parallax,          
+            ShaderOptionTypes.alpha_test,
             ShaderOptionTypes.misc,
             ShaderOptionTypes.environment_mapping,
-            ShaderOptionTypes.blend_mode,
+            ShaderOptionTypes.parallax,
             ShaderOptionTypes.bump_mapping,
             ShaderOptionTypes.self_illumination,
             ShaderOptionTypes.specular_mask,
-            ShaderOptionTypes.alpha_test,
+            ShaderOptionTypes.blend_mode,
             ShaderOptionTypes.albedo,
             ShaderOptionTypes.material_model,
         };
@@ -123,9 +123,9 @@ namespace TagTool.Shaders.ShaderMatching
 
         private static List<EnvironmentMappingOptions> EnvrionmentMappingOrder = new List<EnvironmentMappingOptions> {
             EnvironmentMappingOptions.none,
-            EnvironmentMappingOptions.per_pixel,
             EnvironmentMappingOptions.dynamic,
             EnvironmentMappingOptions.from_flat_texture,
+            EnvironmentMappingOptions.per_pixel,
             EnvironmentMappingOptions.custom_map
         };
 
@@ -146,9 +146,9 @@ namespace TagTool.Shaders.ShaderMatching
             BlendModeOptions.opaque,
             BlendModeOptions.additive,
             BlendModeOptions.multiply,
-            BlendModeOptions.alpha_blend,
             BlendModeOptions.double_multiply,
-            BlendModeOptions.pre_multiplied_alpha
+            BlendModeOptions.pre_multiplied_alpha,
+            BlendModeOptions.alpha_blend,
         };
 
         private static List<ParallaxOptions> ParallaxOrder = new List<ParallaxOptions> {

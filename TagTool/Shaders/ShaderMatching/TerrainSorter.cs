@@ -9,12 +9,12 @@ namespace TagTool.Shaders.ShaderMatching
         // TODO: revise these
 
         private static List<TerrainOptionTypes> TypeOrder = new List<TerrainOptionTypes> {
-           TerrainOptionTypes.material_3,
-           TerrainOptionTypes.material_2,
-           TerrainOptionTypes.material_1,
            TerrainOptionTypes.material_0,
+           TerrainOptionTypes.material_1,
+           TerrainOptionTypes.material_2,
+           TerrainOptionTypes.material_3,
            TerrainOptionTypes.environment_map,
-           TerrainOptionTypes.blending
+           TerrainOptionTypes.blending,
         };
 
         private static List<BlendingOptions> BlendingOrder = new List<BlendingOptions> {
