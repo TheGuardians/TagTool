@@ -65,9 +65,9 @@ namespace TagTool.Shaders.ShaderMatching
             ShaderOptionTypes.environment_mapping,
             ShaderOptionTypes.parallax,
             ShaderOptionTypes.bump_mapping,
+            ShaderOptionTypes.blend_mode,
             ShaderOptionTypes.self_illumination,
             ShaderOptionTypes.specular_mask,
-            ShaderOptionTypes.blend_mode,
             ShaderOptionTypes.albedo,
             ShaderOptionTypes.material_model,
         };
