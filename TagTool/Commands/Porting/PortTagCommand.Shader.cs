@@ -16,6 +16,14 @@ namespace TagTool.Commands.Porting
     {
         public ShaderMatcherNew Matcher = new ShaderMatcherNew();
 
+        private List<string> emblemTagNames = new List<string>
+        {
+            @"objects\characters\odst\shaders\mc_emblem",
+            @"objects\characters\odst_oni_op\shaders\mc_emblem",
+            @"objects\characters\elite\shaders\elite_emblem",
+            @"objects\characters\masterchief\shaders\mc_emblem"
+        };
+
         private RasterizerGlobals ConvertRasterizerGlobals(RasterizerGlobals rasg)
         {
             if (BlamCache.Version == CacheVersion.Halo3ODST)
@@ -349,6 +357,15 @@ namespace TagTool.Commands.Porting
             }
 
             finalRm.BaseRenderMethod = rmdfInstance;
+
+            // remove emblem animations (prevents crash)
+            if (edRmt2Descriptor.Type == "decal" && emblemTagNames.Contains(blamTagName))
+            {
+                finalRm.ShaderProperties[0].EntryPoints.Clear();
+                finalRm.ShaderProperties[0].ParameterTables.Clear();
+                finalRm.ShaderProperties[0].Parameters.Clear();
+                finalRm.ShaderProperties[0].Functions.Clear();
+            }
 
             // fixup rm animations
             if (finalRm.ShaderProperties[0].Functions.Count > 0)
@@ -1381,7 +1398,7 @@ namespace TagTool.Commands.Porting
             }
             if (OptionChanged("terrain", "material_3", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
             {
-                // if the third material is new, set its bitmaps to be that of the second
+                // if the fourth material is new, set its bitmaps to be that of the first
                 if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
                 {
                     bool baseIsSet = false, detailIsSet = false, bumpIsSet = false, detailBumpIsSet = false;
@@ -1425,6 +1442,57 @@ namespace TagTool.Commands.Porting
                                     break;
                                 }
                     }
+
+                    baseIsSet = false; detailIsSet = false; bumpIsSet = false; detailBumpIsSet = false;
+
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                    {
+                        if (!baseIsSet && CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "base_map_m_3")
+                            for (int j = 0; j < bmRmt2.RealParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[j].Name) == "base_map_m_0")
+                                {
+                                    baseIsSet = true;
+                                    realConstants[i] = bmRealConstants[j];
+                                    break;
+                                }
+                        if (!detailIsSet && CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "detail_map_m_3")
+                            for (int j = 0; j < bmRmt2.RealParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[j].Name) == "detail_map_m_0")
+                                {
+                                    detailIsSet = true;
+                                    realConstants[i] = bmRealConstants[j];
+                                    break;
+                                }
+                        if (!bumpIsSet && CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "bump_map_m_3")
+                            for (int j = 0; j < bmRmt2.RealParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[j].Name) == "bump_map_m_0")
+                                {
+                                    bumpIsSet = true;
+                                    realConstants[i] = bmRealConstants[j];
+                                    break;
+                                }
+                        if (!detailBumpIsSet && CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "detail_bump_m_3")
+                            for (int j = 0; j < bmRmt2.RealParameterNames.Count; j++)
+                                if (BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[j].Name) == "detail_bump_m_0")
+                                {
+                                    detailBumpIsSet = true;
+                                    realConstants[i] = bmRealConstants[j];
+                                    break;
+                                }
+                    }
+                }
+            }
+            if (OptionChanged("decal", "tinting", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                // if decal tinting is new, ensure its colour is white
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "tint_color")
+                        {
+                            realConstants[i] = new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 1.0f, Arg3 = 1.0f };
+                            break;
+                        }
                 }
             }
         }
