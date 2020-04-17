@@ -34,6 +34,8 @@ namespace TagTool.Audio
 
             WriteXMAFile(blamSound);
 
+            bool highQuality = sound.SoundClass.HaloOnline == SoundClass.SoundClassHaloOnline.Music || sound.SoundClass.HaloOnline == SoundClass.SoundClassHaloOnline.CinematicMusic;
+
             if (channelCount > 2)
             {
                 // channelCount is 4 or 6, ignore looping
@@ -59,7 +61,7 @@ namespace TagTool.Audio
                 ConvertToWAV(XMAFile, true);
                 blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
                 WriteWAVFile(blamSound);
-                ConvertWAVToMP3Looping(WAVFile);
+                ConvertWAVToMP3Looping(WAVFile, highQuality);
                 blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
             }
             ClearFiles();
@@ -178,12 +180,17 @@ namespace TagTool.Audio
             blamSound.UpdateFormat(Compression.MP3, result);
         }
 
-        private static void ConvertWAVToMP3Looping(string WAVFileName)
+        private static void ConvertWAVToMP3Looping(string WAVFileName, bool highQuality)
         {
+            string suffix = "";
+            if (highQuality)
+            {
+                suffix = " -q:a 0 ";
+            }
             // Assumes that wavFileName and mp3FileName have the same name but different extensions.
             ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
             {
-                Arguments = WAVFileName,
+                Arguments = WAVFileName + suffix,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = false,

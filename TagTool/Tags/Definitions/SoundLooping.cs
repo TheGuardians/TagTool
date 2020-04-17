@@ -90,7 +90,6 @@ namespace TagTool.Tags.Definitions
             NegateRadiusBasedFocus = 1 << 16
         }
 
-        [Flags]
         public enum SoundClassValue : short
         {
             ProjectileImpact,
