@@ -16,7 +16,7 @@ namespace TagTool.Commands.Shaders
 
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, T shader)
         {
-            commandContext.AddCommand(new GenerateShader<T>(cache, tag, shader));
+            //commandContext.AddCommand(new GenerateShader<T>(cache, tag, shader));
             commandContext.AddCommand(new CompileCommand<T>(cache, tag, shader));
             commandContext.AddCommand(new DisassembleCommand<T>(cache, tag, shader));
         }

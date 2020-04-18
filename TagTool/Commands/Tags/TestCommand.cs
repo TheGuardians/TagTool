@@ -20,6 +20,7 @@ using System.Linq;
 using System.IO.Compression;
 using TagTool.Tools.Geometry;
 using TagTool.Shaders;
+using TagTool.Shaders.ShaderGenerator;
 
 namespace TagTool.Commands
 {
@@ -38,27 +39,28 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            
-            var mapFilesFolder = new DirectoryInfo(@"D:\Halo\Maps\Halo3");
-            var outDir = new DirectoryInfo("CacheTest");
-            if (!outDir.Exists)
-                outDir.Create();
 
+            //string filename = "test";
+            //BlamModelFile geometryFormat = new BlamModelFile();
 
-            //
-            // Insert what test command you want below
-            //
-
-
-            //var file = new FileInfo(Path.Combine(mapFilesFolder.FullName, @"descent.map"));
-
-            //var cache = GameCache.Open(file);
-
-            string filename = "test";
-            BlamModelFile geometryFormat = new BlamModelFile();
-
-            using (var stream = Cache.OpenCacheRead())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
+                CachedTag glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
+
+                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
+
+                var worldResult = ShaderGenerator.GenerateGlobalVertexShaderShader(VertexType.World, EntryPoint.Albedo);
+                var rigidResult = ShaderGenerator.GenerateGlobalVertexShaderShader(VertexType.Rigid, EntryPoint.Albedo);
+
+                int worldAlbedoIndex = glvs.VertexTypes[(int)VertexType.World].DrawModes[(int)EntryPoint.Albedo].ShaderIndex;
+                int rigidAlbedoIndex = glvs.VertexTypes[(int)VertexType.Rigid].DrawModes[(int)EntryPoint.Albedo].ShaderIndex;
+
+                glvs.Shaders[worldAlbedoIndex].PCShaderBytecode = worldResult.Bytecode;
+                glvs.Shaders[rigidAlbedoIndex].PCShaderBytecode = rigidResult.Bytecode;
+
+                Cache.Serialize(stream, glvsTag, glvs);
+
+                /*
                 // disassemble specified shaders related to rmt2
                 var tagName = @"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0";
 
@@ -112,7 +114,7 @@ namespace TagTool.Commands
                         }
                     }
                 }
-
+                */
                 /*
                 //objects\gear\human\industrial\toolbox_small\toolbox_small
                 var tag = Cache.TagCache.GetTag(@"objects\vehicles\warthog\warthog", "mode"); // objects\vehicles\warthog\warthog

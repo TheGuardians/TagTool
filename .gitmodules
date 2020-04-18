@@ -1,0 +1,3 @@
+[submodule "ShaderGenerator"]
+	path = ShaderGenerator
+	url = https://github.com/Beatthezombie/HaloShaderGenerator

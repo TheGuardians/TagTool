@@ -202,24 +202,8 @@ namespace TagTool.Commands.Porting
 				case "glps":
 					return CacheContext.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
 				case "rmct":
-					if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
-					{
-						return CacheContext.GetTag<Shader>(@"shaders\invalid");
-					}
-					break;
+                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
 				case "rmt2":
-					if (HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
-					{
-						// discard cortana shaders
-						if (blamTag.Name.ToLower().Contains("cortana_template"))
-						{
-							if (CacheContext.TryGetTag<RenderMethodTemplate>(blamTag.Name, out var rmt2Instance))
-								return rmt2Instance;
-
-							return null; // This will be generated in the shader post
-						}
-					}
-
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
 			} 

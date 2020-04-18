@@ -17,7 +17,7 @@ namespace TagTool.Commands.Shaders
 
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, RenderMethodTemplate render_method_template)
         {
-            commandContext.AddCommand(new GenerateRenderMethodTemplate(cache, tag, render_method_template));
+            //commandContext.AddCommand(new GenerateRenderMethodTemplate(cache, tag, render_method_template));
         }
     }
 }

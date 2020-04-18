@@ -59,16 +59,16 @@ namespace TagTool.Commands.Porting
 
             RenderMethodTemplate rmt2 = null;
             if (shader_properties.Template == null)
-            {
+            {/*
                 GenerateCortanaRMT2Tag(
                     render_method_option_indices,
                     cacheStream,
                     resourceStreams,
                     out CachedTag rmt2Instance,
                     out RenderMethodTemplate newRMT2);
-
+                    
                 shader_properties.Template = rmt2Instance;
-                rmt2 = newRMT2;
+                rmt2 = newRMT2;*/
             }
             else
             {
@@ -304,7 +304,7 @@ namespace TagTool.Commands.Porting
             }
             return index;
         }
-
+        /*
         private void GenerateCortanaRMT2Tag(List<int> options, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, out CachedTag rmt2Instance, out RenderMethodTemplate rmt2)
         {
             string template_name = $@"shaders\cortana_templates\_{string.Join("_", options)}";
@@ -466,7 +466,7 @@ namespace TagTool.Commands.Porting
 
             CacheContext.SaveTagNames();
         }
-
+        */
         public static PixelShaderBlock GeneratePixelShaderBlock(GameCacheHaloOnlineBase cacheContext, ShaderGeneratorResult shader_gen_result)
         {
             var pixelShaderBlock = new PixelShaderBlock

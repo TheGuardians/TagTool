@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using HaloShaderGenerator.Enums;
 using System.Reflection;
+using HaloShaderGenerator.Globals;
 
 namespace TagTool.Commands.Shaders
 {
@@ -105,7 +105,7 @@ namespace TagTool.Commands.Shaders
                 case "shader_templates":
                 case "shader_template":
 
-
+                    /*
                     if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Albedo))
                     {
                         var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
@@ -114,7 +114,7 @@ namespace TagTool.Commands.Shaders
 
                         Console.WriteLine(bytecode?.Length ?? -1);
                     }
-
+                    */
                     break;
                 case "beam_templates":
                 case "beam_template":
