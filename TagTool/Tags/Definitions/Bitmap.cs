@@ -126,7 +126,8 @@ namespace TagTool.Tags.Definitions
 
             public int Unknown8;
             public int UnknownC;
-            public int Unknown10;
+            public short Unknown10;
+            public short Unknown12;
             public int Unknown14;
             public int Unknown18;
             public int Unknown1C;
