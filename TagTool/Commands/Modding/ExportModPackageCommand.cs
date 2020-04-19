@@ -323,7 +323,7 @@ namespace TagTool.Commands.Modding
                     ResourceCacheHaloOnline resourceCache = null;
                     var location = (ResourceLocation)value;
 
-                    if (location == ResourceLocation.None)
+                    if (location == ResourceLocation.None || location == ResourceLocation.RenderModels || location == ResourceLocation.Lightmaps || location == ResourceLocation.Mods)
                         continue;
 
                     try
