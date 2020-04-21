@@ -435,9 +435,9 @@ namespace TagTool.Commands.Porting
                 }
             }
             // a glvs is required. there should be no instance where this code is reached but gotta be sure.
-            if (blamGlvs == null || baseGlvs == null)
+            if (blamGlvs == null || baseGlvs == null || isMs30) // temp. dont convert to ms30 shaders
             {
-                Console.WriteLine("ERROR: no global vertex shader found. Shader animations will not be converted.");
+                Console.WriteLine("Shader animations will not be converted.");
                 finalRm.ShaderProperties[0].EntryPoints.Clear();
                 finalRm.ShaderProperties[0].ParameterTables.Clear();
                 finalRm.ShaderProperties[0].Parameters.Clear();
