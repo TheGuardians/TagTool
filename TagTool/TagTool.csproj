@@ -310,7 +310,6 @@
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
-    <Compile Include="Commands\Porting\MatchTemplateCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
@@ -596,7 +595,6 @@
     <Compile Include="Shaders\ShaderMatching\FoliageSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\HalogramSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\ScreenSorter.cs" />
-    <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Cache\HaloOnline\Strings.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcherNew.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderSorter.cs" />
@@ -635,9 +633,6 @@
     <Compile Include="Extensions\FlipFlopDictionary.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Common\BlamType.cs" />
-    <Compile Include="Shaders\ShaderMatching\ArgumentMapping.cs" />
-    <Compile Include="Shaders\ShaderMatching\FastRenderTags.cs" />
-    <Compile Include="Shaders\ShaderMatching\Unknown3TagBlock.cs" />
     <Compile Include="Tags\TagFieldInfo.cs" />
     <Compile Include="Tags\TagStructure.cs" />
     <Compile Include="Tags\TagStructureReference.cs" />
