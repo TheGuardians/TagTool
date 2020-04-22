@@ -195,6 +195,9 @@ namespace TagTool.Cache.HaloOnline
             // Write the data
             stream.Position = tag.HeaderOffset;
             stream.Write(data, 0, data.Length);
+            
+            if (data.Length == 0)
+                return;
 
             // Re-parse it
             stream.Position = tag.HeaderOffset;
