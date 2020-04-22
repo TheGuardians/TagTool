@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Cache.HaloOnline;
+using System.Linq;
 
 namespace TagTool.Commands.Tags
 {
@@ -37,7 +38,9 @@ namespace TagTool.Commands.Tags
                     var cacheHaloOnline = Cache as GameCacheHaloOnlineBase;
 
                     cacheHaloOnline.TagCacheGenHO.Tags[tag.Index] = null;
-                    cacheHaloOnline.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)tag, new byte[] { });
+
+                    byte[] blankheader = Enumerable.Repeat((byte)0x00, 0x24).ToArray();
+                    cacheHaloOnline.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)tag, blankheader);
                 }
 
                 else
