@@ -439,6 +439,9 @@ namespace TagTool.Commands.Porting
                         {
                             frame.NearPlane *= -1.0f;
                             frame.FarPlane *= -1.0f;
+
+                            if (BlamCache.Version == CacheVersion.Halo3ODST)
+                                frame.FOV *= 0.65535f; // fov change in ODST affected cisc too it seems
                         }
                     }
                     break;

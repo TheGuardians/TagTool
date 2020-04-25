@@ -18,6 +18,8 @@ namespace TagTool.Commands.Porting
     {
         private Scenario CurrentScenario = null;
 
+        private static readonly byte[] DefaultScenarioFxFunction = new byte[] { 0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
         private Scenario ConvertScenario(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
             CurrentScenario = scnr;
@@ -609,6 +611,22 @@ namespace TagTool.Commands.Porting
                 scnr.Globals = new List<HsGlobal>();
                 scnr.Scripts = new List<HsScript>();
                 scnr.ScriptExpressions = new List<HsSyntaxNode>();
+            }
+
+            //
+            // Remove functions from default screen fx
+            //
+
+            if (scnr.DefaultScreenFx != null)
+            {
+                var defaultSefc = CacheContext.Deserialize<AreaScreenEffect>(cacheStream, scnr.DefaultScreenFx);
+                foreach (var screenEffect in defaultSefc.ScreenEffects)
+                {
+                    screenEffect.AngleFalloffFunction.Data = DefaultScenarioFxFunction;
+                    screenEffect.DistanceFalloffFunction.Data = DefaultScenarioFxFunction;
+                    screenEffect.TimeEvolutionFunction.Data = DefaultScenarioFxFunction;
+                }
+                CacheContext.Serialize(cacheStream, scnr.DefaultScreenFx, defaultSefc);
             }
 
             return scnr;

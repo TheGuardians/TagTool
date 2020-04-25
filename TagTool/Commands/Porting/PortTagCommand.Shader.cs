@@ -16,9 +16,10 @@ namespace TagTool.Commands.Porting
     {
         public ShaderMatcherNew Matcher = new ShaderMatcherNew();
 
-        private List<string> emblemTagNames = new List<string>
+        private List<string> emblemTagNames = new List<string> // needs proper fix
         {
             @"objects\characters\odst\shaders\mc_emblem",
+            @"objects\characters\odst_cine\shaders\mc_emblem",
             @"objects\characters\odst_oni_op\shaders\mc_emblem",
             @"objects\characters\elite\shaders\elite_emblem",
             @"objects\characters\masterchief\shaders\mc_emblem"
