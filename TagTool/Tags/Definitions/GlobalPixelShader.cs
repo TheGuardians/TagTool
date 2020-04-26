@@ -6,27 +6,25 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "global_pixel_shader", Tag = "glps", Size = 0x1C)]
     public class GlobalPixelShader : TagStructure
 	{
-        public List<DrawMode> DrawModes;
+        public List<EntryPointBlock> EntryPoints;
         public uint Unknown2;
         public List<PixelShaderBlock> Shaders;
 
         [TagStructure(Size = 0x10)]
-        public class DrawMode : TagStructure
+        public class EntryPointBlock : TagStructure
 		{
-            public List<UnknownBlock2> Unknown;
-            public uint Unknown2;
+            public List<OptionBlock> Option;
+            public int ShaderIndex; // this is used if there is no option block
 
             [TagStructure(Size = 0x10)]
-            public class UnknownBlock2 : TagStructure
+            public class OptionBlock : TagStructure
 			{
-                public uint Unknown;
-                public List<UnknownBlock> Unknown2;
+                public short RenderMethodOptionIndex;
 
-                [TagStructure(Size = 0x4)]
-                public class UnknownBlock : TagStructure
-				{
-                    public uint Unknown;
-                }
+                [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
+                public byte[] Unused_02;
+
+                public List<int> OptionMethodShaderIndices; // the value is the shader index
             }
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
@@ -74,11 +75,37 @@ namespace TagTool.Tags.Definitions
             public List<ParameterTable> ParameterTables; // Ranges of Parameters by usage
             public List<ParameterMapping> Parameters; // Mapping of constants functions, and registers
             public List<ShaderFunction> Functions; // Functions for animated parameters
-            public int AlphaBlendMode;
-            public uint BlendFlags;
+            public AlphaBlendModeValue AlphaBlendMode;
+            public BlendModeFlags BlendFlags;
             public uint Unknown8; // unused?
             [TagField(Length = 8)]
             public short[] QueryableProperties; // Indices of constants. TODO: create an enum
+
+            public enum AlphaBlendModeValue : uint
+            {
+                opaque = 0,
+                additive = 1,
+                multiply = 2,
+                alpha_blend = 3,
+                double_multiply = 4,
+                multiply_add__2 = 5, // not sure why this is here, works tho
+                maximum = 6,
+                multiply_add = 7,
+                add_src_times_dstalpha = 8,
+                add_src_times_srcalpha = 9,
+                inv_alpha_blend = 10,
+                pre_multiplied_alpha__2 = 11, // blend factor of 0
+                pre_multiplied_alpha = 12 // blend factor of -1
+            }
+
+            [Flags]
+            public enum BlendModeFlags : uint
+            {
+                None = 0,
+                Bit0 = 1 << 0,
+                EnableAlphaTest = 1 << 1,
+                SfxDistort_ForceAlphaBlend = 1 << 2 // added by saber
+            }
 
             [TagStructure(Size = 0x18)]
             public class TextureConstant : TagStructure

@@ -541,7 +541,7 @@ namespace TagTool.Commands.Porting
                             else // pixel register
                             {
                                 // get shader index from entry point block
-                                int shaderIndex = basePixl.DrawModes[validEntryPoints[entryPointIndex]].Offset;
+                                int shaderIndex = basePixl.EntryPointShaders[validEntryPoints[entryPointIndex]].Offset;
 
                                 if (shaderIndex > -1)
                                 {
@@ -612,7 +612,7 @@ namespace TagTool.Commands.Porting
                             else // pixel register
                             {
                                 // get shader index from entry point block
-                                int shaderIndex = blamPixl.DrawModes[validEntryPoints[entryPointIndex]].Offset;
+                                int shaderIndex = blamPixl.EntryPointShaders[validEntryPoints[entryPointIndex]].Offset;
 
                                 if (shaderIndex > -1)
                                 {
@@ -923,18 +923,26 @@ namespace TagTool.Commands.Porting
 
         private RealConstant GetDefaultRealConstant(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
         {
-            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out var optionBlock))
+            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.OptionBlock optionBlock))
             {
-                // TODO: verify these -- some parameters are method names???
+                // TODO: verify, very rarely some arg names show up
                 if (!methodNames.Contains(parameter))
+                {
                     Console.WriteLine($"WARNING: No type found for {type} parameter \"{parameter}\"");
 
-                // just 1.0f for now (see above)
-                optionBlock = new RenderMethodOption.OptionBlock
-                {
-                    Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
-                    DefaultFloatArgument = 1.0f
-                };
+                    optionBlock = new RenderMethodOption.OptionBlock
+                    {
+                        Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
+                        DefaultFloatArgument = 0.0f
+                    };
+                }
+
+                else // particles, contrails, ltvl
+                    optionBlock = new RenderMethodOption.OptionBlock
+                    {
+                        Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
+                        DefaultFloatArgument = 1.0f
+                    };
             }
 
             if (type == "terrain" && parameter.StartsWith("specular_tint_m_")) // prevent purple terrain
@@ -943,7 +951,10 @@ namespace TagTool.Commands.Porting
             switch (optionBlock.Type)
             {
                 case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
-                    return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                    if (optionBlock.DefaultFloatArgument == 0.0f)
+                        return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                    else
+                        return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = 0.0f, Arg3 = 0.0f };
 
                 case RenderMethodOption.OptionBlock.OptionDataType.Float:
                     return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = optionBlock.DefaultFloatArgument, Arg3 = optionBlock.DefaultFloatArgument };
