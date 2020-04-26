@@ -14,11 +14,9 @@ namespace TagTool.Tags.Definitions
         public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
         public List<ImportDatum> ImportData;
         public List<ShaderProperty> ShaderProperties;
-        public TagMapping.VariableTypeValue InputVariable;
-        public TagMapping.VariableTypeValue RangeVariable;
-        public TagMapping.OutputModifierValue OutputModifier;
-        public TagMapping.VariableTypeValue OutputModifierInput;
-        public float RuntimeMConstantValue;
+        public RenderMethodRenderFlags RenderFlags;
+        public ushort Unknown1; // not sure what this is
+        public int SkyAtmospherePropertiesIndex; // skya AtmosphereProperties block index
         public int Unknown2; // usually -1
 
         [TagStructure(Size = 0x2)]
@@ -216,6 +214,15 @@ namespace TagTool.Tags.Definitions
                 public byte FunctionIndex;
                 public byte SourceIndex;
             }
+        }
+
+        [Flags]
+        public enum RenderMethodRenderFlags : ushort
+        {
+            None = 0,
+            ClearAtmosphere = 1 << 0,
+            UseSkyAtmosphereProperties = 1 << 1,
+            IsTextureCamera = 1 << 2 // not 100% sure
         }
     }
 }
