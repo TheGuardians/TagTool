@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag RenderMethodOptions;
         public List<Method> Methods;
         public List<DrawMode> DrawModes;
-        public List<UnknownBlock> Unknown;
+        public List<VertexBlock> Vertices;
         public CachedTag GlobalPixelShader;
         public CachedTag GlobalVertexShader;
         public int Unknown2;
@@ -37,7 +37,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class DrawMode : TagStructure
 		{
-            public uint Mode;
+            public int Mode;
             public List<UnknownBlock2> Unknown2;
 
             [TagStructure(Size = 0x10)]
@@ -55,7 +55,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class UnknownBlock : TagStructure
+        public class VertexBlock : TagStructure
 		{
             public short VertexType;
             public short Unknown2;

@@ -584,6 +584,7 @@
     <Compile Include="Shaders\RenderMethodExtern.cs" />
     <Compile Include="Shaders\EntryPoint.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
+    <Compile Include="Shaders\ShaderGenerator\ShaderBlackGenerator.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderGenerator.cs" />
     <Compile Include="Shaders\ShaderMatching\ParticleSorter.cs" />
     <Compile Include="Shaders\ShaderMatching\LightVolumeSorter.cs" />

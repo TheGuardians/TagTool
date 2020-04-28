@@ -431,7 +431,7 @@ namespace TagTool.Commands.Porting
                 var baseRmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, baseRmdfTag);
 
                 // while rmdf is deserialized, get vertex type indices
-                foreach (var vertexUnknown in baseRmdf.Unknown)
+                foreach (var vertexUnknown in baseRmdf.Vertices)
                     SupportedVertexTypes.Add(vertexUnknown.VertexType);
 
                 if (blamRmdf.GlobalVertexShader != null && baseRmdf.GlobalVertexShader != null)

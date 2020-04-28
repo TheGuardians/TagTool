@@ -17,7 +17,7 @@ namespace TagTool.Tags.Definitions
         public class VertexTypeShaders : TagStructure
 		{
             /// <summary>
-            /// Indexed by <see cref="TagTool.Shaders.ShaderDrawModes"/>
+            /// Indexed by <see cref="TagTool.Shaders.EntryPoint"/>
             /// </summary>
             public List<DrawMode> DrawModes;
 
