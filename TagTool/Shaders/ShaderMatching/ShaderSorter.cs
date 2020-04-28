@@ -60,12 +60,12 @@ namespace TagTool.Shaders.ShaderMatching
 
         // these private lists define the order of the types and options in a shader. The matcher will use these when no perfect match exists. 
         private static List<ShaderOptionTypes> TypeOrder = new List<ShaderOptionTypes> {
-            ShaderOptionTypes.alpha_test,
             ShaderOptionTypes.misc,
             ShaderOptionTypes.environment_mapping,
             ShaderOptionTypes.parallax,
             ShaderOptionTypes.bump_mapping,
             ShaderOptionTypes.blend_mode,
+            ShaderOptionTypes.alpha_test,
             ShaderOptionTypes.self_illumination,
             ShaderOptionTypes.specular_mask,
             ShaderOptionTypes.albedo,

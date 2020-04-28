@@ -316,6 +316,9 @@ namespace TagTool.Commands.Porting
                             newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
                     }
 
+            newShaderProperty.AlphaBlendMode = finalRm.ShaderProperties[0].AlphaBlendMode;
+            newShaderProperty.BlendFlags = finalRm.ShaderProperties[0].BlendFlags;
+
             // apply post option->options fixups
             ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
 
@@ -325,6 +328,8 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].RealConstants = newShaderProperty.RealConstants;
             finalRm.ShaderProperties[0].IntegerConstants = newShaderProperty.IntegerConstants;
             finalRm.ShaderProperties[0].BooleanConstants = newShaderProperty.BooleanConstants;
+            finalRm.ShaderProperties[0].AlphaBlendMode = newShaderProperty.AlphaBlendMode;
+            finalRm.ShaderProperties[0].BlendFlags = newShaderProperty.BlendFlags;
 
             // fixup runtime queryable properties
             for (int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
@@ -1231,6 +1236,28 @@ namespace TagTool.Commands.Porting
                         }
                 }
             }
+
+            // check alpha_test compatibility with matched shader
+            if (edShaderProperty.BlendFlags.HasFlag(BlendModeFlags.EnableAlphaTest))
+                foreach (var bmTextureConstant in bmRmt2.TextureParameterNames)
+                {
+                    string bmName = BlamCache.StringTable.GetString(bmTextureConstant.Name);
+                    bool wasFound = false;
+
+                    foreach (var edTextureConstant in edRmt2.TextureParameterNames)
+                        if (bmName == CacheContext.StringTable.GetString(edTextureConstant.Name))
+                        {
+                            wasFound = true;
+                            break;
+                        }
+
+                    if (!wasFound)
+                    {
+                        Console.WriteLine("WARNING: alpha_test most likely not compatible. Removing flag.");
+                        edShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
+                        break;
+                    }
+                }
         }
     }
 }
