@@ -166,7 +166,7 @@ namespace TagTool.Commands.Tags
                     continue;
 
                 var tagName = (tag.Name == null || tag.Name.Length == 0) ? $"0x{tag.Index:X4}" : tag.Name;
-                var groupName = Cache.StringTable.GetString(tag.Group.Name);
+                var groupName = tag.Group.ToString();
 
                 Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tagName}.{groupName}");
             }

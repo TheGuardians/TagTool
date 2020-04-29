@@ -19,7 +19,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The group of the tag definition in the file.
         /// </summary>
-        public TagGroup Group;
+        public TagGroupNew Group;
 
         /// <summary>
         /// All tags referenced by the tag instance in the file.

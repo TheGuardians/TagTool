@@ -91,7 +91,7 @@ namespace TagTool.Commands.Tags
 
                 while ((line = Console.ReadLine()) != "")
                 {
-                    if (!Cache.TryGetTag(line, out var instance))
+                    if (!Cache.TagCache.TryGetTag(line, out var instance))
                         continue;
 
                     LoadTagDependencies(instance.Index);
@@ -125,7 +125,7 @@ namespace TagTool.Commands.Tags
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-                    var groupName = Cache.StringTable.GetString(instance.Group.Name);
+                    var groupName = instance.Group;
 
                     var file = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}.{groupName}"));
                     var data = Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, instance);
@@ -161,7 +161,7 @@ namespace TagTool.Commands.Tags
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-                    var groupName = Cache.StringTable.GetString(instance.Group.Name);
+                    var groupName = instance.Group;
 
                     var tagDefinition = Cache.Deserialize(cacheStream, instance);
 

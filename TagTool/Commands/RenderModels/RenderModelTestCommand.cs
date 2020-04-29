@@ -45,7 +45,7 @@ namespace TagTool.Commands.RenderModels
 
             if (args.Count == 2)
             {
-                if (!Cache.TryGetTag(args[0], out destinationTag) || !destinationTag.IsInGroup("mode"))
+                if (!Cache.TagCache.TryGetTag(args[0], out destinationTag) || !destinationTag.IsInGroup("mode"))
                 {
                     Console.WriteLine("Specified tag is not a render_model: " + args[0]);
                     return false;

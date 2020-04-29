@@ -53,7 +53,7 @@ namespace TagTool.Cache
                 TagCachesStreams.Add(tagStream);
 
                 var names = new Dictionary<int, string>();
-                var tags = new TagCacheHaloOnline(tagStream, names);
+                var tags = new TagCacheHaloOnline(tagStream, StringTable, names);
                 TagCaches = new List<TagCacheHaloOnline>();
                 TagCaches.Add(tags);
                 TagCacheNames.Add(names);
@@ -102,7 +102,7 @@ namespace TagTool.Cache
                 TagCaches = new List<TagCacheHaloOnline>();
                 for (int i = 0; i < tagCacheCount; i++)
                 {
-                    TagCaches.Add(new TagCacheHaloOnline(TagCachesStreams[i], TagCacheNames[i]));
+                    TagCaches.Add(new TagCacheHaloOnline(TagCachesStreams[i], StringTable, TagCacheNames[i]));
                 }
                 
                 Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);

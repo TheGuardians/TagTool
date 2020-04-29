@@ -75,7 +75,7 @@ namespace TagTool.Commands.Scenarios
                         Console.WriteLine($"Converting geometry '{instanceName}'...");
 
                         //add new object to forge globals
-                        CachedTag forgeglobal = CacheContext.GetTag<ForgeGlobalsDefinition>(@"multiplayer\forge_globals");
+                        CachedTag forgeglobal = CacheContext.TagCache.GetTag<ForgeGlobalsDefinition>(@"multiplayer\forge_globals");
                         var tmpforg = (ForgeGlobalsDefinition)CacheContext.Deserialize(stream, forgeglobal);
                         tmpforg.Palette.Add(new ForgeGlobalsDefinition.PaletteItem
                         {

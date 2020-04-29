@@ -68,11 +68,6 @@ namespace TagTool.Audio
             return blamSound;
         }
 
-        public static byte[] GetXMAData(CacheFile cache, DatumHandle handle, int size)
-        {
-            return cache.GetSoundRaw(handle, size);
-        }
-
         public static BlamSound GetXMA(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)
         {
             int pitchRangeGestaltIndex = sound.SoundReference.PitchRangeIndex + pitchRangeIndex;

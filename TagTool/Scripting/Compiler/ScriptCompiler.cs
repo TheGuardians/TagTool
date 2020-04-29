@@ -2141,7 +2141,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<Sound>(soundString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<Sound>(soundString.Value, out var instance))
                     throw new FormatException(soundString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2158,7 +2158,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<Effect>(effectString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<Effect>(effectString.Value, out var instance))
                     throw new FormatException(effectString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2175,7 +2175,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<DamageEffect>(damageString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<DamageEffect>(damageString.Value, out var instance))
                     throw new FormatException(damageString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2192,7 +2192,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
                     throw new FormatException(loopingSoundString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2209,7 +2209,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
                     throw new FormatException(animationGraphString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2226,7 +2226,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
                     throw new FormatException(damageEffectString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2243,7 +2243,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag(objectDefinitionString.Value, out var instance) ||
+                if (!Cache.TagCache.TryGetTag(objectDefinitionString.Value, out var instance) ||
                     !instance.IsInGroup("obje"))
                 {
                     throw new FormatException(objectDefinitionString.Value);
@@ -2263,7 +2263,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
                     throw new FormatException(bitmapString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2280,7 +2280,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
                     throw new FormatException(shaderString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2297,7 +2297,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
                 {
                     throw new FormatException(renderModelString.Value);
                 }
@@ -2316,7 +2316,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
                     throw new FormatException(structureDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2336,7 +2336,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2353,7 +2353,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicSceneDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2370,7 +2370,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
                     throw new FormatException(binkDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2387,7 +2387,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag(anyTagString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag(anyTagString.Value, out var instance))
                     throw new FormatException(anyTagString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2404,7 +2404,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TryGetTag(anyTagNotResolvingString.Value, out var instance))
+                if (!Cache.TagCache.TryGetTag(anyTagNotResolvingString.Value, out var instance))
                     throw new FormatException(anyTagNotResolvingString.Value);
 
                 var expr = ScriptExpressions[handle.Index];

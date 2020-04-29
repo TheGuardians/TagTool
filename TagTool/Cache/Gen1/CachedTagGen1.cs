@@ -13,7 +13,7 @@ namespace TagTool.Cache.Gen1
 
         public override uint DefinitionOffset => Offset;
 
-        public CachedTagGen1(int index, uint ID, TagGroup tagGroup, uint address, string name) : base(index, tagGroup, name)
+        public CachedTagGen1(int index, uint ID, TagGroupGen1 tagGroup, uint address, string name) : base(index, tagGroup, name)
         {
             this.ID = ID;
             Offset = address;

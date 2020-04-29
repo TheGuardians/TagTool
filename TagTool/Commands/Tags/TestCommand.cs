@@ -44,7 +44,7 @@ namespace TagTool.Commands
 
             //string filename = "test";
             //BlamModelFile geometryFormat = new BlamModelFile();
-
+            
             using (var stream = Cache.OpenCacheRead())
             {/*
                 CachedTag glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
@@ -132,6 +132,7 @@ namespace TagTool.Commands
                     geometryFormat.SerializeToFile(writer);
                 }*/
             }
+            
             return true;
         }
 

@@ -21,6 +21,7 @@ using System.IO.Compression;
 using TagTool.Tools.Geometry;
 using TagTool.Shaders;
 using TagTool.Scripting;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands
 {
@@ -134,7 +135,7 @@ namespace TagTool.Commands
             if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
 
-            var structureType = TagDefinition.Find(srcTag.Group.Tag);
+            var structureType = srcCacheContext.TagCache.TagDefinitions.GetTagDefinitionType(srcTag.Group);
             var srcContext = new HaloOnlineSerializationContext(srcStream, srcCacheContext, srcTag);
             var tagData = srcCacheContext.Deserializer.Deserialize(srcContext, structureType);
             CachedTagHaloOnline destTag = null;
@@ -143,7 +144,7 @@ namespace TagTool.Commands
             {
                 if (destCacheContext.TagCacheGenHO.Tags[i] == null)
                 {
-                    destCacheContext.TagCacheGenHO.Tags[i] = destTag = new CachedTagHaloOnline(i, TagGroup.Instances[srcTag.Group.Tag]);
+                    destCacheContext.TagCacheGenHO.Tags[i] = destTag = new CachedTagHaloOnline(i, (TagGroupGen3)srcTag.Group);
                     break;
                 }
             }

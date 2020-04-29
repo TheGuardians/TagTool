@@ -259,10 +259,13 @@
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
     <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
+    <Compile Include="Cache\Gen1\TagGroupGen1.cs" />
     <Compile Include="Cache\Gen2\CachedTagGen2.cs" />
+    <Compile Include="Cache\Gen2\TagGroupGen2.cs" />
     <Compile Include="Cache\Gen2\StringTableGen2.cs" />
     <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
     <Compile Include="Cache\Gen2\TagCacheGen2.cs" />
+    <Compile Include="Cache\Gen3\TagGroupGen3.cs" />
     <Compile Include="Cache\Interops\InteropDefinition.cs" />
     <Compile Include="Cache\Resources\CharacterUsage.cs" />
     <Compile Include="Cache\Resources\ModelVariantUsage.cs" />
@@ -604,6 +607,9 @@
     <Compile Include="GUI\GuiDefinition.cs" />
     <Compile Include="Tags\Definitions\Gen1\ModelAnimationGraph.cs" />
     <Compile Include="Tags\Definitions\Gen1\Sound.cs" />
+    <Compile Include="Cache\Gen1\TagDefinitionsGen1.cs" />
+    <Compile Include="Cache\Gen2\TagDefinitionsGen2.cs" />
+    <Compile Include="Cache\Gen3\TagDefinitionsGen3.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
@@ -614,7 +620,9 @@
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResources.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
     <Compile Include="Tags\TagBlockBitVector.cs" />
+    <Compile Include="Tags\TagDefinitionNew.cs" />
     <Compile Include="Tags\TagFile.cs" />
+    <Compile Include="Tags\TagGroupNew.cs" />
     <Compile Include="Tags\TagReference.cs" />
     <Compile Include="Cache\Resources\ResourceData.cs" />
     <Compile Include="Tags\TagResourceReference.cs" />
@@ -697,7 +705,6 @@
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />
     <Compile Include="Tags\TagFunction.cs" />
-    <Compile Include="Tags\TagGroup.cs" />
     <Compile Include="Tags\TagMapping.cs" />
     <Compile Include="Tags\TagReferenceBlock.cs" />
     <Compile Include="Common\TagVersionMap.cs" />
@@ -749,8 +756,6 @@
     <Compile Include="Layouts\TagLayout.cs" />
     <Compile Include="Layouts\TagLayoutField.cs" />
     <Compile Include="Layouts\TagLayoutWriter.cs" />
-    <Compile Include="Cache\Gen2\CacheFile.cs" />
-    <Compile Include="Cache\Gen2\CacheFileGen2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -922,7 +927,6 @@
     <Compile Include="Tags\Definitions\StructureDesign.cs" />
     <Compile Include="Tags\Definitions\Style.cs" />
     <Compile Include="Tags\Definitions\SurvivalModeGlobals.cs" />
-    <Compile Include="Tags\TagDefinition.cs" />
     <Compile Include="Tags\Definitions\Terminal.cs" />
     <Compile Include="Tags\Definitions\TextureRenderList.cs" />
     <Compile Include="Tags\Definitions\TextValuePairDefinition.cs" />
@@ -988,6 +992,10 @@
       <Project>{17bfeffb-1619-4647-ba40-3cd1d87fd774}</Project>
       <Name>HaloShaderGenerator</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tags\Definitions\Gen2\" />
+    <Folder Include="Tags\Definitions\Gen3\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

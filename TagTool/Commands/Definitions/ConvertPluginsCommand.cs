@@ -74,7 +74,7 @@ namespace TagTool.Commands.Definitions
 
                 // Load the plugin into a layout
                 AssemblyPluginLoadResults loadedPlugin;
-                var groupName = Cache.StringTable.GetString(tag.Group.Name);
+                var groupName = tag.Group.ToString();
                 using (var reader = XmlReader.Create(pluginPath))
                     loadedPlugin = AssemblyPluginLoader.LoadPlugin(reader, groupName, tag.Group.Tag);
 

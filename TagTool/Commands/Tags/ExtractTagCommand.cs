@@ -28,7 +28,7 @@ namespace TagTool.Commands.Tags
             if (args.Count != 2)
                 return false;
 
-            if (!Cache.TryGetTag(args[0], out var instance))
+            if (!Cache.TagCache.TryGetTag(args[0], out var instance))
                 return false;
 
             var file = new FileInfo(args[1]);

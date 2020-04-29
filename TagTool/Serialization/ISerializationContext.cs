@@ -59,7 +59,7 @@ namespace TagTool.Serialization
         /// <param name="group">The tag group of the tag instance.</param>
         /// <param name="name">The name of the tag instance.</param>
         /// <returns></returns>
-        CachedTag GetTagByName(TagGroup group, string name);
+        CachedTag GetTagByName(TagGroupNew group, string name);
 
         /// <summary>
         /// Creates a data block.

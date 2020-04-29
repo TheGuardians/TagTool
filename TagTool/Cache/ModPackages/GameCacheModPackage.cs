@@ -40,8 +40,9 @@ namespace TagTool.Cache
             DisplayName = BaseModPackage.Metadata.Name + ".pak";
 
             ResourceCaches = new ResourceCachesModPackage(BaseModPackage);
-            TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[0], BaseModPackage.TagCacheNames[0]);
             StringTableHaloOnline = BaseModPackage.StringTable;
+            TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[0], StringTableHaloOnline, BaseModPackage.TagCacheNames[0]);
+            
         }
 
         public GameCacheModPackage(ModPackage modPackage, FileInfo file)
@@ -57,7 +58,7 @@ namespace TagTool.Cache
 
         public override object Deserialize(Stream stream, CachedTag instance)
         {
-            var definitionType = TagDefinition.Find(instance.Group);
+            var definitionType = TagCache.TagDefinitions.GetTagDefinitionType(instance.Group);
             var context = new ModPackageTagSerializationContext(stream, this, BaseModPackage, (CachedTagHaloOnline)instance);
             return Deserializer.Deserialize(context, definitionType);
         }

@@ -106,7 +106,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance));
 
         public override object Deserialize(Stream stream, CachedTag instance) =>
-            Deserialize(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
@@ -140,7 +140,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen3SerializationContext(stream, this, instance));
 
         public object Deserialize(Stream stream, CachedTagGen3 instance) =>
-            Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen3SerializationContext(stream, this, instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         #endregion
 

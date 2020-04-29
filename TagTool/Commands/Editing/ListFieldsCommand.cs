@@ -71,7 +71,7 @@ namespace TagTool.Commands.Editing
 
 					var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-					valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
+					valueString = $"[0x{instance.Index:X4}] {tagName}.{instance.Group}";
 				}
 				else if (fieldType == typeof(TagFunction))
 				{

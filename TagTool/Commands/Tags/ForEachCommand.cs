@@ -44,7 +44,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 1)
                 return false;
 
-            if (!Cache.TryParseGroupTag(args[0], out var groupTag))
+            if (!Cache.TagCache.TryParseGroupTag(args[0], out var groupTag))
             {
                 Console.WriteLine($"Invalid tag group: {args[0]}");
                 return true;
@@ -132,7 +132,7 @@ namespace TagTool.Commands.Tags
             {
                 var tagsList = new List<CachedTag>();
                 foreach (var line in File.ReadAllLines(filename))
-                    tags.Add(Cache.GetTag(line));
+                    tags.Add(Cache.TagCache.GetTag(line));
 
                 tags = tagsList;
             }
@@ -172,7 +172,7 @@ namespace TagTool.Commands.Tags
                 ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
 
                 Console.WriteLine();
-                Console.WriteLine($"{tagName}.{Cache.StringTable.GetString(instance.Group.Name)}:");
+                Console.WriteLine($"{tagName}.{instance.Group}:");
                 ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
 
                 while (ContextStack.Context != rootContext) ContextStack.Pop();

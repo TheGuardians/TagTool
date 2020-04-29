@@ -30,16 +30,18 @@ namespace TagTool.Cache.HaloOnline
 
             Endianness = EndianFormat.LittleEndian;
 
+            using (var stream = StringIdCacheFile.Open(FileMode.OpenOrCreate))
+                StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
+
             var names = TagCacheHaloOnline.LoadTagNames(TagNamesFile.FullName);
 
             using (var stream = TagsFile.Open(FileMode.OpenOrCreate))
-                TagCacheGenHO = new TagCacheHaloOnline(stream, names);
+                TagCacheGenHO = new TagCacheHaloOnline(stream, StringTableHaloOnline, names);
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
 
-            using (var stream = StringIdCacheFile.Open(FileMode.OpenOrCreate))
-                StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
+            
 
             DisplayName = Version.ToString();
             Deserializer = new TagDeserializer(Version);

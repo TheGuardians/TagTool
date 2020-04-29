@@ -57,7 +57,7 @@ namespace TagTool.Commands.Porting
 
             using (var stream = HoCache.OpenCacheRead())
             {
-                if (!HoCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
+                if (!HoCache.TagCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
                 {
                     Console.WriteLine($"ERROR: ElDorado multiplayer_globals tag does not exist.");
                     return true;
@@ -70,7 +70,7 @@ namespace TagTool.Commands.Porting
 
             using (var stream = HoCache.OpenCacheReadWrite())
             {
-                if (!HoCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
+                if (!HoCache.TagCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
                 {
                     Console.WriteLine($"ERROR: ElDorado multiplayer_globals tag does not exist.");
                     return true;

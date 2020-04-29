@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TagTool.Cache.Gen3;
 using TagTool.Tags;
 
 namespace TagTool.Cache.HaloOnline
@@ -11,7 +12,7 @@ namespace TagTool.Cache.HaloOnline
         /// <summary>
         /// The tag data's group.
         /// </summary>
-        public TagGroup Group { get; set; } = TagGroup.None;
+        public TagGroupGen3 Group { get; set; } = TagGroupGen3.None;
 
         /// <summary>
         /// The offset of the main structure in the tag data.

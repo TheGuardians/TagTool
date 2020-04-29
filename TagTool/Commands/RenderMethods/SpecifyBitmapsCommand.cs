@@ -47,7 +47,7 @@ namespace TagTool.Commands.RenderMethods
 
                     Console.Write(string.Format("Please enter the {0} index: ", Cache.StringTable.GetString(mapTemplate.Name)));
 
-                    if (!Cache.TryGetCachedTag(Console.ReadLine(), out var shaderMap))
+                    if (!Cache.TagCache.TryGetCachedTag(Console.ReadLine(), out var shaderMap))
                     {
                         Console.WriteLine($"ERROR: Invalid bitmap name, setting to null.");
                         shaderMaps[mapTemplate.Name] = null;

@@ -29,7 +29,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 1 || args.Count > 3)
                 return false;
 
-            if (!Cache.TryGetCachedTag(args[0], out var tag))
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var tag))
             {
                 Console.WriteLine($"ERROR: Invalid tag specifier: {args[0]}");
                 return false;
@@ -43,7 +43,7 @@ namespace TagTool.Commands.Tags
 
             tag.Name = args[1];
 
-            Console.WriteLine($"[Index: 0x{tag.Index:X4}] {args[1]}.{Cache.StringTable.GetString(tag.Group.Name)}");
+            Console.WriteLine($"[Index: 0x{tag.Index:X4}] {args[1]}.{tag.Group}");
 
             return true;
         }

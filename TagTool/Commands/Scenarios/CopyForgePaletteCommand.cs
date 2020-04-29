@@ -55,7 +55,7 @@ namespace TagTool.Commands.Scenarios
                 return false;
             }
 
-            if (!Cache.TryGetTag(args[0], out var destinationTag))
+            if (!Cache.TagCache.TryGetTag(args[0], out var destinationTag))
             {
                 Console.WriteLine($"ERROR: invalid destination scenario index: {args[0]}");
                 return false;

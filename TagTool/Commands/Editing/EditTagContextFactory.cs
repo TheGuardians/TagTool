@@ -35,7 +35,7 @@ namespace TagTool.Commands.Editing
             if (Documentation.ChildNodes.Count == 0 && File.Exists(documentationPath))
                 Documentation.Load(documentationPath);
 
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
             var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
@@ -137,7 +137,7 @@ namespace TagTool.Commands.Editing
                     break;                        
             }
             
-            var structure = TagStructure.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag), cache.Version);
+            var structure = TagStructure.GetTagStructureInfo(cache.TagCache.TagDefinitions.GetTagDefinitionType(tag.Group), cache.Version);
 
             commandContext.AddCommand(new ListFieldsCommand(cache, structure, definition));
             commandContext.AddCommand(new SetFieldCommand(contextStack, cache, tag, structure, definition));

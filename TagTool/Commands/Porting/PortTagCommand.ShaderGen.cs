@@ -115,7 +115,7 @@ namespace TagTool.Commands.Porting
                     if (shaderSamplerArgument.Bitmap == null)
                     {
                         Console.WriteLine($"WARNING: RMCT Conversion couldn't find a shader map for {name_str}");
-                        shaderSamplerArgument.Bitmap = CacheContext.GetTag<Bitmap>(@"shaders\default_bitmaps\bitmaps\gray_50_percent");
+                        shaderSamplerArgument.Bitmap = CacheContext.TagCache.GetTag<Bitmap>(@"shaders\default_bitmaps\bitmaps\gray_50_percent");
                     }
                     shaderSamplerArguments[rmt2SamplerIndex] = shaderSamplerArgument;
                 }

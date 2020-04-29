@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Files
 {
@@ -37,10 +38,10 @@ namespace TagTool.Commands.Files
 
             if (args.Count == 1)
                 path = args[0];
-
-            foreach (KeyValuePair<Tag, Type> tagType in TagDefinition.Types)
+            var definitions = new TagDefinitionsGen3();
+            foreach (KeyValuePair<TagGroupNew, Type> tagType in definitions.Gen3Types)
             {
-                if (tagType.Key == "test")  // skip test definition as it contains unsuported bounds of type long and ulong
+                if (tagType.Key.Tag == "test")  // skip test definition as it contains unsuported bounds of type long and ulong
                     continue;
 
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
@@ -49,7 +50,7 @@ namespace TagTool.Commands.Files
                     {
                         try
                         {
-                            ConvertTagDefinition(tagType.Key, tagType.Value, assemblyVersion.Key, path);
+                            ConvertTagDefinition(tagType.Key.Tag, tagType.Value, assemblyVersion.Key, path);
                         }
                         catch (ArgumentException)
                         {
@@ -58,7 +59,7 @@ namespace TagTool.Commands.Files
                         }
                     }
                     else
-                        ConvertTagDefinition(tagType.Key, tagType.Value, assemblyVersion.Key);
+                        ConvertTagDefinition(tagType.Key.Tag, tagType.Value, assemblyVersion.Key);
                 }
             }
 

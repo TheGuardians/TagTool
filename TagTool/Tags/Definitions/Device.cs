@@ -3,7 +3,7 @@ using System;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Tag = "devi", Size = 0x98, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "device", Tag = "devi", Size = 0x98, MinVersion = CacheVersion.Halo3Retail)]
     public class Device : GameObject
     {
         public DeviceFlagBits DeviceFlags;

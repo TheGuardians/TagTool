@@ -195,7 +195,15 @@ namespace TagTool.Shaders.ShaderGenerator
             return pixl;
         }
 
+        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, IShaderGenerator generator, string shader_type)
+        {
+            var rmdf = new RenderMethodDefinition();
+            var glps = GenerateSharedPixelShader(cache, generator);
+            var glvs = GenerateSharedVertexShader(cache, generator);
 
+            return rmdf;
+
+        }
 
 
 

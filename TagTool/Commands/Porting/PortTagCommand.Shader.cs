@@ -106,7 +106,7 @@ namespace TagTool.Commands.Porting
         private RenderMethod CreateShaderBlack(Stream cacheStream, Stream blamCacheStream, ShaderBlack rmbk, CachedTag blamTag, RenderMethod blamDefinition)
         {
             // use default template - we only need albedo_color for this to work
-            CachedTag defaultTemplateInstance = CacheContext.GetTag(ShaderMatcherNew.DefaultTemplate);
+            CachedTag defaultTemplateInstance = CacheContext.TagCache.GetTag(ShaderMatcherNew.DefaultTemplate);
             rmbk.BaseRenderMethod = Matcher.FindRmdf(defaultTemplateInstance);
 
             rmbk.ShaderProperties[0].Template = defaultTemplateInstance;
@@ -146,37 +146,37 @@ namespace TagTool.Commands.Porting
             switch (groupTag.ToString())
             {
                 case "beam":
-                    return CacheContext.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
+                    return CacheContext.TagCache.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
 
                 case "cntl":
-                    return CacheContext.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
+                    return CacheContext.TagCache.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
 
                 case "decs":
-                    return CacheContext.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
+                    return CacheContext.TagCache.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
 
                 case "ltvl":
-                    return CacheContext.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
+                    return CacheContext.TagCache.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
 
                 case "prt3":
-                    return CacheContext.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
+                    return CacheContext.TagCache.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
 
                 case "rmd ":
-                    return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
+                    return CacheContext.TagCache.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
 
                 case "rmfl":
-                    return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
+                    return CacheContext.TagCache.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
 
                 case "rmtr":
-                    return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+                    return CacheContext.TagCache.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
 
                 case "rmw ":
-                    return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
+                    return CacheContext.TagCache.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
                 case "rmhg":
-                    return CacheContext.GetTag<ShaderHalogram>(@"objects\multi\shaders\koth_shield");
+                    return CacheContext.TagCache.GetTag<ShaderHalogram>(@"objects\multi\shaders\koth_shield");
 
                 case "rmbk": // hackfix
-                    return CacheContext.GetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black");
+                    return CacheContext.TagCache.GetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black");
 
                 case "rmrd":
                 case "rmsh":
@@ -184,9 +184,9 @@ namespace TagTool.Commands.Porting
                 case "rmcs":
                 case "rmzo":
                 case "rmct":
-                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
+                    return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
             }
-            return CacheContext.GetTag<Shader>(@"shaders\invalid");
+            return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
         }
 
         private CachedTag FindClosestRmt2(Stream cacheStream, Stream blamCacheStream, CachedTag blamRmt2)
@@ -425,7 +425,7 @@ namespace TagTool.Commands.Porting
             string blamRmdfName = finalRm.BaseRenderMethod.Name;
             if (isMs30 && blamRmdfName.StartsWith("ms30\\")) // remove "ms30\\" from the name
                 blamRmdfName = finalRm.BaseRenderMethod.Name.Remove(0, 5);
-            if (BlamCache.TryGetTag(blamRmdfName + ".rmdf", out CachedTag blamRmdfTag) && CacheContext.TryGetTag(finalRm.BaseRenderMethod.Name + ".rmdf", out CachedTag baseRmdfTag))
+            if (BlamCache.TagCache.TryGetTag(blamRmdfName + ".rmdf", out CachedTag blamRmdfTag) && CacheContext.TagCache.TryGetTag(finalRm.BaseRenderMethod.Name + ".rmdf", out CachedTag baseRmdfTag))
             {
                 var blamRmdf = BlamCache.Deserialize<RenderMethodDefinition>(blamCacheStream, blamRmdfTag);
                 var baseRmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, baseRmdfTag);
@@ -904,9 +904,9 @@ namespace TagTool.Commands.Porting
             {
                 case "alpha_test_map": // the default bitmap for this puts a transparent "ALPHA" all over the shader
                     if (rmt2Descriptor.IsMs30)
-                        textureConstant.Bitmap = CacheContext.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                        textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
                     else
-                        textureConstant.Bitmap = CacheContext.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                        textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
                     return textureConstant;
             }
 
@@ -918,9 +918,9 @@ namespace TagTool.Commands.Porting
 
                 // null bitmap causes bad rendering, use default_detail in these cases
                 if (rmt2Descriptor.IsMs30)
-                    textureConstant.Bitmap = CacheContext.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                    textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
                 else
-                    textureConstant.Bitmap = CacheContext.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
+                    textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
             }
 
             return textureConstant;
@@ -1117,7 +1117,7 @@ namespace TagTool.Commands.Porting
                                 if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "base_map_m_0")
                                 {
                                     baseIsSet = true;
-                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].Bitmap = CacheContext.TagCache.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
                                     textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
                                     break;
                                 }
@@ -1126,7 +1126,7 @@ namespace TagTool.Commands.Porting
                                 if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "detail_map_m_0")
                                 {
                                     detailIsSet = true;
-                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].Bitmap = CacheContext.TagCache.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
                                     textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
                                     break;
                                 }
@@ -1135,7 +1135,7 @@ namespace TagTool.Commands.Porting
                                 if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "bump_map_m_0")
                                 {
                                     bumpIsSet = true;
-                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].Bitmap = CacheContext.TagCache.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
                                     textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
                                     break;
                                 }
@@ -1144,7 +1144,7 @@ namespace TagTool.Commands.Porting
                                 if (BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[j].Name) == "detail_bump_m_0")
                                 {
                                     detailBumpIsSet = true;
-                                    textureConstants[i].Bitmap = CacheContext.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
+                                    textureConstants[i].Bitmap = CacheContext.TagCache.GetTag(bmTextureConstants[j].Bitmap.Name + ".bitm");
                                     textureConstants[i].BitmapIndex = bmTextureConstants[j].BitmapIndex;
                                     break;
                                 }

@@ -312,7 +312,7 @@ namespace TagTool.Shaders.ShaderMatching
                 if (UseMs30)
                     rmdfName = "ms30\\" + rmdfName;
 
-                if (!BaseCache.TryGetTag(rmdfName, out var baseRmdfTag) || !PortingCache.TryGetTag(rmdfName, out var portingRmdfTag))
+                if (!BaseCache.TagCache.TryGetTag(rmdfName, out var baseRmdfTag) || !PortingCache.TagCache.TryGetTag(rmdfName, out var portingRmdfTag))
                     return srcRmt2Descriptor;
 
                 var baseRmdfDefinition = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, baseRmdfTag);

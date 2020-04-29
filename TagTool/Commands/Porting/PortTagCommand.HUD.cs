@@ -342,7 +342,7 @@ namespace TagTool.Commands.Porting
             {
                 try
                 {
-                    H3Definition.MotionSensorBlip = CacheContext.GetTag<Bitmap>(@"ui\chud\bitmaps\sensor_blips");
+                    H3Definition.MotionSensorBlip = CacheContext.TagCache.GetTag<Bitmap>(@"ui\chud\bitmaps\sensor_blips");
                 }
                 catch
                 {

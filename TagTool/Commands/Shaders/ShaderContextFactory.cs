@@ -6,7 +6,7 @@ namespace TagTool.Commands.Shaders
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, T shader)
         {
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
             var commandContext = new CommandContext(parent, string.Format("{0:X8}.{1}", tag.Index, groupName));
 
             Populate(commandContext, cache, tag, shader);

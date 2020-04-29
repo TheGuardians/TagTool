@@ -13,7 +13,7 @@ namespace TagTool.Cache.Gen2
         public int Size;
         public uint Offset;
 
-        public CachedTagGen2(int index, uint ID, TagGroup tagGroup, uint address, int size, string name) : base(index, tagGroup, name)
+        public CachedTagGen2(int index, uint ID, TagGroupGen2 tagGroup, uint address, int size, string name) : base(index, tagGroup, name)
         {
             Offset = address;
             Size = size;

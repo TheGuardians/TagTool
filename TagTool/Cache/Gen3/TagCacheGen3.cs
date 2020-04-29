@@ -6,6 +6,7 @@ using TagTool.IO;
 using TagTool.Tags;
 using TagTool.BlamFile;
 using TagTool.Serialization;
+using System.Diagnostics;
 
 namespace TagTool.Cache.Gen3
 {
@@ -59,7 +60,7 @@ namespace TagTool.Cache.Gen3
     {
         public TagCacheGen3Header Header;
 
-        public List<TagGroup> Groups;
+        public List<TagGroupGen3> Groups;
 
         public List<CachedTagGen3> Instances;
 
@@ -92,26 +93,28 @@ namespace TagTool.Cache.Gen3
             return null;
         }
 
-        public override CachedTag AllocateTag(TagGroup type, string name = null)
+
+
+        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
         {
             throw new NotImplementedException();
         }
 
-        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
         {
-            return new CachedTagGen3(index, group, name);
+            return new CachedTagGen3(index, (TagGroupGen3)group, name);
         }
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagGen3(-1, TagGroup.None, null);
+            return new CachedTagGen3(-1, (TagGroupGen3)TagGroupNew.None, null);
         }
 
         public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable)
         {
             Version = baseMapFile.Version;
-
-            Groups = new List<TagGroup>();
+            TagDefinitions = new TagDefinitionsGen3();
+            Groups = new List<TagGroupGen3>();
             Instances = new List<CachedTagGen3>();
             GlobalInstances = new Dictionary<Tag, CachedTagGen3>();
 
@@ -170,14 +173,16 @@ namespace TagTool.Cache.Gen3
 
             for (int i = 0; i < Header.TagGroupCount; i++)
             {
-                var group = new TagGroup()
+                var group = new TagGroupGen3()
                 {
                     Tag = reader.ReadTag(),
                     ParentTag = reader.ReadTag(),
-                    GrandparentTag = reader.ReadTag(),
-                    Name = new StringId(reader.ReadUInt32())
+                    GrandParentTag = reader.ReadTag(),
+                    Name = stringTable.GetString(new StringId(reader.ReadUInt32()))
                 };
                 Groups.Add(group);
+                if(!TagDefinitions.TagDefinitionExists(group))
+                    Debug.WriteLine($"Warning: tag definition for {group.Tag} : {group.Name} does not exists!");
             }
 
             #endregion
@@ -189,15 +194,14 @@ namespace TagTool.Cache.Gen3
             for (int i = 0; i < Header.TagInstancesCount; i++)
             {
                 var groupIndex = reader.ReadInt16();
-                var tagGroup = groupIndex == -1 ? new TagGroup() : Groups[groupIndex];
-                string groupName = groupIndex == -1 ? "" : stringTable.GetString(tagGroup.Name);
+                var tagGroup = groupIndex == -1 ? new TagGroupGen3() : Groups[groupIndex];
                 uint ID = (uint)((reader.ReadInt16() << 16) | i);
 
                 var offset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
                     (uint)((ulong)baseMapFile.Header.SectionTable.SectionAddressToOffsets[2] + (ulong)baseMapFile.Header.SectionTable.Sections[2].Offset + (((ulong)reader.ReadUInt32() * 4) - (baseMapFile.Header.VirtualBaseAddress64 - 0x50000000))) :
                     (uint)(reader.ReadUInt32() - addressMask);
 
-                CachedTagGen3 tag = new CachedTagGen3(groupIndex, ID, offset, i, tagGroup, groupName);
+                CachedTagGen3 tag = new CachedTagGen3(groupIndex, ID, offset, i, tagGroup);
                 Instances.Add(tag);
             }
 

@@ -22,7 +22,7 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || !Cache.TryGetCachedTag(args[0], out var originalTag))
+            if (args.Count < 1 || !Cache.TagCache.TryGetCachedTag(args[0], out var originalTag))
                 return false;
 
             var newTag = Cache.TagCache.AllocateTag(originalTag.Group);

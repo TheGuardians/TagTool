@@ -202,7 +202,7 @@ namespace TagTool.Commands.Editing
 
                     var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-                    valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
+                    valueString = $"[0x{instance.Index:X4}] {tagName}.{instance.Group}";
                 }
                 else if (fieldType == typeof(TagFunction))
                 {
@@ -455,7 +455,7 @@ namespace TagTool.Commands.Editing
             }
             else if (type == typeof(CachedTag))
             {
-                if (args.Count != 1 || !cache.TryGetCachedTag(args[0], out var tagInstance))
+                if (args.Count != 1 || !cache.TagCache.TryGetCachedTag(args[0], out var tagInstance))
                     return false;
                 output = tagInstance;
             }

@@ -88,11 +88,11 @@ namespace TagTool.Tags
                     TotalSize += attrib.Size;
                     if (attrib.Tag != null)
                     {
-                        if (GroupTag.Value == -1)
+                        if (GroupTag.IsNull())
                             GroupTag = new Tag(attrib.Tag);
-                        else if (ParentGroupTag.Value == -1)
+                        else if (ParentGroupTag.IsNull())
                             ParentGroupTag = new Tag(attrib.Tag);
-                        else if (GrandparentGroupTag.Value == -1)
+                        else if (GrandparentGroupTag.IsNull())
                             GrandparentGroupTag = new Tag(attrib.Tag);
                     }
                 }

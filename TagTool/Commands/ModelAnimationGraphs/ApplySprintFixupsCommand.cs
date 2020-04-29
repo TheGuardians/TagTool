@@ -36,7 +36,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var tagIndices = new List<int>();
 
             while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
-                if (Cache.TryGetCachedTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
+                if (Cache.TagCache.TryGetCachedTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
                     tagIndices.Add(instance.Index);
 
             using (var stream = Cache.OpenCacheReadWrite())

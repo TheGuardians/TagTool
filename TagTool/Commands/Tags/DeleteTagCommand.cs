@@ -24,7 +24,7 @@ namespace TagTool.Commands.Tags
         
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1 || !Cache.TryGetCachedTag(args[0], out var tag))
+            if (args.Count != 1 || !Cache.TagCache.TryGetCachedTag(args[0], out var tag))
                 return false;
 
             // store these before tag is nulled

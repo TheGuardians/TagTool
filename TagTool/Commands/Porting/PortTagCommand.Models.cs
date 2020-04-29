@@ -504,7 +504,7 @@ namespace TagTool.Commands.Porting
             switch (blamTag.Name)
             {
                 case @"levels\multi\snowbound\sky\sky":
-                    mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
+                    mode.Materials[11].RenderMethod = CacheContext.TagCache.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
                     break;
                 case @"levels\multi\isolation\sky\sky":
                     mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;

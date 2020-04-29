@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace TagTool.Cache.Gen1
 
         public TagCacheGen1(EndianReader reader, MapFile mapFile)
         {
+            TagDefinitions = new TagDefinitionsGen1();
             var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
             reader.SeekTo(tagDataSectionOffset);
 
@@ -62,12 +64,11 @@ namespace TagTool.Cache.Gen1
             
             for (int i = 0; i < Header.TagCount; i++)
             {
-                var group = new TagGroup()
-                {
-                    Tag = new Tag(reader.ReadInt32()),
-                    ParentTag = new Tag(reader.ReadInt32()),
-                    GrandparentTag = new Tag(reader.ReadInt32())
-                };
+                var group = new TagGroupGen1(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
+
+                if (!TagDefinitions.TagDefinitionExists(group))
+                    Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
+
                 var tagID = reader.ReadUInt32();
                 var tagPathNameAddress = reader.ReadUInt32();
                 var currentPos = reader.Position;
@@ -85,12 +86,12 @@ namespace TagTool.Cache.Gen1
             }
         }
 
-        public override CachedTag AllocateTag(TagGroup type, string name = null)
+        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
         {
             throw new NotImplementedException();
         }
 
-        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
         {
             throw new NotImplementedException();
         }

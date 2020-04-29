@@ -214,7 +214,7 @@ namespace TagTool.Commands.Porting
                 Convert(cacheStream, scenarioPath, mapId, blamScnr, blamScnrTag, blamStream, zoneSetIndex, desiredBspMask, conversionFlags);
 
                 // generate the .map file
-                GenerateMapFile(cacheStream, CacheContext.GetTag($"{scenarioPath}.scnr"), mapName, mapDescription);
+                GenerateMapFile(cacheStream, CacheContext.TagCache.GetTag($"{scenarioPath}.scnr"), mapName, mapDescription);
 
                 // finish up
                 CacheContext.SaveStrings();
@@ -391,7 +391,7 @@ namespace TagTool.Commands.Porting
             new MultiplayerScenarioFixup(cacheStream, CacheContext, blamScnrTag.Name, zoneSetIndex, bspMask, conversionFlags).Fixup();
 
             // change the map id
-            var scnrTag = CacheContext.GetTag($"{blamScnrTag}");
+            var scnrTag = CacheContext.TagCache.GetTag($"{blamScnrTag}");
             var newScenario = CacheContext.Deserialize<Scenario>(cacheStream, scnrTag);
             newScenario.MapId = newMapId;
             CacheContext.Serialize(cacheStream, scnrTag, newScenario);
@@ -422,7 +422,7 @@ namespace TagTool.Commands.Porting
             {
                 this.CacheContext = cacheContext;
                 this.CacheStream = cacheStream;
-                this.ScnrTag = cacheContext.GetTag<Scenario>(scenarioTagName);
+                this.ScnrTag = cacheContext.TagCache.GetTag<Scenario>(scenarioTagName);
                 this.Scnr = cacheContext.Deserialize<Scenario>(cacheStream, ScnrTag);
                 this.DesiredZoneSetIndex = desiredZoneSetIndex;
                 this.DesiredBsps = desiredBsps;
@@ -528,7 +528,7 @@ namespace TagTool.Commands.Porting
                     new PlayerStartingProfileBlock
                     {
                         Name = "start_assault",
-                        PrimaryWeapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\assault_rifle\assault_rifle"),
+                        PrimaryWeapon = CacheContext.TagCache.GetTag<Weapon>(@"objects\weapons\rifle\assault_rifle\assault_rifle"),
                         PrimaryRoundsLoaded = 32,
                         PrimaryRoundsTotal = 96,
                         StartingFragGrenadeCount = 2,
@@ -805,7 +805,7 @@ namespace TagTool.Commands.Porting
                 //
 
                 CachedTag lightmapTag;
-                if (!CacheContext.TryGetTag<ScenarioLightmap>(Scnr.Lightmap.Name, out lightmapTag))
+                if (!CacheContext.TagCache.TryGetTag<ScenarioLightmap>(Scnr.Lightmap.Name, out lightmapTag))
                     return;
 
                 var lightmap = CacheContext.Deserialize<ScenarioLightmap>(CacheStream, lightmapTag);

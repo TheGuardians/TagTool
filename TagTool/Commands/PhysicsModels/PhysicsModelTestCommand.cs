@@ -50,7 +50,7 @@ namespace TagTool.Commands.PhysicsModels
             }
             else
             {
-                if (!Cache.TryGetCachedTag(args[1], out tag))
+                if (!Cache.TagCache.TryGetCachedTag(args[1], out tag))
                     return false;
 
                 b_duplicate = false;

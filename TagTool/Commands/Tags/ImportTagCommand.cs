@@ -28,7 +28,7 @@ namespace TagTool.Commands.Tags
             if (args.Count != 2)
                 return false;
 
-            if (!Cache.TryGetCachedTag(args[0], out var instance))
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var instance))
                 return false;
 
             var path = args[1];

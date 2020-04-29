@@ -16,6 +16,7 @@ using TagTool.Serialization;
 using System.Text.RegularExpressions;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Porting
 {
@@ -59,8 +60,8 @@ namespace TagTool.Commands.Porting
 			BlamCache = blamCache;
 			GeometryConverter = new RenderGeometryConverter(cacheContext, blamCache);
 
-			foreach (var tagType in TagDefinition.Types.Keys)
-                DefaultTags[tagType] = CacheContext.TagCache.FindFirstInGroup(tagType);
+			foreach (var tagType in CacheContext.TagCache.TagDefinitions.Types.Keys)
+                DefaultTags[tagType.Tag] = CacheContext.TagCache.FindFirstInGroup(tagType.Tag);
 		}
 
 		public override object Execute(List<string> args)
@@ -177,7 +178,7 @@ namespace TagTool.Commands.Porting
                     if (!FlagIsSet(PortingFlags.Audio))
                     {
                         PortingConstants.DefaultTagNames.TryGetValue(groupTag, out string defaultSoundName);
-                        CacheContext.TryGetTag($"{defaultSoundName}.{groupTag}", out CachedTag result);
+                        CacheContext.TagCache.TryGetTag($"{defaultSoundName}.{groupTag}", out CachedTag result);
                         return result;
                     }
                     break;
@@ -188,21 +189,21 @@ namespace TagTool.Commands.Porting
                     break;
 
 				case "shit": // use the global shit tag until shit tags are port-able
-					if (CacheContext.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
+					if (CacheContext.TagCache.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
                         return shitInstance;
                     if (BlamCache.Version < CacheVersion.HaloOnline106708)
-                        return CacheContext.Deserialize<RasterizerGlobals>(cacheStream, CacheContext.GetTag<RasterizerGlobals>(@"globals\rasterizer_globals")).DefaultShieldImpact;
+                        return CacheContext.Deserialize<RasterizerGlobals>(cacheStream, CacheContext.TagCache.GetTag<RasterizerGlobals>(@"globals\rasterizer_globals")).DefaultShieldImpact;
                     break;
 
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
-                    return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
+                    return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
 
 				case "glvs":
-					return CacheContext.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
+					return CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
-					return CacheContext.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
+					return CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
 				case "rmct":
-                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
+                    return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
 				case "rmt2":
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
@@ -214,19 +215,11 @@ namespace TagTool.Commands.Porting
 
 			CachedTag edTag = null;
 
-			TagGroup edGroup = null;
+            TagGroupGen3 edGroup = (TagGroupGen3)blamTag.Group;
 
-			if (TagGroup.Instances.ContainsKey(groupTag))
+			if (!CacheContext.TagCache.TagDefinitions.TagDefinitionExists(blamTag.Group))
 			{
-				edGroup = TagGroup.Instances[groupTag];
-			}
-			else
-			{
-				edGroup = new TagGroup(
-					blamTag.Group.Tag,
-					blamTag.Group.ParentTag,
-					blamTag.Group.GrandparentTag,
-					CacheContext.StringTable.GetStringId(BlamCache.StringTable.GetString(blamTag.Group.Name)));
+                throw new Exception($"Tag group {blamTag.Group} does not exist in destination cache!");
 			}
 
             var wasReplacing = FlagIsSet(PortingFlags.Replace);
@@ -716,7 +709,7 @@ namespace TagTool.Commands.Porting
 			CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
 			if (FlagIsSet(PortingFlags.Print))
-				Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{CacheContext.StringTable.GetString(edTag.Group.Name)}");
+				Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{(edTag.Group as TagGroupGen3).Name}");
 
 			return edTag;
 		}
@@ -985,7 +978,7 @@ namespace TagTool.Commands.Porting
                                         EngineMomentum = vehi.EngineMomentum,
                                         EngineMaximumAngularVelocity = vehi.EngineMaximumAngularVelocity,
                                         Gears = vehi.Gears,
-                                        GearShiftSound = CacheContext.GetTag<Vehicle>(@"sound\vehicles\warthog\warthog_shift")
+                                        GearShiftSound = CacheContext.TagCache.GetTag<Vehicle>(@"sound\vehicles\warthog\warthog_shift")
                                     },
                                     WheelCircumference = vehi.WheelCircumference,
                                     GravityAdjust = 0.8f
@@ -1426,7 +1419,7 @@ namespace TagTool.Commands.Porting
 
             var tagIdentifiers = tagSpecifier.Split('.');
 
-            if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
+            if (!CacheContext.TagCache.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
             {
                 Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();

@@ -42,7 +42,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 2)
                 return false;
 
-            if (!Cache.TryGetCachedTag(args[1], out var tag))
+            if (!Cache.TagCache.TryGetCachedTag(args[1], out var tag))
                 return false;
 
             switch (args[0].ToLower())
@@ -68,7 +68,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 3)
                 return false;
 
-            var dependencies = args.Skip(2).Select(name => Cache.GetTag(name)).ToList();
+            var dependencies = args.Skip(2).Select(name => Cache.TagCache.GetTag(name)).ToList();
             
             if (dependencies.Count == 0 || dependencies.Any(d => d == null))
                 return false;
@@ -119,7 +119,7 @@ namespace TagTool.Commands.Tags
             else
                 dependencies = tag.Dependencies.Where(i => i >= 0 && i <= Cache.TagCache.Count).Select(i => Cache.TagCacheGenHO.Tags[i]);
 
-            var groupTags = groups.Select(group => Cache.ParseGroupTag(group)).ToArray();
+            var groupTags = groups.Select(group => Cache.TagCache.ParseGroupTag(group)).ToArray();
 
             foreach (var dependency in dependencies)
             {
@@ -128,7 +128,7 @@ namespace TagTool.Commands.Tags
 
                 var tagName = dependency?.Name ?? $"0x{dependency.Index:X4}";
 
-                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{Cache.StringTable.GetString(dependency.Group.Name)}");
+                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{dependency.Group}");
             }
             
             foreach (var instance in tag.Dependencies)
@@ -146,7 +146,7 @@ namespace TagTool.Commands.Tags
             {
                 var tagName = dependency?.Name ?? $"0x{dependency.Index:X4}";
 
-                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.DefinitionOffset:X8}] {tagName}.{Cache.StringTable.GetString(dependency.Group.Name)}");
+                Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.DefinitionOffset:X8}] {tagName}.{dependency.Group}");
             }
 
             return true;

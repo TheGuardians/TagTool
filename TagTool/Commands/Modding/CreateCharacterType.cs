@@ -99,8 +99,8 @@ namespace TagTool.Commands.Modding
         {
             using (var cacheStream = Cache.OpenCacheRead())
             {
-                Globals = Cache.Deserialize<Globals>(cacheStream, Cache.GetTag($"globals\\globals.matg"));
-                ModGlobals = Cache.Deserialize<ModGlobalsDefinition>(cacheStream, Cache.GetTag($"multiplayer\\mod_globals.modg"));
+                Globals = Cache.Deserialize<Globals>(cacheStream, Cache.TagCache.GetTag($"globals\\globals.matg"));
+                ModGlobals = Cache.Deserialize<ModGlobalsDefinition>(cacheStream, Cache.TagCache.GetTag($"multiplayer\\mod_globals.modg"));
             }
         }
 
@@ -108,8 +108,8 @@ namespace TagTool.Commands.Modding
         {
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                Cache.Serialize(stream, Cache.GetTag($"multiplayer\\mod_globals.modg"), ModGlobals);
-                Cache.Serialize(stream, Cache.GetTag($"globals\\globals.matg"), Globals);
+                Cache.Serialize(stream, Cache.TagCache.GetTag($"multiplayer\\mod_globals.modg"), ModGlobals);
+                Cache.Serialize(stream, Cache.TagCache.GetTag($"globals\\globals.matg"), Globals);
             }
         }
 
@@ -176,7 +176,7 @@ namespace TagTool.Commands.Modding
             if (tagName == "\n")
                 return null;
 
-            if (Cache.TryGetTag(tagName, out CachedTag tag))
+            if (Cache.TagCache.TryGetTag(tagName, out CachedTag tag))
                 return tag;
             else
                 return null;

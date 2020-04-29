@@ -193,7 +193,7 @@ namespace TagTool.Commands.Modding
                 }
 
                 TagMapping.Add(modTag.Index, newTag.Index);
-                var definitionType = TagDefinition.Find(modTag.Group.Tag);
+                var definitionType = CacheContext.TagCache.TagDefinitions.GetTagDefinitionType(modTag.Group);
                 var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
                 var tagDefinition = deserializer.Deserialize(new ModPackageTagSerializationContext(modPack.TagCachesStreams[0], CacheContext, modPack, (CachedTagHaloOnline)modTag), definitionType);
                 tagDefinition = ConvertData(modPack, tagDefinition);
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Modding
 
         private ForgeGlobalsDefinition ConvertForgeGlobals(ForgeGlobalsDefinition forg)
         {
-            var currentForgTag = CacheContext.GetTag<ForgeGlobalsDefinition>("multiplayer\\forge_globals");
+            var currentForgTag = CacheContext.TagCache.GetTag<ForgeGlobalsDefinition>("multiplayer\\forge_globals");
             var currentForg = (ForgeGlobalsDefinition)CacheContext.Deserialize(CacheStream, currentForgTag);
 
             // hardcoded base indices:

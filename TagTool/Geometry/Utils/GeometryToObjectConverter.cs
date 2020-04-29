@@ -87,7 +87,7 @@ namespace TagTool.Geometry.Utils
 
             // check if we've already converted the tag, if so just return it
             CachedTag scenTag;
-            if (DestCache.TryGetTag<Scenery>(tagName, out scenTag))
+            if (DestCache.TagCache.TryGetTag<Scenery>(tagName, out scenTag))
                 return scenTag;
 
             // allocate tags

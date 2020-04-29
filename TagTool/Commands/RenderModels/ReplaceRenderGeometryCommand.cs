@@ -39,7 +39,7 @@ namespace TagTool.Commands.RenderModels
 			if (args.Count != 1)
 				return false;
 
-            if (!Cache.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
+            if (!Cache.TagCache.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
             {
                 Console.WriteLine("WARNING: 'shaders\\invalid.shader' not found!");
                 Console.WriteLine("You will have to assign material shaders manually.");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using TagTool.Cache.Gen3;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -29,9 +30,12 @@ namespace TagTool.Cache.HaloOnline
         public TagCacheHaloOnlineHeader Header;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
-
-        public TagCacheHaloOnline(Stream stream, Dictionary<int, string> names = null)
+        public readonly StringTableHaloOnline StringTableReference;
+        
+        public TagCacheHaloOnline(Stream stream, StringTableHaloOnline stringTable, Dictionary<int, string> names = null)
         {
+            TagDefinitions = new TagDefinitionsGen3();
+            StringTableReference = stringTable;
             if (stream.Length != 0)
                 Load(new EndianReader(stream), names ?? new Dictionary<int, string>());
             else
@@ -88,7 +92,7 @@ namespace TagTool.Cache.HaloOnline
                 Tags.Add(tag);
 
                 reader.BaseStream.Position = tag.HeaderOffset;
-                tag.ReadHeader(reader);
+                tag.ReadHeader(reader, StringTableReference);
             }
         }
 
@@ -99,10 +103,10 @@ namespace TagTool.Cache.HaloOnline
         /// <param name="type">The tag's type information.</param>
         /// <param name="name">The name of the tag instance.</param>
         /// <returns>The allocated tag.</returns>
-        public override CachedTag AllocateTag(TagGroup type, string name = null)
+        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
         {
             var tagIndex = Tags.Count;
-            var tag = new CachedTagHaloOnline(tagIndex, type, name);
+            var tag = new CachedTagHaloOnline(tagIndex, (TagGroupGen3)type, name);
             Tags.Add(tag);
             return tag;
         }
@@ -110,14 +114,14 @@ namespace TagTool.Cache.HaloOnline
         /// <summary>
         /// Returns a new CachedTag instance without updating the tag cache.
         /// </summary>
-        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
         {
-            return new CachedTagHaloOnline(index, group, name);
+            return new CachedTagHaloOnline(index, (TagGroupGen3)group, name);
         }
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagHaloOnline(-1, TagGroup.None, null);
+            return new CachedTagHaloOnline(-1, (TagGroupGen3)TagGroupNew.None, null);
         }
 
         /// <summary>
@@ -198,7 +202,7 @@ namespace TagTool.Cache.HaloOnline
             
             // Re-parse it
             stream.Position = tag.HeaderOffset;
-            tag.ReadHeader(new BinaryReader(stream));
+            tag.ReadHeader(new BinaryReader(stream), StringTableReference);
             UpdateTagOffsets(new EndianWriter(stream, EndianFormat.LittleEndian));
         }
 
@@ -214,7 +218,7 @@ namespace TagTool.Cache.HaloOnline
                 throw new ArgumentNullException(nameof(tag));
             else if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            else if (data.Group == TagGroup.None)
+            else if (data.Group as TagGroupGen3 == TagGroupGen3.None)
                 throw new ArgumentException("Cannot assign a tag to a null tag group");
             else if (data.Data == null)
                 throw new ArgumentException("The tag data buffer is null");
@@ -232,7 +236,7 @@ namespace TagTool.Cache.HaloOnline
             // Write in the new header and data
             stream.Position = tag.HeaderOffset;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
-            tag.WriteHeader(writer);
+            tag.WriteHeader(writer, StringTableReference);
             StreamUtil.Fill(stream, 0, (int)(alignedHeaderSize - headerSize));
             stream.Write(data.Data, 0, data.Data.Length);
             StreamUtil.Fill(stream, 0, alignedLength - data.Data.Length);
@@ -258,7 +262,7 @@ namespace TagTool.Cache.HaloOnline
         {
             var data = new CachedTagData
             {
-                Group = tag.Group,
+                Group = (TagGroupGen3)tag.Group,
                 MainStructOffset = tag.DefinitionOffset,
             };
 

@@ -41,7 +41,7 @@ namespace TagTool.Commands.Tags
             while (groupTagString.Length < 4)
                 groupTagString += " ";
 
-            if (!Cache.TryParseGroupTag(groupTagString, out var groupTag))
+            if (!Cache.TagCache.TryParseGroupTag(groupTagString, out var groupTag))
             {
                 var chars = new char[] { ' ', ' ', ' ', ' ' };
 
@@ -51,38 +51,8 @@ namespace TagTool.Commands.Tags
                 groupTag = new Tag(new string(chars));
             }
 
-            if (!TagGroup.Instances.ContainsKey(groupTag))
-            {
-                Console.WriteLine($"ERROR: No tag group definition for group tag '{groupTag}'!");
-                Console.Write($"(BE CAREFUL WITH THIS!!!) Define '{groupTag}' tag group? [y/n]: ");
-
-                var answer = Console.ReadLine().ToLower();
-
-                if (answer != "y" && answer != "yes")
-                    return true;
-
-                Console.WriteLine("Enter the tag group specification in the following format");
-                Console.WriteLine("<group tag> [parent group tag] [grandparent group tag] <group name>:");
-                Console.WriteLine();
-                Console.Write($"{groupTag} specification> ");
-
-                answer = Console.ReadLine();
-
-                var groupArgs = ArgumentParser.ParseCommand(answer, out string redirect);
-
-                switch (groupArgs.Count)
-                {
-                    case 2: new TagGroup(new Tag(groupArgs[0]), Tag.Null, Tag.Null, Cache.StringTable.GetStringId(groupArgs[1])); break;
-                    case 3: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), Tag.Null, Cache.StringTable.GetStringId(groupArgs[2])); break;
-                    case 4: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), new Tag(groupArgs[2]), Cache.StringTable.GetStringId(groupArgs[3])); break;
-                    default: return false;
-                }
-
-                goto begin;
-            }
-
             CachedTag instance = null;
-            TagGroup.Instances.TryGetValue(groupTag, out var tagGroup);
+            var tagGroup = Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag);
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
@@ -90,7 +60,7 @@ namespace TagTool.Commands.Tags
                 {
                     var tagIndex = -1;
 
-                    if (!Cache.TryGetCachedTag(args[1], out instance))
+                    if (!Cache.TagCache.TryGetCachedTag(args[1], out instance))
                     {
                         if (args[1].StartsWith("0x"))
                             tagIndex = Convert.ToInt32(args[1], 16);
@@ -103,7 +73,7 @@ namespace TagTool.Commands.Tags
                     }
 
                     while (tagIndex >= Cache.TagCache.Count)
-                        Cache.TagCache.AllocateTag(TagGroup.None);
+                        Cache.TagCache.AllocateTag(TagGroupNew.None);
 
                     if (tagIndex < Cache.TagCache.Count)
                     {
@@ -114,20 +84,20 @@ namespace TagTool.Commands.Tags
                             Cache.TagCacheGenHO.SetTagDataRaw(stream, oldInstance, new byte[] { });
                         }
 
-                        instance = Cache.TagCache.CreateCachedTag(tagIndex, TagGroup.Instances[groupTag]);
+                        instance = Cache.TagCache.CreateCachedTag(tagIndex, Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag));
                         Cache.TagCacheGenHO.Tags[tagIndex] = (CachedTagHaloOnline)instance;
                     }
                 }
 
                 if (instance == null)
-                    instance = Cache.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+                    instance = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag));
 
-                Cache.Serialize(stream, instance, Activator.CreateInstance(TagDefinition.Find(groupTag)));
+                Cache.Serialize(stream, instance, Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(groupTag)));
             }
 
             var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-            Console.WriteLine($"[Index: 0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}");
+            Console.WriteLine($"[Index: 0x{instance.Index:X4}] {tagName}.{instance.Group}");
             return true;
         }
     }

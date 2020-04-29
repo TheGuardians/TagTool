@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,12 +35,12 @@ namespace TagTool.Cache.Gen2
 
         public TagCacheGen2Header Header;
         public List<CachedTagGen2> Tags = new List<CachedTagGen2>();
-        public Dictionary<Tag, TagGroup> TagGroups = new Dictionary<Tag, TagGroup>();
         public Dictionary<Tag, CachedTagGen2> HardcodedTags = new Dictionary<Tag, CachedTagGen2>();
 
         public TagCacheGen2(EndianReader reader, MapFile mapFile)
         {
             Version = mapFile.Version;
+            TagDefinitions = new TagDefinitionsGen2();
             var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
             reader.SeekTo(tagDataSectionOffset);
 
@@ -58,15 +59,9 @@ namespace TagTool.Cache.Gen2
 
             for(int i = 0; i < Header.TagGroupCount; i++)
             {
-                var tag = new Tag(reader.ReadInt32());
-                var group = new TagGroup()
-                {
-                    Tag = tag,
-                    ParentTag = new Tag(reader.ReadInt32()),
-                    GrandparentTag = new Tag(reader.ReadInt32()),
-                    Name = StringId.Invalid // has no stringids in tag groups
-                };
-                TagGroups[tag] = group;
+                var group = new TagGroupGen2(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
+                if (!TagDefinitions.TagDefinitionExists(group))
+                    Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
             }
 
             //
@@ -85,7 +80,7 @@ namespace TagTool.Cache.Gen2
                 if (tag.Value == -1 || tag.Value == 0 || size == -1 || address == 0xFFFFFFFF || ID == 0 || ID == 0xFFFFFFFF)
                     Tags.Add(null);
                 else
-                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, TagGroups[tag], address, size, null));
+                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(tag), address, size, null));
             }
 
             reader.SeekTo(mapFile.Header.TagNameIndicesOffset);
@@ -123,12 +118,12 @@ namespace TagTool.Cache.Gen2
         }
 
 
-        public override CachedTag AllocateTag(TagGroup type, string name = null)
+        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
         {
             throw new NotImplementedException();
         }
 
-        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
         {
             throw new NotImplementedException();
         }

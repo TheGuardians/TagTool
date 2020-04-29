@@ -48,7 +48,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen2SerializationContext(stream, this, (CachedTagGen2)instance));
 
         public override object Deserialize(Stream stream, CachedTag instance) =>
-            Deserialize(new Gen2SerializationContext(stream, this, (CachedTagGen2)instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen2SerializationContext(stream, this, (CachedTagGen2)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
@@ -67,7 +67,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen2SerializationContext(stream, this, instance));
 
         public object Deserialize(Stream stream, CachedTagGen2 instance) =>
-            Deserialize(new Gen2SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen2SerializationContext(stream, this, instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         //
         // private methods for internal use

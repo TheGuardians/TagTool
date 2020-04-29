@@ -43,13 +43,13 @@ namespace TagTool.Commands.CollisionModels
             // optional argument: forces overwriting of tags that are not type: coll
             var b_force = (args.Count >= 3 && args[2].ToLower().Equals("force"));
 
-            if (args[1].ToLower().Equals("new") && TagGroup.Instances.TryGetValue("coll", out var collGroup))
+            if (args[1].ToLower().Equals("new"))
             {
-                tag = Cache.TagCacheGenHO.AllocateTag(collGroup);
+                tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"));
             }
             else
             {
-                if (!Cache.TryGetTag(args[1], out tag))
+                if (!Cache.TagCache.TryGetTag(args[1], out tag))
                     return false;
             }
 

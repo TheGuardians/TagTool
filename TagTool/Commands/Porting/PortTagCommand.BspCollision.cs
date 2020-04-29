@@ -20,8 +20,6 @@ namespace TagTool.Commands.Porting
         {
             StructureBspTagResources resourceDefinition = BlamCache.ResourceCache.GetStructureBspTagResources(bsp.CollisionBspResource);
 
-            // probably can remove all the code here
-
             if (resourceDefinition == null)
                 return null;
 

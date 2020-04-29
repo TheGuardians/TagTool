@@ -27,15 +27,15 @@ namespace TagTool.Commands.Tags
             if (args.Count != 1)
                 return false;
 
-            if (!Cache.TryGetTag(args[0], out var tag))
+            if (!Cache.TagCache.TryGetTag(args[0], out var tag))
                 return false;
             var hoTag = (CachedTagHaloOnline)tag;
             Console.WriteLine("Information for tag {0:X8}:", tag.Index);
             Console.Write("- Groups:        {0}", tag.Group.Tag);
             if (tag.Group.ParentTag.Value != -1)
                 Console.Write(" -> {0}", tag.Group.ParentTag);
-            if (tag.Group.GrandparentTag.Value != -1)
-                Console.Write(" -> {0}", tag.Group.GrandparentTag);
+            if (tag.Group.GrandParentTag.Value != -1)
+                Console.Write(" -> {0}", tag.Group.GrandParentTag);
             Console.WriteLine();
             Console.WriteLine("- Header offset: 0x{0:X}", hoTag.HeaderOffset);
             Console.WriteLine("- Total size:    0x{0:X}", hoTag.TotalSize);

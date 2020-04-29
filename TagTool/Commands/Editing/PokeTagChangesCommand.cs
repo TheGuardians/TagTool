@@ -21,11 +21,11 @@ namespace TagTool.Commands.Editing
             : base(true,
 
                   "PokeTagChanges",
-                  $"Pokes changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition to a running game's memory.",
+                  $"Pokes changes made to the current {tag.Group} definition to a running game's memory.",
 
                   "PokeTagChanges [process id]",
 
-                  $"Pokes changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition to a running game's memory.")
+                  $"Pokes changes made to the current {tag.Group} definition to a running game's memory.")
         {
             Cache = cache;
             Tag = tag;

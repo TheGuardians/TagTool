@@ -97,7 +97,7 @@ namespace TagTool.Commands.Tags
                     continue;
                 string groupName;
                 if (Cache.Version > CacheVersion.Halo3Beta) // gen 1 and gen 2 tag groups don't have a name stringid
-                    groupName = Cache.StringTable.GetString(tag.Group.Name);
+                    groupName = tag.Group.ToString();
                 else
                     groupName = tag.Group.Tag.ToString();
                 

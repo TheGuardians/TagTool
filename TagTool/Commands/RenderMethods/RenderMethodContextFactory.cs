@@ -7,7 +7,7 @@ namespace TagTool.Commands.RenderMethods
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, RenderMethod renderMethod)
         {
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", tag.Index, groupName));

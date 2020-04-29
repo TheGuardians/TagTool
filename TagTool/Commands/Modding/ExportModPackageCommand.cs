@@ -9,6 +9,8 @@ using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
 using TagTool.Cache.Resources;
 using TagTool.Extensions;
+using TagTool.Tags;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Modding
 {
@@ -96,10 +98,12 @@ namespace TagTool.Commands.Modding
 
             // assign everything to the first cache for now
 
+            AddStringIds();
+
             var tagStream = ModPackage.TagCachesStreams[0];
             ModPackage.CacheNames.Add("default");
 
-            ModPackage.TagCaches[0] = new TagCacheHaloOnline(tagStream, new Dictionary<int, string>());
+            ModPackage.TagCaches[0] = new TagCacheHaloOnline(tagStream, ModPackage.StringTable, new Dictionary<int, string>());
             ModPackage.Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ModPackage.ResourcesStream);
 
             CreateDescription();
@@ -113,7 +117,7 @@ namespace TagTool.Commands.Modding
 
                 Console.WriteLine("Please specify the start index to be used:");
                 string input = line = Console.ReadLine().TrimStart().TrimEnd();
-                if (CacheContext.TryGetTag(input, out var fromInstance) && fromInstance != null)
+                if (CacheContext.TagCache.TryGetTag(input, out var fromInstance) && fromInstance != null)
                     fromIndex = fromInstance.Index;
 
                 if (fromIndex != -1)
@@ -122,7 +126,7 @@ namespace TagTool.Commands.Modding
                     input = Console.ReadLine().TrimStart().TrimEnd();
                     if(input != "")
                     {
-                        if (CacheContext.TryGetTag(input, out var toInstance) && fromInstance != null)
+                        if (CacheContext.TagCache.TryGetTag(input, out var toInstance) && fromInstance != null)
                             toIndex = toInstance.Index;
                         else
                         {
@@ -156,7 +160,7 @@ namespace TagTool.Commands.Modding
                     while (!reader.EndOfStream)
                     {
                         var tagName = reader.ReadLine();
-                        if (CacheContext.TryGetTag(tagName, out var instance) && instance != null)
+                        if (CacheContext.TagCache.TryGetTag(tagName, out var instance) && instance != null)
                             if(!tagIndices.Contains(instance.Index))
                                 tagIndices.Add(instance.Index);
                         else
@@ -171,7 +175,7 @@ namespace TagTool.Commands.Modding
                 Console.WriteLine("Please specify the tags to be used (enter an empty line to finish):");
 
                 while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
-                    if (CacheContext.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
+                    if (CacheContext.TagCache.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
                         tagIndices.Add(instance.Index);
             }
 
@@ -254,7 +258,7 @@ namespace TagTool.Commands.Modding
 
             Console.WriteLine("Building...");
 
-            AddStringIds();
+            
             AddTags(tagIndices);
             
             ModPackage.Save(new FileInfo(packageName));
@@ -345,7 +349,7 @@ namespace TagTool.Commands.Modding
 
                     if (srcTag == null)
                     {
-                        modTagCache.AllocateTag(new TagTool.Tags.TagGroup());
+                        modTagCache.AllocateTag(TagGroupNew.None);
                         continue;
                     }
                         
@@ -354,7 +358,7 @@ namespace TagTool.Commands.Modding
                         var emptyTag = modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
                         var cachedTagData = new CachedTagData();
                         cachedTagData.Data = new byte[0];
-                        cachedTagData.Group = emptyTag.Group;
+                        cachedTagData.Group = (TagGroupGen3)emptyTag.Group;
                         modTagCache.SetTagData(modTagStream, (CachedTagHaloOnline)emptyTag, cachedTagData);
                         continue;
                     }
