@@ -123,7 +123,7 @@ namespace Sentinel.Forms
                 }
             }
 
-            var groupName = Cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             if (tag.Name == null)
             {

@@ -50,7 +50,7 @@ namespace Sentinel.Controls
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-            textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
+            textBox.Text = $"{tagName}.{tag.Group}";
 
             Loading = false;
         }
@@ -62,7 +62,7 @@ namespace Sentinel.Controls
 
             if (value == null)
             {
-                if (!Cache.TryGetTag(textBox.Text, out var tag))
+                if (!Cache.TagCache.TryGetCachedTag(textBox.Text, out var tag))
                 {
                     textBox.ForeColor = Color.Red;
                     return;
@@ -74,7 +74,7 @@ namespace Sentinel.Controls
 
                 var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-                textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
+                textBox.Text = $"{tagName}.{tag.Group}";
             }
 
             Field.SetValue(owner, value);
@@ -91,13 +91,13 @@ namespace Sentinel.Controls
 
                 var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-                textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
+                textBox.Text = $"{tagName}.{tag.Group}";
             }
         }
 
         private void openButton_Click(object sender, EventArgs e)
         {
-            if (!Cache.TryGetTag(textBox.Text, out var tag))
+            if (!Cache.TagCache.TryGetCachedTag(textBox.Text, out var tag))
             {
                 textBox.ForeColor = Color.Red;
                 return;
@@ -107,7 +107,7 @@ namespace Sentinel.Controls
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-            textBox.Text = $"{tagName}.{Cache.StringTable.GetString(tag.Group.Name)}";
+            textBox.Text = $"{tagName}.{tag.Group}";
 
             Form.LoadTagEditor(tag);
         }

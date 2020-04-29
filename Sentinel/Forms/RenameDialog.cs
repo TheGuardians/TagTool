@@ -26,7 +26,7 @@ namespace Sentinel.Forms
 
             InitializeComponent();
 
-            Text = $"Rename {cache.StringTable.GetString(tag.Group.Name)} tag...";
+            Text = $"Rename {tag.Group} tag...";
 
             Value = tag.Name != null ?
                 tag.Name :

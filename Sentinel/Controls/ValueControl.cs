@@ -89,7 +89,7 @@ namespace Sentinel.Controls
         {
             if (type == typeof(Tag))
             {
-                if (!cache.TryParseGroupTag(value, out var tag))
+                if (!cache.TagCache.TryParseGroupTag(value, out var tag))
                     goto end;
             }
             else if (type == typeof(StringId))

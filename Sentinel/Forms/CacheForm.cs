@@ -44,7 +44,7 @@ namespace Sentinel.Forms
                     $"[0x{Tag.Index:X4}] {Tag.Name}" :
                     $"0x{Tag.Index:X4}";
 
-                return $"{tagName}.{Cache.StringTable.GetString(Tag.Group.Name)}";
+                return $"{tagName}.{Tag.Group}";
             }
         }
 
@@ -190,7 +190,7 @@ namespace Sentinel.Forms
                 }
             }
 
-            var groupName = Cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             if (tag.Name == null)
             {
@@ -309,7 +309,7 @@ namespace Sentinel.Forms
 
             var tagName = tag.Name ?? $"0x{tag.Index:X4}";
 
-            var groupName = Cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             statusLabel.Text = $"Loading {tagName}.{ groupName}...";
 
@@ -485,7 +485,7 @@ namespace Sentinel.Forms
             {
                 using (var sfd = new SaveFileDialog())
                 {
-                    var groupName = Cache.StringTable.GetString(tag.Group.Name);
+                    var groupName = tag.Group.ToString();
 
                     sfd.Filter = $"{groupName} files (*.{groupName})|*.{groupName}";
 
@@ -515,7 +515,7 @@ namespace Sentinel.Forms
             {
                 using (var ofd = new OpenFileDialog())
                 {
-                    var groupName = Cache.StringTable.GetString(tag.Group.Name);
+                    var groupName = tag.Group.ToString();
 
                     ofd.Filter = $"{groupName} files (*.{groupName})|*.{groupName}";
 
@@ -659,7 +659,7 @@ namespace Sentinel.Forms
                 tagName = tagName.Substring(index, tagName.Length - index);
             }
 
-            return $"{tagName}.{ Cache.StringTable.GetString(CurrentTag.Group.Name)}";
+            return $"{tagName}.{ CurrentTag.Group}";
         }
 
         private void saveCurrentTagToolStripMenuItem_Click(object sender, EventArgs e)
@@ -678,7 +678,7 @@ namespace Sentinel.Forms
 
             foreach (var entry in CurrentTags)
             {
-                Cache.TryGetTag("0x" + entry.Key.ToString("X"), out var tag); // hacky, works for now
+                Cache.TagCache.TryGetCachedTag("0x" + entry.Key.ToString("X"), out var tag); // hacky, works for now
                 message += $"\n{SaveTagChanges(tag, entry.Value)}";
             }
 
