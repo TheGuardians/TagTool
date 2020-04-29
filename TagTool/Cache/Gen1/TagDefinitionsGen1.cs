@@ -6,14 +6,14 @@ using TagTool.Tags.Definitions.Gen1;
 
 namespace TagTool.Cache.Gen1
 {
-    public class TagDefinitionsGen1 : TagDefinitionsNew
+    public class TagDefinitionsGen1 : TagDefinitions
     {
-        public  Dictionary<TagGroupNew, Type> Gen1Types = new Dictionary<TagGroupNew, Type>
+        public  Dictionary<TagGroup, Type> Gen1Types = new Dictionary<TagGroup, Type>
         {
             { new TagGroupGen1("snd!"), typeof(Sound) },
             { new TagGroupGen1("antr"), typeof(ModelAnimationGraph) },
         };
 
-        public override Dictionary<TagGroupNew, Type> Types { get => Gen1Types; }
+        public override Dictionary<TagGroup, Type> Types { get => Gen1Types; }
     }
 }

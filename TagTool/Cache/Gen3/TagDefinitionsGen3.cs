@@ -7,9 +7,9 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache.Gen3
 {
-    public class TagDefinitionsGen3 : TagDefinitionsNew
+    public class TagDefinitionsGen3 : TagDefinitions
     {
-        public Dictionary<TagGroupNew, Type> Gen3Types = new Dictionary<TagGroupNew, Type>
+        public Dictionary<TagGroup, Type> Gen3Types = new Dictionary<TagGroup, Type>
         {
             { new TagGroupGen3("<fx>", "sound_effect_template"), typeof(SoundEffectTemplate) },
             { new TagGroupGen3("achi", "achievements"), typeof(Achievements) },
@@ -174,7 +174,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("zone", "cache_file_resource_gestalt"), typeof(ResourceGestalt) }
         };
 
-        public override Dictionary<TagGroupNew, Type> Types { get => Gen3Types; }
+        public override Dictionary<TagGroup, Type> Types { get => Gen3Types; }
     }
 
 }

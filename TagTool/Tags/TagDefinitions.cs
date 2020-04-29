@@ -4,11 +4,11 @@ using TagTool.Common;
 
 namespace TagTool.Tags
 {
-    public abstract class TagDefinitionsNew
+    public abstract class TagDefinitions
     {
-        abstract public Dictionary<TagGroupNew, Type> Types { get;}
+        abstract public Dictionary<TagGroup, Type> Types { get;}
 
-        public bool TagDefinitionExists(TagGroupNew group)
+        public bool TagDefinitionExists(TagGroup group)
         {
             return Types.ContainsKey(group);
         }
@@ -21,7 +21,7 @@ namespace TagTool.Tags
             return false;
         }
 
-        public Type GetTagDefinitionType(TagGroupNew group)
+        public Type GetTagDefinitionType(TagGroup group)
         {
             if (Types.ContainsKey(group))
                 return Types[group];
@@ -37,7 +37,7 @@ namespace TagTool.Tags
             return null;
         }
 
-        public TagGroupNew GetTagDefinitionGroupTag(Type type)
+        public TagGroup GetTagDefinitionGroupTag(Type type)
         {
             foreach(var key in Types.Keys)
                 if (Types[key] == type)
@@ -45,7 +45,7 @@ namespace TagTool.Tags
             return null;
         }
 
-        public TagGroupNew GetTagGroupFromTag(Tag tag)
+        public TagGroup GetTagGroupFromTag(Tag tag)
         {
             foreach (var group in Types.Keys)
                 if (group.Tag == tag)

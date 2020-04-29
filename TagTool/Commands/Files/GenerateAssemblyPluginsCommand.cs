@@ -39,7 +39,7 @@ namespace TagTool.Commands.Files
             if (args.Count == 1)
                 path = args[0];
             var definitions = new TagDefinitionsGen3();
-            foreach (KeyValuePair<TagGroupNew, Type> tagType in definitions.Gen3Types)
+            foreach (KeyValuePair<TagGroup, Type> tagType in definitions.Gen3Types)
             {
                 if (tagType.Key.Tag == "test")  // skip test definition as it contains unsuported bounds of type long and ulong
                     continue;

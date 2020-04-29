@@ -58,15 +58,15 @@ namespace TagTool.Serialization
         {
             var tag = GameCache.TagCache.GetTag((uint)index);
 
-            var group = (tag != null) ? tag.Group : TagGroupNew.None;
+            var group = (tag != null) ? tag.Group : TagGroup.None;
 
-            if (index == -1 || group == TagGroupNew.None)
+            if (index == -1 || group == TagGroup.None)
                 return null;
 
             return tag;
         }
 
-        public CachedTag GetTagByName(TagGroupNew group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }

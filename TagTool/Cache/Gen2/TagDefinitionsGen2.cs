@@ -9,14 +9,14 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.Gen2
 {
-    public class TagDefinitionsGen2 : TagDefinitionsNew
+    public class TagDefinitionsGen2 : TagDefinitions
     {
-        public Dictionary<TagGroupNew, Type> Gen1Types = new Dictionary<TagGroupNew, Type>
+        public Dictionary<TagGroup, Type> Gen1Types = new Dictionary<TagGroup, Type>
         {
 
         };
 
-        public override Dictionary<TagGroupNew, Type> Types { get => Gen1Types; }
+        public override Dictionary<TagGroup, Type> Types { get => Gen1Types; }
     }
 
 }

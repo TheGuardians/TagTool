@@ -127,7 +127,7 @@ namespace TagTool.Serialization
             return null;
         }
 
-        public CachedTag GetTagByName(TagGroupNew group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }

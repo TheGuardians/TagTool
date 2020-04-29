@@ -7,31 +7,31 @@ using TagTool.Common;
 
 namespace TagTool.Tags
 {
-    public class TagGroupNew : TagStructure, IEquatable<TagGroupNew>
+    public class TagGroup : TagStructure, IEquatable<TagGroup>
     {
         public Tag Tag;
         public Tag ParentTag;
         public Tag GrandParentTag;
 
-        public static readonly TagGroupNew None = new TagGroupNew(new Tag(-1), new Tag(-1), new Tag(-1));
+        public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1));
 
-        public TagGroupNew() : this(Tag.Null, Tag.Null, Tag.Null){}
+        public TagGroup() : this(Tag.Null, Tag.Null, Tag.Null){}
 
-        public TagGroupNew(Tag tag, Tag parentTag, Tag grandparentTag)
+        public TagGroup(Tag tag, Tag parentTag, Tag grandparentTag)
         {
             Tag = tag;
             ParentTag = parentTag;
             GrandParentTag = grandparentTag;
         }
 
-        public TagGroupNew(Tag tag, Tag parentTag)
+        public TagGroup(Tag tag, Tag parentTag)
         {
             Tag = tag;
             ParentTag = parentTag;
             GrandParentTag = Tag.Null;
         }
 
-        public TagGroupNew(Tag tag) 
+        public TagGroup(Tag tag) 
         {
             Tag = tag;
             ParentTag = Tag.Null;
@@ -43,7 +43,7 @@ namespace TagTool.Tags
         /// </summary>
         /// <param name="groups">The group to check.</param>
         /// <returns><c>true</c> if this group is a subgroup of the other group.</returns>
-        public bool BelongsTo(params TagGroupNew[] groups)
+        public bool BelongsTo(params TagGroup[] groups)
         {
             return BelongsTo(groups.Select(group => group.Tag).ToArray());
         }
@@ -72,22 +72,22 @@ namespace TagTool.Tags
             return false;
         }
 
-        public bool Equals(TagGroupNew other)
+        public bool Equals(TagGroup other)
         {
             return Tag == other.Tag && ParentTag == other.ParentTag && GrandParentTag == other.GrandParentTag;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is TagGroupNew && Equals((TagGroupNew)obj);
+            return obj is TagGroup && Equals((TagGroup)obj);
         }
 
-        public static bool operator ==(TagGroupNew lhs, TagGroupNew rhs)
+        public static bool operator ==(TagGroup lhs, TagGroup rhs)
         {
             return lhs.Equals(rhs);
         }
 
-        public static bool operator !=(TagGroupNew lhs, TagGroupNew rhs)
+        public static bool operator !=(TagGroup lhs, TagGroup rhs)
         {
             return !(lhs == rhs);
         }

@@ -73,7 +73,7 @@ namespace TagTool.Serialization
             return (index >= 0 && index < Cache.TagCache.Count) ? Cache.TagCache.GetTag(index) : null;
         }
 
-        public CachedTag GetTagByName(TagGroupNew group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }

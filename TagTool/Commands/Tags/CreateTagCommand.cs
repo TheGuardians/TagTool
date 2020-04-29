@@ -73,7 +73,7 @@ namespace TagTool.Commands.Tags
                     }
 
                     while (tagIndex >= Cache.TagCache.Count)
-                        Cache.TagCache.AllocateTag(TagGroupNew.None);
+                        Cache.TagCache.AllocateTag(TagGroup.None);
 
                     if (tagIndex < Cache.TagCache.Count)
                     {

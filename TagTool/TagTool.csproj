@@ -620,9 +620,9 @@
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResources.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
     <Compile Include="Tags\TagBlockBitVector.cs" />
-    <Compile Include="Tags\TagDefinitionNew.cs" />
+    <Compile Include="Tags\TagDefinitions.cs" />
     <Compile Include="Tags\TagFile.cs" />
-    <Compile Include="Tags\TagGroupNew.cs" />
+    <Compile Include="Tags\TagGroup.cs" />
     <Compile Include="Tags\TagReference.cs" />
     <Compile Include="Cache\Resources\ResourceData.cs" />
     <Compile Include="Tags\TagResourceReference.cs" />

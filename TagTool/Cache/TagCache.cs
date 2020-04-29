@@ -12,16 +12,16 @@ namespace TagTool.Cache
     {
         // TODO: refactor TagGroup to contain a string instead of string ID
         public CacheVersion Version;
-        public TagDefinitionsNew TagDefinitions;
+        public TagDefinitions TagDefinitions;
         public virtual IEnumerable<CachedTag> TagTable { get; }
         public int Count => TagTable.Count();
         public abstract CachedTag GetTag(uint ID);
         public abstract CachedTag GetTag(int index);
         public abstract CachedTag GetTag(string name, Tag groupTag);
 
-        public abstract CachedTag AllocateTag(TagGroupNew type, string name = null);
+        public abstract CachedTag AllocateTag(TagGroup type, string name = null);
 
-        public abstract CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null);
+        public abstract CachedTag CreateCachedTag(int index, TagGroup group, string name = null);
         public abstract CachedTag CreateCachedTag();
 
         // Utilities
@@ -159,7 +159,7 @@ namespace TagTool.Cache
                 result = GetTag(tagIndex);
 
                 if (result == null) // failsafe for null tags
-                    result = CreateCachedTag(tagIndex, TagGroupNew.None);
+                    result = CreateCachedTag(tagIndex, TagGroup.None);
 
                 return true;
             }

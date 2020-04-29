@@ -22,7 +22,7 @@ namespace TagTool.Serialization
             return Package.TagCaches[0].Tags[index];
         }
 
-        public override CachedTag GetTagByName(TagGroupNew group, string name)
+        public override CachedTag GetTagByName(TagGroup group, string name)
         {
             foreach(var tag in Context.TagCacheGenHO.Tags)
             {

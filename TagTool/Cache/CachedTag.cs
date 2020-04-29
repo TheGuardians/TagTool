@@ -9,7 +9,7 @@ namespace TagTool.Cache
         public string Name;
         public int Index;
         public uint ID;
-        public TagGroupNew Group;
+        public TagGroup Group;
 
         public abstract uint DefinitionOffset { get; }
 
@@ -17,12 +17,12 @@ namespace TagTool.Cache
         {
             Index = -1;
             Name = null;
-            Group = TagGroupNew.None;
+            Group = TagGroup.None;
         }
 
-        public CachedTag(int index, string name = null) : this(index, TagGroupNew.None, name) { }
+        public CachedTag(int index, string name = null) : this(index, TagGroup.None, name) { }
 
-        public CachedTag(int index, TagGroupNew group, string name = null)
+        public CachedTag(int index, TagGroup group, string name = null)
         {
             Index = index;
             Group = group;

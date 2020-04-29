@@ -354,7 +354,7 @@ namespace TagTool.Serialization
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
         private void SerializeTagReference(ISerializationContext context, IDataBlock block, CachedTag referencedTag, TagFieldAttribute valueInfo)
         {
-            if (referencedTag != null && referencedTag.Group == TagGroupNew.None)
+            if (referencedTag != null && referencedTag.Group == TagGroup.None)
                 referencedTag = null;
 
             if (referencedTag != null && valueInfo != null && valueInfo.ValidTags != null)

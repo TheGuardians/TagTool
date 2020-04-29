@@ -95,19 +95,19 @@ namespace TagTool.Cache.Gen3
 
 
 
-        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
+        public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
             throw new NotImplementedException();
         }
 
-        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
         {
             return new CachedTagGen3(index, (TagGroupGen3)group, name);
         }
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagGen3(-1, (TagGroupGen3)TagGroupNew.None, null);
+            return new CachedTagGen3(-1, (TagGroupGen3)TagGroup.None, null);
         }
 
         public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable)

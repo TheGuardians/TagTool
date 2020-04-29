@@ -3,7 +3,7 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.Gen1
 {
-    public class TagGroupGen1 : TagGroupNew
+    public class TagGroupGen1 : TagGroup
     {
         public TagGroupGen1() : base() { }
         public TagGroupGen1(Tag tag) : base(tag) { }

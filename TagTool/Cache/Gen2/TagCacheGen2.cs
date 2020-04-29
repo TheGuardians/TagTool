@@ -118,12 +118,12 @@ namespace TagTool.Cache.Gen2
         }
 
 
-        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
+        public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
             throw new NotImplementedException();
         }
 
-        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
         {
             throw new NotImplementedException();
         }

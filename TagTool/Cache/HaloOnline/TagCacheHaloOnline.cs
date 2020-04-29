@@ -103,7 +103,7 @@ namespace TagTool.Cache.HaloOnline
         /// <param name="type">The tag's type information.</param>
         /// <param name="name">The name of the tag instance.</param>
         /// <returns>The allocated tag.</returns>
-        public override CachedTag AllocateTag(TagGroupNew type, string name = null)
+        public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
             var tagIndex = Tags.Count;
             var tag = new CachedTagHaloOnline(tagIndex, (TagGroupGen3)type, name);
@@ -114,14 +114,14 @@ namespace TagTool.Cache.HaloOnline
         /// <summary>
         /// Returns a new CachedTag instance without updating the tag cache.
         /// </summary>
-        public override CachedTag CreateCachedTag(int index, TagGroupNew group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
         {
             return new CachedTagHaloOnline(index, (TagGroupGen3)group, name);
         }
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagHaloOnline(-1, (TagGroupGen3)TagGroupNew.None, null);
+            return new CachedTagHaloOnline(-1, (TagGroupGen3)TagGroup.None, null);
         }
 
         /// <summary>

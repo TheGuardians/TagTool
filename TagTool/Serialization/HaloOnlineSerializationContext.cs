@@ -84,7 +84,7 @@ namespace TagTool.Serialization
             return Context.TagCacheGenHO.GetTag(index);
         }
 
-        public virtual CachedTag GetTagByName(TagGroupNew group, string name)
+        public virtual CachedTag GetTagByName(TagGroup group, string name)
         {
             return Context.TagCache.GetTag(name, group.Tag);
         }
