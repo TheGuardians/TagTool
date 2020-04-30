@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using TagTool.Cache.Gen3;
 using TagTool.Common;
 using TagTool.Tags;
 
@@ -187,6 +188,19 @@ namespace TagTool.Cache
 
         public bool TryParseGroupTag(string name, out Tag result)
         {
+            if(TagDefinitions.GetType() == typeof(TagDefinitionsGen3))
+            {
+                foreach(var pair in TagDefinitions.Types)
+                {
+                    TagGroupGen3 group = (TagGroupGen3)pair.Key;
+                    if(group.Name == name)
+                    {
+                        result = group.Tag;
+                        return true;
+                    }
+                }
+            }
+
             var type = TagDefinitions.GetTagDefinitionType(name);
 
             if (type != null)
