@@ -30,18 +30,16 @@ namespace TagTool.Cache.HaloOnline
 
             Endianness = EndianFormat.LittleEndian;
 
-            using (var stream = StringIdCacheFile.Open(FileMode.OpenOrCreate))
-                StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
+            using (var tagsStream = TagsFile.Open(FileMode.OpenOrCreate))
+            {
+                FindVersion(new EndianReader(tagsStream));
 
-            var names = TagCacheHaloOnline.LoadTagNames(TagNamesFile.FullName);
+                using (var stream = StringIdCacheFile.Open(FileMode.OpenOrCreate))
+                    StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
 
-            using (var stream = TagsFile.Open(FileMode.OpenOrCreate))
-                TagCacheGenHO = new TagCacheHaloOnline(stream, StringTableHaloOnline, names);
-
-            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
-                Version = closestVersion;
-
-            
+                var names = TagCacheHaloOnline.LoadTagNames(TagNamesFile.FullName);
+                TagCacheGenHO = new TagCacheHaloOnline(tagsStream, StringTableHaloOnline, names);
+            }
 
             DisplayName = Version.ToString();
             Deserializer = new TagDeserializer(Version);
@@ -59,6 +57,19 @@ namespace TagTool.Cache.HaloOnline
         {
             using (var stream = StringIdCacheFile.OpenWrite())
                 StringTableHaloOnline.Save(stream);
+        }
+
+        private void FindVersion(EndianReader reader)
+        {
+            reader.SeekTo(0);
+            var dataContext = new DataSerializationContext(reader);
+            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
+
+            TagCacheHaloOnlineHeader header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
+            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(header.CreationTime, out var closestVersion)))
+                Version = closestVersion;
+
+            reader.SeekTo(0);
         }
     }
 }

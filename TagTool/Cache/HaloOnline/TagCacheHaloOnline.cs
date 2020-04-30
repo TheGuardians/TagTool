@@ -40,9 +40,12 @@ namespace TagTool.Cache.HaloOnline
                 Load(new EndianReader(stream), names ?? new Dictionary<int, string>());
             else
                 CreateTagCache(stream);
+
+            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(Header.CreationTime, out var closestVersion)))
+                Version = closestVersion;
         }
 
-        public void CreateTagCache(Stream stream)
+        private void CreateTagCache(Stream stream)
         {
             TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
             {
