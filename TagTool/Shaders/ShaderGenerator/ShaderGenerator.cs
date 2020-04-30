@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -100,12 +101,13 @@ namespace TagTool.Shaders.ShaderGenerator
                 {
                     foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
                     {
-                        var entryBlock = new GlobalVertexShader.VertexTypeShaders.DrawMode();
+                        var entryBlock = new GlobalVertexShader.VertexTypeShaders.DrawMode { ShaderIndex = -1 };
+                        
                         vertexBlock.DrawModes.Add(entryBlock);
-                        if (generator.IsEntryPointSupported(entryPoint) && !generator.IsVertexShaderShared(entryPoint))
+                        if (generator.IsEntryPointSupported(entryPoint) && generator.IsVertexShaderShared(entryPoint))
                         {
                             entryBlock.ShaderIndex = glvs.Shaders.Count;
-                            var result = generator.GenerateVertexShader(vertex, entryPoint);
+                            var result = generator.GenerateSharedVertexShader(vertex, entryPoint);
                             glvs.Shaders.Add(GenerateVertexShaderBlock(cache, result));
                         }
                     }
@@ -195,14 +197,51 @@ namespace TagTool.Shaders.ShaderGenerator
             return pixl;
         }
 
-        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, IShaderGenerator generator, string shader_type)
+        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, Stream cacheStream, IShaderGenerator generator, string shaderType)
         {
             var rmdf = new RenderMethodDefinition();
+
             var glps = GenerateSharedPixelShader(cache, generator);
             var glvs = GenerateSharedVertexShader(cache, generator);
 
-            return rmdf;
+            
+            var glpsTag = cache.TagCache.AllocateTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders");
+            cache.Serialize(cacheStream, glpsTag, glps);
+            rmdf.GlobalPixelShader = glpsTag;
 
+            var glvsTag = cache.TagCache.AllocateTag<GlobalVertexShader>($"shaders\\{shaderType.ToLower()}_shared_vertex_shaders");
+            cache.Serialize(cacheStream, glvsTag, glvs);
+            rmdf.GlobalVertexShader = glvsTag;
+            
+
+            rmdf.DrawModes = new List<RenderMethodDefinition.DrawMode>();
+            rmdf.Vertices = new List<RenderMethodDefinition.VertexBlock>();
+
+            foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
+                if (generator.IsEntryPointSupported(entryPoint))
+                    rmdf.DrawModes.Add(new RenderMethodDefinition.DrawMode { Mode = (int)entryPoint });
+
+            foreach (VertexType vertexType in Enum.GetValues(typeof(VertexType)))
+                if (generator.IsVertexFormatSupported(vertexType))
+                    rmdf.Vertices.Add(new RenderMethodDefinition.VertexBlock { VertexType = (short)vertexType });
+
+            // hackfix for methods
+            if (shaderType == "black")
+            {
+                rmdf.RenderMethodOptions = cache.TagCache.GetTag(@"shaders\shader_options\global_shader_options", "rmop");
+
+                rmdf.Methods = new List<RenderMethodDefinition.Method>();
+
+                var blacknessStringid = cache.StringTable.GetStringId("blackness(no_options)");
+                if (blacknessStringid == StringId.Invalid)
+                {
+                    blacknessStringid = cache.StringTable.AddString("blackness(no_options)");
+                }
+                rmdf.Methods.Add(new RenderMethodDefinition.Method { Type = blacknessStringid, VertexShaderMethodMacroName = StringId.Invalid, PixelShaderMethodMacroName = StringId.Invalid });
+            }
+
+
+            return rmdf;
         }
 
 

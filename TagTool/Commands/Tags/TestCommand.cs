@@ -41,7 +41,22 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
+                var rmdf = ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, "black");
+                var rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\black");
+                Cache.Serialize(stream, rmdfTag, rmdf);
+                Cache.SaveStrings();
 
+                var hoCache = Cache as GameCacheHaloOnline;
+                hoCache.SaveTagNames();
+            }
+
+            
+
+
+            return true;
             //string filename = "test";
             //BlamModelFile geometryFormat = new BlamModelFile();
             
