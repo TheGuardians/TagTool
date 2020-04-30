@@ -1253,8 +1253,8 @@ namespace TagTool.Commands.Porting
 
                     if (!wasFound)
                     {
-                        Console.WriteLine("WARNING: alpha_test most likely not compatible. Removing flag.");
-                        edShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
+                        Console.WriteLine("WARNING: alpha_test not compatible");
+                        //edShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
                         break;
                     }
                 }
