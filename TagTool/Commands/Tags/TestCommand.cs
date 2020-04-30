@@ -43,14 +43,20 @@ namespace TagTool.Commands
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
+                var shaderType = "black";
+                var rmt2Name = @"shaders\black_templates\_0";
                 var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
-                var rmdf = ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, "black");
-                var rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\black");
+                
+                var rmdf = ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out var glps, out var glvs);
+                var rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
                 Cache.Serialize(stream, rmdfTag, rmdf);
-                Cache.SaveStrings();
 
-                var hoCache = Cache as GameCacheHaloOnline;
-                hoCache.SaveTagNames();
+                var rmt2 = ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+                var rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+                Cache.Serialize(stream, rmt2Tag, rmt2);
+
+                Cache.SaveStrings();
+                (Cache as GameCacheHaloOnline).SaveTagNames();
             }
 
             

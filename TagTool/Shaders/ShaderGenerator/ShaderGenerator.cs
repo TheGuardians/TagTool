@@ -197,14 +197,13 @@ namespace TagTool.Shaders.ShaderGenerator
             return pixl;
         }
 
-        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, Stream cacheStream, IShaderGenerator generator, string shaderType)
+        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, Stream cacheStream, IShaderGenerator generator, string shaderType, out GlobalPixelShader glps, out GlobalVertexShader glvs)
         {
             var rmdf = new RenderMethodDefinition();
 
-            var glps = GenerateSharedPixelShader(cache, generator);
-            var glvs = GenerateSharedVertexShader(cache, generator);
+            glps = GenerateSharedPixelShader(cache, generator);
+            glvs = GenerateSharedVertexShader(cache, generator);
 
-            
             var glpsTag = cache.TagCache.AllocateTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders");
             cache.Serialize(cacheStream, glpsTag, glps);
             rmdf.GlobalPixelShader = glpsTag;
@@ -244,10 +243,6 @@ namespace TagTool.Shaders.ShaderGenerator
             return rmdf;
         }
 
-
-
-
-
         private static int GetArgumentIndex(GameCache cache, string name, List<RenderMethodTemplate.ShaderArgument> args)
         {
             int index = -1;
@@ -263,44 +258,58 @@ namespace TagTool.Shaders.ShaderGenerator
             return index;
         }
 
-        public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, RenderMethodDefinition rmdf, IShaderGenerator generator)
+        public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, Stream cacheStream, RenderMethodDefinition rmdf, GlobalPixelShader glps, GlobalVertexShader glvs, IShaderGenerator generator, string shaderName)
         {
 
             var rmt2 = new RenderMethodTemplate();
-            
-            //rmt2.PixelShader = pixelShaderTag;
-            //rmt2.VertexShader = vertexShaderTag;
-            // iterate on rmdf to find all entry points
-            //rmt2.ValidEntryPoints |= EntryPointBitMask.Active_Camo;
+
+            var pixl = GeneratePixelShader(cache, generator);
+            var vtsh = GenerateVertexShader(cache, generator);
+
+
+            var pixlTag = cache.TagCache.AllocateTag<PixelShader>(shaderName);
+            cache.Serialize(cacheStream, pixlTag, pixl);
+            rmt2.PixelShader = pixlTag;
+
+            var vtshTag = cache.TagCache.AllocateTag<VertexShader>(shaderName);
+            cache.Serialize(cacheStream, vtshTag, vtsh);
+            rmt2.VertexShader = vtshTag;
+
+
+            foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
+                if (generator.IsEntryPointSupported(mode))
+                    rmt2.ValidEntryPoints |= (EntryPointBitMask)(1 << (int)mode);
+
 
             rmt2.RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.BooleanParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.TextureParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
+
             rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
             rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
             rmt2.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
 
-
-            /*
-            foreach (EntryPoint mode in Enum.GetValues(typeof(EntryPoint)))
+            var pixelShaderResult = new ShaderGeneratorResult(null);
+            
+            foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
                 
                 var rmt2Drawmode = new RenderMethodTemplate.PackedInteger_10_6();
                 rmt2.EntryPoints.Add(rmt2Drawmode);
 
-                if (!rmt2.ValidEntryPoints.HasFlag((EntryPointBitMask)(1 << (int)mode)))
-                    continue;
+                if(generator.IsEntryPointSupported(mode))
+                {
+                    rmt2Drawmode.Offset = (ushort)rmt2.ParameterTables.Count();
+                    rmt2Drawmode.Count = 1;
 
-                rmt2Drawmode.Offset = (ushort)rmt2.ParameterTables.Count();
-                rmt2Drawmode.Count = 1;
 
-
-                var registerOffsets = new RenderMethodTemplate.ParameterTable();
-                for (int i = 0; i < registerOffsets.Values.Length; i++)
-                    registerOffsets.Values[i] = new RenderMethodTemplate.PackedInteger_10_6();
-                rmt2.ParameterTables.Add(registerOffsets);
-
+                    var registerOffsets = new RenderMethodTemplate.ParameterTable();
+                    for (int i = 0; i < registerOffsets.Values.Length; i++)
+                        registerOffsets.Values[i] = new RenderMethodTemplate.PackedInteger_10_6();
+                    rmt2.ParameterTables.Add(registerOffsets);
+                }
+                /*
                 registerOffsets[ParameterUsage.TextureExtern].Offset = (ushort)rmt2.Parameters.Count;
                 var srcRenderMethodExternArguments = pixelShaderResult.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.RenderMethodExtern_Arguments);
                 foreach (var src_arg in srcRenderMethodExternArguments)
@@ -395,8 +404,9 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     registerOffsets[ParameterUsage.PS_Real].Count++;
                 }
+                */
             }
-            */
+            
             return rmt2;
         }
     }
