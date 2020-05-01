@@ -153,11 +153,10 @@ namespace TagTool.Shaders.ShaderGenerator
             var glps = new GlobalPixelShader { EntryPoints = new List<GlobalPixelShader.EntryPointBlock>(), Shaders = new List<PixelShaderBlock>() };
             foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
             {
+                var entryPointBlock = new GlobalPixelShader.EntryPointBlock {ShaderIndex = -1 };
+                glps.EntryPoints.Add(entryPointBlock);
                 if (generator.IsEntryPointSupported(entryPoint) && generator.IsPixelShaderShared(entryPoint))
                 {
-                    var entryPointBlock = new GlobalPixelShader.EntryPointBlock();
-                    glps.EntryPoints.Add(entryPointBlock);
-                    entryPointBlock.ShaderIndex = -1; // TODO: add support for shaders shared between options
                     for (int i = 0; i < generator.GetMethodCount(); i++)
                     {
                         if(generator.IsMethodSharedInEntryPoint(entryPoint, i))
