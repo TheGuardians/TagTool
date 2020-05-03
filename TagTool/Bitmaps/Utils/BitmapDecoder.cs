@@ -1071,6 +1071,19 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        private static byte[] DecodeV8U8(byte[] data, int width, int height)
+        {
+            byte[] buffer = new byte[width * height * 4];
+            for (int i = 0; i < (width * height * 2); i += 2)
+            {
+                buffer[i * 2] = 0xFF;
+                buffer[(i * 2) + 1] = (byte)(data[i + 1] + 127);
+                buffer[(i * 2) + 2] = (byte)(data[i + 0] + 127);
+                buffer[(i * 2) + 3] = 0xFF;
+            }
+            return buffer;
+        }
+
         private static byte[] DecodeY8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 4];
@@ -1178,6 +1191,9 @@ namespace TagTool.Bitmaps
                     bitmRaw = DecodeP8(bitmRaw, virtualWidth, virtualHeight);
                     break;
 
+                case BitmapFormat.V8U8:
+                    bitmRaw = DecodeV8U8(bitmRaw, virtualWidth, virtualHeight);
+                    break;
                 default:
                     throw new NotSupportedException("Unsupported bitmap format.");
             }
