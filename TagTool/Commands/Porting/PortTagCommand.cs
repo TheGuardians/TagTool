@@ -700,11 +700,8 @@ namespace TagTool.Commands.Porting
             // Finalize and serialize the new ElDorado tag definition
             //
 
-            if (blamDefinition == null) //If blamDefinition is null, return null tag.
-			{
-				CacheContext.TagCacheGenHO.Tags[edTag.Index] = null;
+            if (blamDefinition == null)
 				return null;
-			}
 
 			CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
