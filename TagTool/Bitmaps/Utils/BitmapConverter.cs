@@ -129,7 +129,13 @@ namespace TagTool.Bitmaps.Utils
                 }
 
                 BaseBitmap resultBitmap = new BaseBitmap(bitmap.Images[imageIndex]);
-                
+                // fix slope_water bitmap conversion
+                if(bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
+                {
+                    resultBitmap.MipMapCount = 0;
+                    resultBitmap.Curve = BitmapImageCurve.Unknown;
+                }
+
                 var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
                 resultBitmap.UpdateFormat(newFormat);
 

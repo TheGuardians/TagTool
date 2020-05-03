@@ -125,7 +125,9 @@ namespace TagTool.Tags.Definitions
             public int BitmapCurveEnum;
 
             public int Unknown8;
-            public int UnknownC;
+            public byte UnknownC;
+            public byte UnknownD;
+            public short UnknownE;
             public short Unknown10;
             public short Unknown12;
             public int Unknown14;
