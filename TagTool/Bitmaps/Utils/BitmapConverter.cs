@@ -157,7 +157,15 @@ namespace TagTool.Bitmaps.Utils
                 
                 if(resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 8x8
                 {
-                    GenerateCompressedMipMaps(resultBitmap);
+                    if(resultBitmap.Type == BitmapType.Array || resultBitmap.Type == BitmapType.Texture3D)
+                    {
+                        resultBitmap.MipMapCount = 0;
+                    }
+                    else
+                    {
+                        GenerateCompressedMipMaps(resultBitmap);
+                    }
+                    
                 }
 
                 
