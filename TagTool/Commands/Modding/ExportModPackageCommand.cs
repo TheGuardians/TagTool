@@ -349,7 +349,7 @@ namespace TagTool.Commands.Modding
 
                     if (srcTag == null)
                     {
-                        modTagCache.AllocateTag(TagGroup.None);
+                        modTagCache.AllocateTag(TagGroupGen3.None);
                         continue;
                     }
                         
