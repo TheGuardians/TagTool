@@ -2694,7 +2694,7 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock2> Unknown2;
             public int BspChecksum;
             public List<ClusterCentroid> ClusterCentroids;
-            public List<UnknownBlock3> Unknown3;
+            public List<WeatherProperty> WeatherProperties;
             public List<FogBlock> Fog;
             public List<CameraEffect> CameraEffects;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
@@ -2728,10 +2728,11 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class UnknownBlock3 : TagStructure
+            public class WeatherProperty : TagStructure
 			{
                 public short Unknown;
-                public short Unknown2;
+                [TagField(Flags = TagFieldFlags.Padding)]
+                public short Unused;
             }
 
             [TagStructure(Size = 0x4)]
