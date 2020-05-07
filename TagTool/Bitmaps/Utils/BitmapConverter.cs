@@ -63,6 +63,7 @@ namespace TagTool.Bitmaps.Utils
                 {
                     mipLevelCount = 1;
                     definition.MipmapCount = 1;
+                    bitmap.Images[imageIndex].MipmapCount = 0;
                 }
 
                 if (!forDDS)
