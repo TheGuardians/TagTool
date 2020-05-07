@@ -675,7 +675,7 @@ namespace TagTool.Commands.Porting
                 case DecalSystem decs:
                 case BeamSystem beam:
                     if (!FlagIsSet(PortingFlags.MatchShaders))
-                        return GetDefaultShader(blamTag.Group.Tag);
+                        return GetDefaultShader(blamTag.Group.Tag, edTag);
                     else
                     {
                         // Verify that the ShaderMatcher is ready to use
@@ -684,7 +684,7 @@ namespace TagTool.Commands.Porting
 
                         blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag, BlamCache.Deserialize(blamCacheStream, blamTag));
                         if (blamDefinition == null) // convert shader failed
-                            return GetDefaultShader(blamTag.Group.Tag);
+                            return GetDefaultShader(blamTag.Group.Tag, edTag);
                     }
                     break;
 
@@ -692,7 +692,7 @@ namespace TagTool.Commands.Porting
                     if (!FlagIsSet(PortingFlags.MatchShaders))
                         ConvertShaderCortana(rmct, cacheStream, blamCacheStream, resourceStreams);
                     else // invalid for now, TODO: fix this up, rmct shouldnt be a special case
-                        return GetDefaultShader(blamTag.Group.Tag);
+                        return GetDefaultShader(blamTag.Group.Tag, edTag);
                     break;
             }
 
@@ -701,7 +701,10 @@ namespace TagTool.Commands.Porting
             //
 
             if (blamDefinition == null)
-				return null;
+            {
+                CacheContext.TagCacheGenHO.Tags[edTag.Index] = null;
+                return null;
+            }
 
 			CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 

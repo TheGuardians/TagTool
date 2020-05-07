@@ -112,8 +112,11 @@ namespace TagTool.Commands.Porting
             return ConvertRenderMethod(cacheStream, blamCacheStream, definition, blamShaderProperty.Template, blamTag.Name);
         }
 
-        private CachedTag GetDefaultShader(Tag groupTag)
+        private CachedTag GetDefaultShader(Tag groupTag, CachedTag edTag)
         {
+            CacheContext.TagCacheGenHO.Tags[edTag.Index] = null;
+            edTag = null;
+
             switch (groupTag.ToString())
             {
                 case "beam":
