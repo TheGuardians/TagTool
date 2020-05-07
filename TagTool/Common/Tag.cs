@@ -172,7 +172,7 @@ namespace TagTool.Common
                     }
             }
 
-            result = Tag.Null;
+            result = Null;
             return name == "none" || name == "null";
         }
 

@@ -17,10 +17,10 @@ namespace TagTool.Cache
         {
             Index = -1;
             Name = null;
-            Group = TagGroup.None;
+            Group = new TagGroup();
         }
 
-        public CachedTag(int index, string name = null) : this(index, TagGroup.None, name) { }
+        public CachedTag(int index, string name = null) : this(index, new TagGroup(), name) { }
 
         public CachedTag(int index, TagGroup group, string name = null)
         {

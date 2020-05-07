@@ -107,7 +107,7 @@ namespace TagTool.Cache.Gen3
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagGen3(-1, (TagGroupGen3)TagGroup.None, null);
+            return new CachedTagGen3(-1, new TagGroupGen3(), null);
         }
 
         public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable)

@@ -160,7 +160,7 @@ namespace TagTool.Cache
                 result = GetTag(tagIndex);
 
                 if (result == null) // failsafe for null tags
-                    result = CreateCachedTag(tagIndex, TagGroup.None);
+                    result = CreateCachedTag(tagIndex, new TagGroup());
 
                 return true;
             }

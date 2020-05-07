@@ -43,6 +43,26 @@ namespace TagTool.Commands
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
+                foreach(var tag in Cache.TagCache.NonNull())
+                {
+                    if (tag.IsInGroup("bitm"))
+                    {
+                        var bitm = Cache.Deserialize<Bitmap>(stream, tag);
+                        foreach(var image in bitm.Images)
+                        {
+                            if(image.Format == BitmapFormat.V8U8)
+                            {
+                                Console.WriteLine($"{image.Type} {image.Depth} {image.Width} {image.Height} {tag.Name}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+            /*
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
                 var shaderType = "black";
                 var rmt2Name = @"shaders\black_templates\_0";
                 var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
@@ -58,11 +78,11 @@ namespace TagTool.Commands
                 Cache.SaveStrings();
                 (Cache as GameCacheHaloOnline).SaveTagNames();
             }
-
+            
             
 
 
-            return true;
+            return true;*/
             //string filename = "test";
             //BlamModelFile geometryFormat = new BlamModelFile();
             
@@ -85,18 +105,43 @@ namespace TagTool.Commands
 
                 
                 // disassemble specified shaders related to rmt2
-                var tagName = @"shaders\black_templates\_0";
+                var tagName = @"shaders\shader_templates\_0_0_0_0_1_0_0_0_0_0_0";
 
                 var rmt2Tag = Cache.TagCache.GetTag(tagName, "rmt2");
-                var glvsTag = Cache.TagCache.GetTag(@"shaders\black_shared_vertex_shaders", "glvs");
+                var glvsTag = Cache.TagCache.GetTag(0x374);
+                var glpsTag = Cache.TagCache.GetTag(0x373);
                 var rmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
+                var glps = Cache.Deserialize<GlobalPixelShader>(stream, glpsTag);
 
                 var pixl = Cache.Deserialize<PixelShader>(stream, rmt2.PixelShader);
 
                 Directory.CreateDirectory(tagName);
-                // get vertex shaders (TODO: check vtsh if it has an overriding shader for the entry point?)
-                foreach(VertexType vertex in Enum.GetValues(typeof(VertexType)))
+
+                /*
+                foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
+                {
+                    foreach(var method in glps.EntryPoints[(int)entry].Option)
+                    {
+                        int method_index = method.RenderMethodOptionIndex;
+                        int optionIndex = 0;
+                        foreach(var shaderIndex in method.OptionMethodShaderIndices)
+                        {
+                            if(shaderIndex != -1)
+                            {
+                                string entryName = entry.ToString().ToLower() + $"_method_{method_index}_option_{optionIndex}" + ".pixel_shader";
+                                string pixelShaderFilename = Path.Combine(tagName, entryName);
+
+                                DisassembleShader(glps, shaderIndex, pixelShaderFilename, Cache);
+                                optionIndex++;
+                            }
+                        }
+                            
+                    }
+                    
+                }
+                
+                foreach (VertexType vertex in Enum.GetValues(typeof(VertexType)))
                 {
                     if( (int)vertex < glvs.VertexTypes.Count)
                     {
@@ -121,7 +166,7 @@ namespace TagTool.Commands
                         }
                     }
                 }
-
+                */
                 foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
                 {
                     if ((int)entry < pixl.EntryPointShaders.Count)

@@ -58,9 +58,9 @@ namespace TagTool.Serialization
         {
             var tag = GameCache.TagCache.GetTag((uint)index);
 
-            var group = (tag != null) ? tag.Group : TagGroup.None;
+            var group = (tag != null) ? tag.Group : new TagGroup();
 
-            if (index == -1 || group == TagGroup.None)
+            if (index == -1 || group.IsNull())
                 return null;
 
             return tag;

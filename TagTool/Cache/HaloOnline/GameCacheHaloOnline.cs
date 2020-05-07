@@ -62,6 +62,14 @@ namespace TagTool.Cache.HaloOnline
         private void FindVersion(EndianReader reader)
         {
             reader.SeekTo(0);
+            // hackfix until we fix tag cache creation
+            if (reader.BaseStream.Length == 0)
+            {
+                Version = CacheVersion.HaloOnline106708;
+                return;
+            }
+                
+
             var dataContext = new DataSerializationContext(reader);
             var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
 

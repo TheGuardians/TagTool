@@ -13,8 +13,6 @@ namespace TagTool.Tags
         public Tag ParentTag;
         public Tag GrandParentTag;
 
-        public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1));
-
         public TagGroup() : this(Tag.Null, Tag.Null, Tag.Null){}
 
         public TagGroup(Tag tag, Tag parentTag, Tag grandparentTag)
@@ -102,5 +100,12 @@ namespace TagTool.Tags
         }
 
         public override string ToString() => Tag.ToString();
+
+        public bool IsNull()
+        {
+            if (Tag.IsNull())
+                return true;
+            return false;
+        }
     }
 }

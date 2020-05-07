@@ -124,7 +124,7 @@ namespace TagTool.Cache.HaloOnline
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagHaloOnline(-1, (TagGroupGen3)TagGroup.None, null);
+            return new CachedTagHaloOnline(-1, new TagGroupGen3(), null);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace TagTool.Cache.HaloOnline
                 throw new ArgumentNullException(nameof(tag));
             else if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            else if (data.Group as TagGroupGen3 == TagGroupGen3.None)
+            else if ((data.Group as TagGroupGen3).IsNull())
                 throw new ArgumentException("Cannot assign a tag to a null tag group");
             else if (data.Data == null)
                 throw new ArgumentException("The tag data buffer is null");

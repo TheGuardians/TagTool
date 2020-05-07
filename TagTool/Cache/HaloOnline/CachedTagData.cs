@@ -12,7 +12,7 @@ namespace TagTool.Cache.HaloOnline
         /// <summary>
         /// The tag data's group.
         /// </summary>
-        public TagGroupGen3 Group { get; set; } = TagGroupGen3.None;
+        public TagGroupGen3 Group { get; set; } = new TagGroupGen3();
 
         /// <summary>
         /// The offset of the main structure in the tag data.
