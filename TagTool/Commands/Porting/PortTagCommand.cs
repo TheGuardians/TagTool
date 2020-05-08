@@ -33,6 +33,7 @@ namespace TagTool.Commands.Porting
 
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
 		private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
+        private readonly List<Tag> ResourceTagGroups = new List<Tag> { new Tag("snd!"), new Tag("bitm"), new Tag("Lbsp") }; // for null tag detection
 
         private DirectoryInfo TempDirectory { get; } = new DirectoryInfo(Path.GetTempPath());
 
@@ -131,6 +132,88 @@ namespace TagTool.Commands.Porting
 			return true;
 		}
 
+        private bool TagIsValid(CachedTag blamTag, Stream blamCacheStream, out CachedTag resultTag)
+        {
+            resultTag = null;
+
+            if (ResourceTagGroups.Contains(blamTag.Group.Tag))
+            {
+                // there is only a few cases here -- if geometry\animation references a null resource its tag is still valid
+
+                if (blamTag.Group.Tag == "snd!")
+                {
+                    Sound sound = BlamCache.Deserialize<Sound>(blamCacheStream, blamTag);
+
+                    if (BlamSoundGestalt == null)
+                        BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
+
+                    var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
+                    if (xmaFileSize < 0)
+                        return false;
+
+                    var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+                    if (soundResource == null)
+                        return false;
+
+                    var xmaData = soundResource.Data.Data;
+                    if (xmaData == null)
+                        return false;
+                }
+                else if (blamTag.Group.Tag == "bitm")
+                {
+                    Bitmap bitmap = BlamCache.Deserialize<Bitmap>(blamCacheStream, blamTag);
+
+                    for (int i = 0; i < bitmap.Images.Count; i++)
+                    {
+                        var image = bitmap.Images[i];
+
+                        // need to assign resource reference to an object here -- otherwise it compiles strangely??
+                        object bitmapResourceDefinition;
+
+                        if (image.XboxFlags.HasFlag(TagTool.Bitmaps.BitmapFlagsXbox.UseInterleavedTextures))
+                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                        else
+                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[i]);
+
+                        if (bitmapResourceDefinition == null)
+                            return false;
+                    }
+                }
+                else if (blamTag.Group.Tag == "Lbsp")
+                {
+                    ScenarioLightmapBspData Lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(blamCacheStream, blamTag);
+
+                    if (BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource) == null)
+                        return false;
+                }
+            }
+            else if (RenderMethodTagGroups.Contains(blamTag.Group.Tag))
+            {
+                RenderMethod renderMethod = BlamCache.Deserialize<RenderMethod>(blamCacheStream, blamTag);
+
+                string templateName = renderMethod.ShaderProperties[0].Template.Name;
+                TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor);
+
+                foreach (var tag in CacheContext.TagCacheGenHO.TagTable)
+                    if (tag.Group.Tag == "rmt2" && tag.Name.Contains(rmt2Descriptor.Type))
+                    {
+                        if ((FlagIsSet(PortingFlags.Ms30) && tag.Name.StartsWith("ms30\\")) || (!FlagIsSet(PortingFlags.Ms30) && !tag.Name.StartsWith("ms30\\")))
+                            return true;
+
+                        else if (tag.Name.StartsWith("ms30\\"))
+                            continue;
+                    }
+
+                // TODO: add code for "!MatchShaders" -- if a perfect match isnt found a null tag will be left in the cache
+
+                // "ConvertTagInternal" isnt called so the default shader needs to be set here
+                resultTag = GetDefaultShader(blamTag.Group.Tag, resultTag);
+                return false;
+            }
+
+            return true;
+        }
+
         public CachedTag ConvertTag(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag blamTag)
         {
             if (blamTag == null)
@@ -144,9 +227,16 @@ namespace TagTool.Commands.Porting
                 if (PortedTags.ContainsKey(blamTag.Index))
                     return PortedTags[blamTag.Index];
 
-                var oldFlags = Flags;
-                result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
-                Flags = oldFlags;
+                if (TagIsValid(blamTag, blamCacheStream, out result))
+                { 
+                    var oldFlags = Flags;
+                    result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
+
+                    if (result == null)
+                        Console.WriteLine("WARNING: null tag allocated in cache");
+
+                    Flags = oldFlags;
+                }
 #if !DEBUG
             }
             catch (Exception e)

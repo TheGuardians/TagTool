@@ -114,9 +114,6 @@ namespace TagTool.Commands.Porting
 
         private CachedTag GetDefaultShader(Tag groupTag, CachedTag edTag)
         {
-            CacheContext.TagCacheGenHO.Tags[edTag.Index] = null;
-            edTag = null;
-
             switch (groupTag.ToString())
             {
                 case "beam":
