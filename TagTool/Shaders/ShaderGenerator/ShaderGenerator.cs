@@ -27,6 +27,16 @@ namespace TagTool.Shaders.ShaderGenerator
 
     public partial class ShaderGenerator
     {
+        private static StringId AddString(GameCache cache, string str)
+        {
+            if (str == "")
+                return StringId.Invalid;
+            var stringId = cache.StringTable.GetStringId(str);
+            if (stringId == StringId.Invalid)
+                stringId = cache.StringTable.AddString(str);
+            return stringId;
+        }
+
         private static List<ShaderParameter> GenerateShaderParametersFromGenerator(GameCache cache, ShaderGeneratorResult result)
         {
             var parameters = new List<ShaderParameter>();
@@ -56,7 +66,7 @@ namespace TagTool.Shaders.ShaderGenerator
                         throw new NotImplementedException();
                 }
 
-                shaderParameter.ParameterName = cache.StringTable.GetStringId(register.Name);
+                shaderParameter.ParameterName = AddString(cache, register.Name);
 
                 parameters.Add(shaderParameter);
             }
@@ -289,6 +299,38 @@ namespace TagTool.Shaders.ShaderGenerator
             rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
             rmt2.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
 
+
+            var pixelShaderParameters = generator.GetPixelShaderParameters();
+            var vertexShaderParameters = generator.GetVertexShaderParameters();
+
+
+            #region build parameter names block using the generator
+            foreach (var realParam in pixelShaderParameters.GetRealParameters())
+                rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
+
+            foreach (var realParam in vertexShaderParameters.GetRealParameters())
+                rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
+
+            foreach (var boolParam in pixelShaderParameters.GetBooleanParameters())
+                rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, boolParam.ParameterName) });
+
+            foreach (var boolParam in vertexShaderParameters.GetBooleanParameters())
+                rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, boolParam.ParameterName) });
+
+            foreach (var intParam in pixelShaderParameters.GetIntegerParameters())
+                rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, intParam.ParameterName) });
+
+            foreach (var intParam in vertexShaderParameters.GetIntegerParameters())
+                rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, intParam.ParameterName) });
+
+            foreach (var samplerParam in pixelShaderParameters.GetSamplerParameters())
+                rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, samplerParam.ParameterName) });
+
+            foreach (var samplerParam in vertexShaderParameters.GetSamplerParameters())
+                rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, samplerParam.ParameterName) });
+            #endregion
+
+            // TODO: use pixl, vtsh, glps or glvs definition to build the parameter tables and parameters block
             var pixelShaderResult = new ShaderGeneratorResult(null);
             
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
