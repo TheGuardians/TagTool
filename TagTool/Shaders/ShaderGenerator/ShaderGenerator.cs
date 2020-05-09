@@ -267,6 +267,98 @@ namespace TagTool.Shaders.ShaderGenerator
             return index;
         }
 
+        private static List<RenderMethodTemplate.ParameterMapping> MapParameters(GameCache cache, ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping, List<RenderMethodTemplate.ShaderArgument> parameterNames)
+        {
+            var result = new List<RenderMethodTemplate.ParameterMapping>();
+            List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
+            switch (usage)
+            {
+                case ParameterUsage.PS_Real:
+                case ParameterUsage.VS_Real:
+                    shaderParameters = parameters.GetRealParameters();
+                    break;
+                case ParameterUsage.PS_Integer:
+                case ParameterUsage.VS_Integer:
+                    shaderParameters = parameters.GetIntegerParameters();
+                    break;
+                case ParameterUsage.PS_Boolean:
+                case ParameterUsage.VS_Boolean:
+                    shaderParameters = parameters.GetBooleanParameters();
+                    break;
+                case ParameterUsage.Texture:
+                    shaderParameters = parameters.GetSamplerParameters();
+                    break;
+                default:
+                    shaderParameters = new List<HaloShaderGenerator.Globals.ShaderParameter>();
+                    break;
+            }
+            foreach (var parameter in shaderParameters)
+            {
+                var argumentMapping = new RenderMethodTemplate.ParameterMapping();
+                var registerName = parameter.RegisterName;
+                if (shaderRegisterMapping.ContainsKey(registerName))
+                {
+                    argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
+                    argumentMapping.ArgumentIndex = (byte)GetArgumentIndex(cache, parameter.ParameterName, parameterNames);
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
+                }
+                result.Add(argumentMapping);
+            }
+            return result;
+        }
+
+        private static List<RenderMethodTemplate.ParameterMapping> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping)
+        {
+            var result = new List<RenderMethodTemplate.ParameterMapping>();
+            List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
+            switch (usage)
+            {
+                case ParameterUsage.PS_RealExtern:
+                case ParameterUsage.VS_RealExtern:
+                    shaderParameters = parameters.GetRealExternParameters();
+                    break;
+                case ParameterUsage.PS_IntegerExtern:
+                case ParameterUsage.VS_IntegerExtern:
+                    shaderParameters = parameters.GetIntegerExternParameters();
+                    break;
+                case ParameterUsage.TextureExtern:
+                    shaderParameters = parameters.GetSamplerExternParameters();
+                    break;
+                default:
+                    shaderParameters = new List<HaloShaderGenerator.Globals.ShaderParameter>();
+                    break;
+            }
+            foreach (var parameter in shaderParameters)
+            {
+                var argumentMapping = new RenderMethodTemplate.ParameterMapping();
+                var registerName = parameter.RegisterName;
+                if (shaderRegisterMapping.ContainsKey(registerName))
+                {
+                    argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
+                    argumentMapping.ArgumentIndex = (byte)parameter.RenderMethodExtern; // use the enum integer value
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
+                }
+                result.Add(argumentMapping);
+            }
+            return result;
+        }
+
+        private static void AddMapping(ParameterUsage usage, RenderMethodTemplate rmt2, RenderMethodTemplate.ParameterTable table, List<RenderMethodTemplate.ParameterMapping> mappings)
+        {
+            table[usage] = new RenderMethodTemplate.PackedInteger_10_6
+            {
+                Offset = (ushort)rmt2.Parameters.Count,
+                Count = (ushort)mappings.Count
+            };
+            rmt2.Parameters.AddRange(mappings);
+        }
+
         public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, Stream cacheStream, RenderMethodDefinition rmdf, GlobalPixelShader glps, GlobalVertexShader glvs, IShaderGenerator generator, string shaderName)
         {
 
@@ -289,22 +381,18 @@ namespace TagTool.Shaders.ShaderGenerator
                 if (generator.IsEntryPointSupported(mode))
                     rmt2.ValidEntryPoints |= (EntryPointBitMask)(1 << (int)mode);
 
+            #region build parameter names block using the generator
 
             rmt2.RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.BooleanParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.TextureParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
 
-            rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
-            rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
-            rmt2.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
-
-
             var pixelShaderParameters = generator.GetPixelShaderParameters();
             var vertexShaderParameters = generator.GetVertexShaderParameters();
+            var globalShaderParameters = generator.GetGlobalParameters();
 
-
-            #region build parameter names block using the generator
+            
             foreach (var realParam in pixelShaderParameters.GetRealParameters())
                 rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
 
@@ -328,14 +416,15 @@ namespace TagTool.Shaders.ShaderGenerator
 
             foreach (var samplerParam in vertexShaderParameters.GetSamplerParameters())
                 rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, samplerParam.ParameterName) });
+
             #endregion
 
-            // TODO: use pixl, vtsh, glps or glvs definition to build the parameter tables and parameters block
-            var pixelShaderResult = new ShaderGeneratorResult(null);
-            
+            rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
+            rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
+            rmt2.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
+
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
-                
                 var rmt2Drawmode = new RenderMethodTemplate.PackedInteger_10_6();
                 rmt2.EntryPoints.Add(rmt2Drawmode);
 
@@ -346,106 +435,110 @@ namespace TagTool.Shaders.ShaderGenerator
 
 
                     var registerOffsets = new RenderMethodTemplate.ParameterTable();
+
                     for (int i = 0; i < registerOffsets.Values.Length; i++)
                         registerOffsets.Values[i] = new RenderMethodTemplate.PackedInteger_10_6();
+
                     rmt2.ParameterTables.Add(registerOffsets);
-                }
-                /*
-                registerOffsets[ParameterUsage.TextureExtern].Offset = (ushort)rmt2.Parameters.Count;
-                var srcRenderMethodExternArguments = pixelShaderResult.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.RenderMethodExtern_Arguments);
-                foreach (var src_arg in srcRenderMethodExternArguments)
-                {
-                    var argument_mapping = new RenderMethodTemplate.ParameterMapping
-                    {
-                        RegisterIndex = (ushort)src_arg.Register
-                    };
 
-                    foreach (var _enum in Enum.GetValues(typeof(RenderMethodExtern)))
+                    // find pixel shader and vertex shader block loaded by this entry point
+
+                    PixelShaderBlock pixelShader;
+                    VertexShaderBlock vertexShader;
+
+
+                    if (generator.IsVertexShaderShared(mode))
+                        vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[(int)mode].ShaderIndex];
+                    else
+                        vertexShader = vtsh.Shaders[vtsh.SupportedVertexTypes[rmdf.Vertices[0].VertexType].EntryPointShaders[(int)mode].Offset];
+
+                    if (generator.IsPixelShaderShared(mode))
                     {
-                        if (_enum.ToString().ToLower() == src_arg.Name)
+                        if(glps.EntryPoints[(int)mode].ShaderIndex == -1)
                         {
-                            argument_mapping.ArgumentIndex = (byte)_enum;
-                            break;
+                            // assumes shared pixel shader are only used for a single method, otherwise unknown procedure to obtain one or more pixel shader block
+                            var optionValue = generator.GetMethodOptionValue(glps.EntryPoints[(int)mode].Option[0].RenderMethodOptionIndex);
+                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].Option[0].OptionMethodShaderIndices[optionValue]];
                         }
+                        else
+                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].ShaderIndex];
                     }
+                    else
+                        pixelShader = pixl.Shaders[pixl.EntryPointShaders[(int)mode].Offset];
 
-                    rmt2.Parameters.Add(argument_mapping);
-                    registerOffsets[ParameterUsage.TextureExtern].Count++;
+                    
+
+                    // build dictionary register name to register index, speeds lookup time
+
+                    Dictionary<string, int> pixelShaderRegisterMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> vertexShaderRegisterMapping = new Dictionary<string, int>();
+
+                    foreach(var reg in pixelShader.PCParameters)
+                        pixelShaderRegisterMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+
+                    foreach (var reg in vertexShader.PCParameters)
+                        vertexShaderRegisterMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+
+                    // build parameter table and registers available for this entry point, order to be determiend
+
+                    List<RenderMethodTemplate.ParameterMapping> mappings;
+                    ParameterUsage currentUsage;
+
+                    currentUsage = ParameterUsage.TextureExtern;
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, pixelShaderRegisterMapping);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.Texture;
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.TextureParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    // ps
+
+                    currentUsage = ParameterUsage.PS_Real;
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.RealParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.PS_Integer;
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.IntegerParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.PS_Boolean;
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.BooleanParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    // vs
+
+                    currentUsage = ParameterUsage.VS_Real;
+                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderRegisterMapping, rmt2.RealParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.VS_Integer;
+                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderRegisterMapping, rmt2.IntegerParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.VS_Boolean;
+                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderRegisterMapping, rmt2.BooleanParameterNames);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    // extern
+
+                    currentUsage = ParameterUsage.PS_RealExtern;
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, pixelShaderRegisterMapping);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.PS_IntegerExtern;
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, pixelShaderRegisterMapping);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.VS_RealExtern;
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, pixelShaderRegisterMapping);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+
+                    currentUsage = ParameterUsage.VS_IntegerExtern;
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, pixelShaderRegisterMapping);
+                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
                 }
 
-                registerOffsets[ParameterUsage.Texture].Offset = (ushort)rmt2.Parameters.Count;
-                var srcSamplerArguments = pixelShaderResult.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.TextureSampler_Arguments);
-                foreach (var samplerRegister in srcSamplerArguments)
-                {
-                    var argumentMapping = new RenderMethodTemplate.ParameterMapping
-                    {
-                        RegisterIndex = (ushort)samplerRegister.Register,
-                        ArgumentIndex = (byte)registerOffsets[ParameterUsage.Texture].Count++
-                    };
-
-                    rmt2.Parameters.Add(argumentMapping);
-
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument
-                    {
-                        Name = cache.StringTable.GetStringId(samplerRegister.Name)
-                    };
-                    rmt2.TextureParameterNames.Add(shaderArgument);
-
-                }
-
-                registerOffsets[ParameterUsage.PS_Real].Offset = (ushort)rmt2.Parameters.Count;
-                // add xform args
-                foreach (var samplerRegister in srcSamplerArguments)
-                {
-                    int index = GetArgumentIndex(cache, samplerRegister.Name, rmt2.RealParameterNames);
-                    HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister xformRegister = null;
-                    foreach (var register in pixelShaderResult.Registers)
-                    {
-                        if (register.Name == $"{samplerRegister.Name}_xform")
-                        {
-                            xformRegister = register;
-                            break;
-                        }
-                    }
-                    if (xformRegister == null) continue;
-
-                    var argumentMapping = new RenderMethodTemplate.ParameterMapping
-                    {
-                        RegisterIndex = (ushort)xformRegister.Register,
-
-                        ArgumentIndex = (byte)(index != -1 ? index : rmt2.RealParameterNames.Count)
-                    };
-                    rmt2.Parameters.Add(argumentMapping);
-
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument
-                    {
-                        Name = cache.StringTable.GetStringId(samplerRegister.Name)
-                    };
-                    rmt2.RealParameterNames.Add(shaderArgument);
-
-                    registerOffsets[ParameterUsage.PS_Real].Count++;
-                }
-
-                var srcVectorArguments = pixelShaderResult.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.Vector_Arguments);
-                foreach (var vectorRegister in srcVectorArguments)
-                {
-                    if (vectorRegister.IsXFormArgument) continue; // we've already added these
-                    var argumentMapping = new RenderMethodTemplate.ParameterMapping
-                    {
-                        RegisterIndex = (ushort)vectorRegister.Register,
-                        ArgumentIndex = (byte)rmt2.RealParameterNames.Count
-                    };
-                    rmt2.Parameters.Add(argumentMapping);
-
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument
-                    {
-                        Name = cache.StringTable.GetStringId(vectorRegister.Name)
-                    };
-                    rmt2.RealParameterNames.Add(shaderArgument);
-
-                    registerOffsets[ParameterUsage.PS_Real].Count++;
-                }
-                */
             }
             
             return rmt2;
