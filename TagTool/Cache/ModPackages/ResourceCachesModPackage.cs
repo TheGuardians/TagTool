@@ -13,9 +13,10 @@ namespace TagTool.Cache.ModPackages
     {
         private ModPackage Package;
 
-        public ResourceCachesModPackage(ModPackage package)
+        public ResourceCachesModPackage(GameCacheModPackage cache, ModPackage package)
         {
             Package = package;
+            Cache = cache;
         }
 
         public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location) => Package.Resources;

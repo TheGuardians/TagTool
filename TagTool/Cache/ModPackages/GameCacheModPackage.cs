@@ -35,7 +35,7 @@ namespace TagTool.Cache
             // load mod package
             BaseModPackage = new ModPackage(file);
 
-            ResourceCaches = new ResourceCachesModPackage(BaseModPackage);
+            ResourceCaches = new ResourceCachesModPackage(this, BaseModPackage);
             StringTableHaloOnline = BaseModPackage.StringTable;
             SetActiveTagCache(0);
         }
@@ -72,6 +72,8 @@ namespace TagTool.Cache
 
         private int GetTagCacheCount() => BaseModPackage.TagCaches.Count;
 
+        public int GetCurrentTagCacheIndex() => CurrentTagCacheIndex;
+
         public void SetActiveTagCache(int index)
         {
             if( index >= 0 && index < GetTagCacheCount())
@@ -79,9 +81,11 @@ namespace TagTool.Cache
                 CurrentTagCacheIndex = index;
                 TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], StringTableHaloOnline, BaseModPackage.TagCacheNames[CurrentTagCacheIndex]);
                 if(GetTagCacheCount() > 1)
-                    DisplayName = BaseModPackage.Metadata.Name + $"_tag_cache_{CurrentTagCacheIndex}_" + ".pak";
+                    DisplayName = BaseModPackage.Metadata.Name + $" {BaseModPackage.CacheNames[CurrentTagCacheIndex]}" + ".pak";
                 else
                     DisplayName = BaseModPackage.Metadata.Name + ".pak";
+
+                Console.WriteLine($"Current Tag Cache: {BaseModPackage.CacheNames[CurrentTagCacheIndex]}.");
             }
             else
             {

@@ -89,6 +89,7 @@ namespace TagTool.Commands.Tags
             {
                 var modCache = cache as GameCacheModPackage;
                 context.AddCommand(new SwitchTagCacheCommand(modCache));
+                context.AddCommand(new DisplayTagCache(modCache));
             }
 
             // porting related

@@ -7,6 +7,7 @@ using TagTool.Serialization;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
 using TagTool.Tags;
+using System.Runtime.InteropServices;
 
 namespace TagTool.Cache
 {
@@ -450,11 +451,21 @@ namespace TagTool.Cache
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
 
-            ResourcesStream = new MemoryStream();
-            int resourceSize = (int)section.Size;
-            byte[] data = new byte[resourceSize];
-            reader.Read(data, 0, resourceSize);
-            ResourcesStream.Write(data, 0, resourceSize);
+            if(section.Size <= 0x7FFFFFFF)
+            {
+                ResourcesStream = new MemoryStream();
+                reader.BaseStream.CopyTo(ResourcesStream);
+            }
+            else
+            {
+                unsafe
+                {
+                    long bufferSize = 4L * 1024 * 1024 * 1024; // 4 GB max
+                    IntPtr data = Marshal.AllocHGlobal((IntPtr)bufferSize);
+                    ResourcesStream = new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite);
+                    reader.BaseStream.CopyTo(ResourcesStream);
+                }
+            }
             ResourcesStream.Position = 0;
         }
 

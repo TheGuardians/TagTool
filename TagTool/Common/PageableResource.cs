@@ -155,6 +155,12 @@ namespace TagTool.Common
                     location = ResourceLocation.ResourcesB;
                     return true;
                 }
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InMods))
+                {
+                    location = ResourceLocation.Mods;
+                    return true;
+                }
+
             }
             else if (Page.NewFlags != 0)
             {
