@@ -373,6 +373,7 @@
     <Compile Include="Commands\Tags\ListNullTagsCommand.cs" />
     <Compile Include="Commands\Tags\ListUnnamedTagsCommand.cs" />
     <Compile Include="Commands\Tags\ListUnusedTagsCommand.cs" />
+    <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
     <Compile Include="Commands\Tags\RebuildCacheFileCommand.cs" />

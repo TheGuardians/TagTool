@@ -85,6 +85,12 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new RebuildCacheFileCommand(hoCache));
             }
 
+            if (cache is GameCacheModPackage)
+            {
+                var modCache = cache as GameCacheModPackage;
+                context.AddCommand(new SwitchTagCacheCommand(modCache));
+            }
+
             // porting related
             context.AddCommand(new UseXSDCommand());
             context.AddCommand(new UseAudioCacheCommand());

@@ -20,11 +20,8 @@ namespace TagTool.Cache
     {
         public FileInfo ModPackageFile;
         public ModPackage BaseModPackage;
-        
-        /// <summary>
-        /// Tag cache index in the list of tag caches.
-        /// </summary>
-        public int CurrentTagCacheIndex { get; set; }
+
+        private int CurrentTagCacheIndex = 0;
 
         public GameCacheModPackage(FileInfo file)
         {
@@ -37,23 +34,10 @@ namespace TagTool.Cache
 
             // load mod package
             BaseModPackage = new ModPackage(file);
-            DisplayName = BaseModPackage.Metadata.Name + ".pak";
 
             ResourceCaches = new ResourceCachesModPackage(BaseModPackage);
             StringTableHaloOnline = BaseModPackage.StringTable;
-            TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[0], StringTableHaloOnline, BaseModPackage.TagCacheNames[0]);
-            
-        }
-
-        public GameCacheModPackage(ModPackage modPackage, FileInfo file)
-        {
-            BaseModPackage = modPackage;
-            Directory = file.Directory;
-            DisplayName = BaseModPackage.Metadata.Name + ".pak";
-            Version = CacheVersion.HaloOnline106708;
-            Endianness = EndianFormat.LittleEndian;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            SetActiveTagCache(0);
         }
 
         public override object Deserialize(Stream stream, CachedTag instance)
@@ -78,14 +62,32 @@ namespace TagTool.Cache
             return new ModPackageTagSerializationContext(stream, this, BaseModPackage, (CachedTagHaloOnline)instance);
         }
 
-        // soon
-        public override Stream OpenCacheRead() => BaseModPackage.TagCachesStreams[0];
+        public override Stream OpenCacheRead() => BaseModPackage.TagCachesStreams[CurrentTagCacheIndex];
 
-        public override Stream OpenCacheReadWrite() => BaseModPackage.TagCachesStreams[0];
+        public override Stream OpenCacheReadWrite() => BaseModPackage.TagCachesStreams[CurrentTagCacheIndex];
 
-        public override Stream OpenCacheWrite() => BaseModPackage.TagCachesStreams[0];
+        public override Stream OpenCacheWrite() => BaseModPackage.TagCachesStreams[CurrentTagCacheIndex];
 
         public override void SaveStrings() { }
+
+        private int GetTagCacheCount() => BaseModPackage.TagCaches.Count;
+
+        public void SetActiveTagCache(int index)
+        {
+            if( index >= 0 && index < GetTagCacheCount())
+            {
+                CurrentTagCacheIndex = index;
+                TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], StringTableHaloOnline, BaseModPackage.TagCacheNames[CurrentTagCacheIndex]);
+                if(GetTagCacheCount() > 1)
+                    DisplayName = BaseModPackage.Metadata.Name + $"_tag_cache_{CurrentTagCacheIndex}_" + ".pak";
+                else
+                    DisplayName = BaseModPackage.Metadata.Name + ".pak";
+            }
+            else
+            {
+                Console.WriteLine($"Invalid tag cache index {index}, {GetTagCacheCount()} tag cache available");
+            }
+        }
     }
 }
 
