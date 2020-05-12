@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using TagTool.Tags.GUI;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -1497,21 +1498,6 @@ namespace TagTool.Tags.Definitions
                     Bit28 = 1 << 28,
                     Bit29 = 1 << 29,
                     Bit30 = 1 << 30,
-                }
-
-                public enum FontValue : short
-                {
-                    Conduit18,
-                    Agency16,
-                    Fixedsys9,
-                    Conduit14,
-                    Conduit32,
-                    Agency32,
-                    Conduit23,
-                    Agency18,
-                    Conduit18_2,
-                    Conduit16,
-                    Agency23
                 }
             }
         }

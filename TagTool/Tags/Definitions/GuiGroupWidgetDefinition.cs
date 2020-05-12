@@ -46,7 +46,7 @@ namespace TagTool.Tags.Definitions
             public StringId DataSourceName;
             public StringId TextString;
             public StringId TextColor;
-            public short TextFont;
+            public FontValue TextFont;
             public short Unknown2;
         }
 

@@ -11,6 +11,7 @@ using TagTool.Commands.Bitmaps;
 using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Shaders;
+using TagTool.Commands.GUI;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
@@ -73,6 +74,8 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ExportModPackageCommand(hoCache));
 
                 context.AddCommand(new UpdateMapFilesCommand(cache));
+
+                context.AddCommand(new RescaleGUICommand(cache));
 
                 context.AddCommand(new PhysicsModelTestCommand(cache));
                 context.AddCommand(new CollisionModelTestCommand(hoCache));

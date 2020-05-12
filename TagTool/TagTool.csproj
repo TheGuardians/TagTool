@@ -308,6 +308,7 @@
     <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
+    <Compile Include="Commands\GUI\RescaleGUICommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />

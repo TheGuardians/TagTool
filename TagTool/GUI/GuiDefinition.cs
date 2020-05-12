@@ -9,14 +9,25 @@ namespace TagTool.Tags.GUI
         public StringId Name;
         public short Unknown;
         public short Layer;
-        public short WidescreenYOffset;
-        public short WidescreenXOffset;
-        public short WidescreenYUnknown;
-        public short WidescreenXUnknown;
-        public short StandardYOffset;
-        public short StandardXOffset;
-        public short StandardYUnknown;
-        public short StandardXUnknown;
+        public short WidescreenYMin;
+        public short WidescreenXMin;
+        public short WidescreenYMax;
+        public short WidescreenXMax;
+        public short StandardYMin;
+        public short StandardXMin;
+        public short StandardYMax;
+        public short StandardXMax;
         public CachedTag Animation;
+    }
+
+    public enum FontValue : short
+    {
+        Fixedsys9,
+        Conduit16,
+        Conduit32,
+        Conduit23,
+        Conduit18,
+        larabie_10,
+        pragmata_14,
     }
 }
