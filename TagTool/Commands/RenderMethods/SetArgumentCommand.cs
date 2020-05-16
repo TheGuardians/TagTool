@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Shaders.ShaderMatching;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.RenderMethods
@@ -29,8 +30,87 @@ namespace TagTool.Commands.RenderMethods
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2 || args.Count > 5)
+            if (args.Count < 1 || args.Count > 5)
                 return false;
+
+            RenderMethodTemplate template = null;
+
+            // set default value
+            if (args.Count == 1)
+            {
+                string constantName = args[0];
+
+                using (var stream = Cache.OpenCacheRead())
+                {
+                    template = Cache.Deserialize<RenderMethodTemplate>(stream, Definition.ShaderProperties[0].Template);
+                    var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, Definition.BaseRenderMethod);
+
+                    int index = -1;
+                    for (int i = 0; i < template.RealParameterNames.Count; i++)
+                        if (Cache.StringTable.GetString(template.RealParameterNames[i].Name) == constantName)
+                        {
+                            index = i;
+                            break;
+                        }
+
+                    if (index == -1)
+                        return false;
+
+                    ShaderMatcherNew.Rmt2Descriptor.TryParse(Definition.ShaderProperties[0].Template.Name, out var rmt2Descriptor);
+
+                    for (int methodIndex = 0; methodIndex < rmt2Descriptor.Options.Length; methodIndex++)
+                    {
+                        var optionTag = rmdf.Methods[methodIndex].ShaderOptions[rmt2Descriptor.Options[methodIndex]].Option;
+                        var rmop = Cache.Deserialize<RenderMethodOption>(stream, optionTag);
+
+                        foreach (var constantData in rmop.Options)
+                            if (Cache.StringTable.GetString(constantData.Name) == constantName)
+                            {
+                                // constant found, apply default value
+
+                                if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
+                                {
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultBitmapScale;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultBitmapScale;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = 0.0f;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = 0.0f;
+                                }
+                                else if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Boolean)
+                                {
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultIntBoolArgument;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultIntBoolArgument;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultIntBoolArgument;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultIntBoolArgument;
+                                }
+                                else if (constantData.DefaultColor.GetValue() > 0)
+                                {
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultColor.Red / 255.0f;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultColor.Green / 255.0f;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultColor.Blue / 255.0f;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultColor.Alpha / 255.0f;
+                                }
+                                else // float, float4
+                                {
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultFloatArgument;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultFloatArgument;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultFloatArgument;
+                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultFloatArgument;
+                                }
+
+                                string argumentValues = $"" +
+                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg0}, " +
+                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg1}, " +
+                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg2}, " +
+                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg3}";
+
+                                Console.WriteLine($"\"{constantName}\" defaulted to \"{argumentValues}\"");
+                                return true;
+                            }
+                    }
+                }
+
+                return false;
+            }
 
             var argumentName = args[0];
             var values = new List<float>();
@@ -44,7 +124,6 @@ namespace TagTool.Commands.RenderMethods
                 args.RemoveAt(1);
             }
 
-            RenderMethodTemplate template = null;
             var properties = Definition.ShaderProperties[0];
 
             using (var cacheStream = Cache.OpenCacheRead())
