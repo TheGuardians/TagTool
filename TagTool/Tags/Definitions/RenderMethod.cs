@@ -15,7 +15,8 @@ namespace TagTool.Tags.Definitions
         public List<ImportDatum> ImportData;
         public List<ShaderProperty> ShaderProperties;
         public RenderMethodRenderFlags RenderFlags;
-        public ushort Unknown1; // not sure what this is
+        public SortingLayerValue SortingLayer;
+        public byte Version;
         public int SkyAtmospherePropertiesIndex; // skya AtmosphereProperties block index
         public int Unknown2; // usually -1
 
@@ -220,9 +221,19 @@ namespace TagTool.Tags.Definitions
         public enum RenderMethodRenderFlags : ushort
         {
             None = 0,
-            ClearAtmosphere = 1 << 0,
+            IgnoreFog = 1 << 0,
             UseSkyAtmosphereProperties = 1 << 1,
-            IsTextureCamera = 1 << 2 // not 100% sure
+            UsesDepthCamera = 1 << 2,
+            DisableWithShields = 1 << 3,
+            EnableWithShields = 1 << 4,
+        }
+
+        public enum SortingLayerValue : byte
+        {
+            Invalid,
+            PrePass,
+            Normal,
+            PostPass
         }
     }
 }

@@ -112,7 +112,7 @@ namespace TagTool.Tags.Definitions
             public enum FlagsValue : int
             {
                 None = 0,
-                Bit0 = 1 << 0,
+                CustomBlendFactor = 1 << 0,
                 Bit1 = 1 << 1,
                 Bit2 = 1 << 2,
                 Bit3 = 1 << 3,

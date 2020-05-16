@@ -25,6 +25,15 @@ namespace TagTool.Commands.Porting
             @"objects\characters\masterchief\shaders\mc_emblem"
         };
 
+        private readonly List<string> EffectRenderMethodTypes = new List<string>
+        {
+            "decal",
+            "contrail",
+            "particle",
+            "beam",
+            "light_volume",
+        };
+
         private RasterizerGlobals ConvertRasterizerGlobals(RasterizerGlobals rasg)
         {
             if (BlamCache.Version == CacheVersion.Halo3ODST)
@@ -252,14 +261,15 @@ namespace TagTool.Commands.Porting
                 newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, edRmt2Descriptor.Type, methodNames, optionBlocks));
 
             foreach (var a in edIntConstants)
-                newShaderProperty.IntegerConstants.Add(0);
+                newShaderProperty.IntegerConstants.Add(GetDefaultValue(a, edRmt2Descriptor.Type, methodNames, optionBlocks));
 
             foreach (var a in edMaps)
                 newShaderProperty.TextureConstants.Add(GetDefaultTextureConstant(a, edRmt2Descriptor, optionBitmaps));
 
             // if we have bits enabled by default, this actually disables boolean args. fixes a few visual issues
             for (int a = 0; a < edRmt2.BooleanParameterNames.Count; a++)
-                newShaderProperty.BooleanConstants |= (1u << a);
+                newShaderProperty.BooleanConstants |= (1u << a); 
+            // newShaderProperty.BooleanConstants |= (GetDefaultValue(CacheContext.StringTable.GetString(edRmt2.BooleanParameterNames[a].Name), edRmt2Descriptor.Type, methodNames, optionBlocks) << a);
 
             // apply option->option conversion where applicable
             ApplyDefaultOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
@@ -901,6 +911,21 @@ namespace TagTool.Commands.Porting
             return textureConstant;
         }
 
+        private uint GetDefaultValue(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
+        {
+            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.OptionBlock optionBlock))
+            {
+                if (!methodNames.Contains(parameter))
+                {
+                    Console.WriteLine($"WARNING: No type found for {type} parameter \"{parameter}\"");
+
+                    optionBlock = new RenderMethodOption.OptionBlock();
+                }
+            }
+
+            return optionBlock.DefaultIntBoolArgument;
+        }
+
         private RealConstant GetDefaultRealConstant(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
         {
             if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.OptionBlock optionBlock))
@@ -920,27 +945,32 @@ namespace TagTool.Commands.Porting
                 else // particles, contrails, ltvl
                     optionBlock = new RenderMethodOption.OptionBlock
                     {
-                        Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
-                        DefaultFloatArgument = 1.0f
+                        Type = RenderMethodOption.OptionBlock.OptionDataType.Sampler,
+                        DefaultBitmapScale = 1.0f
                     };
             }
 
             if (type == "terrain" && parameter.StartsWith("specular_tint_m_")) // prevent purple terrain
                 return new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
 
+            // use color if one is set
+            if (optionBlock.DefaultColor.GetValue() != 0)
+                optionBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.IntegerColor;
+
+            // uses 1.0 as default bitmap scale for effect RMs
+            if (EffectRenderMethodTypes.Contains(type) && optionBlock.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler && optionBlock.DefaultBitmapScale == 0.0f)
+                optionBlock.DefaultBitmapScale = 1.0f;
+
             switch (optionBlock.Type)
             {
                 case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
-                    if (optionBlock.DefaultFloatArgument == 0.0f)
-                        return new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 0.0f, Arg3 = 0.0f };
-                    else
-                        return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = 0.0f, Arg3 = 0.0f };
+                    return new RealConstant { Arg0 = optionBlock.DefaultBitmapScale, Arg1 = optionBlock.DefaultBitmapScale, Arg2 = 0.0f, Arg3 = 0.0f };
 
                 case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                case RenderMethodOption.OptionBlock.OptionDataType.Float4:
                     return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = optionBlock.DefaultFloatArgument, Arg3 = optionBlock.DefaultFloatArgument };
 
                 // convert ARGB to RealRGBA
-                case RenderMethodOption.OptionBlock.OptionDataType.Float4:
                 case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
                     return new RealConstant { Arg0 = optionBlock.DefaultColor.Red / 255.0f, Arg1 = optionBlock.DefaultColor.Blue / 255.0f, Arg2 = optionBlock.DefaultColor.Green / 255.0f, Arg3 = optionBlock.DefaultColor.Alpha / 255.0f };
 
@@ -1046,19 +1076,6 @@ namespace TagTool.Commands.Porting
                 {
                     for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
                         if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "bankalpha_infuence_depth")
-                        {
-                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
-                            break;
-                        }
-                }
-            }
-            if (OptionChanged("shader", "parallax", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
-            {
-                // if parallax is new to the shader, set height map scale to 0
-                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
-                {
-                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
-                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "height_scale")
                         {
                             realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
                             break;

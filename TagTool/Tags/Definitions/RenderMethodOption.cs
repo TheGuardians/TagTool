@@ -21,16 +21,15 @@ namespace TagTool.Tags.Definitions
             public CachedTag DefaultSamplerBitmap;
 
             public float DefaultFloatArgument;
+            public uint DefaultIntBoolArgument;
 
-            public int LayerCount;      // 0, 1, or 4 (found by listing all rmop with value >0 and noticed layers_of_4 had this value as 4)
-            public short Unknown5;
-            public short UnknownDepthRelated;
+            public short Flags;
+            public DefaultFilterModeValue DefaultFilterMode;
+            public DefaultAddressModeValue DefaultAddressMode;
+            public short AnisotropyAmount; // this is set in-engine for HO/H3/ODST -- i think it comes from the bitmap in use
 
-            public short Unknown6;      // 0, 1 or 3, probably an enum, confirmed short value
-            public short Unknown6_1;    //always 0
             public ArgbColor DefaultColor;
-
-            public float DetailMapTilingFactor;
+            public float DefaultBitmapScale;
 
             public uint Unknown11;
             public uint Unknown12;
@@ -53,6 +52,30 @@ namespace TagTool.Tags.Definitions
                 Integer = 3,
                 Boolean = 4,
                 IntegerColor = 5
+            }
+
+            public enum DefaultFilterModeValue : short
+            {
+                Trilinear,
+                Point,
+                Bilinear,
+                unused_00,
+                Anisotropic_2x,
+                unused_01,
+                Anisotropic_4x,
+                LightprobeTextureArray,
+                TextureArrayQuadlinear,
+                TextureArrayQuadanisotropic_2x
+            }
+
+            public enum DefaultAddressModeValue : short
+            {
+                Wrap,
+                Clamp,
+                Mirror,
+                BlackBorder,
+                MirrorOnce,
+                MirrorOnceBorder
             }
         }
     }
