@@ -90,7 +90,7 @@ namespace TagTool.Commands.Modding
                 string name = "default";
                 if (tagCacheCount > 1 || args.Count == 1)
                 {
-                    Console.WriteLine($"Enter the name of tag cache {i + 1}:");
+                    Console.WriteLine($"Enter the name of tag cache {i}:");
                     name = Console.ReadLine().Trim();
                 }
 
