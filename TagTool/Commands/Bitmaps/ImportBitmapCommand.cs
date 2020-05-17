@@ -24,7 +24,7 @@ namespace TagTool.Commands.Bitmaps
                   "ImportBitmap",
                   "Imports an image from a DDS file.",
 
-                  "ImportBitmap <image index> <dds file>",
+                  "ImportBitmap <image index> <dds file> [curve mode]",
 
                   "The image index must be in hexadecimal.\n" +
                   "No conversion will be done on the data in the DDS file.\n" +
@@ -37,7 +37,7 @@ namespace TagTool.Commands.Bitmaps
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 2)
+            if (args.Count > 3 || args.Count < 2)
                 return false;
 
             if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int imageIndex))
@@ -57,7 +57,36 @@ namespace TagTool.Commands.Bitmaps
             }
 
             var imagePath = args[1];
-            
+
+            BitmapImageCurve curve = BitmapImageCurve.xRGB;
+            string inputCurve = null;
+            if (args.Count == 3)
+                inputCurve = args[2];
+
+            if (inputCurve != null)
+            {
+                switch (inputCurve)
+                {
+                    case "linear":
+                        curve = BitmapImageCurve.Linear;
+                        break;
+                    case "sRGB":
+                    case "srgb":
+                        curve = BitmapImageCurve.sRGB;
+                        break;
+                    case "gamma2":
+                        curve = BitmapImageCurve.Gamma2;
+                        break;
+                    case "xRGB":
+                    case "xrgb":
+                        curve = BitmapImageCurve.xRGB;
+                        break;
+                    default:
+                        Console.WriteLine($"Invalid bitmap curve {inputCurve}, using xRGB instead");
+                        break;
+                }
+            }
+
             Console.WriteLine("Importing image data...");
 
 #if !DEBUG
@@ -72,7 +101,7 @@ namespace TagTool.Commands.Bitmaps
                     file.Read(reader);
                 }
 
-                var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file);
+                var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file, curve);
                 var reference = Cache.ResourceCache.CreateBitmapResource(bitmapTextureInteropDefinition);
 
                 // set the tag data

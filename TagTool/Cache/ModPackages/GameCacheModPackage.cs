@@ -23,7 +23,10 @@ namespace TagTool.Cache
 
         private int CurrentTagCacheIndex = 0;
 
-        public GameCacheModPackage(FileInfo file)
+        public  GameCacheHaloOnlineBase BaseCacheReference;
+        public Stream BaseCacheStream;
+
+        public GameCacheModPackage(GameCacheHaloOnlineBase baseCache, FileInfo file)
         {
             ModPackageFile = file;
             Version = CacheVersion.HaloOnline106708;
@@ -31,6 +34,8 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Directory = file.Directory;
+            BaseCacheReference = baseCache;
+            BaseCacheStream = baseCache.OpenCacheRead();
 
             // load mod package
             BaseModPackage = new ModPackage(file);
@@ -40,16 +45,59 @@ namespace TagTool.Cache
             SetActiveTagCache(0);
         }
 
+        public GameCacheModPackage(GameCacheHaloOnline baseCache, bool largeResourceStream=false)
+        {
+            ModPackageFile = null;
+            Directory = null;
+
+            Version = CacheVersion.HaloOnline106708;
+            Endianness = EndianFormat.LittleEndian;
+            Deserializer = new TagDeserializer(Version);
+            Serializer = new TagSerializer(Version);
+            BaseModPackage = new ModPackage(unmanagedResourceStream: largeResourceStream);
+            BaseCacheReference = baseCache;
+            BaseCacheStream = baseCache.OpenCacheRead();
+            ResourceCaches = new ResourceCachesModPackage(this, BaseModPackage);
+
+            // create copy of string table
+            using (var stringStream = (baseCache as GameCacheHaloOnline).StringIdCacheFile.OpenRead())
+            {
+                var newStringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, stringStream);
+                StringTableHaloOnline = newStringTable;
+                BaseModPackage.StringTable = newStringTable;
+            }
+
+
+            SetActiveTagCache(0);
+        }
+
         public override object Deserialize(Stream stream, CachedTag instance)
         {
             var definitionType = TagCache.TagDefinitions.GetTagDefinitionType(instance.Group);
-            var context = new ModPackageTagSerializationContext(stream, this, BaseModPackage, (CachedTagHaloOnline)instance);
-            return Deserializer.Deserialize(context, definitionType);
+            var modCachedTag = TagCache.GetTag(instance.Index) as CachedTagHaloOnline;
+            // deserialization can happen in the base cache if the tag in the mod pack is only a reference
+            if (modCachedTag.IsEmpty())
+            {
+                var baseInstance = BaseCacheReference.TagCache.GetTag(instance.Index);
+                return BaseCacheReference.Deserialize(BaseCacheStream, baseInstance);
+            }
+            else
+            {
+                var context = CreateTagSerializationContext(stream, instance);
+                return Deserializer.Deserialize(context, definitionType);
+            }
         }
 
         public override T Deserialize<T>(Stream stream, CachedTag instance)
         {
-            return Deserializer.Deserialize<T>(CreateTagSerializationContext(stream, instance));
+            var modCachedTag = TagCache.GetTag(instance.Index) as CachedTagHaloOnline;
+            if (modCachedTag.IsEmpty())
+            {
+                var baseInstance = BaseCacheReference.TagCache.GetTag(instance.Index);
+                return BaseCacheReference.Deserialize<T>(BaseCacheStream, baseInstance);
+            }
+            else
+                return Deserializer.Deserialize<T>(CreateTagSerializationContext(stream, instance));
         }
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
@@ -59,7 +107,7 @@ namespace TagTool.Cache
 
         private ISerializationContext CreateTagSerializationContext(Stream stream, CachedTag instance)
         {
-            return new ModPackageTagSerializationContext(stream, this, BaseModPackage, (CachedTagHaloOnline)instance);
+            return new ModPackageTagSerializationContext(stream, this, (CachedTagHaloOnline)instance);
         }
 
         public override Stream OpenCacheRead() => BaseModPackage.TagCachesStreams[CurrentTagCacheIndex];
@@ -70,11 +118,21 @@ namespace TagTool.Cache
 
         public override void SaveStrings() { }
 
-        private int GetTagCacheCount() => BaseModPackage.TagCaches.Count;
+        public override void SaveTagNames(string path = null)
+        {
+            Dictionary<int, string> tagNames = new Dictionary<int, string>();
+            foreach(var tag in TagCache.NonNull())
+            {
+                tagNames[tag.Index] = tag.Name;
+            }
+            BaseModPackage.TagCacheNames[CurrentTagCacheIndex] = tagNames;
+        }
+
+        private int GetTagCacheCount() => BaseModPackage.GetTagCacheCount();
 
         public int GetCurrentTagCacheIndex() => CurrentTagCacheIndex;
 
-        public void SetActiveTagCache(int index)
+        public bool SetActiveTagCache(int index)
         {
             if( index >= 0 && index < GetTagCacheCount())
             {
@@ -86,11 +144,49 @@ namespace TagTool.Cache
                     DisplayName = BaseModPackage.Metadata.Name + ".pak";
 
                 Console.WriteLine($"Current Tag Cache: {BaseModPackage.CacheNames[CurrentTagCacheIndex]}.");
+                return true;
             }
             else
             {
                 Console.WriteLine($"Invalid tag cache index {index}, {GetTagCacheCount()} tag cache available");
+                return false;
             }
+        }
+
+        public bool SaveModPackage(FileInfo file)
+        {
+            // check for null tags
+            foreach(var tag in TagCache.TagTable)
+            {
+                if(tag == null || tag.Name == null)
+                {
+                    if (tag != null)
+                        Console.WriteLine($"Tag: 0x{tag.Index:X4} has no name, will crash ingame.");
+                    else
+                        Console.WriteLine($"Warning: null tag detected.");
+
+                    return false;
+                }
+            }
+
+            BaseModPackage.Save(file);
+            return true;
+        }
+
+        public void SetCampaignFile(Stream stream)
+        {
+            BaseModPackage.CampaignFileStream = stream;
+        }
+
+        public void AddMapFile(Stream mapStream, int mapId)
+        {
+            BaseModPackage.AddMap(mapStream, mapId, CurrentTagCacheIndex);
+        }
+
+        public override void SaveFonts(Stream fontStream)
+        {
+            BaseModPackage.FontPackage = new MemoryStream();
+            fontStream.CopyTo(BaseModPackage.FontPackage);
         }
     }
 }

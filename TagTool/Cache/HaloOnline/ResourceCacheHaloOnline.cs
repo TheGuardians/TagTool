@@ -272,7 +272,8 @@ namespace TagTool.Cache.HaloOnline
             }
 
             // Write the chunks in
-            var writer = new BinaryWriter(resourceStream);
+            //var writer = new BinaryWriter(resourceStream);
+            var writer = new EndianWriter(resourceStream, true, EndianFormat.LittleEndian);
             var roundedSize = ResizeResource(writer.BaseStream, resourceIndex, newSize);
             var resource = Resources[resourceIndex];
             resourceStream.Position = resource.Offset;

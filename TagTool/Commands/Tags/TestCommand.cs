@@ -40,26 +40,6 @@ namespace TagTool.Commands
         {
             if (args.Count > 0)
                 return false;
-
-            using (var stream = Cache.OpenCacheReadWrite())
-            {
-                foreach(var tag in Cache.TagCache.NonNull())
-                {
-                    if (tag.IsInGroup("bitm"))
-                    {
-                        var bitm = Cache.Deserialize<Bitmap>(stream, tag);
-                        foreach(var image in bitm.Images)
-                        {
-                            if(image.Format == BitmapFormat.V8U8)
-                            {
-                                Console.WriteLine($"{image.Type} {image.Depth} {image.Width} {image.Height} {tag.Name}");
-                            }
-                        }
-                    }
-                }
-            }
-
-            return true;
             /*
             using (var stream = Cache.OpenCacheReadWrite())
             {
@@ -78,11 +58,9 @@ namespace TagTool.Commands
                 Cache.SaveStrings();
                 (Cache as GameCacheHaloOnline).SaveTagNames();
             }
-            
-            
-
 
             return true;*/
+
             //string filename = "test";
             //BlamModelFile geometryFormat = new BlamModelFile();
             
@@ -105,11 +83,11 @@ namespace TagTool.Commands
 
                 
                 // disassemble specified shaders related to rmt2
-                var tagName = @"shaders\shader_templates\_0_0_0_0_1_0_0_0_0_0_0";
+                var tagName = @"shaders\shader_templates\_0_3_0_1_1_2_0_0_0_1_0";
 
                 var rmt2Tag = Cache.TagCache.GetTag(tagName, "rmt2");
-                var glvsTag = Cache.TagCache.GetTag(0x374);
-                var glpsTag = Cache.TagCache.GetTag(0x373);
+                var glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders.glvs");
+                var glpsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders.glps");
                 var rmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
                 var glps = Cache.Deserialize<GlobalPixelShader>(stream, glpsTag);

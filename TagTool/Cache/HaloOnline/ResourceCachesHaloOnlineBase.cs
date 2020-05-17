@@ -40,7 +40,7 @@ namespace TagTool.Cache.HaloOnline
         /// <param name="dataStream">The stream to read the resource data from.</param>
         /// <exception cref="System.ArgumentNullException">resource</exception>
         /// <exception cref="System.ArgumentException">The input stream is not open for reading;dataStream</exception>
-        public void AddResource(PageableResource resource, Stream dataStream)
+        public virtual void AddResource(PageableResource resource, Stream dataStream)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");

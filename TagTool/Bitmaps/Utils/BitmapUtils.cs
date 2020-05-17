@@ -209,7 +209,7 @@ namespace TagTool.Bitmaps
             return result;
         }
 
-        public static BitmapTextureInteropDefinition CreateBitmapTextureInteropDefinition(DDSHeader header)
+        public static BitmapTextureInteropDefinition CreateBitmapTextureInteropDefinition(DDSHeader header, BitmapImageCurve bitmapCurve)
         {
             var result = new BitmapTextureInteropDefinition
             {
@@ -224,7 +224,7 @@ namespace TagTool.Bitmaps
             result.Format = BitmapDdsFormatDetection.DetectFormat(header);
             result.D3DFormat = (int)header.PixelFormat.FourCC;
 
-            result.Curve = BitmapImageCurve.xRGB; // find a way to properly determine that
+            result.Curve = bitmapCurve;
 
             if (IsCompressedFormat(result.Format))
                 result.Flags |= BitmapFlags.Compressed;

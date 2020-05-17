@@ -103,8 +103,9 @@ namespace TagTool.Commands.Modding
             var tagStream = ModPackage.TagCachesStreams[0];
             ModPackage.CacheNames.Add("default");
 
-            ModPackage.TagCaches[0] = new TagCacheHaloOnline(tagStream, ModPackage.StringTable, new Dictionary<int, string>());
-            ModPackage.Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ModPackage.ResourcesStream);
+            // temporary cache for holding tags and resources
+            TagCacheHaloOnline modPackTagCache = new TagCacheHaloOnline(tagStream, ModPackage.StringTable, new Dictionary<int, string>());
+            ResourceCacheHaloOnline modPackResourceCache = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ModPackage.ResourcesStream);
 
             CreateDescription();
 
@@ -259,7 +260,7 @@ namespace TagTool.Commands.Modding
             Console.WriteLine("Building...");
 
             
-            AddTags(tagIndices);
+            AddTags(tagIndices, modPackTagCache, modPackResourceCache);
             
             ModPackage.Save(new FileInfo(packageName));
 
@@ -298,10 +299,9 @@ namespace TagTool.Commands.Modding
             ModPackage.Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
         }
 
-        private void AddTags(HashSet<int> tagIndices)
+        private void AddTags(HashSet<int> tagIndices, TagCacheHaloOnline modTagCache, ResourceCacheHaloOnline modPackResourceCache)
         {
             // define current cache tags, names
-            var modTagCache = ModPackage.TagCaches[0];
             var modTagNames = ModPackage.TagCacheNames[0];
             var modTagStream = ModPackage.TagCachesStreams[0];
 
@@ -417,7 +417,7 @@ namespace TagTool.Commands.Modding
                             }
                             else
                             {
-                                var newResourceIndex = ModPackage.Resources.AddRaw(
+                                var newResourceIndex = modPackResourceCache.AddRaw(
                                     ModPackage.ResourcesStream,
                                     srcResourceCaches[resourceLocation].ExtractRaw(
                                         srcResourceStreams[resourceLocation],

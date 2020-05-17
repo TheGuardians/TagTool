@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.BlamFile
 {
@@ -146,6 +148,54 @@ namespace TagTool.BlamFile
             var version = GetMapFileVersion(reader);
             var buildDate = GetBuildDate(reader, version);
             return CacheVersionDetection.GetFromBuildName(buildDate);
+        }
+
+        public static MapFile GenerateMapFile(CacheVersion version, Scenario scnr, CachedTag scenarioTag, Blf mapInfo = null)
+        {
+            MapFile map = new MapFile();
+            var header = new CacheFileHeader();
+
+
+            map.Version = version;
+            map.EndianFormat = EndianFormat.LittleEndian;
+            map.MapVersion = CacheFileVersion.HaloOnline;
+
+            header.HeaderSignature = new Tag("head");
+            header.FooterSignature = new Tag("foot");
+            header.FileVersion = map.MapVersion;
+            header.Build = CacheVersionDetection.GetBuildName(version);
+
+            switch (scnr.MapType)
+            {
+                case ScenarioMapType.MainMenu:
+                    header.CacheType = CacheFileType.MainMenu;
+                    break;
+                case ScenarioMapType.SinglePlayer:
+                    header.CacheType = CacheFileType.Campaign;
+                    break;
+                case ScenarioMapType.Multiplayer:
+                    header.CacheType = CacheFileType.Multiplayer;
+                    break;
+            }
+            header.SharedType = CacheFileSharedType.None;
+
+            header.MapId = scnr.MapId;
+            header.ScenarioTagIndex = scenarioTag.Index;
+            header.Name = scenarioTag.Name.Split('\\').Last();
+            header.ScenarioPath = scenarioTag.Name;
+
+            map.Header = header;
+
+            header.FileLength = 0x3390;
+
+            if (mapInfo != null)
+            {
+                if (mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.StartOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.EndOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
+                {
+                    map.MapFileBlf = mapInfo;
+                }
+            }
+            return map;
         }
     }
 }

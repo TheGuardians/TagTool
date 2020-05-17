@@ -309,10 +309,17 @@
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
     <Compile Include="Commands\GUI\RescaleGUICommand.cs" />
+    <Compile Include="Commands\Files\ImportFontsCommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
+    <Compile Include="Commands\Modding\AddTagCacheCommand.cs" />
+    <Compile Include="Commands\Modding\UpdateDescriptionCommand.cs" />
+    <Compile Include="Commands\Modding\OpenModPackageCommand.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
-    <Compile Include="Commands\Modding\DisplayTagCacheCommand.cs" />
+    <Compile Include="Commands\Modding\ModCacheInfoCommand.cs" />
+    <Compile Include="Commands\Modding\CreateModPackageCommand.cs" />
+    <Compile Include="Commands\Modding\ExtractFontsCommand.cs" />
+    <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
@@ -376,7 +383,7 @@
     <Compile Include="Commands\Tags\ListNullTagsCommand.cs" />
     <Compile Include="Commands\Tags\ListUnnamedTagsCommand.cs" />
     <Compile Include="Commands\Tags\ListUnusedTagsCommand.cs" />
-    <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
+    <Compile Include="Commands\Modding\SaveModPackageCommand.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
     <Compile Include="Commands\Tags\RebuildCacheFileCommand.cs" />
@@ -561,6 +568,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
+    <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
     <Compile Include="Pathfinding\PathfindingGeometry.cs" />
     <Compile Include="Pathfinding\Utils\PathfindingConverter.cs" />

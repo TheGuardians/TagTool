@@ -17,15 +17,11 @@ namespace TagTool.Cache
 
         public ModPackageMetadata Metadata { get; set; } = new ModPackageMetadata();
 
-        public List<TagCacheHaloOnline> TagCaches { get; set; } = null;
-
-        public List<Stream> TagCachesStreams { get; set; } = new List<Stream>();
+        public List<ModPackageStream> TagCachesStreams { get; set; } = new List<ModPackageStream>();
 
         public List<Dictionary<int, string>> TagCacheNames { get; set; } = new List<Dictionary<int, string>>();
 
-        public ResourceCacheHaloOnline Resources { get; set; } = null;
-
-        public Stream ResourcesStream { get; set; } = new MemoryStream();
+        public ModPackageStream ResourcesStream { get; set; }
 
         public List<Stream> MapFileStreams { get; set; } = new List<Stream>();
 
@@ -43,7 +39,22 @@ namespace TagTool.Cache
 
         public Dictionary<string, Stream> Files { get; set; }
 
-        public ModPackage(FileInfo file = null)
+        private int TagCacheCount => CacheNames.Count; // find safer solution?
+
+        public int GetTagCacheCount() => TagCacheCount;
+
+        ~ModPackage()
+        {
+            foreach(var stream in TagCachesStreams)
+            {
+                stream.SetDisposable(true);
+                stream.Dispose();
+            }
+            ResourcesStream.SetDisposable(true);
+            ResourcesStream.Dispose();
+        }
+
+        public ModPackage(FileInfo file = null, bool unmanagedResourceStream=false)
         {
             if (file != null)
                 Load(file);
@@ -51,21 +62,32 @@ namespace TagTool.Cache
             {
                 // init a single cache
                 var tagStream = new MemoryStream();
-                TagCachesStreams.Add(tagStream);
+                TagCachesStreams.Add(new ModPackageStream(tagStream));
 
                 var names = new Dictionary<int, string>();
-                var tags = new TagCacheHaloOnline(tagStream, StringTable, names);
-                TagCaches = new List<TagCacheHaloOnline>();
-                TagCaches.Add(tags);
                 TagCacheNames.Add(names);
+                CacheNames.Add("default");
                 Files = new Dictionary<string, Stream>();
-
-                Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);
+                StringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, null);
                 Header.SectionTable = new ModPackageSectionTable();
+                if (!unmanagedResourceStream)
+                {
+                    ResourcesStream = new ModPackageStream(new MemoryStream());
+                }
+                else
+                {
+                    unsafe
+                    {
+                        long bufferSize = 4L * 1024 * 1024 * 1024; // 4 GB max
+                        IntPtr data = Marshal.AllocHGlobal((IntPtr)bufferSize);
+                        ResourcesStream = new ModPackageStream(new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite));
+                    }
+                }
+                
             }
         }
 
-        public void AddMap(MemoryStream mapStream, int mapId, int cacheIndex)
+        public void AddMap(Stream mapStream, int mapId, int cacheIndex)
         {
             MapFileStreams.Add(mapStream);
             MapToCacheMapping.Add(MapFileStreams.Count - 1, cacheIndex);
@@ -97,16 +119,6 @@ namespace TagTool.Cache
                 ReadStringIdSection(reader);
                 ReadFontSection(reader);
                 ReadFileEntries(reader, dataContext, deserializer);
-
-                int tagCacheCount = TagCachesStreams.Count;
-
-                TagCaches = new List<TagCacheHaloOnline>();
-                for (int i = 0; i < tagCacheCount; i++)
-                {
-                    TagCaches.Add(new TagCacheHaloOnline(TagCachesStreams[i], StringTable, TagCacheNames[i]));
-                }
-                
-                Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);
             }
         }
 
@@ -299,13 +311,13 @@ namespace TagTool.Cache
         private void WriteTagsSection(EndianWriter writer, DataSerializationContext context, TagSerializer serializer)
         {
             uint sectionOffset = (uint)writer.BaseStream.Position;
-            GenericSectionEntry tagCachesEntry = new GenericSectionEntry(TagCaches.Count, 0x8);
+            GenericSectionEntry tagCachesEntry = new GenericSectionEntry(TagCacheCount, 0x8);
             tagCachesEntry.Write(writer);
             // make room for table
 
-            writer.Write(new byte[0x28 * TagCaches.Count]);
+            writer.Write(new byte[0x28 * TagCacheCount]);
 
-            for(int i = 0; i < TagCaches.Count; i++)
+            for(int i = 0; i < TagCacheCount; i++)
             {
 
                 uint offset = (uint)writer.BaseStream.Position;
@@ -334,12 +346,7 @@ namespace TagTool.Cache
 
             for(int i = 0; i < TagCacheNames.Count; i++)
             {
-                //prepare tag names
-                var names = new Dictionary<int, string>();
-
-                foreach (var entry in TagCaches[i].TagTable)
-                    if (entry != null && entry.Name != null)
-                        names.Add(entry.Index, entry.Name);
+                var names = TagCacheNames[i];
 
                 uint offset = (uint)writer.BaseStream.Position;
 
@@ -421,7 +428,7 @@ namespace TagTool.Cache
             var entry = new GenericSectionEntry(reader);
             var cacheCount = entry.Count;
 
-            TagCachesStreams = new List<Stream>();
+            TagCachesStreams = new List<ModPackageStream>();
             CacheNames = new List<string>();
 
             for(int i = 0; i < cacheCount; i++)
@@ -441,7 +448,7 @@ namespace TagTool.Cache
                 reader.Read(data, 0, size);
                 tagStream.Write(data, 0, size);
                 tagStream.Position = 0;
-                TagCachesStreams.Add(tagStream);
+                TagCachesStreams.Add(new ModPackageStream(tagStream));
             }
         }
 
@@ -450,10 +457,11 @@ namespace TagTool.Cache
             var section = GetSectionHeader(reader, ModPackageSection.Resources);
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
-
+            Stream newResourceStream;
             if(section.Size <= 0x7FFFFFFF)
             {
-                ResourcesStream = new MemoryStream();
+                newResourceStream = new MemoryStream();
+                ResourcesStream = new ModPackageStream(newResourceStream);
                 reader.BaseStream.CopyTo(ResourcesStream);
             }
             else
@@ -462,10 +470,12 @@ namespace TagTool.Cache
                 {
                     long bufferSize = 4L * 1024 * 1024 * 1024; // 4 GB max
                     IntPtr data = Marshal.AllocHGlobal((IntPtr)bufferSize);
-                    ResourcesStream = new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite);
+                    newResourceStream = new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite);
+                    ResourcesStream = new ModPackageStream(newResourceStream);
                     reader.BaseStream.CopyTo(ResourcesStream);
                 }
             }
+            
             ResourcesStream.Position = 0;
         }
 
@@ -560,7 +570,8 @@ namespace TagTool.Cache
 
             MapFileStreams = new List<Stream>();
             MapToCacheMapping = new Dictionary<int, int>();
-
+            MapIds = new List<int>();
+            // TODO: add map ids on load
             for(int i = 0; i < mapCount; i++)
             {
                 reader.BaseStream.Position = entry.TableOffset + 0x10 * i + section.Offset;
@@ -576,6 +587,11 @@ namespace TagTool.Cache
                 stream.Write(data, 0, size);
                 MapFileStreams.Add(stream);
 
+                var mapReader = new EndianReader(stream, true, EndianFormat.LittleEndian);
+                MapFile mapFile = new MapFile();
+                mapReader.BaseStream.Position = 0;
+                mapFile.Read(mapReader);
+                MapIds.Add(mapFile.Header.MapId);
             }
         }
 
@@ -664,5 +680,27 @@ namespace TagTool.Cache
                     Header.MapFlags |= MapFlags.MultiplayerMaps;
             }
         }
+
+        // IO stuff
+
+        public void CreateDescription()
+        {
+            Metadata = new ModPackageMetadata();
+
+            Console.WriteLine("Enter the display name of the mod package (16 chars max):");
+            Metadata.Name = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the description of the mod package (128 chars max):");
+            Metadata.Description = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the author of the mod package (16 chars max):");
+            Metadata.Author = Console.ReadLine().Trim();
+
+            Metadata.BuildDateLow = (int)DateTime.Now.ToFileTime() & 0x7FFFFFFF;
+            Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
+        }
+
     }
 }

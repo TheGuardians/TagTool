@@ -50,10 +50,6 @@ namespace TagTool.Cache
                 }
                 else if (file.Name.Equals("tags.dat"))
                     estimatedVersion = CacheVersion.HaloOnline106708;
-                else if (file.Name.Contains(".pak"))
-                {
-                    return new GameCacheModPackage(file);
-                }
                 else
                     throw new Exception("Invalid file passed to GameCache constructor");
             }

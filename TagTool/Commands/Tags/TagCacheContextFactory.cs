@@ -18,9 +18,9 @@ namespace TagTool.Commands.Tags
 {
     public static class TagCacheContextFactory
     {
-        public static CommandContext Create(CommandContextStack contextStack, GameCache cache)
+        public static CommandContext Create(CommandContextStack contextStack, GameCache cache, string contextName="tags")
         {
-            var context = new CommandContext(contextStack.Context, "tags");
+            var context = new CommandContext(contextStack.Context, contextName);
             Populate(contextStack, context, cache);
             return context;
         }
@@ -69,13 +69,14 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ExportTagModCommand(hoCache));
 
                 // modding commands
-                context.AddCommand(new ApplyModPackageCommand(hoCache));
+                context.AddCommand(new OpenModPackageCommand(contextStack, hoCache));
                 context.AddCommand(new CreateCharacterType(cache));
-                context.AddCommand(new ExportModPackageCommand(hoCache));
 
+                
                 context.AddCommand(new UpdateMapFilesCommand(cache));
 
                 context.AddCommand(new RescaleGUICommand(cache));
+                context.AddCommand(new ImportFontsCommand(hoCache));
 
                 context.AddCommand(new PhysicsModelTestCommand(cache));
                 context.AddCommand(new CollisionModelTestCommand(hoCache));
@@ -86,13 +87,19 @@ namespace TagTool.Commands.Tags
             {
                 var hoCache = cache as GameCacheHaloOnline;
                 context.AddCommand(new RebuildCacheFileCommand(hoCache));
+                context.AddCommand(new CreateModPackageCommand(contextStack, hoCache));
             }
 
             if (cache is GameCacheModPackage)
             {
                 var modCache = cache as GameCacheModPackage;
                 context.AddCommand(new SwitchTagCacheCommand(modCache));
-                context.AddCommand(new DisplayTagCache(modCache));
+                context.AddCommand(new ModCacheInfoCommand(modCache));
+                context.AddCommand(new SaveModPackageCommand(modCache));
+                context.AddCommand(new ExtractFontsCommand(modCache));
+                context.AddCommand(new ApplyModPackageCommand(modCache));
+                context.AddCommand(new AddTagCacheCommand(modCache));
+                context.AddCommand(new UpdateDescriptionCommand(modCache));
             }
 
             // porting related

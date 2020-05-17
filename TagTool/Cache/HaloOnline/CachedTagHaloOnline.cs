@@ -92,7 +92,6 @@ namespace TagTool.Cache.HaloOnline
         /// <summary>
         /// Reads the header for the tag instance from a stream.
         /// </summary>
-        /// <param name="reader">The stream to read from.</param>
         internal void ReadHeader(BinaryReader reader, StringTable stringTable)
         {
             Checksum = reader.ReadUInt32();                        // 0x00 uint32 checksum
@@ -190,6 +189,14 @@ namespace TagTool.Cache.HaloOnline
         public void AddResourceOffset(uint offset)
         {
             _resourceOffsets.Add(offset);
+        }
+
+        public bool IsEmpty()
+        {
+            if (TotalSize == DefinitionOffset)
+                return true;
+            else
+                return false;
         }
     }
 }

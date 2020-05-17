@@ -72,7 +72,7 @@ namespace TagTool.Shaders.ShaderMatching
             string result = "";
             result += $"Albedo:         {(AlbedoOptions)options[0]} \n";
             result += $"Blend mode:     {(BlendModeOptions)options[1]} \n";
-            result += $"Fog:            {(FogOptions)options[3]} \n";
+            result += $"Fog:            {(FogOptions)options[2]} \n";
 
             return result;
         }

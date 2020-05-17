@@ -74,6 +74,12 @@ namespace TagTool.Commands.Porting
 			ParsePortingOptions(portingOptions);
 
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;
+            /*
+            if(CacheContext is GameCacheModPackage)
+            {
+                SetFlags(PortingFlags.Memory);
+            }*/
+
 
 			//
 			// Convert Blam data to ElDorado data

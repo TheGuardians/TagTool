@@ -79,5 +79,18 @@ namespace TagTool.Cache.HaloOnline
 
             reader.SeekTo(0);
         }
+
+        public override void SaveFonts(Stream stream)
+        {
+            var fontFilePath = $"{Directory.FullName}\\fonts\\font_package.bin";
+            var fontFile = new FileInfo(fontFilePath);
+            if (fontFile.Exists)
+                fontFile.Delete();
+            
+            using (var fontFileStream = fontFile.Create())
+            {
+                stream.CopyTo(fontFileStream);
+            }
+        }
     }
 }
