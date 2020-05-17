@@ -17,12 +17,13 @@ namespace TagTool.Commands.RenderMethods
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCache info, CachedTag tag, RenderMethod renderMethod)
+        public static void Populate(CommandContext context, GameCache cache, CachedTag tag, RenderMethod renderMethod)
         {
-            context.AddCommand(new ListArgumentsCommand(info, tag, renderMethod));
-            context.AddCommand(new SetArgumentCommand(info, tag, renderMethod));
-            context.AddCommand(new ListBitmapsCommand(info, tag, renderMethod));
-            context.AddCommand(new SpecifyBitmapsCommand(info, tag, renderMethod));
+            context.AddCommand(new ListArgumentsCommand(cache, tag, renderMethod));
+            context.AddCommand(new SetArgumentCommand(cache, tag, renderMethod));
+            context.AddCommand(new ListBitmapsCommand(cache, tag, renderMethod));
+            context.AddCommand(new SpecifyBitmapsCommand(cache, tag, renderMethod));
+            context.AddCommand(new PopulateParametersCommand(cache, tag, renderMethod));
         }
     }
 }

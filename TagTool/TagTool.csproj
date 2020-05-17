@@ -337,6 +337,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.ShaderGen.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
+    <Compile Include="Commands\RenderMethods\PopulateParametersCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractBMFCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractModelCommand.cs" />
