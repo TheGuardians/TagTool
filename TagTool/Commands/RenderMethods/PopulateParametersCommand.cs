@@ -33,10 +33,6 @@ namespace TagTool.Commands.RenderMethods
             if (args.Count != 2)
                 return false;
 
-            // TODO: sampler register support
-
-            // TODO: register pooling -- currently registers are gathered from all EP shaders, some conflict which produces unwanted parameter bindings
-
             string[] pixelRegisterNames = new string[] { "none" };
             string[] vertexRegisterNames = new string[] { "none" };
 
@@ -88,6 +84,7 @@ namespace TagTool.Commands.RenderMethods
                                 {
                                     PixelRegisterPairings.Add(PCParameter.RegisterIndex, pixelRegisterName);
                                     canBreak = true;
+                                    break;
                                 }
 
                             if (canBreak)
@@ -107,6 +104,7 @@ namespace TagTool.Commands.RenderMethods
                                 {
                                     VertexRegisterPairings.Add(PCParameter.RegisterIndex, vertexRegisterName);
                                     canBreak = true;
+                                    break;
                                 }
 
                             if (canBreak)

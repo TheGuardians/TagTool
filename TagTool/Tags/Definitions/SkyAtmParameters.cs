@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Shaders;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
@@ -10,14 +11,17 @@ namespace TagTool.Tags.Definitions
 	{
         public int Unknown1;
         public CachedTag FogBitmap;
-        public float Unknown2;
-        public float Unknown3;
-        public float Unknown4;
+        public float TextureRepeatRate;
+        public float DistanceBetweenSheets;
+        public float DepthFadeFactor;
         public float Unknown5;
-        public float Unknown6;
-        public float Unknown7;
-        public float Unknown8;
-        public int Unknown9;
+        public float FalloffStartDistance;
+        public float DistanceFalloffPower;
+        public float TransparentSortDistance;
+        public SortingLayerValue TransparentSortingLayer;
+
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x3)]
+        public byte[] Unused;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public float Unknown10;
@@ -73,7 +77,8 @@ namespace TagTool.Tags.Definitions
         public class UnderwaterBlock : TagStructure
 		{
             public StringId Name;
-            public RealArgbColor Color;
+            public float Murkiness;
+            public RealRgbColor Color;
         }
     }
 }

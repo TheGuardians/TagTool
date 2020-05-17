@@ -1,6 +1,7 @@
 using System;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Shaders;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using static TagTool.Tags.Definitions.RenderMethodTemplate;
@@ -29,8 +30,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class ShaderFunction : TagStructure
         {
-            // TODO: determine if this is an enum or an index
-            public int Type;
+            public FunctionType Type;
 
             [TagField(Flags = Label)]
             public StringId InputName;
@@ -40,6 +40,19 @@ namespace TagTool.Tags.Definitions
             public float TimePeriod;
 
             public TagFunction Function = new TagFunction { Data = new byte[0] };
+
+            public enum FunctionType : int
+            {
+                Value,
+                Color,
+                ScaleUniform,
+                ScaleX,
+                ScaleY,
+                TranslationX,
+                TranslationY,
+                FrameIndex,
+                Alpha
+            }
         }
 
         [TagStructure(Size = 0x3C)]
@@ -226,14 +239,6 @@ namespace TagTool.Tags.Definitions
             UsesDepthCamera = 1 << 2,
             DisableWithShields = 1 << 3,
             EnableWithShields = 1 << 4,
-        }
-
-        public enum SortingLayerValue : byte
-        {
-            Invalid,
-            PrePass,
-            Normal,
-            PostPass
         }
     }
 }
