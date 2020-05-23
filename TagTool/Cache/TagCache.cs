@@ -201,6 +201,9 @@ namespace TagTool.Cache
                 }
             }
 
+            while (name.Length < 4)
+                name += " "; // rmw, rmd, rm
+
             var type = TagDefinitions.GetTagDefinitionType(name);
 
             if (type != null)

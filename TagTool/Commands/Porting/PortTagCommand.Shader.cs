@@ -123,40 +123,42 @@ namespace TagTool.Commands.Porting
 
         private CachedTag GetDefaultShader(Tag groupTag, CachedTag edTag)
         {
+            CachedTag shaderTag;
+
             switch (groupTag.ToString())
             {
-                case "beam":
-                    return CacheContext.TagCache.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
+                case "beam" when CacheContext.TagCache.TryGetTag(@"objects\weapons\support_high\spartan_laser\fx\firing_3p.beam", out shaderTag):
+                    return shaderTag;
 
-                case "cntl":
-                    return CacheContext.TagCache.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
+                case "cntl" when CacheContext.TagCache.TryGetTag(@"objects\weapons\pistol\needler\fx\projectile.cntl", out shaderTag):
+                    return shaderTag;
 
-                case "decs":
-                    return CacheContext.TagCache.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
+                case "decs" when CacheContext.TagCache.TryGetTag(@"fx\decals\impact_plasma\impact_plasma_medium\hard.decs", out shaderTag):
+                    return shaderTag;
 
-                case "ltvl":
-                    return CacheContext.TagCache.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
+                case "ltvl" when CacheContext.TagCache.TryGetTag(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile.ltvl", out shaderTag):
+                    return shaderTag;
 
-                case "prt3":
-                    return CacheContext.TagCache.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
+                case "prt3" when CacheContext.TagCache.TryGetTag(@"fx\particles\energy\sparks\impact_spark_orange.prt3", out shaderTag):
+                    return shaderTag;
 
-                case "rmd ":
-                    return CacheContext.TagCache.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
+                case "rmd " when CacheContext.TagCache.TryGetTag(@"objects\gear\human\military\shaders\human_military_decals.rmd", out shaderTag):
+                    return shaderTag;
 
-                case "rmfl":
-                    return CacheContext.TagCache.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
+                case "rmfl" when CacheContext.TagCache.TryGetTag(@"levels\multi\riverworld\shaders\riverworld_tree_leafa.rmfl", out shaderTag):
+                    return shaderTag;
 
-                case "rmtr":
-                    return CacheContext.TagCache.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+                case "rmtr" when CacheContext.TagCache.TryGetTag(@"levels\multi\riverworld\shaders\riverworld_ground.rmtr", out shaderTag):
+                    return shaderTag;
 
-                case "rmw ":
-                    return CacheContext.TagCache.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
+                case "rmw " when CacheContext.TagCache.TryGetTag(@"levels\multi\riverworld\shaders\riverworld_water_rough.rmw", out shaderTag):
+                    return shaderTag;
 
-                case "rmhg":
-                    return CacheContext.TagCache.GetTag<ShaderHalogram>(@"objects\multi\shaders\koth_shield");
+                case "rmhg" when CacheContext.TagCache.TryGetTag(@"objects\multi\shaders\koth_shield.rmhg", out shaderTag):
+                    return shaderTag;
 
-                case "rmbk": // hackfix
-                    return CacheContext.TagCache.GetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black");
+                case "rmbk" when CacheContext.TagCache.TryGetTag(@"levels\dlc\bunkerworld\shaders\z_black.rmsh", out shaderTag):
+                    return shaderTag;
 
                 case "rmrd":
                 case "rmsh":
@@ -166,6 +168,8 @@ namespace TagTool.Commands.Porting
                 case "rmct":
                     return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
             }
+
+            Console.WriteLine($"No default shader found for \"{groupTag.ToString()}\", using \"shaders\\invalid.rmsh\"");
             return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
         }
 
