@@ -62,12 +62,10 @@ namespace TagTool.Cache.ModPackages
                 hash = Convert.ToBase64String(sha1.ComputeHash(data));
             }
             // check if a perfect resource match exists, if yes reuse it to save memory in multicache packages
-            if (ExistingResources.ContainsKey(hash) 
-                && ExistingResources[hash].UncompressedBlockSize == resource.Page.UncompressedBlockSize
-                && ExistingResources[hash].CompressedBlockSize == resource.Page.CompressedBlockSize)
+            if (ExistingResources.ContainsKey(hash) && ExistingResources[hash].UncompressedBlockSize == dataSize)
             {
                 var existingPage = ExistingResources[hash];
-                resource.Page.Index = existingPage.Index;
+                resource.Page = existingPage;
                 resource.DisableChecksum();
                 Debug.WriteLine("Found perfect resource match, reusing resource!");
             }
