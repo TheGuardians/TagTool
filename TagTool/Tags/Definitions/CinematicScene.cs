@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
             public uint Unknown2;
             public float Unknown3;
             public List<LightingBlock> Lighting;
-            public List<UnknownBlock> Unknown4;
+            public List<ClipBlock> Clips;
             public List<SoundBlock> Sounds;
             public List<BackgroundSoundBlock> BackgroundSounds;
             public List<EffectBlock> Effects;
@@ -88,8 +88,8 @@ namespace TagTool.Tags.Definitions
             public List<UserInputConstraintsBlock> UserInputConstraints;
 
             public byte[] ImportScript1;
-            public int LoadedFrameCount;
-            public List<FrameBlock> Frames;
+            public int FrameCount;
+            public List<CameraFrame> CameraFrames;
 
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
@@ -104,38 +104,31 @@ namespace TagTool.Tags.Definitions
                 public StringId Marker;
             }
 
-            [TagStructure(Size = 0x18)]
+            [TagStructure(Size = 0x14)]
             public class UserInputConstraintsBlock : TagStructure
             {
                 public short Unknown1;
                 public short Unknown2;
-                public int Unknown3;
-                public float Unknown4;
-                public float Unknown5;
-                public float Unknown6;
-                public float Unknown7;
+                public int Ticks;
+                public Rectangle2d ConstraintBoundaries;
+                public float Unknown3; // friction?
             }
 
             [TagStructure(Size = 0x2C)]
-            public class UnknownBlock : TagStructure
+            public class ClipBlock : TagStructure
 			{
-                public uint Unknown1;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
+                public RealPoint3d PlaneCenter;
+                public RealPoint3d PlaneDirection;
+                public uint FrameStart;
+                public uint FrameEnd;
 
-                public List<UnknownBlock2> Unknown9;
+                public List<ClipPuppetObject> PuppetObjects;
 
-                [TagStructure(Size =0x4)]
-                public class UnknownBlock2 : TagStructure
+                [TagStructure(Size = 0x4)]
+                public class ClipPuppetObject : TagStructure
 				{
-                    public uint Unknown;
+                    public uint PuppetIndex;
                 }
-
             }
 
             [TagStructure(Size = 0x24)]
@@ -175,15 +168,15 @@ namespace TagTool.Tags.Definitions
                 public int OwnerPuppetIndex;
                 [TagField(Flags = Label)]
                 public StringId TargetFunctionName;
-                public List<UnknownBlock2> Unknown;
+                public List<KeyFrame> KeyFrames;
 
                 [TagStructure(Size = 0x10)]
-                public class UnknownBlock2 : TagStructure
+                public class KeyFrame : TagStructure
 				{
-                    public uint Unknown1;
-                    public int Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                    public uint Flags;
+                    public int FrameIndex;
+                    public float Value;
+                    public float InterpolationTime;
                 }
             }
 
@@ -210,36 +203,6 @@ namespace TagTool.Tags.Definitions
                 public int Frame;
                 public byte[] ImportScript;
             }
-
-            [TagStructure(Size = 0x44)]
-            public class FrameBlock : TagStructure
-			{
-                public RealPoint3d Position;
-                public float Unknown1;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public float Unknown5;
-                public float Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float FOV;
-
-                //Depth of field options
-
-                public FlagBits Flags;
-                public float NearPlane;
-                public float FarPlane;
-                public float FocalDepth;
-                public float BlurAmount;
-
-                [Flags]
-                public enum FlagBits : int
-                {
-                    None,
-                    EnableDepthOfField = 1 << 0
-                }
-            }
         }
 
         [TagStructure(Size = 0x14)]
@@ -259,25 +222,33 @@ namespace TagTool.Tags.Definitions
                 public class FrameBlock : TagStructure
 				{
                     public uint UnknownIndex;
-                    public RealPoint3d Position;
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
-                    public float Unknown5;
-                    public float Unknown6;
-                    public float Unknown7;
-                    public float Unknown8;
-                    public float FOV;
-
-                    //Depth of field options
-
-                    public int Flags;
-                    public float NearPlane;
-                    public float FarPlane;
-                    public float FocalDepth;
-                    public float BlurAmount;
+                    public CameraFrame CameraFrame;
                 }
+            }
+        }
+
+        [TagStructure(Size = 0x44)]
+        public class CameraFrame : TagStructure
+        {
+            public RealPoint3d Position;
+            public RealVector3d Forward;
+            public RealVector3d Up;
+
+            public float Unknown7;
+            public float Unknown8;
+            public float FOV;
+
+            public FlagBits Flags;
+            public float NearFocalPlaneDistance;
+            public float FarFocalPlaneDistance;
+            public float FocalDepth;
+            public float BlurAmount;
+
+            [Flags]
+            public enum FlagBits : int
+            {
+                None,
+                EnableDepthOfField = 1 << 0
             }
         }
     }

@@ -61,7 +61,7 @@ namespace TagTool.Commands.Porting
 			BlamCache = blamCache;
 			GeometryConverter = new RenderGeometryConverter(cacheContext, blamCache);
 
-			foreach (var tagType in CacheContext.TagCache.TagDefinitions.Types.Keys)
+            foreach (var tagType in CacheContext.TagCache.TagDefinitions.Types.Keys)
                 DefaultTags[tagType.Tag] = CacheContext.TagCache.FindFirstInGroup(tagType.Tag);
 		}
 
@@ -201,7 +201,7 @@ namespace TagTool.Commands.Porting
                 TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor);
 
                 foreach (var tag in CacheContext.TagCacheGenHO.TagTable)
-                    if (tag.Group.Tag == "rmt2" && tag.Name.Contains(rmt2Descriptor.Type))
+                    if (tag != null && tag.Group.Tag == "rmt2" && tag.Name.Contains(rmt2Descriptor.Type))
                     {
                         if ((FlagIsSet(PortingFlags.Ms30) && tag.Name.StartsWith("ms30\\")) || (!FlagIsSet(PortingFlags.Ms30) && !tag.Name.StartsWith("ms30\\")))
                             return true;
@@ -524,10 +524,10 @@ namespace TagTool.Commands.Porting
                 case CinematicScene cisc:
                     foreach (var shot in cisc.Shots)
                     {
-                        foreach (var frame in shot.Frames)
+                        foreach (var frame in shot.CameraFrames)
                         {
-                            frame.NearPlane *= -1.0f;
-                            frame.FarPlane *= -1.0f;
+                            frame.NearFocalPlaneDistance *= -1.0f;
+                            frame.FarFocalPlaneDistance *= -1.0f;
 
                             if (BlamCache.Version == CacheVersion.Halo3ODST)
                                 frame.FOV *= 0.65535f; // fov change in ODST affected cisc too it seems

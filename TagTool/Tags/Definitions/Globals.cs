@@ -1443,7 +1443,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTag CinematicAnchor;
 
-            public float Unknown1;
+            public float FovConstant;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public float Unknown2;
