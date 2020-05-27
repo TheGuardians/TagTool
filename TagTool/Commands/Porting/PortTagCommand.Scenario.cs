@@ -1414,7 +1414,8 @@ namespace TagTool.Commands.Porting
             ["sc140"] = new List<string>
             {
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
-                "00018790,ACDA4966,ACDB4967,0044,70010000,GlobalsReference,Vehicle,Value,//makes phantom fill up, allows level to finish"
+                "00018790,ACDA4966,ACDB4967,0044,70010000,GlobalsReference,Vehicle,Value,//makes phantom fill up, allows level to finish",
+                "00025501,C711639D,FFFFFFFF,0006,0000003C,Expression,Real,real,value," // convert default near_clip value (0.04 -> 0.0078125)
             },
 
             ["h100"] = new List<string>
