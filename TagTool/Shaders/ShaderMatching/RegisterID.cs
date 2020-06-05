@@ -4,24 +4,24 @@ namespace TagTool.Shaders.ShaderMatching
 {
     public class RegisterID
     {
-        public string Name;
+        public int RegisterIndex;
         public ShaderParameter.RType Type;
 
-        public RegisterID(string name, ShaderParameter.RType type)
+        public RegisterID(int registerIndex, ShaderParameter.RType type)
         {
-            Name = name;
+            RegisterIndex = registerIndex;
             Type = type;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj != null && Name == ((RegisterID)obj).Name && Type == ((RegisterID)obj).Type)
+            if (obj != null && RegisterIndex == ((RegisterID)obj).RegisterIndex && Type == ((RegisterID)obj).Type)
                 return true;
             return false;
         }
         public override int GetHashCode()
         {
-            return Name.GetHashCode() + Type.GetHashCode();
+            return RegisterIndex.GetHashCode() + Type.GetHashCode();
         }
     }
 }
