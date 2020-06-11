@@ -364,7 +364,7 @@ namespace TagTool.Commands.Porting
 
             // fixup rm animations
             if (finalRm.ShaderProperties[0].Functions.Count > 0)
-                RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance);
+                RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
 
             // build new rm option indices
             finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(edRmt2Descriptor);
@@ -372,7 +372,7 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private List<Dictionary<RegisterID, int>> MatchPixelRegisters(PixelShader externalPixl, PixelShader basePixl)
+        private List<Dictionary<RegisterID, int>> MatchPixelRegisters(PixelShader externalPixl, PixelShader basePixl, GlobalPixelShader externalGlps, GlobalPixelShader baseGlps, byte[] bmOptions, byte[] edOptions)
         {
             List<Dictionary<RegisterID, int>> pixelRegisters = new List<Dictionary<RegisterID, int>>();
 
@@ -380,6 +380,46 @@ namespace TagTool.Commands.Porting
             {
                 Dictionary<RegisterID, int> entryPointRegisters = new Dictionary<RegisterID, int>();
 
+                // glps first
+                int bmGlpsIndex = -1;
+                int edGlpsIndex = -1;
+
+                if (externalGlps.EntryPoints[entryPoint].Option.Count > 0 && baseGlps.EntryPoints[entryPoint].Option.Count > 0)
+                {
+                    bmGlpsIndex = externalGlps.EntryPoints[entryPoint].Option[0].OptionMethodShaderIndices[bmOptions[externalGlps.EntryPoints[entryPoint].Option[0].RenderMethodOptionIndex]];
+                    edGlpsIndex = baseGlps.EntryPoints[entryPoint].Option[0].OptionMethodShaderIndices[edOptions[baseGlps.EntryPoints[entryPoint].Option[0].RenderMethodOptionIndex]];
+                }
+                else if (externalGlps.EntryPoints[entryPoint].ShaderIndex > -1 && baseGlps.EntryPoints[entryPoint].ShaderIndex > -1)
+                {
+                    bmGlpsIndex = externalGlps.EntryPoints[entryPoint].ShaderIndex;
+                    edGlpsIndex = baseGlps.EntryPoints[entryPoint].ShaderIndex;
+                }
+
+                if (bmGlpsIndex != -1 && edGlpsIndex != -1)
+                {
+                    foreach (var xboxParameter in externalGlps.Shaders[bmGlpsIndex].XboxParameters)
+                    {
+                        RegisterID registerID = new RegisterID(xboxParameter.RegisterIndex, xboxParameter.RegisterType);
+
+                        if (entryPointRegisters.ContainsKey(registerID))
+                            continue;
+
+                        string xboxParameterName = BlamCache.StringTable.GetString(xboxParameter.ParameterName);
+
+                        foreach (var pcParameter in baseGlps.Shaders[edGlpsIndex].PCParameters)
+                        {
+                            string pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
+
+                            if (xboxParameterName == pcParameterName && xboxParameter.RegisterType == pcParameter.RegisterType)
+                            {
+                                entryPointRegisters.Add(registerID, pcParameter.RegisterIndex);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // pixl
                 for (int i = externalPixl.EntryPointShaders[entryPoint].Offset; i < externalPixl.EntryPointShaders[entryPoint].Offset + externalPixl.EntryPointShaders[entryPoint].Count; i++)
                 {
                     foreach (var xboxParameter in externalPixl.Shaders[i].XboxParameters)
@@ -472,7 +512,7 @@ namespace TagTool.Commands.Porting
             return false;
         }
 
-        private void RebuildRenderMethodAnimations(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, CachedTag rmdfTag)
+        private void RebuildRenderMethodAnimations(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, CachedTag rmdfTag, byte[] bmOptions, byte[] edOptions)
         {
             //
             // Store shader definitions
@@ -482,10 +522,12 @@ namespace TagTool.Commands.Porting
 
             RenderMethodDefinition blamRmdf = BlamCache.Deserialize<RenderMethodDefinition>(blamCacheStream, blamRmdfTag);
             GlobalVertexShader blamGlvs = BlamCache.Deserialize<GlobalVertexShader>(blamCacheStream, blamRmdf.GlobalVertexShader);
+            GlobalPixelShader blamGlps = BlamCache.Deserialize<GlobalPixelShader>(blamCacheStream, blamRmdf.GlobalPixelShader);
             PixelShader blamPixl = BlamCache.Deserialize<PixelShader>(blamCacheStream, bmRmt2.PixelShader);
 
             RenderMethodDefinition rmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfTag);
             GlobalVertexShader glvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, rmdf.GlobalVertexShader);
+            GlobalPixelShader glps = CacheContext.Deserialize<GlobalPixelShader>(cacheStream, rmdf.GlobalPixelShader);
             PixelShader pixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
 
             // get valid vertex types
@@ -496,7 +538,7 @@ namespace TagTool.Commands.Porting
 
             // EntryPoints<<external ID, new register>>
             List<Dictionary<RegisterID, int>> vertexRegisters = MatchVertexRegisters(blamGlvs, glvs, validVertexTypes);
-            List<Dictionary<RegisterID, int>> pixelRegisters = MatchPixelRegisters(blamPixl, pixl);
+            List<Dictionary<RegisterID, int>> pixelRegisters = MatchPixelRegisters(blamPixl, pixl, blamGlps, glps, bmOptions, edOptions);
 
             // <external index, new index>
             Dictionary<int, int> newRealConstantIndices = new Dictionary<int, int>();

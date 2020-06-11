@@ -19,11 +19,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10)]
             public class OptionBlock : TagStructure
 			{
-                public short RenderMethodOptionIndex;
-
-                [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
-                public byte[] Unused_02;
-
+                public int RenderMethodOptionIndex;
                 public List<int> OptionMethodShaderIndices; // the value is the shader index
             }
         }
