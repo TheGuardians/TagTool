@@ -80,7 +80,8 @@ namespace TagTool.Shaders.ShaderGenerator
             var pixelShaderBlock = new PixelShaderBlock
             {
                 PCShaderBytecode = result.Bytecode,
-                PCParameters = GenerateShaderParametersFromGenerator(cache, result)
+                PCParameters = GenerateShaderParametersFromGenerator(cache, result),
+                Unknown8 = 1
             };
 
             return pixelShaderBlock;
@@ -351,12 +352,15 @@ namespace TagTool.Shaders.ShaderGenerator
 
         private static void AddMapping(ParameterUsage usage, RenderMethodTemplate rmt2, RenderMethodTemplate.ParameterTable table, List<RenderMethodTemplate.ParameterMapping> mappings)
         {
-            table[usage] = new RenderMethodTemplate.PackedInteger_10_6
+            if(mappings.Count > 0)
             {
-                Offset = (ushort)rmt2.Parameters.Count,
-                Count = (ushort)mappings.Count
-            };
-            rmt2.Parameters.AddRange(mappings);
+                table[usage] = new RenderMethodTemplate.PackedInteger_10_6
+                {
+                    Offset = (ushort)rmt2.Parameters.Count,
+                    Count = (ushort)mappings.Count
+                };
+                rmt2.Parameters.AddRange(mappings);
+            }
         }
 
         public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, Stream cacheStream, RenderMethodDefinition rmdf, GlobalPixelShader glps, GlobalVertexShader glvs, IShaderGenerator generator, string shaderName)

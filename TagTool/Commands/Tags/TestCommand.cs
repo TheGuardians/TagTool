@@ -23,6 +23,7 @@ using TagTool.Shaders;
 using TagTool.Shaders.ShaderGenerator;
 using TagTool.Commands.Shaders;
 using System.Diagnostics;
+using HaloShaderGenerator.Shader;
 
 namespace TagTool.Commands
 {
@@ -41,8 +42,53 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
             /*
+            Dictionary<string, HashSet<int>> registers = new Dictionary<string, HashSet<int>>();
+
+            using (var stream = Cache.OpenCacheRead())
+            {
+                foreach (var tag in Cache.TagCache.NonNull())
+                {
+                    if(tag.Name != null && tag.IsInGroup("pixl") && !tag.Name.StartsWith("ms30") && tag.Name.Contains("shader_templates"))
+                    {
+                        var pixl = Cache.Deserialize<PixelShader>(stream, tag);
+                        foreach(var shader in pixl.Shaders)
+                        {
+                            foreach(var register in shader.PCParameters)
+                            {
+                                var name = Cache.StringTable.GetString(register.ParameterName);
+                                if (registers.ContainsKey(name))
+                                {
+                                    registers[name].Add(register.RegisterIndex);
+                                }
+                                else
+                                {
+                                    registers[name] = new HashSet<int>();
+                                    registers[name].Add(register.RegisterIndex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach(var reg in registers.Keys)
+            {
+                if(registers[reg].Count == 1)
+                {
+                    Console.Write($"{reg}: ");
+                    foreach (var index in registers[reg])
+                    {
+                        Console.Write($"{index} ");
+                    }
+                    Console.WriteLine();
+                }
+            }
+            */
+
+            
             using (var stream = Cache.OpenCacheReadWrite())
             {
+                /*
                 var shaderType = "black";
                 var rmt2Name = @"shaders\black_templates\_0";
                 var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
@@ -54,18 +100,25 @@ namespace TagTool.Commands
                 var rmt2 = ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
                 var rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
                 Cache.Serialize(stream, rmt2Tag, rmt2);
+                */
+
+
+                var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, Cache.TagCache.GetTag(@"shaders\shader", "rmdf"));
+                var glps = Cache.Deserialize<GlobalPixelShader>(stream, Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps"));
+                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs"));
+
+                var generator = new HaloShaderGenerator.Shader.ShaderGenerator(Albedo.Default, Bump_Mapping.Off, Alpha_Test.Off, Specular_Mask.No_Specular_Mask,
+                    Material_Model.Diffuse_Only, Environment_Mapping.None, Self_Illumination.Off, Blend_Mode.Opaque, Parallax.Off, Misc.First_Person_Never, Distortion.Off);
+
+                var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, @"shaders\generated_test_shader");
+                var rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(@"shaders\generated_test_shader");
+                Cache.Serialize(stream, rmt2Tag, rmt2);
 
                 Cache.SaveStrings();
                 (Cache as GameCacheHaloOnline).SaveTagNames();
             }
 
-            return true;*/
-
-            //string filename = "test";
-            //BlamModelFile geometryFormat = new BlamModelFile();
-            
-            using (var stream = Cache.OpenCacheRead())
-            {/*
+            /*
                 CachedTag glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
 
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
@@ -81,9 +134,13 @@ namespace TagTool.Commands
 
                 Cache.Serialize(stream, glvsTag, glvs);*/
 
+
+            using (var stream = Cache.OpenCacheRead())
+            {
+
                 
                 // disassemble specified shaders related to rmt2
-                var tagName = @"shaders\shader_templates\_0_3_0_1_1_2_0_0_0_1_0";
+                var tagName = @"shaders\shader_templates\_2_0_0_0_0_0_8_1_0_1_0";
 
                 var rmt2Tag = Cache.TagCache.GetTag(tagName, "rmt2");
                 var glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders.glvs");
@@ -96,55 +153,7 @@ namespace TagTool.Commands
 
                 Directory.CreateDirectory(tagName);
 
-                /*
-                foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
-                {
-                    foreach(var method in glps.EntryPoints[(int)entry].Option)
-                    {
-                        int method_index = method.RenderMethodOptionIndex;
-                        int optionIndex = 0;
-                        foreach(var shaderIndex in method.OptionMethodShaderIndices)
-                        {
-                            if(shaderIndex != -1)
-                            {
-                                string entryName = entry.ToString().ToLower() + $"_method_{method_index}_option_{optionIndex}" + ".pixel_shader";
-                                string pixelShaderFilename = Path.Combine(tagName, entryName);
-
-                                DisassembleShader(glps, shaderIndex, pixelShaderFilename, Cache);
-                                optionIndex++;
-                            }
-                        }
-                            
-                    }
-                    
-                }
                 
-                foreach (VertexType vertex in Enum.GetValues(typeof(VertexType)))
-                {
-                    if( (int)vertex < glvs.VertexTypes.Count)
-                    {
-                        var currentVertex = glvs.VertexTypes[(int)vertex];
-                        
-                        foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
-                        {
-                            if ((int)entry < currentVertex.DrawModes.Count)
-                            {
-                                var entryShader = currentVertex.DrawModes[(int)entry].ShaderIndex;
-
-                                if (entryShader != -1)
-                                {
-                                    string entryName = entry.ToString() + ".vertex_shader";
-                                    string vertexFolderName = Path.Combine(tagName, vertex.ToString().ToLower());
-                                    Directory.CreateDirectory(vertexFolderName);
-                                    string vertexShaderFilename = Path.Combine(vertexFolderName, entryName);
-
-                                    DisassembleShader(glvs, entryShader, vertexShaderFilename, Cache);
-                                }
-                            }
-                        }
-                    }
-                }
-                */
                 foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
                 {
                     if ((int)entry < pixl.EntryPointShaders.Count)
@@ -160,21 +169,6 @@ namespace TagTool.Commands
                         }
                     }
                 }
-                
-                /*
-                //objects\gear\human\industrial\toolbox_small\toolbox_small
-                var tag = Cache.TagCache.GetTag(@"objects\vehicles\warthog\warthog", "mode"); // objects\vehicles\warthog\warthog
-                var mode = Cache.Deserialize<RenderModel>(stream, tag);
-                var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource);
-                mode.Geometry.SetResourceBuffers(resource);
-
-                geometryFormat.InitGen3(Cache, mode);
-
-                using (var modelStream = new FileStream($"3dsmax/{filename}.bmf", FileMode.Create))
-                using (var writer = new EndianWriter(modelStream))
-                {
-                    geometryFormat.SerializeToFile(writer);
-                }*/
             }
             
             return true;
