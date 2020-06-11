@@ -305,13 +305,14 @@ namespace TagTool.Shaders.ShaderGenerator
                 else
                 {
                     Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
+                    continue; // skip parameter, not present in shader
                 }
                 result.Add(argumentMapping);
             }
             return result;
         }
 
-        private static List<RenderMethodTemplate.ParameterMapping> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping)
+        private static List<RenderMethodTemplate.ParameterMapping> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, ShaderParameters globalParameters, Dictionary<string, int> shaderRegisterMapping)
         {
             var result = new List<RenderMethodTemplate.ParameterMapping>();
             List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
@@ -320,13 +321,16 @@ namespace TagTool.Shaders.ShaderGenerator
                 case ParameterUsage.PS_RealExtern:
                 case ParameterUsage.VS_RealExtern:
                     shaderParameters = parameters.GetRealExternParameters();
+                    shaderParameters.AddRange(globalParameters.GetRealExternParameters());
                     break;
                 case ParameterUsage.PS_IntegerExtern:
                 case ParameterUsage.VS_IntegerExtern:
                     shaderParameters = parameters.GetIntegerExternParameters();
+                    shaderParameters.AddRange(globalParameters.GetIntegerExternParameters());
                     break;
                 case ParameterUsage.TextureExtern:
                     shaderParameters = parameters.GetSamplerExternParameters();
+                    shaderParameters.AddRange(globalParameters.GetSamplerExternParameters());
                     break;
                 default:
                     shaderParameters = new List<HaloShaderGenerator.Globals.ShaderParameter>();
@@ -344,6 +348,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 else
                 {
                     Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
+                    continue; // skip parameter, not present in shader
                 }
                 result.Add(argumentMapping);
             }
@@ -489,7 +494,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     ParameterUsage currentUsage;
 
                     currentUsage = ParameterUsage.TextureExtern;
-                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.Texture;
@@ -527,19 +532,19 @@ namespace TagTool.Shaders.ShaderGenerator
                     // extern
 
                     currentUsage = ParameterUsage.PS_RealExtern;
-                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.PS_IntegerExtern;
-                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.VS_RealExtern;
-                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.VS_IntegerExtern;
-                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
                 }
 
