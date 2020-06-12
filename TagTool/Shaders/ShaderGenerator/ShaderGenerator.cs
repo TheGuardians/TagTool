@@ -539,6 +539,8 @@ namespace TagTool.Shaders.ShaderGenerator
                     mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
+                    // TODO: get vertex shader specific extern
+                    /*
                     currentUsage = ParameterUsage.VS_RealExtern;
                     mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
@@ -546,6 +548,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     currentUsage = ParameterUsage.VS_IntegerExtern;
                     mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    */
                 }
 
             }
