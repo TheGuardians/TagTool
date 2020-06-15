@@ -308,6 +308,13 @@ namespace TagTool.Commands.Porting
             newShaderProperty.AlphaBlendMode = finalRm.ShaderProperties[0].AlphaBlendMode;
             newShaderProperty.BlendFlags = finalRm.ShaderProperties[0].BlendFlags;
 
+            // in these 3 shaders, alphatesting acts differently than in h3. disabling SW alpha testing works for now (less accurate testing with it off)
+            // TODO: fix properly
+            if (blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights" ||
+                blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights_blue" ||
+                blamTagName == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
+                newShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
+
             // apply post option->options fixups
             ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
 
@@ -1068,28 +1075,6 @@ namespace TagTool.Commands.Porting
                         }
                 }
             }
-
-            // check alpha_test compatibility with matched shader
-            if (edShaderProperty.BlendFlags.HasFlag(BlendModeFlags.EnableAlphaTest))
-                foreach (var bmTextureConstant in bmRmt2.TextureParameterNames)
-                {
-                    string bmName = BlamCache.StringTable.GetString(bmTextureConstant.Name);
-                    bool wasFound = false;
-
-                    foreach (var edTextureConstant in edRmt2.TextureParameterNames)
-                        if (bmName == CacheContext.StringTable.GetString(edTextureConstant.Name))
-                        {
-                            wasFound = true;
-                            break;
-                        }
-
-                    if (!wasFound)
-                    {
-                        Console.WriteLine("WARNING: alpha_test not compatible");
-                        //edShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
-                        break;
-                    }
-                }
         }
     }
 }

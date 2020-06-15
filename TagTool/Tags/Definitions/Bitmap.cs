@@ -249,7 +249,7 @@ namespace TagTool.Tags.Definitions
 
             public int Unknown20;
             public int MipMapOffset;
-            public int Unknown28;
+            public int RasterizerTextureReference;
             public int RuntimeAddress;
         }
 
