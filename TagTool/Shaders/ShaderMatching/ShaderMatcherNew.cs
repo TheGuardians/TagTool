@@ -6,6 +6,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using HaloShaderGenerator.Shader;
 using static TagTool.Tags.Definitions.RenderMethodTemplate;
 
 namespace TagTool.Shaders.ShaderMatching
@@ -115,7 +116,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Find the closest template in the base cache to the input template.
         /// </summary>
-        public CachedTag FindClosestTemplate(CachedTag sourceRmt2Tag, RenderMethodTemplate sourceRmt2)
+        public CachedTag FindClosestTemplate(CachedTag sourceRmt2Tag, RenderMethodTemplate sourceRmt2, bool canGenerate)
         {
             Debug.Assert(IsInitialized);
 
@@ -233,6 +234,12 @@ namespace TagTool.Shaders.ShaderMatching
             // whatever can be used to narrow it down.
             Console.WriteLine($"No rmt2 match found for {sourceRmt2Tag.Name}");
 
+            if (canGenerate && TryGenerateTemplate(sourceRmt2Desc, out CachedTag generatedRmt2))
+            {
+                Console.WriteLine($"Generated rmt2 \"{generatedRmt2.Name}\"");
+                return generatedRmt2;
+            }
+
             if (PerfectMatchesOnly)
                 return null;
 
@@ -262,6 +269,87 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
+        private bool TryGenerateTemplate(Rmt2Descriptor rmt2Desc, out CachedTag generatedRmt2)
+        {
+            if (rmt2Desc.Type == "shader")
+            {
+                string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                List<Material_Model> supportedMaterialModel = new List<Material_Model> { Material_Model.Diffuse_Only };
+                List<Environment_Mapping> supportedEnvironmentMapping = new List<Environment_Mapping> { Environment_Mapping.None };
+                List<Self_Illumination> supportedSelfIllumination = new List<Self_Illumination> { Self_Illumination.Off, Self_Illumination.Simple, Self_Illumination._3_Channel_Self_Illum, Self_Illumination.Plasma, Self_Illumination.From_Diffuse, Self_Illumination.Illum_Detail, Self_Illumination.Self_Illum_Times_Diffuse, Self_Illumination.Simple_With_Alpha_Mask };
+                List<Misc> supportedMisc = new List<Misc> { Misc.First_Person_Never, Misc.First_Person_Sometimes, Misc.First_Person_Always };
+
+                if (supportedMaterialModel.Contains((Material_Model)rmt2Desc.Options[4]) && supportedEnvironmentMapping.Contains((Environment_Mapping)rmt2Desc.Options[5]) && 
+                    supportedSelfIllumination.Contains((Self_Illumination)rmt2Desc.Options[6]) && supportedMisc.Contains((Misc)rmt2Desc.Options[9]))
+                {
+                    var generator = new HaloShaderGenerator.Shader.ShaderGenerator((Albedo)rmt2Desc.Options[0], (Bump_Mapping)rmt2Desc.Options[1], (Alpha_Test)rmt2Desc.Options[2], (Specular_Mask)rmt2Desc.Options[3], (Material_Model)rmt2Desc.Options[4], (Environment_Mapping)rmt2Desc.Options[5], (Self_Illumination)rmt2Desc.Options[6], (Blend_Mode)rmt2Desc.Options[7], (Parallax)rmt2Desc.Options[8], (Misc)rmt2Desc.Options[9], (Distortion)0);
+
+                    // TODO: generate rmdf\glvs\glps if not found
+
+                    var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag("shaders\\shader.rmdf"));
+                    var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                    var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                    var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                    generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                    BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                    return true;
+                }
+            }
+            else if (rmt2Desc.Type == "black")
+            {
+                string tagName = $"shaders\\black_templates\\_0";
+
+                var bkGenerator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
+
+                RenderMethodDefinition rmdf;
+
+                if (!BaseCache.TagCache.TryGetTag("shaders\\black.rmdf", out var rmdfTag))
+                {
+                    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinitionShaderBlack(BaseCache, bkGenerator);
+                    rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\black");
+                    BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                }
+                else
+                    rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
+
+                CachedTag glpsTag = rmdf.GlobalPixelShader;
+                CachedTag glvsTag = rmdf.GlobalVertexShader;
+                GlobalPixelShader glps;
+                GlobalVertexShader glvs;
+
+                if (glpsTag == null)
+                {
+                    glps = ShaderGenerator.ShaderGenerator.GenerateSharedPixelShader(BaseCache, bkGenerator);
+                    glpsTag = BaseCache.TagCache.AllocateTag<GlobalPixelShader>("shaders\\black_shared_pixel_shaders");
+                    BaseCache.Serialize(BaseCacheStream, glpsTag, glps);
+                }
+                else
+                    glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, glpsTag);
+
+                if (glvsTag == null)
+                {
+                    glvs = ShaderGenerator.ShaderGenerator.GenerateSharedVertexShader(BaseCache, bkGenerator);
+                    glvsTag = BaseCache.TagCache.AllocateTag<GlobalVertexShader>("shaders\\black_shared_vertex_shaders");
+                    BaseCache.Serialize(BaseCacheStream, glvsTag, glvs);
+                }
+                else
+                    glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, glvsTag);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, bkGenerator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
+
+            generatedRmt2 = null;
+            return false;
+        }
 
         /// <summary>
         /// Returns the best render_method_template tag match using the given dictionary and source rmt2

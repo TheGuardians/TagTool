@@ -201,7 +201,7 @@ namespace TagTool.Commands.Porting
                 TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor);
 
                 foreach (var tag in CacheContext.TagCacheGenHO.TagTable)
-                    if (tag != null && tag.Group.Tag == "rmt2" && tag.Name.Contains(rmt2Descriptor.Type))
+                    if (tag != null && tag.Group.Tag == "rmt2" && (tag.Name.Contains(rmt2Descriptor.Type) || (rmt2Descriptor.Type == "black" && FlagIsSet(PortingFlags.GenerateShaders))))
                     {
                         if ((FlagIsSet(PortingFlags.Ms30) && tag.Name.StartsWith("ms30\\")) || (!FlagIsSet(PortingFlags.Ms30) && !tag.Name.StartsWith("ms30\\")))
                             return true;

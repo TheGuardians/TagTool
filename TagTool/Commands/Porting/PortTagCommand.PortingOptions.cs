@@ -126,8 +126,14 @@ namespace TagTool.Commands.Porting
             [PortingFlagDescription("Use a regular expression to determine target tags")]
             Regex = 1 << 17,
 
-            // No [PortingFlagDescription] here means we'll flag names as the description.
-            Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Print | Merge
+			/// <summary>
+			/// Attempt to generate shaders.
+			/// </summary>
+			[PortingFlagDescription("Attempt to generate shaders.")]
+			GenerateShaders = 1 << 18,
+
+			// No [PortingFlagDescription] here means we'll flag names as the description.
+			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Print | Merge | GenerateShaders
 		}
 
 		/// <summary>
