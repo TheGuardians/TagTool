@@ -387,6 +387,12 @@ namespace TagTool.Commands.Porting
             {
                 Dictionary<RegisterID, int> entryPointRegisters = new Dictionary<RegisterID, int>();
 
+                if (basePixl.EntryPointShaders.Count <= entryPoint || baseGlps.EntryPoints.Count <= entryPoint)
+                {
+                    Console.WriteLine($"WARNING: Pixel entrypoint does not match up with external ({((EntryPoint)entryPoint).ToString()})");
+                    break;
+                }
+
                 // glps first
                 int bmGlpsIndex = -1;
                 int edGlpsIndex = -1;
@@ -481,6 +487,11 @@ namespace TagTool.Commands.Porting
                 {
                     if (externalGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex == -1)
                         continue;
+                    if (baseGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex == -1)
+                    {
+                        Console.WriteLine($"WARNING: Invalid vertex shader index \"{((TagTool.Geometry.VertexType)validVertexType).ToString()}, {((EntryPoint)i).ToString()}\"");
+                        continue;
+                    }
 
                     foreach (var xboxParameter in externalGlvs.Shaders[externalGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].XboxParameters)
                     {

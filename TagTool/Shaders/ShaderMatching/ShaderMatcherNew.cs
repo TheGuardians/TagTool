@@ -276,12 +276,12 @@ namespace TagTool.Shaders.ShaderMatching
                 string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}";
 
                 List<Material_Model> supportedMaterialModel = new List<Material_Model> { Material_Model.Diffuse_Only };
-                List<Environment_Mapping> supportedEnvironmentMapping = new List<Environment_Mapping> { Environment_Mapping.None };
-                List<Self_Illumination> supportedSelfIllumination = new List<Self_Illumination> { Self_Illumination.Off, Self_Illumination.Simple, Self_Illumination._3_Channel_Self_Illum, Self_Illumination.Plasma, Self_Illumination.From_Diffuse, Self_Illumination.Illum_Detail, Self_Illumination.Self_Illum_Times_Diffuse, Self_Illumination.Simple_With_Alpha_Mask };
+                List<Environment_Mapping> supportedEnvironmentMapping = new List<Environment_Mapping> { Environment_Mapping.None, Environment_Mapping.Per_Pixel };
                 List<Misc> supportedMisc = new List<Misc> { Misc.First_Person_Never, Misc.First_Person_Sometimes, Misc.First_Person_Always };
 
-                if (supportedMaterialModel.Contains((Material_Model)rmt2Desc.Options[4]) && supportedEnvironmentMapping.Contains((Environment_Mapping)rmt2Desc.Options[5]) && 
-                    supportedSelfIllumination.Contains((Self_Illumination)rmt2Desc.Options[6]) && supportedMisc.Contains((Misc)rmt2Desc.Options[9]))
+                if (supportedMaterialModel.Contains((Material_Model)rmt2Desc.Options[4]) && 
+                    supportedEnvironmentMapping.Contains((Environment_Mapping)rmt2Desc.Options[5]) && 
+                    supportedMisc.Contains((Misc)rmt2Desc.Options[9]))
                 {
                     var generator = new HaloShaderGenerator.Shader.ShaderGenerator((Albedo)rmt2Desc.Options[0], (Bump_Mapping)rmt2Desc.Options[1], (Alpha_Test)rmt2Desc.Options[2], (Specular_Mask)rmt2Desc.Options[3], (Material_Model)rmt2Desc.Options[4], (Environment_Mapping)rmt2Desc.Options[5], (Self_Illumination)rmt2Desc.Options[6], (Blend_Mode)rmt2Desc.Options[7], (Parallax)rmt2Desc.Options[8], (Misc)rmt2Desc.Options[9], (Distortion)0);
 
