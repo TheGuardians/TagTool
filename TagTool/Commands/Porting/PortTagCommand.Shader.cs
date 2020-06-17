@@ -1052,6 +1052,20 @@ namespace TagTool.Commands.Porting
                         }
                 }
             }
+            if (OptionChanged("shader", "parallax", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            {
+                if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                    {
+                        // prevent "smoothing"
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "height_map")
+                            realConstants[i] = new RealConstant { Arg0 = 1.0f, Arg1 = 1.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                        if (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name) == "height_scale")
+                            realConstants[i] = new RealConstant { Arg0 = 0.0f, Arg1 = 0.0f, Arg2 = 0.0f, Arg3 = 0.0f };
+                    }
+                }
+            }
         }
 
         private void ApplyPostOptionFixups(ShaderProperty edShaderProperty, ShaderProperty bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
