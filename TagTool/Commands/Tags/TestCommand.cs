@@ -85,7 +85,7 @@ namespace TagTool.Commands
             }
             */
 
-            
+            /*
             using (var stream = Cache.OpenCacheReadWrite())
             {
                 /*
@@ -100,7 +100,7 @@ namespace TagTool.Commands
                 var rmt2 = ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
                 var rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
                 Cache.Serialize(stream, rmt2Tag, rmt2);
-                */
+                
 
 
                 var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, Cache.TagCache.GetTag(@"shaders\shader", "rmdf"));
@@ -117,7 +117,7 @@ namespace TagTool.Commands
                 Cache.SaveStrings();
                 (Cache as GameCacheHaloOnline).SaveTagNames();
             }
-
+            */
             /*
                 CachedTag glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
 
@@ -138,37 +138,42 @@ namespace TagTool.Commands
             using (var stream = Cache.OpenCacheRead())
             {
 
-                
-                // disassemble specified shaders related to rmt2
-                var tagName = @"shaders\shader_templates\_2_0_0_0_0_0_8_1_0_1_0";
-
-                var rmt2Tag = Cache.TagCache.GetTag(tagName, "rmt2");
                 var glvsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders.glvs");
                 var glpsTag = Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders.glps");
-                var rmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
                 var glps = Cache.Deserialize<GlobalPixelShader>(stream, glpsTag);
 
-                var pixl = Cache.Deserialize<PixelShader>(stream, rmt2.PixelShader);
-
-                Directory.CreateDirectory(tagName);
-
-                
-                foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
+                foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    if ((int)entry < pixl.EntryPointShaders.Count)
+                    if (tag.IsInGroup("rmt2") && tag.Name.StartsWith(@"shaders\shader_templates"))
                     {
-                        var entryShader = pixl.EntryPointShaders[(int)entry].Offset;
+                        // disassemble specified shaders related to rmt2
+                        var tagName = tag.Name;
+                        var rmt2Tag = Cache.TagCache.GetTag(tagName, "rmt2");
+                        var rmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
+                        var pixl = Cache.Deserialize<PixelShader>(stream, rmt2.PixelShader);
 
-                        if (pixl.EntryPointShaders[(int)entry].Count != 0)
+                        Directory.CreateDirectory(tagName);
+
+
+                        foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
                         {
-                            string entryName = entry.ToString().ToLower() + ".pixel_shader";
-                            string pixelShaderFilename = Path.Combine(tagName, entryName);
+                            if ((int)entry < pixl.EntryPointShaders.Count)
+                            {
+                                var entryShader = pixl.EntryPointShaders[(int)entry].Offset;
 
-                            DisassembleShader(pixl, entryShader, pixelShaderFilename, Cache);
+                                if (pixl.EntryPointShaders[(int)entry].Count != 0)
+                                {
+                                    string entryName = entry.ToString().ToLower() + ".pixel_shader";
+                                    string pixelShaderFilename = Path.Combine(tagName, entryName);
+
+                                    DisassembleShader(pixl, entryShader, pixelShaderFilename, Cache);
+                                }
+                            }
                         }
                     }
                 }
+                
             }
             
             return true;
