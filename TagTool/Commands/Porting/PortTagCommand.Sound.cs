@@ -133,10 +133,30 @@ namespace TagTool.Commands.Porting
                 //
 
                 var useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
+                var basePermutationCacheName = Path.Combine(TempDirectory.FullName + GetTagFileFriendlyName(blamTag_Name)); //temp File path
+                var originalFilePath = Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, GetTagFileFriendlyName(blamTag_Name)); //old structure file path
 
-                var basePermutationCacheName = Path.Combine(
-                    useCache ? Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName : TempDirectory.FullName,
-                    GetTagFileFriendlyName(blamTag_Name));
+
+                if (useCache)
+                {
+                    var split = blamTag_Name.Split('\\');
+                    var endName = split[split.Length - 1]; //get the last portion of the tag name
+                    var newPath = Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName;
+
+                    for (int i = 0; i < split.Length - 1; i++)
+                    {
+
+                        var folder = split[i];
+
+                        var dir = Path.Combine(newPath, folder); //combine the new path with the current folder
+                        if (!Directory.Exists(dir))// check if that specific folder exists and if not create it
+                            Directory.CreateDirectory(dir);
+
+                        newPath = Path.Combine(newPath, folder); // update the new path varible with the current folder
+                    }
+
+                    basePermutationCacheName = Path.Combine(newPath, endName); //combine the last portion of the tag name with the new path
+                }
 
                 var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
                 var permutationOrder = BlamSoundGestalt.GetPermutationOrder(pitchRangeIndex);
@@ -157,10 +177,17 @@ namespace TagTool.Commands.Porting
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
 
                     string permutationName = $"{basePermutationCacheName}_{relativePitchRangeIndex}_{i}";
-
                     string extension = "mp3";
-
                     var cacheFileName = $"{permutationName}.{extension}";
+
+                    string oldPermutationName = $"{originalFilePath}_{relativePitchRangeIndex}_{i}";
+                    var oldCacheFileName = $"{oldPermutationName}.{extension}";
+
+                    if (File.Exists(oldCacheFileName)) //check if sound exists in the old format and rename it to use the new folder structure
+                    {
+                        Console.WriteLine("Sound exists in original format: " + oldCacheFileName + " Renaming...");
+                        File.Move(oldCacheFileName, cacheFileName);
+                    }
 
                     bool exists = File.Exists(cacheFileName);
 
