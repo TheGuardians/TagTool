@@ -67,6 +67,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ExtractTagCommand(hoCache));
                 context.AddCommand(new ExtractAllTagsCommand(hoCache));
                 context.AddCommand(new ExportTagModCommand(hoCache));
+                context.AddCommand(new DumpDisassembledShadersCommand(hoCache));
 
                 // modding commands
                 context.AddCommand(new OpenModPackageCommand(contextStack, hoCache));
