@@ -412,10 +412,11 @@ namespace TagTool.Geometry.Utils
                     }
                 }
                 var planeposition = new Vector3(pointlist.Average(x => x.X), pointlist.Average(x => x.Y), pointlist.Average(x => x.Z));
+                if (newCollisionGeometry.Surfaces[i].Plane == -1)
+                    continue;
                 var plane = newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value;
                 var calcdistance = PointToPlaneDistance(new Vector3(0), planeposition, new Vector3(plane.I, plane.J, plane.K));
                 newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value.D = calcdistance;
-                var dummy = 0;
             }
 
             // add the collision geometry
