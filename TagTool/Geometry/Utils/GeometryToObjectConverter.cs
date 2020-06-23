@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Numerics;
 using TagTool.Cache;
 using TagTool.Commands.Porting;
 using TagTool.Common;
@@ -29,6 +30,8 @@ namespace TagTool.Geometry.Utils
         private ScenarioLightmapBspData Lbsp;
         private StructureBspTagResources StructureBspResources;
         private Dictionary<short, short> CollisionMaterialMapping;
+        private RealPoint3d GeometryOffset;
+        private RenderGeometryCompression OriginalCompression;
         public PortTagCommand PortTag { get; private set; }
 
         public GeometryToObjectConverter(
@@ -238,6 +241,17 @@ namespace TagTool.Geometry.Utils
 
             return model;
         }
+        private float PointToPlaneDistance(Vector3 pointPosition, Vector3 planePosition, Vector3 planeNormal)
+        {
+            float sb, sn, sd;
+
+            sn = -Vector3.Dot(planeNormal, (pointPosition - planePosition));
+            sd = Vector3.Dot(planeNormal, planeNormal);
+            sb = sn / sd;
+
+            Vector3 result = pointPosition + sb * planeNormal;
+            return Vector3.Distance(pointPosition, result);
+        }
 
         private CollisionModel GenerateCollisionModel(CachedTag modelTag, int geometryIndex, bool iscluster)
         {
@@ -271,16 +285,22 @@ namespace TagTool.Geometry.Utils
                 var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[geometryIndex];
                 var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.MeshIndex];
 
-                foreach (var bspPhysics  in instancedGeometryInstance.BspPhysics)
+                foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
+                {
                     permutation.BspPhysics.Add(ConvertData(bspPhysics));
-                
+                }
+
                 //mopps
                 foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
+                {
                     permutation.BspMoppCodes.Add(ConvertData(mopp));
+                }
 
                 //collision geometry
                 newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
             }
+
+            //cluster geometry
             else
             {
                 var cluster = StructureBsp.Clusters[geometryIndex];
@@ -317,11 +337,32 @@ namespace TagTool.Geometry.Utils
                 bspPhysics.GeometryShape.BspIndex = -1;
                 bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
                 bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
+                //offset MOPPs to origin
+                bspPhysics.GeometryShape.AABB_Max = new RealQuaternion(
+                    bspPhysics.GeometryShape.AABB_Max.I - GeometryOffset.X,
+                    bspPhysics.GeometryShape.AABB_Max.J - GeometryOffset.Y,
+                    bspPhysics.GeometryShape.AABB_Max.K - GeometryOffset.Z,
+                    bspPhysics.GeometryShape.AABB_Max.W);
+                bspPhysics.GeometryShape.AABB_Min = new RealQuaternion(
+                    bspPhysics.GeometryShape.AABB_Min.I - GeometryOffset.X,
+                    bspPhysics.GeometryShape.AABB_Min.J - GeometryOffset.Y,
+                    bspPhysics.GeometryShape.AABB_Min.K - GeometryOffset.Z,
+                    bspPhysics.GeometryShape.AABB_Min.W);
+            }
+
+            //offset MOPPs to origin
+            foreach (var mopp in permutation.BspMoppCodes)
+            {
+                mopp.Info.Offset = new RealQuaternion(
+                    mopp.Info.Offset.I - GeometryOffset.X,
+                    mopp.Info.Offset.J - GeometryOffset.Y,
+                    mopp.Info.Offset.K - GeometryOffset.Z,
+                    mopp.Info.Offset.W);
             }
 
             // fixup surfaces materials block
             // build a mapping of surface material indices to collision materials
-            
+
             foreach (var surface in newCollisionGeometry.Surfaces)
             {
                 if (surface.MaterialIndex == -1)
@@ -332,6 +373,49 @@ namespace TagTool.Geometry.Utils
                     CollisionMaterialMapping.Add(surface.MaterialIndex, modelMaterialIndex);
 
                 surface.MaterialIndex = modelMaterialIndex;
+            }
+
+            //center the offsets for the collision model
+            for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+            {
+                newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
+                newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
+                newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
+            }
+
+            //recalculate plane distances from newly offset vertices
+            for (var i = 0; i < newCollisionGeometry.Surfaces.Count; i++)
+            {
+                var surface = newCollisionGeometry.Surfaces[i];
+                var edge = newCollisionGeometry.Edges[surface.FirstEdge];
+                var pointlist = new HashSet<RealPoint3d>();
+
+                while (true)
+                {
+                    if (edge.LeftSurface == i)
+                    {
+                        pointlist.Add(newCollisionGeometry.Vertices[edge.StartVertex].Point);
+
+                        if (edge.ForwardEdge == surface.FirstEdge)
+                            break;
+                        else
+                            edge = newCollisionGeometry.Edges[edge.ForwardEdge];
+                    }
+                    else if (edge.RightSurface == i)
+                    {
+                        pointlist.Add(newCollisionGeometry.Vertices[edge.EndVertex].Point);
+
+                        if (edge.ReverseEdge == surface.FirstEdge)
+                            break;
+                        else
+                            edge = newCollisionGeometry.Edges[edge.ReverseEdge];
+                    }
+                }
+                var planeposition = new Vector3(pointlist.Average(x => x.X), pointlist.Average(x => x.Y), pointlist.Average(x => x.Z));
+                var plane = newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value;
+                var calcdistance = PointToPlaneDistance(new Vector3(0), planeposition, new Vector3(plane.I, plane.J, plane.K));
+                newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value.D = calcdistance;
+                var dummy = 0;
             }
 
             // add the collision geometry
@@ -429,6 +513,7 @@ namespace TagTool.Geometry.Utils
 
                     var newIndex = (short)newBoundingSpheres.Count;
                     var datum = ConvertData(Lbsp.Geometry.BoundingSpheres[part.TransparentSortingIndex]);
+                    datum.Position -= GeometryOffset;
                     newBoundingSpheres.Add(datum);
                     part.TransparentSortingIndex = newIndex;
                 }
@@ -494,7 +579,7 @@ namespace TagTool.Geometry.Utils
                 resourceDefinition = renderGeometryConverter.Convert(renderGeometry, resourceDefinition);
             }
 
-            // convert world to rigid (or else it can be dragged)
+            // convert world to rigid (or else it can't be dragged)
             if (mesh.ResourceVertexBuffers[0].Format == VertexBufferFormat.World)
             {
                 renderGeometry.Meshes[0].ResourceVertexBuffers[0].Format = VertexBufferFormat.Rigid;
@@ -503,6 +588,22 @@ namespace TagTool.Geometry.Utils
                 var compressionInfo = CompressVertexBuffer(mesh.ResourceVertexBuffers[0]);
                 renderGeometry.Compression = new List<RenderGeometryCompression>() { compressionInfo };
             }
+
+            //fix items being offset from origin
+            OriginalCompression = renderGeometry.Compression[0].DeepClone();
+            RealVector3d scale = new RealVector3d
+            {
+                I = renderGeometry.Compression[0].X.Upper - renderGeometry.Compression[0].X.Lower,
+                J = renderGeometry.Compression[0].Y.Upper - renderGeometry.Compression[0].Y.Lower,
+                K = renderGeometry.Compression[0].Z.Upper - renderGeometry.Compression[0].Z.Lower
+            };
+            renderGeometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
+            renderGeometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
+            renderGeometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
+
+            GeometryOffset.X = OriginalCompression.X.Lower - (-scale.I / 2);
+            GeometryOffset.Y = OriginalCompression.Y.Lower - (-scale.J / 2);
+            GeometryOffset.Z = OriginalCompression.Z.Lower - (-scale.K / 2);
 
             renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
 
