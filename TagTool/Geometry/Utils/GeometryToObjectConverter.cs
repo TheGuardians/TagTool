@@ -581,7 +581,7 @@ namespace TagTool.Geometry.Utils
             }
 
             // convert world to rigid (or else it can't be dragged)
-            if (mesh.ResourceVertexBuffers.Count() > 0 && mesh.ResourceVertexBuffers[0].Format == VertexBufferFormat.World)
+            if (mesh.ResourceVertexBuffers.Count() > 0 && mesh.ResourceVertexBuffers[0] != null && mesh.ResourceVertexBuffers[0].Format == VertexBufferFormat.World)
             {
                 renderGeometry.Meshes[0].ResourceVertexBuffers[0].Format = VertexBufferFormat.Rigid;
                 renderGeometry.Meshes[0].Type = VertexType.Rigid;
