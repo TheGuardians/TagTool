@@ -32,6 +32,7 @@ namespace TagTool.Geometry.Utils
         private Dictionary<short, short> CollisionMaterialMapping;
         private RealPoint3d GeometryOffset;
         private RenderGeometryCompression OriginalCompression;
+        private bool HasValidCollisions = true;
         public PortTagCommand PortTag { get; private set; }
 
         public GeometryToObjectConverter(
@@ -106,7 +107,11 @@ namespace TagTool.Geometry.Utils
             var gameObject = GenerateObject(geometryIndex, ComputeRenderModelEnclosingRadius(renderModel));
 
             // fixup tag refs
-            model.CollisionModel = collisionModelTag;
+            //if coll is empty but referenced here, the game crashes. Only reference coll if it has contents.
+            if (HasValidCollisions)
+            {
+                model.CollisionModel = collisionModelTag;
+            }
             model.RenderModel = renderModelTag;
             gameObject.Model = modelTag;
 
@@ -425,6 +430,12 @@ namespace TagTool.Geometry.Utils
                 NodeIndex = 0,
                 Geometry = newCollisionGeometry
             });
+
+            //check if the collision model actually has any contents, the game doesn't like empty collision model tags
+            if (newCollisionGeometry.Vertices.Count() == 0 && permutation.BspMoppCodes.Count() == 0)
+                HasValidCollisions = false;
+            else
+                HasValidCollisions = true;
 
             return collisionModel;
         }
