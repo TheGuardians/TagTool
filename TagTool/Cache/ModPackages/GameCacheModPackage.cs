@@ -23,7 +23,7 @@ namespace TagTool.Cache
 
         private int CurrentTagCacheIndex = 0;
 
-        public  GameCacheHaloOnlineBase BaseCacheReference;
+        public GameCacheHaloOnlineBase BaseCacheReference;
         public Stream BaseCacheStream;
 
         public GameCacheModPackage(GameCacheHaloOnlineBase baseCache, FileInfo file)
@@ -69,6 +69,11 @@ namespace TagTool.Cache
 
 
             SetActiveTagCache(0);
+        }
+
+        ~GameCacheModPackage()
+        {
+            BaseCacheStream.Close();
         }
 
         public override object Deserialize(Stream stream, CachedTag instance)
