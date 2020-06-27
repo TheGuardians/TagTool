@@ -75,20 +75,20 @@ namespace TagTool.Bitmaps.Utils
                         {
                             if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
                             {
-                                if (layerIndex == 2)
-                                    layerIndex = 3;
-                                else if (layerIndex == 3)
+                                if (layerIndex == 1)
                                     layerIndex = 2;
+                                else if (layerIndex == 2)
+                                    layerIndex = 1;
                             }
 
                             ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
 
                             if (definition.BitmapType == BitmapType.CubeMap)
                             {
-                                if (layerIndex == 3)
+                                if (layerIndex == 2)
+                                    layerIndex = 1;
+                                else if (layerIndex == 1)
                                     layerIndex = 2;
-                                else if (layerIndex == 2)
-                                    layerIndex = 3;
                             }
                         }
                     }
@@ -99,10 +99,10 @@ namespace TagTool.Bitmaps.Utils
                     {
                         if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
                         {
-                            if (layerIndex == 2)
-                                layerIndex = 3;
-                            else if (layerIndex == 3)
+                            if (layerIndex == 1)
                                 layerIndex = 2;
+                            else if (layerIndex == 2)
+                                layerIndex = 1;
                         }
 
                         for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
@@ -112,10 +112,10 @@ namespace TagTool.Bitmaps.Utils
                         
                         if (definition.BitmapType == BitmapType.CubeMap)
                         {
-                            if (layerIndex == 3)
+                            if (layerIndex == 2)
+                                layerIndex = 1;
+                            else if (layerIndex == 1)
                                 layerIndex = 2;
-                            else if (layerIndex == 2)
-                                layerIndex = 3;
                         }
                     }
                 }
