@@ -275,7 +275,7 @@ namespace TagTool.Shaders.ShaderMatching
             {
                 string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}";
 
-                List<Material_Model> supportedMaterialModel = new List<Material_Model> { Material_Model.Diffuse_Only, Material_Model.Cook_Torrance, Material_Model.Two_Lobe_Phong, Material_Model.Foliage, Material_Model.None };
+                List<Material_Model> supportedMaterialModel = new List<Material_Model> { Material_Model.Diffuse_Only, Material_Model.Cook_Torrance, Material_Model.Two_Lobe_Phong, Material_Model.Foliage, Material_Model.None, Material_Model.Glass, Material_Model.Single_Lobe_Phong };
                 List<Environment_Mapping> supportedEnvironmentMapping = new List<Environment_Mapping> { Environment_Mapping.None, Environment_Mapping.Per_Pixel, Environment_Mapping.Dynamic };
 
                 // needs unapply rotation for misc3 + parallax
