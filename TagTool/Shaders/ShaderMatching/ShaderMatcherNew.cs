@@ -370,12 +370,12 @@ namespace TagTool.Shaders.ShaderMatching
                     bestTag = pair.Key;
                 }
             }
-
+            /*
             Console.WriteLine($"Closest tag to {srcTagName} with options and value {targetValue}");
             sortingInterface.PrintOptions(Sorter.GetTemplateOptions(newTagName));
             Console.WriteLine($"is tag {bestTag.Name} with options and value {bestValue + targetValue}");
             sortingInterface.PrintOptions(Sorter.GetTemplateOptions(bestTag.Name));
-
+            */
             return bestTag;
         }
 

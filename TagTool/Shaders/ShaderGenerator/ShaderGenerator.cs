@@ -304,7 +304,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
+                    // Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
                     continue; // skip parameter, not present in shader
                 }
                 result.Add(argumentMapping);
@@ -347,7 +347,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
+                    // Console.WriteLine($"Failed to find {usage} register parameter for {parameter.ParameterName}");
                     continue; // skip parameter, not present in shader
                 }
                 result.Add(argumentMapping);

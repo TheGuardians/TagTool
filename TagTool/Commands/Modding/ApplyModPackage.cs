@@ -99,22 +99,35 @@ namespace TagTool.Commands.Modding
             // fixup map files
             foreach (var mapFile in ModCache.BaseModPackage.MapFileStreams)
             {
-                using (var reader = new EndianReader(mapFile))
+                if (BaseCache is GameCacheModPackage)
                 {
+                    var reader = new EndianReader(mapFile);
+
                     MapFile map = new MapFile();
                     map.Read(reader);
 
-                    var modIndex = map.Header.ScenarioTagIndex;
-                    TagMapping.TryGetValue(modIndex, out int newScnrIndex);
-                    map.Header.ScenarioTagIndex = newScnrIndex;
-                    var mapName = map.Header.Name;
-
-                    var mapPath = $"{BaseCache.Directory.FullName}\\{mapName}.map";
-                    var file = new FileInfo(mapPath);
-                    var fileStream = file.OpenWrite();
-                    using (var writer = new EndianWriter(fileStream, map.EndianFormat))
+                    var modPackCache = BaseCache as GameCacheModPackage;
+                    modPackCache.AddMapFile(mapFile, map.Header.MapId);
+                }
+                else
+                {
+                    using (var reader = new EndianReader(mapFile))
                     {
-                        map.Write(writer);
+                        MapFile map = new MapFile();
+                        map.Read(reader);
+
+                        var modIndex = map.Header.ScenarioTagIndex;
+                        TagMapping.TryGetValue(modIndex, out int newScnrIndex);
+                        map.Header.ScenarioTagIndex = newScnrIndex;
+                        var mapName = map.Header.Name;
+
+                        var mapPath = $"{BaseCache.Directory.FullName}\\{mapName}.map";
+                        var file = new FileInfo(mapPath);
+                        var fileStream = file.OpenWrite();
+                        using (var writer = new EndianWriter(fileStream, map.EndianFormat))
+                        {
+                            map.Write(writer);
+                        }
                     }
                 }
             }
@@ -122,22 +135,28 @@ namespace TagTool.Commands.Modding
             // apply .campaign file
             if(ModCache.BaseModPackage.CampaignFileStream != null && ModCache.BaseModPackage.CampaignFileStream.Length > 0)
             {
-                var campaignFilepath = $"{BaseCache.Directory.FullName}\\halo3.campaign";
-                var campaignFile = new FileInfo(campaignFilepath);
-                using (var campaignFileStream = campaignFile.OpenWrite())
+                if (BaseCache is GameCacheModPackage)
                 {
-                    ModCache.BaseModPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                    var BaseCacheContext = BaseCache as GameCacheModPackage;
+                    BaseCacheContext.SetCampaignFile(ModCache.BaseModPackage.CampaignFileStream);
+                }
+                else
+                {
+                    var campaignFilepath = $"{BaseCache.Directory.FullName}\\halo3.campaign";
+                    var campaignFile = new FileInfo(campaignFilepath);
+                    using (var campaignFileStream = campaignFile.OpenWrite())
+                    {
+                        ModCache.BaseModPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                    }
                 }
             }
             
             // apply fonts
             if(ModCache.BaseModPackage.FontPackage != null && ModCache.BaseModPackage.FontPackage.Length > 0)
             {
-                var fontFilePath = $"{BaseCache.Directory.FullName}\\fonts\\font_package.bin";
-                var fontFile = new FileInfo(fontFilePath);
-                using (var fontFileStream = fontFile.OpenWrite())
+                using (var stream = ModCache.BaseModPackage.FontPackage)
                 {
-                    ModCache.BaseModPackage.FontPackage.CopyTo(fontFileStream);
+                    BaseCache.SaveFonts(stream);
                 }
             }
             
@@ -153,8 +172,6 @@ namespace TagTool.Commands.Modding
 
         private CachedTag ConvertCachedTagInstance(ModPackage modPack, CachedTag modTag)
         {
-            Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
-
             // tag has already been converted
             if (TagMapping.ContainsKey(modTag.Index))
                 return BaseCache.TagCache.GetTag(TagMapping[modTag.Index]);   // get the matching tag in the destination package
@@ -192,6 +209,7 @@ namespace TagTool.Commands.Modding
             }     
             else
             {
+                Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
                 CachedTag newTag;
                 if (!CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out newTag))
                 {

@@ -212,6 +212,7 @@ namespace TagTool.Cache
                     offset = (uint)writer.BaseStream.Position;
                     WriteCampaignFileSection(writer);
                     size = (uint)(writer.BaseStream.Position - offset);
+                    StreamUtil.Align(writer.BaseStream, 4);
                     WriteSectionEntry((int)ModPackageSection.CampaignFiles, writer, size, offset);
                 }
 
@@ -380,7 +381,6 @@ namespace TagTool.Cache
         {
             CampaignFileStream.Position = 0;
             StreamUtil.Copy(CampaignFileStream, writer.BaseStream, (int)CampaignFileStream.Length);
-            StreamUtil.Align(writer.BaseStream, 4);
         }
 
         private void WriteFontFileSection(EndianWriter writer)
