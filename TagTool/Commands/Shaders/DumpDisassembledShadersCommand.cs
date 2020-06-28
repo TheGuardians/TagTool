@@ -82,6 +82,20 @@ namespace TagTool.Commands.Shaders
 
                                 DisassembleShader(glps, entryShader, pixelShaderFilename, Cache);
                             }
+                            else if(glps.EntryPoints[(int)entry].Option.Count > 0)
+                            {
+                                foreach(var option in glps.EntryPoints[(int)entry].Option)
+                                {
+                                    var methodIndex = option.RenderMethodOptionIndex;
+                                    for(int i = 0; i < option.OptionMethodShaderIndices.Count; i++)
+                                    {
+                                        var optionIndex = i;
+                                        string glpsFilename = entry.ToString().ToLower() + $"_{methodIndex}_{optionIndex}" + ".shared_pixel_shader";
+                                        glpsFilename = Path.Combine(glpsTagName, glpsFilename);
+                                        DisassembleShader(glps, option.OptionMethodShaderIndices[i], glpsFilename, Cache);
+                                    }
+                                }
+                            }
 
                         }
                     }
