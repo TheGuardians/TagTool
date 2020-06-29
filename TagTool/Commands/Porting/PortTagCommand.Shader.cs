@@ -308,12 +308,15 @@ namespace TagTool.Commands.Porting
             newShaderProperty.AlphaBlendMode = finalRm.ShaderProperties[0].AlphaBlendMode;
             newShaderProperty.BlendFlags = finalRm.ShaderProperties[0].BlendFlags;
 
-            // in these 3 shaders, alphatesting acts differently than in h3. disabling SW alpha testing works for now (less accurate testing with it off)
+            // in these shaders alphatesting acts differently than in h3. disabling\enabling SW alpha testing works for now
             // TODO: fix properly
             if (blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights" ||
                 blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights_blue" ||
                 blamTagName == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
                 newShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
+            if (blamTagName == @"levels\atlas\sc110\shaders\tree_leaves_acacia" ||
+                (blamTagName == @"levels\solo\030_outskirts\shaders\outtree_leaf" && BlamCache.Version == CacheVersion.Halo3ODST)) // might be in h3 too, remove version if so
+                newShaderProperty.BlendFlags |= BlendModeFlags.EnableAlphaTest;
 
             // apply post option->options fixups
             ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
