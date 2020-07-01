@@ -23,34 +23,31 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1 || args.Count == 0)
+            if (args.Count != 1)
                 return false;
 
             int tagCacheIndex = 0;
-            if (args.Count > 0)
-            {
-                if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
-                    return false;
-            }
+            if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
+                return false;
 
             if (tagCacheIndex < Cache.BaseModPackage.TagCachesStreams.Count && tagCacheIndex >= 0)
             {
-                var oldname = Cache.BaseModPackage.CacheNames[tagCacheIndex];
+                var oldName = Cache.BaseModPackage.CacheNames[tagCacheIndex];
 
-                Console.WriteLine($"Enter the name for tag cache {tagCacheIndex} ({oldname}):");
+                Console.WriteLine($"Enter the name for tag cache {tagCacheIndex} (32 chars max):");
                 string name = Console.ReadLine().Trim();
+                name = name.Length <= 32 ? name : name.Substring(0, 32);
+
                 Cache.BaseModPackage.CacheNames[tagCacheIndex] = name;
 
-                Console.WriteLine($"Tag cache {tagCacheIndex} has been renamed from {oldname} to {name}");
+                Console.WriteLine($"Tag cache {tagCacheIndex} has been renamed from {oldName} to {name}");
+                return true;
             }
             else
             {
                 Console.WriteLine("Invalid tag cache index");
                 return false;
             }
-
-            return true;
-
         }
     }
 }

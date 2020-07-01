@@ -71,8 +71,9 @@ namespace TagTool.Commands.Modding
 
             for (int i = currentTagCacheCount; i < tagCacheCount + currentTagCacheCount; i++)
             {
-                Console.WriteLine($"Enter the name of tag cache {i + 1}:");
+                Console.WriteLine($"Enter the name of tag cache {i + 1} (32 chars max):");
                 string name = Console.ReadLine().Trim();
+                name = name = name.Length <= 32 ? name : name.Substring(0, 32);
 
                 var newTagCacheStream = new MemoryStream();
                 referenceStream.Position = 0;

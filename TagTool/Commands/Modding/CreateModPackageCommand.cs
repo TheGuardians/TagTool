@@ -90,8 +90,9 @@ namespace TagTool.Commands.Modding
                 string name = "default";
                 if (tagCacheCount > 1 || args.Count == 1)
                 {
-                    Console.WriteLine($"Enter the name of tag cache {i}:");
+                    Console.WriteLine($"Enter the name of tag cache {i} (32 chars max):");
                     name = Console.ReadLine().Trim();
+                    name = name.Length <= 32 ? name : name.Substring(0, 32);
                 }
 
                 var newTagCacheStream = new MemoryStream();

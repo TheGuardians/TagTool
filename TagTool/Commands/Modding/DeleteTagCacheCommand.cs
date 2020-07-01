@@ -23,15 +23,12 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1 || args.Count == 0)
+            if (args.Count != 1)
                 return false;
 
             int tagCacheIndex = 0;
-            if (args.Count > 0)
-            {
-                if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
-                    return false;
-            }
+            if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
+                return false;
 
             if (tagCacheIndex == Cache.GetCurrentTagCacheIndex())
             {
@@ -49,6 +46,7 @@ namespace TagTool.Commands.Modding
                     Cache.BaseModPackage.TagCachesStreams.RemoveAt(tagCacheIndex);
                     Cache.BaseModPackage.CacheNames.RemoveAt(tagCacheIndex);
                     Cache.BaseModPackage.TagCacheNames.RemoveAt(tagCacheIndex);
+                    return true;
                 }
                 else
                 {
