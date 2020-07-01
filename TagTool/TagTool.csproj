@@ -313,6 +313,8 @@
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\AddTagCacheCommand.cs" />
+    <Compile Include="Commands\Modding\DeleteTagCacheCommand.cs" />
+    <Compile Include="Commands\Modding\NameTagCacheCommand.cs" />
     <Compile Include="Commands\Modding\UpdateDescriptionCommand.cs" />
     <Compile Include="Commands\Modding\OpenModPackageCommand.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
