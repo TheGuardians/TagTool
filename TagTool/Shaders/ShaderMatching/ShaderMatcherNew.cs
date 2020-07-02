@@ -275,15 +275,10 @@ namespace TagTool.Shaders.ShaderMatching
             {
                 string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}";
 
-                List<Material_Model> supportedMaterialModel = new List<Material_Model> { Material_Model.Diffuse_Only, Material_Model.Cook_Torrance, Material_Model.Two_Lobe_Phong, Material_Model.Foliage, Material_Model.None, Material_Model.Glass, Material_Model.Single_Lobe_Phong };
-                List<Environment_Mapping> supportedEnvironmentMapping = new List<Environment_Mapping> { Environment_Mapping.None, Environment_Mapping.Per_Pixel, Environment_Mapping.Dynamic };
-
                 // needs unapply rotation for misc3 + parallax
                 bool miscUnsupported = rmt2Desc.Options[9] == 3 && rmt2Desc.Options[8] != 0;
 
-                if (supportedMaterialModel.Contains((Material_Model)rmt2Desc.Options[4]) && 
-                    supportedEnvironmentMapping.Contains((Environment_Mapping)rmt2Desc.Options[5]) &&
-                    !miscUnsupported) 
+                if ((Material_Model)rmt2Desc.Options[4] != Material_Model.Organism && rmt2Desc.Options[4] != 8 && !miscUnsupported) // 8 is hair in odst
                 {
                     var generator = new HaloShaderGenerator.Shader.ShaderGenerator((Albedo)rmt2Desc.Options[0], (Bump_Mapping)rmt2Desc.Options[1], (Alpha_Test)rmt2Desc.Options[2], (Specular_Mask)rmt2Desc.Options[3], (Material_Model)rmt2Desc.Options[4], (Environment_Mapping)rmt2Desc.Options[5], (Self_Illumination)rmt2Desc.Options[6], (Blend_Mode)rmt2Desc.Options[7], (Parallax)rmt2Desc.Options[8], (Misc)rmt2Desc.Options[9], (Distortion)0);
 
