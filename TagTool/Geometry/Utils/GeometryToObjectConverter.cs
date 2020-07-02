@@ -320,8 +320,8 @@ namespace TagTool.Geometry.Utils
                         GeometryShape = new CollisionGeometryShape()
                         {
                             // need to double check this
-                            AABB_Min = new RealQuaternion(cluster.BoundsX.Lower, cluster.BoundsY.Lower, cluster.BoundsZ.Lower, 0),
-                            AABB_Max = new RealQuaternion(cluster.BoundsX.Upper, cluster.BoundsY.Upper, cluster.BoundsZ.Upper, 0),
+                            AABB_Center = new RealQuaternion(cluster.BoundsX.Lower, cluster.BoundsY.Lower, cluster.BoundsZ.Lower, 0),
+                            AABB_Half_Extents = new RealQuaternion(cluster.BoundsX.Upper, cluster.BoundsY.Upper, cluster.BoundsZ.Upper, 0),
                         },
                         MoppBvTreeShape = new Havok.HkpBvMoppTreeShape()
                     };
@@ -343,16 +343,11 @@ namespace TagTool.Geometry.Utils
                 bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
                 bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
                 //offset MOPPs to origin
-                bspPhysics.GeometryShape.AABB_Max = new RealQuaternion(
-                    bspPhysics.GeometryShape.AABB_Max.I - GeometryOffset.X,
-                    bspPhysics.GeometryShape.AABB_Max.J - GeometryOffset.Y,
-                    bspPhysics.GeometryShape.AABB_Max.K - GeometryOffset.Z,
-                    bspPhysics.GeometryShape.AABB_Max.W);
-                bspPhysics.GeometryShape.AABB_Min = new RealQuaternion(
-                    bspPhysics.GeometryShape.AABB_Min.I - GeometryOffset.X,
-                    bspPhysics.GeometryShape.AABB_Min.J - GeometryOffset.Y,
-                    bspPhysics.GeometryShape.AABB_Min.K - GeometryOffset.Z,
-                    bspPhysics.GeometryShape.AABB_Min.W);
+                bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
+                    bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
+                    bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
+                    bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
+                    bspPhysics.GeometryShape.AABB_Center.W);
             }
 
             //offset MOPPs to origin
@@ -390,10 +385,10 @@ namespace TagTool.Geometry.Utils
 
             //recalculate plane distances from newly offset vertices
             //initialize a list of lists of vertices
-            var planepointlist = new List<List<RealPoint3d>>();
+            var planepointlist = new List<HashSet<RealPoint3d>>();
             for (var i = 0; i < newCollisionGeometry.Planes.Count; i++)
             {
-                planepointlist.Add(new List<RealPoint3d>());
+                planepointlist.Add(new HashSet<RealPoint3d>());
             }
             //get a list of vertices associated with each plane
             for (var i = 0; i < newCollisionGeometry.Surfaces.Count; i++)

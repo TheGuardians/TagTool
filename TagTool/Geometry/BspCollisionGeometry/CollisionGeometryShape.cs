@@ -14,8 +14,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0x40, MinVersion = CacheVersion.Halo3ODST)]
     public class CollisionGeometryShape : HkpShapeCollection
     {
-        public RealQuaternion AABB_Min;
-        public RealQuaternion AABB_Max;
+        public RealQuaternion AABB_Center;
+        public RealQuaternion AABB_Half_Extents;
         [TagField(Flags = TagFieldFlags.Short)]
         public CachedTag Model;
         public uint CollisionBspAddress; // runtime
