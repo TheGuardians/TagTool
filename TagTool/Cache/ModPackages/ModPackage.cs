@@ -188,6 +188,7 @@ namespace TagTool.Cache
                 offset = (uint)writer.BaseStream.Position;
                 WriteResourcesSection(writer);
                 size = (uint)(writer.BaseStream.Position - offset);
+                StreamUtil.Align(writer.BaseStream, 4);
                 WriteSectionEntry((int)ModPackageSection.Resources, writer, size, offset);
 
                 //
@@ -224,6 +225,7 @@ namespace TagTool.Cache
                     offset = (uint)writer.BaseStream.Position;
                     WriteFontFileSection(writer);
                     size = (uint)(writer.BaseStream.Position - offset);
+                    StreamUtil.Align(writer.BaseStream, 4);
                     WriteSectionEntry((int)ModPackageSection.Fonts, writer, size, offset);
                 }
 
@@ -268,6 +270,20 @@ namespace TagTool.Cache
                 if (packageStream.Length > uint.MaxValue)
                     Console.WriteLine($"WARNING: Mod package size exceeded 0x{uint.MaxValue.ToString("X8")} bytes, it will fail to load.");
 
+            }
+        }
+
+        private static void CopyStreamChunk(EndianReader reader, ModPackageStream stream, uint size)
+        {
+            var bufferSize = 0x14000;
+            var remaining = size;
+            while(remaining > 0)
+            {
+                int readSize = remaining > bufferSize ? bufferSize : (int)remaining;
+                var tempData = new byte[readSize];
+                reader.ReadBlock(tempData, 0, readSize);
+                stream.Write(tempData, 0, readSize);
+                remaining -= (uint)readSize;
             }
         }
 
@@ -374,7 +390,6 @@ namespace TagTool.Cache
         {
             ResourcesStream.Position = 0;
             StreamUtil.Copy(ResourcesStream, writer.BaseStream, ResourcesStream.Length);
-            StreamUtil.Align(writer.BaseStream, 4);
         }
 
         private void WriteCampaignFileSection(EndianWriter writer)
@@ -387,7 +402,6 @@ namespace TagTool.Cache
         {
             FontPackage.Position = 0;
             StreamUtil.Copy(FontPackage, writer.BaseStream, (int)FontPackage.Length);
-            StreamUtil.Align(writer.BaseStream, 4);
         }
 
         private void WriteStringIdsSection(EndianWriter writer)
@@ -440,9 +454,9 @@ namespace TagTool.Cache
                 CacheNames.Add(tableEntry.CacheName);
                 reader.BaseStream.Position = tableEntry.Offset + section.Offset;
 
-                if (section.Size > int.MaxValue)
+                if (tableEntry.Size > int.MaxValue)
                     throw new Exception("Tag cache size not supported");
-                int size = (int)section.Size;
+                int size = (int)tableEntry.Size;
 
                 byte[] data = new byte[size];
                 reader.Read(data, 0, size);
@@ -462,7 +476,7 @@ namespace TagTool.Cache
             {
                 newResourceStream = new MemoryStream();
                 ResourcesStream = new ModPackageStream(newResourceStream);
-                reader.BaseStream.CopyTo(ResourcesStream);
+                CopyStreamChunk(reader, ResourcesStream, section.Size);
             }
             else
             {
@@ -472,7 +486,7 @@ namespace TagTool.Cache
                     IntPtr data = Marshal.AllocHGlobal((IntPtr)bufferSize);
                     newResourceStream = new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite);
                     ResourcesStream = new ModPackageStream(newResourceStream);
-                    reader.BaseStream.CopyTo(ResourcesStream);
+                    CopyStreamChunk(reader, ResourcesStream, section.Size);
                 }
             }
             
@@ -580,7 +594,7 @@ namespace TagTool.Cache
                 reader.BaseStream.Position = tableEntry.Offset + section.Offset;
 
                 MapToCacheMapping.Add(i, tableEntry.CacheIndex);
-                int size = (int)section.Size;
+                int size = tableEntry.Size;
                 var stream = new MemoryStream();
                 byte[] data = new byte[size];
                 reader.Read(data, 0, size);
