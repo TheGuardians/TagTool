@@ -79,7 +79,8 @@ namespace TagTool.Cache
     [Flags]
     public enum ModifierFlags : int
     {
-        SpecialShitGoesHere
+        None = 0,
+        Mainmenu = 1 << 0
     }
 
     [TagStructure(Size = 0x8)]
