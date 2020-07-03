@@ -311,6 +311,7 @@
     <Compile Include="Commands\GUI\RescaleGUICommand.cs" />
     <Compile Include="Commands\Files\ImportFontsCommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
+    <Compile Include="Commands\Modding\ModIsMainmenuCommand.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\AddTagCacheCommand.cs" />
     <Compile Include="Commands\Modding\DeleteTagCacheCommand.cs" />
