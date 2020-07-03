@@ -124,17 +124,24 @@ namespace TagTool.Tags.Definitions
 
             public int BitmapCurveEnum;
 
-            public int Unknown8;
+            public byte Flags;
+            public byte Unknown9;
+            public byte UnknownA;
+            public byte UnknownB;
+
             public byte UnknownC;
             public byte UnknownD;
-            public short UnknownE;
+            public short DownsamplingFlags;
             public short Unknown10;
             public short Unknown12;
             public int Unknown14;
             public int Unknown18;
             public int Unknown1C;
-            public int Unknown20;
-            public int Unknown24;
+            public byte SwizzleRedEnum;
+            public byte SwizzleBlueEnum;
+            public byte SwizzleGreenEnum;
+            public byte SwizzleAlphaEnum;
+            public int FormatEnum; // 0 means the usage above is used
         }
 
         [TagStructure(Size = 0x40)]
