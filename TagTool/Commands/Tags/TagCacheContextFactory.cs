@@ -12,6 +12,7 @@ using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Shaders;
 using TagTool.Commands.GUI;
+using TagTool.Commands.HUD;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
@@ -77,6 +78,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new UpdateMapFilesCommand(cache));
 
                 context.AddCommand(new RescaleGUICommand(cache));
+                context.AddCommand(new RescaleHudTextCommand(cache));
                 context.AddCommand(new ImportFontsCommand(hoCache));
 
                 context.AddCommand(new PhysicsModelTestCommand(cache));
