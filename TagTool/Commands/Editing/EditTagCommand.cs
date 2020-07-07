@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Editing
 {
@@ -30,8 +31,10 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1 || !Cache.TagCache.TryGetCachedTag(args[0], out var tag))
-                return false;
+            if (args.Count != 1)
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var tag))
+                return new TagToolError(CommandError.TagInvalid, $"\"{args[0]}\"");
 
             var oldContext = ContextStack.Context;
 

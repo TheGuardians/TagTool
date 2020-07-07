@@ -1,11 +1,6 @@
 ﻿using TagTool.Cache;
 using System.Collections.Generic;
-using TagTool.Cache.HaloOnline;
-using System;
-using TagTool.Commands.Tags;
-using System.IO;
-using TagTool.Cache.Gen3;
-using TagTool.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Modding
 {
@@ -27,7 +22,7 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count > 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             Cache.BaseModPackage.CreateDescription();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
@@ -39,7 +40,7 @@ namespace TagTool.Commands.Scenarios
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string palette = "all";
 
@@ -50,16 +51,10 @@ namespace TagTool.Commands.Scenarios
             }
 
             if (ValidPalettes.Find(i => i == palette) == null)
-            {
-                Console.WriteLine($"ERROR: invalid forge palette specified: {palette}");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"Palette \"{palette}\"");
 
             if (!Cache.TagCache.TryGetTag(args[0], out var destinationTag))
-            {
-                Console.WriteLine($"ERROR: invalid destination scenario index: {args[0]}");
-                return false;
-            }
+                return new TagToolError(CommandError.TagInvalid, $"\"{args[0]}\"");
 
             Console.Write("Loading destination scenario...");
 

@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using System.Collections.Generic;
 using System.IO;
 using System;
@@ -25,7 +26,7 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var modFonts = Cache.BaseModPackage.FontPackage;
 
@@ -43,6 +44,7 @@ namespace TagTool.Commands.Modding
             }
             else
                 Console.WriteLine("Mod package does not have a font package.");
+
             return true;
         }
     }

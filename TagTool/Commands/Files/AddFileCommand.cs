@@ -3,6 +3,7 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Files
 {
@@ -30,7 +31,7 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var folder = args[0].Replace('/', '\\');
             var file = new FileInfo(args[1]);
@@ -39,10 +40,7 @@ namespace TagTool.Commands.Files
                 folder += "\\";
 
             if (!file.Exists)
-            {
-                Console.WriteLine($"ERROR: File not found: \"{file.FullName}\"");
-                return false;
-            }
+                return new TagToolError(CommandError.FileNotFound);
 
             Definition.Insert(file.Name, folder, File.ReadAllBytes(file.FullName));
 

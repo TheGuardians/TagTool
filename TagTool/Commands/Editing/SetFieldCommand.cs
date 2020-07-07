@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
 
@@ -39,7 +40,7 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count < 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fieldName = args[0];
             var fieldNameLow = fieldName.ToLower();
@@ -64,7 +65,7 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -77,7 +78,7 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
 
@@ -89,11 +90,10 @@ namespace TagTool.Commands.Editing
 
             if (field == null)
             {
-                Console.WriteLine("ERROR: {0} does not contain a field named \"{1}\".", Structure.Types[0].Name, fieldName);
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
                 Structure = previousStructure;
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a field named \"{fieldName}\".");
             }
 
             var fieldType = field.FieldType;
@@ -107,7 +107,7 @@ namespace TagTool.Commands.Editing
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
                 Structure = previousStructure;
-                return false;
+                return new TagToolError(CommandError.OperationFailed, $"Field value could not be parsed for type \"{field.FieldType.ToString()}\"");
             }
 
             if (Cache is GameCacheHaloOnlineBase && field.FieldType == typeof(PageableResource))

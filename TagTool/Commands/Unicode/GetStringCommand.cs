@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Unicode
@@ -31,12 +32,12 @@ namespace TagTool.Commands.Unicode
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var languageName = args[0];
             
             if (!ArgumentParser.TryParseEnum(args[0], out GameLanguage language))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             var stringIdStr = args[1];
             var stringIdIndex = Cache.StringTable.IndexOf(stringIdStr);
@@ -48,10 +49,7 @@ namespace TagTool.Commands.Unicode
 
             var stringId = Cache.StringTable.GetStringId(stringIdIndex);
             if (stringId == StringId.Invalid)
-            {
-                Console.WriteLine("Failed to resolve the stringID.");
-                return true;
-            }
+                return new TagToolError(CommandError.OperationFailed, "Failed to resolve the StringId");
 
             var localizedStr = Definition.Strings.FirstOrDefault(s => s.StringID == stringId);
             if (localizedStr == null)

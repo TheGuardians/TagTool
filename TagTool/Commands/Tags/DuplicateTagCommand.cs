@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Tags
 {
@@ -22,8 +23,10 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || !Cache.TagCache.TryGetCachedTag(args[0], out var originalTag))
-                return false;
+            if (args.Count < 1)
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var originalTag))
+                return new TagToolError(CommandError.TagInvalid);
 
             var newTag = Cache.TagCache.AllocateTag(originalTag.Group);
 

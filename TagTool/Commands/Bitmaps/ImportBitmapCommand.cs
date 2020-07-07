@@ -5,6 +5,7 @@ using System.IO;
 using TagTool.Bitmaps;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Bitmaps.DDS;
@@ -38,10 +39,10 @@ namespace TagTool.Commands.Bitmaps
         public override object Execute(List<string> args)
         {
             if (args.Count > 3 || args.Count < 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int imageIndex))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             if (Bitmap.Images.Count == 0)
             {
@@ -51,12 +52,11 @@ namespace TagTool.Commands.Bitmaps
             }
 
             if (imageIndex < 0 || imageIndex >= Bitmap.Images.Count)
-            {
-                Console.Error.WriteLine("Invalid image index.");
-                return true;
-            }
+                return new TagToolError(CommandError.ArgInvalid, "Invalid image index");
 
             var imagePath = args[1];
+            if (!File.Exists(imagePath))
+                return new TagToolError(CommandError.FileNotFound, $"\"{imagePath}\"");
 
             BitmapImageCurve curve = BitmapImageCurve.xRGB;
             string inputCurve = null;
@@ -115,8 +115,7 @@ namespace TagTool.Commands.Bitmaps
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Importing image data failed: " + ex.Message);
-                return true;
+                return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + ex.Message);
             }
 #endif
 

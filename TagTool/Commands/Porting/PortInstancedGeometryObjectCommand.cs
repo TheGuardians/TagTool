@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Geometry.Utils;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -36,12 +37,10 @@ namespace TagTool.Commands.Porting
             var portingFlags = ParsePortingFlags(argStack);
 
             if (argStack.Count < 1)
-            {
-                Console.WriteLine("ERROR: Expected bsp index!");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgCount, "Expected bsp index!");
 
-            var sbspIndex = int.Parse(argStack.Pop());
+            if (!int.TryParse(argStack.Pop(), out int sbspIndex))
+                return new TagToolError(CommandError.ArgInvalid, "Invalid bsp index");
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())
             using (var hoCacheStream = HoCache.OpenCacheReadWrite())
@@ -77,10 +76,7 @@ namespace TagTool.Commands.Porting
 
                         var index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
                         if (index == -1)
-                        {
-                            Console.WriteLine($"ERROR: Instance not found by identifier {identifier}!");
-                            return false;
-                        }
+                            return new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
 
                         desiredInstances.Add(index, name);
                     }

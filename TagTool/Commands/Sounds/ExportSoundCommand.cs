@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace TagTool.Commands.Sounds
             else if (args.Count == 0)
                 outDirectory = "Sounds";
             else
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (!Directory.Exists(outDirectory))
             {
@@ -48,28 +49,27 @@ namespace TagTool.Commands.Sounds
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(outDirectory);
                 else
-                    return false;
+                    return true;
             }
-
 
             var resourceReference = Definition.Resource;
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(resourceReference);
             
             if (resourceDefinition.Data == null)
             {
-                Console.WriteLine("Invalid sound definition");
-                return false;
+                Console.WriteLine("The sound resource contains no data");
+                return true;
             }
 
             var dataReference = resourceDefinition.Data;
             byte[] soundData = dataReference.Data;
             
-            if(Cache is GameCacheHaloOnlineBase)
+            if (Cache is GameCacheHaloOnlineBase)
             {
                 for (int i = 0; i < Definition.PitchRanges.Count; i++)
                 {
@@ -117,7 +117,8 @@ namespace TagTool.Commands.Sounds
                     }
                 }
             }
-            else if(Cache.GetType() == typeof(GameCacheGen3))
+
+            else if (Cache.GetType() == typeof(GameCacheGen3))
             {
                 if (BlamSoundGestalt == null)
                 {
@@ -143,7 +144,6 @@ namespace TagTool.Commands.Sounds
                     }
                 }
             }
-            
             
             Console.WriteLine("Done!");
             return true;

@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
 using TagTool.Cache.Resources;
 using TagTool.Extensions;
-using TagTool.Tags;
 using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Modding
@@ -26,11 +26,11 @@ namespace TagTool.Commands.Modding
             base(false,
 
                 "ExportModPackage",
-                "",
+                "NO LONGER SUPPORTED - use CreateModPackage instead",
 
                 "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] [FontPackageFile] <Package File>",
 
-                "")
+                "NO LONGER SUPPORTED - use CreateModPackage instead")
         {
             CacheContext = cacheContext;
         }
@@ -38,7 +38,7 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 7)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string packageName;
             string line = null;
@@ -131,8 +131,7 @@ namespace TagTool.Commands.Modding
                             toIndex = toInstance.Index;
                         else
                         {
-                            Console.WriteLine($"Invalid end index");
-                            return false;
+                            return new TagToolError(CommandError.ArgInvalid, "Invalid end index");
                         }
                     }
                 }
@@ -165,7 +164,7 @@ namespace TagTool.Commands.Modding
                             if(!tagIndices.Contains(instance.Index))
                                 tagIndices.Add(instance.Index);
                         else
-                            Console.WriteLine($"Falied to find  tag {tagName}");
+                            Console.WriteLine($"Falied to find tag {tagName}");
                     }
 
                     reader.Close();
@@ -247,7 +246,7 @@ namespace TagTool.Commands.Modding
                 if(!directory.Exists)
                 {
                     Console.WriteLine($"ERROR: Directory does not exist.");
-                    return true;
+                    return new TagToolError(CommandError.DirectoryNotFound);
                 }
 
                 AddFiles(directory);

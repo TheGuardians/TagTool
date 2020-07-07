@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
@@ -26,18 +27,16 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
             if (!Cache.TagCache.TryGetCachedTag(args[0], out var instance))
-                return false;
+                return new TagToolError(CommandError.TagInvalid);
 
             var path = args[1];
 
             if (!File.Exists(path))
-                return false;
+                return new TagToolError(CommandError.FileNotFound, $"\"{path}\"");
 
             byte[] data;
-
             using (var inStream = File.OpenRead(path))
             {
                 data = new byte[inStream.Length];

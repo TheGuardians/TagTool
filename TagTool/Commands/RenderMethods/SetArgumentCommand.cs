@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Shaders.ShaderMatching;
 using TagTool.Tags.Definitions;
 
@@ -31,7 +32,7 @@ namespace TagTool.Commands.RenderMethods
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 5)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             RenderMethodTemplate template = null;
 
@@ -54,7 +55,7 @@ namespace TagTool.Commands.RenderMethods
                         }
 
                     if (index == -1)
-                        return false;
+                        return new TagToolError(CommandError.ArgInvalid, $"The argument \"{args[0]}\" does not exist");
 
                     ShaderMatcherNew.Rmt2Descriptor.TryParse(Definition.ShaderProperties[0].Template.Name, out var rmt2Descriptor);
 
@@ -118,7 +119,7 @@ namespace TagTool.Commands.RenderMethods
             while (args.Count > 1)
             {
                 if (!float.TryParse(args[1], out var value))
-                    throw new FormatException(args[1]);
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
                 values.Add(value);
                 args.RemoveAt(1);
@@ -141,7 +142,7 @@ namespace TagTool.Commands.RenderMethods
             }
 
             if (argumentIndex < 0 || argumentIndex >= properties.RealConstants.Count)
-                throw new KeyNotFoundException($"Invalid argument name: {argumentName}");
+                return new TagToolError(CommandError.ArgInvalid, $"Invalid argument name: {argumentName}");
 
             var argument = properties.RealConstants[argumentIndex];
 

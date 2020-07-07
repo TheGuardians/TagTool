@@ -16,7 +16,7 @@ namespace TagTool.Commands.Common
 				  "Stopwatch reset - Resets the Stopwatch.\n" +
 				  "Stopwatch restart - Restarts the Stopwatch.\n" +
 				  "Stopwatch start - Starts the Stopwatch.\n" +
-				  "Stopwatch stop - Stops the Stopwatch.\n",
+				  "Stopwatch stop - Stops the Stopwatch.",
 
 				  "Utility command for timing other commands.")
 		{
@@ -26,7 +26,7 @@ namespace TagTool.Commands.Common
 		public override object Execute(List<string> args)
 		{
 			if (args.Count == 0)
-				return false;
+				return new TagToolError(CommandError.ArgCount);
 
 			for (var a = 0; a < args.Count; a++)
 			{
@@ -56,7 +56,7 @@ namespace TagTool.Commands.Common
 						StopwatchCommand._stopWatch.Stop();
 						break;
 					default:
-						return false;
+						return new TagToolError(CommandError.ArgInvalid, $"\"{arg}\""); ;
 				}
 			}
 

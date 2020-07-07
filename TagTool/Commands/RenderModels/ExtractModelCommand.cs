@@ -1,12 +1,10 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Serialization;
-using Assimp;
 
 namespace TagTool.Commands.RenderModels
 {
@@ -49,7 +47,7 @@ namespace TagTool.Commands.RenderModels
                 modelFileName = args[2];
             }
             else
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             switch (fileType)
             {
@@ -58,7 +56,7 @@ namespace TagTool.Commands.RenderModels
                     break;
 
                 default:
-                    throw new NotImplementedException(fileType);
+                    return new TagToolError(CommandError.ArgInvalid, $"Unsupported file type \"{fileType}\"");
             }
             
             if (Definition.Geometry.Resource == null)
@@ -91,11 +89,10 @@ namespace TagTool.Commands.RenderModels
 
                     case "dae":
                         return extractor.ExportCollada(modelFile);
-
-                    default:
-                        throw new NotImplementedException(fileType);
                 }
             }
+
+            return true;
         }
     }
 }

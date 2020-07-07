@@ -30,7 +30,7 @@ namespace TagTool.Commands.Bitmaps
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var outDir = args[0];
             Directory.CreateDirectory(outDir);
@@ -73,13 +73,13 @@ namespace TagTool.Commands.Bitmaps
                             }
                         }
                         count++;
-                #if !DEBUG
+#if !DEBUG
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("ERROR: Failed to extract bitmap: " + ex.Message);
+                        return new TagToolError(CommandError.OperationFailed, "Failed to extract bitmap: " + ex.Message);
                     }
-                #endif
+#endif
                 }
             }
 

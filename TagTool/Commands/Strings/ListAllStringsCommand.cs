@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Commands.Common;
 
@@ -33,10 +34,10 @@ namespace TagTool.Commands.Strings
         public override object Execute(List<string> args)
         {
             if (args.Count != 1 && args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (!ArgumentParser.TryParseEnum(args[0], out GameLanguage language))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             var filter = (args.Count == 2) ? args[1] : null;
             var found = false;
@@ -51,9 +52,6 @@ namespace TagTool.Commands.Strings
                     if (strings.Count == 0)
                         continue;
 
-                    if (found)
-                        Console.WriteLine();
-
                     Console.WriteLine("Strings found in {0:X8}.unic:", unicTag.Index);
                     LocalizedStringPrinter.PrintStrings(strings);
 
@@ -62,7 +60,7 @@ namespace TagTool.Commands.Strings
             }
 
             if (!found)
-                Console.Error.WriteLine("No strings found.");
+                Console.WriteLine("No strings found.");
 
             return true;
         }

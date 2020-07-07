@@ -1,25 +1,12 @@
-using TagTool.Cache;
-using TagTool.IO;
 using System.Collections.Generic;
 using System.IO;
 using System;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Tags;
 using TagTool.Serialization;
-using TagTool.Bitmaps;
-using TagTool.Tags.Resources;
-using TagTool.Bitmaps.Utils;
-using TagTool.Bitmaps.DDS;
-using TagTool.Geometry;
-using TagTool.BlamFile;
-using TagTool.Tags.Definitions.Gen1;
 using TagTool.Cache.HaloOnline;
-using TagTool.Havok;
-using System.Linq;
-using System.IO.Compression;
-using TagTool.Tools.Geometry;
-using TagTool.Shaders;
 using TagTool.Scripting;
 using TagTool.Cache.Gen3;
 
@@ -48,7 +35,7 @@ namespace TagTool.Commands
         public override object Execute(List<string> args)
         {
             if (args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string destinationDirectory;
 

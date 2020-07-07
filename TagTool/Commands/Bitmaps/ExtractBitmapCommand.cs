@@ -4,6 +4,7 @@ using System.IO;
 using TagTool.Bitmaps;
 using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -44,7 +45,7 @@ namespace TagTool.Commands.Bitmaps
                 directory = "Bitmaps";
             }
             else
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (!Directory.Exists(directory))
             {
@@ -52,12 +53,12 @@ namespace TagTool.Commands.Bitmaps
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
                 else
-                    return false;
+                    return true;
             }
 
             var ddsOutDir = directory;
@@ -83,11 +84,8 @@ namespace TagTool.Commands.Bitmaps
 
                 var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
 
-                if(ddsFile == null)
-                {
-                    Console.WriteLine($"Invalid bitmap data");
-                    return true;
-                }
+                if (ddsFile == null)
+                    return new TagToolError(CommandError.OperationFailed, "Invalid bitmap data");
 
                 using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))

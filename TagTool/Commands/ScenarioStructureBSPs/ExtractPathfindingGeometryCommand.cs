@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
-using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Tags;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
@@ -35,11 +29,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (Definition.PathfindingResource == null)
             {
-                Console.WriteLine("ERROR: Pathfinding geometry does not have a resource associated with it.");
+                Console.WriteLine("Pathfinding geometry does not have a resource associated with it.");
                 return true;
             }
 

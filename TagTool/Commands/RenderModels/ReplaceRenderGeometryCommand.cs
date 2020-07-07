@@ -1,6 +1,7 @@
 ﻿using Assimp;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 using System;
@@ -37,9 +38,9 @@ namespace TagTool.Commands.RenderModels
 		public override object Execute(List<string> args)
 		{
 			if (args.Count != 1)
-				return false;
+				return new TagToolError(CommandError.ArgCount);
 
-            if (!Cache.TagCache.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
+			if (!Cache.TagCache.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
             {
                 Console.WriteLine("WARNING: 'shaders\\invalid.shader' not found!");
                 Console.WriteLine("You will have to assign material shaders manually.");
@@ -53,7 +54,7 @@ namespace TagTool.Commands.RenderModels
 				throw new FileNotFoundException(sceneFile.FullName);
 
 			if (sceneFile.Extension.ToLower() != ".dae")
-				throw new FormatException($"Input file is not COLLADA format: {sceneFile.FullName}");
+				return new TagToolError(CommandError.FileType, $"\"{sceneFile.FullName}\"");
 
 			Scene scene;
 
@@ -97,7 +98,7 @@ namespace TagTool.Commands.RenderModels
 					var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
 
 					if (permMeshes.Count == 0)
-						throw new Exception($"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+						return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
 
 					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
 

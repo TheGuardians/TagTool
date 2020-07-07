@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Resources;
 
@@ -35,7 +35,7 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 3)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var command = args[0];
 
@@ -72,8 +72,7 @@ namespace TagTool.Commands.Tags
                     break;
 
                 default:
-                    Console.WriteLine($"Invalid resource location: {args[1]}");
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid resource location \"{args[1]}\"");
             }
 
             var index = Convert.ToUInt32(args[2], 16);
@@ -90,11 +89,11 @@ namespace TagTool.Commands.Tags
                     return ListTags(location, index);
 
                 default:
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{command}\"");
             }
         }
 
-        private bool ListTags(ResourceLocation location, uint index)
+        private object ListTags(ResourceLocation location, uint index)
         {
             var indices = new List<int>();
 
@@ -174,10 +173,10 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private bool ExtractResource(ResourceLocation location, uint index, IReadOnlyList<string> args)
+        private object ExtractResource(ResourceLocation location, uint index, IReadOnlyList<string> args)
         {
             if (args.Count != 5)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var compressedSize = Convert.ToUInt32(args[3], 16);
             var outPath = args[4];
@@ -213,10 +212,10 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private bool ImportResource(ResourceLocation location, uint index, IReadOnlyList<string> args)
+        private object ImportResource(ResourceLocation location, uint index, IReadOnlyList<string> args)
         {
             if (args.Count != 4)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var inPath = args[3];
 

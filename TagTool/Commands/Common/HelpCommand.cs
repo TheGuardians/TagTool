@@ -25,7 +25,7 @@ namespace TagTool.Commands.Common
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
             if (args.Count == 1)
                 DisplayCommandHelp(args[0]);
             else

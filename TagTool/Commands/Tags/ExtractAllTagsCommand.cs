@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
@@ -26,7 +27,7 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var directory = args[0];
 
@@ -36,12 +37,12 @@ namespace TagTool.Commands.Tags
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
                 else
-                    return false;
+                    return true;
             }
 
             using (var cacheStream = Cache.OpenCacheRead())
@@ -68,9 +69,7 @@ namespace TagTool.Commands.Tags
                 }
             }
 
-            Console.WriteLine();
             Console.WriteLine("Done!");
-
             return true;
         }
     }

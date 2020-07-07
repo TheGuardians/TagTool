@@ -1,5 +1,6 @@
 ﻿using TagTool.Cache;
 using System.Collections.Generic;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Modding
 {
@@ -23,10 +24,10 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (!int.TryParse(args[0],System.Globalization.NumberStyles.Integer, null, out int tagCacheIndex))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             Cache.SetActiveTagCache(tagCacheIndex);
 

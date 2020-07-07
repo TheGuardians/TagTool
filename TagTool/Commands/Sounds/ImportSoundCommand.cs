@@ -1,8 +1,7 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +23,7 @@ namespace TagTool.Commands.Sounds
                 "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. See documentation for formatting and options.",
                 
                 "ImportSound",
-                "")
+                "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. See documentation for formatting and options.")
         {
             Cache = cache;
             Tag = tag;
@@ -34,7 +33,7 @@ namespace TagTool.Commands.Sounds
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var soundDataAggregate = new byte[0].AsEnumerable();
 
@@ -46,7 +45,7 @@ namespace TagTool.Commands.Sounds
             int pitchRangeCount = GetPitchRangeCountUser();
 
             if (pitchRangeCount <= 0)
-                return false;
+                return new TagToolError(CommandError.CustomError, "Invalid pitch range count");
 
             //
             // Get basic information on the sounds
@@ -155,7 +154,7 @@ namespace TagTool.Commands.Sounds
             var resourceReference = Cache.ResourceCache.CreateSoundResource(resourceDefinition);
             Definition.Resource = resourceReference;
 
-            Console.WriteLine("done.");
+            Console.WriteLine("Done.");
             
             return true;
         }

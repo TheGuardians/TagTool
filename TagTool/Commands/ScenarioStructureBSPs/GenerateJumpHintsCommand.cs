@@ -32,7 +32,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         {
             if (Definition.PathfindingResource == null)
             {
-                Console.WriteLine("ERROR: Pathfinding geometry does not have a resource associated with it.");
+                Console.WriteLine("Pathfinding geometry does not have a resource associated with it.");
                 return true;
             }
 
@@ -40,7 +40,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             foreach(var pathfindingDatum in pathfindingResource.PathfindingData)
             {
-
                 for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
                 {
                     var hint = pathfindingDatum.PathfindingHints[i];

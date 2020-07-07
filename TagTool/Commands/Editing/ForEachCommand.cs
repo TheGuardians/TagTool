@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -39,7 +40,7 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count < 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fieldName = args[0];
             var fieldNameLow = fieldName.ToLower();
@@ -66,7 +67,7 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -79,7 +80,7 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
 
@@ -92,18 +93,12 @@ namespace TagTool.Commands.Editing
             var ownerType = Owner.GetType();
 
             if (field == null)
-            {
-                Console.WriteLine("{0} does not contain a block named \"{1}\"", ownerType.Name, fieldName);
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"\"{ownerType.Name}\" does not contain a tag block named \"{fieldName}\".");
 
             IList fieldValue = null;
 
             if (field.FieldType.GetInterface("IList") == null || (fieldValue = (IList)field.GetValue(Owner)) == null)
-            {
-                Console.WriteLine("{0} does not contain a block named \"{1}\"", ownerType.Name, fieldName);
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"\"{ownerType.Name}\" does not contain a tag block named \"{fieldName}\".");
 
             string fromName = null;
             int? from = null;
@@ -124,6 +119,9 @@ namespace TagTool.Commands.Editing
                         {
                             fromName = args[2];
                             from = FindLabelIndex(fieldValue, fromName);
+
+                            if (from == -1)
+                                return new TagToolError(CommandError.OperationFailed, "Label index returned -1");
                         }
                         args.RemoveRange(1, 2);
                         found = true;
@@ -136,6 +134,9 @@ namespace TagTool.Commands.Editing
                         {
                             toName = args[2];
                             to = FindLabelIndex(fieldValue, toName);
+
+                            if (to == -1)
+                                return new TagToolError(CommandError.OperationFailed, "Label index returned -1");
                         }
                         args.RemoveRange(1, 2);
                         found = true;
@@ -179,7 +180,7 @@ namespace TagTool.Commands.Editing
                 if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
                         .Execute(new List<string> { $"{blockName}[{i}]" })
                         .Equals(false))
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid tag block name");
 
                 var label = GetLabel(fieldValue, i);
 
@@ -235,7 +236,7 @@ namespace TagTool.Commands.Editing
                     return i;
             }
 
-            throw new KeyNotFoundException(displayName);
+            return -1;
         }
     }
 }

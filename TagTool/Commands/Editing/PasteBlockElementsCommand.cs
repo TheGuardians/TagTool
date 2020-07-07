@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
@@ -34,13 +35,10 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (CopyBlockElementsCommand.Elements == null)
-            {
-                Console.WriteLine("ERROR: No elements are available in the clipboard.");
-                return false;
-            }
+                return new TagToolError(CommandError.CustomMessage, "You need to copy at least one block element first");
 
             var fieldName = args[0];
             var fieldNameLow = fieldName.ToLower();
@@ -63,7 +61,7 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -76,20 +74,15 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
             
             var index = -1;
 
             if (args.Count > 1)
-            {
                 if (args[1] != "*" && (!int.TryParse(args[1], out index) || index < 0))
-                {
-                    Console.WriteLine($"Invalid index specified: {args[1]}");
-                    return false;
-                }
-            }
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified: {args[1]}");
 
 			var field = TagStructure.GetTagFieldEnumerable(Structure)
 				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
@@ -100,11 +93,10 @@ namespace TagTool.Commands.Editing
                 (!fieldType.IsGenericType) ||
                 (fieldType.GetInterface("IList") == null))
             {
-                Console.WriteLine("ERROR: {0} does not contain a tag block named \"{1}\".", Structure.Types[0].Name, args[0]);
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
                 Structure = previousStructure;
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
 
             var elementType = field.FieldType.GenericTypeArguments[0];
@@ -124,10 +116,7 @@ namespace TagTool.Commands.Editing
             }
 
             if (index > blockValue.Count)
-            {
-                Console.WriteLine($"Invalid index specified: {index}");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"Invalid index \"{index}\"");
 
             for (var i = 0; i < CopyBlockElementsCommand.Elements.Count; i++)
             {

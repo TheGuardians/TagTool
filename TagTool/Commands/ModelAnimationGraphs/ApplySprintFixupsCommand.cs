@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TagTool.Commands.Common;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
 
@@ -28,7 +26,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             Console.WriteLine("Please specify the tags to be used (enter an empty line to finish):");
 

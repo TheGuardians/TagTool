@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Collections;
 using TagTool.Tags;
-using TagTool.Common;
 using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Commands.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Commands.Editing
@@ -20,7 +21,7 @@ namespace TagTool.Commands.Editing
                   "ListFields",
                   $"Lists the fields in the current {structure.Types[0].Name} definition.",
 
-                  "ListFields",
+                  "ListFields [filter]",
 
                   $"Lists the fields in the current {structure.Types[0].Name} definition.")
         {
@@ -32,7 +33,7 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var match = (args.Count == 1);
             var token = match ? args[0].ToLower() : "";

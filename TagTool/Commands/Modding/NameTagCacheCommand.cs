@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using System.Collections.Generic;
 using System;
 
@@ -24,11 +25,11 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
-            int tagCacheIndex = 0;
+            int tagCacheIndex;
             if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             if (tagCacheIndex < Cache.BaseModPackage.TagCachesStreams.Count && tagCacheIndex >= 0)
             {
@@ -45,8 +46,7 @@ namespace TagTool.Commands.Modding
             }
             else
             {
-                Console.WriteLine("Invalid tag cache index");
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"No tag cache exists at index {tagCacheIndex}");
             }
         }
     }

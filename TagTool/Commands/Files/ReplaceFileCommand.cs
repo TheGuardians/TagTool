@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Files
@@ -30,17 +31,14 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count != 1 && args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var virtualPath = args[0];
             var inputPath = (args.Count == 2) ? args[1] : virtualPath;
             var file = Definition.Find(virtualPath);
 
             if (file == null)
-            {
-                Console.WriteLine("Unable to find file {0}.", virtualPath);
-                return true;
-            }
+                return new TagToolError(CommandError.FileNotFound);
 
             byte[] data;
 
@@ -50,8 +48,7 @@ namespace TagTool.Commands.Files
             }
             catch (IOException)
             {
-                Console.WriteLine("Unable to read from {0}.", inputPath);
-                return true;
+                return new TagToolError(CommandError.FileIO);
             }
 
             Definition.Replace(file, data);

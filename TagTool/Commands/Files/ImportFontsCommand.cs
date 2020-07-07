@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
-using TagTool.IO;
-using TagTool.BlamFile;
-using TagTool.Cache.HaloOnline;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Files
 {
@@ -28,14 +26,14 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var file = new FileInfo(args[0]);
             
             if (!file.Exists)
-                return false;
+                return new TagToolError(CommandError.FileNotFound);
 
-            using(var stream = file.OpenRead())
+            using (var stream = file.OpenRead())
             {
                 Cache.SaveFonts(stream);
             }

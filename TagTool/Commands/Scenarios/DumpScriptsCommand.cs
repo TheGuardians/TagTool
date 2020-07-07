@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Scripting;
 using TagTool.Tags.Definitions;
@@ -33,7 +34,7 @@ namespace TagTool.Commands.Scenarios
         public override object Execute(List<string> args)
         {
             if (args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var csvFileName = $"{Cache.Version.ToString()}_{Definition.MapId}_scripts.csv";
             string functionname = "";

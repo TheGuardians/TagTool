@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using System;
@@ -45,8 +46,7 @@ namespace TagTool.Commands.Sounds
                 directory = "Sounds";
             }
             else
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
 
             if (!Directory.Exists(directory))
             {
@@ -54,17 +54,17 @@ namespace TagTool.Commands.Sounds
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
                 else
-                    return false;
+                    return true;
             }
 
             ExtractXMA(directory);
 
-            Console.WriteLine("done.");
+            Console.WriteLine("Done.");
 
             return true;
         }

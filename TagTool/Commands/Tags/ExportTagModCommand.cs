@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Cache.HaloOnline;
 
@@ -36,7 +37,7 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var name = args[0];
             var directory = new DirectoryInfo(args[1]);

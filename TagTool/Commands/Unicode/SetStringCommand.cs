@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using System.Text.RegularExpressions;
 using System.Globalization;
@@ -35,10 +36,9 @@ namespace TagTool.Commands.Unicode
         public override object Execute(List<string> args)
         {
             if (args.Count != 3)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
             if (!ArgumentParser.TryParseEnum(args[0], out GameLanguage language))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             // Look up the stringID that was passed in
             var stringIdStr = args[1];
@@ -51,8 +51,7 @@ namespace TagTool.Commands.Unicode
             var stringId = Cache.StringTable.GetStringId(stringIdIndex);
             if (stringId == StringId.Invalid)
             {
-                Console.WriteLine("Failed to resolve the stringID.");
-                return true;
+                return new TagToolError(CommandError.OperationFailed, "Failed to resolve the StringId");
             }
             var newValue = new Regex(@"\\[uU]([0-9A-F]{4})").Replace(args[2], match => ((char)Int32.Parse(match.Value.Substring(2), NumberStyles.HexNumber)).ToString());
 

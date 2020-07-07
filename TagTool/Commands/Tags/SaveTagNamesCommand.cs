@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using System.Collections.Generic;
 
 namespace TagTool.Commands.Tags
@@ -23,7 +24,7 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             Cache.SaveTagNames(args.Count == 1 ? args[0] : null);
 

@@ -1,13 +1,12 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.Models
 {
@@ -27,7 +26,7 @@ namespace TagTool.Commands.Models
                   "Extracts a variant of the render model to a file.\n" +
                   "Use the \"ListVariants\" command to list available variants.\n" +
                   "If the model does not have any variants, just use \"default\".\n" +
-                  "Supported file types: obj")
+                  "Supported file types: obj, amf, dae")
         {
             Cache = cache;
             Definition = model;
@@ -36,7 +35,7 @@ namespace TagTool.Commands.Models
         public override object Execute(List<string> args)
         {
             if (args.Count != 3)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var variantName = args[0];
             var fileType = args[1].ToLower();
@@ -50,7 +49,7 @@ namespace TagTool.Commands.Models
                     break;
 
                 default:
-                    throw new NotImplementedException(fileType);
+                    return new TagToolError(CommandError.ArgInvalid, $"Unsupported file type \"{fileType}\"");
             }
 
             //
@@ -117,9 +116,6 @@ namespace TagTool.Commands.Models
                         extractor.ExtractRenderModel();
                         extractor.ExportCollada(modelFile);
                         break;
-                    
-                    default:
-                        throw new NotImplementedException(fileType);
                 }
             }
 

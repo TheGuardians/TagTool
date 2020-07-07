@@ -1,5 +1,5 @@
 using TagTool.Cache;
-using TagTool.IO;
+using TagTool.Commands.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +28,7 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             if (args.Count < 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             while (args.Count > 1)
             {
@@ -38,7 +38,7 @@ namespace TagTool.Commands.Porting
                         break;
 
                     default:
-                        throw new FormatException(args[0]);
+                        return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
                 }
 
                 args.RemoveAt(0);

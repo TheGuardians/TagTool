@@ -10,6 +10,7 @@ using System.Reflection;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Files
 {
@@ -32,7 +33,7 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string path = null;
 
@@ -54,8 +55,7 @@ namespace TagTool.Commands.Files
                         }
                         catch (ArgumentException)
                         {
-                            Console.WriteLine("Invalid path argument.");
-                            return false;
+                            return new TagToolError(CommandError.CustomMessage, "ERROR: Invalid path argument");
                         }
                     }
                     else

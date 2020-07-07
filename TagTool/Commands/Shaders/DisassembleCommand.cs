@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using TagTool.Shaders;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using System.IO;
 using TagTool.IO;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace TagTool.Commands.Shaders
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var disassemblies = new List<string> { };
             var indices = new List<int>();

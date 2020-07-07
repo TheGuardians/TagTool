@@ -6,13 +6,13 @@ using System.Linq;
 using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.Tags;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
-using TagTool.Serialization;
 using System.Text.RegularExpressions;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
@@ -68,9 +68,9 @@ namespace TagTool.Commands.Porting
 		public override object Execute(List<string> args)
 		{
 			if (args.Count < 1)
-				return false;
+                return new TagToolError(CommandError.ArgCount);
 
-			var portingOptions = args.Take(args.Count - 1).ToList();
+            var portingOptions = args.Take(args.Count - 1).ToList();
 			ParsePortingOptions(portingOptions);
 
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;

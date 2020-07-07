@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Scripting;
 using TagTool.Tags;
@@ -49,25 +50,21 @@ namespace TagTool.Commands.Modding
             int tagCacheIndex = -1;
 
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
-            if(args.Count == 0)
+            if (args.Count == 0)
                 tagCacheIndex = 0;
             else
                 if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
-
-            if(tagCacheIndex != ModCache.GetCurrentTagCacheIndex())
+            if (tagCacheIndex != ModCache.GetCurrentTagCacheIndex())
             {
                 if (!ModCache.SetActiveTagCache(tagCacheIndex))
                 {
-                    Console.WriteLine($"Failed to apply mod package to base cache, no changes applied");
-                    return true;
+                    return new TagToolError(CommandError.CustomMessage, "Failed to apply mod package to base cache, no changes applied");
                 }
             }
-                
-
 
             TagMapping = new Dictionary<int, int>();
             StringIdMapping = new Dictionary<StringId, StringId>();

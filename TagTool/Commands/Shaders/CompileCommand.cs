@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using System;
@@ -35,9 +36,7 @@ namespace TagTool.Commands.Shaders
 		public override object Execute(List<string> args)
 		{
 			if (args.Count < 2)
-				return false;
-
-
+                return new TagToolError(CommandError.ArgCount);
 
             bool use_assembly_compiler = args.Count >= 2 && args[0].ToLower() == "asm";
             string file = args[args.Count - 1];

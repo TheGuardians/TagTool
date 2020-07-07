@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Havok;
 using TagTool.Tags.Definitions;
 using System;
@@ -29,7 +30,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string mode = args[0].ToLower();
             string file = args[1].ToLower();
@@ -50,10 +51,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             {
                 Console.WriteLine($"Invalid mode {mode}");
             }
-
-
-
-
             
             return true;
         }
@@ -64,10 +61,9 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             if (!File.Exists(file))
             {
-                Console.WriteLine($"File {file} does not exists!");
+                new TagToolError(CommandError.FileNotFound, $"\"{file}\"");
                 return;
             }
-                
 
             List<byte> newMoppData = new List<byte>();
             using (var reader = new EndianReader(File.Open(file, FileMode.Open)))
@@ -82,8 +78,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             moppData.ArrayBase.Size = (uint)newMoppData.Count;
             moppData.ArrayBase.CapacityAndFlags = moppData.ArrayBase.Size + HkArrayFlags.DONT_DEALLOCATE_FLAG; // works since they are bytes
             moppData.Data = new TagBlock<byte>(CacheAddressType.Memory, newMoppData);
-
-
         }
 
         private void ExportMopps(string file)

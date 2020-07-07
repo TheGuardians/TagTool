@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 using System;
@@ -30,17 +31,17 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fileType = args[0];
             var fileName = args[1];
 
             if (fileType != "obj")
-                throw new NotSupportedException(fileType);
+                return new TagToolError(CommandError.FileType);
 
             if (Definition.Geometry.Resource == null)
             {
-                Console.WriteLine("ERROR: Render geometry does not have a resource associated with it.");
+                Console.WriteLine("Render geometry does not have a resource associated with it.");
                 return true;
             }
 

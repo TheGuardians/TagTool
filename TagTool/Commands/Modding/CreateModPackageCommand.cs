@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache.HaloOnline;
 using System;
+using TagTool.Commands.Common;
 using TagTool.Commands.Tags;
 using System.IO;
 using TagTool.Cache.Gen3;
@@ -31,14 +32,14 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             int tagCacheCount = 1;
             bool useLargeStreams = false;
-            if(args.Count > 0)
+            if (args.Count > 0)
             {
                 if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheCount))
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
                 if (args.Count == 2)
                     useLargeStreams = true;
             }
@@ -80,10 +81,10 @@ namespace TagTool.Commands.Modding
                 modTagCache.SetTagData(referenceStream, (CachedTagHaloOnline)emptyTag, cachedTagData);
                 if (!((CachedTagHaloOnline)emptyTag).IsEmpty())
                 {
-                    throw new Exception();
+                    return new TagToolError(CommandError.OperationFailed, "A tag in the base cache was empty");
                 }
             }
-            Console.WriteLine("done!");
+            Console.WriteLine("Done!");
 
             for (int i = 0; i < tagCacheCount; i++)
             {

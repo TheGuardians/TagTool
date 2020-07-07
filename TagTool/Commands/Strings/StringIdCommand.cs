@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Strings
 {
@@ -31,7 +32,7 @@ namespace TagTool.Commands.Strings
         public override object Execute(List<string> args)
         {
             if (args.Count == 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             switch (args[0].ToLower())
             {
@@ -48,18 +49,21 @@ namespace TagTool.Commands.Strings
                     return ExecuteList(args);
             }
 
-            return false;
+            return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
         }
 
-        private bool ExecuteAdd(List<string> args)
+        private object ExecuteAdd(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var str = args[1];
 
             if (Cache.StringTable.Contains(str))
-                return false;
+            {
+                Console.WriteLine("String already exists");
+                return true;
+            }
 
             var id = Cache.StringTable.AddString(str);
 
@@ -70,29 +74,29 @@ namespace TagTool.Commands.Strings
             return true;
         }
 
-        private bool ExecuteGet(List<string> args)
+        private object ExecuteGet(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (!uint.TryParse(args[1], NumberStyles.HexNumber, null, out uint stringId))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
             var str = Cache.StringTable.GetString(new StringId(stringId));
 
             if (str != null)
                 Console.WriteLine(str);
             else
-                Console.Error.WriteLine("Unable to find a string with ID 0x{0:X}.", stringId);
+                Console.WriteLine("Unable to find a string with ID 0x{0:X}.", stringId);
 
             return true;
         }
 
-        private bool ExecuteGetSet(List<string> args)
+        private object ExecuteGetSet(List<string> args)
         {
             if (args.Count != 1)
-                return false;
-            
+                return new TagToolError(CommandError.ArgCount);
+
             var setStrings = new Dictionary<int, List<StringId>>();
 
             for (var i = 0; i < Cache.StringTable.Count; i++)
@@ -128,10 +132,10 @@ namespace TagTool.Commands.Strings
             return true;
         }
 
-        private bool ExecuteList(List<string> args)
+        private object ExecuteList(List<string> args)
         {
             if (args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var filter = (args.Count == 2) ? args[1] : null;
             var strings = new List<FoundStringID>();
@@ -156,7 +160,7 @@ namespace TagTool.Commands.Strings
 
             if (strings.Count == 0)
             {
-                Console.Error.WriteLine("No strings found.");
+                Console.WriteLine("No strings found.");
                 return true;
             }
 

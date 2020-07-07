@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
@@ -36,12 +37,8 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 4)
-                return false;
-
-
-            if (args.Count < 1 || args.Count > 3)
-                return false;
+            if (args.Count < 1 || args.Count > 4)
+                return new TagToolError(CommandError.ArgCount);
 
             var fieldName = args[0];
             var fieldNameLow = fieldName.ToLower();
@@ -64,7 +61,7 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -77,55 +74,39 @@ namespace TagTool.Commands.Editing
                     while (ContextStack.Context != previousContext) ContextStack.Pop();
                     Owner = previousOwner;
                     Structure = previousStructure;
-                    return false;
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
 
             var index = 0;
 
             if (args.Count > 1 && args[1] != "*")
-            {
                 if (!int.TryParse(args[1], out index) || index < 0)
-                {
-                    Console.WriteLine($"Invalid index specified: {args[1]}");
-                    return false;
-                }
-            }
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified: {args[1]}");
 
             var count = -1;
 
             if (args.Count > 2)
-            {
                 if (args[2] != "*" && (!int.TryParse(args[2], out count) || count < 1))
-                {
-                    Console.WriteLine($"Invalid count specified: {args[2]}");
-                    return false;
-                }
-            }
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid amount specified: {args[2]}");
 
-			var field = TagStructure.GetTagFieldEnumerable(Structure)
+            var field = TagStructure.GetTagFieldEnumerable(Structure)
 				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
 
-            var fieldType = field.FieldType;
-
             if ((field == null) ||
-                (!fieldType.IsGenericType) ||
-                (fieldType.GetInterface("IList") == null))
+                (!field.FieldType.IsGenericType) ||
+                (field.FieldType.GetInterface("IList") == null))
             {
-                Console.WriteLine("ERROR: {0} does not contain a tag block named \"{1}\".", Structure.Types[0].Name, args[0]);
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
                 Structure = previousStructure;
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
 
             var blockValue = field.GetValue(Owner) as IList;
 
             if (blockValue == null)
-            {
-                Console.WriteLine($"Invalid index specified: {args[0]}");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified \"{args[0]}\"");
 
             if (count < 0)
             {
@@ -133,10 +114,7 @@ namespace TagTool.Commands.Editing
             }
 
             if ((index + count) < 0 || (index + count) > blockValue.Count)
-            {
-                Console.WriteLine($"Invalid index: {index}, and count: {count}");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"Invalid index: \"{index}\", and count: \"{count}\"");
 
             ElementType = field.FieldType.GenericTypeArguments[0];
             Elements = new List<object>();

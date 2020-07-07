@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Commands.Editing;
 using TagTool.Common;
 using System.IO;
@@ -31,10 +32,9 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var isConst = false;
-
             if (args[0].ToLower() == "const")
             {
                 args.RemoveAt(0);
@@ -42,13 +42,9 @@ namespace TagTool.Commands.Tags
             }
 
             if (args.Count < 1)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
             if (!Cache.TagCache.TryParseGroupTag(args[0], out var groupTag))
-            {
-                Console.WriteLine($"Invalid tag group: {args[0]}");
-                return true;
-            }
+                return new TagToolError(CommandError.CustomError, $"Invalid group tag \"{args[0]}\"");
 
             args.RemoveAt(0);
 
@@ -143,7 +139,6 @@ namespace TagTool.Commands.Tags
 
             var rootContext = ContextStack.Context;
 
-
             foreach (var instance in tags)
             {
                 if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
@@ -168,7 +163,6 @@ namespace TagTool.Commands.Tags
                 using (var stream = Cache.OpenCacheRead())
                     definition = Cache.Deserialize(stream, instance);
 
-
                 ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
 
                 Console.WriteLine();
@@ -182,7 +176,6 @@ namespace TagTool.Commands.Tags
                     using (var stream = Cache.OpenCacheReadWrite())
                         Cache.Serialize(stream, instance, definition);
                 }
-
             }
 
             Console.WriteLine();

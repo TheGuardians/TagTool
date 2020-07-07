@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 using System.Linq;
 
@@ -24,8 +25,10 @@ namespace TagTool.Commands.Tags
         
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1 || !Cache.TagCache.TryGetCachedTag(args[0], out var tag))
-                return false;
+            if (args.Count != 1)
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var tag))
+                return new TagToolError(CommandError.TagInvalid);
 
             // store these before tag is nulled
             var tagName = tag.Name ?? tag.Index.ToString("X");
@@ -45,7 +48,7 @@ namespace TagTool.Commands.Tags
 
                 else
                 {
-                    throw new NotImplementedException();
+                    return new TagToolError(CommandError.CacheUnsupported);
                 }
             }
 

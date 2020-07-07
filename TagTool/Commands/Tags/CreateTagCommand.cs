@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
 
@@ -27,16 +28,12 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
-            begin:
             var groupTagString = args[0];
 
             if (groupTagString.Length > 4)
-            {
-                Console.WriteLine($"ERROR: Invalid group tag: {groupTagString}");
-                return true;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"Invalid group tag: {groupTagString}");
 
             while (groupTagString.Length < 4)
                 groupTagString += " ";
@@ -65,7 +62,7 @@ namespace TagTool.Commands.Tags
                         if (args[1].StartsWith("0x"))
                             tagIndex = Convert.ToInt32(args[1], 16);
                         else
-                            return false;
+                            return new TagToolError(CommandError.CustomError, "The specified tag index is invalid");
                     }
                     else
                     {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Layouts;
 
@@ -33,7 +34,7 @@ namespace TagTool.Commands.Definitions
         public override object Execute(List<string> args)
         {
             if (args.Count != 3)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
             var inDir = args[0];
             var type = args[1];
             var outDir = args[2];
@@ -47,7 +48,7 @@ namespace TagTool.Commands.Definitions
                     writer = new CppLayoutWriter();
                     break;
                 default:
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{type}\"");
             }
             Directory.CreateDirectory(outDir);
 

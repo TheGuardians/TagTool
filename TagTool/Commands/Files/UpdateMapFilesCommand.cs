@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
-using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.BlamFile;
 using TagTool.Cache.HaloOnline;
 
@@ -32,9 +31,7 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count > 2)
-            {
-                return false;
-            }
+                return new TagToolError(CommandError.ArgCount);
 
             bool forceUpdate = false;
             bool hasMapInfo = false;
@@ -192,7 +189,7 @@ namespace TagTool.Commands.Files
                 return true;
             }
 
-            return false;
+            return new TagToolError(CommandError.CacheUnsupported);
         }
     }
 }

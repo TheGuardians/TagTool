@@ -29,9 +29,7 @@ namespace TagTool.Commands.PhysicsModels
         {
             //Arguments needed: filepath, <new>|<tagIndex>
             if (args.Count < 2)
-            {
-                return false;
-            }
+                return new TagToolError(CommandError.ArgCount);
 
             if (Environment.Is64BitProcess) // JsonMoppNet uses Havok 6.5.0, which is x86 only
             {
@@ -51,7 +49,7 @@ namespace TagTool.Commands.PhysicsModels
             else
             {
                 if (!Cache.TagCache.TryGetCachedTag(args[1], out tag))
-                    return false;
+                    return new TagToolError(CommandError.TagInvalid);
 
                 b_duplicate = false;
             }
@@ -59,23 +57,20 @@ namespace TagTool.Commands.PhysicsModels
             if (!b_force && !b_duplicate && !tag.IsInGroup("phmo"))
             {
                 Console.WriteLine("Tag to override was not of class- 'phmo'. Use third argument- 'force' to inject.");
-                return false;
+                return true;
             }
 
             var filename = args[0];
 
             var modelbuilder = new PhysicsModelBuilder();
             if (!modelbuilder.ParseFromFile(filename))
-            {
-                return false;
-            }
+                return new TagToolError(CommandError.FileIO, "The physics model builder could not parse the specified file");
+
             //modelbuilder must also make a node for the physics model
             var phmo = modelbuilder.Build();
 
             if (phmo == null)
-            {
-                return false;
-            }
+                return new TagToolError(CommandError.OperationFailed, "The built physics model was null");
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
@@ -87,7 +82,7 @@ namespace TagTool.Commands.PhysicsModels
                     if (tag == null)
                     {
                         Console.WriteLine("Failed tag duplication.");
-                        return false;
+                        return true;
                     }
                 }
 

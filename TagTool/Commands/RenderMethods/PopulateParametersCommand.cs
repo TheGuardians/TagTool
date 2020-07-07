@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
-using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.RenderMethods
@@ -31,7 +31,7 @@ namespace TagTool.Commands.RenderMethods
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string[] pixelRegisterNames = new string[] { "none" };
             string[] vertexRegisterNames = new string[] { "none" };
@@ -47,10 +47,7 @@ namespace TagTool.Commands.RenderMethods
             var shaderProperty = Definition.ShaderProperties[0];
 
             if (shaderProperty.Template == null)
-            {
-                Console.WriteLine("ERROR: No template.");
-                return true;
-            }
+                return new TagToolError(CommandError.CustomError, "The shader\'s template was null");
 
             // find parameter registers and pair them for easy lookup later
 
@@ -64,10 +61,7 @@ namespace TagTool.Commands.RenderMethods
                 var glvsTag = rmdf.GlobalVertexShader;
 
                 if (pixlTag == null || glvsTag == null)
-                {
-                    Console.WriteLine("ERROR: No shaders.");
-                    return true;
-                }
+                    return new TagToolError(CommandError.CustomError, "The relative pixl or glvs tag was null");
 
                 var pixl = Cache.Deserialize<PixelShader>(stream, pixlTag);
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
@@ -113,10 +107,7 @@ namespace TagTool.Commands.RenderMethods
                     }
 
                 if ((pixelRegisterNames[0] != "none" && pixelRegisterNames.Length != PixelRegisterPairings.Count) || (vertexRegisterNames[0] != "none" && vertexRegisterNames.Length != VertexRegisterPairings.Count))
-                {
-                    Console.WriteLine("ERROR: One or more registers could not be found.");
-                    return true;
-                }
+                    return new TagToolError(CommandError.CustomError, "One or more registers could not be found");
 
                 // replace RM data
 

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using TagTool.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Serialization;
 using System.Runtime.InteropServices;
 using TagTool.Cache.HaloOnline;
@@ -35,21 +36,20 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
 
             Process process;
 
             if (args.Count == 1)
             {
                 if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int processId) || processId < 0)
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid ProcessId \"{args[0]}\"");
 
-            #if !DEBUG
+#if !DEBUG
                 try
                 {
-            #endif
-                    process = Process.GetProcessById(processId);
+#endif
+                process = Process.GetProcessById(processId);
             #if !DEBUG
                 }
                 catch (ArgumentException)
@@ -64,10 +64,7 @@ namespace TagTool.Commands.Editing
                 var processes = Process.GetProcessesByName("eldorado");
 
                 if (processes.Length == 0)
-                {
-                    Console.Error.WriteLine("Unable to find any eldorado.exe processes.");
-                    return true;
-                }
+                    return new TagToolError(CommandError.OperationFailed, "Unable to find any eldorado.exe processes");
 
                 process = processes[0];
             }
@@ -88,9 +85,9 @@ namespace TagTool.Commands.Editing
                     stopWatch.Stop();
 
                     Console.WriteLine($"Poked tag at 0x{address.ToString("X8")} in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
-                }  
+                }
                 else
-                    Console.Error.WriteLine("Tag 0x{0:X} is not loaded in process 0x{1:X}.", Tag.Index, process.Id);
+                    return new TagToolError(CommandError.OperationFailed, $"Tag 0x{Tag.Index:X} is not loaded in process 0x{process.Id:X}.");
             }
 
             return true;

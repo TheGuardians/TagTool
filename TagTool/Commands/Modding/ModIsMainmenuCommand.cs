@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using System.Collections.Generic;
 using System;
 
@@ -24,14 +25,14 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (args[0] == "1")
                 Cache.BaseModPackage.Header.ModifierFlags |= ModifierFlags.Mainmenu;
             else if (args[0] == "0")
                 Cache.BaseModPackage.Header.ModifierFlags &= ~ModifierFlags.Mainmenu;
             else
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, "Valid arguments are 1 (true) or 0 (false)");
 
             Console.WriteLine(Cache.BaseModPackage.Header.ModifierFlags.ToString());
             return true;

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.Definitions.ForgeGlobalsDefinition;
 
@@ -35,7 +33,7 @@ namespace TagTool.Commands.Forge
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var xml = new XmlDocument();
             xml.Load(args[0]);

@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using System.Collections.Generic;
 using System;
 
@@ -24,28 +25,28 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
-            int tagCacheIndex = 0;
+            int tagCacheIndex;
             if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             if (tagCacheIndex == Cache.GetCurrentTagCacheIndex())
-            {
-                Console.WriteLine("Cant delete the tag cache while it's in use");
-                return true;
-            }
+                return new TagToolError(CommandError.CustomMessage, "A tag cache cannot be deleted while it is in use");
+
             if (tagCacheIndex < Cache.BaseModPackage.TagCachesStreams.Count && tagCacheIndex >= 0)
             {
                 Console.WriteLine($"Delete tag cache {tagCacheIndex} ({Cache.BaseModPackage.CacheNames[tagCacheIndex]}) from the package? (y/n)");
+
                 string response = Console.ReadLine();
+
                 if (response.ToLower().StartsWith("y"))
                 {
-                    Console.WriteLine($"Deleted tag cache {tagCacheIndex} ({Cache.BaseModPackage.CacheNames[tagCacheIndex]}) from package...");
-
                     Cache.BaseModPackage.TagCachesStreams.RemoveAt(tagCacheIndex);
                     Cache.BaseModPackage.CacheNames.RemoveAt(tagCacheIndex);
                     Cache.BaseModPackage.TagCacheNames.RemoveAt(tagCacheIndex);
+
+                    Console.WriteLine($"Deleted tag cache {tagCacheIndex} ({Cache.BaseModPackage.CacheNames[tagCacheIndex]}) from package...");
                     return true;
                 }
                 else
@@ -55,8 +56,7 @@ namespace TagTool.Commands.Modding
             }
             else
             {
-                Console.WriteLine("Invalid tag cache index");
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"No tag cache exists at index {tagCacheIndex}");
             }
 
             return true;

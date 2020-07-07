@@ -4,6 +4,7 @@ using System.IO;
 using System.Numerics;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
@@ -30,11 +31,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (Definition.CollisionBspResource == null)
             {
-                Console.WriteLine("ERROR: Collision geometry does not have a resource associated with it.");
+                Console.WriteLine("Collision geometry does not have a resource associated with it.");
                 return true;
             }
 
@@ -42,8 +43,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             using (var resourceStream = new MemoryStream())
             {
-                
-
                 var file = new FileInfo(args[0]);
 
                 if (!file.Directory.Exists)

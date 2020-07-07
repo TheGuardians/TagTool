@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
@@ -26,19 +27,15 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
             if (!Cache.TagCache.TryGetTag(args[0], out var instance))
-                return false;
+                return new TagToolError(CommandError.TagInvalid);
 
             var file = new FileInfo(args[1]);
-
             if (!file.Directory.Exists)
                 file.Directory.Create();
 
-
             byte[] data;
-
             using (var stream = Cache.OpenCacheRead())
                 data = Cache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
 

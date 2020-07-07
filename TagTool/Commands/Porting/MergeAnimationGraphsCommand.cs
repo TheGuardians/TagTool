@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -41,7 +41,7 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             MergedAnimationGraphs.Clear();
 

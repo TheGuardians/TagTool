@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Tags
 {
@@ -85,7 +86,7 @@ namespace TagTool.Commands.Tags
 						break;
 
                     default:
-                        throw new FormatException(args[0]);
+                        return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
                 }
 
                 args.RemoveAt(0);

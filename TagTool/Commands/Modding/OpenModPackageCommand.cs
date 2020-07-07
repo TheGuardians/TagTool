@@ -1,11 +1,9 @@
 ﻿using TagTool.Cache;
 using System.Collections.Generic;
-using TagTool.Cache.HaloOnline;
 using System;
+using TagTool.Commands.Common;
 using TagTool.Commands.Tags;
 using System.IO;
-using TagTool.Cache.Gen3;
-using TagTool.IO;
 
 namespace TagTool.Commands.Modding
 {
@@ -31,16 +29,16 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var file = new FileInfo(args[0]);
 
             if (!file.Exists)
-                return false;
+                return new TagToolError(CommandError.FileNotFound, $"\"{args[0]}\"");
 
             Console.WriteLine("Initializing cache...");
             GameCacheModPackage modCache = new GameCacheModPackage(Cache, file);
-            Console.WriteLine("done!");
+            Console.WriteLine("Done!");
 
             ContextStack.Push(TagCacheContextFactory.Create(ContextStack, modCache,
                 $"{modCache.BaseModPackage.Metadata.Name}.pak"));

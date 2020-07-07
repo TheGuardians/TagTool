@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using TagTool.BlamFile;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using static TagTool.Commands.Porting.PortTagCommand;
@@ -79,10 +80,7 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("Enter the scenario name:");
                 var scenarioName = Console.ReadLine();
                 if (!Regex.IsMatch(scenarioName, "[a-z0-9_]+"))
-                {
-                    Console.WriteLine("Scenario name must consist of lowercase alphanumeric characters and underscores.");
-                    return false;
-                }
+                    return new TagToolError(CommandError.CustomMessage, "Scenario name must consist of lowercase alphanumeric characters and underscores");
 
                 scenarioPath = $@"levels\custom\{scenarioName}\{scenarioName}";
 
@@ -103,11 +101,8 @@ namespace TagTool.Commands.Porting
                 var mapIdInput = Console.ReadLine();
                 if (int.TryParse(mapIdInput, out tmpMapId))
                 {
-                    if(tmpMapId < kMinMapId || tmpMapId > kMaxMapId)
-                    {
-                        Console.WriteLine($"Map id out of range.");
-                        return false;
-                    }
+                    if (tmpMapId < kMinMapId || tmpMapId > kMaxMapId)
+                        return new TagToolError(CommandError.CustomMessage, "Map id out of range");
                 }
                 else
                 {
@@ -120,18 +115,12 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("Enter the map name (for display):");
                 var mapName = Console.ReadLine();
                 if(mapName.Length >= 4 && mapName.Length > 15)
-                {
-                    Console.WriteLine("Map name must be at 4 to 15 characters.");
-                    return false;
-                }
+                    return new TagToolError(CommandError.CustomMessage, "Map name must be at 4 to 15 characters");
 
                 Console.WriteLine("Enter the map description:");
                 var mapDescription = Console.ReadLine();
                 if (mapDescription.Length > 127)
-                {
-                    Console.WriteLine("Map description must be no longer than 127 characters.");
-                    return false;
-                }
+                    return new TagToolError(CommandError.CustomMessage, "Map description must be no longer than 127 characters");
 
                 Console.WriteLine("-----------------------------------------");
                 for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
@@ -159,10 +148,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 if (zoneSetIndex == -1)
-                {
-                    Console.WriteLine($"Zone set '{zoneSetName}' could not be found!\n");
-                    return true;
-                }
+                    return new TagToolError(CommandError.CustomMessage, $"Zone set '{zoneSetName}' could not be found!\n");
 
                 var zoneSet = blamScnr.ZoneSets[zoneSetIndex];
 

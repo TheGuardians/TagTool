@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
@@ -40,10 +41,9 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 2)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
             if (!Cache.TagCache.TryGetCachedTag(args[1], out var tag))
-                return false;
+                return new TagToolError(CommandError.TagInvalid);
 
             switch (args[0].ToLower())
             {
@@ -59,19 +59,19 @@ namespace TagTool.Commands.Tags
                     return ExecuteListDependsOn((CachedTagHaloOnline)tag);
 
                 default:
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
             }
         }
 
-        private bool ExecuteAddRemove(CachedTagHaloOnline tag, List<string> args)
+        private object ExecuteAddRemove(CachedTagHaloOnline tag, List<string> args)
         {
             if (args.Count < 3)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var dependencies = args.Skip(2).Select(name => Cache.TagCache.GetTag(name)).ToList();
             
             if (dependencies.Count == 0 || dependencies.Any(d => d == null))
-                return false;
+                return new TagToolError(CommandError.CustomError, "No dependencies were listed");
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
@@ -84,7 +84,7 @@ namespace TagTool.Commands.Tags
                         if (data.Dependencies.Add(dependency.Index))
                             Console.WriteLine("Added dependency on tag {0:X8}.", dependency.Index);
                         else
-                            Console.Error.WriteLine("Tag {0:X8} already depends on tag {1:X8}.", tag.Index, dependency.Index);
+                            Console.WriteLine("Tag {0:X8} already depends on tag {1:X8}.", tag.Index, dependency.Index);
                     }
                 }
                 else
@@ -94,7 +94,7 @@ namespace TagTool.Commands.Tags
                         if (data.Dependencies.Remove(dependency.Index))
                             Console.WriteLine("Removed dependency on tag {0:X8}.", dependency.Index);
                         else
-                            Console.Error.WriteLine("Tag {0:X8} does not depend on tag {1:X8}.", tag.Index, dependency.Index);
+                            Console.WriteLine("Tag {0:X8} does not depend on tag {1:X8}.", tag.Index, dependency.Index);
                     }
                 }
 
@@ -104,11 +104,11 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private bool ExecuteList(CachedTagHaloOnline tag, bool all, params string[] groups)
+        private object ExecuteList(CachedTagHaloOnline tag, bool all, params string[] groups)
         {
             if (tag.Dependencies.Count == 0)
             {
-                Console.Error.WriteLine("Tag {0:X8} has no dependencies.", tag.Index);
+                Console.WriteLine("Tag {0:X8} has no dependencies.", tag.Index);
                 return true;
             }
 
@@ -133,12 +133,12 @@ namespace TagTool.Commands.Tags
             
             foreach (var instance in tag.Dependencies)
                 if (instance < 0 || instance >= Cache.TagCache.Count)
-                    Console.WriteLine($"WARNING: dependency is an inexistent tag: 0x{instance:X4}");
+                    Console.WriteLine($"WARNING: dependency is a non-existant tag: 0x{instance:X4}");
                     
             return true;
         }
 
-        private bool ExecuteListDependsOn(CachedTagHaloOnline tag)
+        private object ExecuteListDependsOn(CachedTagHaloOnline tag)
         {
             var dependsOn = Cache.TagCacheGenHO.NonNull().Where(t => ((CachedTagHaloOnline)t).Dependencies.Contains(tag.Index));
 

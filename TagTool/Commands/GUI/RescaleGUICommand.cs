@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Tags;
 using TagTool.Tags.GUI;
 using TagTool.Tags.Definitions;
 using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Cache.HaloOnline;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.GUI
 {
@@ -31,10 +28,9 @@ namespace TagTool.Commands.GUI
         public override object Execute(List<string> args)
         {
             float scalefactor = 1.3125f;
-            if (args.Count > 0)
-            {
-                scalefactor = float.Parse(args[0]);
-            }
+            if (args.Count > 0 && !float.TryParse(args[0], out scalefactor))
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+
             List<string> TargetTagGroups = new List<string>{ "bmp3", "skn3", "txt3", "lst3", "grup", "bkey", "mdl3", "scn3" };
             foreach (var tag in Cache.TagCache.TagTable)
             {

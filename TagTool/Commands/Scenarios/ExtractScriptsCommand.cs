@@ -1,5 +1,6 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Scripting;
 using TagTool.Tags.Definitions;
@@ -158,7 +159,7 @@ namespace TagTool.Commands.Scenarios
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var scriptFile = new FileInfo(args[0]);
 

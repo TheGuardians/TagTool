@@ -5,6 +5,7 @@ using System.Linq;
 using Assimp;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 
@@ -31,7 +32,7 @@ namespace TagTool.Commands.RenderModels
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var stringIdCount = Cache.StringTable.Count;
             var destinationTag = Cache.TagCache.GetTag(@"objects\gear\human\industrial\street_cone\street_cone", "mode");
@@ -46,10 +47,7 @@ namespace TagTool.Commands.RenderModels
             if (args.Count == 2)
             {
                 if (!Cache.TagCache.TryGetTag(args[0], out destinationTag) || !destinationTag.IsInGroup("mode"))
-                {
-                    Console.WriteLine("Specified tag is not a render_model: " + args[0]);
-                    return false;
-                }
+                    return new TagToolError(CommandError.TagInvalid);
 
                 args.RemoveAt(0);
             }
@@ -67,7 +65,7 @@ namespace TagTool.Commands.RenderModels
 
             // Read the custom model file
             if (!File.Exists(args[0]))
-                return false;
+                return new TagToolError(CommandError.FileNotFound);
 
             Console.WriteLine($"File date: {File.GetLastWriteTime(args[0])}");
 
@@ -92,7 +90,7 @@ namespace TagTool.Commands.RenderModels
 
                     for (var i = 0; i < model.Meshes.Count; i++)
                         if (!model.Meshes[i].HasBones)
-                            throw new Exception($"Mesh \"{model.Meshes[i].Name}\" has no bones!");
+                            return new TagToolError(CommandError.CustomError, $"Mesh \"{model.Meshes[i].Name}\" has no bones!");
                 }
                 else
                 {

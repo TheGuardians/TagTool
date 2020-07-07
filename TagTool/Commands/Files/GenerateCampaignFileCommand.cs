@@ -5,6 +5,7 @@ using TagTool.Cache;
 using TagTool.IO;
 using TagTool.BlamFile;
 using TagTool.Cache.HaloOnline;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Files
 {
@@ -28,9 +29,7 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-            {
-                return false;
-            }
+                return new TagToolError(CommandError.ArgCount);
 
             var fileName = $"halo3.campaign";
 
@@ -38,7 +37,7 @@ namespace TagTool.Commands.Files
             var srcFile = new FileInfo(Path.Combine(mapInfoDir.FullName, fileName));
 
             if (!srcFile.Exists)
-                return false;
+                return new TagToolError(CommandError.FileNotFound);
 
             if (Cache is GameCacheHaloOnline)
             {
@@ -73,7 +72,7 @@ namespace TagTool.Commands.Files
             }
             else
             {
-                return false;
+                return new TagToolError(CommandError.CacheUnsupported);
             }
 
             

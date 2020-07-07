@@ -69,6 +69,8 @@ namespace TagTool.Commands.Common
             }
         }
 
+        public static string CurrentCommandName = "";
+
         private static bool ExecuteCommand(CommandContext context, List<string> commandAndArgs)
         {
             if (commandAndArgs.Count == 0)
@@ -87,15 +89,9 @@ namespace TagTool.Commands.Common
             try
             {
 #endif
-            if (!command.Execute(commandAndArgs).Equals(true))
-            {
-                Console.WriteLine("{0}: {1}", command.Name, command.Description);
-                Console.WriteLine();
-                Console.WriteLine("Usage:");
-                Console.WriteLine("{0}", command.Usage);
-                Console.WriteLine();
-                Console.WriteLine("Use \"help {0}\" for more information.", command.Name);
-            }
+            CurrentCommandName = command.Name;
+            command.Execute(commandAndArgs);
+            CurrentCommandName = "";
 #if !DEBUG
             }
             catch (Exception e)
