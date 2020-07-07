@@ -760,7 +760,7 @@ namespace TagTool.Commands.Porting
             if (!optionBitmaps.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out textureConstant.Bitmap) || textureConstant.Bitmap == null)
             {
                 // fallback
-                Console.WriteLine($"WARNING: Sampler parameter \"{parameter}\" has no default bitmap");
+                //Console.WriteLine($"WARNING: Sampler parameter \"{parameter}\" has no default bitmap");
 
                 // null bitmap causes bad rendering, use default_detail in these cases
                 if (rmt2Descriptor.IsMs30)
