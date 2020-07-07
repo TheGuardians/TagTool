@@ -91,7 +91,7 @@ namespace TagTool.Common
                 error = $"Unable to parse \"{args[1]}\" (pitch) as `float`.";
                 return false;
             }
-            else if (!float.TryParse(args[1], out float roll))
+            else if (!float.TryParse(args[2], out float roll))
             {
                 error = $"Unable to parse \"{args[2]}\" (roll) as `float`.";
                 return false;
