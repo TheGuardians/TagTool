@@ -214,79 +214,93 @@ namespace TagTool.Commands.Porting
         void GenerateMapFile(Stream cacheStream, CachedTag scenarioTag, string mapName, string mapDescription)
         {
             var scenarioName = Path.GetFileName(scenarioTag.Name);
-            var mapFile = new FileInfo(Path.Combine(CacheContext.Directory.FullName, $"{scenarioName}.map"));
 
-            Console.WriteLine($"Generating map file '{mapFile.Name}'...");
+            var blf = new BlamFile.Blf(CacheVersion.HaloOnline106708);
 
-            using (var mapFileStream = mapFile.Create())
+            MapFile map = new MapFile();
+            var header = new CacheFileHeader();
+
+            var scnr = CacheContext.Deserialize<Scenario>(cacheStream, scenarioTag);
+
+            map.Version = CacheContext.Version;
+            map.EndianFormat = EndianFormat.LittleEndian;
+            map.MapVersion = CacheFileVersion.HaloOnline;
+
+            header.HeaderSignature = new Tag("head");
+            header.FooterSignature = new Tag("foot");
+            header.FileVersion = map.MapVersion;
+            header.Build = CacheVersionDetection.GetBuildName(CacheContext.Version);
+
+            switch (scnr.MapType)
             {
-                var blf = new BlamFile.Blf(CacheVersion.HaloOnline106708);
+                case ScenarioMapType.MainMenu:
+                    header.CacheType = CacheFileType.MainMenu;
+                    break;
+                case ScenarioMapType.SinglePlayer:
+                    header.CacheType = CacheFileType.Campaign;
+                    break;
+                case ScenarioMapType.Multiplayer:
+                    header.CacheType = CacheFileType.Multiplayer;
+                    break;
+            }
+            header.SharedType = CacheFileSharedType.None;
 
-                MapFile map = new MapFile();
-                var header = new CacheFileHeader();
+            header.MapId = scnr.MapId;
+            header.ScenarioTagIndex = scenarioTag.Index;
+            header.Name = scenarioTag.Name.Split('\\').Last();
+            header.ScenarioPath = scenarioTag.Name;
 
-                var scnr = CacheContext.Deserialize<Scenario>(cacheStream, scenarioTag);
+            map.Header = header;
 
-                map.Version = CacheContext.Version;
-                map.EndianFormat = EndianFormat.LittleEndian;
-                map.MapVersion = CacheFileVersion.HaloOnline;
+            header.FileLength = 0x3390;
 
-                header.HeaderSignature = new Tag("head");
-                header.FooterSignature = new Tag("foot");
-                header.FileVersion = map.MapVersion;
-                header.Build = CacheVersionDetection.GetBuildName(CacheContext.Version);
+            map.MapFileBlf = new Blf(CacheContext.Version);
+            map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
+            map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
+            map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };
 
-                switch (scnr.MapType)
+            var scnrBlf = map.MapFileBlf.Scenario;
+            scnrBlf.MapId = scnr.MapId;
+            scnrBlf.Names = new NameUnicode32[12];
+            for (int i = 0; i < scnrBlf.Names.Length; i++)
+                scnrBlf.Names[i] = new NameUnicode32() { Name = "" };
+
+            scnrBlf.Descriptions = new NameUnicode128[12];
+            for (int i = 0; i < scnrBlf.Descriptions.Length; i++)
+                scnrBlf.Descriptions[i] = new NameUnicode128() { Name = "" };
+
+            scnrBlf.Names[0] = new NameUnicode32() { Name = mapName };
+            scnrBlf.Descriptions[0] = new NameUnicode128() { Name = mapDescription };
+
+            scnrBlf.MapName = scenarioName;
+            scnrBlf.ImageName = $"m_{scenarioName}";
+            scnrBlf.UnknownTeamCount1 = 2;
+            scnrBlf.UnknownTeamCount2 = 6;
+            scnrBlf.GameEngineTeamCounts = new byte[11] { 00, 02, 08, 08, 08, 08, 08, 08, 04, 02, 08 };
+
+            scnrBlf.MapFlags = BlfScenarioFlags.GeneratesFilm | BlfScenarioFlags.IsMainmenu | BlfScenarioFlags.IsDlc;
+
+            map.MapFileBlf.ContentFlags |= BlfFileContentFlags.StartOfFile | BlfFileContentFlags.Scenario | BlfFileContentFlags.EndOfFile;
+
+            if (CacheContext is GameCacheModPackage)
+            {
+                var mapStream = new MemoryStream();
+                var writer = new EndianWriter(mapStream, leaveOpen: true);
+                map.Write(writer);
+
+                var modPackCache = CacheContext as GameCacheModPackage;
+                modPackCache.AddMapFile(mapStream, map.Header.MapId);
+            }
+            else
+            {
+                var mapFile = new FileInfo(Path.Combine(CacheContext.Directory.FullName, $"{scenarioName}.map"));
+
+                Console.WriteLine($"Generating map file '{mapFile.Name}'...");
+
+                using (var mapFileStream = mapFile.Create())
                 {
-                    case ScenarioMapType.MainMenu:
-                        header.CacheType = CacheFileType.MainMenu;
-                        break;
-                    case ScenarioMapType.SinglePlayer:
-                        header.CacheType = CacheFileType.Campaign;
-                        break;
-                    case ScenarioMapType.Multiplayer:
-                        header.CacheType = CacheFileType.Multiplayer;
-                        break;
+                    map.Write(new EndianWriter(mapFileStream));
                 }
-                header.SharedType = CacheFileSharedType.None;
-
-                header.MapId = scnr.MapId;
-                header.ScenarioTagIndex = scenarioTag.Index;
-                header.Name = scenarioTag.Name.Split('\\').Last();
-                header.ScenarioPath = scenarioTag.Name;
-
-                map.Header = header;
-
-                header.FileLength = 0x3390;
-
-                map.MapFileBlf = new Blf(CacheContext.Version);
-                map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
-                map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
-                map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };
-
-                var scnrBlf = map.MapFileBlf.Scenario;
-                scnrBlf.MapId = scnr.MapId;
-                scnrBlf.Names = new NameUnicode32[12];
-                for (int i = 0; i < scnrBlf.Names.Length; i++)
-                    scnrBlf.Names[i] = new NameUnicode32() { Name = "" };
-
-                scnrBlf.Descriptions = new NameUnicode128[12];
-                for (int i = 0; i < scnrBlf.Descriptions.Length; i++)
-                    scnrBlf.Descriptions[i] = new NameUnicode128() { Name = "" };
-
-                scnrBlf.Names[0] = new NameUnicode32() { Name = mapName };
-                scnrBlf.Descriptions[0] = new NameUnicode128() { Name = mapDescription };
-
-                scnrBlf.MapName = scenarioName;
-                scnrBlf.ImageName = $"m_{scenarioName}";
-                scnrBlf.UnknownTeamCount1 = 2;
-                scnrBlf.UnknownTeamCount2 = 6;
-                scnrBlf.GameEngineTeamCounts = new byte[11] { 00, 02, 08, 08, 08, 08, 08, 08, 04, 02, 08 };
-
-                scnrBlf.MapFlags = BlfScenarioFlags.GeneratesFilm | BlfScenarioFlags.IsMainmenu | BlfScenarioFlags.IsDlc;
-
-                map.MapFileBlf.ContentFlags |= BlfFileContentFlags.StartOfFile | BlfFileContentFlags.Scenario | BlfFileContentFlags.EndOfFile;
-                map.Write(new EndianWriter(mapFileStream));
             }
         }
 
