@@ -174,35 +174,20 @@ namespace TagTool.Commands.Modding
                 return BaseCache.TagCache.GetTag(TagMapping[modTag.Index]);   // get the matching tag in the destination package
 
             // Determine if tag requires conversion
-            if (modTag.DefinitionOffset == ((CachedTagHaloOnline)modTag).TotalSize)
+            if (((CachedTagHaloOnline)modTag).IsEmpty())
             {
                 //modtag references a base tag, figure out which one is it and add it to the mapping
-                CachedTag baseTag = null;
-                if (modTag.Index < BaseCache.TagCache.Count)
-                    baseTag = BaseCache.TagCache.GetTag(modTag.Index);
-
-                // mod tag has a name, first check if baseTag name is null, else if the names don't match or group don't match
-                if (baseTag != null && baseTag.Group == modTag.Group && baseTag.Name != null && baseTag.Name == modTag.Name)
+                CachedTag cacheTag;
+                if (CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out cacheTag))
                 {
-                    TagMapping[modTag.Index] = baseTag.Index;
-                    return baseTag;
+                    TagMapping[modTag.Index] = cacheTag.Index;
+                    return cacheTag;
                 }
-                else
-                {
-                    // tag name/group doesn't match base tag, try to look for it
 
-                    CachedTag cacheTag;
-                    if(CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out cacheTag))
-                    {
-                        TagMapping[modTag.Index] = cacheTag.Index;
-                        return cacheTag;
-                    }
-
-                    // Failed to find tag in base cache
-                    Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group.ToString()} in the base cache, returning null tag reference.");
-                    //return null;
-                    throw new Exception("Failed to find tag when applying.");
-                }
+                // Failed to find tag in base cache
+                Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group} in the base cache, returning null tag reference.");
+                //return null;
+                throw new Exception("Failed to find tag when applying.");
             }     
             else
             {
@@ -413,6 +398,11 @@ namespace TagTool.Commands.Modding
                     case HsType.HaloOnlineValue.AnyTagNotResolving:
                         ConvertScriptTagReferenceExpressionData(modPack, expr);
                         return;
+
+                    case HsType.HaloOnlineValue.AiLine when BitConverter.ToInt32(expr.Data, 0) != -1:
+                    case HsType.HaloOnlineValue.StringId:
+                        ConvertScriptStringIdExpressionData(modPack, expr);
+                        return;
                     default:
                         break;
                 }
@@ -428,6 +418,18 @@ namespace TagTool.Commands.Modding
 
             var tag = ConvertCachedTagInstance(modPack, ModCache.TagCacheGenHO.Tags[tagIndex]);
             expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
+        }
+
+        public void ConvertScriptStringIdExpressionData(ModPackage modPack, HsSyntaxNode expr)
+        {
+            StringId modStringId = new StringId(BitConverter.ToUInt32(expr.Data.ToArray(), 0));
+
+            // if string is invalid, don't convert
+            if (modPack.StringTable.GetString(modStringId) == null)
+                return;
+
+            var edStringId = ConvertStringId(modPack, modStringId);
+            expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
         }
     }
 }
