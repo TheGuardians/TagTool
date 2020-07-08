@@ -232,6 +232,22 @@ namespace TagTool.Commands.Porting
                 {
                     chudDefinition.HudWidgets[hudWidgetIndex].StateData[0].UnitGeneralFlags = ChudDefinition.HudWidget.StateDatum.UnitGeneral.ThirdPersonCamera;
                 }
+
+                // reposition h3 metagame widgets (anchors changed in ODST)
+                // this is approximate, could be done better
+                if (BlamCache.Version == CacheVersion.Halo3Retail)
+                {
+                    if (widgetname == "top_bar")
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 960;
+                    if (widgetname == "p1_bar")
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1040;
+                    if (widgetname == "p2_bar")
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1050;
+                    if (widgetname == "p3_bar")
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1060;
+                    if (widgetname == "p4_bar")
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1070;
+                }
             }
             return chudDefinition;
         }
