@@ -806,6 +806,18 @@ namespace TagTool.Commands.Files
                     else
                         throw new NotImplementedException($"Undefined field type \"{fieldType}\" not implemented.");
                 }
+                else if (assemblyPluginFieldType == AssemblyPluginFieldTypes.tagref)
+                {
+                    if (tagFieldAttribute.Flags.HasFlag(Short))
+                    {
+                        assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset, new Dictionary<string, string>() { { "withClass", "false" } }));
+                        offset -= 12;    
+                    }
+                    else
+                    {
+                        assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset));
+                    }
+                }
                 else
                     assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset));
 
