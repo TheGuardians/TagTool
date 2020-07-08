@@ -6,6 +6,7 @@ using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags.Definitions;
+using TagTool.Tags;
 
 namespace TagTool.Commands.CollisionModels
 {
@@ -111,6 +112,91 @@ namespace TagTool.Commands.CollisionModels
             */
 
             return surface_vertex_plane_relationship;
+        }
+
+        public class plane_splitting_parameters
+        {
+            public float plane_splitting_effectiveness;
+            public int BackSurfaceCount;
+            public int BackSurfaceUsedCount;
+            public int FrontSurfaceCount;
+            public int FrontSurfaceUsedCount;
+        }
+
+        public class surface_array_definition
+        {
+            public int free_count;
+            public int used_count;
+            public List<short> surface_array;
+        }
+
+        private plane_splitting_parameters determine_plane_splitting_effectiveness(surface_array_definition surface_array, int plane_index, RealPlane3d plane_block, plane_splitting_parameters splitting_Parameters)
+        {
+            if(surface_array.free_count + surface_array.used_count > 0)
+            {
+                int current_surface_array_index = 0;
+                while (true)
+                {
+                    short surface_index = surface_array.surface_array[current_surface_array_index];
+                    bool surface_is_free = current_surface_array_index < surface_array.free_count;
+                    Surface_Plane_Relationship relationship = determine_surface_plane_relationship((surface_index & (short)0x7FFF), plane_index, plane_block);
+                    if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceOnPlane))
+                    {
+                        if(surface_index < 0)
+                        {
+                            Surface surface_block = Bsp.Surfaces[surface_index];
+                            if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
+                            {
+                                if(surface_block.Plane < 0)
+                                {
+                                    splitting_Parameters.BackSurfaceUsedCount++;
+                                    if (++current_surface_array_index >= surface_array.free_count + surface_array.used_count)
+                                        break;
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                splitting_Parameters.BackSurfaceUsedCount++;
+                            }
+                            splitting_Parameters.FrontSurfaceUsedCount++;
+                            if (++current_surface_array_index >= surface_array.free_count + surface_array.used_count)
+                                break;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        //if surface seems to be on neither side of the plane, consider it to be on both
+                        if (!relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane) && !relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane))
+                        {
+                            relationship |= Surface_Plane_Relationship.SurfaceFrontofPlane;
+                            relationship |= Surface_Plane_Relationship.SurfaceBackofPlane;
+                        }
+                        if (surface_is_free)
+                        {
+                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane))
+                                splitting_Parameters.BackSurfaceCount++;
+                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane))
+                                splitting_Parameters.FrontSurfaceCount++;
+                        }
+                        else
+                        {
+                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane))
+                                splitting_Parameters.BackSurfaceUsedCount++;
+                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane))
+                                splitting_Parameters.FrontSurfaceUsedCount++;
+                        }
+                    }
+
+                    if (++current_surface_array_index >= surface_array.free_count + surface_array.used_count)
+                        break;
+                }
+            }
+
+            splitting_Parameters.plane_splitting_effectiveness =
+                Math.Abs((splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount));
+            return splitting_Parameters;
         }
     }
 }
