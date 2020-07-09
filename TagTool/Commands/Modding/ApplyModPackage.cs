@@ -103,6 +103,10 @@ namespace TagTool.Commands.Modding
                     MapFile map = new MapFile();
                     map.Read(reader);
 
+                    var modIndex = map.Header.ScenarioTagIndex;
+                    TagMapping.TryGetValue(modIndex, out int newScnrIndex);
+                    map.Header.ScenarioTagIndex = newScnrIndex;
+
                     var modPackCache = BaseCache as GameCacheModPackage;
                     modPackCache.AddMapFile(mapFile, map.Header.MapId);
                 }
