@@ -118,6 +118,7 @@ namespace TagTool.Commands.CollisionModels
         public class plane_splitting_parameters
         {
             public double plane_splitting_effectiveness;
+            public int plane_index;
             public int BackSurfaceCount;
             public int BackSurfaceUsedCount;
             public int FrontSurfaceCount;
@@ -200,7 +201,7 @@ namespace TagTool.Commands.CollisionModels
             return splitting_Parameters;
         }
 
-        public plane_splitting_parameters surface_plane_effectiveness_check_loop(surface_array_definition surface_array)
+        public plane_splitting_parameters surface_plane_splitting_effectiveness_check_loop(surface_array_definition surface_array)
         {
             plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
             lowest_plane_splitting_parameters.plane_splitting_effectiveness = double.MaxValue;
@@ -213,9 +214,175 @@ namespace TagTool.Commands.CollisionModels
                 if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                 {
                     lowest_plane_splitting_parameters = current_plane_splitting_parameters;
+                    lowest_plane_splitting_parameters.plane_index = current_plane_index;
                 }
             }
 
+            return lowest_plane_splitting_parameters;
+        }
+
+        public class surface_array_qsort_compar: IComparer<extent_entry>
+        {
+            public int Compare(extent_entry element1, extent_entry element2)
+            {
+                if (element1.coordinate < element2.coordinate)
+                    return -1;
+                if (element1.coordinate > element2.coordinate)
+                    return 1;
+                if (element2.is_max_coord && !element1.is_max_coord)
+                    return -1;
+                if (element1.is_max_coord && !element2.is_max_coord)
+                    return 1;
+                return 0;
+            }
+        }
+
+        public class extent_entry
+        {
+            public float coordinate;
+            public bool is_max_coord;
+        };
+
+        public plane_splitting_parameters generate_object_splitting_plane(surface_array_definition surface_array)
+        {
+            plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
+            lowest_plane_splitting_parameters.plane_splitting_effectiveness = double.MaxValue;
+
+            int best_axis_index = 0;
+            double desired_plane_distance = 0;
+
+            //check X, Y, and Z axes
+            for (int current_test_axis = 0; current_test_axis < 3; current_test_axis++)
+            {
+                //generate a list of maximum and minimum coordinates on the specified plane for each surface
+                List<extent_entry> extents_table = new List<extent_entry>();
+                for (short i = 0; i < surface_array.free_count; i++)
+                {
+                    extent_entry min_coordinate = new extent_entry();
+                    extent_entry max_coordinate = new extent_entry();
+                    max_coordinate.is_max_coord = true;
+                    int surface_index = surface_array.surface_array[i] & 0x7FFF;
+                    Surface surface_block = Bsp.Surfaces[surface_index];
+                    int surface_edge_index = surface_block.FirstEdge;
+                    while (true)
+                    {
+                        Edge surface_edge_block = Bsp.Edges[surface_edge_index];
+                        RealPoint3d edge_vertex;
+                        if (surface_edge_block.RightSurface == surface_index)
+                            edge_vertex = Bsp.Vertices[surface_edge_block.EndVertex].Point;
+                        else
+                            edge_vertex = Bsp.Vertices[surface_edge_block.StartVertex].Point;
+                        switch (current_test_axis)
+                        {
+                            case 0: //X axis
+                                if (min_coordinate.coordinate > edge_vertex.X)
+                                    min_coordinate.coordinate = edge_vertex.X;
+                                if (max_coordinate.coordinate < edge_vertex.X)
+                                    max_coordinate.coordinate = edge_vertex.X;
+                                break;
+                            case 1: //Y axis
+                                if (min_coordinate.coordinate > edge_vertex.Y)
+                                    min_coordinate.coordinate = edge_vertex.Y;
+                                if (max_coordinate.coordinate < edge_vertex.Y)
+                                    max_coordinate.coordinate = edge_vertex.Y;
+                                break;
+                            case 2: //Z axis
+                                if (min_coordinate.coordinate > edge_vertex.Z)
+                                    min_coordinate.coordinate = edge_vertex.Z;
+                                if (max_coordinate.coordinate < edge_vertex.Z)
+                                    max_coordinate.coordinate = edge_vertex.Z;
+                                break;
+                        }
+
+                        if (surface_edge_block.RightSurface == surface_index)
+                            surface_edge_index = surface_edge_block.ReverseEdge;
+                        else
+                            surface_edge_index = surface_edge_block.ForwardEdge;
+                        //break the loop if we have finished circulating the surface
+                        if (surface_edge_index == surface_block.FirstEdge)
+                            break;
+                    }
+                    extents_table.Add(min_coordinate);
+                    extents_table.Add(max_coordinate);
+                }
+                //use the above defined comparer to sort the extent entries first by coordinate and then by whether they are a surface max coordinate or not
+                surface_array_qsort_compar sorter = new surface_array_qsort_compar();
+                extents_table.Sort(sorter);
+
+                int front_count = surface_array.free_count;
+                int back_count = 0;
+                for (int extent_index = 0; extent_index < extents_table.Count; extent_index++)
+                {
+                    if (extents_table[extent_index].is_max_coord)
+                    {
+                        front_count--;
+                        back_count++;
+                    }
+                    double current_splitting_effectiveness = Math.Abs((back_count - front_count) + 2 * (front_count + back_count));
+                    if (current_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
+                    {
+                        lowest_plane_splitting_parameters.plane_splitting_effectiveness = current_splitting_effectiveness;
+                        best_axis_index = current_test_axis;
+                        desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
+                    }
+                }
+            }
+            //generate a plane based on the ideal plane characteristics calculated above
+            RealPlane3d best_plane = new RealPlane3d();
+            best_plane.D = (float)desired_plane_distance;
+            switch (best_axis_index)
+            {
+                case 0:
+                    best_plane.I = 1.0f;
+                    break;
+                case 1:
+                    best_plane.J = 1.0f;
+                    break;
+                case 2:
+                    best_plane.K = 1.0f;
+                    break;
+            }
+            //an identical but opposite facing plane can also be used
+            RealPlane3d inverse_best_plane = new RealPlane3d
+            {
+                I = best_plane.I * -1,
+                J = best_plane.J * -1,
+                K = best_plane.K * -1,
+                D = best_plane.D * -1,
+            };
+            //we can use an existing plane if it is within this tolerance threshold 
+            double plane_tolerance = 0.001000000047497451;
+            int ideal_plane_index;
+            for(ideal_plane_index = 0; ideal_plane_index < Bsp.Planes.Count; ideal_plane_index++)
+            {
+                var plane = Bsp.Planes[ideal_plane_index].Value;
+                if(Math.Abs(plane.I - best_plane.I) < plane_tolerance &&
+                    Math.Abs(plane.J - best_plane.J) < plane_tolerance &&
+                    Math.Abs(plane.K - best_plane.K) < plane_tolerance &&
+                    Math.Abs(plane.D - best_plane.D) < plane_tolerance)
+                {
+                    break;
+                }
+                else if (Math.Abs(plane.I - inverse_best_plane.I) < plane_tolerance &&
+                    Math.Abs(plane.J - inverse_best_plane.J) < plane_tolerance &&
+                    Math.Abs(plane.K - inverse_best_plane.K) < plane_tolerance &&
+                    Math.Abs(plane.D - inverse_best_plane.D) < plane_tolerance)
+                {
+                    break;
+                }
+            }
+            //if we have found a usable existing plane, use it
+            if(ideal_plane_index < Bsp.Planes.Count)
+            {
+                lowest_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, ideal_plane_index, new RealPlane3d(), new plane_splitting_parameters());
+            }
+            //otherwise just add a new plane with ideal characteristics
+            else
+            {
+                Bsp.Planes.Add(new Plane { Value = best_plane });
+                ideal_plane_index = Bsp.Planes.Count - 1;
+                lowest_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, ideal_plane_index, new RealPlane3d(), new plane_splitting_parameters());
+            }
             return lowest_plane_splitting_parameters;
         }
     }
