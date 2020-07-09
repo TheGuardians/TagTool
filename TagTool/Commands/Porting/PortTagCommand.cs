@@ -216,6 +216,8 @@ namespace TagTool.Commands.Porting
                 resultTag = GetDefaultShader(blamTag.Group.Tag, resultTag);
                 return false;
             }
+            else if (blamTag.Group.Tag == "glvs" || blamTag.Group.Tag == "glps")
+                return false; // these tags will be generated in the template generation code
 
             return true;
         }
@@ -295,9 +297,9 @@ namespace TagTool.Commands.Porting
                     return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
 
 				case "glvs":
-					return CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
+                    return null;//CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
-					return CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
+                    return null;// CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
 				case "rmct":
                     return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
 				case "rmt2":

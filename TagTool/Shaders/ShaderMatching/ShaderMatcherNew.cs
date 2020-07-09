@@ -303,38 +303,31 @@ namespace TagTool.Shaders.ShaderMatching
                 var bkGenerator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
 
                 RenderMethodDefinition rmdf;
+                GlobalPixelShader glps;
+                GlobalVertexShader glvs;
 
                 if (!BaseCache.TagCache.TryGetTag("shaders\\black.rmdf", out var rmdfTag))
                 {
-                    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinitionShaderBlack(BaseCache, bkGenerator);
+                    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, bkGenerator, "black", out glps, out glvs);
                     rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\black");
                     BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
                 }
                 else
+                {
                     rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
 
-                CachedTag glpsTag = rmdf.GlobalPixelShader;
-                CachedTag glvsTag = rmdf.GlobalVertexShader;
-                GlobalPixelShader glps;
-                GlobalVertexShader glvs;
+                    if (rmdf.GlobalVertexShader == null || rmdf.GlobalPixelShader == null)
+                    {
+                        // generate rmdf (this is not serialized) to get global shaders
+                        var tempRmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, bkGenerator, "black", out _, out _);
+                        rmdf.GlobalVertexShader = tempRmdf.GlobalVertexShader;
+                        rmdf.GlobalPixelShader = tempRmdf.GlobalPixelShader;
+                        BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                    }
 
-                if (glpsTag == null)
-                {
-                    glps = ShaderGenerator.ShaderGenerator.GenerateSharedPixelShader(BaseCache, bkGenerator);
-                    glpsTag = BaseCache.TagCache.AllocateTag<GlobalPixelShader>("shaders\\black_shared_pixel_shaders");
-                    BaseCache.Serialize(BaseCacheStream, glpsTag, glps);
+                    glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                    glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
                 }
-                else
-                    glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, glpsTag);
-
-                if (glvsTag == null)
-                {
-                    glvs = ShaderGenerator.ShaderGenerator.GenerateSharedVertexShader(BaseCache, bkGenerator);
-                    glvsTag = BaseCache.TagCache.AllocateTag<GlobalVertexShader>("shaders\\black_shared_vertex_shaders");
-                    BaseCache.Serialize(BaseCacheStream, glvsTag, glvs);
-                }
-                else
-                    glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, glvsTag);
 
                 var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, bkGenerator, tagName);
 
