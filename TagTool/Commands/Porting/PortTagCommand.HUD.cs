@@ -234,19 +234,33 @@ namespace TagTool.Commands.Porting
                 }
 
                 // reposition h3 metagame widgets (anchors changed in ODST)
-                // this is approximate, could be done better
                 if (BlamCache.Version == CacheVersion.Halo3Retail)
                 {
                     if (widgetname == "top_bar")
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 960;
+                    { 
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = -90;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                    }
                     if (widgetname == "p1_bar")
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1040;
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = -40;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                    }
                     if (widgetname == "p2_bar")
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1050;
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 13;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                    }
                     if (widgetname == "p3_bar")
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1060;
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 13;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                    }
                     if (widgetname == "p4_bar")
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y += 1070;
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 13;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                    }
                 }
             }
             return chudDefinition;
@@ -346,8 +360,8 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version <= CacheVersion.Halo3Retail)
             {
                 H3Definition.ShieldMinorThreshold = 1.0f;
-                H3Definition.ShieldMajorThreshold = 0.5f;
-                H3Definition.ShieldCriticalThreshold = 0.25f;
+                H3Definition.ShieldMajorThreshold = 0.25f;
+                H3Definition.ShieldCriticalThreshold = 0.0f;
                 H3Definition.HealthMinorThreshold = 0.9f;
                 H3Definition.HealthMajorThreshold = 0.75f;
                 H3Definition.HealthCriticalThreshold = 0.5f;
@@ -369,6 +383,17 @@ namespace TagTool.Commands.Porting
             //metagame values
             H3Definition.CampaignMedalScale = 1.5f;
             H3Definition.CampaignMedalSpacing = 60.0f;
+
+            if (BlamCache.Version <= CacheVersion.Halo3Retail)
+            {
+                // H3 metagame fixups
+                H3Definition.CampaignMedalSpacing = 47.0f;
+                H3Definition.CampaignMedalChudAnchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                H3Definition.CampaignMedalOffsetX = -290;
+                H3Definition.CampaignMedalOffsetY = -113;
+                H3Definition.MetagameScoreboardTopY = 0;
+                H3Definition.MetagameScoreboardSpacing = 0;
+            }
 
             //upscale blip bitmap sizes
             H3Definition.LargeSensorBlipScale *= 1.5f;
