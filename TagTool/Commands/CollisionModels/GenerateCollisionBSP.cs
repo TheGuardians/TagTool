@@ -59,7 +59,8 @@ namespace TagTool.Commands.CollisionModels
             if ((surface_block.Plane & (short)0x7FFF) == plane_index)
                 return Surface_Plane_Relationship.SurfaceOnPlane;
 
-            if (plane_block == null)
+            //if plane block is empty, use the plane index to get one instead
+            if (plane_block == new RealPlane3d())
                 plane_block = Bsp.Planes[plane_index].Value;
 
             int surface_edge_index = surface_block.FirstEdge;
@@ -116,7 +117,7 @@ namespace TagTool.Commands.CollisionModels
 
         public class plane_splitting_parameters
         {
-            public float plane_splitting_effectiveness;
+            public double plane_splitting_effectiveness;
             public int BackSurfaceCount;
             public int BackSurfaceUsedCount;
             public int FrontSurfaceCount;
@@ -197,6 +198,25 @@ namespace TagTool.Commands.CollisionModels
             splitting_Parameters.plane_splitting_effectiveness =
                 Math.Abs((splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount));
             return splitting_Parameters;
+        }
+
+        public plane_splitting_parameters surface_plane_effectiveness_check_loop(surface_array_definition surface_array)
+        {
+            plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
+            lowest_plane_splitting_parameters.plane_splitting_effectiveness = double.MaxValue;
+
+            //loop through free surfaces to see how effectively their associated planes split the remaining surfaces. Find the one that most effectively splits the remaining surfaces.
+            for (short i = 0; i < surface_array.free_count; i++)
+            {
+                int current_plane_index = Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFF)].Plane & 0x7FFFFFFF;
+                plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, current_plane_index, new RealPlane3d(), new plane_splitting_parameters());
+                if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
+                {
+                    lowest_plane_splitting_parameters = current_plane_splitting_parameters;
+                }
+            }
+
+            return lowest_plane_splitting_parameters;
         }
     }
 }

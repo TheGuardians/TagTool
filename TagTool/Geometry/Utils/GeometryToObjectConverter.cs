@@ -384,26 +384,17 @@ namespace TagTool.Geometry.Utils
             }
 
             //recalculate plane distances from newly offset vertices
-            //initialize a list of lists of vertices
-            var planepointlist = new List<HashSet<RealPoint3d>>();
-            for (var i = 0; i < newCollisionGeometry.Planes.Count; i++)
-            {
-                planepointlist.Add(new HashSet<RealPoint3d>());
-            }
-            //get a list of vertices associated with each plane
             for (var i = 0; i < newCollisionGeometry.Surfaces.Count; i++)
             {
-                if (newCollisionGeometry.Surfaces[i].Plane < 0 || newCollisionGeometry.Surfaces[i].Plane >= newCollisionGeometry.Planes.Count)
-                    continue;
                 var surface = newCollisionGeometry.Surfaces[i];
-                var planeindex = newCollisionGeometry.Surfaces[i].Plane;
                 var edge = newCollisionGeometry.Edges[surface.FirstEdge];
+                var pointlist = new HashSet<RealPoint3d>();
 
                 while (true)
                 {
                     if (edge.LeftSurface == i)
                     {
-                        planepointlist[planeindex].Add(newCollisionGeometry.Vertices[edge.StartVertex].Point);
+                        pointlist.Add(newCollisionGeometry.Vertices[edge.StartVertex].Point);
 
                         if (edge.ForwardEdge == surface.FirstEdge)
                             break;
@@ -412,7 +403,7 @@ namespace TagTool.Geometry.Utils
                     }
                     else if (edge.RightSurface == i)
                     {
-                        planepointlist[planeindex].Add(newCollisionGeometry.Vertices[edge.EndVertex].Point);
+                        pointlist.Add(newCollisionGeometry.Vertices[edge.EndVertex].Point);
 
                         if (edge.ReverseEdge == surface.FirstEdge)
                             break;
@@ -420,17 +411,13 @@ namespace TagTool.Geometry.Utils
                             edge = newCollisionGeometry.Edges[edge.ReverseEdge];
                     }
                 }
-            }
-            //use the average of the associated vertices for each plane to calculate plane distance from origin
-            for (var i = 0; i < newCollisionGeometry.Planes.Count; i++) 
-            {
-                var pointlist = planepointlist[i];
-                if (pointlist.Count() == 0)
-                    continue;
                 var planeposition = new Vector3(pointlist.Average(x => x.X), pointlist.Average(x => x.Y), pointlist.Average(x => x.Z));
-                var plane = newCollisionGeometry.Planes[i].Value;
+                //negative plane index indicates it is mirrored, so skip
+                if (newCollisionGeometry.Surfaces[i].Plane < 0)
+                    continue;
+                var plane = newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value;
                 var calcdistance = PointToPlaneDistance(new Vector3(0), planeposition, new Vector3(plane.I, plane.J, plane.K));
-                newCollisionGeometry.Planes[i].Value.D = calcdistance;
+                newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value.D = calcdistance;
             }
 
             // add the collision geometry
