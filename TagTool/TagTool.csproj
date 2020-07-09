@@ -306,11 +306,14 @@
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
     <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
+    <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
     <Compile Include="Commands\GUI\RescaleGUICommand.cs" />
     <Compile Include="Commands\Files\ImportFontsCommand.cs" />
     <Compile Include="Commands\HUD\RescaleHudTextCommand.cs" />
+    <Compile Include="Commands\Modding\AddExtraFilesCommand.cs" />
+    <Compile Include="Commands\Modding\AddFontPackageCommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\ModIsMainmenuCommand.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />

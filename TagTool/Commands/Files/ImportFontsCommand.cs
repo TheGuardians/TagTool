@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
+using TagTool.IO;
 
 namespace TagTool.Commands.Files
 {
@@ -35,7 +36,13 @@ namespace TagTool.Commands.Files
 
             using (var stream = file.OpenRead())
             {
-                Cache.SaveFonts(stream);
+                if (Cache is GameCacheModPackage)
+                {
+                    var modPackCache = Cache as GameCacheModPackage;
+                    StreamUtil.Copy(stream, modPackCache.BaseModPackage.FontPackage, stream.Length);
+
+                }else
+                    Cache.SaveFonts(stream);
             }
 
             Console.WriteLine("Done!");
