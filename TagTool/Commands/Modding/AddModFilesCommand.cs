@@ -45,7 +45,13 @@ namespace TagTool.Commands.Modding
             foreach (var file in directory.GetFiles("*.*", SearchOption.AllDirectories))
             {
                 string virtualPath = directory.GetRelativePath(file.FullName);
-                Cache.BaseModPackage.Files.Add(virtualPath, file.OpenRead());
+                if(!Cache.BaseModPackage.Files.ContainsKey(virtualPath))
+                    Cache.BaseModPackage.Files.Add(virtualPath, file.OpenRead());
+                else
+                {
+                    Cache.BaseModPackage.Files[virtualPath] = file.OpenRead();
+                    Console.WriteLine("Overwriting Existing file: " + virtualPath);
+                }
             }
         }
     }

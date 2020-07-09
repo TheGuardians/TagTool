@@ -313,7 +313,6 @@
     <Compile Include="Commands\Files\ImportFontsCommand.cs" />
     <Compile Include="Commands\HUD\RescaleHudTextCommand.cs" />
     <Compile Include="Commands\Modding\AddExtraFilesCommand.cs" />
-    <Compile Include="Commands\Modding\AddFontPackageCommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\ModIsMainmenuCommand.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
