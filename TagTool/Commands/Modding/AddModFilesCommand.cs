@@ -15,7 +15,7 @@ namespace TagTool.Commands.Modding
             base(true,
                 "AddModFiles",
                 "Adds the files in the directory to the mod package",
-                "AddExtraFiles <folder path>",
+                "AddModFiles <folder path>",
                 "Adds the files in the directory to the mod package")
         {
             Cache = cache;
