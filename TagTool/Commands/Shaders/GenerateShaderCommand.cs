@@ -19,10 +19,9 @@ namespace TagTool.Commands.Shaders
                 "GenerateShader",
                 "Generates a shader template and a relevant \'rm  \' tag if specified",
 
-                "GenerateShader [generate rm tag] <shader type> <options>",
+                "GenerateShader <shader type> <options>",
 
-                "Generates a shader template and a relevant \'rm  \' tag if specified\n" +
-                "[generate rm tag y/n] - Specify \"y\" to create and populate a relevant \'rm  \' tag from the generated rmt2\n" +
+                "Generates a shader template\n" +
                 "<shader type> - Specify shader type, EX. \"shader\" for \'rmsh\'\n" +
                 "<options> - Specify the template\'s options as either integers or by names")
         {
@@ -36,19 +35,9 @@ namespace TagTool.Commands.Shaders
             if (args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            bool generateRenderMethod = false;
-            if (args[0].ToLower() == "y")
-            {
-                // add support soon
-                //generateRenderMethod = true;
-                args.RemoveAt(0);
-            }
-            else if (args[0].ToLower() == "n")
-                args.RemoveAt(0);
-
             string shaderType = args[0].ToLower();
             if (!SupportedShaderTypes.Contains(shaderType))
-                return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is currently unsupported");
+                return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
 
             args.RemoveAt(0); // we should only have options from this point
 
@@ -105,12 +94,6 @@ namespace TagTool.Commands.Shaders
                 }
 
                 Console.WriteLine($"Successfully generated shader template \"{rmt2TagName}\"");
-
-                // shader generated, create rm if specified
-                /*if (generateRenderMethod)
-                {
-
-                }*/
             }
 
             return true;
@@ -142,7 +125,7 @@ namespace TagTool.Commands.Shaders
 
             Cache.Serialize(stream, rmt2Tag, rmt2);
             Cache.SaveStrings();
-            (Cache as GameCacheHaloOnline).SaveTagNames();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
         }
     }
 }
