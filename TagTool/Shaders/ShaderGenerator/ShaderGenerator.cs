@@ -377,11 +377,13 @@ namespace TagTool.Shaders.ShaderGenerator
             var vtsh = GenerateVertexShader(cache, generator);
 
 
-            var pixlTag = cache.TagCache.AllocateTag<PixelShader>(shaderName);
+            if (!cache.TagCache.TryGetTag(shaderName + ".pixl", out var pixlTag))
+                pixlTag = cache.TagCache.AllocateTag<PixelShader>(shaderName);
             cache.Serialize(cacheStream, pixlTag, pixl);
             rmt2.PixelShader = pixlTag;
 
-            var vtshTag = cache.TagCache.AllocateTag<VertexShader>(shaderName);
+            if (!cache.TagCache.TryGetTag(shaderName + ".vtsh", out var vtshTag))
+                vtshTag = cache.TagCache.AllocateTag<VertexShader>(shaderName);
             cache.Serialize(cacheStream, vtshTag, vtsh);
             rmt2.VertexShader = vtshTag;
 
