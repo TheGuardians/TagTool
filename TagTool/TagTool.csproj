@@ -374,6 +374,7 @@
     <Compile Include="Commands\Scenarios\ListScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Shaders\DumpDisassembledShadersCommand.cs" />
+    <Compile Include="Commands\Shaders\GenerateRenderMethodCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
     <Compile Include="Commands\Shaders\UseXSDCommand.cs" />
     <Compile Include="Commands\Sounds\ExtractXMACommand.cs" />
