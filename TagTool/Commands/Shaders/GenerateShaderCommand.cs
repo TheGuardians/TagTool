@@ -4,7 +4,6 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Cache.HaloOnline;
 using HaloShaderGenerator.Shader;
 
 namespace TagTool.Commands.Shaders
