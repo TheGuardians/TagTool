@@ -33,24 +33,121 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
+            //make sure there is nothing in the bsp blocks before starting
             Bsp.Leaves.Clear();
             Bsp.Bsp2dNodes.Clear();
             Bsp.Bsp2dReferences.Clear();
             Bsp.Bsp3dNodes.Clear();
 
+            //allocate surface array before starting the bsp build
+            surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<short>()};
+            //run build_bsp_tree_main here
+            //NOTE: standard limit for number of bsp3dnodes (bsp planes) is 128 (maximum bsp depth)
+
             return true;
+        }
+
+        public void split_surfaces_with_plane(surface_array_definition surface_array, short plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
+        {
+            int surface_array_index = 0;
+            while (true)
+            {
+                short surface_index = surface_array.surface_array[surface_array_index];
+                bool surface_is_mirrored = false;
+                if (surface_index < 0)
+                    surface_is_mirrored = true;
+                surface_index &= 0x7FFF;
+                bool surface_is_free = surface_array_index < surface_array.free_count;
+                switch(determine_surface_plane_relationship(surface_index, plane_index, new RealPlane3d()))
+                {
+                    case Surface_Plane_Relationship.Unknown: //surface does not appear to be on either side of the plane and is not on the plane either
+                        if(surface_index != -1)
+                        {
+                            if (surface_is_free)
+                            {
+                                //free surfaces need to come first in the list
+                                back_surfaces_array.surface_array.Insert(0, surface_index);
+                                back_surfaces_array.free_count++;
+                                front_surfaces_array.surface_array.Insert(0, surface_index);
+                                front_surfaces_array.free_count++;
+                            }
+                            else
+                            {
+                                back_surfaces_array.surface_array.Add(surface_index);
+                                back_surfaces_array.used_count++;
+                                front_surfaces_array.surface_array.Add(surface_index);
+                                front_surfaces_array.used_count++;
+                            }
+                        }
+                        break;
+                    case Surface_Plane_Relationship.SurfaceBackofPlane: //surface is in back of plane
+                        if (surface_index != -1)
+                        {
+                            if (surface_is_free)
+                            {
+                                //free surfaces need to come first in the list
+                                back_surfaces_array.surface_array.Insert(0, surface_index);
+                                back_surfaces_array.free_count++;
+                            }
+                            else
+                            {
+                                back_surfaces_array.surface_array.Add(surface_index);
+                                back_surfaces_array.used_count++;
+                            }
+                        }
+                        break;
+                    case Surface_Plane_Relationship.SurfaceFrontofPlane: //surface is in front of plane
+                        if (surface_index != -1)
+                        {
+                            if (surface_is_free)
+                            {
+                                //free surfaces need to come first in the list
+                                front_surfaces_array.surface_array.Insert(0, surface_index);
+                                front_surfaces_array.free_count++;
+                            }
+                            else
+                            {
+                                front_surfaces_array.surface_array.Add(surface_index);
+                                front_surfaces_array.used_count++;
+                            }
+                        }
+                        break;
+                    case Surface_Plane_Relationship.SurfaceSplitByPlane: //surface is both in front of and behind plane
+                        break;
+                    case Surface_Plane_Relationship.SurfaceOnPlane: //surface is ON the plane
+                        break;
+                }
+
+                surface_array_index++;
+            }
+        }
+
+        public plane_splitting_parameters find_surface_splitting_plane(surface_array_definition surface_array)
+        {
+            plane_splitting_parameters splitting_parameters = new plane_splitting_parameters();
+
+            //this code should only be used with <1024 surfaces as it loops and checks every surface. large meshes first need to be split with generate_object_splitting_plane
+            if (surface_array.free_count < 1024)
+            {
+                splitting_parameters = surface_plane_splitting_effectiveness_check_loop(surface_array);
+                return splitting_parameters;
+            }
+
+            splitting_parameters = generate_object_splitting_plane(surface_array);
+            return splitting_parameters;
         }
 
         [Flags]
         public enum Surface_Plane_Relationship : int
         {
             Unknown = 0,
-            SurfaceFrontofPlane = 1 << 0,
-            SurfaceBackofPlane = 1 << 1,
-            SurfaceOnPlane = 1 << 2
+            SurfaceBackofPlane = 1,
+            SurfaceFrontofPlane = 2,
+            SurfaceSplitByPlane = 3,
+            SurfaceOnPlane = 4
         }
 
-        private Surface_Plane_Relationship determine_surface_plane_relationship(int surface_index, int plane_index, RealPlane3d plane_block)
+        public Surface_Plane_Relationship determine_surface_plane_relationship(int surface_index, int plane_index, RealPlane3d plane_block)
         {
             Surface_Plane_Relationship surface_vertex_plane_relationship = 0;
             Surface surface_block = Bsp.Surfaces[surface_index];
@@ -89,10 +186,10 @@ namespace TagTool.Commands.CollisionModels
                         continue;
                     }
                     else
-                        surface_vertex_plane_relationship |= Surface_Plane_Relationship.SurfaceBackofPlane;
+                        surface_vertex_plane_relationship |= Surface_Plane_Relationship.SurfaceFrontofPlane;
                 }
                 else
-                    surface_vertex_plane_relationship |= Surface_Plane_Relationship.SurfaceFrontofPlane;
+                    surface_vertex_plane_relationship |= Surface_Plane_Relationship.SurfaceBackofPlane;
 
                 if (surface_edge_block.RightSurface == surface_index)
                     surface_edge_index = surface_edge_block.ReverseEdge;
