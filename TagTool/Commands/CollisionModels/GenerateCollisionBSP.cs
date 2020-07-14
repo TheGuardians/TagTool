@@ -47,7 +47,167 @@ namespace TagTool.Commands.CollisionModels
             return true;
         }
 
-        public void split_surfaces_with_plane(surface_array_definition surface_array, short plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
+        public void divide_surface_into_two_surfaces(int original_surface_index, int plane_index, ref int new_surface_index_A, ref int new_surface_index_B)
+        {
+            RealPlane3d plane_block = Bsp.Planes[plane_index].Value;
+            Surface original_surface = Bsp.Surfaces[original_surface_index];
+            Surface new_surface_block_A = Bsp.Surfaces[new_surface_index_A];
+            Surface new_surface_block_B = Bsp.Surfaces[new_surface_index_B];
+
+            //copy over values that won't change
+            new_surface_block_A.Flags = original_surface.Flags;
+            new_surface_block_A.BreakableSurfaceIndex = original_surface.BreakableSurfaceIndex;
+            new_surface_block_A.Plane = original_surface.Plane;
+            new_surface_block_B.Flags = original_surface.Flags;
+            new_surface_block_B.BreakableSurfaceIndex = original_surface.BreakableSurfaceIndex;
+            new_surface_block_B.Plane = original_surface.Plane;
+
+            //find edges of the original surface that are split by the plane   
+            int surface_edge_index = original_surface.FirstEdge;
+            int new_current_edge_index = -1;
+            while (true)
+            {
+                //grab edge vertices
+                Edge surface_edge_block = Bsp.Edges[surface_edge_index];
+                int edge_vertex_A_index;
+                int edge_vertex_B_index;
+
+                if (surface_edge_block.RightSurface == original_surface_index)
+                {
+                    edge_vertex_A_index = surface_edge_block.EndVertex;
+                    edge_vertex_B_index = surface_edge_block.StartVertex;
+                }
+                else
+                {
+                    edge_vertex_A_index = surface_edge_block.StartVertex;
+                    edge_vertex_B_index = surface_edge_block.EndVertex;
+                }
+
+                RealPoint3d edge_vertex_A = Bsp.Vertices[edge_vertex_A_index].Point;
+                RealPoint3d edge_vertex_B = Bsp.Vertices[edge_vertex_B_index].Point;
+
+                //calculate vertex plane relationships
+                Plane_Relationship vertex_plane_relationship_A = determine_vertex_plane_relationship(edge_vertex_A, plane_block);
+                Plane_Relationship vertex_plane_relationship_B = determine_vertex_plane_relationship(edge_vertex_B, plane_block);
+
+                //check if there is a vertex on both sides of the plane
+                Plane_Relationship edge_plane_relationship = vertex_plane_relationship_A | vertex_plane_relationship_B;
+
+                int dividing_edge_index = -1;
+                int previous_new_edge_index = -1;
+                int new_edge_index_A = -1;
+                int new_edge_index_B = -1;
+
+                //if this edge spans the plane, then create a new dividing edge
+                if((edge_plane_relationship & Plane_Relationship.FrontofPlane) > 0 && 
+                    ((edge_plane_relationship & Plane_Relationship.BackofPlane) > 0))
+                {
+                    //allocate new edges and vertex
+                    Bsp.Vertices.Add(new Vertex());
+                    int new_vertex_index_A = Bsp.Vertices.Count - 1;
+                    Vertex new_vertex_block_A = Bsp.Vertices[new_vertex_index_A];
+                    Bsp.Edges.Add(new Edge());
+                    Bsp.Edges.Add(new Edge());
+                    new_edge_index_A = Bsp.Edges.Count - 2;
+                    new_edge_index_B = Bsp.Edges.Count - 1;
+                    Edge new_edge_block_A = Bsp.Edges[new_edge_index_A];
+                    Edge new_edge_block_B = Bsp.Edges[new_edge_index_B];
+
+                    if (dividing_edge_index == -1)
+                    {
+                        //allocate new dividing edge
+                        Bsp.Edges.Add(new Edge());
+                        dividing_edge_index = Bsp.Edges.Count - 1;
+                        Edge dividing_edge_block = Bsp.Edges[dividing_edge_index];
+
+                        //new edge C will be the edge that separates the two new surfaces
+                        dividing_edge_block.StartVertex = (short)new_vertex_index_A;
+                        dividing_edge_block.ReverseEdge = (ushort)new_edge_index_B;
+                        if (vertex_plane_relationship_A.HasFlag(Plane_Relationship.FrontofPlane))
+                            dividing_edge_block.LeftSurface = (short)new_surface_index_B;
+                        else
+                            dividing_edge_block.LeftSurface = (short)new_surface_index_A;
+                        if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane))
+                            dividing_edge_block.RightSurface = (short)new_surface_index_B;
+                        else
+                            dividing_edge_block.RightSurface = (short)new_surface_index_A;
+                    }
+                    else
+                    {
+                        Edge new_current_edge_block = Bsp.Edges[new_current_edge_index];
+                        new_current_edge_block.EndVertex = (short)new_vertex_index_A;
+                        new_current_edge_block.ForwardEdge = (ushort)new_edge_index_B;
+                    }
+
+                    float plane_vertex_input_A = edge_vertex_A.X * plane_block.I + edge_vertex_A.Y * plane_block.J + edge_vertex_A.Z * plane_block.K - plane_block.D;
+                    float plane_vertex_input_B = edge_vertex_B.X * plane_block.I + edge_vertex_B.Y * plane_block.J + edge_vertex_B.Z * plane_block.K - plane_block.D;
+                    float plane_vertex_input_AB_ratio = plane_vertex_input_A / (plane_vertex_input_A - plane_vertex_input_B);
+
+                    new_vertex_block_A.Point.X = (edge_vertex_B.X - edge_vertex_A.X) * plane_vertex_input_AB_ratio + edge_vertex_A.X;
+                    new_vertex_block_A.Point.Y = (edge_vertex_B.Y - edge_vertex_A.Y) * plane_vertex_input_AB_ratio + edge_vertex_A.Y;
+                    new_vertex_block_A.Point.Z = (edge_vertex_B.Z - edge_vertex_A.Z) * plane_vertex_input_AB_ratio + edge_vertex_A.Z;
+                    new_vertex_block_A.FirstEdge = (short)new_edge_index_A;
+
+                    new_edge_block_A.ForwardEdge = (ushort)new_current_edge_index;
+                    new_edge_block_A.StartVertex = (short)edge_vertex_A_index;
+                    new_edge_block_A.EndVertex = (short)new_vertex_index_A;
+                    if (vertex_plane_relationship_A.HasFlag(Plane_Relationship.FrontofPlane))
+                        new_edge_block_A.LeftSurface = (short)new_surface_index_B;
+                    else
+                        new_edge_block_A.LeftSurface = (short)new_surface_index_A;
+                    if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane))
+                        new_edge_block_A.RightSurface = (short)new_surface_index_B;
+                    else
+                        new_edge_block_A.RightSurface = (short)new_surface_index_A;
+
+                    //connect previous edge to generated edges
+                    if(previous_new_edge_index != -1)
+                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)new_edge_index_A;
+                    previous_new_edge_index = new_edge_index_B;
+
+                }
+
+                //not sure about what this is for, if vertex A isn't on the plane or vertex B IS on the plane...
+                else if (!vertex_plane_relationship_A.HasFlag(Plane_Relationship.OnPlane) || vertex_plane_relationship_B.HasFlag(Plane_Relationship.OnPlane))
+                {
+                    //allocate new edge
+                    Bsp.Edges.Add(new Edge());
+                    int new_edge_index_D = Bsp.Edges.Count - 1;
+                    Edge new_edge_block_D = Bsp.Edges[new_edge_index_D];
+
+                    new_edge_block_D.StartVertex = (short)edge_vertex_A_index;
+                    new_edge_block_D.EndVertex = (short)edge_vertex_B_index;
+                    new_edge_block_D.ReverseEdge = ushort.MaxValue; //set to -1
+                    if (vertex_plane_relationship_A.HasFlag(Plane_Relationship.FrontofPlane))
+                        new_edge_block_D.LeftSurface = (short)new_surface_index_B;
+                    else
+                        new_edge_block_D.LeftSurface = (short)new_surface_index_A;
+                    new_edge_block_D.RightSurface = (short)-1;
+                    if (new_edge_index_A == -1)
+                        new_edge_index_A = new_edge_index_D;
+
+                    //connect previous edge to generated edges
+                    if (previous_new_edge_index != -1)
+                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)new_edge_index_D;
+                    previous_new_edge_index = new_edge_index_D;
+                }
+                else
+                {
+
+                }
+
+
+                if (surface_edge_block.RightSurface == original_surface_index)
+                    surface_edge_index = surface_edge_block.ReverseEdge;
+                else
+                    surface_edge_index = surface_edge_block.ForwardEdge;
+                //break the loop if we have finished circulating the surface
+                if (surface_edge_index == original_surface.FirstEdge)
+                    break;
+            }
+        }
+
+        public void split_object_surfaces_with_plane(surface_array_definition surface_array, short plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
         {
             int surface_array_index = 0;
             while (true)
@@ -60,7 +220,7 @@ namespace TagTool.Commands.CollisionModels
                 bool surface_is_free = surface_array_index < surface_array.free_count;
                 switch(determine_surface_plane_relationship(surface_index, plane_index, new RealPlane3d()))
                 {
-                    case Surface_Plane_Relationship.Unknown: //surface does not appear to be on either side of the plane and is not on the plane either
+                    case Plane_Relationship.Unknown: //surface does not appear to be on either side of the plane and is not on the plane either
                         if(surface_index != -1)
                         {
                             if (surface_is_free)
@@ -80,7 +240,7 @@ namespace TagTool.Commands.CollisionModels
                             }
                         }
                         break;
-                    case Surface_Plane_Relationship.SurfaceBackofPlane: //surface is in back of plane
+                    case Plane_Relationship.BackofPlane: //surface is in back of plane
                         if (surface_index != -1)
                         {
                             if (surface_is_free)
@@ -96,7 +256,7 @@ namespace TagTool.Commands.CollisionModels
                             }
                         }
                         break;
-                    case Surface_Plane_Relationship.SurfaceFrontofPlane: //surface is in front of plane
+                    case Plane_Relationship.FrontofPlane: //surface is in front of plane
                         if (surface_index != -1)
                         {
                             if (surface_is_free)
@@ -112,9 +272,15 @@ namespace TagTool.Commands.CollisionModels
                             }
                         }
                         break;
-                    case Surface_Plane_Relationship.SurfaceSplitByPlane: //surface is both in front of and behind plane
+                    case Plane_Relationship.BothSidesofPlane: //surface is both in front of and behind plane
+                        Bsp.Surfaces.Add(new Surface());
+                        Bsp.Surfaces.Add(new Surface());
+                        int new_surface_A_index = Bsp.Surfaces.Count - 2;
+                        int new_surface_B_index = Bsp.Surfaces.Count - 1;
+                        divide_surface_into_two_surfaces(surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index);
+
                         break;
-                    case Surface_Plane_Relationship.SurfaceOnPlane: //surface is ON the plane
+                    case Plane_Relationship.OnPlane: //surface is ON the plane
                         break;
                 }
 
@@ -138,30 +304,51 @@ namespace TagTool.Commands.CollisionModels
         }
 
         [Flags]
-        public enum Surface_Plane_Relationship : int
+        public enum Plane_Relationship : int
         {
             Unknown = 0,
-            SurfaceBackofPlane = 1,
-            SurfaceFrontofPlane = 2,
-            SurfaceSplitByPlane = 3,
-            SurfaceOnPlane = 4
+            BackofPlane = 1,
+            FrontofPlane = 2,
+            BothSidesofPlane = 3, //both 1 & 2 
+            OnPlane = 4
         }
 
-        public Surface_Plane_Relationship determine_surface_plane_relationship(int surface_index, int plane_index, RealPlane3d plane_block)
+        public Plane_Relationship determine_vertex_plane_relationship(RealPoint3d vertex, RealPlane3d plane)
         {
-            Surface_Plane_Relationship surface_vertex_plane_relationship = 0;
+            Plane_Relationship vertex_plane_relationship = new Plane_Relationship();
+
+            float plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
+
+            if (plane_equation_vertex_input >= -0.00024414062)
+            {
+                vertex_plane_relationship |= Plane_Relationship.FrontofPlane;
+            }
+            if (plane_equation_vertex_input <= 0.00024414062)
+            {
+                vertex_plane_relationship |= Plane_Relationship.BackofPlane;
+            }
+            //if it fits both of these parameters, we consider the point to be on the plane
+            if (vertex_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
+                vertex_plane_relationship = Plane_Relationship.OnPlane;
+
+            return vertex_plane_relationship;
+        }
+
+        public Plane_Relationship determine_surface_plane_relationship(int surface_index, int plane_index, RealPlane3d plane_block)
+        {
+            Plane_Relationship surface_plane_relationship = 0;
             Surface surface_block = Bsp.Surfaces[surface_index];
 
             //check if surface is on the plane
             if ((surface_block.Plane & (short)0x7FFF) == plane_index)
-                return Surface_Plane_Relationship.SurfaceOnPlane;
+                return Plane_Relationship.OnPlane;
 
             //if plane block is empty, use the plane index to get one instead
             if (plane_block == new RealPlane3d())
                 plane_block = Bsp.Planes[plane_index].Value;
 
             int surface_edge_index = surface_block.FirstEdge;
-            while(true)
+            while (true)
             {
                 Edge surface_edge_block = Bsp.Edges[surface_edge_index];
                 RealPoint3d edge_vertex;
@@ -169,27 +356,11 @@ namespace TagTool.Commands.CollisionModels
                     edge_vertex = Bsp.Vertices[surface_edge_block.EndVertex].Point;
                 else
                     edge_vertex = Bsp.Vertices[surface_edge_block.StartVertex].Point;
-                float plane_equation_vertex_input = edge_vertex.X * plane_block.I + edge_vertex.Y * plane_block.J + edge_vertex.Z * plane_block.K - plane_block.D;
 
-                if (plane_equation_vertex_input >= -0.00024414062)
-                {
-                    //if the plane equation vertex input is within these tolerances, it is considered to be on the plane 
-                    if (plane_equation_vertex_input <= 0.00024414062)
-                    {
-                        if (surface_edge_block.RightSurface == surface_index)
-                            surface_edge_index = surface_edge_block.ReverseEdge;
-                        else
-                            surface_edge_index = surface_edge_block.ForwardEdge;
-                        //break the loop if we have finished circulating the surface
-                        if (surface_edge_index == surface_block.FirstEdge)
-                            break;
-                        continue;
-                    }
-                    else
-                        surface_vertex_plane_relationship |= Surface_Plane_Relationship.SurfaceFrontofPlane;
-                }
-                else
-                    surface_vertex_plane_relationship |= Surface_Plane_Relationship.SurfaceBackofPlane;
+                Plane_Relationship vertex_plane_relationship = determine_vertex_plane_relationship(edge_vertex, plane_block);
+                //if a vertex is on the plane, just ignore it and continue testing the remainder
+                if (!vertex_plane_relationship.HasFlag(Plane_Relationship.OnPlane))
+                    surface_plane_relationship |= vertex_plane_relationship;
 
                 if (surface_edge_block.RightSurface == surface_index)
                     surface_edge_index = surface_edge_block.ReverseEdge;
@@ -202,15 +373,17 @@ namespace TagTool.Commands.CollisionModels
 
             //there is code here to deal with unclear results, but it appears that it will lead to an infinite loop
             /*
-            if (surface_vertex_plane_relationship == Surface_Plane_Relationship.Unknown || 
-                surface_vertex_plane_relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane) && surface_vertex_plane_relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane))
+            if (surface_vertex_plane_relationship == Plane_Relationship.Unknown || 
+                surface_vertex_plane_relationship.HasFlag(Plane_Relationship.SurfaceFrontofPlane) && surface_vertex_plane_relationship.HasFlag(Plane_Relationship.SurfaceBackofPlane))
             {
-                surface_vertex_plane_relationship = determine_surface_plane_relationship(surface_index, -1, plane_block);
+                surface_vertex_plane_relationship = determine_Plane_Relationship(surface_index, -1, plane_block);
             }
             */
 
-            return surface_vertex_plane_relationship;
+            return surface_plane_relationship;
         }
+
+
 
         public class plane_splitting_parameters
         {
@@ -238,8 +411,8 @@ namespace TagTool.Commands.CollisionModels
                 {
                     short surface_index = surface_array.surface_array[current_surface_array_index];
                     bool surface_is_free = current_surface_array_index < surface_array.free_count;
-                    Surface_Plane_Relationship relationship = determine_surface_plane_relationship((surface_index & (short)0x7FFF), plane_index, plane_block);
-                    if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceOnPlane))
+                    Plane_Relationship relationship = determine_surface_plane_relationship((surface_index & (short)0x7FFF), plane_index, plane_block);
+                    if (relationship.HasFlag(Plane_Relationship.OnPlane))
                     {
                         if(surface_index < 0)
                         {
@@ -267,23 +440,23 @@ namespace TagTool.Commands.CollisionModels
                     else
                     {
                         //if surface seems to be on neither side of the plane, consider it to be on both
-                        if (!relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane) && !relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane))
+                        if (!relationship.HasFlag(Plane_Relationship.BackofPlane) && !relationship.HasFlag(Plane_Relationship.FrontofPlane))
                         {
-                            relationship |= Surface_Plane_Relationship.SurfaceFrontofPlane;
-                            relationship |= Surface_Plane_Relationship.SurfaceBackofPlane;
+                            relationship |= Plane_Relationship.FrontofPlane;
+                            relationship |= Plane_Relationship.BackofPlane;
                         }
                         if (surface_is_free)
                         {
-                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane))
+                            if (relationship.HasFlag(Plane_Relationship.FrontofPlane))
                                 splitting_Parameters.BackSurfaceCount++;
-                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane))
+                            if (relationship.HasFlag(Plane_Relationship.BackofPlane))
                                 splitting_Parameters.FrontSurfaceCount++;
                         }
                         else
                         {
-                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceFrontofPlane))
+                            if (relationship.HasFlag(Plane_Relationship.FrontofPlane))
                                 splitting_Parameters.BackSurfaceUsedCount++;
-                            if (relationship.HasFlag(Surface_Plane_Relationship.SurfaceBackofPlane))
+                            if (relationship.HasFlag(Plane_Relationship.BackofPlane))
                                 splitting_Parameters.FrontSurfaceUsedCount++;
                         }
                     }
