@@ -61,10 +61,14 @@ namespace TagTool.Commands.CollisionModels
             new_surface_block_B.Flags = original_surface.Flags;
             new_surface_block_B.BreakableSurfaceIndex = original_surface.BreakableSurfaceIndex;
             new_surface_block_B.Plane = original_surface.Plane;
-
-            //find edges of the original surface that are split by the plane   
+            
             int surface_edge_index = original_surface.FirstEdge;
-            int new_current_edge_index = -1;
+
+            int dividing_edge_index = -1;
+            int previous_new_edge_index = -1;
+            int first_new_edge_index = -1;
+
+            //find edges of the original surface that are split by the plane and divide them
             while (true)
             {
                 //grab edge vertices
@@ -93,11 +97,6 @@ namespace TagTool.Commands.CollisionModels
                 //check if there is a vertex on both sides of the plane
                 Plane_Relationship edge_plane_relationship = vertex_plane_relationship_A | vertex_plane_relationship_B;
 
-                int dividing_edge_index = -1;
-                int previous_new_edge_index = -1;
-                int new_edge_index_A = -1;
-                int new_edge_index_B = -1;
-
                 //if this edge spans the plane, then create a new dividing edge
                 if((edge_plane_relationship & Plane_Relationship.FrontofPlane) > 0 && 
                     ((edge_plane_relationship & Plane_Relationship.BackofPlane) > 0))
@@ -108,8 +107,8 @@ namespace TagTool.Commands.CollisionModels
                     Vertex new_vertex_block_A = Bsp.Vertices[new_vertex_index_A];
                     Bsp.Edges.Add(new Edge());
                     Bsp.Edges.Add(new Edge());
-                    new_edge_index_A = Bsp.Edges.Count - 2;
-                    new_edge_index_B = Bsp.Edges.Count - 1;
+                    int new_edge_index_A = Bsp.Edges.Count - 2;
+                    int new_edge_index_B = Bsp.Edges.Count - 1;
                     Edge new_edge_block_A = Bsp.Edges[new_edge_index_A];
                     Edge new_edge_block_B = Bsp.Edges[new_edge_index_B];
 
@@ -134,9 +133,9 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Edge new_current_edge_block = Bsp.Edges[new_current_edge_index];
-                        new_current_edge_block.EndVertex = (short)new_vertex_index_A;
-                        new_current_edge_block.ForwardEdge = (ushort)new_edge_index_B;
+                        Edge dividing_edge_block = Bsp.Edges[dividing_edge_index];
+                        dividing_edge_block.EndVertex = (short)new_vertex_index_A;
+                        dividing_edge_block.ForwardEdge = (ushort)new_edge_index_B;
                     }
 
                     float plane_vertex_input_A = edge_vertex_A.X * plane_block.I + edge_vertex_A.Y * plane_block.J + edge_vertex_A.Z * plane_block.K - plane_block.D;
@@ -148,7 +147,7 @@ namespace TagTool.Commands.CollisionModels
                     new_vertex_block_A.Point.Z = (edge_vertex_B.Z - edge_vertex_A.Z) * plane_vertex_input_AB_ratio + edge_vertex_A.Z;
                     new_vertex_block_A.FirstEdge = (short)new_edge_index_A;
 
-                    new_edge_block_A.ForwardEdge = (ushort)new_current_edge_index;
+                    new_edge_block_A.ForwardEdge = (ushort)dividing_edge_index;
                     new_edge_block_A.StartVertex = (short)edge_vertex_A_index;
                     new_edge_block_A.EndVertex = (short)new_vertex_index_A;
                     if (vertex_plane_relationship_A.HasFlag(Plane_Relationship.FrontofPlane))
@@ -183,8 +182,8 @@ namespace TagTool.Commands.CollisionModels
                     else
                         new_edge_block_D.LeftSurface = (short)new_surface_index_A;
                     new_edge_block_D.RightSurface = (short)-1;
-                    if (new_edge_index_A == -1)
-                        new_edge_index_A = new_edge_index_D;
+                    if (first_new_edge_index == -1)
+                        first_new_edge_index = new_edge_index_D;
 
                     //connect previous edge to generated edges
                     if (previous_new_edge_index != -1)
@@ -193,9 +192,58 @@ namespace TagTool.Commands.CollisionModels
                 }
                 else
                 {
+                    //allocate new edge
+                    Bsp.Edges.Add(new Edge());
+                    int new_edge_index_E = Bsp.Edges.Count - 1;
+                    Edge new_edge_block_E = Bsp.Edges[new_edge_index_E];
 
+                    if(dividing_edge_index == -1)
+                    {
+                        //allocate new dividing edge
+                        Bsp.Edges.Add(new Edge());
+                        dividing_edge_index = Bsp.Edges.Count - 1;
+                        Edge dividing_edge_block = Bsp.Edges[dividing_edge_index];
+
+                        dividing_edge_block.StartVertex = (short)edge_vertex_A_index;
+                        dividing_edge_block.EndVertex = (short)-1;
+                        dividing_edge_block.ForwardEdge = ushort.MaxValue; //set to -1
+                        dividing_edge_block.ReverseEdge = (ushort)new_edge_index_E;
+
+                        if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.BackofPlane))
+                            dividing_edge_block.LeftSurface = (short)new_surface_index_B;
+                        else
+                            dividing_edge_block.LeftSurface = (short)new_surface_index_A;
+                        if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane))
+                            dividing_edge_block.RightSurface = (short)new_surface_index_B;
+                        else
+                            dividing_edge_block.RightSurface = (short)new_surface_index_A;
+                    }
+                    else
+                    {
+                        Edge dividing_edge_block = Bsp.Edges[dividing_edge_index];
+                        dividing_edge_block.EndVertex = (short)edge_vertex_A_index;
+                        dividing_edge_block.ForwardEdge = (ushort)new_edge_index_E;
+                    }
+
+                    new_edge_block_E.EndVertex = (short)edge_vertex_B_index;
+                    new_edge_block_E.StartVertex = (short)edge_vertex_A_index;
+                    new_edge_block_E.ForwardEdge = ushort.MaxValue; //set to -1
+                    new_edge_block_E.ReverseEdge = ushort.MaxValue; //set to -1
+                    new_edge_block_E.RightSurface = -1;
+
+                    if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane))
+                        new_edge_block_E.LeftSurface = (short)new_surface_index_B;
+                    else
+                        new_edge_block_E.LeftSurface = (short)new_surface_index_A;
+
+                    if (first_new_edge_index == -1)
+                        first_new_edge_index = dividing_edge_index;
+
+                    //connect previous edge to new generated edges
+                    if (previous_new_edge_index != -1)
+                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)dividing_edge_index;
+                    previous_new_edge_index = new_edge_index_E;
                 }
-
 
                 if (surface_edge_block.RightSurface == original_surface_index)
                     surface_edge_index = surface_edge_block.ReverseEdge;
@@ -205,6 +253,10 @@ namespace TagTool.Commands.CollisionModels
                 if (surface_edge_index == original_surface.FirstEdge)
                     break;
             }
+            //connect loose ends and set first edge of new surfaces
+            Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)first_new_edge_index;
+            new_surface_block_A.FirstEdge = (ushort)dividing_edge_index;
+            new_surface_block_B.FirstEdge = (ushort)dividing_edge_index;
         }
 
         public void split_object_surfaces_with_plane(surface_array_definition surface_array, short plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
@@ -213,6 +265,7 @@ namespace TagTool.Commands.CollisionModels
             while (true)
             {
                 short surface_index = surface_array.surface_array[surface_array_index];
+                bool surface_is_double_sided = Bsp.Surfaces[surface_index].Flags.HasFlag(SurfaceFlags.TwoSided);
                 bool surface_is_mirrored = false;
                 if (surface_index < 0)
                     surface_is_mirrored = true;
@@ -277,10 +330,75 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Surfaces.Add(new Surface());
                         int new_surface_A_index = Bsp.Surfaces.Count - 2;
                         int new_surface_B_index = Bsp.Surfaces.Count - 1;
+
+                        //split surface into two new surfaces, one on each side of the plane
                         divide_surface_into_two_surfaces(surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index);
 
+                        //propagate surface index flags to child surfaces
+                        uint back_surface_index;
+                        uint front_surface_index;
+                        if (surface_is_mirrored)
+                        {
+                            back_surface_index = (uint)new_surface_A_index | 0x80000000;
+                            front_surface_index = (uint)new_surface_B_index | 0x80000000;
+                        }
+                        else
+                        {
+                            back_surface_index = (uint)new_surface_A_index & 0x7FFFFFFF;
+                            front_surface_index = (uint)new_surface_B_index & 0x7FFFFFFF;
+                        }
+
+                        //add child surfaces to appropriate arrays
+                        if (surface_is_free)
+                        {
+                            //free surfaces need to come first in the list
+                            back_surfaces_array.surface_array.Insert(0, (short)back_surface_index);
+                            back_surfaces_array.free_count++;
+                            front_surfaces_array.surface_array.Insert(0, (short)front_surface_index);
+                            front_surfaces_array.free_count++;
+                        }
+                        else
+                        {
+                            back_surfaces_array.surface_array.Add((short)back_surface_index);
+                            back_surfaces_array.used_count++;
+                            front_surfaces_array.surface_array.Add((short)front_surface_index);
+                            front_surfaces_array.used_count++;
+                        }
                         break;
                     case Plane_Relationship.OnPlane: //surface is ON the plane
+                        if (!surface_is_mirrored)
+                        {
+
+                        }
+                        if (surface_is_double_sided)
+                        {
+                            if (!surface_is_mirrored)
+                            {
+                                back_surface_index = (uint)surface_index & 0x7FFFFFFF;
+                            }
+                            else
+                            {
+                                back_surface_index = (uint)surface_index | 0x80000000;
+                            }
+
+                        }
+                        else
+                        {
+                            if (!surface_is_mirrored)
+                            {
+                                front_surface_index = (uint)surface_index & 0x7FFFFFFF;
+                            }
+                            else
+                                back_surface_index = (uint)surface_index | 0x80000000;
+                        }
+                        if (surface_is_double_sided)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
                         break;
                 }
 
