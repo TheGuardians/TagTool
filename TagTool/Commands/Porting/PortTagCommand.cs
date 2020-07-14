@@ -612,23 +612,23 @@ namespace TagTool.Commands.Porting
                             //fix weapon target tracking
                             if (weapon.Tracking > 0 || weapon.WeaponType == Weapon.WeaponTypeValue.Needler)
                             {
-                                weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>{
-                                    new Weapon.TargetTrackingBlock{
+                                weapon.TargetTracking = new List<Unit.TargetTrackingBlock>{
+                                    new Unit.TargetTrackingBlock{
                                         AcquireTime = (weapon.Tracking == Weapon.TrackingType.HumanTracking ? 1.0f : 0.0f),
                                         GraceTime = (weapon.WeaponType == Weapon.WeaponTypeValue.Needler ? 0.2f : 0.1f),
                                         DecayTime = (weapon.WeaponType == Weapon.WeaponTypeValue.Needler ? 0.0f : 0.2f),
                                         TrackingTypes = (weapon.Tracking == Weapon.TrackingType.HumanTracking ?
-                                            new List<Weapon.TargetTrackingBlock.TrackingType> {
-                                                new Weapon.TargetTrackingBlock.TrackingType{
+                                            new List<Unit.TargetTrackingBlock.TrackingType> {
+                                                new Unit.TargetTrackingBlock.TrackingType{
                                                     TrackingType2 = CacheContext.StringTable.GetStringId("ground_vehicles")
                                                 },
-                                                new Weapon.TargetTrackingBlock.TrackingType{
+                                                new Unit.TargetTrackingBlock.TrackingType{
                                                     TrackingType2 = CacheContext.StringTable.GetStringId("flying_vehicles")
                                                 },
                                             }
                                             :
-                                            new List<Weapon.TargetTrackingBlock.TrackingType> {
-                                                new Weapon.TargetTrackingBlock.TrackingType{
+                                            new List<Unit.TargetTrackingBlock.TrackingType> {
+                                                new Unit.TargetTrackingBlock.TrackingType{
                                                     TrackingType2 = CacheContext.StringTable.GetStringId("bipeds")
                                                 },
                                         })
@@ -640,6 +640,39 @@ namespace TagTool.Commands.Porting
                                     weapon.TargetTracking[0].LockedSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);                                      
                                 }
                             }                    
+                            break;
+                        /*case Vehicle vehicle:
+                            //fix vehicle weapon target tracking
+                            if (vehicle.TargetTracking == null)
+                                vehicle.TargetTracking = new List<Unit.TargetTrackingBlock>();
+                            foreach (var weaponBlock in vehicle.Weapons)
+                            {
+                                if (weaponBlock.Weapon2 != null)
+                                {
+                                    var vehicleWeap = CacheContext.Deserialize<Weapon>(cacheStream, weaponBlock.Weapon2);
+                                    if (vehicleWeap.Tracking > 0 && vehicleWeap.TargetTracking.Count > 0)
+                                    {
+                                        vehicle.TargetTracking.AddRange(vehicleWeap.TargetTracking);
+                                    }
+                                }
+                            }
+                            break;*/
+                        case Biped biped:
+                            // add bipeds filter to "target_main" (fixes needler tracking)
+                            if (biped.Model != null)
+                            {
+                                var hlmt = CacheContext.Deserialize<Model>(cacheStream, biped.Model);
+
+                                foreach (var target in hlmt.Targets)
+                                {
+                                    if (target.TargetFilter == StringId.Invalid && CacheContext.StringTable.GetString(target.MarkerName) == "target_main")
+                                    {
+                                        target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                                    }
+                                }
+
+                                CacheContext.Serialize(cacheStream, biped.Model, hlmt);
+                            }
                             break;
                         default:
                             break;
