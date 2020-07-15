@@ -253,7 +253,7 @@ namespace TagTool.Cache
     }
 
 
-    [TagStructure]
+    [TagStructure(Size = 0x108)]
     public class FileTableEntry
     {
         public uint Size;

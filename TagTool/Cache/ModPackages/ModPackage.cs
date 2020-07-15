@@ -619,12 +619,15 @@ namespace TagTool.Cache
 
             var fileTable = new GenericSectionEntry(reader);
 
-            reader.BaseStream.Position = fileTable.TableOffset + section.Offset;
+            
             for(int i = 0; i < fileTable.Count; i++)
-            {         
+            {
+                reader.BaseStream.Position = fileTable.TableOffset + section.Offset + 0x108 * i;
+
                 var tableEntry = deserializer.Deserialize<FileTableEntry>(context);
 
                 var stream = new MemoryStream();
+                reader.BaseStream.Position = section.Offset + tableEntry.Offset;
                 StreamUtil.Copy(reader.BaseStream, stream, tableEntry.Size);
 
                 Files.Add(tableEntry.Path, stream);
