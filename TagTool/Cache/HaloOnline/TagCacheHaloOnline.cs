@@ -199,14 +199,17 @@ namespace TagTool.Cache.HaloOnline
             ResizeBlock(stream, tag, tag.HeaderOffset, tag.TotalSize, data.Length);
             tag.TotalSize = (uint)data.Length;
 
-            // Write the data
-            stream.Position = tag.HeaderOffset;
-            stream.Write(data, 0, data.Length);
-            
-            // Re-parse it
-            stream.Position = tag.HeaderOffset;
-            tag.ReadHeader(new BinaryReader(stream), StringTableReference);
-            UpdateTagOffsets(new EndianWriter(stream, EndianFormat.LittleEndian));
+            if(data.Length > 0)
+            {
+                // Write the data
+                stream.Position = tag.HeaderOffset;
+                stream.Write(data, 0, data.Length);
+
+                // Re-parse it
+                stream.Position = tag.HeaderOffset;
+                tag.ReadHeader(new BinaryReader(stream), StringTableReference);
+                UpdateTagOffsets(new EndianWriter(stream, EndianFormat.LittleEndian));
+            }
         }
 
         /// <summary>
