@@ -92,7 +92,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown15;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<TargetTrackingBlock> TargetTracking;
+        public List<Unit.TargetTrackingBlock> TargetTracking;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown16;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -186,23 +186,6 @@ namespace TagTool.Tags.Definitions
             InhibitsPrimary,
             LoadsAlternateAmmunition,
             LoadsMultiplePrimaryAmmunition,
-        }
-        
-        [TagStructure(Size = 0x38)]
-        public class TargetTrackingBlock : TagStructure
-		{
-            public List<TrackingType> TrackingTypes;
-            public float AcquireTime;
-            public float GraceTime;
-            public float DecayTime;
-            public CachedTag TrackingSound;
-            public CachedTag LockedSound;
-
-            [TagStructure(Size = 0x4)]
-            public class TrackingType : TagStructure
-			{
-                public StringId TrackingType2;
-            }
         }
 
         public enum MovementPenalizedValue : short
