@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using TagTool.Cache.Resources;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -90,6 +91,22 @@ namespace TagTool.Cache.HaloOnline
             using (var fontFileStream = fontFile.Create())
             {
                 stream.CopyTo(fontFileStream);
+            }
+        }
+
+        public override void AddModFile(string path, Stream file)
+        {
+            var modFile = new FileInfo(path);
+            if (modFile.Exists)
+            {
+                Console.WriteLine("Overwriting Existing file: " + path);
+                modFile.Delete();
+            }
+
+            using (var modFileStream = modFile.Create())
+            {
+                file.Position = 0;
+                file.CopyTo(modFileStream);
             }
         }
     }

@@ -193,6 +193,22 @@ namespace TagTool.Cache
             BaseModPackage.FontPackage = new MemoryStream();
             fontStream.CopyTo(BaseModPackage.FontPackage);
         }
+
+        public override void AddModFile(string path, Stream file)
+        {
+            if (!BaseModPackage.Files.ContainsKey(path))
+            {
+                file.Position = 0;
+                BaseModPackage.Files.Add(path, file);
+            }
+            else
+            {
+                file.Position = 0;
+                BaseModPackage.Files.Remove(path);
+                BaseModPackage.Files.Add(path, file);
+                Console.WriteLine("Overwriting Existing file: " + path);
+            }
+        }
     }
 }
 

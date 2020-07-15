@@ -88,5 +88,7 @@ namespace TagTool.Cache
         public virtual void SaveTagNames(string path = null) => throw new NotImplementedException();
 
         public virtual void SaveFonts(Stream fontStream) => throw new NotImplementedException();
+
+        public virtual void AddModFile(string path, Stream file) => throw new NotImplementedException();
     }
 }
