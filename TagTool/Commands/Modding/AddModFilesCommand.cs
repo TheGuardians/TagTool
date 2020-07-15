@@ -45,8 +45,11 @@ namespace TagTool.Commands.Modding
             foreach (var file in directory.GetFiles("*.*", SearchOption.AllDirectories))
             {
                 string virtualPath = directory.GetRelativePath(file.FullName);
-                if(!Cache.BaseModPackage.Files.ContainsKey(virtualPath))
+                if (!Cache.BaseModPackage.Files.ContainsKey(virtualPath))
+                {
+                    Console.WriteLine("Adding: " + virtualPath);
                     Cache.BaseModPackage.Files.Add(virtualPath, file.OpenRead());
+                }
                 else
                 {
                     Cache.BaseModPackage.Files[virtualPath] = file.OpenRead();

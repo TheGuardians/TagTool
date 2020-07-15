@@ -160,6 +160,45 @@ namespace TagTool.Commands.Modding
                     BaseCache.SaveFonts(stream);
                 }
             }
+
+            // apply mod files
+            if(ModCache.BaseModPackage.Files != null && ModCache.BaseModPackage.Files.Count > 0)
+            {
+
+                if(BaseCache is GameCacheHaloOnline)
+                {
+                    Console.WriteLine("Mod Files exist in package. Overwrite in BaseCache? (y/n)");
+                    string response = Console.ReadLine();
+                    if (response.ToLower().StartsWith("y"))
+                    {
+                        Console.WriteLine("Please enter the directory for the Mod Files:");
+                        string directoryPath = Console.ReadLine();
+
+                        var directory = new DirectoryInfo(directoryPath);
+                        if (!directory.Exists)
+                        {
+                            Console.WriteLine($"ERROR: Directory does not exist.");
+                            return new TagToolError(CommandError.DirectoryNotFound);
+                        }
+
+                        Console.WriteLine("Writing Mod Files to Directory");
+                        foreach (var file in ModCache.BaseModPackage.Files)
+                        {
+                            Console.WriteLine("Writing: {0}", file.Key);
+                            directory.CreateSubdirectory(Path.GetDirectoryName(file.Key.ToString()));
+                            BaseCache.AddModFile(Path.Combine(directory.FullName, file.Key), file.Value);
+                        }
+
+                    }
+                    else
+                        Console.WriteLine("Skipping Mod Files");
+                }else
+                foreach (var file in ModCache.BaseModPackage.Files)
+                {
+                    Console.WriteLine("Copying: {0}", file.Key);
+                    BaseCache.AddModFile(file.Key, file.Value);
+                }
+            }
             
             CacheStream.Dispose();
             BaseCache.SaveTagNames();
