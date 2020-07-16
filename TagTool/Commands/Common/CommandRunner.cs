@@ -8,7 +8,7 @@ using TagTool.IO;
 
 namespace TagTool.Commands.Common
 {
-    class CommandRunner
+    public class CommandRunner
     {
         public CommandContextStack ContextStack;
         public bool EOF { get; private set; } = false;
