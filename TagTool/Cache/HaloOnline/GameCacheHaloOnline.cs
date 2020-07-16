@@ -20,7 +20,15 @@ namespace TagTool.Cache.HaloOnline
 
         public override Stream OpenCacheReadWrite() => TagsFile.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-        public override Stream OpenCacheWrite() => TagsFile.OpenWrite();     
+        public override Stream OpenCacheWrite() => TagsFile.OpenWrite();
+
+        private static Stream OpenFileStream(FileInfo file)
+        {
+            return file.Open(
+                file.Exists ? FileMode.Open : FileMode.Create,
+                file.Exists ? FileAccess.Read : FileAccess.ReadWrite,
+                FileShare.Read);
+        }
 
         public GameCacheHaloOnline(DirectoryInfo directory)
         {
@@ -31,7 +39,7 @@ namespace TagTool.Cache.HaloOnline
 
             Endianness = EndianFormat.LittleEndian;
 
-            using (var tagsStream = TagsFile.Open(FileMode.OpenOrCreate))
+            using (var tagsStream = OpenFileStream(TagsFile))
             {
                 FindVersion(new EndianReader(tagsStream));
 
