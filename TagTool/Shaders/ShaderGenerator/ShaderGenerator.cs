@@ -275,19 +275,31 @@ namespace TagTool.Shaders.ShaderGenerator
             switch (usage)
             {
                 case ParameterUsage.PS_Real:
+                    shaderParameters = parameters.GetRealPixelParameters();
+                    break;
+
                 case ParameterUsage.VS_Real:
-                    shaderParameters = parameters.GetRealParameters();
+                    shaderParameters = parameters.GetRealVertexParameters();
                     break;
+
                 case ParameterUsage.PS_Integer:
+                    shaderParameters = parameters.GetIntegerPixelParameters();
+                    break;
+
                 case ParameterUsage.VS_Integer:
-                    shaderParameters = parameters.GetIntegerParameters();
+                    shaderParameters = parameters.GetIntegerVertexParameters();
                     break;
+
                 case ParameterUsage.PS_Boolean:
-                case ParameterUsage.VS_Boolean:
-                    shaderParameters = parameters.GetBooleanParameters();
+                    shaderParameters = parameters.GetBooleanPixelParameters();
                     break;
+
+                case ParameterUsage.VS_Boolean:
+                    shaderParameters = parameters.GetBooleanVertexParameters();
+                    break;
+
                 case ParameterUsage.Texture:
-                    shaderParameters = parameters.GetSamplerParameters();
+                    shaderParameters = parameters.GetSamplerPixelParameters();
                     break;
                 default:
                     shaderParameters = new List<HaloShaderGenerator.Globals.ShaderParameter>();
@@ -319,19 +331,27 @@ namespace TagTool.Shaders.ShaderGenerator
             switch (usage)
             {
                 case ParameterUsage.PS_RealExtern:
-                case ParameterUsage.VS_RealExtern:
-                    shaderParameters = parameters.GetRealExternParameters();
-                    shaderParameters.AddRange(globalParameters.GetRealExternParameters());
+                    shaderParameters = parameters.GetRealExternPixelParameters();
+                    shaderParameters.AddRange(globalParameters.GetRealExternPixelParameters());
                     break;
                 case ParameterUsage.PS_IntegerExtern:
-                case ParameterUsage.VS_IntegerExtern:
-                    shaderParameters = parameters.GetIntegerExternParameters();
-                    shaderParameters.AddRange(globalParameters.GetIntegerExternParameters());
+                    shaderParameters = parameters.GetIntegerExternPixelParameters();
+                    shaderParameters.AddRange(globalParameters.GetIntegerExternPixelParameters());
                     break;
                 case ParameterUsage.TextureExtern:
-                    shaderParameters = parameters.GetSamplerExternParameters();
-                    shaderParameters.AddRange(globalParameters.GetSamplerExternParameters());
+                    shaderParameters = parameters.GetSamplerExternPixelParameters();
+                    shaderParameters.AddRange(globalParameters.GetSamplerExternPixelParameters());
                     break;
+
+                case ParameterUsage.VS_RealExtern:
+                    shaderParameters = parameters.GetRealExternVertexParameters();
+                    shaderParameters.AddRange(globalParameters.GetRealExternVertexParameters());
+                    break;
+                case ParameterUsage.VS_IntegerExtern:
+                    shaderParameters = parameters.GetIntegerExternVertexParameters();
+                    shaderParameters.AddRange(globalParameters.GetIntegerExternVertexParameters());
+                    break;
+
                 default:
                     shaderParameters = new List<HaloShaderGenerator.Globals.ShaderParameter>();
                     break;
@@ -404,28 +424,25 @@ namespace TagTool.Shaders.ShaderGenerator
             var globalShaderParameters = generator.GetGlobalParameters();
 
             
-            foreach (var realParam in pixelShaderParameters.GetRealParameters())
+            foreach (var realParam in pixelShaderParameters.GetRealPixelParameters())
                 rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
 
-            foreach (var realParam in vertexShaderParameters.GetRealParameters())
+            foreach (var realParam in vertexShaderParameters.GetRealVertexParameters())
                 rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
 
-            foreach (var boolParam in pixelShaderParameters.GetBooleanParameters())
+            foreach (var boolParam in pixelShaderParameters.GetBooleanPixelParameters())
                 rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, boolParam.ParameterName) });
 
-            foreach (var boolParam in vertexShaderParameters.GetBooleanParameters())
+            foreach (var boolParam in vertexShaderParameters.GetBooleanVertexParameters())
                 rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, boolParam.ParameterName) });
 
-            foreach (var intParam in pixelShaderParameters.GetIntegerParameters())
+            foreach (var intParam in pixelShaderParameters.GetIntegerPixelParameters())
                 rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, intParam.ParameterName) });
 
-            foreach (var intParam in vertexShaderParameters.GetIntegerParameters())
+            foreach (var intParam in vertexShaderParameters.GetIntegerVertexParameters())
                 rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, intParam.ParameterName) });
 
-            foreach (var samplerParam in pixelShaderParameters.GetSamplerParameters())
-                rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, samplerParam.ParameterName) });
-
-            foreach (var samplerParam in vertexShaderParameters.GetSamplerParameters())
+            foreach (var samplerParam in pixelShaderParameters.GetSamplerPixelParameters())
                 rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, samplerParam.ParameterName) });
 
             #endregion
@@ -541,16 +558,18 @@ namespace TagTool.Shaders.ShaderGenerator
                     mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
-                    // TODO: get vertex shader specific extern
-                    /*
+                    // vs extern
+
+                    
                     currentUsage = ParameterUsage.VS_RealExtern;
-                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.VS_IntegerExtern;
-                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderRegisterMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
-                    */
+                    
+                    
                 }
 
             }
