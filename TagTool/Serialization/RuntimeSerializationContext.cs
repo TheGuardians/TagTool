@@ -60,11 +60,11 @@ namespace TagTool.Serialization
             }
             else if(data.Length > OriginalSize - HeaderSize)
             {
-                Console.WriteLine($"Cannot poke a tag larger than the tag currently in memory. Size: 0x{OriginalSize.ToString("X8")} Poking: 0x{data.Length.ToString("X8")}");
+                throw new InvalidDataException($"Cannot poke a tag larger than the tag currently in memory. Size: 0x{OriginalSize.ToString("X8")} Poking: 0x{data.Length.ToString("X8")}");
             }
             else if (mainStructOffset + HeaderSize != OriginalStructOffset)
             {
-                Console.WriteLine($"Error: tag size changed or the serializer failed!");
+                throw new InvalidDataException($"Error: tag size changed or the serializer failed!");
             }
         }
 
