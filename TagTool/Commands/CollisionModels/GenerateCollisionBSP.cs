@@ -40,11 +40,27 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Bsp3dNodes.Clear();
 
             //allocate surface array before starting the bsp build
-            surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<short>()};
+            surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>()};
             //run build_bsp_tree_main here
             //NOTE: standard limit for number of bsp3dnodes (bsp planes) is 128 (maximum bsp depth)
 
             return true;
+        }
+
+        public surface_array_definition collect_plane_matching_surfaces(surface_array_definition surface_array, int plane_index)
+        {
+            surface_array_definition plane_matched_surface_array = new surface_array_definition();
+            for (int surface_array_index = 0; surface_array_index < surface_array.used_count; surface_array_index++)
+            {
+                int surface_index = surface_array.surface_array[surface_array_index];
+                if(surface_index < 0 && Bsp.Surfaces[surface_index & 0x7FFFFFFF].Plane == plane_index)
+                {
+                    plane_matched_surface_array.surface_array.Add(surface_index);
+                    //reset plane matching surfaces in the primary array to an unused state
+                    surface_array.surface_array[surface_array_index] = surface_index & 0x7FFFFFFF;
+                }
+            }
+            return plane_matched_surface_array;
         }
 
         public void build_leaves(surface_array_definition surface_array, ref int leaf_index)
@@ -69,7 +85,15 @@ namespace TagTool.Commands.CollisionModels
 
                 if(surface_index < 0)
                 {
-                    int plane_index = surface_block.Plane;  
+                    int plane_index = surface_block.Plane;
+                    surface_array_definition plane_matched_surface_array = collect_plane_matching_surfaces(surface_array, plane_index);
+                    if(plane_matched_surface_array.surface_array.Count > 0)
+                    {
+                        Bsp.Bsp2dReferences.Add(new Bsp2dReference());
+                        int bsp2drefindex = Bsp.Bsp2dReferences.Count - 1;
+                        Plane plane_block = Bsp.Planes[plane_index & 0x7FFFFFFF];
+
+                    }
                 }
             }
 
@@ -295,7 +319,7 @@ namespace TagTool.Commands.CollisionModels
             int surface_array_index = 0;
             while (true)
             {
-                short surface_index = surface_array.surface_array[surface_array_index];
+                int surface_index = surface_array.surface_array[surface_array_index];
                 bool surface_is_double_sided = Bsp.Surfaces[surface_index].Flags.HasFlag(SurfaceFlags.TwoSided);
                 bool surface_is_mirrored = false;
                 if (surface_index < 0)
@@ -590,7 +614,7 @@ namespace TagTool.Commands.CollisionModels
         {
             public int free_count;
             public int used_count;
-            public List<short> surface_array;
+            public List<int> surface_array;
         }
 
         private plane_splitting_parameters determine_plane_splitting_effectiveness(surface_array_definition surface_array, int plane_index, RealPlane3d plane_block, plane_splitting_parameters splitting_Parameters)
@@ -600,9 +624,9 @@ namespace TagTool.Commands.CollisionModels
                 int current_surface_array_index = 0;
                 while (true)
                 {
-                    short surface_index = surface_array.surface_array[current_surface_array_index];
+                    int surface_index = surface_array.surface_array[current_surface_array_index];
                     bool surface_is_free = current_surface_array_index < surface_array.free_count;
-                    Plane_Relationship relationship = determine_surface_plane_relationship((surface_index & (short)0x7FFF), plane_index, plane_block);
+                    Plane_Relationship relationship = determine_surface_plane_relationship((surface_index & 0x7FFFFFFF), plane_index, plane_block);
                     if (relationship.HasFlag(Plane_Relationship.OnPlane))
                     {
                         if(surface_index < 0)
