@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting
     {
         public ShaderMatcherNew Matcher = new ShaderMatcherNew();
 
-        private List<string> emblemTagNames = new List<string> // needs proper fix
+        private List<string> emblemTagNames = new List<string>
         {
             @"objects\characters\odst\shaders\mc_emblem",
             @"objects\characters\odst_cine\shaders\mc_emblem",
@@ -364,13 +364,13 @@ namespace TagTool.Commands.Porting
             finalRm.BaseRenderMethod = rmdfInstance;
 
             // remove emblem animations (prevents crash)
-            if (edRmt2Descriptor.Type == "decal" && emblemTagNames.Contains(blamTagName))
+            /*if (edRmt2Descriptor.Type == "decal" && emblemTagNames.Contains(blamTagName))
             {
                 finalRm.ShaderProperties[0].EntryPoints.Clear();
                 finalRm.ShaderProperties[0].ParameterTables.Clear();
                 finalRm.ShaderProperties[0].Parameters.Clear();
                 finalRm.ShaderProperties[0].Functions.Clear();
-            }
+            }*/
 
             // fixup rm animations
             if (finalRm.ShaderProperties[0].Functions.Count > 0)
