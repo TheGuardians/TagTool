@@ -63,16 +63,107 @@ namespace TagTool.Commands.CollisionModels
             return plane_matched_surface_array;
         }
 
-        public void build_leaves(surface_array_definition surface_array, ref int leaf_index)
+        public int plane_determine_axis_minimum_coefficient(Plane plane_block)
         {
+            int minimum_coefficient;
+            float plane_I = Math.Abs(plane_block.Value.I);
+            float plane_J = Math.Abs(plane_block.Value.J);
+            float plane_K = Math.Abs(plane_block.Value.K);
+            if (plane_K < plane_J || plane_K < plane_I)
+            {
+                if (plane_J >= plane_I)
+                    minimum_coefficient = 1;
+                else
+                    minimum_coefficient = 0;
+            }
+            else
+                minimum_coefficient = 2;
+            return minimum_coefficient;
+        }
+
+        public bool check_plane_projection_parameter_greater_than_0(Plane plane_block, int projection_axis)
+        {
+            switch (projection_axis)
+            {
+                case 0: //x axis
+                    return plane_block.Value.I > 0;
+                case 1: //y axis
+                    return plane_block.Value.J > 0;
+                case 2: //z axis
+                    return plane_block.Value.K > 0;
+            }
+            return false;
+        }
+
+        public void sort_surfaces_by_plane_2D(int plane_projection_axis, int plane_mirror_check, Bsp2dNode bsp2dnode_block, surface_array_definition plane_matched_surface_array, surface_array_definition back_surface_array, surface_array_definition front_surface_array)
+        {
+            foreach(int surface_index in plane_matched_surface_array.surface_array)
+            {
+                Plane_Relationship surface_location = determine_surface_plane_relationship_2D(surface_index, bsp2dnode_block, plane_projection_axis, plane_mirror_check);
+                if (surface_location.HasFlag(Plane_Relationship.BackofPlane))
+                {
+                    back_surface_array.surface_array.Add(surface_index);
+                }
+                if (surface_location.HasFlag(Plane_Relationship.FrontofPlane))
+                {
+                    front_surface_array.surface_array.Add(surface_index);
+                }
+            }
+        }
+
+        public int create_bsp2dnodes(int plane_projection_axis, int plane_mirror_check, surface_array_definition plane_matched_surface_array)
+        {
+            int bsp2dnode_index = -1;
+            int back_bsp2dnode_index = -1;
+            int front_bsp2dnode_index = -1;
+            Bsp2dNode bsp2dnode_block = new Bsp2dNode(){LeftChild = -1, RightChild = -1};
+            plane_splitting_parameters splitting_parameters = generate_best_splitting_plane_2D(plane_projection_axis, plane_mirror_check, ref bsp2dnode_block, plane_matched_surface_array);
+            if(splitting_parameters.FrontSurfaceCount > 0 && splitting_parameters.BackSurfaceCount > 0)
+            {
+                surface_array_definition back_surface_array = new surface_array_definition();
+                surface_array_definition front_surface_array = new surface_array_definition();
+
+                Bsp.Bsp2dNodes.Add(bsp2dnode_block);
+                bsp2dnode_index = Bsp.Bsp2dNodes.Count - 1;
+
+                sort_surfaces_by_plane_2D(plane_projection_axis, plane_mirror_check, bsp2dnode_block, plane_matched_surface_array, back_surface_array, front_surface_array);
+
+                //create a child node with the back surface array first
+                back_bsp2dnode_index = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, back_surface_array);
+                if (back_bsp2dnode_index == -1)
+                {
+                    bsp2dnode_index = -1;
+                }
+                else
+                {
+                    front_bsp2dnode_index = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, front_surface_array);
+                    if (front_bsp2dnode_index == -1)
+                    {
+                        bsp2dnode_index = -1;
+                    }
+                    else
+                    {
+                        bsp2dnode_block.LeftChild = (short)back_bsp2dnode_index;
+                        bsp2dnode_block.RightChild = (short)front_bsp2dnode_index;
+                    }
+                }
+                return bsp2dnode_index;
+            }
+            Console.WriteLine("### ERROR couldn't build bsp because of overlapping surfaces.\n");
+            return bsp2dnode_index;
+        }
+
+        public bool build_leaves(surface_array_definition surface_array, ref int leaf_index)
+        {
+            bool result = true;
+
             Bsp.Leaves.Add(new Leaf());
             leaf_index = Bsp.Leaves.Count - 1;
-            Leaf leaf_block = Bsp.Leaves[leaf_index];
 
             //allocate initial leaf values
-            leaf_block.Flags = 0;
-            leaf_block.Bsp2dReferenceCount = 0;
-            leaf_block.FirstBsp2dReference = -1;
+            Bsp.Leaves[leaf_index].Flags = 0;
+            Bsp.Leaves[leaf_index].Bsp2dReferenceCount = 0;
+            Bsp.Leaves[leaf_index].FirstBsp2dReference = -1;
 
             for(int surface_array_index = 0; surface_array_index < surface_array.free_count + surface_array.used_count; surface_array_index++)
             {
@@ -81,7 +172,7 @@ namespace TagTool.Commands.CollisionModels
 
                 //carry over surface flags
                 if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
-                    leaf_block.Flags |= LeafFlags.ContainsDoubleSidedSurfaces;
+                    Bsp.Leaves[leaf_index].Flags |= LeafFlags.ContainsDoubleSidedSurfaces;
 
                 if(surface_index < 0)
                 {
@@ -92,14 +183,30 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp2dReferences.Add(new Bsp2dReference());
                         int bsp2drefindex = Bsp.Bsp2dReferences.Count - 1;
                         Plane plane_block = Bsp.Planes[plane_index & 0x7FFFFFFF];
+                        int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
+                        bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
+                        Bsp.Bsp2dReferences[bsp2drefindex].PlaneIndex = (short)plane_index;
+                        Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = -1;
 
+                        //update leaf block parameters given new bsp2dreference
+                        Bsp.Leaves[leaf_index].Bsp2dReferenceCount++;
+                        if (Bsp.Leaves[leaf_index].FirstBsp2dReference == -1)
+                            Bsp.Leaves[leaf_index].FirstBsp2dReference = bsp2drefindex;
+
+                        //not 100% sure what this is checking
+                        int plane_mirror_check = plane_projection_parameter_greater_than_0 != plane_index < 0 ? 1 : 0;
+
+                        int bsp2dnodeindex = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, plane_matched_surface_array);
+                        Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = (short)bsp2dnodeindex;
+                        if (bsp2dnodeindex == -1)
+                        {
+                            Console.WriteLine("### ERROR couldn't build bsp2d.\n");
+                            result = false;
+                        }
                     }
                 }
             }
-
-
-            //write back changes to leaf in surface list
-            Bsp.Leaves[leaf_index] = leaf_block;
+            return result;
         }
 
         public void divide_surface_into_two_surfaces(int original_surface_index, int plane_index, ref int new_surface_index_A, ref int new_surface_index_B)
@@ -551,6 +658,87 @@ namespace TagTool.Commands.CollisionModels
             return vertex_plane_relationship;
         }
 
+        public RealPoint2d vertex_get_projection_relevant_coords(Vertex vertex_block, int plane_projection_axis, int plane_mirror_check)
+        {
+            RealPoint2d relevant_coords = new RealPoint2d();
+            int v4 = 2 * (plane_mirror_check + 2 * plane_projection_axis);
+            List<int> coordinate_list = new List<int>{ 2, 1, 1, 2, 0, 2, 2, 0, 1, 0, 0, 1 };
+            int vertex_coord_A = coordinate_list[v4+1];
+            int vertex_coord_B = coordinate_list[v4];
+            switch (vertex_coord_A)
+            {
+                case 0:
+                    relevant_coords.X = vertex_block.Point.X;
+                    break;
+                case 1:
+                    relevant_coords.X = vertex_block.Point.Y;
+                    break;
+                case 2:
+                    relevant_coords.X = vertex_block.Point.Z;
+                    break;
+            }
+            switch (vertex_coord_B)
+            {
+                case 0:
+                    relevant_coords.Y = vertex_block.Point.X;
+                    break;
+                case 1:
+                    relevant_coords.Y = vertex_block.Point.Y;
+                    break;
+                case 2:
+                    relevant_coords.Y = vertex_block.Point.Z;
+                    break;
+            }
+            return relevant_coords;
+        }
+
+        public Plane_Relationship determine_surface_plane_relationship_2D(int surface_index, Bsp2dNode bsp2dnodeblock, int plane_projection_axis, int plane_mirror_check)
+        {
+            Plane_Relationship surface_plane_relationship = 0;
+            Surface surface_block = Bsp.Surfaces[surface_index];
+
+            int surface_edge_index = surface_block.FirstEdge;
+            while (true)
+            {
+                Edge surface_edge_block = Bsp.Edges[surface_edge_index];
+                Vertex edge_vertex;
+                if (surface_edge_block.RightSurface == surface_index)
+                    edge_vertex = Bsp.Vertices[surface_edge_block.EndVertex];
+                else
+                    edge_vertex = Bsp.Vertices[surface_edge_block.StartVertex];
+
+                RealPoint2d relevant_coords = vertex_get_projection_relevant_coords(edge_vertex, plane_projection_axis, plane_mirror_check);
+                float plane_equation_vertex_input = bsp2dnodeblock.Plane.I * relevant_coords.X + bsp2dnodeblock.Plane.J * relevant_coords.Y - bsp2dnodeblock.Plane.D;
+
+                if (plane_equation_vertex_input >= -0.00024414062)
+                {
+                    surface_plane_relationship |= Plane_Relationship.FrontofPlane;
+                }
+                if (plane_equation_vertex_input <= 0.00024414062)
+                {
+                    surface_plane_relationship |= Plane_Relationship.BackofPlane;
+                }
+
+                if (surface_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
+                    break;
+
+                if (surface_edge_block.RightSurface == surface_index)
+                    surface_edge_index = surface_edge_block.ReverseEdge;
+                else
+                    surface_edge_index = surface_edge_block.ForwardEdge;
+                //break the loop if we have finished circulating the surface
+                if (surface_edge_index == surface_block.FirstEdge)
+                    break;
+            }
+
+            //if it fits both of these parameters, we consider the point to be on the plane
+            if (surface_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
+                return surface_plane_relationship;
+
+            Console.WriteLine("### WARNING found possible T-junction.\n");
+            return surface_plane_relationship;
+        }
+
         public Plane_Relationship determine_surface_plane_relationship(int surface_index, int plane_index, RealPlane3d plane_block)
         {
             Plane_Relationship surface_plane_relationship = 0;
@@ -617,7 +805,24 @@ namespace TagTool.Commands.CollisionModels
             public List<int> surface_array;
         }
 
-        private plane_splitting_parameters determine_plane_splitting_effectiveness(surface_array_definition surface_array, int plane_index, RealPlane3d plane_block, plane_splitting_parameters splitting_Parameters)
+        public plane_splitting_parameters determine_plane_splitting_effectiveness_2D(Bsp2dNode bsp2dnode_block, int plane_projection_axis, int a3, surface_array_definition plane_matched_surface_array)
+        {
+            plane_splitting_parameters splitting_Parameters = new plane_splitting_parameters();
+            foreach(int surface_index in plane_matched_surface_array.surface_array)
+            {
+                Plane_Relationship surface_plane_orientation = determine_surface_plane_relationship_2D(surface_index, bsp2dnode_block, plane_projection_axis, a3);
+                if (surface_plane_orientation.HasFlag(Plane_Relationship.BackofPlane))
+                    splitting_Parameters.BackSurfaceCount++;
+                if (surface_plane_orientation.HasFlag(Plane_Relationship.FrontofPlane))
+                    splitting_Parameters.FrontSurfaceCount++;
+            }
+            splitting_Parameters.plane_splitting_effectiveness =
+                Math.Abs((splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount));
+
+            return splitting_Parameters;
+        }
+
+        public plane_splitting_parameters determine_plane_splitting_effectiveness(surface_array_definition surface_array, int plane_index, RealPlane3d plane_block, plane_splitting_parameters splitting_Parameters)
         {
             if(surface_array.free_count + surface_array.used_count > 0)
             {
@@ -686,6 +891,76 @@ namespace TagTool.Commands.CollisionModels
             return splitting_Parameters;
         }
 
+        public Bsp2dNode generate_bsp2d_plane_parameters(RealPoint2d Coords1, RealPoint2d Coords2)
+        {
+            Bsp2dNode bsp2dnode_block = new Bsp2dNode();
+            bsp2dnode_block.Plane.I = Coords2.Y - Coords1.Y;
+            bsp2dnode_block.Plane.J = Coords1.X - Coords2.X;
+
+            float vertex_plane_vector_dot = (float)Math.Sqrt(bsp2dnode_block.Plane.I * bsp2dnode_block.Plane.I + (Coords1.X - Coords2.X) * (Coords1.X - Coords2.X));
+
+            if(Math.Abs(vertex_plane_vector_dot) >= 0.00009999999747378752)
+            {
+                bsp2dnode_block.Plane.I = ((1.0f / vertex_plane_vector_dot) * bsp2dnode_block.Plane.I);
+                bsp2dnode_block.Plane.J = ((1.0f / vertex_plane_vector_dot) * bsp2dnode_block.Plane.J);
+                bsp2dnode_block.Plane.D = ((1.0f / vertex_plane_vector_dot) * bsp2dnode_block.Plane.J) * Coords1.Y + ((1.0f / vertex_plane_vector_dot) * bsp2dnode_block.Plane.I) * Coords1.X;
+            }
+            else
+            {
+                bsp2dnode_block.Plane.D = 0;
+            }
+            return bsp2dnode_block;
+        }
+
+        public plane_splitting_parameters generate_best_splitting_plane_2D(int plane_projection_axis, int a3, ref Bsp2dNode bsp2dnode_block, surface_array_definition plane_matched_surface_array)
+        {
+            plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
+            lowest_plane_splitting_parameters.plane_splitting_effectiveness = double.MaxValue;
+
+            foreach(int surface_index in plane_matched_surface_array.surface_array)
+            {
+                Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
+                int surface_edge_index = surface_block.FirstEdge;
+                while (true)
+                {
+                    Edge surface_edge_block = Bsp.Edges[surface_edge_index];
+                    Vertex start_vertex = Bsp.Vertices[surface_edge_block.StartVertex];
+                    Vertex end_vertex = Bsp.Vertices[surface_edge_block.EndVertex];
+                    RealPoint2d Coords1;
+                    RealPoint2d Coords2;
+                    if (surface_edge_block.RightSurface == surface_index)
+                    {
+                        Coords1 = vertex_get_projection_relevant_coords(end_vertex, plane_projection_axis, a3);
+                        Coords2 = vertex_get_projection_relevant_coords(start_vertex, plane_projection_axis, a3);
+                    }
+                    else
+                    {
+                        Coords2 = vertex_get_projection_relevant_coords(end_vertex, plane_projection_axis, a3);
+                        Coords1 = vertex_get_projection_relevant_coords(start_vertex, plane_projection_axis, a3);
+                    }
+
+                    Bsp2dNode current_bsp2dnode_block = generate_bsp2d_plane_parameters(Coords1, Coords2);
+
+                    plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness_2D(current_bsp2dnode_block, plane_projection_axis, a3, plane_matched_surface_array);
+
+                    if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
+                    {
+                        lowest_plane_splitting_parameters = current_plane_splitting_parameters;
+                        bsp2dnode_block = current_bsp2dnode_block;
+                    }
+
+                    if (surface_edge_block.RightSurface == surface_index)
+                        surface_edge_index = surface_edge_block.ReverseEdge;
+                    else
+                        surface_edge_index = surface_edge_block.ForwardEdge;
+                    //break the loop if we have finished circulating the surface
+                    if (surface_edge_index == surface_block.FirstEdge)
+                        break;
+                }
+            }
+            return lowest_plane_splitting_parameters;
+        }
+
         public plane_splitting_parameters surface_plane_splitting_effectiveness_check_loop(surface_array_definition surface_array)
         {
             plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
@@ -694,7 +969,7 @@ namespace TagTool.Commands.CollisionModels
             //loop through free surfaces to see how effectively their associated planes split the remaining surfaces. Find the one that most effectively splits the remaining surfaces.
             for (short i = 0; i < surface_array.free_count; i++)
             {
-                int current_plane_index = Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFF)].Plane & 0x7FFFFFFF;
+                int current_plane_index = Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFFFFFF;
                 plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, current_plane_index, new RealPlane3d(), new plane_splitting_parameters());
                 if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                 {
