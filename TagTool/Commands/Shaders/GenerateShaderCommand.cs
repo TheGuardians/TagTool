@@ -27,7 +27,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", /*"black"*/ };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", /*"black"*/ };
 
         public override object Execute(List<string> args)
         {
@@ -89,10 +89,11 @@ namespace TagTool.Commands.Shaders
                 switch (shaderType)
                 {
                     case "shader": GenerateShader(stream, options, rmt2TagName, rmdf); break;
-                    //case "black": GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
+                    case "particle": GenerateParticle(stream, options, rmt2TagName, rmdf); break;
+                        //case "black": GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
                 }
 
-                Console.WriteLine($"Successfully generated shader template \"{rmt2TagName}\"");
+                Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
             }
 
             return true;
@@ -116,6 +117,40 @@ namespace TagTool.Commands.Shaders
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateParticle(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.Particle.Albedo albedo = (HaloShaderGenerator.Particle.Albedo)options[0];
+            HaloShaderGenerator.Particle.Blend_Mode blend_mode = (HaloShaderGenerator.Particle.Blend_Mode)options[1];
+            HaloShaderGenerator.Particle.Specialized_Rendering specialized_rendering = (HaloShaderGenerator.Particle.Specialized_Rendering)options[2];
+            HaloShaderGenerator.Particle.Lighting lighting = (HaloShaderGenerator.Particle.Lighting)options[3];
+            HaloShaderGenerator.Particle.Render_Targets render_targets = (HaloShaderGenerator.Particle.Render_Targets)options[4];
+            HaloShaderGenerator.Particle.Depth_Fade depth_fade = (HaloShaderGenerator.Particle.Depth_Fade)options[5];
+            HaloShaderGenerator.Particle.Black_Point black_point = (HaloShaderGenerator.Particle.Black_Point)options[6];
+            HaloShaderGenerator.Particle.Fog fog = (HaloShaderGenerator.Particle.Fog)options[7];
+            HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)options[8];
+            HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)options[9];
+
+            if (albedo != HaloShaderGenerator.Particle.Albedo.Diffuse_Only)
+            {
+                Console.WriteLine($"\"Albedo.{albedo.ToString()}\" not supported.");
+                return;
+            }
+
+            var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, Cache.TagCache.GetTag("shaders\\particle_shared_pixel_shaders.glps"));
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, Cache.TagCache.GetTag("shaders\\particle_shared_vertex_shaders.glvs"));
 
             var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
 
