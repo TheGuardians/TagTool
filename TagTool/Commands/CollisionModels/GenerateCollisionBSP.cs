@@ -108,12 +108,12 @@ namespace TagTool.Commands.CollisionModels
             int leaf_index = 0;
             for(int bsp3dnode_index = 0; bsp3dnode_index < Bsp.Bsp3dNodes.Count; bsp3dnode_index++)
             {
-                if (Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid == 0xFF) //-1
+                if (Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid == (byte)0xFF) //-1
                 {
                     Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid = (byte)(leaf_index | 0x80000000);
                     leaf_index++;
                 }
-                if (Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid == 0xFF) //-1
+                if (Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid == (byte)0xFF) //-1
                 {
                     Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid = (byte)(leaf_index | 0x80000000);
                     leaf_index++;
@@ -121,7 +121,7 @@ namespace TagTool.Commands.CollisionModels
             }
             if(leaf_index > Bsp.Leaves.Count || leaf_index != Bsp.Bsp3dNodes.Count + 1)
             {
-                Console.WriteLine("### Error the number of leaves does not match the bsp!");
+                Console.WriteLine("### ERROR the number of leaves does not match the bsp!");
                 return false;
             }
             return true;
@@ -135,7 +135,8 @@ namespace TagTool.Commands.CollisionModels
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
                     surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>() };
                     surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>() };
-                    split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array);
+                    if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
+                        return false;
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode());
                     int current_bsp3dnode_index = Bsp.Bsp3dNodes.Count - 1;
                     int back_child_node_index = -1;
@@ -565,9 +566,15 @@ namespace TagTool.Commands.CollisionModels
             new_surface_block_B.FirstEdge = (ushort)dividing_edge_index;
         }
 
-        public void split_object_surfaces_with_plane(surface_array_definition surface_array, int plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
+        public bool split_object_surfaces_with_plane(surface_array_definition surface_array, int plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
         {
             int surface_array_index = 0;
+
+            int back_free_count = 0;
+            int back_used_count = 0;
+            int front_free_count = 0;
+            int front_used_count = 0;
+
             while (true)
             {
                 int surface_index = surface_array.surface_array[surface_array_index];
@@ -575,11 +582,11 @@ namespace TagTool.Commands.CollisionModels
                 bool surface_is_mirrored = false;
                 if (surface_index < 0)
                     surface_is_mirrored = true;
-                int absolute_surface_index = (int)(surface_index & 0x7FFF);
+                int absolute_surface_index = (int)(surface_index & 0x7FFFFFFF);
                 bool surface_is_free = surface_array_index < surface_array.free_count;
                 int current_surface_plane_index = Bsp.Surfaces[absolute_surface_index].Plane;
-                uint back_surface_index = 0xFFFFFFFF;
-                uint front_surface_index = 0xFFFFFFFF;
+                int back_surface_index = -1;
+                int front_surface_index = -1;
                 switch (determine_surface_plane_relationship(absolute_surface_index, plane_index, new RealPlane3d()))
                 {
                     case Plane_Relationship.Unknown: //surface does not appear to be on either side of the plane and is not on the plane either
@@ -589,16 +596,16 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 //free surfaces need to come first in the list
                                 back_surfaces_array.surface_array.Insert(0, surface_index);
-                                back_surfaces_array.free_count++;
+                                back_free_count++;
                                 front_surfaces_array.surface_array.Insert(0, surface_index);
-                                front_surfaces_array.free_count++;
+                                front_free_count++;
                             }
                             else
                             {
                                 back_surfaces_array.surface_array.Add(surface_index);
-                                back_surfaces_array.used_count++;
+                                back_used_count++;
                                 front_surfaces_array.surface_array.Add(surface_index);
-                                front_surfaces_array.used_count++;
+                                front_used_count++;
                             }
                         }
                         break;
@@ -610,12 +617,12 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 //free surfaces need to come first in the list
                                 back_surfaces_array.surface_array.Insert(0, surface_index);
-                                back_surfaces_array.free_count++;
+                                back_free_count++;
                             }
                             else
                             {
                                 back_surfaces_array.surface_array.Add(surface_index);
-                                back_surfaces_array.used_count++;
+                                back_used_count++;
                             }
                         }
                         break;
@@ -627,12 +634,12 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 //free surfaces need to come first in the list
                                 front_surfaces_array.surface_array.Insert(0, surface_index);
-                                front_surfaces_array.free_count++;
+                                front_free_count++;
                             }
                             else
                             {
                                 front_surfaces_array.surface_array.Add(surface_index);
-                                front_surfaces_array.used_count++;
+                                front_used_count++;
                             }
                         }
                         break;
@@ -649,41 +656,41 @@ namespace TagTool.Commands.CollisionModels
                         //propagate surface index flags to child surfaces
                         if (surface_is_mirrored)
                         {
-                            back_surface_index = (uint)new_surface_A_index | 0x80000000;
-                            front_surface_index = (uint)new_surface_B_index | 0x80000000;
+                            back_surface_index = (int)(new_surface_A_index | 0x80000000);
+                            front_surface_index = (int)(new_surface_B_index | 0x80000000);
                         }
                         else
                         {
-                            back_surface_index = (uint)new_surface_A_index & 0x7FFFFFFF;
-                            front_surface_index = (uint)new_surface_B_index & 0x7FFFFFFF;
+                            back_surface_index = (int)new_surface_A_index & 0x7FFFFFFF;
+                            front_surface_index = (int)new_surface_B_index & 0x7FFFFFFF;
                         }
 
                         //add child surfaces to appropriate arrays
                         if (surface_is_free)
                         {
                             //free surfaces need to come first in the list
-                            if (back_surface_index != 0xFFFFFFFF)
+                            if (back_surface_index != -1)
                             {
-                                back_surfaces_array.surface_array.Insert(0, (short)back_surface_index);
-                                back_surfaces_array.free_count++;
+                                back_surfaces_array.surface_array.Insert(0, back_surface_index);
+                                back_free_count++;
                             }
-                            if (front_surface_index != 0xFFFFFFFF)
+                            if (front_surface_index != -1)
                             {
-                                front_surfaces_array.surface_array.Insert(0, (short)front_surface_index);
-                                front_surfaces_array.free_count++;
+                                front_surfaces_array.surface_array.Insert(0, front_surface_index);
+                                front_free_count++;
                             }
                         }
                         else
                         {
-                            if (back_surface_index != 0xFFFFFFFF)
+                            if (back_surface_index != -1)
                             {
-                                back_surfaces_array.surface_array.Add((short)back_surface_index);
-                                back_surfaces_array.used_count++;
+                                back_surfaces_array.surface_array.Add(back_surface_index);
+                                back_used_count++;
                             }
-                            if (front_surface_index != 0xFFFFFFFF)
+                            if (front_surface_index != -1)
                             {
-                                front_surfaces_array.surface_array.Add((short)front_surface_index);
-                                front_surfaces_array.used_count++;
+                                front_surfaces_array.surface_array.Add(front_surface_index);
+                                front_used_count++;
                             }
                         }
                         break;
@@ -698,62 +705,83 @@ namespace TagTool.Commands.CollisionModels
                         {
                             if (current_surface_plane_index >= 0)
                             {
-                                back_surface_index = (uint)absolute_surface_index & 0x7FFFFFFF;
-                                front_surface_index = (uint)absolute_surface_index | 0x80000000;
+                                back_surface_index = (int)absolute_surface_index & 0x7FFFFFFF;
+                                front_surface_index = (int)(absolute_surface_index | 0x80000000);
                             }
                             else
                             {
-                                back_surface_index = (uint)absolute_surface_index | 0x80000000;
-                                front_surface_index = (uint)absolute_surface_index & 0x7FFFFFFF;
+                                back_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                front_surface_index = (int)absolute_surface_index & 0x7FFFFFFF;
                             }
                         }
                         else
                         {
                             if (current_surface_plane_index >= 0)
                             {
-                                front_surface_index = (uint)absolute_surface_index | 0x80000000;
-                                back_surface_index = 0xFFFFFFFF;
+                                front_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                back_surface_index = -1;
                             }
                             else
                             {
-                                back_surface_index = (uint)absolute_surface_index | 0x80000000;
-                                front_surface_index = 0xFFFFFFFF;
+                                back_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                front_surface_index = -1;
                             }
                         }
                         //add child surfaces to appropriate arrays
                         if (surface_is_free)
                         {
                             //free surfaces need to come first in the list
-                            if(back_surface_index != 0xFFFFFFFF)
+                            if(back_surface_index != -1)
                             {
-                                back_surfaces_array.surface_array.Insert(0, (short)back_surface_index);
-                                back_surfaces_array.free_count++;
+                                back_surfaces_array.surface_array.Insert(0, back_surface_index);
+                                back_free_count++;
                             }
-                            if (front_surface_index != 0xFFFFFFFF)
+                            if(front_surface_index != -1)
                             {
-                                front_surfaces_array.surface_array.Insert(0, (short)front_surface_index);
-                                front_surfaces_array.free_count++;
+                                front_surfaces_array.surface_array.Insert(0, front_surface_index);
+                                front_free_count++;
                             }
                         }
                         else
                         {
-                            if (back_surface_index != 0xFFFFFFFF)
+                            if(back_surface_index != -1)
                             {
-                                back_surfaces_array.surface_array.Add((short)back_surface_index);
-                                back_surfaces_array.used_count++;
+                                back_surfaces_array.surface_array.Add(back_surface_index);
+                                back_used_count++;
                             }
-                            if (front_surface_index != 0xFFFFFFFF)
+                            if(front_surface_index != -1)
                             {
-                                front_surfaces_array.surface_array.Add((short)front_surface_index);
-                                front_surfaces_array.used_count++;
+                                front_surfaces_array.surface_array.Add(front_surface_index);
+                                front_used_count++;
                             }
                         }
                         break;
                 }
 
                 if (++surface_array_index >= surface_array.free_count + surface_array.used_count)
-                    return;
+                    break;
             }
+            if (back_free_count != back_surfaces_array.free_count)
+            {
+                Console.WriteLine("back_free_index==back_surfaces->free_count");
+                return false;
+            }
+            if (back_used_count != back_surfaces_array.used_count)
+            {
+                Console.WriteLine("back_used_index==back_surfaces->used_count");
+                return false;
+            }
+            if (front_free_count != front_surfaces_array.free_count)
+            {
+                Console.WriteLine("front_free_index==front_surfaces->free_count");
+                return false;
+            }
+            if (front_used_count != front_surfaces_array.used_count)
+            {
+                Console.WriteLine("front_used_index==front_surfaces->used_count");
+                return false;
+            }
+            return true;
         }
 
         public plane_splitting_parameters find_surface_splitting_plane(surface_array_definition surface_array)
