@@ -336,7 +336,7 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
-            if (rmt2Desc.Type == "particle")
+            else if (rmt2Desc.Type == "particle")
             {
                 string tagName = $"shaders\\particle_templates\\_{string.Join("_", rmt2Desc.Options)}";
 

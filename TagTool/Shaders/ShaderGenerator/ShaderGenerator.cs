@@ -454,10 +454,13 @@ namespace TagTool.Shaders.ShaderGenerator
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
                 var rmt2Drawmode = new RenderMethodTemplate.PackedInteger_10_6();
-                rmt2.EntryPoints.Add(rmt2Drawmode);
 
                 if(generator.IsEntryPointSupported(mode))
                 {
+                    while (rmt2.EntryPoints.Count < (int)mode) // makeup count, this is to prevent all entry points being added
+                        rmt2.EntryPoints.Add(new RenderMethodTemplate.PackedInteger_10_6());
+
+                    rmt2.EntryPoints.Add(rmt2Drawmode);
                     rmt2Drawmode.Offset = (ushort)rmt2.ParameterTables.Count();
                     rmt2Drawmode.Count = 1;
 
