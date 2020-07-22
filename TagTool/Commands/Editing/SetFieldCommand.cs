@@ -513,6 +513,10 @@ namespace TagTool.Commands.Editing
                             resourceLocation = ResourceLocation.Lightmaps;
                             break;
 
+                        case "mods":
+                            resourceLocation = ResourceLocation.Mods;
+                            break;
+
                         default:
                             throw new FormatException($"Invalid resource location: {args[0]}");
                     }
