@@ -340,34 +340,31 @@ namespace TagTool.Shaders.ShaderMatching
             {
                 string tagName = $"shaders\\particle_templates\\_{string.Join("_", rmt2Desc.Options)}";
 
-                if (rmt2Desc.Options[0] == 0)
-                {
-                    HaloShaderGenerator.Particle.Albedo albedo = (HaloShaderGenerator.Particle.Albedo)rmt2Desc.Options[0];
-                    HaloShaderGenerator.Particle.Blend_Mode blend_mode = (HaloShaderGenerator.Particle.Blend_Mode)rmt2Desc.Options[1];
-                    HaloShaderGenerator.Particle.Specialized_Rendering specialized_rendering = (HaloShaderGenerator.Particle.Specialized_Rendering)rmt2Desc.Options[2];
-                    HaloShaderGenerator.Particle.Lighting lighting = (HaloShaderGenerator.Particle.Lighting)rmt2Desc.Options[3];
-                    HaloShaderGenerator.Particle.Render_Targets render_targets = (HaloShaderGenerator.Particle.Render_Targets)rmt2Desc.Options[4];
-                    HaloShaderGenerator.Particle.Depth_Fade depth_fade = (HaloShaderGenerator.Particle.Depth_Fade)rmt2Desc.Options[5];
-                    HaloShaderGenerator.Particle.Black_Point black_point = (HaloShaderGenerator.Particle.Black_Point)rmt2Desc.Options[6];
-                    HaloShaderGenerator.Particle.Fog fog = (HaloShaderGenerator.Particle.Fog)rmt2Desc.Options[7];
-                    HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)rmt2Desc.Options[8];
-                    HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)rmt2Desc.Options[9];
+                HaloShaderGenerator.Particle.Albedo albedo = (HaloShaderGenerator.Particle.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Particle.Blend_Mode blend_mode = (HaloShaderGenerator.Particle.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Particle.Specialized_Rendering specialized_rendering = (HaloShaderGenerator.Particle.Specialized_Rendering)rmt2Desc.Options[2];
+                HaloShaderGenerator.Particle.Lighting lighting = (HaloShaderGenerator.Particle.Lighting)rmt2Desc.Options[3];
+                HaloShaderGenerator.Particle.Render_Targets render_targets = (HaloShaderGenerator.Particle.Render_Targets)rmt2Desc.Options[4];
+                HaloShaderGenerator.Particle.Depth_Fade depth_fade = (HaloShaderGenerator.Particle.Depth_Fade)rmt2Desc.Options[5];
+                HaloShaderGenerator.Particle.Black_Point black_point = (HaloShaderGenerator.Particle.Black_Point)rmt2Desc.Options[6];
+                HaloShaderGenerator.Particle.Fog fog = (HaloShaderGenerator.Particle.Fog)rmt2Desc.Options[7];
+                HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)rmt2Desc.Options[8];
+                HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)rmt2Desc.Options[9];
 
-                    var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
+                var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
 
-                    // TODO: generate rmdf\glvs\glps if not found
+                // TODO: generate rmdf\glvs\glps if not found
 
-                    var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag("shaders\\particle.rmdf"));
-                    var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
-                    var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag("shaders\\particle.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
 
-                    var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
 
-                    generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
 
-                    BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
-                    return true;
-                }
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
             }
 
             generatedRmt2 = null;

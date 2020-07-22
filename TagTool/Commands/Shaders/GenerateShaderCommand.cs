@@ -141,12 +141,6 @@ namespace TagTool.Commands.Shaders
             HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)options[8];
             HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)options[9];
 
-            if (albedo != HaloShaderGenerator.Particle.Albedo.Diffuse_Only)
-            {
-                Console.WriteLine($"\"Albedo.{albedo.ToString()}\" not supported.");
-                return;
-            }
-
             var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, Cache.TagCache.GetTag("shaders\\particle_shared_pixel_shaders.glps"));
