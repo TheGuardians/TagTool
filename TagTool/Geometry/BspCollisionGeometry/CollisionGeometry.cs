@@ -249,10 +249,11 @@ namespace TagTool.Geometry.BspCollisionGeometry
         TwoSided = 1 << 0,
         Invisible = 1 << 1,
         Climbable = 1 << 2,
-        Invalid = 1 << 3,
-        Conveyor = 1 << 4,
-        Slip = 1 << 5,
-        PlaneNegated = 1 << 6
+        Breakable = 1 << 3,
+        Invalid = 1 << 4,
+        Conveyor = 1 << 5,
+        Slip = 1 << 6,
+        PlaneNegated = 1 << 7
     }
 
     [Flags]

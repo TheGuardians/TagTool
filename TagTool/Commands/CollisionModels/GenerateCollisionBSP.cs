@@ -42,7 +42,13 @@ namespace TagTool.Commands.CollisionModels
             //allocate surface array before starting the bsp build
             surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>()};
             for (int i = 0; i < Bsp.Surfaces.Count; i++)
-                surface_array.surface_array.Add(i);
+            {
+                if(Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Climbable) || Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Breakable))
+                    surface_array.surface_array.Add(i);
+                else
+                    surface_array.surface_array.Add((int)(i | 0x80000000));
+            }
+                
             //NOTE: standard limit for number of bsp3dnodes (bsp planes) is 128 (maximum bsp depth)
             int bsp3dnode_index = -1;
             if(build_bsp_tree_main(surface_array, ref bsp3dnode_index) && set_bsp3dnode_leaf_children())
@@ -67,10 +73,10 @@ namespace TagTool.Commands.CollisionModels
             int free_surfaces_positive = 0;
             int used_surfaces_positive = 0;
             int used_surfaces_negative = 0;
-            for (int surface_index_index = 0; surface_index_index < surface_array.surface_array.Count; surface_index_index++)
+            for (int surface_index_index = 0; surface_index_index < surface_array_total_count; surface_index_index++)
             {
                 int surface_index = surface_array.surface_array[surface_index_index];
-                if(surface_index_index > surface_array.free_count) //surface is used
+                if(surface_index_index >= surface_array.free_count) //surface is used
                 {
                     if (surface_index >= 0)
                         used_surfaces_positive++;
@@ -84,8 +90,8 @@ namespace TagTool.Commands.CollisionModels
                     free_surfaces_positive++;
                 }
             }
-            bool no_free_surfaces_positive = free_surfaces_positive <= 0;
-            bool no_used_surfaces_positive = used_surfaces_positive <= 0;
+            bool no_free_surfaces_positive = free_surfaces_positive == 0;
+            bool no_used_surfaces_positive = used_surfaces_positive == 0;
             if (free_surfaces_positive > 0)
             {
                 if (no_used_surfaces_positive)
@@ -93,7 +99,7 @@ namespace TagTool.Commands.CollisionModels
             }
             if (no_free_surfaces_positive && no_used_surfaces_positive)
                 return 2;
-            if(used_surfaces_negative > 0 || no_used_surfaces_positive)
+            if(used_surfaces_negative > 0 || used_surfaces_positive <= 0)
                 return surface_array_recalculate_counts(ref surface_array);
             return 3;
         }
@@ -108,14 +114,14 @@ namespace TagTool.Commands.CollisionModels
             int leaf_index = 0;
             for(int bsp3dnode_index = 0; bsp3dnode_index < Bsp.Bsp3dNodes.Count; bsp3dnode_index++)
             {
-                if (Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid == (byte)0xFF) //-1
+                if ((Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid & 0x80) != 0)
                 {
-                    Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid = (byte)(leaf_index | 0x80000000);
+                    //Bsp.Bsp3dNodes[bsp3dnode_index].FrontChildMid = leaf_index < 0 ? (byte)(leaf_index | 0x80) : (byte)leaf_index;
                     leaf_index++;
                 }
-                if (Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid == (byte)0xFF) //-1
+                if ((Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid & 0x80) != 0)
                 {
-                    Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid = (byte)(leaf_index | 0x80000000);
+                    //Bsp.Bsp3dNodes[bsp3dnode_index].BackChildMid = leaf_index < 0 ? (byte)(leaf_index | 0x80) : (byte)leaf_index;
                     leaf_index++;
                 }
             }
@@ -145,8 +151,8 @@ namespace TagTool.Commands.CollisionModels
                     if(build_bsp_tree_main(back_surface_array,ref back_child_node_index) && build_bsp_tree_main(front_surface_array, ref front_child_node_index))
                     {
                         Bsp.Bsp3dNodes[current_bsp3dnode_index].Plane = (short)splitting_parameters.plane_index;
-                        Bsp.Bsp3dNodes[current_bsp3dnode_index].FrontChildMid = (byte)front_child_node_index;
-                        Bsp.Bsp3dNodes[current_bsp3dnode_index].BackChildMid = (byte)back_child_node_index;
+                        Bsp.Bsp3dNodes[current_bsp3dnode_index].FrontChildMid = front_child_node_index < 0 ? (byte)(front_child_node_index | 0x80) : (byte)front_child_node_index;
+                        Bsp.Bsp3dNodes[current_bsp3dnode_index].BackChildMid = back_child_node_index < 0 ? (byte)(back_child_node_index | 0x80) : (byte)back_child_node_index;
                         bsp3dnode_index = current_bsp3dnode_index;
                     }
                     else
@@ -194,15 +200,15 @@ namespace TagTool.Commands.CollisionModels
 
         public surface_array_definition collect_plane_matching_surfaces(ref surface_array_definition surface_array, int plane_index)
         {
-            surface_array_definition plane_matched_surface_array = new surface_array_definition();
+            surface_array_definition plane_matched_surface_array = new surface_array_definition {surface_array = new List<int>() };
             for (int surface_array_index = 0; surface_array_index < surface_array.used_count; surface_array_index++)
             {
-                int surface_index = surface_array.surface_array[surface_array_index];
-                if(surface_index < 0 && Bsp.Surfaces[surface_index & 0x7FFFFFFF].Plane == plane_index)
+                int surface_index = surface_array.surface_array[surface_array_index] & 0x7FFFFFFF;
+                if(surface_index < 0 && Bsp.Surfaces[surface_index].Plane == plane_index)
                 {
                     plane_matched_surface_array.surface_array.Add(surface_index);
                     //reset plane matching surfaces in the primary array to an unused state
-                    surface_array.surface_array[surface_array_index] = surface_index & 0x7FFFFFFF;
+                    surface_array.surface_array[surface_array_index] = surface_index;
                 }
             }
             return plane_matched_surface_array;
@@ -313,7 +319,7 @@ namespace TagTool.Commands.CollisionModels
             for(int surface_array_index = 0; surface_array_index < surface_array.free_count + surface_array.used_count; surface_array_index++)
             {
                 int surface_index = surface_array.surface_array[surface_array_index];
-                Surface surface_block = Bsp.Surfaces[(int)(surface_index & 0x7FFFFFFFF)];
+                Surface surface_block = Bsp.Surfaces[(int)(surface_index & 0x7FFFFFFF)];
 
                 //carry over surface flags
                 if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
@@ -575,210 +581,212 @@ namespace TagTool.Commands.CollisionModels
             int front_free_count = 0;
             int front_used_count = 0;
 
-            while (true)
+            int unknown_count = 0;
+            int back_of_plane_count = 0;
+            int front_of_plane_count = 0;
+            int split_plane_count = 0;
+            int on_plane_count = 0;
+
+            if(surface_array.free_count + surface_array.used_count > 0)
             {
-                int surface_index = surface_array.surface_array[surface_array_index];
-                bool surface_is_double_sided = Bsp.Surfaces[surface_index].Flags.HasFlag(SurfaceFlags.TwoSided);
-                bool surface_is_mirrored = false;
-                if (surface_index < 0)
-                    surface_is_mirrored = true;
-                int absolute_surface_index = (int)(surface_index & 0x7FFFFFFF);
-                bool surface_is_free = surface_array_index < surface_array.free_count;
-                int current_surface_plane_index = Bsp.Surfaces[absolute_surface_index].Plane;
-                int back_surface_index = -1;
-                int front_surface_index = -1;
-                switch (determine_surface_plane_relationship(absolute_surface_index, plane_index, new RealPlane3d()))
+                while (true)
                 {
-                    case Plane_Relationship.Unknown: //surface does not appear to be on either side of the plane and is not on the plane either
-                        if(surface_index != -1)
-                        {
-                            if (surface_is_free)
+                    int surface_index = surface_array.surface_array[surface_array_index];
+                    bool surface_index_less_than_0 = false;
+                    if (surface_index < 0)
+                        surface_index_less_than_0 = true;
+                    int absolute_surface_index = surface_index & 0x7FFFFFFF;
+                    bool surface_is_free = surface_array_index < surface_array.free_count;
+                    int current_surface_plane_index = Bsp.Surfaces[absolute_surface_index].Plane;
+                    bool surface_is_double_sided = Bsp.Surfaces[absolute_surface_index].Flags.HasFlag(SurfaceFlags.TwoSided);
+                    int back_surface_index = -1;
+                    int front_surface_index = -1;
+                    switch (determine_surface_plane_relationship(absolute_surface_index, plane_index, new RealPlane3d()))
+                    {
+                        case Plane_Relationship.Unknown: //surface does not appear to be on either side of the plane and is not on the plane either
+                            unknown_count++;
+                            if (surface_index != -1)
                             {
-                                //free surfaces need to come first in the list
-                                back_surfaces_array.surface_array.Insert(0, surface_index);
-                                back_free_count++;
-                                front_surfaces_array.surface_array.Insert(0, surface_index);
-                                front_free_count++;
+                                if (surface_is_free)
+                                {
+                                    //free surfaces need to come first in the list
+                                    back_surfaces_array.surface_array.Insert(0, surface_index);
+                                    back_free_count++;
+                                    front_surfaces_array.surface_array.Insert(0, surface_index);
+                                    front_free_count++;
+                                }
+                                else
+                                {
+                                    back_surfaces_array.surface_array.Add(surface_index);
+                                    back_used_count++;
+                                    front_surfaces_array.surface_array.Add(surface_index);
+                                    front_used_count++;
+                                }
                             }
-                            else
-                            {
-                                back_surfaces_array.surface_array.Add(surface_index);
-                                back_used_count++;
-                                front_surfaces_array.surface_array.Add(surface_index);
-                                front_used_count++;
-                            }
-                        }
-                        break;
-
-                    case Plane_Relationship.BackofPlane: //surface is in back of plane
-                        if (surface_index != -1)
-                        {
-                            if (surface_is_free)
-                            {
-                                //free surfaces need to come first in the list
-                                back_surfaces_array.surface_array.Insert(0, surface_index);
-                                back_free_count++;
-                            }
-                            else
-                            {
-                                back_surfaces_array.surface_array.Add(surface_index);
-                                back_used_count++;
-                            }
-                        }
-                        break;
-
-                    case Plane_Relationship.FrontofPlane: //surface is in front of plane
-                        if (surface_index != -1)
-                        {
-                            if (surface_is_free)
-                            {
-                                //free surfaces need to come first in the list
-                                front_surfaces_array.surface_array.Insert(0, surface_index);
-                                front_free_count++;
-                            }
-                            else
-                            {
-                                front_surfaces_array.surface_array.Add(surface_index);
-                                front_used_count++;
-                            }
-                        }
-                        break;
-
-                    case Plane_Relationship.BothSidesofPlane: //surface is both in front of and behind plane
-                        Bsp.Surfaces.Add(new Surface());
-                        Bsp.Surfaces.Add(new Surface());
-                        int new_surface_A_index = Bsp.Surfaces.Count - 2;
-                        int new_surface_B_index = Bsp.Surfaces.Count - 1;
-
-                        //split surface into two new surfaces, one on each side of the plane
-                        divide_surface_into_two_surfaces(surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index);
-
-                        //propagate surface index flags to child surfaces
-                        if (surface_is_mirrored)
-                        {
-                            back_surface_index = (int)(new_surface_A_index | 0x80000000);
-                            front_surface_index = (int)(new_surface_B_index | 0x80000000);
-                        }
-                        else
-                        {
-                            back_surface_index = (int)new_surface_A_index & 0x7FFFFFFF;
-                            front_surface_index = (int)new_surface_B_index & 0x7FFFFFFF;
-                        }
-
-                        //add child surfaces to appropriate arrays
-                        if (surface_is_free)
-                        {
-                            //free surfaces need to come first in the list
-                            if (back_surface_index != -1)
-                            {
-                                back_surfaces_array.surface_array.Insert(0, back_surface_index);
-                                back_free_count++;
-                            }
-                            if (front_surface_index != -1)
-                            {
-                                front_surfaces_array.surface_array.Insert(0, front_surface_index);
-                                front_free_count++;
-                            }
-                        }
-                        else
-                        {
-                            if (back_surface_index != -1)
-                            {
-                                back_surfaces_array.surface_array.Add(back_surface_index);
-                                back_used_count++;
-                            }
-                            if (front_surface_index != -1)
-                            {
-                                front_surfaces_array.surface_array.Add(front_surface_index);
-                                front_used_count++;
-                            }
-                        }
-                        break;
-
-                    case Plane_Relationship.OnPlane: //surface is ON the plane
-                        //assign surface index flags
-                        if (!surface_is_mirrored)
-                        {
                             break;
-                        }
-                        if (surface_is_double_sided)
-                        {
-                            if (current_surface_plane_index >= 0)
+
+                        case Plane_Relationship.BackofPlane: //surface is in back of plane
+                            back_of_plane_count++;
+                            if (surface_index != -1)
                             {
-                                back_surface_index = (int)absolute_surface_index & 0x7FFFFFFF;
-                                front_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                if (surface_is_free)
+                                {
+                                    //free surfaces need to come first in the list
+                                    back_surfaces_array.surface_array.Insert(0, surface_index);
+                                    back_free_count++;
+                                }
+                                else
+                                {
+                                    back_surfaces_array.surface_array.Add(surface_index);
+                                    back_used_count++;
+                                }
+                            }
+                            break;
+
+                        case Plane_Relationship.FrontofPlane: //surface is in front of plane
+                            front_of_plane_count++;
+                            if (surface_index != -1)
+                            {
+                                if (surface_is_free)
+                                {
+                                    //free surfaces need to come first in the list
+                                    front_surfaces_array.surface_array.Insert(0, surface_index);
+                                    front_free_count++;
+                                }
+                                else
+                                {
+                                    front_surfaces_array.surface_array.Add(surface_index);
+                                    front_used_count++;
+                                }
+                            }
+                            break;
+
+                        case Plane_Relationship.BothSidesofPlane: //surface is both in front of and behind plane
+                            split_plane_count++;
+                            Bsp.Surfaces.Add(new Surface());
+                            Bsp.Surfaces.Add(new Surface());
+                            int new_surface_A_index = Bsp.Surfaces.Count - 2;
+                            int new_surface_B_index = Bsp.Surfaces.Count - 1;
+
+                            //split surface into two new surfaces, one on each side of the plane
+                            divide_surface_into_two_surfaces(surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index);
+
+                            //propagate surface index flags to child surfaces
+                            if (surface_index_less_than_0)
+                            {
+                                back_surface_index = (int)(new_surface_A_index | 0x80000000);
+                                front_surface_index = (int)(new_surface_B_index | 0x80000000);
                             }
                             else
                             {
-                                back_surface_index = (int)(absolute_surface_index | 0x80000000);
-                                front_surface_index = (int)absolute_surface_index & 0x7FFFFFFF;
+                                back_surface_index = (int)new_surface_A_index & 0x7FFFFFFF;
+                                front_surface_index = (int)new_surface_B_index & 0x7FFFFFFF;
                             }
-                        }
-                        else
-                        {
-                            if (current_surface_plane_index >= 0)
+
+                            //add child surfaces to appropriate arrays
+                            if (surface_is_free)
                             {
-                                front_surface_index = (int)(absolute_surface_index | 0x80000000);
-                                back_surface_index = -1;
+                                //free surfaces need to come first in the list
+                                if (back_surface_index != -1)
+                                {
+                                    back_surfaces_array.surface_array.Insert(0, back_surface_index);
+                                    back_free_count++;
+                                }
+                                if (front_surface_index != -1)
+                                {
+                                    front_surfaces_array.surface_array.Insert(0, front_surface_index);
+                                    front_free_count++;
+                                }
                             }
                             else
                             {
-                                back_surface_index = (int)(absolute_surface_index | 0x80000000);
-                                front_surface_index = -1;
+                                if (back_surface_index != -1)
+                                {
+                                    back_surfaces_array.surface_array.Add(back_surface_index);
+                                    back_used_count++;
+                                }
+                                if (front_surface_index != -1)
+                                {
+                                    front_surfaces_array.surface_array.Add(front_surface_index);
+                                    front_used_count++;
+                                }
                             }
-                        }
-                        //add child surfaces to appropriate arrays
-                        if (surface_is_free)
-                        {
-                            //free surfaces need to come first in the list
-                            if(back_surface_index != -1)
+                            break;
+
+                        case Plane_Relationship.OnPlane: //surface is ON the plane
+                            on_plane_count++;
+                            if (!surface_index_less_than_0)
                             {
-                                back_surfaces_array.surface_array.Insert(0, back_surface_index);
-                                back_free_count++;
+                                break;
                             }
-                            if(front_surface_index != -1)
+                            if(!surface_is_free || (current_surface_plane_index & 0x7FFFFFFF) != plane_index)
                             {
-                                front_surfaces_array.surface_array.Insert(0, front_surface_index);
-                                front_free_count++;
+                                Console.WriteLine("### ERROR Surface on plane does not have matching plane index!");
                             }
-                        }
-                        else
-                        {
-                            if(back_surface_index != -1)
+                            if (!surface_is_double_sided) //surface is NOT double sided
+                            {
+                                if (current_surface_plane_index >= 0)
+                                {
+                                    back_surface_index = (int)absolute_surface_index & 0x7FFFFFFF;
+                                    front_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                }
+                                else
+                                {
+                                    back_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                    front_surface_index = (int)absolute_surface_index & 0x7FFFFFFF;
+                                }
+                            }
+                            else
+                            {
+                                if (current_surface_plane_index >= 0)
+                                {
+                                    front_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                    back_surface_index = -1;
+                                }
+                                else
+                                {
+                                    back_surface_index = (int)(absolute_surface_index | 0x80000000);
+                                    front_surface_index = -1;
+                                }
+                            }
+                            //add child surfaces to appropriate arrays
+                            //none of these surfaces are considered free, as surface_is_free is set to false for all conditions
+                            if (back_surface_index != -1)
                             {
                                 back_surfaces_array.surface_array.Add(back_surface_index);
                                 back_used_count++;
                             }
-                            if(front_surface_index != -1)
+                            if (front_surface_index != -1)
                             {
                                 front_surfaces_array.surface_array.Add(front_surface_index);
                                 front_used_count++;
                             }
-                        }
+                            break;
+                    }
+
+                    if (++surface_array_index >= surface_array.free_count + surface_array.used_count)
                         break;
                 }
-
-                if (++surface_array_index >= surface_array.free_count + surface_array.used_count)
-                    break;
             }
+            
             if (back_free_count != back_surfaces_array.free_count)
             {
-                Console.WriteLine("back_free_index==back_surfaces->free_count");
+                Console.WriteLine("back_free_count != back_surfaces->free_count");
                 return false;
             }
             if (back_used_count != back_surfaces_array.used_count)
             {
-                Console.WriteLine("back_used_index==back_surfaces->used_count");
+                Console.WriteLine("back_used_count != back_surfaces->used_count");
                 return false;
             }
             if (front_free_count != front_surfaces_array.free_count)
             {
-                Console.WriteLine("front_free_index==front_surfaces->free_count");
+                Console.WriteLine("front_free_count != front_surfaces->free_count");
                 return false;
             }
             if (front_used_count != front_surfaces_array.used_count)
             {
-                Console.WriteLine("front_used_index==front_surfaces->used_count");
+                Console.WriteLine("front_used_count != front_surfaces->used_count");
                 return false;
             }
             return true;
@@ -811,23 +819,20 @@ namespace TagTool.Commands.CollisionModels
 
         public Plane_Relationship determine_vertex_plane_relationship(RealPoint3d vertex, RealPlane3d plane)
         {
-            Plane_Relationship vertex_plane_relationship = new Plane_Relationship();
-
             float plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
             if (plane_equation_vertex_input >= -0.00024414062)
             {
-                vertex_plane_relationship |= Plane_Relationship.FrontofPlane;
+                //if the plane distance is within both of these bounds, it is considered ON the plane
+                if (plane_equation_vertex_input <= 0.00024414062)
+                    return Plane_Relationship.OnPlane;
+                else
+                    return Plane_Relationship.FrontofPlane;
             }
-            if (plane_equation_vertex_input <= 0.00024414062)
+            else
             {
-                vertex_plane_relationship |= Plane_Relationship.BackofPlane;
+                return Plane_Relationship.BackofPlane;
             }
-            //if it fits both of these parameters, we consider the point to be on the plane
-            if (vertex_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
-                vertex_plane_relationship = Plane_Relationship.OnPlane;
-
-            return vertex_plane_relationship;
         }
 
         public RealPoint2d vertex_get_projection_relevant_coords(Vertex vertex_block, int plane_projection_axis, int plane_mirror_check)
@@ -1009,7 +1014,7 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if(surface_index < 0)
                         {
-                            Surface surface_block = Bsp.Surfaces[surface_index];
+                            Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
                             if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
                             {
                                 if(surface_block.Plane < 0)
