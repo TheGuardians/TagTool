@@ -151,8 +151,8 @@ namespace TagTool.Commands.CollisionModels
             {
                 case 1: //construct bsp3d nodes
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
-                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>() };
-                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>() };
+                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(splitting_parameters.BackSurfaceCount + splitting_parameters.BackSurfaceUsedCount) };
+                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(splitting_parameters.FrontSurfaceCount + splitting_parameters.FrontSurfaceUsedCount) };
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                         return false;
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
@@ -659,17 +659,16 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 if (surface_is_free)
                                 {
-                                    //free surfaces need to come first in the list
-                                    back_surfaces_array.surface_array.Insert(0, surface_index);
+                                    back_surfaces_array.surface_array[back_free_count] = surface_index;
                                     back_free_count++;
-                                    front_surfaces_array.surface_array.Insert(0, surface_index);
+                                    front_surfaces_array.surface_array[front_free_count] = surface_index;
                                     front_free_count++;
                                 }
                                 else
                                 {
-                                    back_surfaces_array.surface_array.Add(surface_index);
+                                    back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = surface_index;
                                     back_used_count++;
-                                    front_surfaces_array.surface_array.Add(surface_index);
+                                    front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = surface_index;
                                     front_used_count++;
                                 }
                             }
@@ -681,13 +680,12 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 if (surface_is_free)
                                 {
-                                    //free surfaces need to come first in the list
-                                    back_surfaces_array.surface_array.Insert(0, surface_index);
+                                    back_surfaces_array.surface_array[back_free_count] = surface_index;
                                     back_free_count++;
                                 }
                                 else
                                 {
-                                    back_surfaces_array.surface_array.Add(surface_index);
+                                    back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = surface_index;
                                     back_used_count++;
                                 }
                             }
@@ -699,13 +697,12 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 if (surface_is_free)
                                 {
-                                    //free surfaces need to come first in the list
-                                    front_surfaces_array.surface_array.Insert(0, surface_index);
+                                    front_surfaces_array.surface_array[front_free_count] = surface_index;
                                     front_free_count++;
                                 }
                                 else
                                 {
-                                    front_surfaces_array.surface_array.Add(surface_index);
+                                    front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = surface_index;
                                     front_used_count++;
                                 }
                             }
@@ -739,12 +736,12 @@ namespace TagTool.Commands.CollisionModels
                                 //free surfaces need to come first in the list
                                 if (back_surface_index != -1)
                                 {
-                                    back_surfaces_array.surface_array.Insert(0, back_surface_index);
+                                    back_surfaces_array.surface_array[back_free_count] = surface_index;
                                     back_free_count++;
                                 }
                                 if (front_surface_index != -1)
                                 {
-                                    front_surfaces_array.surface_array.Insert(0, front_surface_index);
+                                    front_surfaces_array.surface_array[front_free_count] = surface_index;
                                     front_free_count++;
                                 }
                             }
@@ -752,12 +749,12 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 if (back_surface_index != -1)
                                 {
-                                    back_surfaces_array.surface_array.Add(back_surface_index);
+                                    back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = surface_index;
                                     back_used_count++;
                                 }
                                 if (front_surface_index != -1)
                                 {
-                                    front_surfaces_array.surface_array.Add(front_surface_index);
+                                    front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = surface_index;
                                     front_used_count++;
                                 }
                             }
@@ -803,12 +800,12 @@ namespace TagTool.Commands.CollisionModels
                             //none of these surfaces are considered free, as surface_is_free is set to false for all conditions
                             if (back_surface_index != -1)
                             {
-                                back_surfaces_array.surface_array.Add(back_surface_index);
+                                back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = surface_index;
                                 back_used_count++;
                             }
                             if (front_surface_index != -1)
                             {
-                                front_surfaces_array.surface_array.Add(front_surface_index);
+                                front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = surface_index;
                                 front_used_count++;
                             }
                             break;
