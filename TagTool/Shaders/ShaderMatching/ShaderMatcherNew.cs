@@ -271,6 +271,8 @@ namespace TagTool.Shaders.ShaderMatching
 
         private bool TryGenerateTemplate(Rmt2Descriptor rmt2Desc, out CachedTag generatedRmt2)
         {
+            generatedRmt2 = null;
+
             if (rmt2Desc.Type == "shader")
             {
                 string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}_0";
@@ -351,6 +353,9 @@ namespace TagTool.Shaders.ShaderMatching
                 HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)rmt2Desc.Options[8];
                 HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)rmt2Desc.Options[9];
 
+                if (rmt2Desc.Options[0] == 6 || rmt2Desc.Options[0] == 7)
+                    return false;
+
                 var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
 
                 // TODO: generate rmdf\glvs\glps if not found
@@ -367,7 +372,6 @@ namespace TagTool.Shaders.ShaderMatching
                 return true;
             }
 
-            generatedRmt2 = null;
             return false;
         }
 
