@@ -33,6 +33,7 @@ namespace TagTool.Geometry.Utils
         private RealPoint3d GeometryOffset;
         private RenderGeometryCompression OriginalCompression;
         private bool HasValidCollisions = true;
+        private bool CenterGeometry = false;
         public PortTagCommand PortTag { get; private set; }
 
         public GeometryToObjectConverter(
@@ -342,22 +343,28 @@ namespace TagTool.Geometry.Utils
                 bspPhysics.GeometryShape.BspIndex = -1;
                 bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
                 bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
-                //offset MOPPs to origin
-                bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
-                    bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
-                    bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
-                    bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
-                    bspPhysics.GeometryShape.AABB_Center.W);
+                if (CenterGeometry)
+                {
+                    //offset MOPPs to origin
+                    bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
+                        bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
+                        bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
+                        bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
+                        bspPhysics.GeometryShape.AABB_Center.W);
+                }
             }
 
-            //offset MOPPs to origin
-            foreach (var mopp in permutation.BspMoppCodes)
+            if (CenterGeometry)
             {
-                mopp.Info.Offset = new RealQuaternion(
-                    mopp.Info.Offset.I - GeometryOffset.X,
-                    mopp.Info.Offset.J - GeometryOffset.Y,
-                    mopp.Info.Offset.K - GeometryOffset.Z,
-                    mopp.Info.Offset.W);
+                //offset MOPPs to origin
+                foreach (var mopp in permutation.BspMoppCodes)
+                {
+                    mopp.Info.Offset = new RealQuaternion(
+                        mopp.Info.Offset.I - GeometryOffset.X,
+                        mopp.Info.Offset.J - GeometryOffset.Y,
+                        mopp.Info.Offset.K - GeometryOffset.Z,
+                        mopp.Info.Offset.W);
+                }
             }
 
             // fixup surfaces materials block
@@ -374,52 +381,81 @@ namespace TagTool.Geometry.Utils
 
                 surface.MaterialIndex = modelMaterialIndex;
             }
-
-            //center the offsets for the collision model
-            for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+            if (CenterGeometry)
             {
-                newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
-                newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
-                newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
-            }
-
-            //recalculate plane distances from newly offset vertices
-            for (var i = 0; i < newCollisionGeometry.Surfaces.Count; i++)
-            {
-                var surface = newCollisionGeometry.Surfaces[i];
-                var edge = newCollisionGeometry.Edges[surface.FirstEdge];
-                var pointlist = new HashSet<RealPoint3d>();
-
-                while (true)
+                //center the offsets for the collision model
+                for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
                 {
-                    if (edge.LeftSurface == i)
-                    {
-                        pointlist.Add(newCollisionGeometry.Vertices[edge.StartVertex].Point);
-
-                        if (edge.ForwardEdge == surface.FirstEdge)
-                            break;
-                        else
-                            edge = newCollisionGeometry.Edges[edge.ForwardEdge];
-                    }
-                    else if (edge.RightSurface == i)
-                    {
-                        pointlist.Add(newCollisionGeometry.Vertices[edge.EndVertex].Point);
-
-                        if (edge.ReverseEdge == surface.FirstEdge)
-                            break;
-                        else
-                            edge = newCollisionGeometry.Edges[edge.ReverseEdge];
-                    }
+                    newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
+                    newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
+                    newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
                 }
-                var planeposition = new Vector3(pointlist.Average(x => x.X), pointlist.Average(x => x.Y), pointlist.Average(x => x.Z));
-                //negative plane index indicates it is mirrored, so skip
-                if (newCollisionGeometry.Surfaces[i].Plane < 0)
-                    continue;
-                var plane = newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value;
-                var calcdistance = PointToPlaneDistance(new Vector3(0), planeposition, new Vector3(plane.I, plane.J, plane.K));
-                newCollisionGeometry.Planes[newCollisionGeometry.Surfaces[i].Plane].Value.D = calcdistance;
-            }
 
+                //recalculate plane distances from newly offset vertices
+                for (var plane_index = 0; plane_index < newCollisionGeometry.Planes.Count; plane_index++)
+                {
+                    //find a surface that is on this plane
+                    int surface_index = -1;
+                    Surface surface = new Surface();
+                    for (var testsurfaceindex = 0; testsurfaceindex < newCollisionGeometry.Surfaces.Count; testsurfaceindex++)
+                    {
+                        if (newCollisionGeometry.Surfaces[testsurfaceindex].Plane == plane_index)
+                        {
+                            surface_index = testsurfaceindex;
+                            surface = newCollisionGeometry.Surfaces[surface_index];
+                            break;
+                        }
+                    }
+                    //if this plane has a surface that is on it, use the points on the surface to recalculate the plane distance
+                    if (surface_index != -1)
+                    {
+                        //circulate the edges of the surface, collecting a list of surface vertices
+                        var edge = newCollisionGeometry.Edges[surface.FirstEdge];
+                        var pointlist = new HashSet<RealPoint3d>();
+                        while (true)
+                        {
+                            if (edge.LeftSurface == surface_index)
+                            {
+                                pointlist.Add(newCollisionGeometry.Vertices[edge.StartVertex].Point);
+
+                                if (edge.ForwardEdge == surface.FirstEdge)
+                                    break;
+                                else
+                                    edge = newCollisionGeometry.Edges[edge.ForwardEdge];
+                            }
+                            else if (edge.RightSurface == surface_index)
+                            {
+                                pointlist.Add(newCollisionGeometry.Vertices[edge.EndVertex].Point);
+
+                                if (edge.ReverseEdge == surface.FirstEdge)
+                                    break;
+                                else
+                                    edge = newCollisionGeometry.Edges[edge.ReverseEdge];
+                            }
+                        }
+
+                        var planeposition = new Vector3(pointlist.Average(x => x.X), pointlist.Average(x => x.Y), pointlist.Average(x => x.Z));
+                        var plane = newCollisionGeometry.Planes[plane_index].Value;
+                        //use a known point on the plane to recalculate the plane distance from the origin
+                        var calcdistance = PointToPlaneDistance(new Vector3(0), planeposition, new Vector3(plane.I, plane.J, plane.K));
+                        newCollisionGeometry.Planes[plane_index].Value.D = calcdistance;
+                    }
+                    //if the plane has no surfaces on it, it will be axis aligned, and a reliable distance from the object origin
+                    else
+                    {
+                        var plane = newCollisionGeometry.Planes[plane_index].Value;
+                        Vector3 normal = new Vector3(plane.I, plane.J, plane.K);
+                        //calculate the point on the plane nearest to (0,0,0)
+                        Vector3 nearestpoint = (plane.D / (normal.X * normal.X + normal.Y * normal.Y + normal.Z * normal.Z)) * normal;
+                        Vector3 GeometryOffsetVector = new Vector3(GeometryOffset.X, GeometryOffset.Y, GeometryOffset.Z);
+                        //use a known point on the plane to recalculate the plane distance from the OBJECT origin, which we can then set as the new distance from the absolute origin
+                        var calcdistance = PointToPlaneDistance(GeometryOffsetVector, nearestpoint, new Vector3(plane.I, plane.J, plane.K));
+                        newCollisionGeometry.Planes[plane_index].Value.D = calcdistance;
+                    }
+
+                }
+            }
+            
             // add the collision geometry
             permutation.Bsps.Add(new CollisionModel.Region.Permutation.Bsp()
             {
@@ -436,10 +472,6 @@ namespace TagTool.Geometry.Utils
             return collisionModel;
         }
 
-        private BspCollisionGeometry.CollisionGeometry CullCollisionGeometry(BspCollisionGeometry.CollisionGeometry collisionGeometry)
-        {
-            return collisionGeometry;
-        }
         private RenderModel GenerateRenderModel(int geometryIndex, bool iscluster)
         {
             var renderModel = new RenderModel();
@@ -597,21 +629,24 @@ namespace TagTool.Geometry.Utils
                 renderGeometry.Compression = new List<RenderGeometryCompression>() { compressionInfo };
             }
 
-            //fix items being offset from origin
-            OriginalCompression = renderGeometry.Compression[0].DeepClone();
-            RealVector3d scale = new RealVector3d
+            if (CenterGeometry)
             {
-                I = renderGeometry.Compression[0].X.Upper - renderGeometry.Compression[0].X.Lower,
-                J = renderGeometry.Compression[0].Y.Upper - renderGeometry.Compression[0].Y.Lower,
-                K = renderGeometry.Compression[0].Z.Upper - renderGeometry.Compression[0].Z.Lower
-            };
-            renderGeometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
-            renderGeometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
-            renderGeometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
+                //fix items being offset from origin
+                OriginalCompression = renderGeometry.Compression[0].DeepClone();
+                RealVector3d scale = new RealVector3d
+                {
+                    I = renderGeometry.Compression[0].X.Upper - renderGeometry.Compression[0].X.Lower,
+                    J = renderGeometry.Compression[0].Y.Upper - renderGeometry.Compression[0].Y.Lower,
+                    K = renderGeometry.Compression[0].Z.Upper - renderGeometry.Compression[0].Z.Lower
+                };
+                renderGeometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
+                renderGeometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
+                renderGeometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
 
-            GeometryOffset.X = OriginalCompression.X.Lower - (-scale.I / 2);
-            GeometryOffset.Y = OriginalCompression.Y.Lower - (-scale.J / 2);
-            GeometryOffset.Z = OriginalCompression.Z.Lower - (-scale.K / 2);
+                GeometryOffset.X = OriginalCompression.X.Lower - (-scale.I / 2);
+                GeometryOffset.Y = OriginalCompression.Y.Lower - (-scale.J / 2);
+                GeometryOffset.Z = OriginalCompression.Z.Lower - (-scale.K / 2);
+            }        
 
             renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
 
