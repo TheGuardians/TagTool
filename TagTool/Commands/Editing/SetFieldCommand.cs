@@ -520,7 +520,10 @@ namespace TagTool.Commands.Editing
                         default:
                             throw new FormatException($"Invalid resource location: {args[0]}");
                     }
-                    
+
+                    if (cache is GameCacheModPackage)
+                        resourceLocation = ResourceLocation.Mods;
+
                     var resourceFile = new FileInfo(args[1]);
 
                     if (!resourceFile.Exists)

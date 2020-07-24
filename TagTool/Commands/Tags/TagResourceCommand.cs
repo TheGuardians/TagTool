@@ -75,6 +75,9 @@ namespace TagTool.Commands.Tags
                     return new TagToolError(CommandError.ArgInvalid, $"Invalid resource location \"{args[1]}\"");
             }
 
+            if (Cache is GameCacheModPackage)
+                location = ResourceLocation.Mods;
+
             var index = Convert.ToUInt32(args[2], 16);
 
             switch (command.ToLower())
