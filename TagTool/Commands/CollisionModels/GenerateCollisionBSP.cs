@@ -137,12 +137,12 @@ namespace TagTool.Commands.CollisionModels
         public struct coll_bsp3dnode
         {
             public short Plane;
-            public byte FrontChildLower;
-            public byte FrontChildMid;
-            public byte FrontChildUpper;
             public byte BackChildLower;
             public byte BackChildMid;
             public byte BackChildUpper;
+            public byte FrontChildLower;
+            public byte FrontChildMid;
+            public byte FrontChildUpper;
         }
 
         public bool build_bsp_tree_main(surface_array_definition surface_array, ref int bsp3dnode_index)
@@ -151,8 +151,9 @@ namespace TagTool.Commands.CollisionModels
             {
                 case 1: //construct bsp3d nodes
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
-                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(splitting_parameters.BackSurfaceCount + splitting_parameters.BackSurfaceUsedCount) };
-                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(splitting_parameters.FrontSurfaceCount + splitting_parameters.FrontSurfaceUsedCount) };
+                    //these arrays need to be initialized with empty elements so that specific indices can be directly assigned
+                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.BackSurfaceCount + splitting_parameters.BackSurfaceUsedCount]) };
+                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.FrontSurfaceCount + splitting_parameters.FrontSurfaceUsedCount]) };
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                         return false;
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
@@ -187,12 +188,12 @@ namespace TagTool.Commands.CollisionModels
                             EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian);
                             EndianReader reader = new EndianReader(stream, EndianFormat.LittleEndian);
                             writer.Write(node.Plane);
-                            writer.Write(node.FrontChildLower);
-                            writer.Write(node.FrontChildMid);
-                            writer.Write(node.FrontChildUpper);
                             writer.Write(node.BackChildLower);
                             writer.Write(node.BackChildMid);
                             writer.Write(node.BackChildUpper);
+                            writer.Write(node.FrontChildLower);
+                            writer.Write(node.FrontChildMid);
+                            writer.Write(node.FrontChildUpper);
                             stream.Position = 0;
                             bsp3dnode_value = reader.ReadUInt64();
                         }
@@ -293,19 +294,31 @@ namespace TagTool.Commands.CollisionModels
             return false;
         }
 
-        public void sort_surfaces_by_plane_2D(int plane_projection_axis, int plane_mirror_check, Bsp2dNode bsp2dnode_block, surface_array_definition plane_matched_surface_array, surface_array_definition back_surface_array, surface_array_definition front_surface_array)
+        public void sort_surfaces_by_plane_2D(plane_splitting_parameters splitting_parameters, int plane_projection_axis, int plane_mirror_check, Bsp2dNode bsp2dnode_block, surface_array_definition plane_matched_surface_array, surface_array_definition back_surface_array, surface_array_definition front_surface_array)
         {
+            int back_surface_count = 0;
+            int front_surface_count = 0;
             foreach(int surface_index in plane_matched_surface_array.surface_array)
             {
                 Plane_Relationship surface_location = determine_surface_plane_relationship_2D(surface_index, bsp2dnode_block, plane_projection_axis, plane_mirror_check);
                 if (surface_location.HasFlag(Plane_Relationship.BackofPlane))
                 {
-                    back_surface_array.surface_array.Add(surface_index);
+                    back_surface_array.surface_array[back_surface_count] = surface_index;
+                    back_surface_count++;
                 }
                 if (surface_location.HasFlag(Plane_Relationship.FrontofPlane))
                 {
-                    front_surface_array.surface_array.Add(surface_index);
+                    front_surface_array.surface_array[front_surface_count] = surface_index;
+                    front_surface_count++;
                 }
+            }
+            if (front_surface_count != splitting_parameters.FrontSurfaceCount)
+            {
+                Console.WriteLine("### ERROR: BSP2D front_surface_index_index!=front_surface_index_count");
+            }
+            if (back_surface_count != splitting_parameters.BackSurfaceCount)
+            {
+                Console.WriteLine("### ERROR: BSP2D back_surface_index_index!=back_surface_index_count");
             }
         }
 
@@ -320,13 +333,13 @@ namespace TagTool.Commands.CollisionModels
             plane_splitting_parameters splitting_parameters = generate_best_splitting_plane_2D(plane_projection_axis, plane_mirror_check, ref bsp2dnode_block, plane_matched_surface_array);
             if(splitting_parameters.FrontSurfaceCount > 0 && splitting_parameters.BackSurfaceCount > 0)
             {
-                surface_array_definition back_surface_array = new surface_array_definition {surface_array = new List<int>() };
-                surface_array_definition front_surface_array = new surface_array_definition { surface_array = new List<int>() };
+                surface_array_definition back_surface_array = new surface_array_definition {surface_array = new List<int>(new int[splitting_parameters.BackSurfaceCount]) };
+                surface_array_definition front_surface_array = new surface_array_definition { surface_array = new List<int>(new int[splitting_parameters.FrontSurfaceCount]) };
 
                 Bsp.Bsp2dNodes.Add(bsp2dnode_block);
                 bsp2dnode_index = Bsp.Bsp2dNodes.Count - 1;
 
-                sort_surfaces_by_plane_2D(plane_projection_axis, plane_mirror_check, bsp2dnode_block, plane_matched_surface_array, back_surface_array, front_surface_array);
+                sort_surfaces_by_plane_2D(splitting_parameters, plane_projection_axis, plane_mirror_check, bsp2dnode_block, plane_matched_surface_array, back_surface_array, front_surface_array);
 
                 //create a child node with the back surface array first
                 back_bsp2dnode_index = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, back_surface_array);
