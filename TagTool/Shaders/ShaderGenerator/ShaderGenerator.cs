@@ -73,7 +73,7 @@ namespace TagTool.Shaders.ShaderGenerator
             return parameters;
         }
 
-        private static PixelShaderBlock GeneratePixelShaderBlock(GameCache cache, ShaderGeneratorResult result)
+        public static PixelShaderBlock GeneratePixelShaderBlock(GameCache cache, ShaderGeneratorResult result)
         {
             if (result == null)
                 return null;

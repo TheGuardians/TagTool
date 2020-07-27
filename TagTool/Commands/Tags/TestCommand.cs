@@ -70,7 +70,10 @@ namespace TagTool.Commands
             using (var stream = Cache.OpenCacheReadWrite())
             {
                 var generator = new HaloShaderGenerator.Shader.ShaderGenerator();
+                // recompile glvs
+
                 var tag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
+                
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, tag);
                 // world rigid skinned
                 for(int i = 0; i < 3; i++)
@@ -92,6 +95,18 @@ namespace TagTool.Commands
                 }
 
                 Cache.Serialize(stream, tag, glvs);
+                
+                // recompile glps
+
+                tag = Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps");
+                var glps = Cache.Deserialize<GlobalPixelShader>(stream, tag);
+
+                for(int i = 0; i < 2; i++)
+                {
+                    var result = generator.GenerateSharedPixelShader(ShaderStage.Shadow_Generate, 2, i);
+                    glps.Shaders[i] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GeneratePixelShaderBlock(Cache, result);
+                }
+                Cache.Serialize(stream, tag, glps);
 
             }
 
