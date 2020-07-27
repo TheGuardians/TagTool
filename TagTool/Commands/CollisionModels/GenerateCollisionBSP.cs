@@ -382,7 +382,7 @@ namespace TagTool.Commands.CollisionModels
             for(int surface_array_index = 0; surface_array_index < surface_array.free_count + surface_array.used_count; surface_array_index++)
             {
                 int surface_index = surface_array.surface_array[surface_array_index];
-                Surface surface_block = Bsp.Surfaces[(int)(surface_index & 0x7FFFFFFF)];
+                Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
 
                 //carry over surface flags
                 if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
@@ -399,7 +399,7 @@ namespace TagTool.Commands.CollisionModels
                         Plane plane_block = Bsp.Planes[plane_index & 0x7FFFFFFF];
                         int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
                         bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
-                        Bsp.Bsp2dReferences[bsp2drefindex].PlaneIndex = (short)plane_index;
+                        Bsp.Bsp2dReferences[bsp2drefindex].PlaneIndex = plane_index < 0 ? (short)(plane_index | 0x8000) : (short)plane_index;
                         Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = -1;
 
                         //update leaf block parameters given new bsp2dreference
@@ -749,12 +749,12 @@ namespace TagTool.Commands.CollisionModels
                                 //free surfaces need to come first in the list
                                 if (back_surface_index != -1)
                                 {
-                                    back_surfaces_array.surface_array[back_free_count] = surface_index;
+                                    back_surfaces_array.surface_array[back_free_count] = back_surface_index;
                                     back_free_count++;
                                 }
                                 if (front_surface_index != -1)
                                 {
-                                    front_surfaces_array.surface_array[front_free_count] = surface_index;
+                                    front_surfaces_array.surface_array[front_free_count] = front_surface_index;
                                     front_free_count++;
                                 }
                             }
@@ -762,12 +762,12 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 if (back_surface_index != -1)
                                 {
-                                    back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = surface_index;
+                                    back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = back_surface_index;
                                     back_used_count++;
                                 }
                                 if (front_surface_index != -1)
                                 {
-                                    front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = surface_index;
+                                    front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = front_surface_index;
                                     front_used_count++;
                                 }
                             }
@@ -813,12 +813,12 @@ namespace TagTool.Commands.CollisionModels
                             //none of these surfaces are considered free, as surface_is_free is set to false for all conditions
                             if (back_surface_index != -1)
                             {
-                                back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = surface_index;
+                                back_surfaces_array.surface_array[back_used_count + back_surfaces_array.free_count] = back_surface_index;
                                 back_used_count++;
                             }
                             if (front_surface_index != -1)
                             {
-                                front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = surface_index;
+                                front_surfaces_array.surface_array[front_used_count + front_surfaces_array.free_count] = front_surface_index;
                                 front_used_count++;
                             }
                             break;
@@ -1208,7 +1208,7 @@ namespace TagTool.Commands.CollisionModels
             //loop through free surfaces to see how effectively their associated planes split the remaining surfaces. Find the one that most effectively splits the remaining surfaces.
             for (int i = 0; i < surface_array.free_count; i++)
             {
-                int current_plane_index = Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFFFFFF;
+                int current_plane_index = (int)Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFFFFFF;
                 plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, current_plane_index, new RealPlane3d());
                 if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                 {
