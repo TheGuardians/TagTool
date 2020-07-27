@@ -87,7 +87,7 @@ namespace TagTool.Shaders.ShaderGenerator
             return pixelShaderBlock;
         }
 
-        private static VertexShaderBlock GenerateVertexShaderBlock(GameCache cache, ShaderGeneratorResult result)
+        public static VertexShaderBlock GenerateVertexShaderBlock(GameCache cache, ShaderGeneratorResult result)
         {
             if (result == null)
                 return null;

@@ -24,6 +24,7 @@ using TagTool.Shaders.ShaderGenerator;
 using TagTool.Commands.Shaders;
 using System.Diagnostics;
 using HaloShaderGenerator.Shader;
+using HaloShaderGenerator.Globals;
 
 namespace TagTool.Commands
 {
@@ -42,11 +43,9 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            
+            /*
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                
-
                 var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, Cache.TagCache.GetTag(@"shaders\shader", "rmdf"));
                 var glps = Cache.Deserialize<GlobalPixelShader>(stream, Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps"));
                 var glvs = Cache.Deserialize<GlobalVertexShader>(stream, Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs"));
@@ -66,66 +65,35 @@ namespace TagTool.Commands
                 rmsh.ShaderProperties[0].Template = rmt2Tag;
                 Cache.Serialize(stream, guardianRmshTag, rmsh);
             }
-            
-
-            /*
-            var shaderType = "black";
-            var rmt2Name = @"shaders\black_templates\_0";
-            var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
-                
-            var rmdf = ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out var glps, out var glvs);
-            var rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
-            Cache.Serialize(stream, rmdfTag, rmdf);
-
-            var rmt2 = ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-            var rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-            Cache.Serialize(stream, rmt2Tag, rmt2);
             */
 
-
-            /*
-            Dictionary<string, HashSet<int>> registers = new Dictionary<string, HashSet<int>>();
-
-            using (var stream = Cache.OpenCacheRead())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
-                foreach (var tag in Cache.TagCache.NonNull())
+                var generator = new HaloShaderGenerator.Shader.ShaderGenerator();
+                var tag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
+                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, tag);
+                // world rigid skinned
+                for(int i = 0; i < 3; i++)
                 {
-                    if(tag.Name != null && tag.IsInGroup("pixl") && !tag.Name.StartsWith("ms30") && tag.Name.Contains("shader_templates"))
+                    var vertexBlock = glvs.VertexTypes[i];
+                    for(int j = 0; j < vertexBlock.DrawModes.Count; j++)
                     {
-                        var pixl = Cache.Deserialize<PixelShader>(stream, tag);
-                        foreach(var shader in pixl.Shaders)
+                        var entryPoint = vertexBlock.DrawModes[j];
+                        var entryPointEnum = (ShaderStage)j;
+                        if (entryPoint.ShaderIndex != -1)
                         {
-                            foreach(var register in shader.PCParameters)
+                            if (generator.IsEntryPointSupported(entryPointEnum) && generator.IsVertexShaderShared(entryPointEnum))
                             {
-                                var name = Cache.StringTable.GetString(register.ParameterName);
-                                if (registers.ContainsKey(name))
-                                {
-                                    registers[name].Add(register.RegisterIndex);
-                                }
-                                else
-                                {
-                                    registers[name] = new HashSet<int>();
-                                    registers[name].Add(register.RegisterIndex);
-                                }
+                                var result = generator.GenerateSharedVertexShader((HaloShaderGenerator.Globals.VertexType)i, entryPointEnum);
+                                glvs.Shaders[entryPoint.ShaderIndex] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateVertexShaderBlock(Cache, result);
                             }
                         }
                     }
                 }
-            }
 
-            foreach(var reg in registers.Keys)
-            {
-                if(registers[reg].Count == 1)
-                {
-                    Console.Write($"{reg}: ");
-                    foreach (var index in registers[reg])
-                    {
-                        Console.Write($"{index} ");
-                    }
-                    Console.WriteLine();
-                }
+                Cache.Serialize(stream, tag, glvs);
+
             }
-            */
 
 
             return true;
