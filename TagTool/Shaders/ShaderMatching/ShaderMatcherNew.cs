@@ -353,7 +353,7 @@ namespace TagTool.Shaders.ShaderMatching
                 HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)rmt2Desc.Options[8];
                 HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)rmt2Desc.Options[9];
 
-                if (rmt2Desc.Options[0] == 6 || rmt2Desc.Options[0] == 7)
+                if (rmt2Desc.Options[0] == 7) // no examples for this in odst, use another build or reach maybe?
                     return false;
 
                 var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
