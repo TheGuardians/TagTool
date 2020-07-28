@@ -424,7 +424,7 @@ namespace TagTool.Geometry
 
                 surface.Plane = (short)uplane_idx;
 
-                surface.FirstEdge = (ushort)first_edge;
+                surface.FirstEdge = (short)first_edge;
                 surface.MaterialIndex = material;
                 surface.BreakableSurfaceIndex = breakable_surface;
                 surface.Flags = (SurfaceFlags)flags;
@@ -453,8 +453,8 @@ namespace TagTool.Geometry
 
                 edge.StartVertex = (short)start_vert_idx;
                 edge.EndVertex = (short)end_vert_idx;
-                edge.ForwardEdge = (ushort)forward_edge_idx;
-                edge.ReverseEdge = (ushort)reverse_edge_idx;
+                edge.ForwardEdge = (short)forward_edge_idx;
+                edge.ReverseEdge = (short)reverse_edge_idx;
                 edge.LeftSurface = (short)left_surface_idx;
                 edge.RightSurface = (short)right_surface_idx;
 

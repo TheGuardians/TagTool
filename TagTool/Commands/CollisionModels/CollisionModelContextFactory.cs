@@ -18,7 +18,7 @@ namespace TagTool.Commands.CollisionModels
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, CollisionModel definition)
         {
             commandContext.AddCommand(new ExtractModelCommand(cache, definition));
-            commandContext.AddCommand(new GenerateCollisionBSPCommand(cache, definition));
+            commandContext.AddCommand(new GenerateCollisionBSPCommand(ref definition));
         }
     }
 }

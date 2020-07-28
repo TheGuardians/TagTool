@@ -14,6 +14,7 @@ using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Geometry.Utils
 {
@@ -115,6 +116,13 @@ namespace TagTool.Geometry.Utils
             }
             model.RenderModel = renderModelTag;
             gameObject.Model = modelTag;
+
+            //regenerate collision bsp following adjustments
+            if (CenterGeometry && HasValidCollisions)
+            {
+                GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
+                generateCollisionBSP.Execute(new List<string>());
+            }
 
             // finally serialize all the tags
             DestCache.Serialize(DestStream, renderModelTag, renderModel);

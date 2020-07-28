@@ -198,7 +198,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
     {
         public short Plane;
 
-        public ushort FirstEdge;
+        public short FirstEdge;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public SurfaceFlags Flags_H2;
@@ -228,8 +228,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
     {
         public short StartVertex;
         public short EndVertex;
-        public ushort ForwardEdge;
-        public ushort ReverseEdge;
+        public short ForwardEdge;
+        public short ReverseEdge;
         public short LeftSurface;
         public short RightSurface;
     }
