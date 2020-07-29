@@ -329,6 +329,7 @@
     <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
+    <Compile Include="Commands\Porting\DoNotReplaceGroupsCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />

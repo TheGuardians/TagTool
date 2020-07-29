@@ -341,7 +341,8 @@ namespace TagTool.Commands.Porting
                 }
                 else if (!FlagIsSet(PortingFlags.New))
                 {
-                    if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
+                    if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()) 
+                        && !DoNotReplaceGroupsCommand.UserDefinedDoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
                     {
                         if (!FlagIsSet(PortingFlags.Recursive))
                             ToggleFlags(PortingFlags.Replace | PortingFlags.Recursive);
