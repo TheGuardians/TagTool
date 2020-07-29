@@ -214,11 +214,10 @@ namespace TagTool.Cache.Gen3
             }
         }
 
-        private T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        public override object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
 
-            T result;
             byte[] resourceDefinitionData = new byte[tagResource.DefinitionDataLength];
             Array.Copy(ResourceGestalt.DefinitionData, tagResource.DefinitionDataOffset, resourceDefinitionData, 0, tagResource.DefinitionDataLength);
 
@@ -243,9 +242,8 @@ namespace TagTool.Cache.Gen3
                 var context = new ResourceDefinitionSerializationContext(dataReader, secondaryDataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
                 var deserializer = new ResourceDeserializer(Cache.Version);
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                result = deserializer.Deserialize<T>(context);
+                return deserializer.Deserialize(context, definitionType);
             }
-            return result;
         }
 
         private byte[] ReadSegmentData(ResourceData resource, int pageIndex, int offset, int sizeIndex)

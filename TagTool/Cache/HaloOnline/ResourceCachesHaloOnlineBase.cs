@@ -220,9 +220,13 @@ namespace TagTool.Cache.HaloOnline
 
         private T GetResourceDefinition<T>(TagResourceReference resourceReference)
         {
+            return (T)GetResourceDefinition(resourceReference, typeof(T));
+        }
+
+        public override object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType)
+        {
             var tagResource = GetPageableResource(resourceReference).Resource;
 
-            T result;
             byte[] resourceDefinitionData = tagResource.DefinitionData;
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
 
@@ -240,9 +244,8 @@ namespace TagTool.Cache.HaloOnline
                 var deserializer = new ResourceDeserializer(Cache.Version);
                 // deserialize without access to the data
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                result = deserializer.Deserialize<T>(context);
+                return deserializer.Deserialize(context, definitionType);
             }
-            return result;
         }
 
         public override BinkResource GetBinkResource(TagResourceReference resourceReference)

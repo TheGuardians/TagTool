@@ -1,10 +1,18 @@
-﻿using TagTool.Tags;
+﻿using System;
+using TagTool.Tags;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Cache.Resources
 {
     public abstract class ResourceCache
     {
+        public abstract object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType);
+
+        public T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        {
+            return (T)GetResourceDefinition(resourceReference, typeof(T));
+        }
+
         public abstract BinkResource GetBinkResource(TagResourceReference resourceReference);
         public abstract BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference);
         public abstract BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);

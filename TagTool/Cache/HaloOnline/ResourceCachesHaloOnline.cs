@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using TagTool.Common;
+using TagTool.Tags;
 
 namespace TagTool.Cache.HaloOnline
 {
