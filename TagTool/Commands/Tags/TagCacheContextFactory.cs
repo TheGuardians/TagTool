@@ -85,7 +85,7 @@ namespace TagTool.Commands.Tags
 
                 context.AddCommand(new PhysicsModelTestCommand(cache));
                 context.AddCommand(new CollisionModelTestCommand(hoCache));
-                
+                context.AddCommand(new Test2Command(hoCache));
             }
 
             if(cache is GameCacheHaloOnline)
