@@ -397,71 +397,7 @@ namespace TagTool.Geometry.Utils
                     newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
                     newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
                     newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
-                }
-
-                //recalculate plane distances from newly offset vertices
-                for (var plane_index = 0; plane_index < newCollisionGeometry.Planes.Count; plane_index++)
-                {
-                    //find a surface that is on this plane
-                    int surface_index = -1;
-                    Surface surface = new Surface();
-                    for (var testsurfaceindex = 0; testsurfaceindex < newCollisionGeometry.Surfaces.Count; testsurfaceindex++)
-                    {
-                        if (newCollisionGeometry.Surfaces[testsurfaceindex].Plane == plane_index)
-                        {
-                            surface_index = testsurfaceindex;
-                            surface = newCollisionGeometry.Surfaces[surface_index];
-                            break;
-                        }
-                    }
-                    //if this plane has a surface that is on it, use the points on the surface to recalculate the plane distance
-                    if (surface_index != -1)
-                    {
-                        //circulate the edges of the surface, collecting a list of surface vertices
-                        var edge = newCollisionGeometry.Edges[surface.FirstEdge];
-                        var pointlist = new HashSet<RealPoint3d>();
-                        while (true)
-                        {
-                            if (edge.LeftSurface == surface_index)
-                            {
-                                pointlist.Add(newCollisionGeometry.Vertices[edge.StartVertex].Point);
-
-                                if (edge.ForwardEdge == surface.FirstEdge)
-                                    break;
-                                else
-                                    edge = newCollisionGeometry.Edges[edge.ForwardEdge];
-                            }
-                            else if (edge.RightSurface == surface_index)
-                            {
-                                pointlist.Add(newCollisionGeometry.Vertices[edge.EndVertex].Point);
-
-                                if (edge.ReverseEdge == surface.FirstEdge)
-                                    break;
-                                else
-                                    edge = newCollisionGeometry.Edges[edge.ReverseEdge];
-                            }
-                        }
-
-                        var planeposition = new Vector3(pointlist.Average(x => x.X), pointlist.Average(x => x.Y), pointlist.Average(x => x.Z));
-                        var plane = newCollisionGeometry.Planes[plane_index].Value;
-                        //use a known point on the plane to recalculate the plane distance from the origin
-                        var calcdistance = PointToPlaneDistance(new Vector3(0), planeposition, new Vector3(plane.I, plane.J, plane.K));
-                        newCollisionGeometry.Planes[plane_index].Value.D = calcdistance;
-                    }
-                    //if the plane has no surfaces on it, it will be axis aligned, and a reliable distance from the object origin
-                    else
-                    {
-                        var plane = newCollisionGeometry.Planes[plane_index].Value;
-                        Vector3 normal = new Vector3(plane.I, plane.J, plane.K);
-                        //calculate the point on the plane nearest to (0,0,0)
-                        Vector3 nearestpoint = (plane.D / (normal.X * normal.X + normal.Y * normal.Y + normal.Z * normal.Z)) * normal;
-                        Vector3 GeometryOffsetVector = new Vector3(GeometryOffset.X, GeometryOffset.Y, GeometryOffset.Z);
-                        //use a known point on the plane to recalculate the plane distance from the OBJECT origin, which we can then set as the new distance from the absolute origin
-                        var calcdistance = PointToPlaneDistance(GeometryOffsetVector, nearestpoint, new Vector3(plane.I, plane.J, plane.K));
-                        newCollisionGeometry.Planes[plane_index].Value.D = calcdistance;
-                    }
-
-                }
+                }    
             }
             
             // add the collision geometry

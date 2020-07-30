@@ -45,10 +45,14 @@ namespace TagTool.Commands.CollisionModels
                         SurfaceCleanupList = new List<int>();
 
                         //make sure there is nothing in the bsp blocks before starting
+                        Bsp.Planes.Clear();
                         Bsp.Leaves.Clear();
                         Bsp.Bsp2dNodes.Clear();
                         Bsp.Bsp2dReferences.Clear();
                         Bsp.Bsp3dNodes.Clear();
+
+                        //regenerate the surface planes from surface vertices
+                        generate_surface_planes();
 
                         //allocate surface array before starting the bsp build
                         surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
@@ -973,22 +977,22 @@ namespace TagTool.Commands.CollisionModels
             
             if (back_free_count != back_surfaces_array.free_count)
             {
-                Console.WriteLine("back_free_count != back_surfaces->free_count");
+                Console.WriteLine("###ERROR: back_free_count != back_surfaces->free_count");
                 return false;
             }
             if (back_used_count != back_surfaces_array.used_count)
             {
-                Console.WriteLine("back_used_count != back_surfaces->used_count");
+                Console.WriteLine("###ERROR: back_used_count != back_surfaces->used_count");
                 return false;
             }
             if (front_free_count != front_surfaces_array.free_count)
             {
-                Console.WriteLine("front_free_count != front_surfaces->free_count");
+                Console.WriteLine("###ERROR: front_free_count != front_surfaces->free_count");
                 return false;
             }
             if (front_used_count != front_surfaces_array.used_count)
             {
-                Console.WriteLine("front_used_count != front_surfaces->used_count");
+                Console.WriteLine("###ERROR: front_used_count != front_surfaces->used_count");
                 return false;
             }
             return true;
@@ -1159,11 +1163,7 @@ namespace TagTool.Commands.CollisionModels
                     break;
             }
 
-            if (surface_plane_relationship == 0)
-            {
-                //there is code here to deal with unclear results, but it appears that it will lead to an infinite loop, not sure how it works yet
-                Console.WriteLine("### ERROR: Could not determine surface plane relationship!");
-            }
+            //there is code here to deal with unclear results, but it appears that it will lead to an infinite loop, not sure how it works yet
 
             return surface_plane_relationship;
         }
@@ -1469,7 +1469,10 @@ namespace TagTool.Commands.CollisionModels
                     {
                         lowest_plane_splitting_parameters.plane_splitting_effectiveness = current_splitting_effectiveness;
                         best_axis_index = current_test_axis;
-                        desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
+                        if(extent_index == 0)
+                            desired_plane_distance = extents_table[extent_index].coordinate;
+                        else
+                            desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
                     }
                 }
             }
@@ -1530,6 +1533,164 @@ namespace TagTool.Commands.CollisionModels
                 lowest_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, ideal_plane_index, new RealPlane3d());
             }
             return lowest_plane_splitting_parameters;
+        }
+
+
+        ///////////////////////////////////////////
+        //plane generation stuff stored down here
+        ///////////////////////////////////////////
+        
+        public void generate_surface_planes()
+        {
+            for (var surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+            {
+                List<RealPoint3d> pointlist = new List<RealPoint3d>();
+                Surface surface_block = Bsp.Surfaces[surface_index];
+
+                int surface_edge_index = surface_block.FirstEdge;
+                //collect vertices on the plane
+                while (true)
+                {
+                    Edge surface_edge_block = Bsp.Edges[surface_edge_index];
+                    if (surface_edge_block.RightSurface == surface_index)
+                        pointlist.Add(Bsp.Vertices[surface_edge_block.EndVertex].Point);
+                    else
+                        pointlist.Add(Bsp.Vertices[surface_edge_block.StartVertex].Point);
+
+
+                    if (surface_edge_block.RightSurface == surface_index)
+                        surface_edge_index = surface_edge_block.ReverseEdge;
+                    else
+                        surface_edge_index = surface_edge_block.ForwardEdge;
+                    //break the loop if we have finished circulating the surface
+                    if (surface_edge_index == surface_block.FirstEdge)
+                        break;
+                }
+                if (pointlist.Count < 3)
+                {
+                    Console.WriteLine("###ERROR: Not enough points to generate a plane!");
+                    continue;
+                }
+                else
+                {
+                    int plane_index = -1;
+                    foreach (Plane existing_plane in Bsp.Planes)
+                    {
+                        if (plane_test_points(existing_plane.Value, pointlist))
+                        {
+                            plane_index = Bsp.Planes.IndexOf(existing_plane);
+                            if (plane_is_mirrored(pointlist[0], pointlist[1], pointlist[2], existing_plane.Value))
+                                Bsp.Surfaces[surface_index].Plane = (short)(plane_index | 0x8000);
+                            else
+                                Bsp.Surfaces[surface_index].Plane = (short)plane_index;
+                            break;
+                        }
+                    }
+                    if(plane_index == -1)
+                    {
+                        int count = 0;
+                        while (!plane_generation_points_valid(pointlist[count], pointlist[count + 1], pointlist[count + 2]))
+                        {
+                            if (count++ + 2 >= pointlist.Count - 1)
+                            {
+                                count = -1;
+                                break;
+                            }
+                        }
+                        if (count == -1)
+                        {
+                            Console.WriteLine("###ERROR: Surface points overlapping, cannot generate plane!");
+                            continue;
+                        }
+
+                        RealPlane3d newplane = generate_plane_from_3_points(pointlist[count], pointlist[count + 1], pointlist[count + 2]);
+                        if(plane_test_points(newplane, pointlist))
+                        {
+                            Bsp.Planes.Add(new Plane { Value = newplane });
+                            plane_index = Bsp.Planes.Count - 1;
+                            Bsp.Surfaces[surface_index].Plane = (short)plane_index;
+                        }
+                        else
+                        {
+                            Console.WriteLine("###ERROR: Generated plane which doesnt fit points!");
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool plane_test_points(RealPlane3d plane, List<RealPoint3d> pointlist)
+        {
+            foreach(var point in pointlist)
+            {
+                float plane_fit = point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D;
+                if (plane_fit < -0.00024414062 || plane_fit > 0.00024414062)
+                    return false;
+            }
+            return true;
+        }
+
+        public bool plane_is_mirrored(RealPoint3d point0, RealPoint3d point1, RealPoint3d point2, RealPlane3d plane)
+        {
+            float v10 = point1.X - point0.X;
+            float v11 = point1.Y - point0.Y;
+            float v12 = point1.Z - point0.Z;
+            float v13 = point2.X - point0.X;
+            float v14 = point2.Y - point0.Y;
+            float v15 = point2.Z - point0.Z;
+            float v16 = v15 * v11 - v14 * v12;
+            float v17 = v12 * v13 - v15 * v10;
+            float v18 = v10 * v14 - v11 * v13;
+            if (v18 * plane.K
+               + v17 * plane.J
+               + v16 * plane.I > 0.0)
+                return false;
+            else
+                return true;
+        }
+
+        public bool plane_generation_points_valid(RealPoint3d point0, RealPoint3d point1, RealPoint3d point2)
+        {
+            if (Math.Abs(point0.X - point1.X) < 0.00009999999747378752
+              && Math.Abs(point0.Y - point1.Y) < 0.00009999999747378752
+              && Math.Abs(point0.Z - point1.Z) < 0.00009999999747378752)
+            {
+                return false;
+            }
+            if (Math.Abs(point1.X - point2.X) < 0.00009999999747378752
+              && Math.Abs(point1.Y - point2.Y) < 0.00009999999747378752
+              && Math.Abs(point1.Z - point2.Z) < 0.00009999999747378752)
+            {
+                return false;
+            }
+            if (Math.Abs(point2.X - point0.X) < 0.00009999999747378752
+              && Math.Abs(point2.Y - point0.Y) < 0.00009999999747378752
+              && Math.Abs(point2.Z - point0.Z) < 0.00009999999747378752)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public RealPlane3d generate_plane_from_3_points(RealPoint3d point0, RealPoint3d point1, RealPoint3d point2)
+        {
+            RealPlane3d plane = new RealPlane3d();
+
+            RealPoint3d diff10 = point1 - point0;
+            RealPoint3d diff20 = point2 - point0;
+
+            plane.I = diff10.Y * diff20.Z - diff20.Y * diff10.Z;
+            plane.J = diff20.X * diff10.Z - diff10.X * diff20.Z;
+            plane.K = diff10.X * diff20.Y - diff20.X * diff10.Y;
+
+            //float dist = (float)Math.Sqrt(plane.I * plane.I + plane.J * plane.J + plane.K * plane.K);
+            //plane.I /= dist;
+            //plane.J /= dist;
+            //plane.K /= dist;
+
+            plane.D = -plane.I * point0.X - plane.J * point0.Y - plane.K * point0.Z;          
+            return plane;
         }
     }
 }
