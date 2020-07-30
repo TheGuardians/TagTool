@@ -1613,7 +1613,9 @@ namespace TagTool.Commands.CollisionModels
                         else
                         {
                             Console.WriteLine("###ERROR: Generated plane which doesnt fit points!");
-                            continue;
+                            Bsp.Planes.Add(new Plane { Value = newplane });
+                            plane_index = Bsp.Planes.Count - 1;
+                            Bsp.Surfaces[surface_index].Plane = (short)plane_index;
                         }
                     }
                 }
@@ -1677,19 +1679,21 @@ namespace TagTool.Commands.CollisionModels
         {
             RealPlane3d plane = new RealPlane3d();
 
-            RealPoint3d diff10 = point1 - point0;
-            RealPoint3d diff20 = point2 - point0;
+            RealVector3d diff10 = new RealVector3d { I = point1.X - point0.X, J = point1.Y - point0.Y, K = point1.Z - point0.Z };
+            RealVector3d diff20 = new RealVector3d { I = point2.X - point0.X, J = point2.Y - point0.Y, K = point2.Z - point0.Z };
 
-            plane.I = diff10.Y * diff20.Z - diff20.Y * diff10.Z;
-            plane.J = diff20.X * diff10.Z - diff10.X * diff20.Z;
-            plane.K = diff10.X * diff20.Y - diff20.X * diff10.Y;
+            RealVector3d plane_normal = RealVector3d.CrossProduct(diff20, diff10);
 
-            //float dist = (float)Math.Sqrt(plane.I * plane.I + plane.J * plane.J + plane.K * plane.K);
-            //plane.I /= dist;
-            //plane.J /= dist;
-            //plane.K /= dist;
+            plane.I = plane_normal.I;
+            plane.J = plane_normal.J;
+            plane.K = plane_normal.K;
 
-            plane.D = -plane.I * point0.X - plane.J * point0.Y - plane.K * point0.Z;          
+            float dist = (float)Math.Sqrt(plane.I * plane.I + plane.J * plane.J + plane.K * plane.K);
+            plane.I /= dist;
+            plane.J /= dist;
+            plane.K /= dist;
+            plane.D = plane.I * point0.X + plane.J * point0.Y + plane.K * point0.Z;          
+
             return plane;
         }
     }
