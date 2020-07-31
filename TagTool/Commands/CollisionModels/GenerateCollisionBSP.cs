@@ -17,8 +17,9 @@ namespace TagTool.Commands.CollisionModels
         private CollisionGeometry Bsp { get; set; }
         private List<int> SurfaceCleanupList { get; set; }
         private List<int> EdgeCleanupList { get; set; }
+        private bool GeneratePlanes { get; set; }
 
-        public GenerateCollisionBSPCommand(ref CollisionModel definition) :
+    public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
 
                 "GenerateCollisionBSP",
@@ -30,6 +31,7 @@ namespace TagTool.Commands.CollisionModels
         {
             Definition = definition;
             Bsp = new CollisionGeometry();
+            GeneratePlanes = false;
         }
 
         public override object Execute(List<string> args)
@@ -45,14 +47,17 @@ namespace TagTool.Commands.CollisionModels
                         SurfaceCleanupList = new List<int>();
 
                         //make sure there is nothing in the bsp blocks before starting
-                        Bsp.Planes.Clear();
                         Bsp.Leaves.Clear();
                         Bsp.Bsp2dNodes.Clear();
                         Bsp.Bsp2dReferences.Clear();
                         Bsp.Bsp3dNodes.Clear();
 
                         //regenerate the surface planes from surface vertices
-                        generate_surface_planes();
+                        if (GeneratePlanes)
+                        {
+                            Bsp.Planes.Clear();
+                            generate_surface_planes();
+                        }
 
                         //allocate surface array before starting the bsp build
                         surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
@@ -73,7 +78,6 @@ namespace TagTool.Commands.CollisionModels
                         else
                         {
                             Console.WriteLine("### Failed to build collision bsp!");
-                            return false;
                         }
                     }
                 }
@@ -1201,7 +1205,7 @@ namespace TagTool.Commands.CollisionModels
                 splitting_Parameters.plane_splitting_effectiveness = double.MaxValue;
             else
                 splitting_Parameters.plane_splitting_effectiveness =
-                Math.Abs((splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount));
+                Math.Abs(splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount);
 
             return splitting_Parameters;
         }
@@ -1219,6 +1223,10 @@ namespace TagTool.Commands.CollisionModels
                     Plane_Relationship relationship = determine_surface_plane_relationship((surface_index & 0x7FFFFFFF), plane_index, plane_block);
                     if (relationship.HasFlag(Plane_Relationship.OnPlane))
                     {
+                        if (!surface_is_free)
+                        {
+                            Console.WriteLine("###ERROR: Surface should not be free!");
+                        }
                         if(surface_index < 0)
                         {
                             Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
@@ -1272,26 +1280,29 @@ namespace TagTool.Commands.CollisionModels
             }
 
             splitting_Parameters.plane_splitting_effectiveness =
-                Math.Abs((splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount));
+                Math.Abs(splitting_Parameters.BackSurfaceCount - splitting_Parameters.FrontSurfaceCount) + 2 * (splitting_Parameters.FrontSurfaceCount + splitting_Parameters.BackSurfaceCount);
+
             return splitting_Parameters;
         }
 
         public Bsp2dNode generate_bsp2d_plane_parameters(RealPoint2d Coords1, RealPoint2d Coords2)
         {
             Bsp2dNode bsp2dnode_block = new Bsp2dNode();
-            bsp2dnode_block.Plane.I = Coords2.Y - Coords1.Y;
-            bsp2dnode_block.Plane.J = Coords1.X - Coords2.X;
+            double plane_I = Coords2.Y - Coords1.Y;
+            double plane_J = Coords1.X - Coords2.X;
 
-            float dist = (float)Math.Sqrt((Coords2.Y - Coords1.Y) * (Coords2.Y - Coords1.Y) + (Coords2.X - Coords1.X) * (Coords2.X - Coords1.X));
+            double dist = (float)Math.Sqrt(plane_I * plane_I + plane_J * plane_J);
 
             if (Math.Abs(dist) < 0.0001)
             {
+                bsp2dnode_block.Plane.I = (float)plane_I;
+                bsp2dnode_block.Plane.J = (float)plane_J;
                 bsp2dnode_block.Plane.D = 0;
             }
             else
             {
-                bsp2dnode_block.Plane.I /= dist;
-                bsp2dnode_block.Plane.J /= dist;
+                bsp2dnode_block.Plane.I = (float)(plane_I / dist);
+                bsp2dnode_block.Plane.J = (float)(plane_J / dist);
                 bsp2dnode_block.Plane.D = bsp2dnode_block.Plane.J * Coords1.Y + bsp2dnode_block.Plane.I * Coords1.X;
             }
             return bsp2dnode_block;
@@ -1464,7 +1475,7 @@ namespace TagTool.Commands.CollisionModels
                         front_count--;
                         back_count++;
                     }
-                    double current_splitting_effectiveness = Math.Abs((back_count - front_count) + 2 * (front_count + back_count));
+                    double current_splitting_effectiveness = Math.Abs(back_count - front_count) + 2 * (front_count + back_count);
                     if (current_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                     {
                         lowest_plane_splitting_parameters.plane_splitting_effectiveness = current_splitting_effectiveness;
@@ -1589,8 +1600,24 @@ namespace TagTool.Commands.CollisionModels
                     if(plane_index == -1)
                     {
                         int count = 0;
-                        while (!plane_generation_points_valid(pointlist[count], pointlist[count + 1], pointlist[count + 2]))
+                        while (true)
                         {
+                            if(plane_generation_points_valid(pointlist[count], pointlist[count + 1], pointlist[count + 2]))
+                            {
+                                RealPlane3d newplane = generate_plane_from_3_points(pointlist[count], pointlist[count + 1], pointlist[count + 2]);
+                                if (plane_test_points(newplane, new List<RealPoint3d> { pointlist[count], pointlist[count + 1], pointlist[count + 2] }))
+                                {
+                                    Bsp.Planes.Add(new Plane { Value = newplane });
+                                    plane_index = Bsp.Planes.Count - 1;
+                                    Bsp.Surfaces[surface_index].Plane = (short)plane_index;
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("###ERROR: Did not produce valid plane from points!");
+                                }
+                            }
+
                             if (count++ + 2 >= pointlist.Count - 1)
                             {
                                 count = -1;
@@ -1599,23 +1626,8 @@ namespace TagTool.Commands.CollisionModels
                         }
                         if (count == -1)
                         {
-                            Console.WriteLine("###ERROR: Surface points overlapping, cannot generate plane!");
+                            Console.WriteLine("###ERROR: No valid planes could be produced from pointset!");
                             continue;
-                        }
-
-                        RealPlane3d newplane = generate_plane_from_3_points(pointlist[count], pointlist[count + 1], pointlist[count + 2]);
-                        if(plane_test_points(newplane, pointlist))
-                        {
-                            Bsp.Planes.Add(new Plane { Value = newplane });
-                            plane_index = Bsp.Planes.Count - 1;
-                            Bsp.Surfaces[surface_index].Plane = (short)plane_index;
-                        }
-                        else
-                        {
-                            Console.WriteLine("###ERROR: Generated plane which doesnt fit points!");
-                            Bsp.Planes.Add(new Plane { Value = newplane });
-                            plane_index = Bsp.Planes.Count - 1;
-                            Bsp.Surfaces[surface_index].Plane = (short)plane_index;
                         }
                     }
                 }
@@ -1679,20 +1691,25 @@ namespace TagTool.Commands.CollisionModels
         {
             RealPlane3d plane = new RealPlane3d();
 
-            RealVector3d diff10 = new RealVector3d { I = point1.X - point0.X, J = point1.Y - point0.Y, K = point1.Z - point0.Z };
-            RealVector3d diff20 = new RealVector3d { I = point2.X - point0.X, J = point2.Y - point0.Y, K = point2.Z - point0.Z };
+            double xdiff10 = point1.X - point0.X;
+            double ydiff10 = point1.Y - point0.Y;
+            double zdiff10 = point1.Z - point0.Z;
+            double xdiff20 = point2.X - point0.X;
+            double ydiff20 = point2.Y - point0.Y;
+            double zdiff20 = point2.Z - point0.Z;
 
-            RealVector3d plane_normal = RealVector3d.CrossProduct(diff20, diff10);
-
-            plane.I = plane_normal.I;
-            plane.J = plane_normal.J;
-            plane.K = plane_normal.K;
-
-            float dist = (float)Math.Sqrt(plane.I * plane.I + plane.J * plane.J + plane.K * plane.K);
-            plane.I /= dist;
-            plane.J /= dist;
-            plane.K /= dist;
-            plane.D = plane.I * point0.X + plane.J * point0.Y + plane.K * point0.Z;          
+            double v11 = zdiff20 * ydiff10 - ydiff20 * zdiff10;
+            double v12 = xdiff20 * zdiff10 - zdiff20 * xdiff10;
+            double v13 = ydiff20 * xdiff10 - xdiff20 * ydiff10;
+            double v14 = 1.0 / Math.Sqrt(v13 * v13 + v12 * v12 + v11 * v11);
+            double v15 = v14 * v11;
+            double v16 = v14 * v12;
+            double v17 = v14 * v13;
+            double v18 = point0.Y * v16 + point0.X * v15 + point0.Z * v17;
+            plane.I = (float)v15;
+            plane.J = (float)v16;
+            plane.K = (float)v17;
+            plane.D = (float)v18;
 
             return plane;
         }
