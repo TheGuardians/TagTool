@@ -17,7 +17,6 @@ namespace TagTool.Commands.CollisionModels
         private CollisionGeometry Bsp { get; set; }
         private List<int> SurfaceCleanupList { get; set; }
         private List<int> EdgeCleanupList { get; set; }
-        private bool GeneratePlanes { get; set; }
 
     public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
@@ -31,18 +30,17 @@ namespace TagTool.Commands.CollisionModels
         {
             Definition = definition;
             Bsp = new CollisionGeometry();
-            GeneratePlanes = false;
         }
 
         public override object Execute(List<string> args)
         {
-            foreach(var region in Definition.Regions)
+            for (int region_index = 0; region_index < Definition.Regions.Count; region_index++)
             {
-                foreach(var permutation in region.Permutations)
+                for(int permutation_index = 0; permutation_index < Definition.Regions[region_index].Permutations.Count; permutation_index++)
                 {
-                    for(int bspindex = 0; bspindex < permutation.Bsps.Count; bspindex++)
+                    for(int bspindex = 0; bspindex < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bspindex++)
                     {
-                        Bsp = permutation.Bsps[bspindex].Geometry.DeepClone();
+                        Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bspindex].Geometry.DeepClone();
                         EdgeCleanupList = new List<int>();
                         SurfaceCleanupList = new List<int>();
 
@@ -53,11 +51,8 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp3dNodes.Clear();
 
                         //regenerate the surface planes from surface vertices
-                        if (GeneratePlanes)
-                        {
-                            Bsp.Planes.Clear();
-                            generate_surface_planes();
-                        }
+                        Bsp.Planes.Clear();
+                        generate_surface_planes();                      
 
                         //allocate surface array before starting the bsp build
                         surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
@@ -72,12 +67,12 @@ namespace TagTool.Commands.CollisionModels
                         int bsp3dnode_index = -1;
                         if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
                         {
-                            Console.WriteLine("### Collision bsp built successfully!");
-                            permutation.Bsps[bspindex].Geometry = Bsp;
+                            Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
+                            Definition.Regions[region_index].Permutations[permutation_index].Bsps[bspindex].Geometry = Bsp;
                         }
                         else
                         {
-                            Console.WriteLine("### Failed to build collision bsp!");
+                            Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
                         }
                     }
                 }
@@ -280,8 +275,8 @@ namespace TagTool.Commands.CollisionModels
                 case 1: //construct bsp3d nodes
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
                     //these arrays need to be initialized with empty elements so that specific indices can be directly assigned
-                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.BackSurfaceCount + splitting_parameters.BackSurfaceUsedCount]) };
-                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.FrontSurfaceCount + splitting_parameters.FrontSurfaceUsedCount]) };
+                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
+                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                         return false;
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
@@ -1418,7 +1413,7 @@ namespace TagTool.Commands.CollisionModels
                     extent_entry min_coordinate = new extent_entry();
                     extent_entry max_coordinate = new extent_entry();
                     max_coordinate.is_max_coord = true;
-                    int surface_index = surface_array.surface_array[i] & 0x7FFF;
+                    int surface_index = surface_array.surface_array[i] & 0x7FFFFFFF;
                     Surface surface_block = Bsp.Surfaces[surface_index];
                     int surface_edge_index = surface_block.FirstEdge;
                     while (true)
@@ -1535,6 +1530,7 @@ namespace TagTool.Commands.CollisionModels
             if(ideal_plane_index < Bsp.Planes.Count)
             {
                 lowest_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, ideal_plane_index, new RealPlane3d());
+                lowest_plane_splitting_parameters.plane_index = ideal_plane_index;
             }
             //otherwise just add a new plane with ideal characteristics
             else
@@ -1542,6 +1538,7 @@ namespace TagTool.Commands.CollisionModels
                 Bsp.Planes.Add(new Plane { Value = best_plane });
                 ideal_plane_index = Bsp.Planes.Count - 1;
                 lowest_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, ideal_plane_index, new RealPlane3d());
+                lowest_plane_splitting_parameters.plane_index = ideal_plane_index;
             }
             return lowest_plane_splitting_parameters;
         }
