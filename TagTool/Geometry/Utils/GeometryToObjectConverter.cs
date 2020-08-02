@@ -69,8 +69,10 @@ namespace TagTool.Geometry.Utils
             StructureBspResources = SourceCache.ResourceCache.GetStructureBspTagResources(StructureBsp.CollisionBspResource);
         }
 
-        public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false)
+        public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false, bool centergeometry = false)
         {
+            CenterGeometry = centergeometry;
+
             //return null tag and skip to next bsp if bsp resources is null
             if (StructureBspResources == null)
                 return null;
