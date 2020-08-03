@@ -174,7 +174,7 @@ namespace TagTool.Tags.Definitions
             public float FadeOutDuration;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public short Unknown2;
+            public SoundFadeMode FadeMode;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short Unknown3;
 
@@ -204,6 +204,15 @@ namespace TagTool.Tags.Definitions
                 OutputFrontSpeakers,
                 OutputRearSpeakers,
                 OutputCenterSpeakers,
+            }
+
+            public enum SoundFadeMode : short
+            {
+                None,
+                Linear,
+                Power,
+                InversePower,
+                EaseInOut
             }
         }
 
