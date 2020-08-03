@@ -169,14 +169,18 @@ namespace TagTool.Tags.Definitions
             public float FadeInDuration;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown1;
+            public SoundFadeMode FadeInMode;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Padding1;
 
             public float FadeOutDuration;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public SoundFadeMode FadeMode;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public short Unknown3;
+            public SoundFadeMode FadeOutMode;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Padding2;
 
             public CachedTag In;
             public CachedTag Loop;
@@ -191,12 +195,19 @@ namespace TagTool.Tags.Definitions
             public float AlternateCrossfadeDuration;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown5;
+            public SoundFadeMode AlternateCrossfadeMode;
+
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Padding3;
 
             public float AlternateFadeOutDuration;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown6;
+            public SoundFadeMode AlternateFadeOutMode;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Padding4;
 
             public enum OutputEffectValue : short
             {

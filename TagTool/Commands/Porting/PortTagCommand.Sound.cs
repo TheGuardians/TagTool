@@ -385,6 +385,17 @@ namespace TagTool.Commands.Porting
                 soundLooping.Unknown4 = 1;
             }
 
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                foreach (var track in soundLooping.Tracks)
+                {
+                    // FadeMode was added in ODST, H3 uses Linear for in sounds, and Power for out sounds
+                    track.FadeInMode = SoundLooping.Track.SoundFadeMode.Linear;
+                    track.FadeOutMode = SoundLooping.Track.SoundFadeMode.Power;
+                    track.AlternateCrossfadeMode = SoundLooping.Track.SoundFadeMode.Linear;
+                    track.AlternateFadeOutMode = SoundLooping.Track.SoundFadeMode.Power;
+                }
+            }
 
             return soundLooping;
         }
