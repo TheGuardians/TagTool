@@ -140,5 +140,25 @@ namespace TagTool.Tags
 
             public VersionedCache(CacheVersion version) => Version = version;
         }
+
+        public static uint GetStructureSize(Type type, CacheVersion version = CacheVersion.Unknown)
+        {
+            uint size = 0;
+
+            var currentType = type;
+
+            while(currentType != typeof(object))
+            {
+                var attribute = VersionedCaches[version].GetTagStructureAttribute(currentType, version);
+
+                currentType = currentType.BaseType;
+
+                if (attribute == null)
+                    continue;
+                    
+                size += attribute.Size;
+            }
+            return size;
+        }
     }
 }
