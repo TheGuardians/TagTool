@@ -17,6 +17,7 @@ namespace TagTool.Commands.CollisionModels
         private CollisionGeometry Bsp { get; set; }
         private List<int> SurfaceCleanupList { get; set; }
         private List<int> EdgeCleanupList { get; set; }
+        private bool debug = false;
 
     public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
@@ -1079,6 +1080,8 @@ namespace TagTool.Commands.CollisionModels
         {
             Plane_Relationship surface_plane_relationship = 0;
             Surface surface_block = Bsp.Surfaces[surface_index];
+            List<RealPoint2d> pointlist = new List<RealPoint2d>();
+            List<float> inputlist = new List<float>();
 
             int surface_edge_index = surface_block.FirstEdge;
             while (true)
@@ -1091,7 +1094,10 @@ namespace TagTool.Commands.CollisionModels
                     edge_vertex = Bsp.Vertices[surface_edge_block.StartVertex];
 
                 RealPoint2d relevant_coords = vertex_get_projection_relevant_coords(edge_vertex, plane_projection_axis, plane_mirror_check);
+                pointlist.Add(relevant_coords);
+
                 float plane_equation_vertex_input = bsp2dnodeblock.Plane.I * relevant_coords.X + bsp2dnodeblock.Plane.J * relevant_coords.Y - bsp2dnodeblock.Plane.D;
+                inputlist.Add(plane_equation_vertex_input);
 
                 if (plane_equation_vertex_input < -0.00012207031)
                 {
@@ -1118,7 +1124,15 @@ namespace TagTool.Commands.CollisionModels
             if (surface_plane_relationship > 0)
                 return surface_plane_relationship;
 
-            Console.WriteLine("### WARNING found possible T-junction.");
+            if (debug)
+            {
+                Console.WriteLine("### WARNING found possible T-junction.");
+                Console.WriteLine($"Plane:{bsp2dnodeblock.Plane}");
+                foreach(var point in pointlist)
+                    Console.WriteLine($"Vertex:{point}");
+                foreach (var input in inputlist)
+                    Console.WriteLine($"Plane Fit:{input}");
+            }
             return surface_plane_relationship;
         }
 
