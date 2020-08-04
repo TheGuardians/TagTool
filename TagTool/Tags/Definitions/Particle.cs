@@ -89,7 +89,8 @@ namespace TagTool.Tags.Definitions
             LowResolutionTighterMask = 1 << 11,
             NeverKillVerticesOnGpu = 1 << 12,
             ParticleVelocityRelativeToCamera = 1 << 13,
-            RenderWithWater = 1 << 14
+            RenderWithWater = 1 << 14,
+            HasParticleModel = 1 << 15,
         }
 
         public enum ParticleBillboardStyleValue : short

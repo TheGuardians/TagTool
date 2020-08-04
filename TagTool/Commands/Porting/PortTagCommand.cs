@@ -706,10 +706,13 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertMultilingualUnicodeStringList(cacheStream, blamCacheStream, resourceStreams, unic);
 					break;
 
-				case Particle particle when BlamCache.Version == CacheVersion.Halo3Retail:
-					// Shift all flags above 2 by 1.
-					particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
-					break;
+                case Particle particle:
+                    if (BlamCache.Version == CacheVersion.Halo3Retail) // Shift all flags above 2 by 1.
+					    particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
+                    // temp prevent odst prt3 using static_default entry point
+                    if ((particle.Flags >> 5 & 1) == 1)
+                        particle.Flags &= ~(1 << 5);
+                    break;
 
 				case ParticleModel particleModel:
                     blamDefinition = ConvertParticleModel(edTag, blamTag, particleModel);
