@@ -52,6 +52,9 @@ namespace TagTool.Commands.Tags
                         if (Cache.TagCache.TryGetTag(tag.ToString(), out existingTag))
                             continue;
 
+                        if (tag.Name.Contains("lightmap") || tag.Name.Contains("cubemap"))
+                            continue;
+
                         Console.WriteLine($"Converting {tag}...");
 
                         var portTag = new PortTagCommand(Cache, srcCache);
