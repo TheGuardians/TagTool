@@ -1408,11 +1408,10 @@ namespace TagTool.Commands.CollisionModels
             {
                 //generate a list of maximum and minimum coordinates on the specified plane for each surface
                 List<extent_entry> extents_table = new List<extent_entry>();
-                for (short i = 0; i < surface_array.free_count; i++)
+                for (int i = 0; i < surface_array.free_count; i++)
                 {
-                    extent_entry min_coordinate = new extent_entry();
-                    extent_entry max_coordinate = new extent_entry();
-                    max_coordinate.is_max_coord = true;
+                    extent_entry min_coordinate = new extent_entry { coordinate = float.MaxValue, is_max_coord = false };
+                    extent_entry max_coordinate = new extent_entry { coordinate = float.MinValue, is_max_coord = true };
                     int surface_index = surface_array.surface_array[i] & 0x7FFFFFFF;
                     Surface surface_block = Bsp.Surfaces[surface_index];
                     int surface_edge_index = surface_block.FirstEdge;
@@ -1468,6 +1467,9 @@ namespace TagTool.Commands.CollisionModels
                     if (extents_table[extent_index].is_max_coord)
                     {
                         front_count--;
+                    }
+                    else
+                    {
                         back_count++;
                     }
                     double current_splitting_effectiveness = Math.Abs(back_count - front_count) + 2 * (front_count + back_count);
