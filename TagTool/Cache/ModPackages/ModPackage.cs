@@ -299,11 +299,13 @@ namespace TagTool.Cache
         private void WriteMapsSection(EndianWriter writer)
         {
             uint sectionOffset = (uint)writer.BaseStream.Position;
-            GenericSectionEntry mapEntry = new GenericSectionEntry(MapFileStreams.Count, 0x8);
+            uint sectionEntrySize = TagStructure.GetStructureSize(typeof(GenericSectionEntry));
+            int cacheMapEntrySize = (int)TagStructure.GetStructureSize(typeof(CacheMapTableEntry));
+            GenericSectionEntry mapEntry = new GenericSectionEntry(MapFileStreams.Count, sectionEntrySize);
             mapEntry.Write(writer);
             // make room for table
 
-            writer.Write(new byte[0x10 * mapEntry.Count]);
+            writer.Write(new byte[cacheMapEntrySize * mapEntry.Count]);
 
             for(int i = 0; i < MapFileStreams.Count; i++)
             {
@@ -316,7 +318,7 @@ namespace TagTool.Cache
                 StreamUtil.Align(writer.BaseStream, 4);
 
                 // seek to the table and update size and offset
-                writer.BaseStream.Seek(mapEntry.TableOffset + 0x10 * i + sectionOffset, SeekOrigin.Begin);
+                writer.BaseStream.Seek(mapEntry.TableOffset + cacheMapEntrySize * i + sectionOffset, SeekOrigin.Begin);
                 var tableEntry = new CacheMapTableEntry(size, offset - sectionOffset, MapToCacheMapping[i], MapIds[i]);
                 tableEntry.Write(writer);
                 writer.BaseStream.Seek(0, SeekOrigin.End);
@@ -328,11 +330,13 @@ namespace TagTool.Cache
         private void WriteTagsSection(EndianWriter writer, DataSerializationContext context, TagSerializer serializer)
         {
             uint sectionOffset = (uint)writer.BaseStream.Position;
-            GenericSectionEntry tagCachesEntry = new GenericSectionEntry(TagCacheCount, 0x8);
+            uint sectionEntrySize = TagStructure.GetStructureSize(typeof(GenericSectionEntry));
+            int tagCacheEntrySize = (int)TagStructure.GetStructureSize(typeof(CacheTableEntry));
+            GenericSectionEntry tagCachesEntry = new GenericSectionEntry(TagCacheCount, sectionEntrySize);
             tagCachesEntry.Write(writer);
             // make room for table
 
-            writer.Write(new byte[0x28 * TagCacheCount]);
+            writer.Write(new byte[tagCacheEntrySize * TagCacheCount]);
 
             for(int i = 0; i < TagCacheCount; i++)
             {
@@ -345,7 +349,7 @@ namespace TagTool.Cache
 
                 uint size = (uint)(writer.BaseStream.Position - offset);
 
-                writer.BaseStream.Seek(tagCachesEntry.TableOffset + 0x28 * i + sectionOffset, SeekOrigin.Begin);
+                writer.BaseStream.Seek(tagCachesEntry.TableOffset + tagCacheEntrySize * i + sectionOffset, SeekOrigin.Begin);
                 var tableEntry = new CacheTableEntry(size, offset - sectionOffset, CacheNames[i]);
                 serializer.Serialize(context, tableEntry);
                 writer.BaseStream.Seek(0, SeekOrigin.End);
@@ -355,11 +359,13 @@ namespace TagTool.Cache
         private void WriteTagNamesSection(EndianWriter writer, DataSerializationContext context, TagSerializer serializer)
         {
             uint sectionOffset = (uint)writer.BaseStream.Position;
-            GenericSectionEntry tagNameFileEntry = new GenericSectionEntry(TagCacheNames.Count, 0x8);
+            uint sectionEntrySize = TagStructure.GetStructureSize(typeof(GenericSectionEntry));
+            uint tableEntrySize = TagStructure.GetStructureSize(typeof(GenericTableEntry));
+            GenericSectionEntry tagNameFileEntry = new GenericSectionEntry(TagCacheNames.Count, sectionEntrySize);
             tagNameFileEntry.Write(writer);
             // make room for table
 
-            writer.Write(new byte[0x8 * TagCacheNames.Count]);
+            writer.Write(new byte[tableEntrySize * TagCacheNames.Count]);
 
             for(int i = 0; i < TagCacheNames.Count; i++)
             {
@@ -367,7 +373,7 @@ namespace TagTool.Cache
 
                 uint offset = (uint)writer.BaseStream.Position;
 
-                GenericSectionEntry tagNameTable = new GenericSectionEntry(names.Count, offset - sectionOffset + 0x8);
+                GenericSectionEntry tagNameTable = new GenericSectionEntry(names.Count, offset - sectionOffset + sectionEntrySize);
                 tagNameTable.Write(writer);
 
                 foreach (var entry in names)
@@ -378,7 +384,7 @@ namespace TagTool.Cache
 
                 uint size = (uint)(writer.BaseStream.Position - offset);
 
-                writer.BaseStream.Seek(tagNameFileEntry.TableOffset + 0x8 * i + sectionOffset, SeekOrigin.Begin);
+                writer.BaseStream.Seek(tagNameFileEntry.TableOffset + tableEntrySize * i + sectionOffset, SeekOrigin.Begin);
                 var tableEntry = new GenericTableEntry(size, offset - sectionOffset);
                 tableEntry.Write(writer);
                 writer.BaseStream.Seek(0, SeekOrigin.End);
@@ -420,7 +426,8 @@ namespace TagTool.Cache
 
         private ModPackageSectionHeader GetSectionHeader(EndianReader reader, ModPackageSection section)
         {
-            reader.SeekTo(Header.SectionTable.Offset + 0x8 * (int)section);
+            uint sectionHeaderSize = TagStructure.GetStructureSize(typeof(ModPackageSectionHeader));
+            reader.SeekTo(Header.SectionTable.Offset + sectionHeaderSize * (int)section);
             return new ModPackageSectionHeader(reader);
         }
 
@@ -438,7 +445,7 @@ namespace TagTool.Cache
             var section = GetSectionHeader(reader, ModPackageSection.Tags);
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
-
+            int tagCacheEntrySize = (int)TagStructure.GetStructureSize(typeof(CacheTableEntry));
             var entry = new GenericSectionEntry(reader);
             var cacheCount = entry.Count;
 
@@ -449,7 +456,7 @@ namespace TagTool.Cache
             {
                 var tagStream = new MemoryStream();
 
-                reader.BaseStream.Position = entry.TableOffset + 0x28 * i + section.Offset;
+                reader.BaseStream.Position = entry.TableOffset + tagCacheEntrySize * i + section.Offset;
                 var tableEntry = deserializer.Deserialize<CacheTableEntry>(context);
                 CacheNames.Add(tableEntry.CacheName);
                 reader.BaseStream.Position = tableEntry.Offset + section.Offset;
@@ -498,7 +505,7 @@ namespace TagTool.Cache
             var section = GetSectionHeader(reader, ModPackageSection.TagNames);
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
-
+            int tableEntrySize = (int)TagStructure.GetStructureSize(typeof(GenericTableEntry));
             var entry = new GenericSectionEntry(reader);
             var cacheCount = entry.Count;
 
@@ -507,7 +514,7 @@ namespace TagTool.Cache
             for(int i = 0; i < cacheCount; i++)
             {
                 var nameDict = new Dictionary<int, string>();
-                reader.BaseStream.Position = entry.TableOffset + 0x8 * i + section.Offset;
+                reader.BaseStream.Position = entry.TableOffset + tableEntrySize * i + section.Offset;
 
                 var tagNamesTableEntry = new GenericTableEntry(reader);
                 if (tagNamesTableEntry.Size == 0)
@@ -588,7 +595,8 @@ namespace TagTool.Cache
             // TODO: add map ids on load
             for(int i = 0; i < mapCount; i++)
             {
-                reader.BaseStream.Position = entry.TableOffset + 0x10 * i + section.Offset;
+                var structureSize = TagStructure.GetStructureSize(typeof(CacheMapTableEntry));
+                reader.BaseStream.Position = entry.TableOffset + structureSize * i + section.Offset;
                 var tableEntry = new CacheMapTableEntry(reader);
 
                 reader.BaseStream.Position = tableEntry.Offset + section.Offset;
@@ -622,8 +630,9 @@ namespace TagTool.Cache
             
             for(int i = 0; i < fileTable.Count; i++)
             {
-                reader.BaseStream.Position = fileTable.TableOffset + section.Offset + 0x108 * i;
-
+                var entryStructureSize = TagStructure.GetStructureSize(typeof(FileTableEntry));
+                reader.BaseStream.Position = fileTable.TableOffset + section.Offset + entryStructureSize * i;
+                
                 var tableEntry = deserializer.Deserialize<FileTableEntry>(context);
 
                 var stream = new MemoryStream();
@@ -636,10 +645,11 @@ namespace TagTool.Cache
 
         private void WriteFileEntries(EndianWriter writer, ISerializationContext context, TagSerializer serializer)
         {
-            const int kFileTableEntrySize = 0x108;
+            int kFileTableEntrySize = (int)TagStructure.GetStructureSize(typeof(FileTableEntry));
+            uint sectionEntrySize = TagStructure.GetStructureSize(typeof(GenericSectionEntry));
 
             uint sectionOffset = (uint)writer.BaseStream.Position;
-            GenericSectionEntry table = new GenericSectionEntry(Files.Count, 0x8);
+            GenericSectionEntry table = new GenericSectionEntry(Files.Count, sectionEntrySize);
             table.Write(writer);
 
             // make room for table
