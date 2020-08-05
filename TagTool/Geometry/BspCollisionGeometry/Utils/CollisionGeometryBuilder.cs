@@ -317,10 +317,10 @@ namespace TagTool.Geometry
                 var leaf = new Leaf();
 
                 leaf.Flags = (LeafFlags)flags;
-                leaf.Bsp2dReferenceCount = (short)bsp2dRefCount;
+                leaf.Bsp2dReferenceCount = bsp2dRefCount;
                 // ReForge change:
                 // leaf.FirstBsp2dReference = (int)(((ushort)Unknown << 16) | (ushort)first2dRef);
-                leaf.FirstBsp2dReference = (int)((ushort)first2dRef | (ushort)Unknown);
+                leaf.FirstBsp2dReference = (uint)((ushort)first2dRef | (ushort)Unknown);
 
                 bsp.Geometry.Leaves.Add(leaf);
             }
@@ -422,9 +422,9 @@ namespace TagTool.Geometry
                 if (plane_idx < 0)
                     uplane_idx |= 0x8000;
 
-                surface.Plane = (short)uplane_idx;
+                surface.Plane = (ushort)uplane_idx;
 
-                surface.FirstEdge = (short)first_edge;
+                surface.FirstEdge = (ushort)first_edge;
                 surface.MaterialIndex = material;
                 surface.BreakableSurfaceIndex = breakable_surface;
                 surface.Flags = (SurfaceFlags)flags;
@@ -451,12 +451,12 @@ namespace TagTool.Geometry
 
                 var edge = new Edge();
 
-                edge.StartVertex = (short)start_vert_idx;
-                edge.EndVertex = (short)end_vert_idx;
-                edge.ForwardEdge = (short)forward_edge_idx;
-                edge.ReverseEdge = (short)reverse_edge_idx;
-                edge.LeftSurface = (short)left_surface_idx;
-                edge.RightSurface = (short)right_surface_idx;
+                edge.StartVertex = (ushort)start_vert_idx;
+                edge.EndVertex = (ushort)end_vert_idx;
+                edge.ForwardEdge = (ushort)forward_edge_idx;
+                edge.ReverseEdge = (ushort)reverse_edge_idx;
+                edge.LeftSurface = (ushort)left_surface_idx;
+                edge.RightSurface = (ushort)right_surface_idx;
 
                 bsp.Geometry.Edges.Add(edge);
             }
@@ -480,7 +480,7 @@ namespace TagTool.Geometry
                 var vert = new Vertex();
 
                 vert.Point = new RealPoint3d(point_x, point_y, point_z);
-                vert.FirstEdge = (short)first_edge;
+                vert.FirstEdge = (ushort)first_edge;
 
                 bsp.Geometry.Vertices.Add(vert);
             }
