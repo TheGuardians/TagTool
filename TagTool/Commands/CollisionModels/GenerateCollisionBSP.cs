@@ -39,45 +39,53 @@ namespace TagTool.Commands.CollisionModels
             {
                 for(int permutation_index = 0; permutation_index < Definition.Regions[region_index].Permutations.Count; permutation_index++)
                 {
-                    for(int bspindex = 0; bspindex < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bspindex++)
+                    for(int bsp_index = 0; bsp_index < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bsp_index++)
                     {
-                        Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bspindex].Geometry.DeepClone();
-                        EdgeCleanupList = new List<int>();
-                        SurfaceCleanupList = new List<int>();
-
-                        //make sure there is nothing in the bsp blocks before starting
-                        Bsp.Leaves.Clear();
-                        Bsp.Bsp2dNodes.Clear();
-                        Bsp.Bsp2dReferences.Clear();
-                        Bsp.Bsp3dNodes.Clear();
-
-                        //regenerate the surface planes from surface vertices
-                        Bsp.Planes.Clear();
-                        generate_surface_planes();                      
-
-                        //allocate surface array before starting the bsp build
-                        surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
-                        for (int i = 0; i < Bsp.Surfaces.Count; i++)
-                        {
-                            if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Climbable) || Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Breakable))
-                                surface_array.surface_array.Add(i);
-                            else
-                                surface_array.surface_array.Add((int)(i | 0x80000000));
-                        }
-
-                        int bsp3dnode_index = -1;
-                        if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
-                        {
-                            Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
-                            Definition.Regions[region_index].Permutations[permutation_index].Bsps[bspindex].Geometry = Bsp;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
-                        }
+                        if (!generate_bsp(region_index, permutation_index, bsp_index))
+                            return false;
                     }
                 }
             }        
+            return true;
+        }
+
+        public bool generate_bsp(int region_index, int permutation_index, int bsp_index)
+        {
+            Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry.DeepClone();
+            EdgeCleanupList = new List<int>();
+            SurfaceCleanupList = new List<int>();
+
+            //make sure there is nothing in the bsp blocks before starting
+            Bsp.Leaves.Clear();
+            Bsp.Bsp2dNodes.Clear();
+            Bsp.Bsp2dReferences.Clear();
+            Bsp.Bsp3dNodes.Clear();
+
+            //regenerate the surface planes from surface vertices
+            Bsp.Planes.Clear();
+            generate_surface_planes();
+
+            //allocate surface array before starting the bsp build
+            surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
+            for (int i = 0; i < Bsp.Surfaces.Count; i++)
+            {
+                if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Climbable) || Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Breakable))
+                    surface_array.surface_array.Add(i);
+                else
+                    surface_array.surface_array.Add((int)(i | 0x80000000));
+            }
+
+            int bsp3dnode_index = -1;
+            if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
+            {
+                Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
+                Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = Bsp;
+            }
+            else
+            {
+                Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
+                return false;
+            }
             return true;
         }
 
