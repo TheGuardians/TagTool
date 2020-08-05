@@ -6,12 +6,14 @@ using TagTool.IO;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0x30)]
+    [TagStructure(Size = 0x458)]
     public class ModPackageHeader
     {
         public Tag Signature = new Tag("mod!");
 
-        public ModPackageVersion Version = ModPackageVersion.MultiCache;
+        public ModPackageMajorVersion VersionMajor = ModPackageMajorVersion.Current;
+
+        public short VersionMinor;
 
         public uint FileSize;
 
@@ -24,24 +26,43 @@ namespace TagTool.Cache
 
         public ModPackageSectionTable SectionTable;
 
+        [TagField(Length = 0x226)]
+        public byte[] RSAPublicKey;
+
+        [TagField(Length = 0x200)]
+        public byte[] RSASignature;
+
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
     }
 
-    [TagStructure(Size = 0xBC)]
+    public enum ModPackageMajorVersion : short
+    {
+        Current = 4
+    }
+
+    [TagStructure(Size = 0x470)]
     public class ModPackageMetadata
     {
         public Tag Signature = new Tag("desc");
 
-        [TagField(CharSet = Unicode, Length = 16)]
+        [TagField(CharSet = Unicode, Length = 32)]
         public string Name;
 
-        [TagField(CharSet = Ansi, Length = 16)]
+        [TagField(CharSet = Ansi, Length = 32)]
         public string Author;
 
-        [TagField(CharSet = Ansi, Length = 128)]
+        [TagField(CharSet = Ansi, Length = 512)]
         public string Description;
 
         public int BuildDateHigh;
         public int BuildDateLow;
+
+        public short VersionMajor = 1;
+        public short VersionMinor;
+
+        [TagField(CharSet = Ansi, Length = 512)]
+        public string URL;
     }
 
     public enum ModPackageSection : int
@@ -60,27 +81,21 @@ namespace TagTool.Cache
         SectionCount
     }
 
-    public enum ModPackageVersion : int
-    {
-        Unknown = 0,
-        Basic = 1,
-        Extended = 2,
-        MultiCache = 3
-    }
-
     [Flags]
     public enum MapFlags : int
     {
         MultiplayerMaps,
         CampaignMaps,
-        MainmenuMaps
+        MainmenuMaps,
+        FirefightMaps
     }
 
     [Flags]
     public enum ModifierFlags : int
     {
         None = 0,
-        Mainmenu = 1 << 0
+        Mainmenu = 1 << 0,
+        SignedBit = (1 << 1)
     }
 
     [TagStructure(Size = 0x8)]

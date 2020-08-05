@@ -8,6 +8,8 @@ using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
 using TagTool.Tags;
 using System.Runtime.InteropServices;
+using TagTool.Common;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Cache
 {
@@ -259,6 +261,17 @@ namespace TagTool.Cache
                 Header.SHA1 = new SHA1Managed().ComputeHash(packageStream);
 
                 //
+                // Sign the package using the ED profile keys
+                //
+
+                byte[] privateKey, publicKey;
+                if(TryReadElDewritoProfileKeys(out privateKey, out publicKey))
+                {
+                    SignPackage(Header, privateKey, publicKey);
+                    Header.ModifierFlags |= ModifierFlags.SignedBit;
+                }
+
+                //
                 // update package header
                 //
 
@@ -271,6 +284,28 @@ namespace TagTool.Cache
                     Console.WriteLine($"WARNING: Mod package size exceeded 0x{uint.MaxValue.ToString("X8")} bytes, it will fail to load.");
 
             }
+        }
+
+        private bool TryReadElDewritoProfileKeys(out byte[] privateKey, out byte[] publicKey)
+        {
+            privateKey = publicKey = null;
+
+            var keysPath = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "ElDewrito\\keys.cfg");
+            if (!File.Exists(keysPath))
+                return false;
+
+            var cfg = File.ReadAllText(keysPath);
+            privateKey = Convert.FromBase64String(Regex.Match(cfg, "Player.PrivKey\\s+\"([^\"]+)").Groups[1].Value);
+            publicKey = Convert.FromBase64String(Regex.Match(cfg, "Player.PubKey\\s+\"([^\"]+)").Groups[1].Value);
+
+            return true;
+        }
+
+        private void SignPackage(ModPackageHeader header, byte[] privateKey, byte[] publicKey)
+        {
+            var rsa = RSAUtil.DecodeRSAPrivateKey(privateKey);
+            header.RSAPublicKey = publicKey;
+            header.RSASignature = rsa.SignHash(header.SHA1, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
         }
 
         private static void CopyStreamChunk(EndianReader reader, ModPackageStream stream, uint size)
@@ -714,16 +749,33 @@ namespace TagTool.Cache
         {
             Metadata = new ModPackageMetadata();
 
-            Console.WriteLine("Enter the display name of the mod package (16 chars max):");
+            Console.WriteLine("Enter the display name of the mod package (32 chars max):");
             Metadata.Name = Console.ReadLine().Trim();
 
             Console.WriteLine();
-            Console.WriteLine("Enter the description of the mod package (128 chars max):");
+            Console.WriteLine("Enter the description of the mod package (512 chars max):");
             Metadata.Description = Console.ReadLine().Trim();
 
             Console.WriteLine();
-            Console.WriteLine("Enter the author of the mod package (16 chars max):");
+            Console.WriteLine("Enter the author of the mod package (32 chars max):");
             Metadata.Author = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the version of the mod package: (major.minor)");
+
+            try
+            {
+                var version = Version.Parse(Console.ReadLine());
+                Metadata.VersionMajor = (short)version.Major;
+                Metadata.VersionMinor = (short)version.Minor;
+            }
+            catch(ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("ERROR: Failed to parse version number, setting it to 0.");
+                Metadata.VersionMajor = 0;
+                Metadata.VersionMinor = 0;
+            }
 
             Metadata.BuildDateLow = (int)DateTime.Now.ToFileTime() & 0x7FFFFFFF;
             Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
