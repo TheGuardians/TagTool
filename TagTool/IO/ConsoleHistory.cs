@@ -11,13 +11,16 @@ namespace TagTool.IO
     {
         private static bool IsNewLine { get; set; } = true;
         private static string CurrentLine { get; set; } = "";
+        private static byte[] InputBuffer = new byte[4096];
 
         private static List<string> Lines { get; } = new List<string>();
 
         public static void Initialize()
         {
             Console.SetOut(new Writer(Console.Out));
-            Console.SetIn(new Reader(Console.In));
+
+            Stream inputStream = Console.OpenStandardInput(InputBuffer.Length);
+            Console.SetIn(new Reader(new StreamReader(inputStream, Console.InputEncoding, false, InputBuffer.Length)));
         }
 
         public static string Dump(string name)
