@@ -28,7 +28,7 @@ using HaloShaderGenerator.Globals;
 
 namespace TagTool.Commands
 {
-    
+
     public class TestCommand : Command
     {
         GameCache Cache;
@@ -38,11 +38,116 @@ namespace TagTool.Commands
             Cache = cache;
         }
 
+        public void RegenShaderGLVS()
+        {
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                var generator = new HaloShaderGenerator.Shader.ShaderGenerator();
+                // recompile glvs
+
+                var tag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
+
+                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, tag);
+                // world rigid skinned
+                for (int i = 0; i < 3; i++)
+                {
+                    var vertexBlock = glvs.VertexTypes[i];
+                    for (int j = 0; j < vertexBlock.DrawModes.Count; j++)
+                    {
+                        var entryPoint = vertexBlock.DrawModes[j];
+                        var entryPointEnum = (ShaderStage)j;
+                        if (entryPoint.ShaderIndex != -1)
+                        {
+                            if (generator.IsEntryPointSupported(entryPointEnum) && generator.IsVertexShaderShared(entryPointEnum))
+                            {
+                                var result = generator.GenerateSharedVertexShader((HaloShaderGenerator.Globals.VertexType)i, entryPointEnum);
+                                glvs.Shaders[entryPoint.ShaderIndex] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateVertexShaderBlock(Cache, result);
+                            }
+                        }
+                    }
+                }
+
+                Cache.Serialize(stream, tag, glvs);
+
+                // recompile glps
+
+                tag = Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps");
+                var glps = Cache.Deserialize<GlobalPixelShader>(stream, tag);
+
+                for (int i = 0; i < 2; i++)
+                {
+                    var result = generator.GenerateSharedPixelShader(ShaderStage.Shadow_Generate, 2, i);
+                    glps.Shaders[i] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GeneratePixelShaderBlock(Cache, result);
+                }
+                Cache.Serialize(stream, tag, glps);
+
+            }
+        }
+
         public override object Execute(List<string> args)
         {
             if (args.Count > 0)
                 return false;
 
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                int newNameCount = 0;
+                foreach(var tag in Cache.TagCache.NonNull())
+                {
+                    var tagGroups = new Tag[]{ "rm  ", new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
+                    if(tag.IsInGroup(tagGroups))
+                    {
+                        CachedTagHaloOnline hoTag = tag as CachedTagHaloOnline;
+                        foreach(var dep in hoTag.Dependencies)
+                        {
+                            var depName = Cache.TagCache.GetTag(dep).Name;
+                            if (depName.Contains("ms30"))
+                            {
+                                if (!tag.Name.StartsWith("ms30"))
+                                {
+                                    Console.WriteLine(tag.Name);
+                                    tag.Name = "ms30\\" + tag.Name;
+                                    newNameCount += 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for(int i = 0; i < 10; i++)
+                {
+                    foreach (var tag in Cache.TagCache.NonNull())
+                    {
+                        var tagGroups = new Tag[] { "scen", "mode", "mach", "item", "hlmt", "dctr", "bloc" };
+                        if (!tag.IsInGroup(tagGroups) || tag.Name.Contains("eldewrito") || tag.Name.Contains("reforge"))
+                            continue;
+
+                        CachedTagHaloOnline hoTag = tag as CachedTagHaloOnline;
+                        foreach (var dep in hoTag.Dependencies)
+                        {
+                            var depName = Cache.TagCache.GetTag(dep).Name;
+                            if (depName.Contains("ms30"))
+                            {
+                                if (!tag.Name.StartsWith("ms30"))
+                                {
+                                    Console.WriteLine($"{tag.Name}.{tag.Group}");
+                                    tag.Name = "ms30\\" + tag.Name;
+                                    newNameCount += 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                Console.WriteLine($"Added ms30 prefix to {newNameCount} tags.");
+                var hoCache = Cache as GameCacheHaloOnline;
+                hoCache.SaveTagNames();
+            }
+
+
+
+            return true;
             /*
             using (var stream = Cache.OpenCacheReadWrite())
             {
@@ -66,52 +171,6 @@ namespace TagTool.Commands
                 Cache.Serialize(stream, guardianRmshTag, rmsh);
             }
             */
-
-            using (var stream = Cache.OpenCacheReadWrite())
-            {
-                var generator = new HaloShaderGenerator.Shader.ShaderGenerator();
-                // recompile glvs
-
-                var tag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
-                
-                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, tag);
-                // world rigid skinned
-                for(int i = 0; i < 3; i++)
-                {
-                    var vertexBlock = glvs.VertexTypes[i];
-                    for(int j = 0; j < vertexBlock.DrawModes.Count; j++)
-                    {
-                        var entryPoint = vertexBlock.DrawModes[j];
-                        var entryPointEnum = (ShaderStage)j;
-                        if (entryPoint.ShaderIndex != -1)
-                        {
-                            if (generator.IsEntryPointSupported(entryPointEnum) && generator.IsVertexShaderShared(entryPointEnum))
-                            {
-                                var result = generator.GenerateSharedVertexShader((HaloShaderGenerator.Globals.VertexType)i, entryPointEnum);
-                                glvs.Shaders[entryPoint.ShaderIndex] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateVertexShaderBlock(Cache, result);
-                            }
-                        }
-                    }
-                }
-
-                Cache.Serialize(stream, tag, glvs);
-                
-                // recompile glps
-
-                tag = Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps");
-                var glps = Cache.Deserialize<GlobalPixelShader>(stream, tag);
-
-                for(int i = 0; i < 2; i++)
-                {
-                    var result = generator.GenerateSharedPixelShader(ShaderStage.Shadow_Generate, 2, i);
-                    glps.Shaders[i] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GeneratePixelShaderBlock(Cache, result);
-                }
-                Cache.Serialize(stream, tag, glps);
-
-            }
-
-
-            return true;
         }
     }
 }
