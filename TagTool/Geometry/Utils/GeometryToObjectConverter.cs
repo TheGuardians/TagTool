@@ -68,7 +68,7 @@ namespace TagTool.Geometry.Utils
             StructureBspResources = SourceCache.ResourceCache.GetStructureBspTagResources(StructureBsp.CollisionBspResource);
         }
 
-        public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false)
+        public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false, bool centergeometry = true)
         {
             //return null tag and skip to next bsp if bsp resources is null
             if (StructureBspResources == null)
@@ -125,7 +125,7 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
 
             //if the offset from the origin is >2 units in any dimension, center the object
-            if(HasValidCollisions && GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f)
+            if(HasValidCollisions && centergeometry && GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f)
             {
                 var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
                 var collisiongeometrybackup = newCollisionGeometry.DeepClone();
