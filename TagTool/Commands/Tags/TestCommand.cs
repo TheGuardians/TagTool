@@ -92,13 +92,13 @@ namespace TagTool.Commands
             using (var stream = Cache.OpenCacheReadWrite())
             {
                 int newNameCount = 0;
-                foreach(var tag in Cache.TagCache.NonNull())
+                foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    var tagGroups = new Tag[]{ "rm  ", new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-                    if(tag.IsInGroup(tagGroups))
+                    var tagGroups = new Tag[] { "rm  ", new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
+                    if (tag.IsInGroup(tagGroups))
                     {
                         CachedTagHaloOnline hoTag = tag as CachedTagHaloOnline;
-                        foreach(var dep in hoTag.Dependencies)
+                        foreach (var dep in hoTag.Dependencies)
                         {
                             var depName = Cache.TagCache.GetTag(dep).Name;
                             if (depName.Contains("ms30"))
@@ -115,7 +115,7 @@ namespace TagTool.Commands
                     }
                 }
 
-                for(int i = 0; i < 10; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     foreach (var tag in Cache.TagCache.NonNull())
                     {
@@ -143,9 +143,43 @@ namespace TagTool.Commands
                 Console.WriteLine($"Added ms30 prefix to {newNameCount} tags.");
                 var hoCache = Cache as GameCacheHaloOnline;
                 hoCache.SaveTagNames();
+
+
+                foreach (var file in Cache.Directory.GetFiles("*.map"))
+                {
+                    using (var mapFileStream = file.Open(FileMode.Open, FileAccess.ReadWrite))
+                    {
+                        var reader = new EndianReader(mapFileStream);
+                        var writer = new EndianWriter(mapFileStream);
+
+                        var mapFile = new MapFile();
+                        mapFile.Read(reader);
+
+                        if (mapFile.MapFileBlf.MapVariant == null)
+                            continue;
+
+                        var tagNamesChunk = mapFile.MapFileBlf.MapVariantTagNames;
+                        var palette = mapFile.MapFileBlf.MapVariant.MapVariant.Palette;
+                        for (int i = 0; i < palette.Length; i++)
+                        {
+                            if (palette[i].TagIndex == -1)
+                                continue;
+
+                            var name = tagNamesChunk.Names[i].Name;
+                            string newName = $"ms30\\{name}";
+                            if (Cache.TagCache.TryGetTag(newName, out CachedTag tag))
+                            {
+                                tagNamesChunk.Names[i].Name = newName;
+                                Console.WriteLine($"Prefixed '{tag}'");
+                            }
+                        }
+
+                        mapFileStream.Position = 0;
+                        mapFile.Write(writer);
+                    }
+                }
+
             }
-
-
 
             return true;
             /*
