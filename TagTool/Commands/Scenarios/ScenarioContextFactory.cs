@@ -26,7 +26,7 @@ namespace TagTool.Commands.Scenarios
             context.AddCommand(new CompileScriptsCommand(cache, scenario));
             context.AddCommand(new ListScriptsCommand(cache, tag, scenario));
             context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario));
-            context.AddCommand(new ConvertGeometryCommand(cache, scenario));
+            context.AddCommand(new ConvertInstancedGeometryCommand(cache, scenario));
         }
     }
 }

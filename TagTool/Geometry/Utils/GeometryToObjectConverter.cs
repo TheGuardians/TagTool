@@ -125,50 +125,60 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
 
             //if the offset from the origin is >2 units in any dimension, center the object
-            if(HasValidCollisions && centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
+            if(centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
             {
-                var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
-                var collisiongeometrybackup = newCollisionGeometry.DeepClone();
-
-                //center the offsets for the collision model
-                for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+                if (HasValidCollisions)
                 {
-                    newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
-                    newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
-                    newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
+                    var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+                    var collisiongeometrybackup = newCollisionGeometry.DeepClone();
+
+                    //center the offsets for the collision model
+                    for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+                    {
+                        newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
+                        newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
+                        newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
+                    }
+
+                    GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
+                    //proceed only if bsp generation succeeds, otherwise just revert to noncentered
+                    if (generateCollisionBSP.generate_bsp(0, 0, 0))
+                    {
+                        //offset MOPP extents to origin
+                        foreach (var bspPhysics in collisionModel.Regions[0].Permutations[0].BspPhysics)
+                        {
+                            bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
+                                bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
+                                bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
+                                bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
+                                bspPhysics.GeometryShape.AABB_Center.W);
+                        }
+                        //fix mopp code offsets to origin
+                        foreach (var mopp in collisionModel.Regions[0].Permutations[0].BspMoppCodes)
+                        {
+                            mopp.Info.Offset = new RealQuaternion(
+                                mopp.Info.Offset.I - GeometryOffset.X,
+                                mopp.Info.Offset.J - GeometryOffset.Y,
+                                mopp.Info.Offset.K - GeometryOffset.Z,
+                                mopp.Info.Offset.W);
+                        }
+                        //set render model compression to center around origin
+                        renderModel.Geometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
+                        renderModel.Geometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
+                        renderModel.Geometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
+                    }
+                    else
+                    {
+                        //bsp generation failed, uncenter stuff again
+                        collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = collisiongeometrybackup;
+                    }
                 }
-
-                GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
-                //proceed only if bsp generation succeeds, otherwise just revert to noncentered
-                if (generateCollisionBSP.generate_bsp(0,0,0))
+                else
                 {
-                    //offset MOPP extents to origin
-                    foreach (var bspPhysics in collisionModel.Regions[0].Permutations[0].BspPhysics)
-                    {
-                        bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
-                            bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
-                            bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
-                            bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
-                            bspPhysics.GeometryShape.AABB_Center.W);
-                    }
-                    //fix mopp code offsets to origin
-                    foreach (var mopp in collisionModel.Regions[0].Permutations[0].BspMoppCodes)
-                    {
-                        mopp.Info.Offset = new RealQuaternion(
-                            mopp.Info.Offset.I - GeometryOffset.X,
-                            mopp.Info.Offset.J - GeometryOffset.Y,
-                            mopp.Info.Offset.K - GeometryOffset.Z,
-                            mopp.Info.Offset.W);
-                    }
                     //set render model compression to center around origin
                     renderModel.Geometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
                     renderModel.Geometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
                     renderModel.Geometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
-                }
-                else
-                {
-                    //bsp generation failed, uncenter stuff again
-                    collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = collisiongeometrybackup;
                 }
             }
 
