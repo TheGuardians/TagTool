@@ -84,7 +84,7 @@ namespace TagTool.Commands.Scenarios
                 else
                 {
                     Console.WriteLine("------------------------------------------------------------------");
-                    Console.WriteLine("Enter each instance with the format <Name or Index> [New tagname]");
+                    Console.WriteLine("Enter each instance with the format <Index> [New tagname]");
                     Console.WriteLine("Enter a blank line to finish.");
                     Console.WriteLine("------------------------------------------------------------------");
                     for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
