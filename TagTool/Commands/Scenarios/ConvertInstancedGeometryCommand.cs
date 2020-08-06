@@ -26,7 +26,7 @@ namespace TagTool.Commands.Scenarios
                 "ConvertInstancedGeometry",
                 "Convert Instanced Geometry in Halo Online maps to forge objects",
 
-                "ConvertInstancedGeometry <BspIndex> [geometry index] [nocenter] [<Instance index or 'all'> [New Tagname]]",
+                "ConvertInstancedGeometry <BspIndex> [nocenter] [<Instance index or 'all'> [New Tagname]]",
 
                 "Convert Instanced Geometry in Halo Online maps to forge objects")
         {
