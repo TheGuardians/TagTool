@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
@@ -15,8 +16,9 @@ namespace TagTool.Commands.Scenarios
 {
     class ConvertInstancedGeometryCommand : Command
     {
-        private GameCache CacheContext { get; }
+        private GameCacheHaloOnlineBase HoCache { get; }
         private Scenario Scnr { get; }
+        private bool centergeometry = true;
 
         public ConvertInstancedGeometryCommand(GameCache cacheContext, Scenario scnr) :
             base(false,
@@ -24,88 +26,84 @@ namespace TagTool.Commands.Scenarios
                 "ConvertInstancedGeometry",
                 "Convert Instanced Geometry in Halo Online maps to forge objects",
 
-                "ConvertInstancedGeometry [geometry index]",
+                "ConvertInstancedGeometry <BspIndex> [geometry index] [nocenter] [<Instance index or name> [New Tagname]]",
 
                 "Convert Instanced Geometry in Halo Online maps to forge objects")
         {
-            CacheContext = cacheContext;
+            HoCache = (GameCacheHaloOnlineBase)cacheContext;
             Scnr = scnr;
         }
 
         public override object Execute(List<string> args)
         {
-            bool iscluster = false;
-            int geometry_index = -1;
-            if (args.Count > 0)
-            {
-                if (!int.TryParse(args[0], out geometry_index))
-                    return new TagToolError(CommandError.ArgInvalid, "Invalid geometry index");
-            }
+            var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
-            using (var stream = CacheContext.OpenCacheReadWrite())
+            if (argStack.Count < 1)
+                return new TagToolError(CommandError.ArgCount, "Expected bsp index!");
+
+            if (!int.TryParse(argStack.Pop(), out int sbspIndex))
+                return new TagToolError(CommandError.ArgInvalid, "Invalid bsp index");
+
+            using (var hoCacheStream = HoCache.OpenCacheReadWrite())
             {
-                for (var sbspindex = 0; sbspindex < Scnr.StructureBsps.Count; sbspindex++)
+                var hoSbsp = HoCache.Deserialize<ScenarioStructureBsp>(hoCacheStream, Scnr.StructureBsps[sbspIndex].StructureBsp);
+
+                var desiredInstances = new Dictionary<int, string>();
+
+                if (argStack.Count > 0 && argStack.Peek().ToLower() == "nocenter")
                 {
-                    var sbsp = (ScenarioStructureBsp)CacheContext.Deserialize(stream, Scnr.StructureBsps[sbspindex].StructureBsp);
-
-                    var converter = new GeometryToObjectConverter((GameCacheHaloOnlineBase)CacheContext, stream, CacheContext, stream, Scnr, sbspindex);
-                    
-                    var converted = new HashSet<short>();
-
-                    var loopcounter = iscluster ? sbsp.Clusters.Count : sbsp.InstancedGeometryInstances.Count;
-
-                    //populate list of geometry to convert
-                    List<int> GeometryList = new List<int>();
-                    if (geometry_index != -1)
-                        GeometryList.Add(geometry_index);
-                    else
-                        for (var i = 0; i < loopcounter; i++)
-                            GeometryList.Add(i);
-
-                    foreach (int geometryIndex in GeometryList)
+                    argStack.Pop();
+                    centergeometry = false;
+                }
+                if (argStack.Count > 0)
+                {
+                    int.TryParse(argStack.Pop(), out int index);
+                    string desiredName = null;
+                    if (argStack.Count > 0)
                     {
-                        var meshindex = iscluster ? sbsp.Clusters[geometryIndex].MeshIndex : sbsp.InstancedGeometryInstances[geometryIndex].MeshIndex;
-                        if (converted.Contains(meshindex))
-                            continue;
-                        converted.Add(meshindex);
-                        //strip digits from the end of the instancedgeometry name
-                        //string instancedgeoname = CacheContext.StringTable.GetString(InstancedGeometryBlock.Name);
-                        //var digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-                        //var instancedgeoname = tempname.TrimEnd(digits);
+                        desiredName = argStack.Pop();
+                    }
 
-                        //string NewName = $"objects\\reforge\\instanced_geometry\\{currentmeshindex}";
+                    desiredInstances.Add(index, desiredName);
+                }
+                else
+                {
+                    Console.WriteLine("------------------------------------------------------------------");
+                    Console.WriteLine("Enter each instance with the format <Name or Index> [New tagname]");
+                    Console.WriteLine("Enter a blank line to finish.");
+                    Console.WriteLine("------------------------------------------------------------------");
+                    for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                    {
+                        var parts = line.Split(' ');
+                        int.TryParse(parts[0], out var index);
+                        var name = parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : null;
 
-                        var objectTag = converter.ConvertGeometry(geometryIndex, null, iscluster);
+                        if (index == -1)
+                            return new TagToolError(CommandError.OperationFailed);
 
-                        //if sbsp resource is null this tag will return null, and we skip to the next bsp
-                        if (objectTag == null)
-                            break;
-
-                        var instanceName = $"geometry_{geometryIndex:000}";
-                        Console.WriteLine($"Converting geometry '{instanceName}'...");
-
-                        //add new object to forge globals
-                        CachedTag forgeglobal = CacheContext.TagCache.GetTag<ForgeGlobalsDefinition>(@"multiplayer\forge_globals");
-                        var tmpforg = (ForgeGlobalsDefinition)CacheContext.Deserialize(stream, forgeglobal);
-                        tmpforg.Palette.Add(new ForgeGlobalsDefinition.PaletteItem
-                        {
-                            Name = Path.GetFileName(objectTag.Name),
-                            Type = ForgeGlobalsDefinition.PaletteItemType.Structure,
-                            CategoryIndex = 64,
-                            DescriptionIndex = -1,
-                            MaxAllowed = 0,
-                            Object = objectTag
-                        });
-                        CacheContext.Serialize(stream, forgeglobal, tmpforg);
-                        CacheContext.SaveStrings();
+                        desiredInstances.Add(index, name);
                     }
                 }
 
-                if (CacheContext is GameCacheHaloOnlineBase hoCache)
-                    hoCache.SaveTagNames();
-            }
+                if (desiredInstances.Count < 1)
+                    return true;
 
-            Console.WriteLine("Done!");
+                var converter = new GeometryToObjectConverter(HoCache, hoCacheStream, HoCache, hoCacheStream, Scnr, sbspIndex);
+
+                foreach (var kv in desiredInstances)
+                {
+                    try
+                    {
+                        var instance = hoSbsp.InstancedGeometryInstances[kv.Key];
+                        var tag = converter.ConvertGeometry(kv.Key, kv.Value, false, centergeometry);
+                    }
+                    finally
+                    {
+                        HoCache.SaveStrings();
+                        HoCache.SaveTagNames();
+                    }
+                }
+            }
 
             return true;
         }
