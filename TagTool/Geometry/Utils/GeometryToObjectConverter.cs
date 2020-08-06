@@ -125,7 +125,7 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
 
             //if the offset from the origin is >2 units in any dimension, center the object
-            if(HasValidCollisions && centergeometry && GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f)
+            if(HasValidCollisions && centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
             {
                 var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
                 var collisiongeometrybackup = newCollisionGeometry.DeepClone();
