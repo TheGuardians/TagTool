@@ -26,7 +26,7 @@ namespace TagTool.Commands.Scenarios
                 "ConvertInstancedGeometry",
                 "Convert Instanced Geometry in Halo Online maps to forge objects",
 
-                "ConvertInstancedGeometry <BspIndex> [geometry index] [nocenter] [<Instance index or name> [New Tagname]]",
+                "ConvertInstancedGeometry <BspIndex> [geometry index] [nocenter] [<Instance index or 'all'> [New Tagname]]",
 
                 "Convert Instanced Geometry in Halo Online maps to forge objects")
         {
@@ -49,6 +49,7 @@ namespace TagTool.Commands.Scenarios
                 var hoSbsp = HoCache.Deserialize<ScenarioStructureBsp>(hoCacheStream, Scnr.StructureBsps[sbspIndex].StructureBsp);
 
                 var desiredInstances = new Dictionary<int, string>();
+                var converted = new HashSet<short>();
 
                 if (argStack.Count > 0 && argStack.Peek().ToLower() == "nocenter")
                 {
@@ -57,14 +58,28 @@ namespace TagTool.Commands.Scenarios
                 }
                 if (argStack.Count > 0)
                 {
-                    int.TryParse(argStack.Pop(), out int index);
-                    string desiredName = null;
-                    if (argStack.Count > 0)
+                    if(argStack.Peek().ToLower() == "all")
                     {
-                        desiredName = argStack.Pop();
+                        for(var instanceindex = 0; instanceindex < hoSbsp.InstancedGeometryInstances.Count; instanceindex++)
+                        {
+                            short meshindex = hoSbsp.InstancedGeometryInstances[instanceindex].MeshIndex;
+                            if (converted.Contains(meshindex))
+                                continue;
+                            converted.Add(meshindex);
+                            desiredInstances.Add(instanceindex, null);
+                        }
                     }
+                    else
+                    {
+                        int.TryParse(argStack.Pop(), out int index);
+                        string desiredName = null;
+                        if (argStack.Count > 0)
+                        {
+                            desiredName = argStack.Pop();
+                        }
 
-                    desiredInstances.Add(index, desiredName);
+                        desiredInstances.Add(index, desiredName);
+                    }
                 }
                 else
                 {
