@@ -94,7 +94,15 @@ namespace TagTool.BlamFile
 
                     case "modp":
                         ContentFlags |= BlfFileContentFlags.ModReference;
-                        ModReference = (BlfModPackageReference)deserializer.Deserialize(dataContext, typeof(BlfModPackageReference));
+                        if(header.MajorVersion == (short)BlfModPackageReferenceVersion.Version1)
+                        {
+                            var v1 = (BlfModPackageReferenceV1)deserializer.Deserialize(dataContext, typeof(BlfModPackageReferenceV1));
+                            ModReference = new BlfModPackageReference(v1); // Convert to the new format
+                        }
+                        else
+                        {
+                            ModReference = (BlfModPackageReference)deserializer.Deserialize(dataContext, typeof(BlfModPackageReference));
+                        }
                         break;
 
                     case "mapv":
@@ -460,8 +468,14 @@ namespace TagTool.BlamFile
         public NameUnicode128[] Descriptions;
     }
 
+    enum BlfModPackageReferenceVersion : short
+    {
+        Version1 = 1,
+        Current = 2
+    }
+
     [TagStructure(Size = 0x44, Align = 0x1)]
-    public class BlfModPackageReference : BlfChunkHeader
+    public class BlfModPackageReferenceV1 : BlfChunkHeader
     {
         [TagField(Length = 0x10, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public string Name;
@@ -469,6 +483,31 @@ namespace TagTool.BlamFile
         public string Author;
         [TagField(Length = 0x14)]
         public byte[] Hash;
+    }
+
+    [TagStructure(Size = 0x484)]
+    public class BlfModPackageReference : BlfChunkHeader
+    {
+        [TagField(Length = 0x14)]
+        public byte[] Hash;
+
+        public ModPackageMetadata Metadata;
+
+        public BlfModPackageReference()
+        {
+            Signature = new Tag("modp");
+            Length = (int)typeof(BlfModPackageReference).GetSize() - (int)typeof(BlfChunkHeader).GetSize();
+            MajorVersion = (short)BlfModPackageReferenceVersion.Current;
+            MinorVersion = 0;
+        }
+
+        public BlfModPackageReference(BlfModPackageReferenceV1 v1) : this()
+        {
+            Hash = v1.Hash;
+            Metadata = new ModPackageMetadata();
+            Metadata.Name = v1.Name;
+            Metadata.Author = v1.Author;
+        }
     }
 
     [TagStructure(Size = 0x130C, Align = 0x1)]
