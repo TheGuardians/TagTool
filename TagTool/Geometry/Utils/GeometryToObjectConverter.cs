@@ -34,7 +34,6 @@ namespace TagTool.Geometry.Utils
         private RealPoint3d GeometryOffset;
         private RenderGeometryCompression OriginalCompression;
         private bool HasValidCollisions = true;
-        private bool CenterGeometry = false;
         public PortTagCommand PortTag { get; private set; }
 
         public GeometryToObjectConverter(
@@ -69,10 +68,8 @@ namespace TagTool.Geometry.Utils
             StructureBspResources = SourceCache.ResourceCache.GetStructureBspTagResources(StructureBsp.CollisionBspResource);
         }
 
-        public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false, bool centergeometry = false)
+        public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false, bool centergeometry = true)
         {
-            CenterGeometry = centergeometry;
-
             //return null tag and skip to next bsp if bsp resources is null
             if (StructureBspResources == null)
                 return null;
@@ -110,6 +107,71 @@ namespace TagTool.Geometry.Utils
             var model = GenerateModel(renderModel, collisionModel);
             var gameObject = GenerateObject(geometryIndex, ComputeRenderModelEnclosingRadius(renderModel));
 
+            //fix items being offset from origin
+            //first determine what the offset is from the origin
+            OriginalCompression = renderModel.Geometry.Compression[0].DeepClone();
+            RealVector3d scale = new RealVector3d
+            {
+                I = renderModel.Geometry.Compression[0].X.Upper - renderModel.Geometry.Compression[0].X.Lower,
+                J = renderModel.Geometry.Compression[0].Y.Upper - renderModel.Geometry.Compression[0].Y.Lower,
+                K = renderModel.Geometry.Compression[0].Z.Upper - renderModel.Geometry.Compression[0].Z.Lower
+            };
+
+            GeometryOffset.X = OriginalCompression.X.Lower - (-scale.I / 2);
+            GeometryOffset.Y = OriginalCompression.Y.Lower - (-scale.J / 2);
+            GeometryOffset.Z = OriginalCompression.Z.Lower - (-scale.K / 2);
+
+            if (collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry.Vertices.Count < 1 || collisionModel.Regions[0].Permutations[0].BspPhysics.Count < 1)
+                HasValidCollisions = false;
+
+            //if the offset from the origin is >2 units in any dimension, center the object
+            if(HasValidCollisions && centergeometry && GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f)
+            {
+                var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+                var collisiongeometrybackup = newCollisionGeometry.DeepClone();
+
+                //center the offsets for the collision model
+                for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+                {
+                    newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
+                    newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
+                    newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
+                }
+
+                GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
+                //proceed only if bsp generation succeeds, otherwise just revert to noncentered
+                if (generateCollisionBSP.generate_bsp(0,0,0))
+                {
+                    //offset MOPP extents to origin
+                    foreach (var bspPhysics in collisionModel.Regions[0].Permutations[0].BspPhysics)
+                    {
+                        bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
+                            bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
+                            bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
+                            bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
+                            bspPhysics.GeometryShape.AABB_Center.W);
+                    }
+                    //fix mopp code offsets to origin
+                    foreach (var mopp in collisionModel.Regions[0].Permutations[0].BspMoppCodes)
+                    {
+                        mopp.Info.Offset = new RealQuaternion(
+                            mopp.Info.Offset.I - GeometryOffset.X,
+                            mopp.Info.Offset.J - GeometryOffset.Y,
+                            mopp.Info.Offset.K - GeometryOffset.Z,
+                            mopp.Info.Offset.W);
+                    }
+                    //set render model compression to center around origin
+                    renderModel.Geometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
+                    renderModel.Geometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
+                    renderModel.Geometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
+                }
+                else
+                {
+                    //bsp generation failed, uncenter stuff again
+                    collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = collisiongeometrybackup;
+                }
+            }
+
             // fixup tag refs
             //if coll is empty but referenced here, the game crashes. Only reference coll if it has contents.
             if (HasValidCollisions)
@@ -118,13 +180,6 @@ namespace TagTool.Geometry.Utils
             }
             model.RenderModel = renderModelTag;
             gameObject.Model = modelTag;
-
-            //regenerate collision bsp following adjustments
-            if (CenterGeometry && HasValidCollisions)
-            {
-                GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
-                generateCollisionBSP.Execute(new List<string>());
-            }
 
             // finally serialize all the tags
             DestCache.Serialize(DestStream, renderModelTag, renderModel);
@@ -353,28 +408,6 @@ namespace TagTool.Geometry.Utils
                 bspPhysics.GeometryShape.BspIndex = -1;
                 bspPhysics.GeometryShape.CollisionGeometryShapeKey = 0xffff;
                 bspPhysics.GeometryShape.CollisionGeometryShapeType = 0;
-                if (CenterGeometry)
-                {
-                    //offset MOPPs to origin
-                    bspPhysics.GeometryShape.AABB_Center = new RealQuaternion(
-                        bspPhysics.GeometryShape.AABB_Center.I - GeometryOffset.X,
-                        bspPhysics.GeometryShape.AABB_Center.J - GeometryOffset.Y,
-                        bspPhysics.GeometryShape.AABB_Center.K - GeometryOffset.Z,
-                        bspPhysics.GeometryShape.AABB_Center.W);
-                }
-            }
-
-            if (CenterGeometry)
-            {
-                //offset MOPPs to origin
-                foreach (var mopp in permutation.BspMoppCodes)
-                {
-                    mopp.Info.Offset = new RealQuaternion(
-                        mopp.Info.Offset.I - GeometryOffset.X,
-                        mopp.Info.Offset.J - GeometryOffset.Y,
-                        mopp.Info.Offset.K - GeometryOffset.Z,
-                        mopp.Info.Offset.W);
-                }
             }
 
             // fixup surfaces materials block
@@ -391,17 +424,7 @@ namespace TagTool.Geometry.Utils
 
                 surface.MaterialIndex = modelMaterialIndex;
             }
-            if (CenterGeometry)
-            {
-                //center the offsets for the collision model
-                for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
-                {
-                    newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
-                    newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
-                    newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
-                }    
-            }
-            
+
             // add the collision geometry
             permutation.Bsps.Add(new CollisionModel.Region.Permutation.Bsp()
             {
@@ -574,25 +597,6 @@ namespace TagTool.Geometry.Utils
                 var compressionInfo = CompressVertexBuffer(mesh.ResourceVertexBuffers[0]);
                 renderGeometry.Compression = new List<RenderGeometryCompression>() { compressionInfo };
             }
-
-            if (CenterGeometry)
-            {
-                //fix items being offset from origin
-                OriginalCompression = renderGeometry.Compression[0].DeepClone();
-                RealVector3d scale = new RealVector3d
-                {
-                    I = renderGeometry.Compression[0].X.Upper - renderGeometry.Compression[0].X.Lower,
-                    J = renderGeometry.Compression[0].Y.Upper - renderGeometry.Compression[0].Y.Lower,
-                    K = renderGeometry.Compression[0].Z.Upper - renderGeometry.Compression[0].Z.Lower
-                };
-                renderGeometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
-                renderGeometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
-                renderGeometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
-
-                GeometryOffset.X = OriginalCompression.X.Lower - (-scale.I / 2);
-                GeometryOffset.Y = OriginalCompression.Y.Lower - (-scale.J / 2);
-                GeometryOffset.Z = OriginalCompression.Z.Lower - (-scale.K / 2);
-            }        
 
             renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
 

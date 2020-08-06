@@ -168,13 +168,13 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public byte Bsp2dReferenceCount_H2;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public short Bsp2dReferenceCount;
+        public ushort Bsp2dReferenceCount;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public short FirstBsp2dReference_H2;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public int FirstBsp2dReference;
+        public uint FirstBsp2dReference;
     }
 
     [TagStructure(Size = 0x4)]
@@ -196,9 +196,9 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
     public class Surface : TagStructure
     {
-        public short Plane;
+        public ushort Plane;
 
-        public short FirstEdge;
+        public ushort FirstEdge;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public SurfaceFlags Flags_H2;
@@ -226,19 +226,19 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0xC)]
     public class Edge : TagStructure
     {
-        public short StartVertex;
-        public short EndVertex;
-        public short ForwardEdge;
-        public short ReverseEdge;
-        public short LeftSurface;
-        public short RightSurface;
+        public ushort StartVertex;
+        public ushort EndVertex;
+        public ushort ForwardEdge;
+        public ushort ReverseEdge;
+        public ushort LeftSurface;
+        public ushort RightSurface;
     }
 
     [TagStructure(Size = 0x10, Align = 0x10)]
     public class Vertex : TagStructure
     {
         public RealPoint3d Point;
-        public short FirstEdge;
+        public ushort FirstEdge;
         public short Sink;
     }
 

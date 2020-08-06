@@ -39,45 +39,53 @@ namespace TagTool.Commands.CollisionModels
             {
                 for(int permutation_index = 0; permutation_index < Definition.Regions[region_index].Permutations.Count; permutation_index++)
                 {
-                    for(int bspindex = 0; bspindex < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bspindex++)
+                    for(int bsp_index = 0; bsp_index < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bsp_index++)
                     {
-                        Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bspindex].Geometry.DeepClone();
-                        EdgeCleanupList = new List<int>();
-                        SurfaceCleanupList = new List<int>();
-
-                        //make sure there is nothing in the bsp blocks before starting
-                        Bsp.Leaves.Clear();
-                        Bsp.Bsp2dNodes.Clear();
-                        Bsp.Bsp2dReferences.Clear();
-                        Bsp.Bsp3dNodes.Clear();
-
-                        //regenerate the surface planes from surface vertices
-                        Bsp.Planes.Clear();
-                        generate_surface_planes();                      
-
-                        //allocate surface array before starting the bsp build
-                        surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
-                        for (int i = 0; i < Bsp.Surfaces.Count; i++)
-                        {
-                            if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Climbable) || Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Breakable))
-                                surface_array.surface_array.Add(i);
-                            else
-                                surface_array.surface_array.Add((int)(i | 0x80000000));
-                        }
-
-                        int bsp3dnode_index = -1;
-                        if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
-                        {
-                            Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
-                            Definition.Regions[region_index].Permutations[permutation_index].Bsps[bspindex].Geometry = Bsp;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
-                        }
+                        if (!generate_bsp(region_index, permutation_index, bsp_index))
+                            return false;
                     }
                 }
             }        
+            return true;
+        }
+
+        public bool generate_bsp(int region_index, int permutation_index, int bsp_index)
+        {
+            Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry.DeepClone();
+            EdgeCleanupList = new List<int>();
+            SurfaceCleanupList = new List<int>();
+
+            //make sure there is nothing in the bsp blocks before starting
+            Bsp.Leaves.Clear();
+            Bsp.Bsp2dNodes.Clear();
+            Bsp.Bsp2dReferences.Clear();
+            Bsp.Bsp3dNodes.Clear();
+
+            //regenerate the surface planes from surface vertices
+            Bsp.Planes.Clear();
+            generate_surface_planes();
+
+            //allocate surface array before starting the bsp build
+            surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
+            for (int i = 0; i < Bsp.Surfaces.Count; i++)
+            {
+                if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Climbable) || Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Breakable))
+                    surface_array.surface_array.Add(i);
+                else
+                    surface_array.surface_array.Add((int)(i | 0x80000000));
+            }
+
+            int bsp3dnode_index = -1;
+            if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
+            {
+                Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
+                Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = Bsp;
+            }
+            else
+            {
+                Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
+                return false;
+            }
             return true;
         }
 
@@ -503,7 +511,7 @@ namespace TagTool.Commands.CollisionModels
             //allocate initial leaf values
             Bsp.Leaves[leaf_index].Flags = 0;
             Bsp.Leaves[leaf_index].Bsp2dReferenceCount = 0;
-            Bsp.Leaves[leaf_index].FirstBsp2dReference = -1;
+            Bsp.Leaves[leaf_index].FirstBsp2dReference = 0xFFFFFFFF;
 
             for(int surface_array_index = 0; surface_array_index < surface_array.free_count + surface_array.used_count; surface_array_index++)
             {
@@ -530,8 +538,8 @@ namespace TagTool.Commands.CollisionModels
 
                         //update leaf block parameters given new bsp2dreference
                         Bsp.Leaves[leaf_index].Bsp2dReferenceCount++;
-                        if (Bsp.Leaves[leaf_index].FirstBsp2dReference == -1)
-                            Bsp.Leaves[leaf_index].FirstBsp2dReference = bsp2drefindex;
+                        if (Bsp.Leaves[leaf_index].FirstBsp2dReference == 0xFFFFFFFF)
+                            Bsp.Leaves[leaf_index].FirstBsp2dReference = (uint)bsp2drefindex;
 
                         //not 100% sure what this is checking
                         bool plane_index_negative = plane_index < 0;
@@ -559,13 +567,13 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Surfaces[new_surface_index_A].Flags = original_surface.Flags;
             Bsp.Surfaces[new_surface_index_A].BreakableSurfaceIndex = original_surface.BreakableSurfaceIndex;
             Bsp.Surfaces[new_surface_index_A].Plane = original_surface.Plane;
-            Bsp.Surfaces[new_surface_index_A].FirstEdge = -1;
+            Bsp.Surfaces[new_surface_index_A].FirstEdge = 0xFFFF;
             Bsp.Surfaces[new_surface_index_B].Flags = original_surface.Flags;
             Bsp.Surfaces[new_surface_index_B].BreakableSurfaceIndex = original_surface.BreakableSurfaceIndex;
             Bsp.Surfaces[new_surface_index_B].Plane = original_surface.Plane;
-            Bsp.Surfaces[new_surface_index_B].FirstEdge = -1;
+            Bsp.Surfaces[new_surface_index_B].FirstEdge = 0xFFFF;
 
-            int surface_edge_index = original_surface.FirstEdge;
+            ushort surface_edge_index = original_surface.FirstEdge;
 
             int dividing_edge_index = -1;
             int previous_new_edge_index = -1;
@@ -621,23 +629,23 @@ namespace TagTool.Commands.CollisionModels
                         dividing_edge_index = Bsp.Edges.Count - 1;
 
                         //new edge C will be the edge that separates the two new surfaces
-                        Bsp.Edges[dividing_edge_index].StartVertex = (short)new_vertex_index_A;
-                        Bsp.Edges[dividing_edge_index].ReverseEdge = (short)new_edge_index_B;
-                        Bsp.Edges[dividing_edge_index].EndVertex = -1;
-                        Bsp.Edges[dividing_edge_index].ForwardEdge = -1;
+                        Bsp.Edges[dividing_edge_index].StartVertex = (ushort)new_vertex_index_A;
+                        Bsp.Edges[dividing_edge_index].ReverseEdge = (ushort)new_edge_index_B;
+                        Bsp.Edges[dividing_edge_index].EndVertex = 0xFFFF;
+                        Bsp.Edges[dividing_edge_index].ForwardEdge = 0xFFFF;
                         if (vertex_plane_relationship_A.HasFlag(Plane_Relationship.FrontofPlane) || vertex_plane_relationship_A.HasFlag(Plane_Relationship.OnPlane))
-                            Bsp.Edges[dividing_edge_index].LeftSurface = (short)new_surface_index_B;
+                            Bsp.Edges[dividing_edge_index].LeftSurface = (ushort)new_surface_index_B;
                         else
-                            Bsp.Edges[dividing_edge_index].LeftSurface = (short)new_surface_index_A;
+                            Bsp.Edges[dividing_edge_index].LeftSurface = (ushort)new_surface_index_A;
                         if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane) || vertex_plane_relationship_B.HasFlag(Plane_Relationship.OnPlane))
-                            Bsp.Edges[dividing_edge_index].RightSurface = (short)new_surface_index_B;
+                            Bsp.Edges[dividing_edge_index].RightSurface = (ushort)new_surface_index_B;
                         else
-                            Bsp.Edges[dividing_edge_index].RightSurface = (short)new_surface_index_A;
+                            Bsp.Edges[dividing_edge_index].RightSurface = (ushort)new_surface_index_A;
                     }
                     else
                     {
-                        Bsp.Edges[dividing_edge_index].EndVertex = (short)new_vertex_index_A;
-                        Bsp.Edges[dividing_edge_index].ForwardEdge = (short)new_edge_index_B;
+                        Bsp.Edges[dividing_edge_index].EndVertex = (ushort)new_vertex_index_A;
+                        Bsp.Edges[dividing_edge_index].ForwardEdge = (ushort)new_edge_index_B;
                     }
 
                     float plane_vertex_input_A = edge_vertex_A.X * plane_block.I + edge_vertex_A.Y * plane_block.J + edge_vertex_A.Z * plane_block.K - plane_block.D;
@@ -648,36 +656,36 @@ namespace TagTool.Commands.CollisionModels
                     Bsp.Vertices[new_vertex_index_A].Point.X = (edge_vertex_B.X - edge_vertex_A.X) * plane_vertex_input_AB_ratio + edge_vertex_A.X;
                     Bsp.Vertices[new_vertex_index_A].Point.Y = (edge_vertex_B.Y - edge_vertex_A.Y) * plane_vertex_input_AB_ratio + edge_vertex_A.Y;
                     Bsp.Vertices[new_vertex_index_A].Point.Z = (edge_vertex_B.Z - edge_vertex_A.Z) * plane_vertex_input_AB_ratio + edge_vertex_A.Z;
-                    Bsp.Vertices[new_vertex_index_A].FirstEdge = (short)new_edge_index_A;
+                    Bsp.Vertices[new_vertex_index_A].FirstEdge = (ushort)new_edge_index_A;
 
                     //allocate values for new_edge_A
-                    Bsp.Edges[new_edge_index_A].ForwardEdge = (short)dividing_edge_index;
-                    Bsp.Edges[new_edge_index_A].ReverseEdge = -1;
-                    Bsp.Edges[new_edge_index_A].StartVertex = (short)edge_vertex_A_index;
-                    Bsp.Edges[new_edge_index_A].EndVertex = (short)new_vertex_index_A;
+                    Bsp.Edges[new_edge_index_A].ForwardEdge = (ushort)dividing_edge_index;
+                    Bsp.Edges[new_edge_index_A].ReverseEdge = 0xFFFF;
+                    Bsp.Edges[new_edge_index_A].StartVertex = (ushort)edge_vertex_A_index;
+                    Bsp.Edges[new_edge_index_A].EndVertex = (ushort)new_vertex_index_A;
                     if (vertex_plane_relationship_A.HasFlag(Plane_Relationship.FrontofPlane) || vertex_plane_relationship_A.HasFlag(Plane_Relationship.OnPlane))
-                        Bsp.Edges[new_edge_index_A].LeftSurface = (short)new_surface_index_B;
+                        Bsp.Edges[new_edge_index_A].LeftSurface = (ushort)new_surface_index_B;
                     else
-                        Bsp.Edges[new_edge_index_A].LeftSurface = (short)new_surface_index_A;
-                    Bsp.Edges[new_edge_index_A].RightSurface = -1;
+                        Bsp.Edges[new_edge_index_A].LeftSurface = (ushort)new_surface_index_A;
+                    Bsp.Edges[new_edge_index_A].RightSurface = 0xFFFF;
 
                     //allocate values for new_edge_B
-                    Bsp.Edges[new_edge_index_B].ForwardEdge = -1;
-                    Bsp.Edges[new_edge_index_B].ReverseEdge = -1;
-                    Bsp.Edges[new_edge_index_B].StartVertex = (short)new_vertex_index_A;
-                    Bsp.Edges[new_edge_index_B].EndVertex = (short)edge_vertex_B_index;
+                    Bsp.Edges[new_edge_index_B].ForwardEdge = 0xFFFF;
+                    Bsp.Edges[new_edge_index_B].ReverseEdge = 0xFFFF;
+                    Bsp.Edges[new_edge_index_B].StartVertex = (ushort)new_vertex_index_A;
+                    Bsp.Edges[new_edge_index_B].EndVertex = (ushort)edge_vertex_B_index;
                     if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane) || vertex_plane_relationship_B.HasFlag(Plane_Relationship.OnPlane))
-                        Bsp.Edges[new_edge_index_B].LeftSurface = (short)new_surface_index_B;
+                        Bsp.Edges[new_edge_index_B].LeftSurface = (ushort)new_surface_index_B;
                     else
-                        Bsp.Edges[new_edge_index_B].LeftSurface = (short)new_surface_index_A;
-                    Bsp.Edges[new_edge_index_B].RightSurface = -1;
+                        Bsp.Edges[new_edge_index_B].LeftSurface = (ushort)new_surface_index_A;
+                    Bsp.Edges[new_edge_index_B].RightSurface = 0xFFFF;
 
                     if (first_new_edge_index == -1)
                         first_new_edge_index = new_edge_index_A;
 
                     //connect previous edge to generated edges
                     if (previous_new_edge_index != -1)
-                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (short)new_edge_index_A;
+                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)new_edge_index_A;
                     previous_new_edge_index = new_edge_index_B;
                 }
 
@@ -688,22 +696,22 @@ namespace TagTool.Commands.CollisionModels
                     Bsp.Edges.Add(new Edge());
                     int new_edge_index_D = Bsp.Edges.Count - 1;
 
-                    Bsp.Edges[new_edge_index_D].StartVertex = (short)edge_vertex_A_index;
-                    Bsp.Edges[new_edge_index_D].EndVertex = (short)edge_vertex_B_index;
-                    Bsp.Edges[new_edge_index_D].ForwardEdge = -1;
-                    Bsp.Edges[new_edge_index_D].ReverseEdge = -1;
+                    Bsp.Edges[new_edge_index_D].StartVertex = (ushort)edge_vertex_A_index;
+                    Bsp.Edges[new_edge_index_D].EndVertex = (ushort)edge_vertex_B_index;
+                    Bsp.Edges[new_edge_index_D].ForwardEdge = 0xFFFF;
+                    Bsp.Edges[new_edge_index_D].ReverseEdge = 0xFFFF;
                     if (edge_plane_relationship.HasFlag(Plane_Relationship.BackofPlane))
-                        Bsp.Edges[new_edge_index_D].LeftSurface = (short)new_surface_index_A;
+                        Bsp.Edges[new_edge_index_D].LeftSurface = (ushort)new_surface_index_A;
                     else
-                        Bsp.Edges[new_edge_index_D].LeftSurface = (short)new_surface_index_B;
-                    Bsp.Edges[new_edge_index_D].RightSurface = -1;
+                        Bsp.Edges[new_edge_index_D].LeftSurface = (ushort)new_surface_index_B;
+                    Bsp.Edges[new_edge_index_D].RightSurface = 0xFFFF;
 
                     if (first_new_edge_index == -1)
                         first_new_edge_index = new_edge_index_D;
 
                     //connect previous edge to generated edges
                     if (previous_new_edge_index != -1)
-                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (short)new_edge_index_D;
+                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)new_edge_index_D;
                     previous_new_edge_index = new_edge_index_D;
                 }
 
@@ -719,48 +727,48 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Edges.Add(new Edge());
                         dividing_edge_index = Bsp.Edges.Count - 1;
 
-                        Bsp.Edges[dividing_edge_index].StartVertex = (short)edge_vertex_A_index;
-                        Bsp.Edges[dividing_edge_index].EndVertex = -1;
-                        Bsp.Edges[dividing_edge_index].ForwardEdge = -1;
-                        Bsp.Edges[dividing_edge_index].ReverseEdge = (short)new_edge_index_E;
+                        Bsp.Edges[dividing_edge_index].StartVertex = (ushort)edge_vertex_A_index;
+                        Bsp.Edges[dividing_edge_index].EndVertex = 0xFFFF;
+                        Bsp.Edges[dividing_edge_index].ForwardEdge = 0xFFFF;
+                        Bsp.Edges[dividing_edge_index].ReverseEdge = (ushort)new_edge_index_E;
 
                         if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.BackofPlane))
-                            Bsp.Edges[dividing_edge_index].LeftSurface = (short)new_surface_index_B;
+                            Bsp.Edges[dividing_edge_index].LeftSurface = (ushort)new_surface_index_B;
                         else
-                            Bsp.Edges[dividing_edge_index].LeftSurface = (short)new_surface_index_A;
+                            Bsp.Edges[dividing_edge_index].LeftSurface = (ushort)new_surface_index_A;
 
                         if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane) || vertex_plane_relationship_B.HasFlag(Plane_Relationship.OnPlane))
-                            Bsp.Edges[dividing_edge_index].RightSurface = (short)new_surface_index_B;
+                            Bsp.Edges[dividing_edge_index].RightSurface = (ushort)new_surface_index_B;
                         else
-                            Bsp.Edges[dividing_edge_index].RightSurface = (short)new_surface_index_A;
+                            Bsp.Edges[dividing_edge_index].RightSurface = (ushort)new_surface_index_A;
                     }
                     else
                     {
-                        if (Bsp.Edges[dividing_edge_index].EndVertex != -1)
+                        if (Bsp.Edges[dividing_edge_index].EndVertex != 0xFFFF)
                             Console.WriteLine("### ERROR: Dividing Edge EndVertex should be -1");
-                        Bsp.Edges[dividing_edge_index].EndVertex = (short)edge_vertex_A_index;
-                        if (Bsp.Edges[dividing_edge_index].ForwardEdge != -1)
+                        Bsp.Edges[dividing_edge_index].EndVertex = (ushort)edge_vertex_A_index;
+                        if (Bsp.Edges[dividing_edge_index].ForwardEdge != 0xFFFF)
                             Console.WriteLine("### ERROR: Dividing Edge ForwardEdge should be -1");
-                        Bsp.Edges[dividing_edge_index].ForwardEdge = (short)new_edge_index_E;
+                        Bsp.Edges[dividing_edge_index].ForwardEdge = (ushort)new_edge_index_E;
                     }
 
-                    Bsp.Edges[new_edge_index_E].EndVertex = (short)edge_vertex_B_index;
-                    Bsp.Edges[new_edge_index_E].StartVertex = (short)edge_vertex_A_index;
-                    Bsp.Edges[new_edge_index_E].ForwardEdge = -1;
-                    Bsp.Edges[new_edge_index_E].ReverseEdge = -1;
-                    Bsp.Edges[new_edge_index_E].RightSurface = -1;
+                    Bsp.Edges[new_edge_index_E].EndVertex = (ushort)edge_vertex_B_index;
+                    Bsp.Edges[new_edge_index_E].StartVertex = (ushort)edge_vertex_A_index;
+                    Bsp.Edges[new_edge_index_E].ForwardEdge = 0xFFFF;
+                    Bsp.Edges[new_edge_index_E].ReverseEdge = 0xFFFF;
+                    Bsp.Edges[new_edge_index_E].RightSurface = 0xFFFF;
 
                     if (vertex_plane_relationship_B.HasFlag(Plane_Relationship.FrontofPlane) || vertex_plane_relationship_B.HasFlag(Plane_Relationship.OnPlane))
-                        Bsp.Edges[new_edge_index_E].LeftSurface = (short)new_surface_index_B;
+                        Bsp.Edges[new_edge_index_E].LeftSurface = (ushort)new_surface_index_B;
                     else
-                        Bsp.Edges[new_edge_index_E].LeftSurface = (short)new_surface_index_A;
+                        Bsp.Edges[new_edge_index_E].LeftSurface = (ushort)new_surface_index_A;
 
                     if (first_new_edge_index == -1)
                         first_new_edge_index = dividing_edge_index;
 
                     //connect previous edge to new generated edges
                     if (previous_new_edge_index != -1)
-                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (short)dividing_edge_index;
+                        Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)dividing_edge_index;
                     previous_new_edge_index = new_edge_index_E;
                 }
 
@@ -773,9 +781,9 @@ namespace TagTool.Commands.CollisionModels
                     break;
             }
             //connect loose ends and set first edge of new surfaces
-            Bsp.Edges[previous_new_edge_index].ForwardEdge = (short)first_new_edge_index;
-            Bsp.Surfaces[new_surface_index_A].FirstEdge = (short)dividing_edge_index;
-            Bsp.Surfaces[new_surface_index_B].FirstEdge = (short)dividing_edge_index;
+            Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)first_new_edge_index;
+            Bsp.Surfaces[new_surface_index_A].FirstEdge = (ushort)dividing_edge_index;
+            Bsp.Surfaces[new_surface_index_B].FirstEdge = (ushort)dividing_edge_index;
         }
 
         public bool split_object_surfaces_with_plane(surface_array_definition surface_array, int plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
@@ -1604,9 +1612,9 @@ namespace TagTool.Commands.CollisionModels
                         {
                             plane_index = Bsp.Planes.IndexOf(existing_plane);
                             if (plane_is_mirrored(pointlist[0], pointlist[1], pointlist[2], existing_plane.Value))
-                                Bsp.Surfaces[surface_index].Plane = (short)(plane_index | 0x8000);
+                                Bsp.Surfaces[surface_index].Plane = (ushort)(plane_index | 0x8000);
                             else
-                                Bsp.Surfaces[surface_index].Plane = (short)plane_index;
+                                Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
                             break;
                         }
                     }
@@ -1622,7 +1630,7 @@ namespace TagTool.Commands.CollisionModels
                                 {
                                     Bsp.Planes.Add(new Plane { Value = newplane });
                                     plane_index = Bsp.Planes.Count - 1;
-                                    Bsp.Surfaces[surface_index].Plane = (short)plane_index;
+                                    Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
                                     break;
                                 }
                                 else

@@ -22,6 +22,7 @@ namespace TagTool.Commands.Scenarios
             context.AddCommand(new CopyForgePaletteCommand(cache, scenario));
             context.AddCommand(new ExtractScriptsCommand(cache, tag, scenario));
             context.AddCommand(new DumpScriptsCommand(cache, scenario));
+            context.AddCommand(new ImportScriptsCommand(scenario));
             context.AddCommand(new CompileScriptsCommand(cache, scenario));
             context.AddCommand(new ListScriptsCommand(cache, tag, scenario));
             context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario));

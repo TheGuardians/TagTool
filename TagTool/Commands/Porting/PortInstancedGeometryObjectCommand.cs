@@ -16,6 +16,7 @@ namespace TagTool.Commands.Porting
     {
         private GameCacheHaloOnlineBase HoCache { get; }
         private GameCache BlamCache;
+        private bool centergeometry = true;
 
         public PortInstancedGeometryObjectCommand(GameCacheHaloOnlineBase cache, GameCache blamCache) :
             base(true,
@@ -23,7 +24,7 @@ namespace TagTool.Commands.Porting
                 "PortInstancedGeometryObject",
                 "Converts one or more instanced geometry instances to objects.",
 
-                "PortInstancedGeometryObject [PortingFlags] <BspIndex> [center] [<Instance index or name> [New Tagname]]",
+                "PortInstancedGeometryObject [PortingFlags] <BspIndex> [nocenter] [<Instance index or name> [New Tagname]]",
                 "Converts one or more instanced geometry instances to objects. Enter just the bsp index for a wizard.")
         {
             HoCache = cache;
@@ -49,12 +50,11 @@ namespace TagTool.Commands.Porting
                 var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, blamScnr.StructureBsps[sbspIndex].StructureBsp);
 
                 var desiredInstances = new Dictionary<int, string>();
-                bool centergeometry = false;
 
-                if (argStack.Count > 0 && argStack.Peek().ToLower() == "center")
+                if (argStack.Count > 0 && argStack.Peek().ToLower() == "nocenter")
                 {
                     argStack.Pop();
-                    centergeometry = true;
+                    centergeometry = false;
                 }
                 if (argStack.Count > 0)
                 {
