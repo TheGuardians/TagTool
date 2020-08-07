@@ -66,6 +66,8 @@ namespace TagTool.Cache
                 var tagStream = new MemoryStream();
                 TagCachesStreams.Add(new ModPackageStream(tagStream));
 
+                FontPackage = new MemoryStream();
+
                 var names = new Dictionary<int, string>();
                 TagCacheNames.Add(names);
                 CacheNames.Add("default");
