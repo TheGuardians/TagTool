@@ -33,15 +33,28 @@ namespace TagTool.Common
                 RSAParameters RSAparams = new RSAParameters();
                 RSAparams.Modulus = reader.ReadBytes(GetIntegerSize(reader));
                 RSAparams.Exponent = reader.ReadBytes(GetIntegerSize(reader));
-                RSAparams.D = reader.ReadBytes(GetIntegerSize(reader));
+                RSAparams.D = PadArray(reader.ReadBytes(GetIntegerSize(reader)), RSAparams.Modulus.Length);
                 RSAparams.P = reader.ReadBytes(GetIntegerSize(reader));
                 RSAparams.Q = reader.ReadBytes(GetIntegerSize(reader));
-                RSAparams.DP = reader.ReadBytes(GetIntegerSize(reader));
-                RSAparams.DQ = reader.ReadBytes(GetIntegerSize(reader));
-                RSAparams.InverseQ = reader.ReadBytes(GetIntegerSize(reader));
+                RSAparams.DP = PadArray(reader.ReadBytes(GetIntegerSize(reader)), RSAparams.P.Length);
+                RSAparams.DQ = PadArray(reader.ReadBytes(GetIntegerSize(reader)), RSAparams.Q.Length);
+                RSAparams.InverseQ = PadArray(reader.ReadBytes(GetIntegerSize(reader)), RSAparams.Q.Length);
                 RSA.ImportParameters(RSAparams);
                 return RSA;
             }
+        }
+
+        private static byte[] PadArray(byte[] array, int size)
+        {
+            if (array.Length == size)
+                return array;
+
+            if (array.Length > size)
+                throw new ArgumentException("pad size cannot be larger than the array size", nameof(size));
+
+            byte[] result = new byte[size];
+            Array.Copy(array, 0, result, size - array.Length, array.Length);
+            return result;
         }
 
         private static int GetIntegerSize(BinaryReader reader)
