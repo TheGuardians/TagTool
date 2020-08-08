@@ -36,13 +36,7 @@ namespace TagTool.Commands.Files
 
             using (var stream = file.OpenRead())
             {
-                if (Cache is GameCacheModPackage)
-                {
-                    var modPackCache = Cache as GameCacheModPackage;
-                    StreamUtil.Copy(stream, modPackCache.BaseModPackage.FontPackage, stream.Length);
-
-                }else
-                    Cache.SaveFonts(stream);
+                Cache.SaveFonts(stream);
             }
 
             Console.WriteLine("Done!");

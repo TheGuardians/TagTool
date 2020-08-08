@@ -34,6 +34,11 @@ namespace TagTool.Commands.Modding
 
             Console.WriteLine($"Current tag cache: {Cache.DisplayName} index: {Cache.GetCurrentTagCacheIndex()}");
 
+            if(Cache.BaseModPackage.FontPackage != null && Cache.BaseModPackage.FontPackage.Length > 0)
+            {
+                Console.Write($"Current mod package contains a font package.");
+            }
+
             return true;
         }
     }
