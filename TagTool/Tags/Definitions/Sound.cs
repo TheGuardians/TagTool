@@ -72,7 +72,17 @@ namespace TagTool.Tags.Definitions
         {
             None = 0,
             LoopingSound = 1 << 0,
-            SplitLongSoundIntoPermutations  = 1 << 1
+            SplitLongSoundIntoPermutations  = 1 << 1,
+            Bit2 = 1 << 2,
+            UseTagResourceMaybe = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7,
+            Bit8 = 1 << 8,
+            Bit9 = 1 << 9,
+            Bit10 = 1 << 10,
+            CopyIntoMemoryBeforePlaying = 1 << 11
         }
 
         [TagStructure(Size = 0x9, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
