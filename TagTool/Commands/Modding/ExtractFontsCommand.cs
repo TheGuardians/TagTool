@@ -39,6 +39,7 @@ namespace TagTool.Commands.Modding
 
                 using (var stream = file.Create())
                 {
+                    modFonts.Seek(0, SeekOrigin.Begin);
                     modFonts.CopyTo(stream);
                 }
             }
