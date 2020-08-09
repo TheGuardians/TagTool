@@ -25,6 +25,7 @@ namespace TagTool.Commands.Forge
         public static void Populate(CommandContext context, GameCache cache, CachedTag instance, ForgeGlobalsDefinition definition)
         {
             context.AddCommand(new ParseItemsXmlCommand(cache, instance, definition));
+            context.AddCommand(new MaximizeBudgetCommand(cache as GameCacheHaloOnlineBase, definition));
         }
     }
 }

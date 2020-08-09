@@ -253,6 +253,7 @@
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\XboxGraphics.cs" />
+    <Compile Include="BlamFile\MapVariantGenerator.cs" />
     <Compile Include="Cache\CachedTag.cs" />
     <Compile Include="Cache\CacheFile\CacheFileVersion.cs" />
     <Compile Include="Cache\Codecs\CodecDefinition.cs" />
@@ -309,6 +310,7 @@
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
+    <Compile Include="Commands\Forge\MaximizeBudgetCommand.cs" />
     <Compile Include="Commands\GUI\RescaleGUICommand.cs" />
     <Compile Include="Commands\Files\ImportFontsCommand.cs" />
     <Compile Include="Commands\HUD\RescaleHudTextCommand.cs" />

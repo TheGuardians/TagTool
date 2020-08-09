@@ -17,9 +17,10 @@ namespace TagTool.BlamFile
         public GameEngineType GameType;
         public float MaximumBudget;
         public float SpentBudget;
-        public byte RuntimeShowHelpers;
-        public byte DirtyFlag;
-        public short Pad;
+        public bool RuntimeShowHelpers;
+        public bool DirtyFlag;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public uint MapChecksum;
 
         [TagField(Length = 640)]
@@ -81,10 +82,16 @@ namespace TagTool.BlamFile
     [Flags]
     public enum PlacementFlags : short
     {
-        Valid = 0x1,
-        Touched = 0x2,
-        Deleted = 0x20,
-        Attached = 0x200
+        Valid = (1 << 0),
+        Touched = (1 << 1),
+        UnknownBit2 = (1 << 2),
+        FromScenario = (1 << 3),
+        UnknownBit4 = (1 << 4),
+        Deleted = (1 << 5),
+        UnknownBit6 = (1 << 6),
+        UnknownBit7 = (1 << 7),
+        Attached = (1 << 8),
+        AttachedFixed = (1 << 9)
     }
 
     [TagStructure(Size = 0x18)]
@@ -103,10 +110,11 @@ namespace TagTool.BlamFile
     public class MapVariantPlacement
     {
         public PlacementFlags PlacementFlags;
-        public ushort Unknown02;
-        public uint ObjectIndex;
-        public uint EditorObjectIndex;
-        public uint PaletteIndex;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public int ObjectIndex;
+        public int EditorObjectIndex;
+        public int PaletteIndex;
         public RealPoint3d Position;
         public RealVector3d Forward;
         public RealVector3d Up;
@@ -128,11 +136,10 @@ namespace TagTool.BlamFile
     [TagStructure(Size = 0x8)]
     public class ObjectIdentifier
     {
-        public ushort UniqueID1;    // should be a uint with a manual swap
-        public ushort UniqueID2;
+        public DatumHandle UniqueID;
         public short BspIndex;
-        public byte Type;
-        public byte Source;
+        public sbyte Type;
+        public sbyte Source;
     }
 
     public enum MultiplayerObjectType : sbyte
@@ -165,7 +172,10 @@ namespace TagTool.BlamFile
 
     public enum MultiplayerObjectFlags : sbyte
     {
-
+        Unknown = (1 << 0),
+        PlacedAtStart = (1 << 1),
+        Symmetric = (1 << 2),
+        Asymmetric = (1 << 3)
     }
 
     public enum MultiplayerObjectShapeType : sbyte
