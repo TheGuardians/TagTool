@@ -226,6 +226,9 @@ namespace TagTool.Cache.Gen3
             byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
             byte[] secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
 
+            if (primaryResourceData == null && secondaryResourceData == null)
+                return null;
+
             if (primaryResourceData == null)
                 primaryResourceData = new byte[0];
 
