@@ -30,6 +30,8 @@ namespace TagTool.BlamFile
         public BlfMapVariant MapVariant;
         public BlfGameVariant GameVariant;
         public BlfContentHeader ContentHeader;
+        public BlfMapImage MapImage;
+        public byte[] JpegImage;
 
         public Blf(CacheVersion version)
         {
@@ -124,9 +126,15 @@ namespace TagTool.BlamFile
                         ContentFlags |= BlfFileContentFlags.ContentHeader;
                         ContentHeader = (BlfContentHeader)deserializer.Deserialize(dataContext, typeof(BlfContentHeader));
                         break;
+
+                    case "mapi":
+                        ContentFlags |= BlfFileContentFlags.MapImage;
+                        MapImage = (BlfMapImage)deserializer.Deserialize(dataContext, typeof(BlfMapImage));
+                        JpegImage = reader.ReadBytes(MapImage.JpegSize);
+                        break;
+
                     case "scnd":
                     case "scnc":
-                    case "mapi":
                     case "flmh":
                     case "flmd":
                     case "athr":
@@ -330,6 +338,7 @@ namespace TagTool.BlamFile
         GameVariant = 1 << 6,
         ModReference = 1 << 7,
         MapVariantTagNames = 1 << 8,
+        MapImage = 1 << 9,
     }
 
     [Flags]
@@ -547,6 +556,13 @@ namespace TagTool.BlamFile
     {
         public uint BuildVersion;
         public ContentItemMetadata Metadata;
+    }
+
+    [TagStructure(Size = 0x8, Align = 0x1)]
+    public class BlfMapImage : BlfChunkHeader
+    {
+        public uint Unknown;
+        public int JpegSize;
     }
 
     [TagStructure(Size = 0x100, Align = 0x1)]
