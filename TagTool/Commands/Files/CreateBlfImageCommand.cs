@@ -65,7 +65,7 @@ namespace TagTool.Commands.Files
                 EndOfFile = new BlfChunkEndOfFile
                 {
                     Signature = "_eof",
-                    Length = 0x5,
+                    Length = 0x11,
                     MajorVersion = 1,
                     MinorVersion = 1,
                     AuthenticationDataSize = 0,
