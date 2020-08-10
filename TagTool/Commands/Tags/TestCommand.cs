@@ -13,7 +13,6 @@ using TagTool.Bitmaps.Utils;
 using TagTool.Bitmaps.DDS;
 using TagTool.Geometry;
 using TagTool.BlamFile;
-using TagTool.Tags.Definitions.Gen1;
 using TagTool.Cache.HaloOnline;
 using TagTool.Havok;
 using System.Linq;
@@ -84,11 +83,8 @@ namespace TagTool.Commands
             }
         }
 
-        public override object Execute(List<string> args)
+        public void RenameMS30Shaders()
         {
-            if (args.Count > 0)
-                return false;
-
             using (var stream = Cache.OpenCacheReadWrite())
             {
                 int newNameCount = 0;
@@ -115,36 +111,11 @@ namespace TagTool.Commands
                     }
                 }
 
-                for (int i = 0; i < 10; i++)
-                {
-                    foreach (var tag in Cache.TagCache.NonNull())
-                    {
-                        var tagGroups = new Tag[] { "scen", "mode", "mach", "item", "hlmt", "dctr", "bloc" };
-                        if (!tag.IsInGroup(tagGroups) || tag.Name.Contains("eldewrito") || tag.Name.Contains("reforge"))
-                            continue;
-
-                        CachedTagHaloOnline hoTag = tag as CachedTagHaloOnline;
-                        foreach (var dep in hoTag.Dependencies)
-                        {
-                            var depName = Cache.TagCache.GetTag(dep).Name;
-                            if (depName.Contains("ms30"))
-                            {
-                                if (!tag.Name.StartsWith("ms30"))
-                                {
-                                    Console.WriteLine($"{tag.Name}.{tag.Group}");
-                                    tag.Name = "ms30\\" + tag.Name;
-                                    newNameCount += 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
                 Console.WriteLine($"Added ms30 prefix to {newNameCount} tags.");
                 var hoCache = Cache as GameCacheHaloOnline;
                 hoCache.SaveTagNames();
 
-
+                /*
                 foreach (var file in Cache.Directory.GetFiles("*.map"))
                 {
                     using (var mapFileStream = file.Open(FileMode.Open, FileAccess.ReadWrite))
@@ -178,10 +149,20 @@ namespace TagTool.Commands
                         mapFile.Write(writer);
                     }
                 }
+                */
 
             }
+        }
+
+        public override object Execute(List<string> args)
+        {
+            if (args.Count > 0)
+                return false;
+
+            RenameMS30Shaders();
 
             return true;
+
             /*
             using (var stream = Cache.OpenCacheReadWrite())
             {
