@@ -226,7 +226,7 @@ namespace TagTool.Cache.Gen3
             byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
             byte[] secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
 
-            if (primaryResourceData == null && secondaryResourceData == null)
+            if (primaryResourceData == null && secondaryResourceData == null && (definitionType ==  typeof(BitmapTextureInteropResource) || definitionType == typeof(BitmapTextureInterleavedInteropResource)))
                 return null;
 
             if (primaryResourceData == null)
