@@ -52,6 +52,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListUnnamedTagsCommand(cache));
             context.AddCommand(new ExtractBitmapsCommand(cache));
             context.AddCommand(new ExtractBlfImageCommand());
+            context.AddCommand(new CreateBlfImageCommand());
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)

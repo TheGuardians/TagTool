@@ -310,6 +310,7 @@
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
+    <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
     <Compile Include="Commands\Files\ExtractBlfImageCommand.cs" />
     <Compile Include="Commands\Forge\MaximizeBudgetCommand.cs" />
     <Compile Include="Commands\GUI\RescaleGUICommand.cs" />

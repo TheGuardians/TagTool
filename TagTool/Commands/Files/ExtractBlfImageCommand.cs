@@ -1,9 +1,9 @@
-﻿using TagTool.Cache;
-using System.Collections.Generic;
-using TagTool.Commands.Common;
+﻿using System.Collections.Generic;
 using System.IO;
-using TagTool.IO;
 using TagTool.BlamFile;
+using TagTool.Cache;
+using TagTool.Commands.Common;
+using TagTool.IO;
 
 namespace TagTool.Commands.Files
 {
@@ -46,7 +46,8 @@ namespace TagTool.Commands.Files
             using (var stream = file.OpenRead())
             using (var reader = new EndianReader(stream))
             {
-                reader.Format = EndianFormat.BigEndian;
+                if (version == CacheVersion.Halo3Retail || version == CacheVersion.Halo3ODST)
+                    reader.Format = EndianFormat.BigEndian;
                 if (!blf.Read(reader))
                     return new TagToolError(CommandError.CustomMessage, "Could not parse BLF");
             }

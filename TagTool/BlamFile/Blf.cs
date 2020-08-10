@@ -181,6 +181,23 @@ namespace TagTool.BlamFile
             if (ContentFlags.HasFlag(BlfFileContentFlags.MapVariantTagNames))
                 serializer.Serialize(dataContext, MapVariantTagNames);
 
+            if (ContentFlags.HasFlag(BlfFileContentFlags.MapImage))
+            {
+                if (JpegImage != null && JpegImage.Length > 0)
+                {
+                    MapImage.JpegSize = JpegImage.Length;
+                    serializer.Serialize(dataContext, MapImage);
+                    // image is always little endian
+                    writer.Format = EndianFormat.LittleEndian;
+                    writer.WriteBlock(JpegImage);
+                    writer.Format = Format;
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: No data, image will not be written to BLF");
+                }
+            }
+
 
             switch (AuthenticationType)
             {
