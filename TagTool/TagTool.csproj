@@ -373,6 +373,7 @@
     <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
     <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
+    <Compile Include="Commands\Scenarios\ImportMapVariantCommand.cs" />
     <Compile Include="Commands\Scenarios\ImportScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\DumpScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
