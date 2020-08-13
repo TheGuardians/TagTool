@@ -675,7 +675,7 @@ namespace TagTool.Cache
                 var stream = new MemoryStream();
                 reader.BaseStream.Position = section.Offset + tableEntry.Offset;
                 StreamUtil.Copy(reader.BaseStream, stream, tableEntry.Size);
-
+                stream.Position = 0;
                 Files.Add(tableEntry.Path, stream);
             }
         }
