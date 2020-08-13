@@ -47,16 +47,23 @@ namespace TagTool.Commands.Modding
                 string virtualPath = directory.GetRelativePath(file.FullName);
                 if (!Cache.BaseModPackage.Files.ContainsKey(virtualPath))
                 {
-                    using (FileStream stream = file.OpenRead()) {
+                    using (FileStream stream = file.OpenRead())
+                    {
+                        var ms = new MemoryStream();
+                        stream.CopyTo(ms);
+                        ms.Position = 0;
                         Console.WriteLine("Adding: " + virtualPath);
-                        Cache.BaseModPackage.Files.Add(virtualPath, stream);
+                        Cache.BaseModPackage.Files.Add(virtualPath, ms);
                     }
                 }
                 else
                 {
                     using (FileStream stream = file.OpenRead())
                     {
-                        Cache.BaseModPackage.Files[virtualPath] = stream;
+                        var ms = new MemoryStream();
+                        stream.CopyTo(ms);
+                        ms.Position = 0;
+                        Cache.BaseModPackage.Files[virtualPath] = ms;
                         Console.WriteLine("Overwriting Existing file: " + virtualPath);
                     }
                 }
