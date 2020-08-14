@@ -25,6 +25,11 @@ namespace TagTool.Commands.Porting
             @"objects\characters\masterchief\shaders\mc_emblem"
         };
 
+        private readonly List<string> RealConstantToBoolConstant = new List<string>
+        {
+            "use_material_texture",
+        };
+
         private readonly List<string> EffectRenderMethodTypes = new List<string>
         {
             "decal",
@@ -298,12 +303,22 @@ namespace TagTool.Commands.Porting
                         newShaderProperty.IntegerConstants[edIntConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].IntegerConstants[bmIntConstants.IndexOf(bA)];
 
             foreach (var eA in edBoolConstants)
-                foreach (var bA in bmBoolConstants)
-                    if (eA == bA)
-                    {
-                        if ((finalRm.ShaderProperties[0].BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) == 0)
-                            newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
-                    }
+            {
+                if (RealConstantToBoolConstant.Contains(eA) && bmRealConstants.Contains(eA))
+                {
+                    if (finalRm.ShaderProperties[0].RealConstants[bmRealConstants.IndexOf(eA)].Arg0 == 0.0f)
+                        newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
+                }
+                else
+                {
+                    foreach (var bA in bmBoolConstants)
+                        if (eA == bA)
+                        {
+                            if ((finalRm.ShaderProperties[0].BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) == 0)
+                                newShaderProperty.BooleanConstants &= ~(1u << edBoolConstants.IndexOf(eA));
+                        }
+                }
+            }
 
             newShaderProperty.AlphaBlendMode = finalRm.ShaderProperties[0].AlphaBlendMode;
             newShaderProperty.BlendFlags = finalRm.ShaderProperties[0].BlendFlags;
