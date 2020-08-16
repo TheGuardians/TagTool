@@ -235,6 +235,17 @@ namespace TagTool.Commands.Scenarios
                         multiplayer.SpawnSequence = (sbyte)placement.Properties.SharedStorage;
                         break;
                 }
+
+                // handle instanced geometry
+
+                if (instance is SceneryInstance)
+                {
+                    var tag = (_objectTypes[instance.ObjectType.Halo3ODST].Palette[instance.PaletteIndex] as ScenarioPaletteEntry).Object;
+                    var scenery = _cache.Deserialize(_cacheStream, tag) as Scenery;
+                    var model = _cache.Deserialize(_cacheStream, scenery.Model) as Model;
+                    if (model.CollisionModel != null && model.PhysicsModel == null)
+                        instance.Scale = properties.Shape.Width;
+                }
             }
 
             private void HandleDeletedPlacements()
