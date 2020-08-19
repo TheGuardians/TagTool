@@ -21,9 +21,10 @@ namespace TagTool.Commands.Sounds
                 
                 "ImportSound",
                 "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. See documentation for formatting and options.",
-                
-                "ImportSound",
-                "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. See documentation for formatting and options.")
+
+                "ImportSound\n" +
+                "ImportSound <Raw> <Data File>",
+                "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. Use raw to import a new sound resource without touching tag data. See documentation for formatting and options.")
         {
             Cache = cache;
             Tag = tag;
@@ -32,11 +33,35 @@ namespace TagTool.Commands.Sounds
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 0)
+            if (args.Count > 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            var soundDataAggregate = new byte[0].AsEnumerable();
+            if (args.Count == 0)
+                ImportCustom();
+            else
+            {
+                if (args[0] != "raw")
+                    return new TagToolError(CommandError.ArgInvalid);
+                ImportSoundResource(File.ReadAllBytes(args[1]));
+            }
 
+            Console.WriteLine("Done.");
+            return true;
+        }
+
+        private object ImportSoundResource(byte[] data)
+        {
+            Console.Write("Creating new sound resource...");
+
+            var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(data);
+            var resourceReference = Cache.ResourceCache.CreateSoundResource(resourceDefinition);
+            Definition.Resource = resourceReference;
+            return true;
+        }
+
+        private object ImportCustom()
+        {
+            var soundDataAggregate = new byte[0].AsEnumerable();
             int currentFileOffset = 0;
             int totalSampleCount = 0;
             int maxPermutationSampleCount = 0;
@@ -59,7 +84,7 @@ namespace TagTool.Commands.Sounds
             Definition.SampleRate.value = GetSoundSampleRateUser();
 
             Definition.PlatformCodec.Compression = GetSoundCompressionUser();
-            
+
             Definition.PlatformCodec.Encoding = GetSoundEncodingUser();
 
             Definition.PitchRanges = new List<PitchRange>();
@@ -68,7 +93,7 @@ namespace TagTool.Commands.Sounds
             // For each pitch range, get all the permutations and append sound data.
             //
 
-            for(int u = 0; u < pitchRangeCount; u++)
+            for (int u = 0; u < pitchRangeCount; u++)
             {
                 int permutationCount = GetPermutationCountUser();
 
@@ -88,7 +113,7 @@ namespace TagTool.Commands.Sounds
                 pitchRange.PitchRangeParameters.UnknownBounds = new Bounds<short>(-32768, 32767);
 
                 pitchRange.Permutations = new List<Permutation>();
-                
+
                 //
                 // Permutation section
                 //
@@ -132,7 +157,7 @@ namespace TagTool.Commands.Sounds
                 Definition.PitchRanges.Add(pitchRange);
             }
 
-            Definition.Promotion.LongestPermutationDuration =(uint)( 1000 * (double)maxPermutationSampleCount / (Definition.SampleRate.GetSampleRateHz()));
+            Definition.Promotion.LongestPermutationDuration = (uint)(1000 * (double)maxPermutationSampleCount / (Definition.SampleRate.GetSampleRateHz()));
             Definition.Promotion.TotalSampleSize = (uint)totalSampleCount;
 
 
@@ -143,19 +168,8 @@ namespace TagTool.Commands.Sounds
 
             Definition.Unknown12 = 0;
 
-            //
-            // Create new resource
-            //
+            ImportSoundResource(soundDataAggregate.ToArray());
 
-            Console.Write("Creating new sound resource...");
-
-            var data = soundDataAggregate.ToArray();
-            var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(data);
-            var resourceReference = Cache.ResourceCache.CreateSoundResource(resourceDefinition);
-            Definition.Resource = resourceReference;
-
-            Console.WriteLine("Done.");
-            
             return true;
         }
 
