@@ -22,8 +22,7 @@ namespace TagTool.Commands.Sounds
                 "ImportSound",
                 "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. See documentation for formatting and options.",
 
-                "ImportSound\n" +
-                "ImportSound <Raw> <Data File>",
+                "ImportSound [Raw] [Data File]",
                 "Import one (or many) sound files into the current snd! tag. Overwrites existing sound data. Use raw to import a new sound resource without touching tag data. See documentation for formatting and options.")
         {
             Cache = cache;
@@ -33,7 +32,7 @@ namespace TagTool.Commands.Sounds
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 2)
+            if (args.Count > 2 || args.Count == 1)
                 return new TagToolError(CommandError.ArgCount);
 
             if (args.Count == 0)
