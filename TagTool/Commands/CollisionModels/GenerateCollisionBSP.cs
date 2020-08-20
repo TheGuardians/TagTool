@@ -15,8 +15,6 @@ namespace TagTool.Commands.CollisionModels
     {
         private CollisionModel Definition { get; }
         private CollisionGeometry Bsp { get; set; }
-        private List<int> SurfaceCleanupList { get; set; }
-        private List<int> EdgeCleanupList { get; set; }
         private bool debug = false;
 
     public GenerateCollisionBSPCommand(ref CollisionModel definition) :
@@ -52,8 +50,6 @@ namespace TagTool.Commands.CollisionModels
         public bool generate_bsp(int region_index, int permutation_index, int bsp_index)
         {
             Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry.DeepClone();
-            EdgeCleanupList = new List<int>();
-            SurfaceCleanupList = new List<int>();
 
             //make sure there is nothing in the bsp blocks before starting
             Bsp.Leaves.Clear();
@@ -64,6 +60,13 @@ namespace TagTool.Commands.CollisionModels
             //regenerate the surface planes from surface vertices
             Bsp.Planes.Clear();
             generate_surface_planes();
+
+            //reduce collision geometry to merge tris and split surfaces
+            if (!reduce_collision_geometry())
+            {
+                Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
+                return false;
+            }
 
             //allocate surface array before starting the bsp build
             surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
@@ -889,9 +892,6 @@ namespace TagTool.Commands.CollisionModels
 
                             //split surface into two new surfaces, one on each side of the plane
                             divide_surface_into_two_surfaces(absolute_surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index);
-
-                            //we will later want to dispose of the surface that we split into two as it is now unnecessary
-                            SurfaceCleanupList.Add(absolute_surface_index);
 
                             //propagate surface index flags to child surfaces
                             if (surface_index_less_than_0)
@@ -1803,7 +1803,7 @@ namespace TagTool.Commands.CollisionModels
                     int surface_A = rightsurface_index;
                     int surface_B = leftsurface_index;
 
-                    if (leftsurface_index < rightsurface_index)
+                    if (leftsurface_index <= rightsurface_index)
                     {
                         surface_A = leftsurface_index;
                         surface_B = rightsurface_index;
@@ -1829,9 +1829,9 @@ namespace TagTool.Commands.CollisionModels
                                 {
                                     bool loop_direction_is_reverse = loop_direction == 0;
 
-                                    int next_edge_index_A = loop_direction_is_reverse ? edge_block.ForwardEdge : edge_block.ReverseEdge;
-                                    Edge next_edge_A = Bsp.Edges[edge_block.ForwardEdge];
-                                    bool next_right_surface_is_current_left = next_edge_A.RightSurface == edge_block.LeftSurface;
+                                    int next_edge_index_A = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
+                                    Edge next_edge_A = Bsp.Edges[next_edge_index_A];
+                                    bool next_right_surface_check = next_edge_A.RightSurface == (loop_direction_is_reverse ? edge_block.LeftSurface : edge_block.RightSurface);
 
                                     int next_edge_index_B = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
                                     Edge next_edge_B = Bsp.Edges[next_edge_index_B];
@@ -1850,12 +1850,12 @@ namespace TagTool.Commands.CollisionModels
                                     Vertex next_vertex = Bsp.Vertices[next_vertex_index];
                                     RealPoint2d coords1 = vertex_get_projection_relevant_coords(next_vertex, projection_axis, plane_mirror_check);
 
-                                    int vertex_A_index = next_right_surface_is_current_left ? next_edge_A.EndVertex : next_edge_A.StartVertex;
-                                    Vertex vertex_block_A = Bsp.Vertices[next_vertex_index];
+                                    int vertex_A_index = next_right_surface_check ? next_edge_A.EndVertex : next_edge_A.StartVertex;
+                                    Vertex vertex_block_A = Bsp.Vertices[vertex_A_index];
                                     RealPoint2d coordsA = vertex_get_projection_relevant_coords(vertex_block_A, projection_axis, plane_mirror_check);
 
-                                    int vertex_B_index = next_right_surface_is_current_left ?  next_edge_A.StartVertex : next_edge_A.EndVertex;
-                                    Vertex vertex_block_B = Bsp.Vertices[next_vertex_index];
+                                    int vertex_B_index = next_right_surface_check ?  next_edge_A.StartVertex : next_edge_A.EndVertex;
+                                    Vertex vertex_block_B = Bsp.Vertices[vertex_B_index];
                                     RealPoint2d coordsB = vertex_get_projection_relevant_coords(vertex_block_B, projection_axis, plane_mirror_check);
 
                                     if ((coordsB.Y - coordsA.Y) * (coordsA.X - coords1.X) - (coordsA.Y - coords1.Y) * (coordsB.X - coordsA.X) <= 0.000099999997)
@@ -1865,13 +1865,70 @@ namespace TagTool.Commands.CollisionModels
                                         break;
                                 }
 
+                                //if the edge fails the above check, then this code is responsible for changing the references of the related edges and vertices 
+                                //it also flags the surface and edge so they can later be deleted
+                                if(loop_direction >= 2)
+                                {
+                                    int loop_direction_A = 0;
+                                    int next_edge = edge_block.ForwardEdge;
+                                    while (loop_direction_A < 2)
+                                    {
+                                        bool loop_direction_is_reverse = loop_direction_A == 0;
+                                        int next_edge_index = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
+                                        Edge current_edge = Bsp.Edges[next_edge_index];
+                                        bool next_right_surface_matches_current_surface = false;
+                                        while (next_edge_index != edge_index)
+                                        {
+                                            current_edge = Bsp.Edges[next_edge_index];
+                                            next_right_surface_matches_current_surface = current_edge.RightSurface == (loop_direction_is_reverse ? edge_block.RightSurface : edge_block.LeftSurface);
+                                            if (next_right_surface_matches_current_surface)
+                                                current_edge.RightSurface = (ushort)surface_A;
+                                            else
+                                                current_edge.LeftSurface = (ushort)surface_A;
+                                            next_edge_index = next_right_surface_matches_current_surface ? current_edge.ReverseEdge : current_edge.ForwardEdge;
+                                        }
+                                        if (next_right_surface_matches_current_surface)
+                                            current_edge.ReverseEdge = (ushort)next_edge;
+                                        else
+                                            current_edge.ForwardEdge = (ushort)next_edge;
+
+                                        next_edge = edge_block.ReverseEdge;
+                                        loop_direction_A++;
+                                    }
+
+                                    if (Bsp.Vertices[edge_block.StartVertex].FirstEdge == edge_index)
+                                        Bsp.Vertices[edge_block.StartVertex].FirstEdge = edge_block.ReverseEdge;
+                                    if (Bsp.Vertices[edge_block.EndVertex].FirstEdge == edge_index)
+                                        Bsp.Vertices[edge_block.EndVertex].FirstEdge = edge_block.ForwardEdge;
+                                    if (surface_A_block.FirstEdge == edge_index)
+                                    {
+                                        int v37 = edge_block.ForwardEdge;
+                                        if (v37 > edge_block.ReverseEdge)
+                                            v37 = edge_block.ReverseEdge;
+                                        surface_A_block.FirstEdge = (ushort)v37;
+                                    }
+                                    surface_B_block.Plane = ushort.MaxValue;
+                                    surface_B_block.FirstEdge = ushort.MaxValue;
+                                    surface_B_block.Flags = 0;
+                                    surface_B_block.BreakableSurfaceIndex = short.MaxValue;
+                                    surface_deleted_table[surface_B] = -1;
+                                    edge_block.StartVertex = ushort.MaxValue;
+                                    edge_block.EndVertex = ushort.MaxValue;
+                                    edge_block.ForwardEdge = ushort.MaxValue;
+                                    edge_block.ReverseEdge = ushort.MaxValue;
+                                    edge_block.LeftSurface = ushort.MaxValue;
+                                    edge_block.RightSurface = ushort.MaxValue;
+                                    edge_deleted_table[edge_index] = -1;
+                                }
                             }
                         }
                     }
-
-
                 }
-                
+                if (!recompile_collision_geometry(surface_deleted_table, edge_deleted_table))
+                {
+                    Console.WriteLine("###ERROR: Failed to recompile collision geometry!");
+                    return false;
+                }
                 return true;
             }
             Console.WriteLine("###ERROR: Failed to reduce collision geometry");
@@ -1897,20 +1954,105 @@ namespace TagTool.Commands.CollisionModels
             return edge_count;
         }
 
+        public bool recompile_collision_geometry(List<int> surface_deleted_table, List<int> edge_deleted_table)
+        {
+            int edge_starting_count = Bsp.Edges.Count.DeepClone();
+            int surface_starting_count = Bsp.Surfaces.Count.DeepClone();
+
+            //reindex and cull edges
+            int edge_element_count = 0;
+            for (int edge_index = 0; edge_index < Bsp.Edges.Count; ++edge_index)
+            {
+                if (edge_deleted_table[edge_index] != -1)
+                {
+                    edge_deleted_table[edge_index] = edge_element_count++;
+                    if (edge_deleted_table[edge_index] > edge_index)
+                    {
+                        Console.WriteLine("edge_deleted_table[edge_index]>=edge_index");
+                        return false;
+                    }
+                    Bsp.Edges[edge_deleted_table[edge_index]] = Bsp.Edges[edge_index];
+                }
+            }
+            while(Bsp.Edges.Count > edge_element_count)
+            {
+                Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
+            }
+
+            //reindex and cull surfaces
+            int surface_element_count = 0;
+            for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; ++surface_index)
+            {
+                if (surface_deleted_table[surface_index] != -1)
+                {
+                    surface_deleted_table[surface_index] = surface_element_count++;
+                    if (surface_deleted_table[surface_index] > surface_index)
+                    {
+                        Console.WriteLine("surface_deleted_table[surface_index]>=surface_index");
+                        return false;
+                    }
+                    Bsp.Surfaces[surface_deleted_table[surface_index]] = Bsp.Surfaces[surface_index];
+                }
+            }
+            while (Bsp.Surfaces.Count > surface_element_count)
+            {
+                Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
+            }
+
+            //fix vertex first edges
+            for (int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
+            {
+                if(Bsp.Vertices[vertex_index].FirstEdge != ushort.MaxValue)
+                    Bsp.Vertices[vertex_index].FirstEdge = (ushort)edge_deleted_table[Bsp.Vertices[vertex_index].FirstEdge];              
+            }
+
+            //fix edge references
+            for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
+            {
+                if (Bsp.Edges[edge_index].ForwardEdge != ushort.MaxValue)
+                    Bsp.Edges[edge_index].ForwardEdge = (ushort)edge_deleted_table[Bsp.Edges[edge_index].ForwardEdge];
+                if (Bsp.Edges[edge_index].ReverseEdge != ushort.MaxValue)
+                    Bsp.Edges[edge_index].ReverseEdge = (ushort)edge_deleted_table[Bsp.Edges[edge_index].ReverseEdge];
+                if (Bsp.Edges[edge_index].LeftSurface != ushort.MaxValue)
+                    Bsp.Edges[edge_index].LeftSurface = (ushort)surface_deleted_table[Bsp.Edges[edge_index].LeftSurface];
+                if (Bsp.Edges[edge_index].RightSurface != ushort.MaxValue)
+                    Bsp.Edges[edge_index].RightSurface = (ushort)surface_deleted_table[Bsp.Edges[edge_index].RightSurface];
+            }
+
+            //fix surface first edges
+            for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+            {
+                if (Bsp.Surfaces[surface_index].FirstEdge != ushort.MaxValue)
+                {
+                    int first_edge = edge_deleted_table[Bsp.Surfaces[surface_index].FirstEdge];
+                    if (first_edge < 0 || first_edge > Bsp.Edges.Count)
+                    {
+                        Console.WriteLine("###ERROR: first_edge_index<0 && first_edge_index>bsp->edges.count");
+                        return false;
+                    }
+                    Bsp.Surfaces[surface_index].FirstEdge = (ushort)first_edge;
+                }
+            }
+
+            int surfaces_removed = surface_starting_count - Bsp.Surfaces.Count;
+            int edges_removed = edge_starting_count - Bsp.Edges.Count;
+            if(debug)
+                Console.WriteLine($"Successfully removed {surfaces_removed} surfaces and {edges_removed} edges!");
+
+            return true;
+        }
+
         public bool reduce_collision_bsp() //function unfinished, not needed yet
         {
-            List<int> surface_array = new List<int>(new int[Bsp.Surfaces.Count]);
-            List<int> edge_array = new List<int>(new int[Bsp.Edges.Count]);
-            List<int> vertex_array = new List<int>(new int[Bsp.Vertices.Count]);
+            List<int> deleted_surface_array = new List<int>(new int[Bsp.Surfaces.Count]);
+            List<int> deleted_edge_array = new List<int>(new int[Bsp.Edges.Count]);
+            List<int> deleted_vertex_array = new List<int>(new int[Bsp.Vertices.Count]);
 
             //make a list of valid and invalid surfaces
             int new_surface_index = 0;
             for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
             {
-                if (SurfaceCleanupList.Contains(surface_index))
-                    surface_array[surface_index] = -1;
-                else
-                    surface_array[surface_index] = new_surface_index++;
+                deleted_surface_array[surface_index] = new_surface_index++;
             }
 
             //make a list of valid and invalid edges
@@ -1918,22 +2060,20 @@ namespace TagTool.Commands.CollisionModels
             for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
             {
                 bool edge_is_valid = false;
-                if (EdgeCleanupList.Contains(edge_index))
-                    edge_array[edge_index] = -1;
-                else if (Bsp.Edges[edge_index].LeftSurface != ushort.MaxValue)
+                if (Bsp.Edges[edge_index].LeftSurface != ushort.MaxValue)
                 {
-                    if (surface_array[Bsp.Edges[edge_index].LeftSurface] != -1)
+                    if (deleted_surface_array[Bsp.Edges[edge_index].LeftSurface] != -1)
                         edge_is_valid = true;
                 }
                 else if (Bsp.Edges[edge_index].RightSurface != ushort.MaxValue)
                 {
-                    if (surface_array[Bsp.Edges[edge_index].RightSurface] != -1)
+                    if (deleted_surface_array[Bsp.Edges[edge_index].RightSurface] != -1)
                         edge_is_valid = true;
                 }
                 else if(edge_is_valid)
-                    edge_array[edge_index] = new_edge_index++;
+                    deleted_edge_array[edge_index] = new_edge_index++;
                 else
-                    edge_array[edge_index] = -1;
+                    deleted_edge_array[edge_index] = -1;
             }
 
             //make a list of valid and invalid vertices
@@ -1945,33 +2085,33 @@ namespace TagTool.Commands.CollisionModels
                 while (true)
                 {
                     Edge edge_block = Bsp.Edges[current_edge_index];
-                    if (edge_array[Bsp.Vertices[vertex_index].FirstEdge] != -1)
+                    if (deleted_edge_array[Bsp.Vertices[vertex_index].FirstEdge] != -1)
                         break;
                     if (edge_block.EndVertex != vertex_index)
                         current_edge_index = edge_block.ReverseEdge;
                     else
                         current_edge_index = edge_block.ForwardEdge;
-                    if(current_edge_index == Bsp.Vertices[vertex_index].FirstEdge || current_edge_index == ushort.MaxValue)
+                    if (current_edge_index == Bsp.Vertices[vertex_index].FirstEdge || current_edge_index == ushort.MaxValue)
                     {
                         current_edge_index = 0;
-                        if(Bsp.Edges.Count <= 0)
+                        if (Bsp.Edges.Count <= 0)
                         {
-                            vertex_array[vertex_index] = -1;
+                            deleted_vertex_array[vertex_index] = -1;
                             vertex_is_valid = false;
                         }
                         while (true)
                         {
-                            if(edge_array[current_edge_index] != -1)
+                            if (deleted_edge_array[current_edge_index] != -1)
                             {
                                 Edge test_edge = Bsp.Edges[current_edge_index];
-                                if(test_edge.StartVertex == vertex_index || test_edge.EndVertex == vertex_index)
+                                if (test_edge.StartVertex == vertex_index || test_edge.EndVertex == vertex_index)
                                 {
                                     break;
                                 }
                             }
-                            if(++current_edge_index >= Bsp.Edges.Count)
+                            if (++current_edge_index >= Bsp.Edges.Count)
                             {
-                                vertex_array[vertex_index] = -1;
+                                deleted_vertex_array[vertex_index] = -1;
                                 vertex_is_valid = false;
                                 break;
                             }
@@ -1982,21 +2122,21 @@ namespace TagTool.Commands.CollisionModels
                 if (vertex_is_valid)
                 {
                     Bsp.Vertices[vertex_index].FirstEdge = (ushort)current_edge_index;
-                    vertex_array[vertex_index] = new_vertex_index++;
+                    deleted_vertex_array[vertex_index] = new_vertex_index++;
                 }
             }
 
             //INDEX REFERENCE FIXUPS BEGIN HERE
 
-            if(Bsp.Bsp2dReferences.Count > 0)
+            if (Bsp.Bsp2dReferences.Count > 0)
             {
                 for (int bsp2dref_index = 0; bsp2dref_index < Bsp.Bsp2dReferences.Count; bsp2dref_index++)
                 {
                     short bsp2dnode_index = Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex;
-                    if(bsp2dnode_index < 0)
+                    if (bsp2dnode_index < 0)
                     {
                         int absolute_bsp2dnode_index = bsp2dnode_index & 0x7FFF;
-                        Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex = (short)(surface_array[absolute_bsp2dnode_index] | 0x8000);
+                        Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex = (short)(deleted_surface_array[absolute_bsp2dnode_index] | 0x8000);
                     }
                 }
             }
@@ -2010,35 +2150,35 @@ namespace TagTool.Commands.CollisionModels
                     if (leftchild_index < 0)
                     {
                         int absolute_leftchild_index = leftchild_index & 0x7FFF;
-                        Bsp.Bsp2dNodes[bsp2dnode_index].LeftChild = (short)(surface_array[absolute_leftchild_index] | 0x8000);
+                        Bsp.Bsp2dNodes[bsp2dnode_index].LeftChild = (short)(deleted_surface_array[absolute_leftchild_index] | 0x8000);
                     }
 
                     short rightchild_index = Bsp.Bsp2dNodes[bsp2dnode_index].RightChild;
                     if (rightchild_index < 0)
                     {
                         int absolute_rightchild_index = rightchild_index & 0x7FFF;
-                        Bsp.Bsp2dNodes[bsp2dnode_index].RightChild = (short)(surface_array[absolute_rightchild_index] | 0x8000);
+                        Bsp.Bsp2dNodes[bsp2dnode_index].RightChild = (short)(deleted_surface_array[absolute_rightchild_index] | 0x8000);
                     }
                 }
             }
 
             for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
             {
-                if(surface_array[surface_index] != -1)
+                if (deleted_surface_array[surface_index] != -1)
                 {
-                    Bsp.Surfaces[surface_index].FirstEdge = (ushort)edge_array[Bsp.Surfaces[surface_index].FirstEdge];
+                    Bsp.Surfaces[surface_index].FirstEdge = (ushort)deleted_edge_array[Bsp.Surfaces[surface_index].FirstEdge];
                 }
             }
 
             for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
             {
-                if(edge_array[edge_index] != -1)
+                if (deleted_edge_array[edge_index] != -1)
                 {
-                    Bsp.Edges[edge_index].StartVertex = (ushort)vertex_array[Bsp.Edges[edge_index].StartVertex];
-                    Bsp.Edges[edge_index].EndVertex = (ushort)vertex_array[Bsp.Edges[edge_index].EndVertex];
-                    if(Bsp.Edges[edge_index].ForwardEdge != ushort.MaxValue)
-                        Bsp.Edges[edge_index].ForwardEdge = (ushort)edge_array[Bsp.Edges[edge_index].ForwardEdge];
-                    Bsp.Edges[edge_index].ReverseEdge = (ushort)edge_array[Bsp.Edges[edge_index].ReverseEdge];
+                    Bsp.Edges[edge_index].StartVertex = (ushort)deleted_vertex_array[Bsp.Edges[edge_index].StartVertex];
+                    Bsp.Edges[edge_index].EndVertex = (ushort)deleted_vertex_array[Bsp.Edges[edge_index].EndVertex];
+                    if (Bsp.Edges[edge_index].ForwardEdge != ushort.MaxValue)
+                        Bsp.Edges[edge_index].ForwardEdge = (ushort)deleted_edge_array[Bsp.Edges[edge_index].ForwardEdge];
+                    Bsp.Edges[edge_index].ReverseEdge = (ushort)deleted_edge_array[Bsp.Edges[edge_index].ReverseEdge];
                 }
             }
 
