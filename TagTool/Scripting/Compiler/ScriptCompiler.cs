@@ -2775,12 +2775,13 @@ namespace TagTool.Scripting.Compiler
 
         private DatumHandle CompileDeviceExpression(ScriptString deviceString)
         {
+            ushort? deviceOpcode = deviceString.Value == "none" ? null : (ushort?)HsType.HaloOnlineValue.DeviceName;
             var handle = AllocateExpression(HsType.HaloOnlineValue.Device, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)deviceString.Line);
 
             if (handle != DatumHandle.None)
             {
                 var deviceIndex = deviceString.Value == "none" ? -1 :
-                    Definition.ObjectNames.Find(on => on.Name == deviceString.Value).PlacementIndex;
+                    Definition.ObjectNames.FindIndex(on => on.Name == deviceString.Value);
 
                 if (deviceString.Value != "none" && deviceIndex == -1)
                     throw new FormatException(deviceString.Value);
@@ -2795,12 +2796,13 @@ namespace TagTool.Scripting.Compiler
 
         private DatumHandle CompileSceneryExpression(ScriptString sceneryString)
         {
+            ushort? sceneryOpcode = sceneryString.Value == "none" ? null : (ushort?)HsType.HaloOnlineValue.SceneryName;
             var handle = AllocateExpression(HsType.HaloOnlineValue.Scenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)sceneryString.Line);
 
             if (handle != DatumHandle.None)
             {
                 var sceneryIndex = sceneryString.Value == "none" ? -1 :
-                    Definition.ObjectNames.Find(on => on.Name == sceneryString.Value).PlacementIndex;
+                    Definition.ObjectNames.FindIndex(on => on.Name == sceneryString.Value);
 
                 if (sceneryString.Value != "none" && sceneryIndex == -1)
                     throw new FormatException(sceneryString.Value);
