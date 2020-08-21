@@ -62,11 +62,11 @@ namespace TagTool.Commands.CollisionModels
             generate_surface_planes();
 
             //reduce collision geometry to merge tris and split surfaces
-            if (!reduce_collision_geometry())
-            {
-                Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
-                return false;
-            }
+            //if (!reduce_collision_geometry())
+            //{
+            //    Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
+            //    return false;
+            //}
 
             //allocate surface array before starting the bsp build
             surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
