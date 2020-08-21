@@ -2776,7 +2776,7 @@ namespace TagTool.Scripting.Compiler
         private DatumHandle CompileDeviceExpression(ScriptString deviceString)
         {
             ushort? deviceOpcode = deviceString.Value == "none" ? null : (ushort?)HsType.HaloOnlineValue.DeviceName;
-            var handle = AllocateExpression(HsType.HaloOnlineValue.Device, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)deviceString.Line);
+            var handle = AllocateExpression(HsType.HaloOnlineValue.Device, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, deviceOpcode, line: (short)deviceString.Line);
 
             if (handle != DatumHandle.None)
             {
@@ -2797,7 +2797,7 @@ namespace TagTool.Scripting.Compiler
         private DatumHandle CompileSceneryExpression(ScriptString sceneryString)
         {
             ushort? sceneryOpcode = sceneryString.Value == "none" ? null : (ushort?)HsType.HaloOnlineValue.SceneryName;
-            var handle = AllocateExpression(HsType.HaloOnlineValue.Scenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)sceneryString.Line);
+            var handle = AllocateExpression(HsType.HaloOnlineValue.Scenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, sceneryOpcode, line: (short)sceneryString.Line);
 
             if (handle != DatumHandle.None)
             {
