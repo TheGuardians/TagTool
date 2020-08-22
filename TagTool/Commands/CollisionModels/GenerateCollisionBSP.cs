@@ -61,12 +61,11 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Planes.Clear();
             generate_surface_planes();
 
-            //reduce collision geometry to merge tris and split surfaces
-            //if (!reduce_collision_geometry())
-            //{
-            //    Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
-            //    return false;
-            //}
+            if (!verify_collision_geometry())
+            {
+                Console.WriteLine($"### Failed to verify collision geometry!");
+                return false;
+            }
 
             //allocate surface array before starting the bsp build
             surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
@@ -561,7 +560,7 @@ namespace TagTool.Commands.CollisionModels
             return result;
         }
 
-        public void divide_surface_into_two_surfaces(int original_surface_index, int plane_index, ref int new_surface_index_A, ref int new_surface_index_B)
+        public bool divide_surface_into_two_surfaces(int original_surface_index, int plane_index, ref int new_surface_index_A, ref int new_surface_index_B)
         {
             RealPlane3d plane_block = Bsp.Planes[plane_index].Value;
             Surface original_surface = Bsp.Surfaces[original_surface_index];
@@ -647,6 +646,7 @@ namespace TagTool.Commands.CollisionModels
                         if(Bsp.Edges[dividing_edge_index].EndVertex != ushort.MaxValue)
                         {
                             Console.WriteLine("### ERROR: Dividing Edge EndVertex should be -1");
+                            return false;
                         }
 
                         Bsp.Edges[dividing_edge_index].EndVertex = (ushort)new_vertex_index_A;
@@ -654,6 +654,7 @@ namespace TagTool.Commands.CollisionModels
                         if (Bsp.Edges[dividing_edge_index].ForwardEdge != ushort.MaxValue)
                         {
                             Console.WriteLine("### ERROR: Dividing Edge ForwardEdge should be -1");
+                            return false;
                         }
 
                         Bsp.Edges[dividing_edge_index].ForwardEdge = (ushort)new_edge_index_B;
@@ -756,10 +757,16 @@ namespace TagTool.Commands.CollisionModels
                     else
                     {
                         if (Bsp.Edges[dividing_edge_index].EndVertex != ushort.MaxValue)
+                        {
                             Console.WriteLine("### ERROR: Dividing Edge EndVertex should be -1");
+                            return false;
+                        }
                         Bsp.Edges[dividing_edge_index].EndVertex = (ushort)edge_vertex_A_index;
                         if (Bsp.Edges[dividing_edge_index].ForwardEdge != ushort.MaxValue)
+                        {
                             Console.WriteLine("### ERROR: Dividing Edge ForwardEdge should be -1");
+                            return false;
+                        }
                         Bsp.Edges[dividing_edge_index].ForwardEdge = (ushort)new_edge_index_E;
                     }
 
@@ -795,6 +802,7 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)first_new_edge_index;
             Bsp.Surfaces[new_surface_index_A].FirstEdge = (ushort)dividing_edge_index;
             Bsp.Surfaces[new_surface_index_B].FirstEdge = (ushort)dividing_edge_index;
+            return true;
         }
 
         public bool split_object_surfaces_with_plane(surface_array_definition surface_array, int plane_index, ref surface_array_definition back_surfaces_array, ref surface_array_definition front_surfaces_array)
@@ -891,7 +899,10 @@ namespace TagTool.Commands.CollisionModels
                             int new_surface_B_index = Bsp.Surfaces.Count - 1;
 
                             //split surface into two new surfaces, one on each side of the plane
-                            divide_surface_into_two_surfaces(absolute_surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index);
+                            if(!divide_surface_into_two_surfaces(absolute_surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index))
+                            {
+                                return false;
+                            }
 
                             //propagate surface index flags to child surfaces
                             if (surface_index_less_than_0)
@@ -2182,6 +2193,109 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
 
+            return true;
+        }
+
+        //////////////////////////
+        //VERIFICATION CHECKS
+        ///////////////////////////
+        public bool verify_collision_geometry()
+        {
+            if(Bsp.Edges.Count > 0 && Bsp.Surfaces.Count > 0)
+            {
+                for(int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
+                {
+                    Edge edge_block = Bsp.Edges[edge_index];
+                    if(edge_block.StartVertex < 0 || edge_block.StartVertex >= Bsp.Vertices.Count)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} has a bad start vertex index.");
+                        return false;
+                    }
+                    if (edge_block.EndVertex < 0 || edge_block.EndVertex >= Bsp.Vertices.Count)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} has a bad end vertex index.");
+                        return false;
+                    }
+                    if(edge_block.StartVertex == edge_block.EndVertex)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} references only one vertex.");
+                        return false;
+                    }
+                    if(edge_get_length(edge_index) < 0.001)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} is too short.");
+                        return false;
+                    }
+
+                    if (edge_block.ForwardEdge < 0 || edge_block.ForwardEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} has a bad forward edge index.");
+                        return false;
+                    }
+                    if (edge_block.ReverseEdge < 0 || edge_block.ReverseEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} has a bad reverse edge index.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge == edge_index || edge_block.ReverseEdge == edge_index)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} references itself.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge == edge_block.ReverseEdge)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} references only one edge.");
+                        return false;
+                    }
+                    for(int direction = 0; direction < 2; direction++)
+                    {
+                        int next_edge_index = direction == 0 ? edge_block.ForwardEdge : edge_block.ReverseEdge;
+                        Edge next_edge_block = Bsp.Edges[next_edge_index];
+                        int test_vertex = direction == 0 ? edge_block.EndVertex : edge_block.StartVertex;
+                        int test_surface = direction == 0 ? edge_block.LeftSurface : edge_block.RightSurface;
+                        if ((next_edge_block.StartVertex != test_vertex || next_edge_block.LeftSurface != test_surface)
+                         && (next_edge_block.EndVertex != test_vertex || next_edge_block.RightSurface != test_surface))
+                        {
+                            string directionstring = direction == 0 ? "forward" : "reverse";
+                            Console.WriteLine($"### ERROR edge {edge_index} doesn't share a vertex or surface with its {directionstring} edge.");
+                            return false;
+                        }
+                    }
+                    if (edge_block.LeftSurface < 0 || edge_block.LeftSurface >= Bsp.Surfaces.Count)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} has a bad left surface index.");
+                        return false;
+                    }
+                    if (edge_block.RightSurface < 0 || edge_block.RightSurface >= Bsp.Surfaces.Count)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} has a bad right surface index.");
+                        return false;
+                    }
+                    if (edge_block.LeftSurface == edge_block.RightSurface)
+                    {
+                        Console.WriteLine($"### ERROR edge {edge_index} references only one surface.");
+                        return false;
+                    }
+                }
+                for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+                {
+                    Surface surface_block = Bsp.Surfaces[surface_index];
+                    if(surface_block.FirstEdge < 0 || surface_block.FirstEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"### ERROR surface {surface_index} has a bad first edge index");
+                        return false;
+                    }
+                    if(surface_count_edges(surface_index) > 8)
+                    {
+                        Console.WriteLine($"### ERROR surface {surface_index} has too many edges");
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
             return true;
         }
     }
