@@ -19,6 +19,7 @@ namespace TagTool.Commands.CollisionModels
         {
             commandContext.AddCommand(new ExtractModelCommand(cache, definition));
             commandContext.AddCommand(new GenerateCollisionBSPCommand(ref definition));
+            commandContext.AddCommand(new MoppDataCommand(ref definition));
         }
     }
 }

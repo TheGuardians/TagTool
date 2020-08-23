@@ -307,6 +307,7 @@
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
     <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
+    <Compile Include="Commands\CollisionModels\MoppDataCommand.cs" />
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
