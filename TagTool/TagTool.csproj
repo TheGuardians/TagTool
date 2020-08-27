@@ -320,7 +320,7 @@
     <Compile Include="Commands\Modding\AddModFilesCommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\DeleteModFilesCommand.cs" />
-    <Compile Include="Commands\Modding\ModIsMainmenuCommand.cs" />
+    <Compile Include="Commands\Modding\SetModTypeCommand.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\AddTagCacheCommand.cs" />
     <Compile Include="Commands\Modding\DeleteTagCacheCommand.cs" />
