@@ -14,7 +14,7 @@ using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
-using TagTool.Commands.CollisionModels.OffsetCollisonBsp;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Geometry.Utils
 {
@@ -130,10 +130,19 @@ namespace TagTool.Geometry.Utils
                 if (HasValidCollisions)
                 {
                     var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+                    var collisiongeometrybackup = newCollisionGeometry.DeepClone();
 
+                    //center the offsets for the collision model
+                    for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+                    {
+                        newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
+                        newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
+                        newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
+                    }
+
+                    GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
                     //proceed only if bsp generation succeeds, otherwise just revert to noncentered
-                    OffsetCollisionBSP offset_class = new OffsetCollisionBSP();
-                    if (offset_class.offset_bsp(GeometryOffset, ref newCollisionGeometry))
+                    if (generateCollisionBSP.generate_bsp(0, 0, 0))
                     {
                         //offset MOPP extents to origin
                         foreach (var bspPhysics in collisionModel.Regions[0].Permutations[0].BspPhysics)
@@ -157,6 +166,11 @@ namespace TagTool.Geometry.Utils
                         renderModel.Geometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
                         renderModel.Geometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
                         renderModel.Geometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
+                    }
+                    else
+                    {
+                        //bsp generation failed, uncenter stuff again
+                        collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = collisiongeometrybackup;
                     }
                 }
                 else
