@@ -14,7 +14,7 @@ using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
-using TagTool.Commands.CollisionModels.OffsetCollisonBsp;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Geometry.Utils
 {
@@ -53,7 +53,7 @@ namespace TagTool.Geometry.Utils
             StructureBsp = SourceCache.Deserialize<ScenarioStructureBsp>(SourceStream, Scenario.StructureBsps[structureBspIndex].StructureBsp);
             sLdT = SourceCache.Deserialize<ScenarioLightmap>(SourceStream, Scenario.Lightmap);
 
-            if(SourceCache.Version >= CacheVersion.Halo3ODST)
+            if (SourceCache.Version >= CacheVersion.Halo3ODST)
             {
                 Lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, sLdT.LightmapDataReferences[StructureBspIndex]);
             }
@@ -61,7 +61,7 @@ namespace TagTool.Geometry.Utils
             {
                 Lbsp = sLdT.Lightmaps[StructureBspIndex];
             }
-           
+
             var resourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
             Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
 
@@ -83,7 +83,7 @@ namespace TagTool.Geometry.Utils
             {
                 tagName = $"objects\\{scenarioFolder}\\clusters\\cluster_{StructureBspIndex}_{geometryIndex}";
             }
-                      
+
             if (desiredTagName != null)
                 tagName = desiredTagName;
 
@@ -125,15 +125,24 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
 
             //if the offset from the origin is >2 units in any dimension, center the object
-            if(centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
+            if (centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
             {
                 if (HasValidCollisions)
                 {
                     var newCollisionGeometry = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+                    var collisiongeometrybackup = newCollisionGeometry.DeepClone();
 
+                    //center the offsets for the collision model
+                    for (var i = 0; i < newCollisionGeometry.Vertices.Count; i++)
+                    {
+                        newCollisionGeometry.Vertices[i].Point.X -= GeometryOffset.X;
+                        newCollisionGeometry.Vertices[i].Point.Y -= GeometryOffset.Y;
+                        newCollisionGeometry.Vertices[i].Point.Z -= GeometryOffset.Z;
+                    }
+
+                    GenerateCollisionBSPCommand generateCollisionBSP = new GenerateCollisionBSPCommand(ref collisionModel);
                     //proceed only if bsp generation succeeds, otherwise just revert to noncentered
-                    OffsetCollisionBSP offset_class = new OffsetCollisionBSP();
-                    if (offset_class.offset_bsp(GeometryOffset, ref newCollisionGeometry))
+                    if (generateCollisionBSP.generate_bsp(0, 0, 0))
                     {
                         //offset MOPP extents to origin
                         foreach (var bspPhysics in collisionModel.Regions[0].Permutations[0].BspPhysics)
@@ -157,6 +166,11 @@ namespace TagTool.Geometry.Utils
                         renderModel.Geometry.Compression[0].X = new Bounds<float>(-scale.I / 2, scale.I / 2);
                         renderModel.Geometry.Compression[0].Y = new Bounds<float>(-scale.J / 2, scale.J / 2);
                         renderModel.Geometry.Compression[0].Z = new Bounds<float>(-scale.K / 2, scale.K / 2);
+                    }
+                    else
+                    {
+                        //bsp generation failed, uncenter stuff again
+                        collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = collisiongeometrybackup;
                     }
                 }
                 else
@@ -377,7 +391,7 @@ namespace TagTool.Geometry.Utils
                 {
                     permutation.BspMoppCodes.Add(ConvertData(mopp));
 
-                    var bspPhysics =  new CollisionBspPhysicsDefinition
+                    var bspPhysics = new CollisionBspPhysicsDefinition
                     {
                         GeometryShape = new CollisionGeometryShape()
                         {
@@ -571,7 +585,7 @@ namespace TagTool.Geometry.Utils
                     Lbsp.Geometry.Compression[compressionindex].DeepClone()
                 };
             }
-            
+
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
 
             if (loddataindex != -1)
@@ -723,7 +737,7 @@ namespace TagTool.Geometry.Utils
         private static float ComputeRenderModelEnclosingRadius(RenderModel model)
         {
             var compressionInfo = model.Geometry.Compression[0];
-            return Math.Max(compressionInfo.X.Length, 
+            return Math.Max(compressionInfo.X.Length,
                 compressionInfo.Y.Length > compressionInfo.Z.Length ?
                 compressionInfo.Y.Length : compressionInfo.Z.Length) * 2.0f;
         }
