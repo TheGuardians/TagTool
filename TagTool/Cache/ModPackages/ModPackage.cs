@@ -779,6 +779,24 @@ namespace TagTool.Cache
                 Metadata.VersionMinor = 0;
             }
 
+            Console.WriteLine();
+            Console.WriteLine("Please enter the types of the mod package. Separated by a space [MainMenu Multiplayer Campaign Firefight]");
+            string response = Console.ReadLine().Trim();
+
+            Header.ModifierFlags = Header.ModifierFlags & ModifierFlags.SignedBit;
+
+            var args = response.Split(' ');
+            for (int x = 0; x < args.Length; x++)
+            {
+                if (Enum.TryParse<ModifierFlags>(args[x].ToLower(), out var value) && args[x] != "SignedBit")
+                {
+                    Header.ModifierFlags |= value;
+                }
+                else
+                    Console.WriteLine($"Could not parse flag \"{response}\"");
+            }
+            Console.WriteLine();
+
             Metadata.BuildDateLow = (int)DateTime.Now.ToFileTime() & 0x7FFFFFFF;
             Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
         }

@@ -94,8 +94,11 @@ namespace TagTool.Cache
     public enum ModifierFlags : int
     {
         None = 0,
-        Mainmenu = 1 << 0,
-        SignedBit = (1 << 1)
+        mainmenu = 1 << 0,
+        multiplayer = 1 << 1,
+        campaign = 1 << 2,
+        firefight = 1 << 3,
+        SignedBit = (1 << 4)
     }
 
     [TagStructure(Size = 0x8)]
