@@ -129,7 +129,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                         Vertex new_vertex_block = NewBsp.Vertices[vertex_index];
                         RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
                         float new_plane_D = plane_2d.I * newcoords.X + plane_2d.J * newcoords.Y;
-                        Bsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
+                        NewBsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
                         break;
                     }
                 }
