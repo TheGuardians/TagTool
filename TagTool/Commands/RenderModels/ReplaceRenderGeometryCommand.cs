@@ -27,8 +27,9 @@ namespace TagTool.Commands.RenderModels
 
 				"Replaces the render_geometry of the current render_model tag " +
 				"with geometry compiled from a COLLADA scene file (.DAE)\n" +
-                "Your collada file must contain a single mesh for every permutation.\n" +
-                "Name your meshes as {region}:{permutation}. Example: 'hull:base'")
+                "Your collada file must contain a single mesh for every permutation.\n\n" +
+                "For 3ds Max name your meshes as {region}:{permutation} (e.g. hull:base)\n" +
+                "For Blender name them as {region}_{permutation}Mesh (e.g. hull_baseMesh)")
 		{
 			Cache = cache;
 			Tag = tag;
@@ -82,7 +83,9 @@ namespace TagTool.Commands.RenderModels
 			{
 				builder.BeginRegion(region.Name);
 
-				var regionName = Cache.StringTable.GetString(region.Name);
+                string[] altconventions = { ":", "_" };
+
+                var regionName = Cache.StringTable.GetString(region.Name);
 
 				foreach (var permutation in region.Permutations)
 				{
@@ -93,11 +96,14 @@ namespace TagTool.Commands.RenderModels
 						continue;
 
 					var permName = Cache.StringTable.GetString(permutation.Name);
-					var meshName = $"{regionName}FBXASC058{permName}Mesh";
+                    var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
+                    foreach (string entry in altconventions)
+                    {
+                        var tempMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
+                        permMeshes.AddRange(tempMeshes);
+                    }
 
-					var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
-
-					if (permMeshes.Count == 0)
+                    if (permMeshes.Count == 0)
 						return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
 
 					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
