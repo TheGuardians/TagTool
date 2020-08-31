@@ -125,7 +125,7 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
 
             //if the offset from the origin is >2 units in any dimension, center the object
-            if(centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
+            if(centergeometry && (Math.Abs(GeometryOffset.X) >= 2.0f || Math.Abs(GeometryOffset.Y) >= 2.0f || Math.Abs(GeometryOffset.Z) >= 2.0f))
             {
                 if (HasValidCollisions)
                 {
