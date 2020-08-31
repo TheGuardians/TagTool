@@ -83,9 +83,9 @@ namespace TagTool.Commands.RenderModels
 			{
 				builder.BeginRegion(region.Name);
 
-                string[] altconventions = { ":", "_" };
+				string[] altconventions = { ":", "_" };
 
-                var regionName = Cache.StringTable.GetString(region.Name);
+				var regionName = Cache.StringTable.GetString(region.Name);
 
 				foreach (var permutation in region.Permutations)
 				{
@@ -96,8 +96,8 @@ namespace TagTool.Commands.RenderModels
 						continue;
 
 					var permName = Cache.StringTable.GetString(permutation.Name);
-                    var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
-                    foreach (string entry in altconventions)
+					var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
+					foreach (string entry in altconventions)
 					{
 					    var tempMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
 					    permMeshes.AddRange(tempMeshes);
