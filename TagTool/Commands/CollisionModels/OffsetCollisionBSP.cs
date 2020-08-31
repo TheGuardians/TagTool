@@ -49,38 +49,29 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
         {
             for(int plane_index = 0; plane_index < Bsp.Planes.Count; plane_index++)
             {
-                int plane_parent_surface = find_plane_parent_surface(plane_index);
-                if(plane_parent_surface != -1)
+                RealPlane3d plane = Bsp.Planes[plane_index].Value;
+
+                if(plane_regeneration_hack(plane_index))
                 {
-                    recalculate_surface_plane(plane_parent_surface, plane_index);
+                    return true;
+                }
+                else if (plane.I == 1.0f && plane.J == 0.0f && plane.K == 0.0f)
+                {
+                    NewBsp.Planes[plane_index].Value.D -= GeometryOffset.X;
+                }
+                else if (plane.J == 1.0f && plane.I == 0.0f && plane.K == 0.0f)
+                {
+                    NewBsp.Planes[plane_index].Value.D -= GeometryOffset.Y;
+                }
+                else if (plane.K == 1.0f && plane.J == 0.0f && plane.I == 0.0f)
+                {
+                    NewBsp.Planes[plane_index].Value.D -= GeometryOffset.Z;
                 }
                 else
                 {
-                    RealPlane3d plane = Bsp.Planes[plane_index].Value;
-                    if(plane.I + plane.J + plane.K == 1.0f)
-                    {
-                        if(plane.I == 1.0f && plane.J == 0.0f && plane.K == 0.0f)
-                        {
-                            NewBsp.Planes[plane_index].Value.D -= GeometryOffset.X;
-                        }
-                        else if (plane.J == 1.0f && plane.I == 0.0f && plane.K == 0.0f)
-                        {
-                            NewBsp.Planes[plane_index].Value.D -= GeometryOffset.Y;
-                        }
-                        else if (plane.K == 1.0f && plane.J == 0.0f && plane.I == 0.0f)
-                        {
-                            NewBsp.Planes[plane_index].Value.D -= GeometryOffset.Z;
-                        }
-                    }
-                    else
-                    {
-                        if (!plane_regeneration_hack(plane_index))
-                        {
-                            Console.WriteLine($"###ERROR: Plane {plane_index} could not be regenerated!");
-                            return false;
-                        }
-                    }
-                }                
+                    Console.WriteLine($"### ERROR: Plane {plane_index} could not be regenerated!");
+                    return false;
+                }
             }
             return true;
         }
@@ -88,20 +79,27 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
         public bool plane_regeneration_hack(int plane_index)
         {
             RealPoint3d matching_point = new RealPoint3d();
-            RealPlane3d plane_block = Bsp.Planes[plane_index].Value;
+            int matching_vertex_index = -1;
+            double plane_fit = float.MaxValue;
+            RealPlane3d plane = Bsp.Planes[plane_index].Value;
             for(int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
             {
-                if (determine_vertex_plane_relationship(Bsp.Vertices[vertex_index].Point, plane_block) == Plane_Relationship.OnPlane)
+                RealPoint3d vertex = Bsp.Vertices[vertex_index].Point;
+                double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
+
+                if (plane_equation_vertex_input >= -0.00024414062 && plane_equation_vertex_input <= 0.00024414062 
+                    && plane_equation_vertex_input < plane_fit)
                 {
+                    plane_fit = plane_equation_vertex_input;
+                    matching_vertex_index = vertex_index;
                     matching_point = NewBsp.Vertices[vertex_index].Point;
-                    break;
                 }
             }
 
-            if (matching_point == new RealPoint3d())
+            if (matching_vertex_index == -1)
                 return false;
 
-            float new_plane_D = plane_block.I * matching_point.X + plane_block.J * matching_point.Y + plane_block.K * matching_point.Z;
+            float new_plane_D = plane.I * matching_point.X + plane.J * matching_point.Y + plane.K * matching_point.Z;
             NewBsp.Planes[plane_index].Value.D = new_plane_D;
             return true;
         }
@@ -115,6 +113,8 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             RealPlane2d plane_2d = Bsp.Bsp2dNodes[node_index].Plane;
 
             int vertex_index = 0;
+            double planefit_2d = float.MaxValue;
+            int matching_vertex_index = -1;
             for (vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
             {
                 Vertex vertex_block = Bsp.Vertices[vertex_index];
@@ -122,25 +122,28 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 if (determine_vertex_plane_relationship(point, plane_block.Value) == Plane_Relationship.OnPlane)
                 {
                     RealPoint2d coords = vertex_get_projection_relevant_coords(vertex_block, plane_projection_axis, plane_mirror_check);
-                    float plane_2d_coord_input = plane_2d.I * coords.X + plane_2d.J * coords.Y - plane_2d.D;
+                    double plane_2d_coord_input = plane_2d.I * coords.X + plane_2d.J * coords.Y - plane_2d.D;
 
-                    if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031)
+                    if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031 &&
+                        plane_2d_coord_input < planefit_2d)
                     {
-                        Vertex new_vertex_block = NewBsp.Vertices[vertex_index];
-                        RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
-                        float new_plane_D = plane_2d.I * newcoords.X + plane_2d.J * newcoords.Y;
-                        NewBsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
-                        break;
+                        matching_vertex_index = vertex_index;
+                        planefit_2d = plane_2d_coord_input;
                     }
                 }
             }
 
             //no matching vertex has been found
-            if (vertex_index >= Bsp.Vertices.Count)
+            if (matching_vertex_index == -1)
             {
                 Console.WriteLine($"###ERROR: Could not find an vertex to generate a 2d plane for node {node_index}");
                 return false;
             }
+
+            Vertex new_vertex_block = NewBsp.Vertices[matching_vertex_index];
+            RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
+            float new_plane_D = plane_2d.I * newcoords.X + plane_2d.J * newcoords.Y;
+            NewBsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
 
             int right_child_node = Bsp.Bsp2dNodes[node_index].RightChild & 0xFFFF;
             int left_child_node = Bsp.Bsp2dNodes[node_index].LeftChild & 0xFFFF;
@@ -167,7 +170,11 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 int node_index = Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex & 0xFFFF;
 
                 if (!recalculate_bsp2dnodes(node_index, plane_block, plane_projection_axis, plane_mirror_check))
+                {
+                    Console.WriteLine($"###ERROR: Could not regenerate bsp2dnode {node_index}");
                     return false;
+                }
+
 
                 /*int edge_index = 0;
                 for (edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
