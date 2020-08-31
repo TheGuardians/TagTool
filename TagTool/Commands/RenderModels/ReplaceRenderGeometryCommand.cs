@@ -98,12 +98,12 @@ namespace TagTool.Commands.RenderModels
 					var permName = Cache.StringTable.GetString(permutation.Name);
                     var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
                     foreach (string entry in altconventions)
-                    {
-                        var tempMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
-                        permMeshes.AddRange(tempMeshes);
-                    }
-
-                    if (permMeshes.Count == 0)
+					{
+					    var tempMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
+					    permMeshes.AddRange(tempMeshes);
+					}
+					
+					if (permMeshes.Count == 0)
 						return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
 
 					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
