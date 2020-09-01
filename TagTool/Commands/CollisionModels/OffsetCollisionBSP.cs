@@ -87,9 +87,9 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
                 if (plane_equation_vertex_input >= -0.00024414062 && plane_equation_vertex_input <= 0.00024414062 
-                    && plane_equation_vertex_input < plane_fit)
+                    && (Math.Abs(plane_equation_vertex_input) < plane_fit))
                 {
-                    plane_fit = plane_equation_vertex_input;
+                    plane_fit = Math.Abs(plane_equation_vertex_input);
                     matching_vertex_index = vertex_index;
                     matching_point = NewBsp.Vertices[vertex_index].Point;
                 }
@@ -124,10 +124,10 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                     double plane_2d_coord_input = plane_2d.I * coords.X + plane_2d.J * coords.Y - plane_2d.D;
 
                     if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031 &&
-                        plane_2d_coord_input < planefit_2d)
+                        (Math.Abs(plane_2d_coord_input) < planefit_2d))
                     {
                         matching_vertex_index = vertex_index;
-                        planefit_2d = plane_2d_coord_input;
+                        planefit_2d = Math.Abs(plane_2d_coord_input);
                     }
                 }
             }
