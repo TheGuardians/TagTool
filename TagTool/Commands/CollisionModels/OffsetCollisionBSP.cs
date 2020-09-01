@@ -53,7 +53,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 
                 if(plane_regeneration_hack(plane_index))
                 {
-                    return true;
+                    continue;
                 }
                 else if (plane.I == 1.0f && plane.J == 0.0f && plane.K == 0.0f)
                 {
