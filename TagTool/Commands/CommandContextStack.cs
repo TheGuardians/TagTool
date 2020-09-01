@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,11 @@ namespace TagTool.Commands
     public class CommandContextStack
     {
         private Stack<CommandContext> ContextStack { get; } = new Stack<CommandContext>();
+
+        /// <summary>
+        /// An event that is fired when a context is popped from the stack
+        /// </summary>
+        public event Action<CommandContext> ContextPopped;
 
         /// <summary>
         /// Gets the currently-active context, or <c>null</c> if there is none.
@@ -53,7 +59,8 @@ namespace TagTool.Commands
         /// <returns><c>true</c> if more contexts still remain on the stack, <c>false</c> if the stack is now empty.</returns>
         public bool Pop()
         {
-            ContextStack.Pop();
+            var context = ContextStack.Pop();
+            ContextPopped?.Invoke(context);
 
             return (ContextStack.Count != 0);
         }
