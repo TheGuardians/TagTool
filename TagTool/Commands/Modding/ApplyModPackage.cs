@@ -89,7 +89,7 @@ namespace TagTool.Commands.Modding
                 if (modTag != null)
                 {
                     if (!TagMapping.ContainsKey(modTag.Index))
-                        ConvertCachedTagInstance(ModCache.BaseModPackage, modTag);
+                        ConvertCachedTagInstance(ModCache.BaseModPackage, modTag, false);
                 }
             }
 
@@ -209,8 +209,7 @@ namespace TagTool.Commands.Modding
             return true;
         }
 
-
-        private CachedTag ConvertCachedTagInstance(ModPackage modPack, CachedTag modTag)
+        private CachedTag ConvertCachedTagInstance(ModPackage modPack, CachedTag modTag, bool isTagReference = true)
         {
             // tag has already been converted
             if (TagMapping.ContainsKey(modTag.Index))
@@ -229,9 +228,13 @@ namespace TagTool.Commands.Modding
 
                 // Failed to find tag in base cache
                 Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group} in the base cache, returning null tag reference.");
-                //return null;
+
+                // check if anything actually depends on this tag
+                if (!isTagReference)
+                    return null;
+
                 throw new Exception("Failed to find tag when applying.");
-            }     
+            }
             else
             {
                 Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
