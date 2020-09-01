@@ -16,7 +16,6 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
         private CollisionGeometry Bsp { get; set; }
         private CollisionGeometry NewBsp { get; set; }
         private RealPoint3d GeometryOffset { get; set; }
-        private bool debug = false;
 
         public bool offset_bsp(RealPoint3d geometryoffset, ref CollisionGeometry inputbsp)
         {
@@ -80,7 +79,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
         {
             RealPoint3d matching_point = new RealPoint3d();
             int matching_vertex_index = -1;
-            double plane_fit = float.MaxValue;
+            double plane_fit = double.MaxValue;
             RealPlane3d plane = Bsp.Planes[plane_index].Value;
             for(int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
             {
@@ -113,7 +112,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             RealPlane2d plane_2d = Bsp.Bsp2dNodes[node_index].Plane;
 
             int vertex_index = 0;
-            double planefit_2d = float.MaxValue;
+            double planefit_2d = double.MaxValue;
             int matching_vertex_index = -1;
             for (vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
             {
