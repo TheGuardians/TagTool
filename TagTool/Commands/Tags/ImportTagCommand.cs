@@ -44,7 +44,13 @@ namespace TagTool.Commands.Tags
             }
 
             using (var stream = Cache.OpenCacheReadWrite())
+            {
                 Cache.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)instance, data);
+
+                // Reserialize to avoid issues with missing tag reference fixups
+                var definition = Cache.Deserialize(stream, instance);
+                Cache.Serialize(stream, instance, definition);
+            }
 
             Console.WriteLine($"Imported 0x{data.Length:X} bytes.");
 
