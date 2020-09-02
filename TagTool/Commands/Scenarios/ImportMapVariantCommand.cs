@@ -16,15 +16,16 @@ namespace TagTool.Commands.Scenarios
     class ImportMapVariantCommand : Command
     {
         private GameCache Cache;
+        private CachedTag Tag;
         private Scenario Definition;
 
-        public ImportMapVariantCommand(GameCacheHaloOnlineBase cache, Scenario definition) :
+        public ImportMapVariantCommand(GameCacheHaloOnlineBase cache, CachedTag Tag, Scenario definition) :
             base(false,
 
                 "ImportMapVariant",
                 "Imports a map variant into the current scenario",
-                "ImportMapVariant <Path>",
-                "")
+                "ImportMapVariant [MapFile] <Path>",
+                "If optional argument MapFile is specified, the map variant will instead be stored directly in the .map file and become the default map.")
         {
             Cache = cache;
             Definition = definition;
@@ -35,6 +36,17 @@ namespace TagTool.Commands.Scenarios
             if (args.Count < 1)
                 return new TagToolError(CommandError.ArgCount);
 
+            bool importingIntoMapFile  = false;
+
+            if(args.Count > 0)
+            {
+                if(args[0] == "MapFile")
+                {
+                    importingIntoMapFile = true;
+                    args.RemoveAt(0);
+                }
+            }
+
             var sandboxMapFile = new FileInfo(args[0]);
             using (var stream = sandboxMapFile.OpenRead())
             {
@@ -43,20 +55,82 @@ namespace TagTool.Commands.Scenarios
                 if (!blf.Read(reader))
                     return new TagToolError(CommandError.FileType, "Not a valid sandbox.map file");
 
-                ImportMapVariant(blf);
+                if (importingIntoMapFile)
+                    ImportIntoMapFile(blf);
+                else
+                    ImportIntoScenario(blf);
             }
 
             Console.WriteLine("Done.");
             return true;
         }
 
-        private void ImportMapVariant(Blf blf)
+        private void ImportIntoMapFile(Blf mapVariantBlf)
+        {
+            if (Cache is GameCacheModPackage modCache)
+            {
+                var mapFileIndex = modCache.BaseModPackage.MapIds.IndexOf(Definition.MapId);
+                if (mapFileIndex == -1)
+                    throw new InvalidOperationException("Map not found in in mod package");
+
+                InjectMapVariantIntoMapFile(modCache.BaseModPackage.MapFileStreams[mapFileIndex], mapVariantBlf);
+            }
+            else
+            {
+                var file = FindMapFileInDirectory(Definition.MapId, Cache.Directory);
+                if (file == null)
+                    throw new InvalidOperationException("Map not found in in cache directory");
+
+                using (var stream = file.Open(FileMode.Open, FileAccess.ReadWrite))
+                    InjectMapVariantIntoMapFile(stream, mapVariantBlf);
+            }
+        }
+
+        private void ImportIntoScenario(Blf mapVariantBlf)
         {
             using (var cacheStream = Cache.OpenCacheRead())
             {
-                var importer = new MapVariantImporter(cacheStream, Cache, Definition, blf);
+                var importer = new MapVariantImporter(cacheStream, Cache, Definition, mapVariantBlf);
                 importer.Import();
             }
+        }
+
+        private FileInfo FindMapFileInDirectory(int mapId, DirectoryInfo directory)
+        {
+            foreach (var file in directory.GetFiles("*.map"))
+            {
+                using (var reader = new EndianReader(file.OpenRead()))
+                {
+                    reader.BaseStream.Position = 0x2DEC;
+                    if (reader.ReadInt32() == mapId)
+                        return file;
+                }
+            }
+
+            return null;
+        }
+
+        private void InjectMapVariantIntoMapFile(Stream mapFileStream, Blf mapVariantBlf)
+        {
+            var reader = new EndianReader(mapFileStream);
+            var writer = new EndianWriter(mapFileStream);
+
+            var mapFile = new MapFile();
+            mapFile.Read(reader);
+
+            if (mapFile.MapFileBlf == null)
+                throw new InvalidOperationException("Not a valid map file. Missing blf data");
+
+            if (mapVariantBlf.MapVariant.MapVariant.MapId != Definition.MapId)
+                throw new InvalidOperationException("Tried to import a map variant into a scenario with a different map id");
+
+            mapFile.MapFileBlf.MapVariant = mapVariantBlf.MapVariant;
+            mapFile.MapFileBlf.ContentFlags |= BlfFileContentFlags.MapVariant;
+            mapFile.MapFileBlf.MapVariantTagNames = mapVariantBlf.MapVariantTagNames;
+            mapFile.MapFileBlf.ContentFlags |= BlfFileContentFlags.MapVariantTagNames;
+
+            writer.BaseStream.Position = 0;
+            mapFile.Write(writer);
         }
 
         class MapVariantImporter
