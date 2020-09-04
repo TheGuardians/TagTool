@@ -419,6 +419,29 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
+            else if (rmt2Desc.Type == "light_volume")
+            {
+                string tagName = $"shaders\\light_volume_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.LightVolume.Albedo albedo = (HaloShaderGenerator.LightVolume.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.LightVolume.Blend_Mode blend_mode = (HaloShaderGenerator.LightVolume.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.LightVolume.Fog fog = (HaloShaderGenerator.LightVolume.Fog)rmt2Desc.Options[2];
+
+                var generator = new HaloShaderGenerator.LightVolume.LightVolumeGenerator(albedo, blend_mode, fog, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
 
             return false;
         }
