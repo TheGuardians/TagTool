@@ -13,6 +13,7 @@ using TagTool.Tags;
 using TagTool.Tags.Resources;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.ModPackages;
+using System.Collections;
 
 namespace TagTool.Cache
 {
@@ -107,6 +108,7 @@ namespace TagTool.Cache
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
+            definition = ConvertResources(definition);
             Serializer.Serialize(CreateTagSerializationContext(stream, instance), definition);
         }
 
@@ -208,6 +210,46 @@ namespace TagTool.Cache
                 BaseModPackage.Files.Add(path, file);
                 Console.WriteLine("Overwriting Existing file: " + path);
             }
+        }
+
+        private object ConvertResources(object data)
+        {
+            switch (data)
+            {
+                case TagResourceReference resource:
+                    ConvertResource(resource);
+                    break;
+                case TagStructure tagStruct:
+                    ConvertResources(tagStruct);
+                    break;
+                case IList collection:
+                    ConvertResources(collection);
+                    break;
+            }
+            return data;
+        }
+
+        private void ConvertResources(TagStructure tagStruct)
+        {
+            foreach (var field in tagStruct.GetTagFieldEnumerable(Version))
+                ConvertResources(field.GetValue(tagStruct));
+        }
+
+        private void ConvertResources(IList collection)
+        {
+            for (var i = 0; i < collection.Count; i++)
+                ConvertResources(collection[i]);
+        }
+
+        private TagResourceReference ConvertResource(TagResourceReference resource)
+        {
+            resource.HaloOnlinePageableResource.GetLocation(out ResourceLocation location);
+            if (location == ResourceLocation.Mods)
+                return resource;
+
+            Console.WriteLine($"Converting resource {resource.HaloOnlinePageableResource.Page.Index}");
+            ResourceCaches.AddResource(resource.HaloOnlinePageableResource, BaseModPackage.ResourcesStream);
+            return resource;
         }
     }
 }
