@@ -371,6 +371,54 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
+            else if (rmt2Desc.Type == "contrail")
+            {
+                string tagName = $"shaders\\contrail_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Contrail.Albedo albedo = (HaloShaderGenerator.Contrail.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Contrail.Blend_Mode blend_mode = (HaloShaderGenerator.Contrail.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Contrail.Black_Point black_point = (HaloShaderGenerator.Contrail.Black_Point)rmt2Desc.Options[2];
+                HaloShaderGenerator.Contrail.Fog fog = (HaloShaderGenerator.Contrail.Fog)rmt2Desc.Options[3];
+
+                var generator = new HaloShaderGenerator.Contrail.ContrailGenerator(albedo, blend_mode, black_point, fog, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
+            else if (rmt2Desc.Type == "beam")
+            {
+                string tagName = $"shaders\\beam_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Beam.Albedo albedo = (HaloShaderGenerator.Beam.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Beam.Blend_Mode blend_mode = (HaloShaderGenerator.Beam.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Beam.Black_Point black_point = (HaloShaderGenerator.Beam.Black_Point)rmt2Desc.Options[2];
+                HaloShaderGenerator.Beam.Fog fog = (HaloShaderGenerator.Beam.Fog)rmt2Desc.Options[3];
+
+                var generator = new HaloShaderGenerator.Beam.BeamGenerator(albedo, blend_mode, black_point, fog, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
 
             return false;
         }

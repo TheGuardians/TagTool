@@ -27,7 +27,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", /*"black"*/ };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", "contrail", "beam",  /*"black"*/ };
 
         public override object Execute(List<string> args)
         {
@@ -90,6 +90,8 @@ namespace TagTool.Commands.Shaders
                 {
                     case "shader": GenerateShader(stream, options, rmt2TagName, rmdf); break;
                     case "particle": GenerateParticle(stream, options, rmt2TagName, rmdf); break;
+                    case "contrail": GenerateContrail(stream, options, rmt2TagName, rmdf); break;
+                    case "beam": GenerateBeam(stream, options, rmt2TagName, rmdf); break;
                         //case "black": GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
                 }
 
@@ -143,8 +145,52 @@ namespace TagTool.Commands.Shaders
 
             var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
 
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, Cache.TagCache.GetTag("shaders\\particle_shared_pixel_shaders.glps"));
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, Cache.TagCache.GetTag("shaders\\particle_shared_vertex_shaders.glvs"));
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateContrail(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.Contrail.Albedo albedo = (HaloShaderGenerator.Contrail.Albedo)options[0];
+            HaloShaderGenerator.Contrail.Blend_Mode blend_mode = (HaloShaderGenerator.Contrail.Blend_Mode)options[1];
+            HaloShaderGenerator.Contrail.Black_Point black_point = (HaloShaderGenerator.Contrail.Black_Point)options[2];
+            HaloShaderGenerator.Contrail.Fog fog = (HaloShaderGenerator.Contrail.Fog)options[3];
+
+            var generator = new HaloShaderGenerator.Contrail.ContrailGenerator(albedo, blend_mode, black_point, fog, true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateBeam(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.Beam.Albedo albedo = (HaloShaderGenerator.Beam.Albedo)options[0];
+            HaloShaderGenerator.Beam.Blend_Mode blend_mode = (HaloShaderGenerator.Beam.Blend_Mode)options[1];
+            HaloShaderGenerator.Beam.Black_Point black_point = (HaloShaderGenerator.Beam.Black_Point)options[2];
+            HaloShaderGenerator.Beam.Fog fog = (HaloShaderGenerator.Beam.Fog)options[3];
+
+            var generator = new HaloShaderGenerator.Beam.BeamGenerator(albedo, blend_mode, black_point, fog, true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
 
             var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
 
