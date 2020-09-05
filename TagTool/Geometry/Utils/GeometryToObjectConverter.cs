@@ -561,18 +561,17 @@ namespace TagTool.Geometry.Utils
             {
                 mesh
             };
-            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>()
-            {
-                Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone()
-            };
+
+            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            if (meshindex != -1 && meshindex < Lbsp.Geometry.MeshClusterVisibility.Count)
+                renderGeometry.MeshClusterVisibility.Add(Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone());
 
             //instanced geo has a compression index
             if (!iscluster)
             {
-                renderGeometry.Compression = new List<RenderGeometryCompression>
-                {
-                    Lbsp.Geometry.Compression[compressionindex].DeepClone()
-                };
+                renderGeometry.Compression = new List<RenderGeometryCompression>();
+                if (compressionindex != -1 && compressionindex < Lbsp.Geometry.Compression.Count)
+                    renderGeometry.Compression.Add(Lbsp.Geometry.Compression[compressionindex].DeepClone());
             }
             
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
