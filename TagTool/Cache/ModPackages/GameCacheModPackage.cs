@@ -216,7 +216,7 @@ namespace TagTool.Cache
         {
             switch (data)
             {
-                case TagResourceReference resource:
+                case PageableResource resource:
                     ConvertResource(resource);
                     break;
                 case TagStructure tagStruct:
@@ -241,14 +241,14 @@ namespace TagTool.Cache
                 ConvertResources(collection[i]);
         }
 
-        private TagResourceReference ConvertResource(TagResourceReference resource)
+        private PageableResource ConvertResource(PageableResource resource)
         {
-            resource.HaloOnlinePageableResource.GetLocation(out ResourceLocation location);
+            resource.GetLocation(out ResourceLocation location);
             if (location == ResourceLocation.Mods)
                 return resource;
 
-            Console.WriteLine($"Converting resource {resource.HaloOnlinePageableResource.Page.Index}");
-            ResourceCaches.AddResource(resource.HaloOnlinePageableResource, BaseModPackage.ResourcesStream);
+            Console.WriteLine($"Converting resource {resource.Page.Index}");
+            ResourceCaches.AddResource(resource, BaseModPackage.ResourcesStream);
             return resource;
         }
     }

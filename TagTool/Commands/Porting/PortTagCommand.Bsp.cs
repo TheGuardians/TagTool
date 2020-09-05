@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTag instance, Dictionary<ResourceLocation, Stream> resourceStreams)
+        public ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTag instance, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             var converter = new RenderGeometryConverter(CacheContext, BlamCache);   // should be made static
 
