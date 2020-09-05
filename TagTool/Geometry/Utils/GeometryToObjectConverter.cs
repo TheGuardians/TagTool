@@ -577,7 +577,7 @@ namespace TagTool.Geometry.Utils
             
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
 
-            if (loddataindex != -1)
+            if (loddataindex != -1 && loddataindex < Lbsp.Geometry.InstancedGeometryPerPixelLighting.Count)
                 renderGeometry.InstancedGeometryPerPixelLighting.Add(
                     Lbsp.Geometry.InstancedGeometryPerPixelLighting[loddataindex].DeepClone());
 
