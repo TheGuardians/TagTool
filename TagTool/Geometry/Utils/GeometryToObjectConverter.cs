@@ -496,13 +496,16 @@ namespace TagTool.Geometry.Utils
             {
                 foreach (var part in mesh.Parts)
                 {
-                    short newMaterialIndex;
-                    if (!materialMapping.TryGetValue(part.MaterialIndex, out newMaterialIndex))
+                    if(part.MaterialIndex != -1 && part.MaterialIndex < StructureBsp.Materials.Count)
                     {
-                        newMaterialIndex = (short)newmaterials.Count;
-                        newmaterials.Add(ConvertData(StructureBsp.Materials[part.MaterialIndex]));
+                        short newMaterialIndex;
+                        if (!materialMapping.TryGetValue(part.MaterialIndex, out newMaterialIndex))
+                        {
+                            newMaterialIndex = (short)newmaterials.Count;
+                            newmaterials.Add(ConvertData(StructureBsp.Materials[part.MaterialIndex]));
+                        }
+                        part.MaterialIndex = newMaterialIndex;
                     }
-                    part.MaterialIndex = newMaterialIndex;
                 }
             }
 
