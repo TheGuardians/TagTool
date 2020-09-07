@@ -755,10 +755,10 @@ namespace TagTool.Tags.Definitions
         {
             public float Scale;
             public RealMatrix4x3 Matrix;
-            public short MeshIndex;
+            public short DefinitionIndex;
             public FlagsValue Flags;
             public short LodDataIndex;
-            public short Unknown;
+            public short CompressionIndex;
             public uint SeamBitVector;
             public RealPoint3d WorldBoundingSphereCenter;
             public Bounds<float> BoundingSphereRadiusBounds;

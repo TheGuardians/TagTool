@@ -431,7 +431,7 @@ namespace TagTool.Commands.Porting
                 var sldtTag = scnr.Lightmap;
                 tagRenamer.Rename(sldtTag, $"{scenarioPath}_faux_lightmap");
                 var sldt = (ScenarioLightmap)srcCache.Deserialize(srcStream, sldtTag);
-                ConvertLightmap(srcCache.Version, sldt, includeBspMask);
+                ConvertLightmap(srcCache.Version, srcStream, sldt, includeBspMask);
                 sldt = (ScenarioLightmap)porttag.ConvertData(destStream, srcStream, resourceStreams, sldt, sldt, sldtTag.Name);
                 sldt = porttag.ConvertScenarioLightmap(destStream, srcStream, resourceStreams, sldtTag.Name, sldt);
 
@@ -630,12 +630,50 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private void ConvertLightmap(CacheVersion version, ScenarioLightmap lightmap, uint includeBspMask)
+        private void ConvertLightmap(CacheVersion version, Stream srcStream, ScenarioLightmap lightmap, uint includeBspMask)
         {
-            if (version < CacheVersion.Halo3ODST)
-                RemoveBlockElementsNotInMask(lightmap.Lightmaps, includeBspMask);
+            if (version >= CacheVersion.Halo3ODST)
+            {
+                var newLightmapDataReference = new List<CachedTag>();
+                for (int test_index = 0; test_index < 32; test_index++)
+                {
+                    if ((includeBspMask & (1 << test_index)) > 0)
+                    {
+                        foreach (var lbspTag in lightmap.LightmapDataReferences)
+                        {
+                            if (lbspTag == null)
+                                continue;
+                            var test_lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(srcStream, lbspTag);
+
+                            if (test_index == test_lbsp.BspIndex)
+                            {
+                                newLightmapDataReference.Add(lbspTag);
+                                break;
+                            }
+                        }
+                    }
+                }
+                lightmap.LightmapDataReferences = newLightmapDataReference;
+            }
             else
-                RemoveBlockElementsNotInMask(lightmap.LightmapDataReferences, includeBspMask);
+            {
+                var newLightmapBspData = new List<ScenarioLightmapBspData>();
+                for (int test_index = 0; test_index < 32; test_index++)
+                {
+                    if ((includeBspMask & (1 << test_index)) > 0)
+                    {
+                        foreach (var lightmapdata in lightmap.Lightmaps)
+                        {
+                            if (lightmapdata.BspIndex == test_index)
+                            {
+                                newLightmapBspData.Add(lightmapdata);
+                                break;
+                            }
+                        }
+                    }
+                }
+                lightmap.Lightmaps = newLightmapBspData;
+            }
         }
 
         private static void FixupStructureBsp(ScenarioStructureBsp sbsp, short index)

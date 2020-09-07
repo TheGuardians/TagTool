@@ -53,13 +53,33 @@ namespace TagTool.Geometry.Utils
             StructureBsp = SourceCache.Deserialize<ScenarioStructureBsp>(SourceStream, Scenario.StructureBsps[structureBspIndex].StructureBsp);
             sLdT = SourceCache.Deserialize<ScenarioLightmap>(SourceStream, Scenario.Lightmap);
 
-            if(SourceCache.Version >= CacheVersion.Halo3ODST)
+
+
+            if (SourceCache.Version >= CacheVersion.Halo3ODST)
             {
-                Lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, sLdT.LightmapDataReferences[StructureBspIndex]);
+                foreach (var lbspTag in sLdT.LightmapDataReferences)
+                {
+                    if (lbspTag == null)
+                        continue;
+                    var test_lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, lbspTag);
+
+                    if (StructureBspIndex == test_lbsp.BspIndex)
+                    {
+                        Lbsp = test_lbsp;
+                        break;
+                    }
+                }
             }
             else
             {
-                Lbsp = sLdT.Lightmaps[StructureBspIndex];
+                foreach(var lightmapdata in sLdT.Lightmaps)
+                {
+                    if (lightmapdata.BspIndex == StructureBspIndex)
+                    {
+                        Lbsp = lightmapdata;
+                        break;
+                    }
+                }
             }
            
             var resourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
@@ -353,7 +373,7 @@ namespace TagTool.Geometry.Utils
             {
                 //bsp physics
                 var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[geometryIndex];
-                var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.MeshIndex];
+                var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.DefinitionIndex];
 
                 foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
                 {
@@ -542,7 +562,7 @@ namespace TagTool.Geometry.Utils
             if (!iscluster)
             {
                 var instance = StructureBsp.InstancedGeometryInstances[geometryIndex];
-                var instanceDef = StructureBspResources.InstancedGeometry[instance.MeshIndex];
+                var instanceDef = StructureBspResources.InstancedGeometry[instance.DefinitionIndex];
                 meshindex = instanceDef.MeshIndex;
                 compressionindex = instanceDef.CompressionIndex;
                 loddataindex = instance.LodDataIndex;

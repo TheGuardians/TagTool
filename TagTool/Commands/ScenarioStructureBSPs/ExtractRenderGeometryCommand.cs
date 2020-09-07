@@ -73,7 +73,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     foreach (var instance in Definition.InstancedGeometryInstances)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[instance.MeshIndex]);
+                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[instance.DefinitionIndex]);
                         objExtractor.ExtractMesh(meshReader, vertexCompressor);
                     }
 

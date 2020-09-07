@@ -62,7 +62,7 @@ namespace TagTool.Commands.Scenarios
                     {
                         for(var instanceindex = 0; instanceindex < hoSbsp.InstancedGeometryInstances.Count; instanceindex++)
                         {
-                            short meshindex = hoSbsp.InstancedGeometryInstances[instanceindex].MeshIndex;
+                            short meshindex = hoSbsp.InstancedGeometryInstances[instanceindex].DefinitionIndex;
                             if (converted.Contains(meshindex))
                                 continue;
                             converted.Add(meshindex);
