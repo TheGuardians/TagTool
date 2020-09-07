@@ -442,6 +442,32 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
+            else if (rmt2Desc.Type == "decal")
+            {
+                string tagName = $"shaders\\decal_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Decal.Albedo albedo = (HaloShaderGenerator.Decal.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Decal.Blend_Mode blend_mode = (HaloShaderGenerator.Decal.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Decal.Render_Pass render_pass = (HaloShaderGenerator.Decal.Render_Pass)rmt2Desc.Options[2];
+                HaloShaderGenerator.Decal.Specular specular = (HaloShaderGenerator.Decal.Specular)rmt2Desc.Options[3];
+                HaloShaderGenerator.Decal.Bump_Mapping bump_mapping = (HaloShaderGenerator.Decal.Bump_Mapping)rmt2Desc.Options[4];
+                HaloShaderGenerator.Decal.Tinting tinting = (HaloShaderGenerator.Decal.Tinting)rmt2Desc.Options[5];
+
+                var generator = new HaloShaderGenerator.Decal.DecalGenerator(albedo, blend_mode, render_pass, specular, bump_mapping, tinting, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
 
             return false;
         }

@@ -27,7 +27,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", "contrail", "beam", "light_volume", /*"black"*/ };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", "contrail", "beam", "light_volume", "decal", "black" };
 
         public override object Execute(List<string> args)
         {
@@ -88,12 +88,13 @@ namespace TagTool.Commands.Shaders
                 // generate shader
                 switch (shaderType)
                 {
-                    case "shader": GenerateShader(stream, options, rmt2TagName, rmdf); break;
-                    case "particle": GenerateParticle(stream, options, rmt2TagName, rmdf); break;
-                    case "contrail": GenerateContrail(stream, options, rmt2TagName, rmdf); break;
-                    case "beam": GenerateBeam(stream, options, rmt2TagName, rmdf); break;
-                    case "light_volume": GenerateLightVolume(stream, options, rmt2TagName, rmdf); break;
-                        //case "black": GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
+                    case "shader":          GenerateShader(stream, options, rmt2TagName, rmdf); break;
+                    case "particle":        GenerateParticle(stream, options, rmt2TagName, rmdf); break;
+                    case "contrail":        GenerateContrail(stream, options, rmt2TagName, rmdf); break;
+                    case "beam":            GenerateBeam(stream, options, rmt2TagName, rmdf); break;
+                    case "light_volume":    GenerateLightVolume(stream, options, rmt2TagName, rmdf); break;
+                    case "decal":           GenerateDecal(stream, options, rmt2TagName, rmdf); break;
+                    case "black":           GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
@@ -210,6 +211,47 @@ namespace TagTool.Commands.Shaders
             HaloShaderGenerator.LightVolume.Fog fog = (HaloShaderGenerator.LightVolume.Fog)options[2];
 
             var generator = new HaloShaderGenerator.LightVolume.LightVolumeGenerator(albedo, blend_mode, fog, true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateDecal(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.Decal.Albedo albedo = (HaloShaderGenerator.Decal.Albedo)options[0];
+            HaloShaderGenerator.Decal.Blend_Mode blend_mode = (HaloShaderGenerator.Decal.Blend_Mode)options[1];
+            HaloShaderGenerator.Decal.Render_Pass render_pass = (HaloShaderGenerator.Decal.Render_Pass)options[2];
+            HaloShaderGenerator.Decal.Specular specular = (HaloShaderGenerator.Decal.Specular)options[3];
+            HaloShaderGenerator.Decal.Bump_Mapping bump_mapping = (HaloShaderGenerator.Decal.Bump_Mapping)options[4];
+            HaloShaderGenerator.Decal.Tinting tinting = (HaloShaderGenerator.Decal.Tinting)options[5];
+
+            var generator = new HaloShaderGenerator.Decal.DecalGenerator(albedo, blend_mode, render_pass, specular, bump_mapping, tinting, true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateShaderBlack(Stream stream, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
