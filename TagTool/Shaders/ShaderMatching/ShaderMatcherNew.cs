@@ -468,6 +468,33 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
+            else if (rmt2Desc.Type == "halogram")
+            {
+                string tagName = $"shaders\\halogram_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Halogram.Albedo albedo = (HaloShaderGenerator.Halogram.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Halogram.Self_Illumination self_illumination = (HaloShaderGenerator.Halogram.Self_Illumination)rmt2Desc.Options[1];
+                HaloShaderGenerator.Halogram.Blend_Mode blend_mode = (HaloShaderGenerator.Halogram.Blend_Mode)rmt2Desc.Options[2];
+                HaloShaderGenerator.Halogram.Misc misc = (HaloShaderGenerator.Halogram.Misc)rmt2Desc.Options[3];
+                HaloShaderGenerator.Halogram.Warp warp = (HaloShaderGenerator.Halogram.Warp)rmt2Desc.Options[4];
+                HaloShaderGenerator.Halogram.Overlay overlay = (HaloShaderGenerator.Halogram.Overlay)rmt2Desc.Options[5];
+                HaloShaderGenerator.Halogram.Edge_Fade edge_fade = (HaloShaderGenerator.Halogram.Edge_Fade)rmt2Desc.Options[6];
+
+                var generator = new HaloShaderGenerator.Halogram.HalogramGenerator(albedo, self_illumination, blend_mode, misc, warp, overlay, edge_fade, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
 
             return false;
         }

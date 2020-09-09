@@ -27,7 +27,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", "contrail", "beam", "light_volume", "decal", "black" };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
 
         public override object Execute(List<string> args)
         {
@@ -95,6 +95,8 @@ namespace TagTool.Commands.Shaders
                     case "light_volume":    GenerateLightVolume(stream, options, rmt2TagName, rmdf); break;
                     case "decal":           GenerateDecal(stream, options, rmt2TagName, rmdf); break;
                     case "black":           GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
+                    case "halogram":        GenerateHalogram(stream, options, rmt2TagName, rmdf); break;
+
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
@@ -252,6 +254,31 @@ namespace TagTool.Commands.Shaders
         private void GenerateShaderBlack(Stream stream, string rmt2Name, RenderMethodDefinition rmdf)
         {
             var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateHalogram(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.Halogram.Albedo albedo = (HaloShaderGenerator.Halogram.Albedo)options[0];
+            HaloShaderGenerator.Halogram.Self_Illumination self_illumination = (HaloShaderGenerator.Halogram.Self_Illumination)options[1];
+            HaloShaderGenerator.Halogram.Blend_Mode blend_mode = (HaloShaderGenerator.Halogram.Blend_Mode)options[2];
+            HaloShaderGenerator.Halogram.Misc misc = (HaloShaderGenerator.Halogram.Misc)options[3];
+            HaloShaderGenerator.Halogram.Warp warp = (HaloShaderGenerator.Halogram.Warp)options[4];
+            HaloShaderGenerator.Halogram.Overlay overlay = (HaloShaderGenerator.Halogram.Overlay)options[5];
+            HaloShaderGenerator.Halogram.Edge_Fade edge_fade = (HaloShaderGenerator.Halogram.Edge_Fade)options[6];
+
+            var generator = new HaloShaderGenerator.Halogram.HalogramGenerator(albedo, self_illumination, blend_mode, misc, warp, overlay, edge_fade, true);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
