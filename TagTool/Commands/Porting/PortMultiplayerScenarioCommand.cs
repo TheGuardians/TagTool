@@ -701,6 +701,7 @@ namespace TagTool.Commands.Porting
             private uint IncludeBspMask;
             private Dictionary<short, short> BspIndexRemapping;
             private MultiplayerScenarioConversionFlags ConversionFlags;
+            private uint NewBspMask;
 
             public MultiplayerScenarioConverter(Scenario scenario, int zoneSetIndex, uint includeBspMask, MultiplayerScenarioConversionFlags flags)
             {
@@ -713,7 +714,7 @@ namespace TagTool.Commands.Porting
 
             public void Convert()
             {
-                CreateBspMask();
+                NewBspMask = CreateBspMask();
                 RemoveBlockElementsNotInMask(Scenario.StructureBsps, IncludeBspMask);
                 ConvertSkies();
                 ConvertZoneSet();
@@ -801,7 +802,7 @@ namespace TagTool.Commands.Porting
                 var zoneSetPvs = Scenario.ZoneSetPvs[zoneSet.PotentiallyVisibleSetIndex];
 
                 uint newBspPvsMask = CreateBspPvsMask((uint)zoneSetPvs.StructureBspMask);
-                zoneSetPvs.StructureBspMask = (BspFlags)newBspPvsMask;
+                zoneSetPvs.StructureBspMask = (BspFlags)NewBspMask;
                 RemoveBlockElementsNotInMask(zoneSetPvs.BspChecksums, newBspPvsMask);
                 RemoveBlockElementsNotInMask(zoneSetPvs.StructureBspPotentiallyVisibleSets, newBspPvsMask);
                 RemoveBlockElementsNotInMask(zoneSetPvs.PortalToDeviceMappings, newBspPvsMask);
@@ -823,7 +824,7 @@ namespace TagTool.Commands.Porting
                         Name = zoneSet.Name,
                         BspAtlasIndex = -1,
                         PotentiallyVisibleSetIndex = 0,
-                        LoadedBsps = (BspFlags)newBspPvsMask
+                        LoadedBsps = (BspFlags)NewBspMask
                     }
                 };
 
