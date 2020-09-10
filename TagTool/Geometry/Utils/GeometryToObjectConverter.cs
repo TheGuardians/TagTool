@@ -573,9 +573,7 @@ namespace TagTool.Geometry.Utils
                 meshindex = cluster.MeshIndex;
             }
 
-            var mesh = Lbsp.Geometry.Meshes[meshindex];
-
-            var resourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, meshindex);
+            var resourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, meshindex, out Mesh mesh);
 
             var renderGeometry = new RenderGeometry();
 
@@ -693,7 +691,7 @@ namespace TagTool.Geometry.Utils
             return compression;
         }
 
-        private static RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex)
+        private static RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex, out Mesh mesh)
         {
             RenderGeometryApiResourceDefinition result = new RenderGeometryApiResourceDefinition
             {
@@ -705,7 +703,7 @@ namespace TagTool.Geometry.Utils
             result.IndexBuffers.AddressType = CacheAddressType.Definition;
             result.VertexBuffers.AddressType = CacheAddressType.Definition;
 
-            var mesh = renderGeometry.Meshes[meshindex];
+            mesh = renderGeometry.Meshes[meshindex].DeepClone();
 
             for (int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
             {
