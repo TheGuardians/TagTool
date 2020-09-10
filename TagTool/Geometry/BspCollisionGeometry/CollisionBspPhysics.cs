@@ -14,6 +14,6 @@ namespace TagTool.Geometry.BspCollisionGeometry
     public class CollisionBspPhysicsDefinition : TagStructure
     {
         public CollisionGeometryShape GeometryShape;
-        public HkpBvMoppTreeShape MoppBvTreeShape;
+        public CMoppBvTreeShape MoppBvTreeShape;
     }
 }

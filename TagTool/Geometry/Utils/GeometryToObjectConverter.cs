@@ -396,7 +396,7 @@ namespace TagTool.Geometry.Utils
                 var cluster = StructureBsp.Clusters[geometryIndex];
 
                 // bsp physics & mopps
-                foreach (var mopp in cluster.CollisionMoppCodes)
+                foreach (var mopp in cluster.InstancedGeometryPhysics.MoppCodes)
                 {
                     permutation.BspMoppCodes.Add(ConvertData(mopp));
 
@@ -408,7 +408,7 @@ namespace TagTool.Geometry.Utils
                             AABB_Center = new RealQuaternion(cluster.BoundsX.Lower, cluster.BoundsY.Lower, cluster.BoundsZ.Lower, 0),
                             AABB_Half_Extents = new RealQuaternion(cluster.BoundsX.Upper, cluster.BoundsY.Upper, cluster.BoundsZ.Upper, 0),
                         },
-                        MoppBvTreeShape = new Havok.HkpBvMoppTreeShape()
+                        MoppBvTreeShape = new Havok.CMoppBvTreeShape()
                     };
                     permutation.BspPhysics.Add(bspPhysics);
                 }

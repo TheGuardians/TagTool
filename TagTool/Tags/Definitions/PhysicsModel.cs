@@ -49,7 +49,7 @@ namespace TagTool.Tags.Definitions
 
         public List<List> Lists;
         public List<ListShape> ListShapes;
-        public List<HkpBvMoppTreeShape> Mopps;
+        public List<CMoppBvTreeShape> Mopps;
         public byte[] MoppData;
         public List<HingeConstraint> HingeConstraints;
         public List<RagdollConstraint> RagdollConstraints;

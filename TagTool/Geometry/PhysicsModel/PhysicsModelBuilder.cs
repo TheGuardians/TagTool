@@ -98,13 +98,13 @@ namespace TagTool.Geometry
                 //phmo needs to use shapelist and listelements reflexives
                 _phmo.Lists = new List<PhysicsModel.List>();
                 _phmo.ListShapes = new List<PhysicsModel.ListShape>();
-                _phmo.Mopps = new List<HkpBvMoppTreeShape>();
+                _phmo.Mopps = new List<CMoppBvTreeShape>();
                 
-                var moppTagblock = new HkpBvMoppTreeShape
+                var moppTagblock = new CMoppBvTreeShape
                 {
                     ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80},
                     Type = 27,
-                    Child = new HkpSingleShapeContainer { Type = BlamShapeType.List, Index = 0},
+                    Child = new HkpSingleShapeContainer { Type = BlamShapeType.List, Index = 0}
                 };
                 
                 _phmo.MoppData = moppCodeBlockStream.ToArray();
