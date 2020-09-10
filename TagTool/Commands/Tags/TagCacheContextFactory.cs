@@ -108,6 +108,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new AddTagCacheCommand(modCache));
                 context.AddCommand(new DeleteTagCacheCommand(modCache));
                 context.AddCommand(new AddModFilesCommand(modCache));
+                context.AddCommand(new ListModFilesCommand(modCache));
                 context.AddCommand(new DeleteModFilesCommand(modCache));
                 context.AddCommand(new NameTagCacheCommand(modCache));
                 context.AddCommand(new UpdateDescriptionCommand(modCache));
