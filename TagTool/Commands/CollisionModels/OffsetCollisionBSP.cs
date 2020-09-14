@@ -130,7 +130,8 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 RealPoint3d vertex = Bsp.Vertices[vertex_index].Point;
                 double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
-                if (Math.Abs(plane_equation_vertex_input) < plane_fit)
+                if (plane_equation_vertex_input >= -0.00024414062 && plane_equation_vertex_input <= 0.00024414062 &&
+                    Math.Abs(plane_equation_vertex_input) < plane_fit)
                 {
                     plane_fit = Math.Abs(plane_equation_vertex_input);
                     matching_vertex_index = vertex_index;
@@ -413,7 +414,8 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                     RealPoint2d coords = vertex_get_projection_relevant_coords(vertex_block, plane_projection_axis, plane_mirror_check);
                     double plane_2d_coord_input = plane_2d.I * coords.X + plane_2d.J * coords.Y - plane_2d.D;
 
-                    if (Math.Abs(plane_2d_coord_input) < planefit_2d)
+                    if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031 && 
+                        Math.Abs(plane_2d_coord_input) < planefit_2d)
                     {
                         matching_vertex_index = plane_matching_vertices[vertex_index];
                         planefit_2d = Math.Abs(plane_2d_coord_input);
