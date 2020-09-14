@@ -8,6 +8,7 @@ using TagTool.Common;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags.Definitions;
 using TagTool.Tags;
+using System.Diagnostics;
 
 namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 {
@@ -33,11 +34,17 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 NewBsp.Vertices[i].Point.Z -= GeometryOffset.Z;
             }
 
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             if (recalculate_bsp_planes() && recalculate_bsp2dreferences())
             {
                 verify_planes();
                 verify_bsp2dreferences();
+                sw.Stop();
                 Console.WriteLine($"### Collision bsp offset successfully! ({planewarnings} warnings)");
+                if(debug)
+                    Console.WriteLine($"Collision bsp offset Time Elapsed: {sw.Elapsed}");
                 inputbsp = NewBsp;
                 return true;
             }
@@ -123,8 +130,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 RealPoint3d vertex = Bsp.Vertices[vertex_index].Point;
                 double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
-                if (plane_equation_vertex_input >= -0.00024414062 && plane_equation_vertex_input <= 0.00024414062
-                    && (Math.Abs(plane_equation_vertex_input) < plane_fit))
+                if (Math.Abs(plane_equation_vertex_input) < plane_fit)
                 {
                     plane_fit = Math.Abs(plane_equation_vertex_input);
                     matching_vertex_index = vertex_index;
@@ -132,26 +138,32 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 }
             }
 
-            if (matching_vertex_index == -1)
-                return false;
-
             float new_plane_D = plane.I * matching_point.X + plane.J * matching_point.Y + plane.K * matching_point.Z;
             NewBsp.Planes[plane_index].Value.D = new_plane_D;
 
             plane_vertex_splitting_parameters parameters = check_plane_split(plane_index);
             int loopcounter = 10000;
+            byte direction_history = 0;
+            float adjustment_factor = 0.001f;
             while (!verify_split_parameters(parameters))
             {
                 if (parameters.new_front_count > parameters.front_count ||
                     parameters.new_back_count < parameters.back_count)
                 {
-                    NewBsp.Planes[plane_index].Value.D += 0.000001f;
+                    NewBsp.Planes[plane_index].Value.D += adjustment_factor;
+                    direction_history = (byte)((direction_history >> 1) | (byte)0x80);
                 }
                 else if (parameters.new_front_count < parameters.front_count ||
                     parameters.new_back_count > parameters.back_count)
                 {
-                    NewBsp.Planes[plane_index].Value.D -= 0.000001f;
+                    NewBsp.Planes[plane_index].Value.D -= adjustment_factor;
+                    direction_history = (byte)((direction_history >> 1) & (byte)0x7F);
                 }
+                //direction history is a binary history of which direction the plane has been moving
+                //0x55 is 01010101, meaning the plane has been shifting back and forth, unable to properly split vertices
+                //therefore, we will move to a finer adjustment for the plane
+                if (direction_history == (byte)0x55)
+                    adjustment_factor /= 10.0f;
                 parameters = check_plane_split(plane_index);
                 if (loopcounter-- <= 0)
                     break;
@@ -274,20 +286,60 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             return parameters;
         }
 
-        public bool recalculate_bsp2dnodes(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check)
+        public plane_vertex_splitting_parameters check_bsp2dnode_split_from_vertex_list(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check, List<int> plane_vertex_list)
+        {
+            RealPlane2d node = Bsp.Bsp2dNodes[node_index].Plane;
+            RealPlane2d newnode = NewBsp.Bsp2dNodes[node_index].Plane;
+            plane_vertex_splitting_parameters parameters = new plane_vertex_splitting_parameters();
+            for (int vertex_index = 0; vertex_index < plane_vertex_list.Count; vertex_index++)
+            {
+                Vertex vertex_block = Bsp.Vertices[plane_vertex_list[vertex_index]];
+                RealPoint2d coords = vertex_get_projection_relevant_coords(vertex_block, plane_projection_axis, plane_mirror_check);
+                switch (determine_vertex_plane_relationship_2D(coords, node))
+                {
+                    case Plane_Relationship.BackofPlane:
+                        parameters.back_count++;
+                        break;
+                    case Plane_Relationship.FrontofPlane:
+                        parameters.front_count++;
+                        break;
+                    case Plane_Relationship.OnPlane:
+                        parameters.onplane_count++;
+                        break;
+                }
+
+                Vertex new_vertex_block = NewBsp.Vertices[plane_vertex_list[vertex_index]];
+                RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
+                switch (determine_vertex_plane_relationship_2D(newcoords, newnode))
+                {
+                    case Plane_Relationship.BackofPlane:
+                        parameters.new_back_count++;
+                        break;
+                    case Plane_Relationship.FrontofPlane:
+                        parameters.new_front_count++;
+                        break;
+                    case Plane_Relationship.OnPlane:
+                        parameters.new_onplane_count++;
+                        break;
+                }
+            }
+            return parameters;
+        }
+
+        public bool recalculate_bsp2dnodes(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check, List<int> plane_matching_vertices)
         {
             //nodes with the 0x8000 flag are actually surface indices
             if ((node_index & 0x8000) != 0)
                 return true;
 
-            if (recalculate_bsp2dnodes_by_split_comparison(node_index, plane_block, plane_projection_axis, plane_mirror_check) ||
-                recalculate_bsp2dnodes_by_best_match(node_index, plane_block, plane_projection_axis, plane_mirror_check))
+            if (recalculate_bsp2dnodes_by_split_comparison(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices) ||
+                recalculate_bsp2dnodes_by_best_match(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices))
             {
                 int right_child_node = Bsp.Bsp2dNodes[node_index].RightChild & 0xFFFF;
                 int left_child_node = Bsp.Bsp2dNodes[node_index].LeftChild & 0xFFFF;
 
-                if (recalculate_bsp2dnodes(left_child_node, plane_block, plane_projection_axis, plane_mirror_check) &&
-                    recalculate_bsp2dnodes(right_child_node, plane_block, plane_projection_axis, plane_mirror_check))
+                if (recalculate_bsp2dnodes(left_child_node, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices) &&
+                    recalculate_bsp2dnodes(right_child_node, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices))
                     return true;
                 return false;
             }
@@ -297,7 +349,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             }
         }
 
-        public bool recalculate_bsp2dnodes_by_split_comparison(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check)
+        public bool recalculate_bsp2dnodes_by_split_comparison(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check, List<int> plane_matching_vertices)
         {
             //nodes with the 0x8000 flag are actually surface indices
             if ((node_index & 0x8000) != 0)
@@ -307,10 +359,10 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 
             int vertex_index = 0;
             int matching_vertex_index = -1;
-            for (vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
+            for (vertex_index = 0; vertex_index < plane_matching_vertices.Count; vertex_index++)
             {
-                Vertex vertex_block = Bsp.Vertices[vertex_index];
-                RealPoint3d point = Bsp.Vertices[vertex_index].Point;
+                Vertex vertex_block = Bsp.Vertices[plane_matching_vertices[vertex_index]];
+                RealPoint3d point = vertex_block.Point;
                 if (determine_vertex_plane_relationship(point, plane_block.Value) == Plane_Relationship.OnPlane)
                 {
                     RealPoint2d coords = vertex_get_projection_relevant_coords(vertex_block, plane_projection_axis, plane_mirror_check);
@@ -318,14 +370,14 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 
                     if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031)
                     {
-                        Vertex new_vertex_block = NewBsp.Vertices[vertex_index];
+                        Vertex new_vertex_block = NewBsp.Vertices[plane_matching_vertices[vertex_index]];
                         RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
                         float new_plane_D = plane_2d.I * newcoords.X + plane_2d.J * newcoords.Y;
                         NewBsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
-                        plane_vertex_splitting_parameters parameters = check_bsp2dnode_split(node_index, plane_block, plane_projection_axis, plane_mirror_check);
+                        plane_vertex_splitting_parameters parameters = check_bsp2dnode_split_from_vertex_list(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
                         if (verify_split_parameters(parameters))
                         {
-                            matching_vertex_index = vertex_index;
+                            matching_vertex_index = plane_matching_vertices[vertex_index];
                             break;
                         }
                     }
@@ -341,7 +393,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             return true;
         }
 
-        public bool recalculate_bsp2dnodes_by_best_match(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check)
+        public bool recalculate_bsp2dnodes_by_best_match(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check, List<int> plane_matching_vertices)
         {
             //nodes with the 0x8000 flag are actually surface indices
             if ((node_index & 0x8000) != 0)
@@ -352,19 +404,18 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             int vertex_index = 0;
             double planefit_2d = double.MaxValue;
             int matching_vertex_index = -1;
-            for (vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
+            for (vertex_index = 0; vertex_index < plane_matching_vertices.Count; vertex_index++)
             {
-                Vertex vertex_block = Bsp.Vertices[vertex_index];
-                RealPoint3d point = Bsp.Vertices[vertex_index].Point;
+                Vertex vertex_block = Bsp.Vertices[plane_matching_vertices[vertex_index]];
+                RealPoint3d point = vertex_block.Point;
                 if (determine_vertex_plane_relationship(point, plane_block.Value) == Plane_Relationship.OnPlane)
                 {
                     RealPoint2d coords = vertex_get_projection_relevant_coords(vertex_block, plane_projection_axis, plane_mirror_check);
                     double plane_2d_coord_input = plane_2d.I * coords.X + plane_2d.J * coords.Y - plane_2d.D;
 
-                    if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031 &&
-                        (Math.Abs(plane_2d_coord_input) < planefit_2d))
+                    if (Math.Abs(plane_2d_coord_input) < planefit_2d)
                     {
-                        matching_vertex_index = vertex_index;
+                        matching_vertex_index = plane_matching_vertices[vertex_index];
                         planefit_2d = Math.Abs(plane_2d_coord_input);
                     }
                 }
@@ -381,21 +432,30 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
             float new_plane_D = plane_2d.I * newcoords.X + plane_2d.J * newcoords.Y;
             NewBsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
-
-            plane_vertex_splitting_parameters parameters = check_bsp2dnode_split(node_index, plane_block, plane_projection_axis, plane_mirror_check);
+            
+            plane_vertex_splitting_parameters parameters = check_bsp2dnode_split_from_vertex_list(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
             int loopcounter = 10000;
+            byte direction_history = 0;
+            float adjustment_factor = 0.0001f;
             while (!verify_split_parameters(parameters))
             {
                 if (parameters.new_front_count > parameters.front_count ||
                     parameters.new_back_count < parameters.back_count)
                 {
-                    NewBsp.Bsp2dNodes[node_index].Plane.D += 0.000001f;
+                    NewBsp.Bsp2dNodes[node_index].Plane.D += adjustment_factor;
+                    direction_history = (byte)((direction_history >> 1) | (byte)0x80);
                 }
                 else if (parameters.new_front_count < parameters.front_count ||
                     parameters.new_back_count > parameters.back_count)
                 {
-                    NewBsp.Bsp2dNodes[node_index].Plane.D -= 0.000001f;
+                    NewBsp.Bsp2dNodes[node_index].Plane.D -= adjustment_factor;
+                    direction_history = (byte)((direction_history >> 1) & (byte)0x7F);
                 }
+                //direction history is a binary history of which direction the plane has been moving
+                //0x55 is 01010101, meaning the plane has been shifting back and forth, unable to properly split vertices
+                //therefore, we will move to a finer adjustment for the plane
+                if (direction_history == (byte)0x55)
+                    adjustment_factor /= 10.0f;
                 parameters = check_bsp2dnode_split(node_index, plane_block, plane_projection_axis, plane_mirror_check);
                 if (loopcounter-- <= 0)
                     break;
@@ -418,17 +478,28 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 
                 int node_index = Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex & 0xFFFF;
 
-                verify_bsp2dnodes(node_index, plane_block, plane_projection_axis, plane_mirror_check);
+                List<int> plane_matching_vertices = new List<int>();
+                for (int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
+                {
+                    Vertex vertex_block = Bsp.Vertices[vertex_index];
+                    RealPoint3d point = Bsp.Vertices[vertex_index].Point;
+                    if (determine_vertex_plane_relationship(point, plane_block.Value) == Plane_Relationship.OnPlane)
+                    {
+                        plane_matching_vertices.Add(vertex_index);
+                    }
+                }
+
+                verify_bsp2dnodes(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
             }
         }
 
-        public void verify_bsp2dnodes(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check)
+        public void verify_bsp2dnodes(int node_index, Plane plane_block, int plane_projection_axis, int plane_mirror_check, List<int> plane_matching_vertices)
         {
             //nodes with the 0x8000 flag are actually surface indices
             if ((node_index & 0x8000) != 0)
                 return;
 
-            plane_vertex_splitting_parameters parameters = check_bsp2dnode_split(node_index, plane_block, plane_projection_axis, plane_mirror_check);
+            plane_vertex_splitting_parameters parameters = check_bsp2dnode_split_from_vertex_list(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
             if (!verify_split_parameters(parameters))
             {
                 if (debug)
@@ -439,8 +510,8 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             int right_child_node = Bsp.Bsp2dNodes[node_index].RightChild & 0xFFFF;
             int left_child_node = Bsp.Bsp2dNodes[node_index].LeftChild & 0xFFFF;
 
-            verify_bsp2dnodes(left_child_node, plane_block, plane_projection_axis, plane_mirror_check);
-            verify_bsp2dnodes(right_child_node, plane_block, plane_projection_axis, plane_mirror_check);
+            verify_bsp2dnodes(left_child_node, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
+            verify_bsp2dnodes(right_child_node, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
 
             return;
         }
@@ -459,7 +530,18 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 
                 int node_index = Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex & 0xFFFF;
 
-                if (!recalculate_bsp2dnodes(node_index, plane_block, plane_projection_axis, plane_mirror_check))
+                List<int> plane_matching_vertices = new List<int>();
+                for (int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
+                {
+                    Vertex vertex_block = Bsp.Vertices[vertex_index];
+                    RealPoint3d point = Bsp.Vertices[vertex_index].Point;
+                    if (determine_vertex_plane_relationship(point, plane_block.Value) == Plane_Relationship.OnPlane)
+                    {
+                        plane_matching_vertices.Add(vertex_index);
+                    }
+                }
+
+                if (!recalculate_bsp2dnodes(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices))
                 {
                     Console.WriteLine($"###ERROR: Could not regenerate bsp2dnode {node_index}");
                     return false;
