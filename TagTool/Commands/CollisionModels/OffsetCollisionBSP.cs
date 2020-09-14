@@ -42,9 +42,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 verify_planes();
                 verify_bsp2dreferences();
                 sw.Stop();
-                Console.WriteLine($"### Collision bsp offset successfully! ({planewarnings} warnings)");
-                if(debug)
-                    Console.WriteLine($"Collision bsp offset Time Elapsed: {sw.Elapsed}");
+                Console.WriteLine($"### Collision bsp offset successfully! ({planewarnings} warnings, {sw.Elapsed.TotalSeconds} seconds)");
                 inputbsp = NewBsp;
                 return true;
             }
@@ -60,16 +58,8 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             for(int plane_index = 0; plane_index < Bsp.Planes.Count; plane_index++)
             {
                 RealPlane3d plane = Bsp.Planes[plane_index].Value;
-
-                if(plane_regeneration_by_split_comparison(plane_index))
-                {
-                    continue;
-                }
-                else if (plane_regeneration_by_best_match(plane_index))
-                {
-                    continue;
-                }
-                else if (plane.I == 1.0f && plane.J == 0.0f && plane.K == 0.0f)
+                
+                if (plane.I == 1.0f && plane.J == 0.0f && plane.K == 0.0f)
                 {
                     NewBsp.Planes[plane_index].Value.D = Bsp.Planes[plane_index].Value.D - GeometryOffset.X;
                 }
@@ -80,6 +70,14 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 else if (plane.K == 1.0f && plane.J == 0.0f && plane.I == 0.0f)
                 {
                     NewBsp.Planes[plane_index].Value.D = Bsp.Planes[plane_index].Value.D - GeometryOffset.Z;
+                }
+                else if (plane_regeneration_by_split_comparison(plane_index))
+                {
+                    continue;
+                }
+                else if (plane_regeneration_by_best_match(plane_index))
+                {
+                    continue;
                 }
                 else
                 {
@@ -130,8 +128,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 RealPoint3d vertex = Bsp.Vertices[vertex_index].Point;
                 double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
-                if (plane_equation_vertex_input >= -0.00024414062 && plane_equation_vertex_input <= 0.00024414062 &&
-                    Math.Abs(plane_equation_vertex_input) < plane_fit)
+                if (Math.Abs(plane_equation_vertex_input) < plane_fit)
                 {
                     plane_fit = Math.Abs(plane_equation_vertex_input);
                     matching_vertex_index = vertex_index;
@@ -145,25 +142,26 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             plane_vertex_splitting_parameters parameters = check_plane_split(plane_index);
             int loopcounter = 10000;
             byte direction_history = 0;
-            float adjustment_factor = 0.001f;
+            float adjustment_factor = 0.1f;
             while (!verify_split_parameters(parameters))
             {
                 if (parameters.new_front_count > parameters.front_count ||
                     parameters.new_back_count < parameters.back_count)
                 {
                     NewBsp.Planes[plane_index].Value.D += adjustment_factor;
-                    direction_history = (byte)((direction_history >> 1) | (byte)0x80);
+                    direction_history = (byte)((direction_history << 1) | (byte)0x1);
                 }
                 else if (parameters.new_front_count < parameters.front_count ||
                     parameters.new_back_count > parameters.back_count)
                 {
                     NewBsp.Planes[plane_index].Value.D -= adjustment_factor;
-                    direction_history = (byte)((direction_history >> 1) & (byte)0x7F);
+                    direction_history = (byte)((direction_history << 1) & (byte)0xFE);
                 }
                 //direction history is a binary history of which direction the plane has been moving
-                //0x55 is 01010101, meaning the plane has been shifting back and forth, unable to properly split vertices
+                //0xA is 1010 and 0x5 is 0101, meaning the plane has been shifting back and forth, unable to properly split vertices
                 //therefore, we will move to a finer adjustment for the plane
-                if (direction_history == (byte)0x55)
+                if ((direction_history & 0xF) == 0xA ||
+                    (direction_history & 0xF) == 0x5)
                     adjustment_factor /= 10.0f;
                 parameters = check_plane_split(plane_index);
                 if (loopcounter-- <= 0)
@@ -414,7 +412,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                     RealPoint2d coords = vertex_get_projection_relevant_coords(vertex_block, plane_projection_axis, plane_mirror_check);
                     double plane_2d_coord_input = plane_2d.I * coords.X + plane_2d.J * coords.Y - plane_2d.D;
 
-                    if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031 && 
+                    if (plane_2d_coord_input >= -0.00012207031 && plane_2d_coord_input <= 0.00012207031 &&
                         Math.Abs(plane_2d_coord_input) < planefit_2d)
                     {
                         matching_vertex_index = plane_matching_vertices[vertex_index];
@@ -429,34 +427,35 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 Console.WriteLine($"###ERROR: Could not find a vertex to generate a 2d plane for node {node_index}");
                 return false;
             }
-           
+
             Vertex new_vertex_block = NewBsp.Vertices[matching_vertex_index];
             RealPoint2d newcoords = vertex_get_projection_relevant_coords(new_vertex_block, plane_projection_axis, plane_mirror_check);
             float new_plane_D = plane_2d.I * newcoords.X + plane_2d.J * newcoords.Y;
             NewBsp.Bsp2dNodes[node_index].Plane.D = new_plane_D;
-            
+
             plane_vertex_splitting_parameters parameters = check_bsp2dnode_split_from_vertex_list(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices);
             int loopcounter = 10000;
             byte direction_history = 0;
-            float adjustment_factor = 0.0001f;
+            float adjustment_factor = 0.001f;
             while (!verify_split_parameters(parameters))
             {
                 if (parameters.new_front_count > parameters.front_count ||
                     parameters.new_back_count < parameters.back_count)
                 {
                     NewBsp.Bsp2dNodes[node_index].Plane.D += adjustment_factor;
-                    direction_history = (byte)((direction_history >> 1) | (byte)0x80);
+                    direction_history = (byte)((direction_history << 1) | (byte)0x1);
                 }
                 else if (parameters.new_front_count < parameters.front_count ||
                     parameters.new_back_count > parameters.back_count)
                 {
                     NewBsp.Bsp2dNodes[node_index].Plane.D -= adjustment_factor;
-                    direction_history = (byte)((direction_history >> 1) & (byte)0x7F);
+                    direction_history = (byte)((direction_history << 1) & (byte)0xFE);
                 }
                 //direction history is a binary history of which direction the plane has been moving
-                //0x55 is 01010101, meaning the plane has been shifting back and forth, unable to properly split vertices
+                //0xA is 1010 and 0x5 is 0101, meaning the plane has been shifting back and forth, unable to properly split vertices
                 //therefore, we will move to a finer adjustment for the plane
-                if (direction_history == (byte)0x55)
+                if ((direction_history & 0xF) == 0xA ||
+                    (direction_history & 0xF) == 0x5)
                     adjustment_factor /= 10.0f;
                 parameters = check_bsp2dnode_split(node_index, plane_block, plane_projection_axis, plane_mirror_check);
                 if (loopcounter-- <= 0)
