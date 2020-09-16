@@ -49,8 +49,6 @@ namespace TagTool.Commands.CollisionModels
             //check inputs
             if(Cache.TagCache.TryGetTag(tagName + ".coll", out tag))
                 return new TagToolError(CommandError.OperationFailed, "Selected TagName already exists in the cache!");
-            if (!Path.GetExtension(filepath).Equals(".obj"))
-                return new TagToolError(CommandError.FileType);
             //if (!Directory.Exists(filepath))
             //    return new TagToolError(CommandError.FileNotFound);
 
