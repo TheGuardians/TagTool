@@ -76,12 +76,12 @@ namespace TagTool.Commands.CollisionModels
             int bsp3dnode_index = -1;
             if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
             {
-                Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
+                Console.WriteLine($"### Collision bsp r{region_index}p{permutation_index}b{bsp_index} built successfully!");
                 Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = Bsp;
             }
             else
             {
-                Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
+                Console.WriteLine($"### Failed to build collision bsp r{region_index}p{permutation_index}b{bsp_index}!");
                 return false;
             }
             return true;

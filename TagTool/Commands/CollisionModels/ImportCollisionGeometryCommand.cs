@@ -398,7 +398,7 @@ namespace TagTool.Commands.CollisionModels
                                 {
                                     bool loop_direction_is_reverse = loop_direction == 0;
 
-                                    int next_edge_index_A = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
+                                    int next_edge_index_A = loop_direction_is_reverse ? edge_block.ForwardEdge : edge_block.ReverseEdge;
                                     Edge next_edge_A = Bsp.Edges[next_edge_index_A];
                                     bool next_right_surface_check = next_edge_A.RightSurface == (loop_direction_is_reverse ? edge_block.LeftSurface : edge_block.RightSurface);
 
