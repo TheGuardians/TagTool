@@ -28,7 +28,7 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry <filepath>|<dirpath> <index>|<new> [force]",
+                  "ImportCollisionGeometry <filepath> <tagname>",
                   
                   "Import an obj file as a collision model tag")
         {
@@ -37,32 +37,24 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
-            //Arguments needed: filepath, <new>|<tagIndex>
+            //Arguments needed: <filepath> <tagname>
             if (args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
+            var filepath = args[0];
+            var tagName = args[1];
+
             CachedTag tag;
 
-            // optional argument: forces overwriting of tags that are not type: coll
-            var b_force = (args.Count >= 3 && args[2].ToLower().Equals("force"));
+            //check inputs
+            if(Cache.TagCache.TryGetTag(tagName, out tag))
+                return new TagToolError(CommandError.OperationFailed, "Selected TagName already exists in the cache!");
+            if (!Path.GetExtension(filepath).Equals(".obj"))
+                return new TagToolError(CommandError.FileNotFound);
+            if (!Directory.Exists(filepath))
+                return new TagToolError(CommandError.FileType);
 
-            if (args[1].ToLower().Equals("new"))
-            {
-                tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"));
-            }
-            else
-            {
-                if (!Cache.TagCache.TryGetTag(args[1], out tag))
-                    return new TagToolError(CommandError.TagInvalid);
-            }
-
-            if (!b_force && !tag.IsInGroup("coll"))
-                return new TagToolError(CommandError.ArgInvalid, "Tag to override was not of class- 'coll'. Use third argument- 'force' to inject into this tag.");
-
-            string filepath = args[0];
-            string[] fpaths = null;
-            bool b_singleFile = Path.GetExtension(filepath).Equals(".model_collision_geometry")
-                && !Directory.Exists(filepath);
+            tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"), tagName);
 
             //import the mesh and get the vertices and indices
             using (var importer = new AssimpContext())
@@ -72,7 +64,7 @@ namespace TagTool.Commands.CollisionModels
                 using (var logStream = new LogStream((msg, userData) => Console.WriteLine(msg)))
                 {
                     logStream.Attach();
-                    model = importer.ImportFile(args[0],
+                    model = importer.ImportFile(filepath,
                         PostProcessSteps.OptimizeMeshes |
                         PostProcessSteps.FindDegenerates |
                         PostProcessSteps.OptimizeGraph |
