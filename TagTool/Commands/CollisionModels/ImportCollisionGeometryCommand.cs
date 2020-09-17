@@ -90,13 +90,24 @@ namespace TagTool.Commands.CollisionModels
             };
 
             collisionModel.Regions = new List<CollisionModel.Region>()
+            {
+                new CollisionModel.Region()
                 {
-                    new CollisionModel.Region()
-                    {
-                        Name = Cache.StringTable.GetStringId("default"),
-                        Permutations = new List<CollisionModel.Region.Permutation>() { permutation }
-                    }
-                };
+                    Name = Cache.StringTable.GetStringId("default"),
+                    Permutations = new List<CollisionModel.Region.Permutation>() { permutation }
+                }
+            };
+
+            collisionModel.Nodes = new List<CollisionModel.Node>()
+            {
+                new CollisionModel.Node()
+                {
+                    Name = Cache.StringTable.GetStringId("default"),
+                    ParentNode = -1,
+                    NextSiblingNode = -1,
+                    FirstChildNode = -1
+                }
+            };
 
             //begin building the collision geometry
             collisionModel.Regions[0].Permutations[0].Bsps.Add(new CollisionModel.Region.Permutation.Bsp());
@@ -132,8 +143,7 @@ namespace TagTool.Commands.CollisionModels
             Cache.SaveStrings();
             Cache.SaveTagNames();
 
-            Console.Write($"Successfully imported coll to: {tag.Name}");
-            TagPrinter.PrintTagShort(tag);
+            Console.WriteLine($"Successfully imported collision model to: {tag.Name}.coll");
 
             return true;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.IO;
@@ -284,6 +285,12 @@ namespace TagTool.Commands.CollisionModels
                     //these arrays need to be initialized with empty elements so that specific indices can be directly assigned
                     surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
                     surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
+
+                    //here we are going to preserve the current counts of the various geometry primitives, so that they can be reset later
+                    int vertex_block_count = Bsp.Vertices.Count;
+                    int surface_block_count = Bsp.Surfaces.Count;
+                    int edges_block_count = Bsp.Edges.Count;
+
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                         return false;
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
@@ -333,6 +340,14 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode{ Value = bsp3dnode_value };
 
                         bsp3dnode_index = current_bsp3dnode_index;
+
+                        //here we are going to reset the counts of the various geometry primitives to their prior state
+                        while (Bsp.Vertices.Count > vertex_block_count)
+                            Bsp.Vertices.RemoveAt(Bsp.Vertices.Count - 1);
+                        while (Bsp.Surfaces.Count > surface_block_count)
+                            Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
+                        while (Bsp.Edges.Count > edges_block_count)
+                            Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
                     }
                     else
                     {
@@ -1257,14 +1272,14 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if (!surface_is_free)
                         {
-                            Console.WriteLine("###ERROR: Surface should not be free!");
+                            Console.WriteLine("###ERROR: Surface should be free!");
                         }
                         if(surface_index < 0)
                         {
                             Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
                             if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
                             {
-                                if((short)surface_block.Plane < 0)
+                                if((surface_block.Plane & 0x8000) > 0)
                                 {
                                     splitting_Parameters.BackSurfaceUsedCount++;
                                     if (++current_surface_array_index >= surface_array.free_count + surface_array.used_count)
