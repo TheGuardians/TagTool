@@ -64,7 +64,6 @@ namespace TagTool.Commands.CollisionModels
                         PostProcessSteps.OptimizeMeshes |
                         PostProcessSteps.FindDegenerates |
                         PostProcessSteps.OptimizeGraph |
-                        PostProcessSteps.JoinIdenticalVertices |
                         PostProcessSteps.PreTransformVertices |
                         PostProcessSteps.Triangulate |
                         PostProcessSteps.FixInFacingNormals);
@@ -122,7 +121,7 @@ namespace TagTool.Commands.CollisionModels
                 Leaves = new TagBlock<Leaf>()
             };
             Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
-            if (!collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() 
+            if (!join_identical_vertices() || !collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() 
                 || !generate_surface_planes() || !reduce_collision_geometry())
             {
                 Console.WriteLine("### Failed to import collision geometry!");
@@ -147,6 +146,30 @@ namespace TagTool.Commands.CollisionModels
             Console.WriteLine($"Successfully imported collision model to: {tag.Name}.coll");
 
             return true;
+        }
+
+        public bool join_identical_vertices()
+        {
+           List<Assimp.Vector3D> newVertices = new List<Vector3D>();
+           int[] newIndices = new int[Indices.Length];
+           int index_buffer_index = 0;
+           while (index_buffer_index < Indices.Length)
+           {
+                if (!newVertices.Contains(Vertices[Indices[index_buffer_index]]))
+                {
+                    newVertices.Add(Vertices[Indices[index_buffer_index]]);
+                    newIndices[index_buffer_index] = newVertices.Count - 1;
+                }
+                else
+                {
+                    newIndices[index_buffer_index] = newVertices.IndexOf(Vertices[Indices[index_buffer_index]]);
+                }
+                index_buffer_index++;
+           }
+           Console.WriteLine($"Merged {Vertices.Count - newVertices.Count} vertices");
+           Vertices = newVertices.DeepClone();
+           Indices = newIndices.DeepClone();
+           return true;
         }
 
         public bool collision_geometry_add_surfaces()
@@ -259,16 +282,17 @@ namespace TagTool.Commands.CollisionModels
 
         public bool collision_geometry_check_for_open_edges()
         {
+            bool result = true;
             for(int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
             {
                 Edge edge = Bsp.Edges[edge_index];
                 if(edge.RightSurface == ushort.MaxValue)
                 {
                     Console.WriteLine($"###ERROR: Edge {edge_index} is open!");
-                    return false;
+                    result = false;
                 }
             }
-            return true;
+            return result;
         }
 
         public bool check_plane_projection_parameter_greater_than_0(TagTool.Geometry.BspCollisionGeometry.Plane plane_block, int projection_axis)
