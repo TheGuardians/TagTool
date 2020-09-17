@@ -52,8 +52,6 @@ namespace TagTool.Commands.CollisionModels
             //if (!Directory.Exists(filepath))
             //    return new TagToolError(CommandError.FileNotFound);
 
-            tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"), tagName);
-
             //import the mesh and get the vertices and indices
             using (var importer = new AssimpContext())
             {
@@ -68,7 +66,8 @@ namespace TagTool.Commands.CollisionModels
                         PostProcessSteps.OptimizeGraph |
                         PostProcessSteps.JoinIdenticalVertices |
                         PostProcessSteps.PreTransformVertices |
-                        PostProcessSteps.Triangulate);
+                        PostProcessSteps.Triangulate |
+                        PostProcessSteps.FixInFacingNormals);
                     logStream.Detach();
                 }
 
@@ -134,7 +133,9 @@ namespace TagTool.Commands.CollisionModels
             GenerateCollisionBSPCommand bsp_builder = new GenerateCollisionBSPCommand(ref collisionModel);
             if (!bsp_builder.generate_bsp(0, 0, 0))
                 return false;
-            
+
+            tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"), tagName);
+
             //write out the tag
             using (var stream = Cache.OpenCacheReadWrite())
             {
@@ -152,7 +153,8 @@ namespace TagTool.Commands.CollisionModels
         {
             foreach (var vertex in Vertices)
             {
-                Bsp.Vertices.Add(new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = vertex.Y, Z = vertex.Z }, FirstEdge = ushort.MaxValue });
+                //the Y and Z axes are swapped in Halo, don't ask me why
+                Bsp.Vertices.Add(new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue });
             }
             int index_buffer_index = 0;
             while (index_buffer_index < Indices.Length)
