@@ -217,30 +217,19 @@ namespace TagTool.Cache
             switch (data)
             {
                 case PageableResource resource:
-                    ConvertResource(resource);
-                    break;
+                    return ConvertResource(resource);
                 case TagStructure tagStruct:
-                    ConvertResources(tagStruct);
+                    foreach (var field in tagStruct.GetTagFieldEnumerable(Version))
+                        field.SetValue(data, ConvertResources(field.GetValue(tagStruct)));
                     break;
                 case IList collection:
-                    ConvertResources(collection);
+                    for (var i = 0; i < collection.Count; i++)
+                        collection[i] = ConvertResources(collection[i]);
                     break;
             }
             return data;
         }
-
-        private void ConvertResources(TagStructure tagStruct)
-        {
-            foreach (var field in tagStruct.GetTagFieldEnumerable(Version))
-                ConvertResources(field.GetValue(tagStruct));
-        }
-
-        private void ConvertResources(IList collection)
-        {
-            for (var i = 0; i < collection.Count; i++)
-                ConvertResources(collection[i]);
-        }
-
+           
         private PageableResource ConvertResource(PageableResource resource)
         {
             resource.GetLocation(out ResourceLocation location);
@@ -248,7 +237,9 @@ namespace TagTool.Cache
                 return resource;
 
             Console.WriteLine($"Converting resource {resource.Page.Index}");
-            ResourceCaches.AddResource(resource, BaseModPackage.ResourcesStream);
+            var rawResource = BaseCacheReference.ResourceCaches.ExtractRawResource(resource);
+            resource.ChangeLocation(ResourceLocation.Mods);
+            ResourceCaches.AddRawResource(resource, rawResource);
             return resource;
         }
     }
