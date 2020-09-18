@@ -11,6 +11,8 @@ namespace TagTool.Commands.Modding
     {
         private readonly GameCacheHaloOnlineBase Cache;
         private CommandContextStack ContextStack { get; }
+        private GameCacheModPackage ModCache;
+        private CommandContext Context;
 
         public OpenModPackageCommand(CommandContextStack contextStack, GameCacheHaloOnlineBase cache) :
             base(true,
@@ -37,14 +39,24 @@ namespace TagTool.Commands.Modding
                 return new TagToolError(CommandError.FileNotFound, $"\"{args[0]}\"");
 
             Console.WriteLine("Initializing cache...");
-            GameCacheModPackage modCache = new GameCacheModPackage(Cache, file);
+
+            ModCache = new GameCacheModPackage(Cache, file);
+            Context = TagCacheContextFactory.Create(ContextStack, ModCache, $"{ModCache.BaseModPackage.Metadata.Name}.pak");
+            ContextStack.Push(Context);
+            ContextStack.ContextPopped += ContextStack_ContextPopped;
+
             Console.WriteLine("Done!");
 
-            ContextStack.Push(TagCacheContextFactory.Create(ContextStack, modCache,
-                $"{modCache.BaseModPackage.Metadata.Name}.pak"));
-
             return true;
+        }
 
+        private void ContextStack_ContextPopped(CommandContext context)
+        {
+            if (context != Context)
+                return;
+
+            ContextStack.ContextPopped -= ContextStack_ContextPopped;
+            ModCache.BaseCacheStream?.Dispose();
         }
     }
 }

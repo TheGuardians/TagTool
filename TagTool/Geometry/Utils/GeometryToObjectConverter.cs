@@ -53,13 +53,33 @@ namespace TagTool.Geometry.Utils
             StructureBsp = SourceCache.Deserialize<ScenarioStructureBsp>(SourceStream, Scenario.StructureBsps[structureBspIndex].StructureBsp);
             sLdT = SourceCache.Deserialize<ScenarioLightmap>(SourceStream, Scenario.Lightmap);
 
-            if(SourceCache.Version >= CacheVersion.Halo3ODST)
+
+
+            if (SourceCache.Version >= CacheVersion.Halo3ODST)
             {
-                Lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, sLdT.LightmapDataReferences[StructureBspIndex]);
+                foreach (var lbspTag in sLdT.LightmapDataReferences)
+                {
+                    if (lbspTag == null)
+                        continue;
+                    var test_lbsp = SourceCache.Deserialize<ScenarioLightmapBspData>(SourceStream, lbspTag);
+
+                    if (StructureBspIndex == test_lbsp.BspIndex)
+                    {
+                        Lbsp = test_lbsp;
+                        break;
+                    }
+                }
             }
             else
             {
-                Lbsp = sLdT.Lightmaps[StructureBspIndex];
+                foreach(var lightmapdata in sLdT.Lightmaps)
+                {
+                    if (lightmapdata.BspIndex == StructureBspIndex)
+                    {
+                        Lbsp = lightmapdata;
+                        break;
+                    }
+                }
             }
            
             var resourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
@@ -125,7 +145,7 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
 
             //if the offset from the origin is >2 units in any dimension, center the object
-            if(centergeometry && (GeometryOffset.X >= 2.0f || GeometryOffset.Y >= 2.0f || GeometryOffset.Z >= 2.0f))
+            if(centergeometry && (Math.Abs(GeometryOffset.X) >= 2.0f || Math.Abs(GeometryOffset.Y) >= 2.0f || Math.Abs(GeometryOffset.Z) >= 2.0f))
             {
                 if (HasValidCollisions)
                 {
@@ -353,7 +373,7 @@ namespace TagTool.Geometry.Utils
             {
                 //bsp physics
                 var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[geometryIndex];
-                var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.MeshIndex];
+                var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.DefinitionIndex];
 
                 foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
                 {
@@ -376,7 +396,7 @@ namespace TagTool.Geometry.Utils
                 var cluster = StructureBsp.Clusters[geometryIndex];
 
                 // bsp physics & mopps
-                foreach (var mopp in cluster.CollisionMoppCodes)
+                foreach (var mopp in cluster.InstancedGeometryPhysics.MoppCodes)
                 {
                     permutation.BspMoppCodes.Add(ConvertData(mopp));
 
@@ -388,7 +408,7 @@ namespace TagTool.Geometry.Utils
                             AABB_Center = new RealQuaternion(cluster.BoundsX.Lower, cluster.BoundsY.Lower, cluster.BoundsZ.Lower, 0),
                             AABB_Half_Extents = new RealQuaternion(cluster.BoundsX.Upper, cluster.BoundsY.Upper, cluster.BoundsZ.Upper, 0),
                         },
-                        MoppBvTreeShape = new Havok.HkpBvMoppTreeShape()
+                        MoppBvTreeShape = new Havok.CMoppBvTreeShape()
                     };
                     permutation.BspPhysics.Add(bspPhysics);
                 }
@@ -496,13 +516,16 @@ namespace TagTool.Geometry.Utils
             {
                 foreach (var part in mesh.Parts)
                 {
-                    short newMaterialIndex;
-                    if (!materialMapping.TryGetValue(part.MaterialIndex, out newMaterialIndex))
+                    if(part.MaterialIndex != -1 && part.MaterialIndex < StructureBsp.Materials.Count)
                     {
-                        newMaterialIndex = (short)newmaterials.Count;
-                        newmaterials.Add(ConvertData(StructureBsp.Materials[part.MaterialIndex]));
+                        short newMaterialIndex;
+                        if (!materialMapping.TryGetValue(part.MaterialIndex, out newMaterialIndex))
+                        {
+                            newMaterialIndex = (short)newmaterials.Count;
+                            newmaterials.Add(ConvertData(StructureBsp.Materials[part.MaterialIndex]));
+                        }
+                        part.MaterialIndex = newMaterialIndex;
                     }
-                    part.MaterialIndex = newMaterialIndex;
                 }
             }
 
@@ -539,7 +562,7 @@ namespace TagTool.Geometry.Utils
             if (!iscluster)
             {
                 var instance = StructureBsp.InstancedGeometryInstances[geometryIndex];
-                var instanceDef = StructureBspResources.InstancedGeometry[instance.MeshIndex];
+                var instanceDef = StructureBspResources.InstancedGeometry[instance.DefinitionIndex];
                 meshindex = instanceDef.MeshIndex;
                 compressionindex = instanceDef.CompressionIndex;
                 loddataindex = instance.LodDataIndex;
@@ -550,9 +573,7 @@ namespace TagTool.Geometry.Utils
                 meshindex = cluster.MeshIndex;
             }
 
-            var mesh = Lbsp.Geometry.Meshes[meshindex];
-
-            var resourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, meshindex);
+            var resourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, meshindex, out Mesh mesh);
 
             var renderGeometry = new RenderGeometry();
 
@@ -561,23 +582,22 @@ namespace TagTool.Geometry.Utils
             {
                 mesh
             };
-            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>()
-            {
-                Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone()
-            };
+
+            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            if (meshindex != -1 && meshindex < Lbsp.Geometry.MeshClusterVisibility.Count)
+                renderGeometry.MeshClusterVisibility.Add(Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone());
 
             //instanced geo has a compression index
             if (!iscluster)
             {
-                renderGeometry.Compression = new List<RenderGeometryCompression>
-                {
-                    Lbsp.Geometry.Compression[compressionindex].DeepClone()
-                };
+                renderGeometry.Compression = new List<RenderGeometryCompression>();
+                if (compressionindex != -1 && compressionindex < Lbsp.Geometry.Compression.Count)
+                    renderGeometry.Compression.Add(Lbsp.Geometry.Compression[compressionindex].DeepClone());
             }
             
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
 
-            if (loddataindex != -1)
+            if (loddataindex != -1 && loddataindex < Lbsp.Geometry.InstancedGeometryPerPixelLighting.Count)
                 renderGeometry.InstancedGeometryPerPixelLighting.Add(
                     Lbsp.Geometry.InstancedGeometryPerPixelLighting[loddataindex].DeepClone());
 
@@ -671,7 +691,7 @@ namespace TagTool.Geometry.Utils
             return compression;
         }
 
-        private static RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex)
+        private static RenderGeometryApiResourceDefinition GetSingleMeshResourceDefinition(RenderGeometry renderGeometry, int meshindex, out Mesh mesh)
         {
             RenderGeometryApiResourceDefinition result = new RenderGeometryApiResourceDefinition
             {
@@ -683,7 +703,7 @@ namespace TagTool.Geometry.Utils
             result.IndexBuffers.AddressType = CacheAddressType.Definition;
             result.VertexBuffers.AddressType = CacheAddressType.Definition;
 
-            var mesh = renderGeometry.Meshes[meshindex];
+            mesh = renderGeometry.Meshes[meshindex].DeepClone();
 
             for (int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
             {

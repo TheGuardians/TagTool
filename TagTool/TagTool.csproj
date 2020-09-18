@@ -306,8 +306,10 @@
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
+    <Compile Include="Commands\CollisionModels\ImportCollisionGeometryCommand.cs" />
     <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
     <Compile Include="Commands\CollisionModels\MoppDataCommand.cs" />
+    <Compile Include="Commands\CollisionModels\GenerateBspPhysics.cs" />
     <Compile Include="Commands\CollisionModels\OffsetCollisionBSP.cs" />
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
@@ -321,6 +323,7 @@
     <Compile Include="Commands\Modding\AddModFilesCommand.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\DeleteModFilesCommand.cs" />
+    <Compile Include="Commands\Modding\ListModFilesCommand.cs" />
     <Compile Include="Commands\Modding\SetModTypeCommand.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\AddTagCacheCommand.cs" />

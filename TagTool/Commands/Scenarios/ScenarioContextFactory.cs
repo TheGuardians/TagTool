@@ -30,7 +30,7 @@ namespace TagTool.Commands.Scenarios
 
             if(cache is GameCacheHaloOnlineBase hoCache)
             {
-                context.AddCommand(new ImportMapVariantCommand(hoCache, scenario));
+                context.AddCommand(new ImportMapVariantCommand(hoCache, tag, scenario));
             }
         }
     }

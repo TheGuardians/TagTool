@@ -130,7 +130,7 @@ namespace TagTool.Commands.Porting
             return lensFlare;
         }
 
-        private ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
+        public ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
             if (BlamCache.Version > CacheVersion.Halo3Retail)
                 return scenarioLightmap;

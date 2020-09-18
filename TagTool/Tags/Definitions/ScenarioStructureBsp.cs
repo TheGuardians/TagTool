@@ -509,24 +509,7 @@ namespace TagTool.Tags.Definitions
             public uint Unknown9;
             public uint Unknown10;
             public List<Portal> Portals;
-            public int Unknown11;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public CachedTag Bsp;
-            public int ClusterIndex;
-            public int Unknown15;
-            public short Size2;
-            public short Count2;
-            public int Offset2;
-            public int Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-            public uint Unknown19;
-            public List<TagHkpMoppCode> CollisionMoppCodes;
+            public InstancedGeometryPhysicsData InstancedGeometryPhysics;
             public short MeshIndex;
             public short Unknown20;
             public List<Seam> Seams;
@@ -541,6 +524,15 @@ namespace TagTool.Tags.Definitions
             public class Portal : TagStructure
             {
                 public short PortalIndex;
+            }
+
+            [TagStructure(Size = 0x3C)]
+            public class InstancedGeometryPhysicsData : HkpShapeCollection
+            {
+                public CachedTag StructureBsp;
+                public int ClusterIndex;
+                public HkpMoppBvTreeShape Shape;
+                public List<TagHkpMoppCode> MoppCodes;
             }
 
             [TagStructure(Size = 0x1)]
@@ -755,10 +747,10 @@ namespace TagTool.Tags.Definitions
         {
             public float Scale;
             public RealMatrix4x3 Matrix;
-            public short MeshIndex;
+            public short DefinitionIndex;
             public FlagsValue Flags;
             public short LodDataIndex;
-            public short Unknown;
+            public short CompressionIndex;
             public uint SeamBitVector;
             public RealPoint3d WorldBoundingSphereCenter;
             public Bounds<float> BoundingSphereRadiusBounds;

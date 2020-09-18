@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.IO;
@@ -57,10 +58,6 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Bsp2dReferences.Clear();
             Bsp.Bsp3dNodes.Clear();
 
-            //regenerate the surface planes from surface vertices
-            Bsp.Planes.Clear();
-            generate_surface_planes();
-
             if (!verify_collision_geometry())
             {
                 Console.WriteLine($"### Failed to verify collision geometry!");
@@ -80,12 +77,12 @@ namespace TagTool.Commands.CollisionModels
             int bsp3dnode_index = -1;
             if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
             {
-                Console.WriteLine($"### Collision bsp region {region_index} permutation {permutation_index} built successfully!");
+                Console.WriteLine($"### Collision bsp R{region_index}P{permutation_index}B{bsp_index} built successfully!");
                 Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = Bsp;
             }
             else
             {
-                Console.WriteLine($"### Failed to build collision bsp region {region_index} permutation {permutation_index}!");
+                Console.WriteLine($"### Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
             return true;
@@ -288,6 +285,12 @@ namespace TagTool.Commands.CollisionModels
                     //these arrays need to be initialized with empty elements so that specific indices can be directly assigned
                     surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
                     surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
+
+                    //here we are going to preserve the current counts of the various geometry primitives, so that they can be reset later
+                    int vertex_block_count = Bsp.Vertices.Count;
+                    int surface_block_count = Bsp.Surfaces.Count;
+                    int edges_block_count = Bsp.Edges.Count;
+
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                         return false;
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
@@ -337,6 +340,14 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode{ Value = bsp3dnode_value };
 
                         bsp3dnode_index = current_bsp3dnode_index;
+
+                        //here we are going to reset the counts of the various geometry primitives to their prior state
+                        while (Bsp.Vertices.Count > vertex_block_count)
+                            Bsp.Vertices.RemoveAt(Bsp.Vertices.Count - 1);
+                        while (Bsp.Surfaces.Count > surface_block_count)
+                            Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
+                        while (Bsp.Edges.Count > edges_block_count)
+                            Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
                     }
                     else
                     {
@@ -1261,14 +1272,14 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if (!surface_is_free)
                         {
-                            Console.WriteLine("###ERROR: Surface should not be free!");
+                            Console.WriteLine("###ERROR: Surface should be free!");
                         }
                         if(surface_index < 0)
                         {
                             Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
                             if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
                             {
-                                if((short)surface_block.Plane < 0)
+                                if((surface_block.Plane & 0x8000) > 0)
                                 {
                                     splitting_Parameters.BackSurfaceUsedCount++;
                                     if (++current_surface_array_index >= surface_array.free_count + surface_array.used_count)
@@ -1586,473 +1597,10 @@ namespace TagTool.Commands.CollisionModels
             return lowest_plane_splitting_parameters;
         }
 
-
-        ///////////////////////////////////////////
-        //plane generation stuff stored down here
-        ///////////////////////////////////////////
-        
-        public void generate_surface_planes()
-        {
-            for (var surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
-            {
-                List<RealPoint3d> pointlist = new List<RealPoint3d>();
-                Surface surface_block = Bsp.Surfaces[surface_index];
-
-                int surface_edge_index = surface_block.FirstEdge;
-                //collect vertices on the plane
-                while (true)
-                {
-                    Edge surface_edge_block = Bsp.Edges[surface_edge_index];
-                    if (surface_edge_block.RightSurface == surface_index)
-                        pointlist.Add(Bsp.Vertices[surface_edge_block.EndVertex].Point);
-                    else
-                        pointlist.Add(Bsp.Vertices[surface_edge_block.StartVertex].Point);
-
-
-                    if (surface_edge_block.RightSurface == surface_index)
-                        surface_edge_index = surface_edge_block.ReverseEdge;
-                    else
-                        surface_edge_index = surface_edge_block.ForwardEdge;
-                    //break the loop if we have finished circulating the surface
-                    if (surface_edge_index == surface_block.FirstEdge)
-                        break;
-                }
-                if (pointlist.Count < 3)
-                {
-                    Console.WriteLine("###ERROR: Not enough points to generate a plane!");
-                    continue;
-                }
-                else
-                {
-                    int plane_index = -1;
-                    foreach (Plane existing_plane in Bsp.Planes)
-                    {
-                        if (plane_test_points(existing_plane.Value, pointlist))
-                        {
-                            plane_index = Bsp.Planes.IndexOf(existing_plane);
-                            if (plane_is_mirrored(pointlist[0], pointlist[1], pointlist[2], existing_plane.Value))
-                                Bsp.Surfaces[surface_index].Plane = (ushort)(plane_index | 0x8000);
-                            else
-                                Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
-                            break;
-                        }
-                    }
-                    if(plane_index == -1)
-                    {
-                        int count = 0;
-                        while (true)
-                        {
-                            if(plane_generation_points_valid(pointlist[count], pointlist[count + 1], pointlist[count + 2]))
-                            {
-                                RealPlane3d newplane = generate_plane_from_3_points(pointlist[count], pointlist[count + 1], pointlist[count + 2]);
-                                if (plane_test_points(newplane, new List<RealPoint3d> { pointlist[count], pointlist[count + 1], pointlist[count + 2] }))
-                                {
-                                    Bsp.Planes.Add(new Plane { Value = newplane });
-                                    plane_index = Bsp.Planes.Count - 1;
-                                    Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
-                                    break;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("###ERROR: Did not produce valid plane from points!");
-                                }
-                            }
-
-                            if (count++ + 2 >= pointlist.Count - 1)
-                            {
-                                count = -1;
-                                break;
-                            }
-                        }
-                        if (count == -1)
-                        {
-                            Console.WriteLine("###ERROR: No valid planes could be produced from pointset!");
-                            continue;
-                        }
-                    }
-                }
-            }
-        }
-
-        public bool plane_test_points(RealPlane3d plane, List<RealPoint3d> pointlist)
-        {
-            foreach(var point in pointlist)
-            {
-                float plane_fit = point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D;
-                if (plane_fit < -0.00024414062 || plane_fit > 0.00024414062)
-                    return false;
-            }
-            return true;
-        }
-
-        public bool plane_is_mirrored(RealPoint3d point0, RealPoint3d point1, RealPoint3d point2, RealPlane3d plane)
-        {
-            float v10 = point1.X - point0.X;
-            float v11 = point1.Y - point0.Y;
-            float v12 = point1.Z - point0.Z;
-            float v13 = point2.X - point0.X;
-            float v14 = point2.Y - point0.Y;
-            float v15 = point2.Z - point0.Z;
-            float v16 = v15 * v11 - v14 * v12;
-            float v17 = v12 * v13 - v15 * v10;
-            float v18 = v10 * v14 - v11 * v13;
-            if (v18 * plane.K
-               + v17 * plane.J
-               + v16 * plane.I > 0.0)
-                return false;
-            else
-                return true;
-        }
-
-        public bool plane_generation_points_valid(RealPoint3d point0, RealPoint3d point1, RealPoint3d point2)
-        {
-            if (Math.Abs(point0.X - point1.X) < 0.00009999999747378752
-              && Math.Abs(point0.Y - point1.Y) < 0.00009999999747378752
-              && Math.Abs(point0.Z - point1.Z) < 0.00009999999747378752)
-            {
-                return false;
-            }
-            if (Math.Abs(point1.X - point2.X) < 0.00009999999747378752
-              && Math.Abs(point1.Y - point2.Y) < 0.00009999999747378752
-              && Math.Abs(point1.Z - point2.Z) < 0.00009999999747378752)
-            {
-                return false;
-            }
-            if (Math.Abs(point2.X - point0.X) < 0.00009999999747378752
-              && Math.Abs(point2.Y - point0.Y) < 0.00009999999747378752
-              && Math.Abs(point2.Z - point0.Z) < 0.00009999999747378752)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        public RealPlane3d generate_plane_from_3_points(RealPoint3d point0, RealPoint3d point1, RealPoint3d point2)
-        {
-            RealPlane3d plane = new RealPlane3d();
-
-            double xdiff10 = point1.X - point0.X;
-            double ydiff10 = point1.Y - point0.Y;
-            double zdiff10 = point1.Z - point0.Z;
-            double xdiff20 = point2.X - point0.X;
-            double ydiff20 = point2.Y - point0.Y;
-            double zdiff20 = point2.Z - point0.Z;
-
-            double v11 = zdiff20 * ydiff10 - ydiff20 * zdiff10;
-            double v12 = xdiff20 * zdiff10 - zdiff20 * xdiff10;
-            double v13 = ydiff20 * xdiff10 - xdiff20 * ydiff10;
-            double v14 = 1.0 / Math.Sqrt(v13 * v13 + v12 * v12 + v11 * v11);
-            double v15 = v14 * v11;
-            double v16 = v14 * v12;
-            double v17 = v14 * v13;
-            double v18 = point0.Y * v16 + point0.X * v15 + point0.Z * v17;
-            plane.I = (float)v15;
-            plane.J = (float)v16;
-            plane.K = (float)v17;
-            plane.D = (float)v18;
-
-            return plane;
-        }
-
         ///////////////////////////////////////////
         //bsp/geo reduction stuff stored down here
         ///////////////////////////////////////////
-        
-        public struct edge_array_element
-        {
-            public int edge_index;
-            public float edge_length;
-        }
-
-        public float edge_get_length(int edge_index)
-        {
-            Edge target_edge = Bsp.Edges[edge_index];
-            RealPoint3d start_vertex = Bsp.Vertices[target_edge.StartVertex].Point;
-            RealPoint3d end_vertex = Bsp.Vertices[target_edge.EndVertex].Point;
-            double xdiff = end_vertex.X - start_vertex.X;
-            double ydiff = end_vertex.Y - start_vertex.Y;
-            double zdiff = end_vertex.Z - start_vertex.Z;
-            return (float)Math.Sqrt(xdiff * xdiff + zdiff * zdiff + ydiff * ydiff);
-        }
-
-        public class edge_array_qsort_compar : IComparer<edge_array_element>
-        {
-            public int Compare(edge_array_element element1, edge_array_element element2)
-            {
-                if (element1.edge_length > element2.edge_length)
-                    return -1;
-                if (element1.edge_length >= element2.edge_length)
-                    return element1.edge_index - element2.edge_index;
-                return 1;
-            }
-        }
-
-        public bool reduce_collision_geometry()
-        {
-            if(Bsp.Edges.Count > 0 && Bsp.Surfaces.Count > 0)
-            {
-                List<edge_array_element> edge_array = new List<edge_array_element>();
-                List<int> edge_deleted_table = new List<int>(new int[Bsp.Edges.Count]);
-                List<int> surface_deleted_table = new List<int>(new int[Bsp.Surfaces.Count]);
-
-                //allocate a list of edges with the length of each edge, and sort them
-                for(var edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
-                {
-                    edge_array.Add(new edge_array_element { edge_index = edge_index, edge_length = edge_get_length(edge_index) });
-                }
-                edge_array_qsort_compar sorter = new edge_array_qsort_compar();
-                edge_array.Sort(sorter);
-                
-                //loop through edge array
-                for(var edge_array_element_index = 0; edge_array_element_index < edge_array.Count; edge_array_element_index++)
-                {
-                    int edge_index = edge_array[edge_array_element_index].edge_index;
-                    Edge edge_block = Bsp.Edges[edge_index];
-                    int leftsurface_index = edge_block.LeftSurface;
-                    int rightsurface_index = edge_block.RightSurface;
-
-                    int surface_A = rightsurface_index;
-                    int surface_B = leftsurface_index;
-
-                    if (leftsurface_index <= rightsurface_index)
-                    {
-                        surface_A = leftsurface_index;
-                        surface_B = rightsurface_index;
-                    }
-
-                    //check to make sure the surface indices are not null
-                    if((ushort)surface_A != ushort.MaxValue && (ushort)surface_B != ushort.MaxValue)
-                    {
-                        Surface surface_A_block = Bsp.Surfaces[surface_A];
-                        Surface surface_B_block = Bsp.Surfaces[surface_B];
-
-                        if(surface_A_block.Plane == surface_B_block.Plane && surface_A_block.BreakableSurfaceIndex == surface_B_block.BreakableSurfaceIndex)
-                        {
-                            //we only want to make surfaces with a maximum of 8 edges, so make sure that merging these two surfaces will result in a surface with no more than 8 edges
-                            if(surface_count_edges(surface_A) + surface_count_edges(surface_B) - 2 <= 8)
-                            {
-                                Plane surface_plane = Bsp.Planes[surface_A_block.Plane & 0x7FFF];
-                                int projection_axis = plane_determine_axis_minimum_coefficient(surface_plane);
-                                int plane_mirror_check = check_plane_projection_parameter_greater_than_0(surface_plane, projection_axis) != (surface_A_block.Plane < 0) ? 1 : 0;
-
-                                int loop_direction = 0;
-                                while (true)
-                                {
-                                    bool loop_direction_is_reverse = loop_direction == 0;
-
-                                    int next_edge_index_A = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
-                                    Edge next_edge_A = Bsp.Edges[next_edge_index_A];
-                                    bool next_right_surface_check = next_edge_A.RightSurface == (loop_direction_is_reverse ? edge_block.LeftSurface : edge_block.RightSurface);
-
-                                    int next_edge_index_B = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
-                                    Edge next_edge_B = Bsp.Edges[next_edge_index_B];
-
-                                    bool surface_is_right_of_edge = false;
-                                    while (next_edge_index_B != edge_index)
-                                    {
-                                        next_edge_B = Bsp.Edges[next_edge_index_B];
-
-                                        surface_is_right_of_edge = loop_direction_is_reverse ? next_edge_B.RightSurface == edge_block.RightSurface : next_edge_B.RightSurface == edge_block.LeftSurface;
-
-                                        next_edge_index_B = surface_is_right_of_edge ? next_edge_B.ReverseEdge : next_edge_B.ForwardEdge;
-                                    }
-
-                                    int next_vertex_index = surface_is_right_of_edge ? next_edge_B.EndVertex : next_edge_B.StartVertex;
-                                    Vertex next_vertex = Bsp.Vertices[next_vertex_index];
-                                    RealPoint2d coords1 = vertex_get_projection_relevant_coords(next_vertex, projection_axis, plane_mirror_check);
-
-                                    int vertex_A_index = next_right_surface_check ? next_edge_A.EndVertex : next_edge_A.StartVertex;
-                                    Vertex vertex_block_A = Bsp.Vertices[vertex_A_index];
-                                    RealPoint2d coordsA = vertex_get_projection_relevant_coords(vertex_block_A, projection_axis, plane_mirror_check);
-
-                                    int vertex_B_index = next_right_surface_check ?  next_edge_A.StartVertex : next_edge_A.EndVertex;
-                                    Vertex vertex_block_B = Bsp.Vertices[vertex_B_index];
-                                    RealPoint2d coordsB = vertex_get_projection_relevant_coords(vertex_block_B, projection_axis, plane_mirror_check);
-
-                                    if ((coordsB.Y - coordsA.Y) * (coordsA.X - coords1.X) - (coordsA.Y - coords1.Y) * (coordsB.X - coordsA.X) <= 0.000099999997)
-                                        break;
-
-                                    if (++loop_direction >= 2)
-                                        break;
-                                }
-
-                                //if the edge fails the above check, then this code is responsible for changing the references of the related edges and vertices 
-                                //it also flags the surface and edge so they can later be deleted
-                                if(loop_direction >= 2)
-                                {
-                                    int loop_direction_A = 0;
-                                    int next_edge = edge_block.ForwardEdge;
-                                    while (loop_direction_A < 2)
-                                    {
-                                        bool loop_direction_is_reverse = loop_direction_A == 0;
-                                        int next_edge_index = loop_direction_is_reverse ? edge_block.ReverseEdge : edge_block.ForwardEdge;
-                                        Edge current_edge = Bsp.Edges[next_edge_index];
-                                        bool next_right_surface_matches_current_surface = false;
-                                        while (next_edge_index != edge_index)
-                                        {
-                                            current_edge = Bsp.Edges[next_edge_index];
-                                            next_right_surface_matches_current_surface = current_edge.RightSurface == (loop_direction_is_reverse ? edge_block.RightSurface : edge_block.LeftSurface);
-                                            if (next_right_surface_matches_current_surface)
-                                                current_edge.RightSurface = (ushort)surface_A;
-                                            else
-                                                current_edge.LeftSurface = (ushort)surface_A;
-                                            next_edge_index = next_right_surface_matches_current_surface ? current_edge.ReverseEdge : current_edge.ForwardEdge;
-                                        }
-                                        if (next_right_surface_matches_current_surface)
-                                            current_edge.ReverseEdge = (ushort)next_edge;
-                                        else
-                                            current_edge.ForwardEdge = (ushort)next_edge;
-
-                                        next_edge = edge_block.ReverseEdge;
-                                        loop_direction_A++;
-                                    }
-
-                                    if (Bsp.Vertices[edge_block.StartVertex].FirstEdge == edge_index)
-                                        Bsp.Vertices[edge_block.StartVertex].FirstEdge = edge_block.ReverseEdge;
-                                    if (Bsp.Vertices[edge_block.EndVertex].FirstEdge == edge_index)
-                                        Bsp.Vertices[edge_block.EndVertex].FirstEdge = edge_block.ForwardEdge;
-                                    if (surface_A_block.FirstEdge == edge_index)
-                                    {
-                                        int v37 = edge_block.ForwardEdge;
-                                        if (v37 > edge_block.ReverseEdge)
-                                            v37 = edge_block.ReverseEdge;
-                                        surface_A_block.FirstEdge = (ushort)v37;
-                                    }
-                                    surface_B_block.Plane = ushort.MaxValue;
-                                    surface_B_block.FirstEdge = ushort.MaxValue;
-                                    surface_B_block.Flags = 0;
-                                    surface_B_block.BreakableSurfaceIndex = short.MaxValue;
-                                    surface_deleted_table[surface_B] = -1;
-                                    edge_block.StartVertex = ushort.MaxValue;
-                                    edge_block.EndVertex = ushort.MaxValue;
-                                    edge_block.ForwardEdge = ushort.MaxValue;
-                                    edge_block.ReverseEdge = ushort.MaxValue;
-                                    edge_block.LeftSurface = ushort.MaxValue;
-                                    edge_block.RightSurface = ushort.MaxValue;
-                                    edge_deleted_table[edge_index] = -1;
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!recompile_collision_geometry(surface_deleted_table, edge_deleted_table))
-                {
-                    Console.WriteLine("###ERROR: Failed to recompile collision geometry!");
-                    return false;
-                }
-                return true;
-            }
-            Console.WriteLine("###ERROR: Failed to reduce collision geometry");
-            return false;
-        }
-
-        int surface_count_edges(int surface_index)
-        {
-            int edge_count = 0;
-            Surface surface_block = Bsp.Surfaces[surface_index];
-            int first_Edge_index = surface_block.FirstEdge;
-            int current_edge_index = surface_block.FirstEdge;
-            do
-            {
-                Edge edge_block = Bsp.Edges[current_edge_index];
-                ++edge_count;
-                if (edge_block.RightSurface == surface_index)
-                    current_edge_index = edge_block.ReverseEdge;
-                else
-                    current_edge_index = edge_block.ForwardEdge;
-            }
-            while (current_edge_index != first_Edge_index);
-            return edge_count;
-        }
-
-        public bool recompile_collision_geometry(List<int> surface_deleted_table, List<int> edge_deleted_table)
-        {
-            int edge_starting_count = Bsp.Edges.Count.DeepClone();
-            int surface_starting_count = Bsp.Surfaces.Count.DeepClone();
-
-            //reindex and cull edges
-            int edge_element_count = 0;
-            for (int edge_index = 0; edge_index < Bsp.Edges.Count; ++edge_index)
-            {
-                if (edge_deleted_table[edge_index] != -1)
-                {
-                    edge_deleted_table[edge_index] = edge_element_count++;
-                    if (edge_deleted_table[edge_index] > edge_index)
-                    {
-                        Console.WriteLine("edge_deleted_table[edge_index]>=edge_index");
-                        return false;
-                    }
-                    Bsp.Edges[edge_deleted_table[edge_index]] = Bsp.Edges[edge_index];
-                }
-            }
-            while(Bsp.Edges.Count > edge_element_count)
-            {
-                Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
-            }
-
-            //reindex and cull surfaces
-            int surface_element_count = 0;
-            for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; ++surface_index)
-            {
-                if (surface_deleted_table[surface_index] != -1)
-                {
-                    surface_deleted_table[surface_index] = surface_element_count++;
-                    if (surface_deleted_table[surface_index] > surface_index)
-                    {
-                        Console.WriteLine("surface_deleted_table[surface_index]>=surface_index");
-                        return false;
-                    }
-                    Bsp.Surfaces[surface_deleted_table[surface_index]] = Bsp.Surfaces[surface_index];
-                }
-            }
-            while (Bsp.Surfaces.Count > surface_element_count)
-            {
-                Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
-            }
-
-            //fix vertex first edges
-            for (int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
-            {
-                if(Bsp.Vertices[vertex_index].FirstEdge != ushort.MaxValue)
-                    Bsp.Vertices[vertex_index].FirstEdge = (ushort)edge_deleted_table[Bsp.Vertices[vertex_index].FirstEdge];              
-            }
-
-            //fix edge references
-            for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
-            {
-                if (Bsp.Edges[edge_index].ForwardEdge != ushort.MaxValue)
-                    Bsp.Edges[edge_index].ForwardEdge = (ushort)edge_deleted_table[Bsp.Edges[edge_index].ForwardEdge];
-                if (Bsp.Edges[edge_index].ReverseEdge != ushort.MaxValue)
-                    Bsp.Edges[edge_index].ReverseEdge = (ushort)edge_deleted_table[Bsp.Edges[edge_index].ReverseEdge];
-                if (Bsp.Edges[edge_index].LeftSurface != ushort.MaxValue)
-                    Bsp.Edges[edge_index].LeftSurface = (ushort)surface_deleted_table[Bsp.Edges[edge_index].LeftSurface];
-                if (Bsp.Edges[edge_index].RightSurface != ushort.MaxValue)
-                    Bsp.Edges[edge_index].RightSurface = (ushort)surface_deleted_table[Bsp.Edges[edge_index].RightSurface];
-            }
-
-            //fix surface first edges
-            for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
-            {
-                if (Bsp.Surfaces[surface_index].FirstEdge != ushort.MaxValue)
-                {
-                    int first_edge = edge_deleted_table[Bsp.Surfaces[surface_index].FirstEdge];
-                    if (first_edge < 0 || first_edge > Bsp.Edges.Count)
-                    {
-                        Console.WriteLine("###ERROR: first_edge_index<0 && first_edge_index>bsp->edges.count");
-                        return false;
-                    }
-                    Bsp.Surfaces[surface_index].FirstEdge = (ushort)first_edge;
-                }
-            }
-
-            int surfaces_removed = surface_starting_count - Bsp.Surfaces.Count;
-            int edges_removed = edge_starting_count - Bsp.Edges.Count;
-            if(debug)
-                Console.WriteLine($"Successfully removed {surfaces_removed} surfaces and {edges_removed} edges!");
-
-            return true;
-        }
-
+       
         public bool reduce_collision_bsp() //function unfinished, not needed yet
         {
             List<int> deleted_surface_array = new List<int>(new int[Bsp.Surfaces.Count]);
@@ -2297,6 +1845,36 @@ namespace TagTool.Commands.CollisionModels
                 return false;
             }
             return true;
+        }
+
+        public float edge_get_length(int edge_index)
+        {
+            Edge target_edge = Bsp.Edges[edge_index];
+            RealPoint3d start_vertex = Bsp.Vertices[target_edge.StartVertex].Point;
+            RealPoint3d end_vertex = Bsp.Vertices[target_edge.EndVertex].Point;
+            double xdiff = end_vertex.X - start_vertex.X;
+            double ydiff = end_vertex.Y - start_vertex.Y;
+            double zdiff = end_vertex.Z - start_vertex.Z;
+            return (float)Math.Sqrt(xdiff * xdiff + zdiff * zdiff + ydiff * ydiff);
+        }
+
+        int surface_count_edges(int surface_index)
+        {
+            int edge_count = 0;
+            Surface surface_block = Bsp.Surfaces[surface_index];
+            int first_Edge_index = surface_block.FirstEdge;
+            int current_edge_index = surface_block.FirstEdge;
+            do
+            {
+                Edge edge_block = Bsp.Edges[current_edge_index];
+                ++edge_count;
+                if (edge_block.RightSurface == surface_index)
+                    current_edge_index = edge_block.ReverseEdge;
+                else
+                    current_edge_index = edge_block.ForwardEdge;
+            }
+            while (current_edge_index != first_Edge_index);
+            return edge_count;
         }
     }
 }

@@ -45,7 +45,7 @@ namespace TagTool.Havok
     {
         public TagBlock<byte> Data;
 
-        [TagField(Length = 4)]
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
         public byte[] Padding3;
     }
 
@@ -70,11 +70,10 @@ namespace TagTool.Havok
         public byte[] Padding2;
     }
 
-    [TagStructure(Size = 0x10)]
-    public class HkpBvMoppTreeShape : HkpShape
+    [TagStructure(Size = 0xC)]
+    public class HkpMoppBvTreeShape : HkpShape
     {
         public HkpSingleShapeContainer Child;
-        public uint ShapeCollectionAddress;
         public uint MoppCodeAddress;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ReachUnknown9;
@@ -84,6 +83,12 @@ namespace TagTool.Havok
         public float ReachUnknown11;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ReachUnknown12;
+    }
+
+    [TagStructure(Size = 0x4)]
+    public class CMoppBvTreeShape : HkpMoppBvTreeShape
+    {
+        public float Scale;
     }
 
     [TagStructure(Size = 0x4)]
@@ -127,12 +132,12 @@ namespace TagTool.Havok
         public short Index;
     }
 
-    [TagStructure(Size = 0x10)]
+    [TagStructure(Size = 0x8)]
     public class HkpShapeCollection : HkpShape
     {
         public HkpShapeContainer Container;
         public bool DisableWelding;
-        [TagField(Length = 11)]
+        [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
     }
 

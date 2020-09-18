@@ -22,8 +22,10 @@ namespace TagTool.IO
                     chunkSize = size;
 
                 var read = input.Read(buffer, 0, (int)chunkSize);
+                if (read != chunkSize)
+                    throw new EndOfStreamException("Failed to copy stream");
                 output.Write(buffer, 0, read);
-                size -= bufferSize;
+                size -= read;
             }
         }
 

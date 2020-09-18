@@ -500,81 +500,119 @@ namespace TagTool.Shaders.ShaderGenerator
                     
 
                     // build dictionary register name to register index, speeds lookup time
+                    // needs to be built for each usage type to avoid name conflicts
 
-                    Dictionary<string, int> pixelShaderRegisterMapping = new Dictionary<string, int>();
-                    Dictionary<string, int> vertexShaderRegisterMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> pixelShaderSamplerMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> pixelShaderVectorMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> pixelShaderIntegerMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> pixelShaderBooleanMapping = new Dictionary<string, int>();
+                    
+                    foreach (var reg in pixelShader.PCParameters)
+                    {
+                        switch (reg.RegisterType)
+                        {
+                            case ShaderParameter.RType.Sampler:
+                                pixelShaderSamplerMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                            case ShaderParameter.RType.Vector:
+                                pixelShaderVectorMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                            case ShaderParameter.RType.Integer:
+                                pixelShaderIntegerMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                            case ShaderParameter.RType.Boolean:
+                                pixelShaderBooleanMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                        }
+                    }
 
-                    foreach(var reg in pixelShader.PCParameters)
-                        pixelShaderRegisterMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                    Dictionary<string, int> vertexShaderSamplerMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> vertexShaderVectorMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> vertexShaderIntegerMapping = new Dictionary<string, int>();
+                    Dictionary<string, int> vertexShaderBooleanMapping = new Dictionary<string, int>();
 
                     foreach (var reg in vertexShader.PCParameters)
-                        vertexShaderRegisterMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                    {
+                        switch (reg.RegisterType)
+                        {
+                            case ShaderParameter.RType.Sampler:
+                                vertexShaderSamplerMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                            case ShaderParameter.RType.Vector:
+                                vertexShaderVectorMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                            case ShaderParameter.RType.Integer:
+                                vertexShaderIntegerMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                            case ShaderParameter.RType.Boolean:
+                                vertexShaderBooleanMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                break;
+                        }
+                    }
 
-                    // build parameter table and registers available for this entry point, order to be determiend
+                    // build parameter table and registers available for this entry point, order to be determined
 
                     List<RenderMethodTemplate.ParameterMapping> mappings;
                     ParameterUsage currentUsage;
 
+                    // sampler (ps)
+
                     currentUsage = ParameterUsage.TextureExtern;
-                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderSamplerMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.Texture;
-                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.TextureParameterNames);
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderSamplerMapping, rmt2.TextureParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     // ps
 
                     currentUsage = ParameterUsage.PS_Real;
-                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.RealParameterNames);
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderVectorMapping, rmt2.RealParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.PS_Integer;
-                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.IntegerParameterNames);
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderIntegerMapping, rmt2.IntegerParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.PS_Boolean;
-                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderRegisterMapping, rmt2.BooleanParameterNames);
+                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderBooleanMapping, rmt2.BooleanParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     // vs
 
                     currentUsage = ParameterUsage.VS_Real;
-                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderRegisterMapping, rmt2.RealParameterNames);
+                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderVectorMapping, rmt2.RealParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.VS_Integer;
-                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderRegisterMapping, rmt2.IntegerParameterNames);
+                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderIntegerMapping, rmt2.IntegerParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.VS_Boolean;
-                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderRegisterMapping, rmt2.BooleanParameterNames);
+                    mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderBooleanMapping, rmt2.BooleanParameterNames);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
-                    // extern
+                    // ps extern
 
                     currentUsage = ParameterUsage.PS_RealExtern;
-                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderVectorMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.PS_IntegerExtern;
-                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderIntegerMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     // vs extern
 
-                    
                     currentUsage = ParameterUsage.VS_RealExtern;
-                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderVectorMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
 
                     currentUsage = ParameterUsage.VS_IntegerExtern;
-                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderRegisterMapping);
+                    mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderIntegerMapping);
                     AddMapping(currentUsage, rmt2, registerOffsets, mappings);
-                    
-                    
                 }
-
             }
             
             return rmt2;

@@ -371,6 +371,130 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
+            else if (rmt2Desc.Type == "contrail")
+            {
+                string tagName = $"shaders\\contrail_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Contrail.Albedo albedo = (HaloShaderGenerator.Contrail.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Contrail.Blend_Mode blend_mode = (HaloShaderGenerator.Contrail.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Contrail.Black_Point black_point = (HaloShaderGenerator.Contrail.Black_Point)rmt2Desc.Options[2];
+                HaloShaderGenerator.Contrail.Fog fog = (HaloShaderGenerator.Contrail.Fog)rmt2Desc.Options[3];
+
+                var generator = new HaloShaderGenerator.Contrail.ContrailGenerator(albedo, blend_mode, black_point, fog, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
+            else if (rmt2Desc.Type == "beam")
+            {
+                string tagName = $"shaders\\beam_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Beam.Albedo albedo = (HaloShaderGenerator.Beam.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Beam.Blend_Mode blend_mode = (HaloShaderGenerator.Beam.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Beam.Black_Point black_point = (HaloShaderGenerator.Beam.Black_Point)rmt2Desc.Options[2];
+                HaloShaderGenerator.Beam.Fog fog = (HaloShaderGenerator.Beam.Fog)rmt2Desc.Options[3];
+
+                var generator = new HaloShaderGenerator.Beam.BeamGenerator(albedo, blend_mode, black_point, fog, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
+            else if (rmt2Desc.Type == "light_volume")
+            {
+                string tagName = $"shaders\\light_volume_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.LightVolume.Albedo albedo = (HaloShaderGenerator.LightVolume.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.LightVolume.Blend_Mode blend_mode = (HaloShaderGenerator.LightVolume.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.LightVolume.Fog fog = (HaloShaderGenerator.LightVolume.Fog)rmt2Desc.Options[2];
+
+                var generator = new HaloShaderGenerator.LightVolume.LightVolumeGenerator(albedo, blend_mode, fog, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
+            else if (rmt2Desc.Type == "decal")
+            {
+                string tagName = $"shaders\\decal_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Decal.Albedo albedo = (HaloShaderGenerator.Decal.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Decal.Blend_Mode blend_mode = (HaloShaderGenerator.Decal.Blend_Mode)rmt2Desc.Options[1];
+                HaloShaderGenerator.Decal.Render_Pass render_pass = (HaloShaderGenerator.Decal.Render_Pass)rmt2Desc.Options[2];
+                HaloShaderGenerator.Decal.Specular specular = (HaloShaderGenerator.Decal.Specular)rmt2Desc.Options[3];
+                HaloShaderGenerator.Decal.Bump_Mapping bump_mapping = (HaloShaderGenerator.Decal.Bump_Mapping)rmt2Desc.Options[4];
+                HaloShaderGenerator.Decal.Tinting tinting = (HaloShaderGenerator.Decal.Tinting)rmt2Desc.Options[5];
+
+                var generator = new HaloShaderGenerator.Decal.DecalGenerator(albedo, blend_mode, render_pass, specular, bump_mapping, tinting, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
+            else if (rmt2Desc.Type == "halogram")
+            {
+                string tagName = $"shaders\\halogram_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                HaloShaderGenerator.Halogram.Albedo albedo = (HaloShaderGenerator.Halogram.Albedo)rmt2Desc.Options[0];
+                HaloShaderGenerator.Halogram.Self_Illumination self_illumination = (HaloShaderGenerator.Halogram.Self_Illumination)rmt2Desc.Options[1];
+                HaloShaderGenerator.Halogram.Blend_Mode blend_mode = (HaloShaderGenerator.Halogram.Blend_Mode)rmt2Desc.Options[2];
+                HaloShaderGenerator.Halogram.Misc misc = (HaloShaderGenerator.Halogram.Misc)rmt2Desc.Options[3];
+                HaloShaderGenerator.Halogram.Warp warp = (HaloShaderGenerator.Halogram.Warp)rmt2Desc.Options[4];
+                HaloShaderGenerator.Halogram.Overlay overlay = (HaloShaderGenerator.Halogram.Overlay)rmt2Desc.Options[5];
+                HaloShaderGenerator.Halogram.Edge_Fade edge_fade = (HaloShaderGenerator.Halogram.Edge_Fade)rmt2Desc.Options[6];
+
+                var generator = new HaloShaderGenerator.Halogram.HalogramGenerator(albedo, self_illumination, blend_mode, misc, warp, overlay, edge_fade, true);
+
+                // TODO: generate rmdf\glvs\glps if not found
+
+                var rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, BaseCache.TagCache.GetTag($"shaders\\{rmt2Desc.Type}.rmdf"));
+                var glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                var glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
+            }
 
             return false;
         }

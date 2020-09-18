@@ -146,14 +146,14 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                     foreach (var instanceDef in Definition.InstancedGeometryInstances)
                     {
-                        if (instanceDef.MeshIndex == -1)
+                        if (instanceDef.DefinitionIndex == -1)
                             continue;
 
-                        var instance = resourceDefinition.InstancedGeometry[instanceDef.MeshIndex];
+                        var instance = resourceDefinition.InstancedGeometry[instanceDef.DefinitionIndex];
 
                         var instanceName = instanceDef.Name != StringId.Invalid ?
                             CacheContext.StringTable.GetString(instanceDef.Name) :
-                            $"instance_{instanceDef.MeshIndex}";
+                            $"instance_{instanceDef.DefinitionIndex}";
 
                         for (var i = 0; i < instance.CollisionInfo.Vertices.Count; i++)
                         {

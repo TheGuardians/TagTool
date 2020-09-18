@@ -66,7 +66,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
-            public short UnknownSHCoefficientsIndex;
+            public short InstancedGeometryLightProbesIndex;
             public short Padding;
         }
     }

@@ -709,9 +709,6 @@ namespace TagTool.Cache
                 tableEntry.Size = (uint)fileEntry.Value.Length;
                 tableEntry.Offset = offset;
                 serializer.Serialize(context, tableEntry);
-
-                // move back to where we were
-                writer.Seek(0, SeekOrigin.End);
             }
         }
 

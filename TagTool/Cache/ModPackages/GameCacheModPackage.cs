@@ -13,6 +13,7 @@ using TagTool.Tags;
 using TagTool.Tags.Resources;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.ModPackages;
+using System.Collections;
 
 namespace TagTool.Cache
 {
@@ -107,6 +108,7 @@ namespace TagTool.Cache
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
+            definition = ConvertResources(definition);
             Serializer.Serialize(CreateTagSerializationContext(stream, instance), definition);
         }
 
@@ -208,6 +210,37 @@ namespace TagTool.Cache
                 BaseModPackage.Files.Add(path, file);
                 Console.WriteLine("Overwriting Existing file: " + path);
             }
+        }
+
+        private object ConvertResources(object data)
+        {
+            switch (data)
+            {
+                case PageableResource resource:
+                    return ConvertResource(resource);
+                case TagStructure tagStruct:
+                    foreach (var field in tagStruct.GetTagFieldEnumerable(Version))
+                        field.SetValue(data, ConvertResources(field.GetValue(tagStruct)));
+                    break;
+                case IList collection:
+                    for (var i = 0; i < collection.Count; i++)
+                        collection[i] = ConvertResources(collection[i]);
+                    break;
+            }
+            return data;
+        }
+           
+        private PageableResource ConvertResource(PageableResource resource)
+        {
+            resource.GetLocation(out ResourceLocation location);
+            if (location == ResourceLocation.Mods)
+                return resource;
+
+            Console.WriteLine($"Converting resource {resource.Page.Index}");
+            var rawResource = BaseCacheReference.ResourceCaches.ExtractRawResource(resource);
+            resource.ChangeLocation(ResourceLocation.Mods);
+            ResourceCaches.AddRawResource(resource, rawResource);
+            return resource;
         }
     }
 }
