@@ -20,7 +20,8 @@ namespace TagTool.Commands.CollisionModels
         private List<Assimp.Vector3D> Vertices { get; set; }
         private int[] Indices { get; set; }
         private bool debug = false;
-        private int max_surface_edges = 3;
+        private int max_surface_edges = 8;
+        private bool buildmopp = false;
 
         public ImportCollisionGeometryCommand(GameCacheHaloOnlineBase cache)
             : base(false,
@@ -28,7 +29,7 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry <filepath> <tagname>",
+                  "ImportCollisionGeometry [mopp] <filepath> <tagname>",
                   
                   "Import an obj file as a collision model tag")
         {
@@ -41,8 +42,22 @@ namespace TagTool.Commands.CollisionModels
             if (args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            var filepath = args[0];
-            var tagName = args[1];
+            string filepath;
+            string tagName;
+
+            if(args.Count == 3 && args[0] == "mopp")
+            {
+                buildmopp = true;
+                //mopp generation can only accept triangles
+                max_surface_edges = 3;
+                filepath = args[1];
+                tagName = args[2];
+            }
+            else
+            {
+                filepath = args[0];
+                tagName = args[1];
+            }
 
             CachedTag tag;
 
@@ -133,9 +148,14 @@ namespace TagTool.Commands.CollisionModels
             if (!bsp_builder.generate_bsp(0, 0, 0))
                 return false;
 
-            GenerateBspPhysics moppgenerator = new GenerateBspPhysics();
-            moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
-            moppgenerator.generate_mopp_codes();
+            if (buildmopp)
+            {
+                GenerateBspPhysics moppgenerator = new GenerateBspPhysics();
+                moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+                CollisionModel.Region.Permutation temp_permutation = collisionModel.Regions[0].Permutations[0];
+                moppgenerator.generate_mopp_codes(ref temp_permutation);
+                collisionModel.Regions[0].Permutations[0] = temp_permutation;
+            }
 
             tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"), tagName);
 
