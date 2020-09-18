@@ -309,6 +309,7 @@
     <Compile Include="Commands\CollisionModels\ImportCollisionGeometryCommand.cs" />
     <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
     <Compile Include="Commands\CollisionModels\MoppDataCommand.cs" />
+    <Compile Include="Commands\CollisionModels\GenerateBspPhysics.cs" />
     <Compile Include="Commands\CollisionModels\OffsetCollisionBSP.cs" />
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />

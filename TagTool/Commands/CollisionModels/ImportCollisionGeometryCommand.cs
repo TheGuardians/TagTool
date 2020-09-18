@@ -20,7 +20,7 @@ namespace TagTool.Commands.CollisionModels
         private List<Assimp.Vector3D> Vertices { get; set; }
         private int[] Indices { get; set; }
         private bool debug = false;
-        private int max_surface_edges = 8;
+        private int max_surface_edges = 3;
 
         public ImportCollisionGeometryCommand(GameCacheHaloOnlineBase cache)
             : base(false,
@@ -132,6 +132,10 @@ namespace TagTool.Commands.CollisionModels
             GenerateCollisionBSPCommand bsp_builder = new GenerateCollisionBSPCommand(ref collisionModel);
             if (!bsp_builder.generate_bsp(0, 0, 0))
                 return false;
+
+            GenerateBspPhysics moppgenerator = new GenerateBspPhysics();
+            moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+            moppgenerator.generate_mopp_codes();
 
             tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"), tagName);
 
