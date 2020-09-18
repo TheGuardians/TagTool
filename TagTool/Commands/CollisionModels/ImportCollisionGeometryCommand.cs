@@ -312,7 +312,9 @@ namespace TagTool.Commands.CollisionModels
                 Edge edge = Bsp.Edges[edge_index];
                 if(edge.RightSurface == ushort.MaxValue)
                 {
-                    Console.WriteLine($"###ERROR: Edge {edge_index} is open!");
+                    Console.WriteLine($"###ERROR: Edge with below vertices is open!");
+                    Console.WriteLine($"{Bsp.Vertices[edge.StartVertex].Point}");
+                    Console.WriteLine($"{Bsp.Vertices[edge.EndVertex].Point}");
                     result = false;
                 }
             }
