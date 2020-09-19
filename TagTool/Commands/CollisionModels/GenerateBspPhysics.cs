@@ -26,7 +26,7 @@ namespace TagTool.Commands.CollisionModels
         [DllImport("kernel32.dll", EntryPoint = "FreeLibrary")]
         static extern bool FreeLibrary(int hModule);
 
-        public const string dllpath = @"C:\Users\User\Desktop\NifMopp.dll";
+        public const string dllpath = @"Tools\NifMopp.dll";
 
         //[DllImport(dllpath, CharSet = CharSet.Auto)]
         //public unsafe static extern int fnGenerateMoppCode(int nVerts, [MarshalAs(UnmanagedType.LPArray)] Vector3[] verts, int nTris, [MarshalAs(UnmanagedType.LPArray)] Triangle[] tris);
@@ -64,7 +64,11 @@ namespace TagTool.Commands.CollisionModels
             }
 
             int hModule = LoadLibrary(dllpath);
-            if (hModule == 0) return false;
+            if (hModule == 0) 
+            {
+                Console.WriteLine("ERROR: Could not load NifMopp.dll!");
+                return false;
+            }
 
             IntPtr GenerateMoppCode = GetProcAddress(hModule, "GenerateMoppCode");
             IntPtr RetrieveMoppCode = GetProcAddress(hModule, "RetrieveMoppCode");

@@ -153,7 +153,11 @@ namespace TagTool.Commands.CollisionModels
                 GenerateBspPhysics moppgenerator = new GenerateBspPhysics();
                 moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
                 CollisionModel.Region.Permutation temp_permutation = collisionModel.Regions[0].Permutations[0];
-                moppgenerator.generate_mopp_codes(ref temp_permutation);
+                if(!moppgenerator.generate_mopp_codes(ref temp_permutation))
+                {
+                    Console.WriteLine("ERROR: Failed to build mopps!");
+                    return false;
+                }
                 collisionModel.Regions[0].Permutations[0] = temp_permutation;
             }
 

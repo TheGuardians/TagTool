@@ -17,6 +17,8 @@ namespace TagTool.Commands.CollisionModels
         private CollisionModel Definition { get; }
         private CollisionGeometry Bsp { get; set; }
         private bool debug = false;
+        private int original_surface_count = 0;
+        private List<int> surface_addendums = new List<int>();
 
     public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
@@ -62,6 +64,12 @@ namespace TagTool.Commands.CollisionModels
             {
                 Console.WriteLine($"### Failed to verify collision geometry!");
                 return false;
+            }
+
+            //populate surface_addendums list for usage later on
+            for(int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+            {
+                surface_addendums.Add(surface_index);
             }
 
             //allocate surface array before starting the bsp build
@@ -356,7 +364,7 @@ namespace TagTool.Commands.CollisionModels
                     }
                     return true;
                 case 2: //build leaves
-                    if(set_used_surface_flags(ref surface_array) == -1)
+                    if(surfaces_reset_for_leaf_building(ref surface_array) == -1)
                     {
                         Console.WriteLine("### ERROR tried to build leaves while there are free surfaces.");
                         return false;
@@ -381,7 +389,7 @@ namespace TagTool.Commands.CollisionModels
             }
         }
 
-        public int set_used_surface_flags(ref surface_array_definition surface_array)
+        public int surfaces_reset_for_leaf_building(ref surface_array_definition surface_array)
         {
             if (surface_array.free_count > 0)
                 return -1;
@@ -908,6 +916,10 @@ namespace TagTool.Commands.CollisionModels
                             Bsp.Surfaces.Add(new Surface());
                             int new_surface_A_index = Bsp.Surfaces.Count - 2;
                             int new_surface_B_index = Bsp.Surfaces.Count - 1;
+
+                            //here we will record the parent surface index for these child surfaces for use later on
+                            surface_addendums.Add(absolute_surface_index);
+                            surface_addendums.Add(absolute_surface_index);
 
                             //split surface into two new surfaces, one on each side of the plane
                             if(!divide_surface_into_two_surfaces(absolute_surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index))
