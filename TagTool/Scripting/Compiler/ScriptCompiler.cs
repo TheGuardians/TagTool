@@ -1154,7 +1154,7 @@ namespace TagTool.Scripting.Compiler
 
                         var ifHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var ifExpr = ScriptExpressions[ifHandle.Index];
-
+                        // if opcode
                         var functionNameHandle = AllocateExpression(HsType.HaloOnlineValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
                         var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
                         functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
@@ -1181,17 +1181,19 @@ namespace TagTool.Scripting.Compiler
 
                         booleanExpr.NextExpressionHandle = thenHandle;
 
-                        if (thenGroup.Tail is ScriptGroup elseGroup)
-                        {
-                            if (!(elseGroup.Tail is ScriptInvalid))
-                                throw new FormatException(group.ToString());
+                        var nextGroup = thenGroup;
+                        var nextExpr = thenExpr;
 
-                            thenExpr.NextExpressionHandle = CompileExpression(type, elseGroup.Head);
-                        }
-                        else if (!(thenGroup.Tail is ScriptInvalid))
+                        do
                         {
-                            throw new FormatException(group.ToString());
+                            if (nextGroup.Tail is ScriptGroup elseGroup)
+                            {
+                                nextExpr.NextExpressionHandle = CompileExpression(type, elseGroup.Head);
+                                nextGroup = elseGroup;
+                                nextExpr = ScriptExpressions[nextExpr.NextExpressionHandle.Index];
+                            }
                         }
+                        while (!(nextGroup.Tail is ScriptInvalid)); // until the end of the nest
 
                         return ifHandle;
                     }
@@ -2018,8 +2020,21 @@ namespace TagTool.Scripting.Compiler
         private DatumHandle CompileAiOrdersExpression(ScriptString aiOrdersString) =>
             throw new NotImplementedException();
 
-        private DatumHandle CompileAiLineExpression(ScriptString aiLineString) =>
-            throw new NotImplementedException();
+        private DatumHandle CompileAiLineExpression(ScriptString aiLineString)
+        {
+            var handle = AllocateExpression(HsType.HaloOnlineValue.AiLine, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)aiLineString.Line);
+
+            if (handle != DatumHandle.None)
+            {
+                var lineStringId = Cache.StringTable.GetStringId(aiLineString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(aiLineString.Value);
+                Array.Copy(BitConverter.GetBytes(lineStringId.Value), expr.Data, 4);
+            }
+
+            return handle;
+        }
 
         private DatumHandle CompileStartingProfileExpression(ScriptString startingProfileString)
         {
