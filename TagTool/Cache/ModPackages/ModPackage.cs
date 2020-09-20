@@ -699,6 +699,8 @@ namespace TagTool.Cache
                 // write the contents
                 fileEntry.Value.CopyTo(writer.BaseStream);
 
+                long endPos = writer.BaseStream.Position;
+
                 // seek to the file table entry
                 writer.BaseStream.Position = sectionOffset + table.TableOffset + index * kFileTableEntrySize;
                 index++;
@@ -709,6 +711,8 @@ namespace TagTool.Cache
                 tableEntry.Size = (uint)fileEntry.Value.Length;
                 tableEntry.Offset = offset;
                 serializer.Serialize(context, tableEntry);
+
+                writer.BaseStream.Position = endPos;
             }
         }
 
