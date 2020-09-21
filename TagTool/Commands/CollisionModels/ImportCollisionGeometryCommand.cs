@@ -55,6 +55,8 @@ namespace TagTool.Commands.CollisionModels
             }
             else
             {
+                buildmopp = false;
+                max_surface_edges = 8;
                 filepath = args[0];
                 tagName = args[1];
             }
@@ -136,8 +138,7 @@ namespace TagTool.Commands.CollisionModels
                 Leaves = new TagBlock<Leaf>()
             };
             Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
-            if (!join_identical_vertices() || !collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() 
-                || !reduce_collision_geometry())
+            if (!join_identical_vertices() || !collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() || !reduce_collision_geometry())
             {
                 Console.WriteLine("### Failed to import collision geometry!");
                 return false;
@@ -423,6 +424,9 @@ namespace TagTool.Commands.CollisionModels
 
         public bool reduce_collision_geometry()
         {
+            if (max_surface_edges == 3)
+                return true;
+
             if (Bsp.Edges.Count > 0 && Bsp.Surfaces.Count > 0)
             {
                 List<edge_array_element> edge_array = new List<edge_array_element>();
@@ -691,8 +695,7 @@ namespace TagTool.Commands.CollisionModels
 
             int surfaces_removed = surface_starting_count - Bsp.Surfaces.Count;
             int edges_removed = edge_starting_count - Bsp.Edges.Count;
-            if (debug)
-                Console.WriteLine($"Successfully removed {surfaces_removed} surfaces and {edges_removed} edges!");
+            Console.WriteLine($"Successfully removed {surfaces_removed} surfaces and {edges_removed} edges!");
 
             return true;
         }
@@ -725,9 +728,9 @@ namespace TagTool.Commands.CollisionModels
                 if (surface_edge_index == surface_block.FirstEdge)
                     break;
             }
-            if (pointlist.Count < 3)
+            if (pointlist.Count < 3 || !plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
             {
-                Console.WriteLine("###ERROR: Not enough points to generate a plane!");
+                Console.WriteLine("###ERROR: Surface invalid for plane generation!");
                 return false;
             }
             else
@@ -748,21 +751,18 @@ namespace TagTool.Commands.CollisionModels
                 }
                 if (plane_index == -1)
                 {
-                    if (plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
+                    RealPlane3d newplane = generate_plane_from_3_points(pointlist[0], pointlist[1], pointlist[2]);
+                    if (plane_test_points(newplane, new List<RealPoint3d> { pointlist[0], pointlist[1], pointlist[2] }))
                     {
-                        RealPlane3d newplane = generate_plane_from_3_points(pointlist[0], pointlist[1], pointlist[2]);
-                        if (plane_test_points(newplane, new List<RealPoint3d> { pointlist[0], pointlist[1], pointlist[2] }))
-                        {
-                            Bsp.Planes.Add(new TagTool.Geometry.BspCollisionGeometry.Plane { Value = newplane });
-                            plane_index = Bsp.Planes.Count - 1;
-                            Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
-                        }
-                        else
-                        {
-                            Console.WriteLine("###ERROR: Did not produce valid plane from points!");
-                            return false;
-                        }
-                    }                      
+                        Bsp.Planes.Add(new TagTool.Geometry.BspCollisionGeometry.Plane { Value = newplane });
+                        plane_index = Bsp.Planes.Count - 1;
+                        Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
+                    }
+                    else
+                    {
+                        Console.WriteLine("###ERROR: Did not produce valid plane from points!");
+                        return false;
+                    }                                        
                 }
             }
             return true;

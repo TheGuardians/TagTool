@@ -303,7 +303,7 @@ namespace TagTool.Commands.CollisionModels
 
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                     {
-                        Console.WriteLine("###ERROR: Failed to split surfaces with plane!");
+                        Console.WriteLine("###ERROR Failed to split surface!");
                         return false;
                     }
                     Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
@@ -481,11 +481,11 @@ namespace TagTool.Commands.CollisionModels
             }
             if (front_surface_count != splitting_parameters.FrontSurfaceCount)
             {
-                Console.WriteLine("###ERROR: BSP2D front_surface_index_index!=front_surface_index_count");
+                Console.WriteLine("###ERROR BSP2D front_surface_index_index!=front_surface_index_count");
             }
             if (back_surface_count != splitting_parameters.BackSurfaceCount)
             {
-                Console.WriteLine("###ERROR: BSP2D back_surface_index_index!=back_surface_index_count");
+                Console.WriteLine("###ERROR BSP2D back_surface_index_index!=back_surface_index_count");
             }
         }
 
@@ -681,7 +681,7 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if(Bsp.Edges[dividing_edge_index].EndVertex != ushort.MaxValue)
                         {
-                            Console.WriteLine("###ERROR: Dividing Edge EndVertex should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge EndVertex should be -1");
                             return false;
                         }
 
@@ -689,7 +689,7 @@ namespace TagTool.Commands.CollisionModels
 
                         if (Bsp.Edges[dividing_edge_index].ForwardEdge != ushort.MaxValue)
                         {
-                            Console.WriteLine("###ERROR: Dividing Edge ForwardEdge should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge ForwardEdge should be -1");
                             return false;
                         }
 
@@ -794,13 +794,13 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if (Bsp.Edges[dividing_edge_index].EndVertex != ushort.MaxValue)
                         {
-                            Console.WriteLine("###ERROR: Dividing Edge EndVertex should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge EndVertex should be -1");
                             return false;
                         }
                         Bsp.Edges[dividing_edge_index].EndVertex = (ushort)edge_vertex_A_index;
                         if (Bsp.Edges[dividing_edge_index].ForwardEdge != ushort.MaxValue)
                         {
-                            Console.WriteLine("###ERROR: Dividing Edge ForwardEdge should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge ForwardEdge should be -1");
                             return false;
                         }
                         Bsp.Edges[dividing_edge_index].ForwardEdge = (ushort)new_edge_index_E;
@@ -836,12 +836,12 @@ namespace TagTool.Commands.CollisionModels
                     //check for errors before exiting loop
                     if (first_new_edge_index == -1 || previous_new_edge_index == -1)
                     {
-                        Console.WriteLine("###ERROR: First New Edge index or Previous New Edge Index value not set!");
+                        Console.WriteLine("###ERROR First New Edge index or Previous New Edge Index value not set!");
                         return false;
                     }
                     if (dividing_edge_index == -1)
                     {
-                        Console.WriteLine("###ERROR: Dividing Edge index value not set!");
+                        Console.WriteLine("###ERROR Dividing Edge index value not set!");
                         return false;
                     }
                     break;
@@ -1057,22 +1057,22 @@ namespace TagTool.Commands.CollisionModels
             
             if (back_free_count != back_surfaces_array.free_count)
             {
-                Console.WriteLine("###ERROR: back_free_count != back_surfaces->free_count");
+                Console.WriteLine("###ERROR back_free_count != back_surfaces->free_count");
                 return false;
             }
             if (back_used_count != back_surfaces_array.used_count)
             {
-                Console.WriteLine("###ERROR: back_used_count != back_surfaces->used_count");
+                Console.WriteLine("###ERROR back_used_count != back_surfaces->used_count");
                 return false;
             }
             if (front_free_count != front_surfaces_array.free_count)
             {
-                Console.WriteLine("###ERROR: front_free_count != front_surfaces->free_count");
+                Console.WriteLine("###ERROR front_free_count != front_surfaces->free_count");
                 return false;
             }
             if (front_used_count != front_surfaces_array.used_count)
             {
-                Console.WriteLine("###ERROR: front_used_count != front_surfaces->used_count");
+                Console.WriteLine("###ERROR front_used_count != front_surfaces->used_count");
                 return false;
             }
             return true;
@@ -1105,7 +1105,7 @@ namespace TagTool.Commands.CollisionModels
 
         public Plane_Relationship determine_vertex_plane_relationship(RealPoint3d vertex, RealPlane3d plane)
         {
-            float plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
+            double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
             if (plane_equation_vertex_input >= -0.00024414062)
             {
@@ -1261,7 +1261,7 @@ namespace TagTool.Commands.CollisionModels
             {
                 int parent_surface_index = surface_addendums[surface_index];
                 if (Bsp.Surfaces[surface_index].Plane != Bsp.Surfaces[parent_surface_index].Plane)
-                    Console.WriteLine("###ERROR: Parent surface plane did not match child surface plane!");
+                    Console.WriteLine("###ERROR Parent surface plane did not match child surface plane!");
                 surface_plane_relationship = determine_surface_plane_relationship(parent_surface_index, plane_index, plane_block);
             }
 
@@ -1321,7 +1321,7 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if (!surface_is_free)
                         {
-                            Console.WriteLine("###ERROR: Surface should be free!");
+                            Console.WriteLine("###ERROR Plane matching surface should be free!");
                         }
                         if(surface_index < 0)
                         {
