@@ -13,9 +13,10 @@ using System.Diagnostics;
 
 namespace TagTool.Commands.CollisionModels
 {
-    public class GenerateBspPhysics
+    public class GenerateBspPhysicsCommand : Command
     {
         public CollisionGeometry Bsp { get; set; }
+        public CollisionModel Definition { get; set; }
 
         [DllImport("kernel32.dll", EntryPoint = "LoadLibrary")]
         static extern int LoadLibrary(
@@ -36,6 +37,36 @@ namespace TagTool.Commands.CollisionModels
         //public unsafe static extern int fnRetrieveMoppScale(float* value);
         //[DllImport(dllpath, CharSet = CharSet.Auto)]
         //public unsafe static extern int fnRetrieveMoppOrigin(Vector3* value);
+
+        public GenerateBspPhysicsCommand(ref CollisionModel definition) :
+            base(true,
+
+                "GenerateBspPhysics",
+                "Generates BspPhysics for the current collision tag, removing the previous BspPhysics",
+
+                "GenerateBspPhysics",
+
+                "")
+        {
+            Definition = definition;
+            Bsp = new CollisionGeometry();
+        }
+        public override object Execute(List<string> args)
+        {
+            CollisionModel.Region.Permutation Permutation = Definition.Regions[0].Permutations[0];
+            Bsp = Definition.Regions[0].Permutations[0].Bsps[0].Geometry;
+            if (!generate_mopp_codes(ref Permutation))
+            {
+                Console.WriteLine("ERROR: Failed to build mopps!");
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Mopps built successfully!");
+                Definition.Regions[0].Permutations[0] = Permutation;
+            }           
+            return true;
+        }
 
         public struct Vector3
         {

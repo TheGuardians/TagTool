@@ -151,7 +151,7 @@ namespace TagTool.Commands.CollisionModels
 
             if (buildmopp)
             {
-                GenerateBspPhysics moppgenerator = new GenerateBspPhysics();
+                GenerateBspPhysicsCommand moppgenerator = new GenerateBspPhysicsCommand(ref collisionModel);
                 moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
                 CollisionModel.Region.Permutation temp_permutation = collisionModel.Regions[0].Permutations[0];
                 if(!moppgenerator.generate_mopp_codes(ref temp_permutation))

@@ -1259,10 +1259,14 @@ namespace TagTool.Commands.CollisionModels
             //split surfaces may become very small and be hard to work with. To get clarity, we can use the parent surface of the split surface
             if(surface_plane_relationship == Plane_Relationship.Unknown && surface_index >= original_surface_count)
             {
-                int parent_surface_index = surface_addendums[surface_index];
-                if (Bsp.Surfaces[surface_index].Plane != Bsp.Surfaces[parent_surface_index].Plane)
-                    Console.WriteLine("###ERROR Parent surface plane did not match child surface plane!");
-                surface_plane_relationship = determine_surface_plane_relationship(parent_surface_index, plane_index, plane_block);
+                while (true)
+                {
+                    surface_index = surface_addendums[surface_index];
+                    surface_plane_relationship = determine_surface_plane_relationship(surface_index, plane_index, plane_block);
+                    if (surface_plane_relationship == Plane_Relationship.BackofPlane || surface_plane_relationship == Plane_Relationship.FrontofPlane ||
+                        surface_index < original_surface_count)
+                        break;
+                }          
             }
 
             return surface_plane_relationship;
