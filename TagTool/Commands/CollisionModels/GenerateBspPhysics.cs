@@ -134,7 +134,6 @@ namespace TagTool.Commands.CollisionModels
                 Permutation.BspMoppCodes[0].Data.Add(moppcode);
             }
 
-
             Permutation.BspMoppCodes[0].Info = new Havok.CodeInfo { Offset = new RealQuaternion(origin.a, origin.b, origin.c, scale) };
             Permutation.BspMoppCodes[0].ArrayBase = new Havok.HkArrayBase { Size = (uint)len, CapacityAndFlags = (uint)(len | 0x80000000)};
             Permutation.BspMoppCodes[0].ReferencedObject = new Havok.HkpReferencedObject { ReferenceCount = 128 };
