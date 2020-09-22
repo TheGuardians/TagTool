@@ -262,6 +262,7 @@
     <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagGroupGen1.cs" />
     <Compile Include="Cache\Gen2\CachedTagGen2.cs" />
+    <Compile Include="Cache\Gen2\ResourceCacheGen2.cs" />
     <Compile Include="Cache\Gen2\TagGroupGen2.cs" />
     <Compile Include="Cache\Gen2\StringTableGen2.cs" />
     <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
@@ -649,6 +650,7 @@
     <Compile Include="Cache\Gen1\TagDefinitionsGen1.cs" />
     <Compile Include="Cache\Gen2\TagDefinitionsGen2.cs" />
     <Compile Include="Cache\Gen3\TagDefinitionsGen3.cs" />
+    <Compile Include="Tags\Definitions\Gen2\RenderModel.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
@@ -1023,7 +1025,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Tags\Definitions\Gen2\" />
     <Folder Include="Tags\Definitions\Gen3\" />
   </ItemGroup>
   <ItemGroup>

@@ -149,7 +149,10 @@ namespace TagTool.Cache.Gen2
         {
             foreach (var tag in Tags)
             {
-                if (tag != null && groupTag == tag.Group.Tag && name == tag.Name)
+                if (tag == null || tag.Group is null)
+                    continue;
+
+                if (groupTag == tag.Group.Tag && name == tag.Name)
                     return tag;
             }
             return null;

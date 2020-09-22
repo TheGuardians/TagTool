@@ -2,7 +2,7 @@
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
     public class TagResourceGen2 : TagStructure
 	{
         public TagResourceTypeGen2 Type;

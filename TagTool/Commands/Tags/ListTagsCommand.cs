@@ -94,7 +94,7 @@ namespace TagTool.Commands.Tags
 
             foreach (var tag in Cache.TagCache.TagTable)
             {
-                if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
+                if (tag == null || tag.Group is null|| (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
                     continue;
                 string groupName;
                 if (Cache.Version > CacheVersion.Halo3Beta) // gen 1 and gen 2 tag groups don't have a name stringid

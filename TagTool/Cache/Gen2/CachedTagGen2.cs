@@ -15,6 +15,7 @@ namespace TagTool.Cache.Gen2
 
         public CachedTagGen2(int index, uint ID, TagGroupGen2 tagGroup, uint address, int size, string name) : base(index, tagGroup, name)
         {
+            this.ID = ID;
             Offset = address;
             Size = size;
         }
