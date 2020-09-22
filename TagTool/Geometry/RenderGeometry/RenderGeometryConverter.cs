@@ -162,8 +162,9 @@ namespace TagTool.Geometry
                         List<WorldVertex> worldVertices = new List<WorldVertex>();
                         List<Unknown1B> h3WaterParameters = new List<Unknown1B>();
                         List<Unknown1A> h3WaterIndices = new List<Unknown1A>();
+                        List<StaticPerPixelData> staticPerPixel = new List<StaticPerPixelData>();
 
-                        using(var stream = new MemoryStream(mesh.ResourceVertexBuffers[0].Data.Data))
+                        using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[0].Data.Data))
                         {
                             var vertexStream = VertexStreamFactory.Create(HOCache.Version, stream);
                             for(int v = 0; v < mesh.ResourceVertexBuffers[0].Count; v++)
@@ -180,6 +181,12 @@ namespace TagTool.Geometry
                             var vertexStream = VertexStreamFactory.Create(SourceCache.Version, stream);
                             for (int v = 0; v < mesh.ResourceVertexBuffers[7].Count; v++)
                                 h3WaterParameters.Add(vertexStream.ReadUnknown1B());
+                        }
+                        using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[1].Data.Data))
+                        {
+                            var vertexStream = VertexStreamFactory.Create(HOCache.Version, stream);
+                            for (int v = 0; v < mesh.ResourceVertexBuffers[1].Count; v++)
+                                staticPerPixel.Add(vertexStream.ReadStaticPerPixelData());
                         }
 
                         // create vertex buffer for Unknown1A -> World
@@ -228,10 +235,21 @@ namespace TagTool.Geometry
                                     {
                                         var worldVertex = worldVertices[unknown1A.Vertices[j]];
                                         var unknown1B = h3WaterParameters[unknown1A.Indices[j]];
+                                        var spp = staticPerPixel[unknown1A.Vertices[j]];
+
+                                        var worldWaterVertex = new WorldWaterVertex()
+                                        {
+                                            Position = worldVertex.Position,
+                                            Binormal = worldVertex.Binormal,
+                                            Normal = worldVertex.Normal,
+                                            Tangent = worldVertex.Tangent,
+                                            Texcoord = worldVertex.Texcoord,
+                                            StaticPerPixel = spp.Texcoord
+                                        };
 
                                         // conversion should happen here
                                         
-                                        outWorldVertexStream.WriteWorldWaterVertex(worldVertex);
+                                        outWorldVertexStream.WriteWorldWaterVertex(worldWaterVertex);
                                         outWaterParameterVertexStream.WriteUnknown1B(unknown1B);
                                     }
                                 }

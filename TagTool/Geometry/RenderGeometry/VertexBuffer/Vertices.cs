@@ -260,4 +260,9 @@ namespace TagTool.Geometry
         public float Unknown8 { get; set; }
         public float Unknown9 { get; set; }
     }
+
+    public class WorldWaterVertex : WorldVertex
+    {
+        public RealVector2d StaticPerPixel;
+    }
 }

@@ -634,28 +634,33 @@ namespace TagTool.Geometry
             _stream.WriteFloat1(v.Unknown9);
         }
 
-        //TODO The last 2 float in WorldWaterVertex are unknown
-
-        public WorldVertex ReadWorldWaterVertex()
+        public WorldWaterVertex ReadWorldWaterVertex()
         {
-            return new WorldVertex
+            var position = new RealQuaternion(_stream.ReadFloat3(), 0);
+            var texcoord = _stream.ReadFloat2();
+            var tangent = new RealQuaternion(_stream.ReadFloat3(), 0);
+            var binormal = _stream.ReadFloat3();
+            var spp = _stream.ReadFloat2();
+            var normal = RealVector3d.CrossProduct(binormal, new RealVector3d(tangent.I, tangent.J, tangent.K));
+
+            return new WorldWaterVertex
             {
-                Position = new RealQuaternion(_stream.ReadFloat3(), 0),
-                Texcoord = _stream.ReadFloat2(),
-                Tangent = new RealQuaternion(_stream.ReadFloat3(), 0),
-                Binormal = _stream.ReadFloat3(),
-                Normal = new RealVector3d(0, 0, 1)
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Binormal = binormal,
+                Normal = normal,
+                StaticPerPixel = spp
             };
         }
 
-        public void WriteWorldWaterVertex(WorldVertex v)
+        public void WriteWorldWaterVertex(WorldWaterVertex v)
         {
             _stream.WriteFloat3(v.Position.IJK);
             _stream.WriteFloat2(v.Texcoord);
             _stream.WriteFloat3(v.Tangent.IJK);
             _stream.WriteFloat3(v.Binormal);
-            //Temporary hack to have the right size I have no idea what these 2 values are
-            _stream.WriteFloat2(new RealVector2d(1, 1));
+            _stream.WriteFloat2(v.StaticPerPixel);
         }
 
         public int GetVertexSize(VertexBufferFormat type)

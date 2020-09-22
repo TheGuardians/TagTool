@@ -477,12 +477,12 @@ namespace TagTool.Geometry
             throw new NotImplementedException();
         }
 
-        public void WriteWorldWaterVertex(WorldVertex v)
+        public void WriteWorldWaterVertex(WorldWaterVertex v)
         {
             throw new NotImplementedException();
         }
 
-        public WorldVertex ReadWorldWaterVertex()
+        public WorldWaterVertex ReadWorldWaterVertex()
         {
             throw new NotImplementedException();
         }

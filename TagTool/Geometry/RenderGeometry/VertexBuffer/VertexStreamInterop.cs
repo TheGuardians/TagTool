@@ -639,9 +639,9 @@ namespace TagTool.Geometry
 
         //TODO The last 2 float in WorldWaterVertex are unknown
 
-        public WorldVertex ReadWorldWaterVertex()
+        public WorldWaterVertex ReadWorldWaterVertex()
         {
-            return new WorldVertex
+            return new WorldWaterVertex
             {
                 Position = new RealQuaternion(_stream.ReadFloat3(), 0),
                 Texcoord = _stream.ReadFloat2(),
@@ -651,7 +651,7 @@ namespace TagTool.Geometry
             };
         }
 
-        public void WriteWorldWaterVertex(WorldVertex v)
+        public void WriteWorldWaterVertex(WorldWaterVertex v)
         {
             _stream.WriteFloat3(v.Position.IJK);
             _stream.WriteFloat2(v.Texcoord);
