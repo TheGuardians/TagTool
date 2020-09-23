@@ -57,83 +57,56 @@ namespace TagTool.Geometry.BspCollisionGeometry
     {
         public ulong Value;
 
-        public short Plane
+        public int Plane
         {
-            get => (short)((Value >> 48) & 0xFFFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                var newBytes = BitConverter.GetBytes(value);
-                for (var i = 0; i < newBytes.Length; i++)
-                    allBytes[((allBytes.Length - 1) - 0) - i] = newBytes[(newBytes.Length - 1) - i];
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            get => (int)(Value & 0xffff);
+            set => Value |= ((ulong)value & 0xffff);
         }
 
-        public byte FrontChildLower
+        public int FrontChild
         {
-            get => (byte)((Value >> 40) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 2] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            get => (int)((Value >> 16) & 0xffffff);
+            set => Value = (Value & 0xffffff000000ffffUL) | (((ulong)value & 0xffffff) << 16);
         }
 
-        public byte FrontChildMid
+        public int BackChild
         {
-            get => (byte)((Value >> 32) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 3] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            get => (int)((Value >> 40) & 0xffffff);
+            set => Value = (Value & 0xffffffffffUL) | (((ulong)value & 0xffffff) << 40);
         }
 
-        public byte FrontChildUpper
+        public int GetChild(Side side)
         {
-            get => (byte)((Value >> 24) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 4] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            return side == Side.Front ? FrontChild : BackChild;
         }
 
-        public byte BackChildLower
+        public static int GetChildIndex(int child)
         {
-            get => (byte)((Value >> 16) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 5] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            int index = child & 0x7fffff;
+            int signExtMask = 1 << 22;
+            return (signExtMask ^ index) - signExtMask;
         }
 
-        public byte BackChildMid
+        public static ChildType GetChildType(int child)
         {
-            get => (byte)((Value >> 8) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 6] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            return (ChildType)((child >> 23) & 1);
         }
 
-        public byte BackChildUpper
+        public static int CreateChild(ChildType type, int index)
         {
-            get => (byte)(Value & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 7] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            return ((int)type << 23) | (index & 0x7fffff);
+        }
+
+        public enum ChildType
+        {
+            Node,
+            Leaf
+        }
+
+        public enum Side
+        {
+            Front,
+            Back
         }
     }
 
