@@ -34,7 +34,7 @@ namespace TagTool.Commands.Modding
             if (!Cache.SaveModPackage(file))
                 return new TagToolError(CommandError.OperationFailed, "Failed to save mod package");
 			else
-				Console.WriteLine("Done!");
+				Console.WriteLine("ModPackage saved to \"" + path + "\".");
 
 			return true;
         }
