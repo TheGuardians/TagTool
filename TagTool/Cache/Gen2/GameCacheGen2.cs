@@ -16,8 +16,10 @@ namespace TagTool.Cache
 
         public TagCacheGen2 TagCacheGen2;
         public StringTableGen2 StringTableGen2;
-        public CacheFileType SharedCacheType;
+        public CacheFileType SharedCacheType = CacheFileType.None;
         public string SharedCacheName;
+        public FileInfo SharedCacheFile;
+        public GameCacheGen2 SharedCache;
 
         public override TagCache TagCache => TagCacheGen2;
         public override StringTable StringTable => StringTableGen2;
@@ -49,7 +51,6 @@ namespace TagTool.Cache
                     break;
             }
 
-
             using (var cacheStream = OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, Endianness))
             {
@@ -57,6 +58,17 @@ namespace TagTool.Cache
                 StringTableGen2 = new StringTableGen2(reader, mapFile);
             }
 
+            LoadSharedCache();
+        }
+
+        private void LoadSharedCache()
+        {
+            if (SharedCacheType == CacheFileType.None)
+                return;
+            
+            SharedCacheFile = new FileInfo(Path.Combine(Directory.FullName, SharedCacheName));
+            SharedCache = (GameCacheGen2)GameCache.Open(SharedCacheFile);
+            TagCacheGen2 = TagCacheGen2.Combine(TagCacheGen2, SharedCache.TagCacheGen2);
         }
 
         #region Serialization
@@ -99,7 +111,7 @@ namespace TagTool.Cache
         #endregion
 
 
-        public override Stream OpenCacheRead() => CacheFile.OpenRead();
+        public override Stream OpenCacheRead() => new Gen2CacheStream(CacheFile.OpenRead(), SharedCache?.OpenCacheRead());
 
         public override Stream OpenCacheReadWrite()
         {
@@ -114,6 +126,46 @@ namespace TagTool.Cache
         public override void SaveStrings()
         {
             throw new NotImplementedException();
+        }
+
+        // Purpose: to opaquely manage the lifetime of the shared cache stream
+        internal class Gen2CacheStream : Stream
+        {
+            internal readonly Stream BaseStream;
+            internal readonly Stream SharedStream;
+
+            public Gen2CacheStream(Stream baseStream, Stream sharedStream)
+            {
+                BaseStream = baseStream;
+                SharedStream = sharedStream;
+            }
+
+            public override bool CanRead => BaseStream.CanRead;
+
+            public override bool CanSeek => BaseStream.CanSeek;
+
+            public override bool CanWrite => BaseStream.CanWrite;
+
+            public override long Length => BaseStream.Length;
+
+            public override long Position { get => BaseStream.Position; set => BaseStream.Position = value; }
+
+            public override void Flush() => BaseStream.Flush();
+
+            public override int Read(byte[] buffer, int offset, int count) => BaseStream.Read(buffer, offset, count);
+
+            public override long Seek(long offset, SeekOrigin origin) => BaseStream.Seek(offset, origin);
+
+            public override void SetLength(long value) => BaseStream.SetLength(value);
+
+            public override void Write(byte[] buffer, int offset, int count) => BaseStream.Write(buffer, offset, count);
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+                if (disposing && SharedStream != null)
+                    SharedStream.Dispose();
+            }
         }
     }
 }

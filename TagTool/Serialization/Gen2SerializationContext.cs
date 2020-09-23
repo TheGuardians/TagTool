@@ -18,20 +18,29 @@ namespace TagTool.Serialization
 
         public Gen2SerializationContext(Stream stream, GameCacheGen2 gameCache, CachedTagGen2 tag)
         {
-            GameCache = gameCache;
             Tag = tag;
-            Stream = stream;
+
+            if (tag.IsShared)
+            {
+                GameCache = gameCache.SharedCache;
+                Stream = ((GameCacheGen2.Gen2CacheStream)stream).SharedStream;
+            }
+            else
+            {
+                GameCache = gameCache;
+                Stream = stream;
+            }
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return (uint)(address - GameCache.TagCacheGen2.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            return (uint)(address - GameCache.BaseMapFile.Header.VirtualAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
             var reader = new EndianReader(Stream, GameCache.BaseMapFile.EndianFormat);
-            reader.SeekTo(Tag.Offset - GameCache.TagCacheGen2.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            reader.SeekTo(Tag.Offset - GameCache.BaseMapFile.Header.VirtualAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
             return reader;
         }
 

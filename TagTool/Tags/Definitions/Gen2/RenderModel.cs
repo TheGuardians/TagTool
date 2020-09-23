@@ -110,6 +110,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// <summary>
                 /// The level-of-detail section indices of the permutation.
                 /// </summary>
+                [TagField(Length = 6)]
                 public short[] LodSectionIndices = new short[6];
             }
         }

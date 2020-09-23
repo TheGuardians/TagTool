@@ -24,7 +24,7 @@ namespace TagTool.Cache
         [TagField(MaxVersion = CacheVersion.HaloPC)]
         public int TagDataSize;
 
-        public int MemoryBufferOffset;
+        public uint MemoryBufferOffset;
         public int MemoryBufferSize;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
