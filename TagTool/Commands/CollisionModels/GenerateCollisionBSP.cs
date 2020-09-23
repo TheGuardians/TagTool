@@ -299,7 +299,6 @@ namespace TagTool.Commands.CollisionModels
                     int vertex_block_count = Bsp.Vertices.Count;
                     int surface_block_count = Bsp.Surfaces.Count;
                     int edges_block_count = Bsp.Edges.Count;
-                    int addendums_count = surface_addendums.Count;
 
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
                     {
@@ -353,22 +352,23 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode{ Value = bsp3dnode_value };
 
                         bsp3dnode_index = current_bsp3dnode_index;
-
-                        //here we are going to reset the counts of the various geometry primitives to their prior state
-                        while (Bsp.Vertices.Count > vertex_block_count)
-                            Bsp.Vertices.RemoveAt(Bsp.Vertices.Count - 1);
-                        while (Bsp.Surfaces.Count > surface_block_count)
-                            Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
-                        while (Bsp.Edges.Count > edges_block_count)
-                            Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
-                        while (surface_addendums.Count > addendums_count)
-                            surface_addendums.RemoveAt(surface_addendums.Count - 1);
                     }
                     else
                     {
                         Console.WriteLine("###ERROR couldn't build surface lists.");
                         return false;
                     }
+
+                    //here we are going to reset the counts of the various geometry primitives to their prior state
+                    while (Bsp.Vertices.Count > vertex_block_count)
+                        Bsp.Vertices.RemoveAt(Bsp.Vertices.Count - 1);
+                    while (Bsp.Surfaces.Count > surface_block_count)
+                        Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
+                    while (Bsp.Edges.Count > edges_block_count)
+                        Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
+                    while (surface_addendums.Count > surface_block_count)
+                        surface_addendums.RemoveAt(surface_addendums.Count - 1);
+
                     return true;
                 case 2: //build leaves
                     if(surfaces_reset_for_leaf_building(ref surface_array) == -1)
@@ -1256,6 +1256,11 @@ namespace TagTool.Commands.CollisionModels
                     break;
             }
 
+            if(surface_index == 4417 && surface_plane_relationship == Plane_Relationship.Unknown)
+            {
+                Console.Write("yay");
+            }
+
             //split surfaces may become very small and be hard to work with. To get clarity, we can use the parent surface of the split surface
             if(surface_plane_relationship == Plane_Relationship.Unknown && surface_index >= original_surface_count)
             {
@@ -1263,9 +1268,13 @@ namespace TagTool.Commands.CollisionModels
                 {
                     surface_index = surface_addendums[surface_index];
                     surface_plane_relationship = determine_surface_plane_relationship(surface_index, plane_index, plane_block);
-                    if (surface_plane_relationship == Plane_Relationship.BackofPlane || surface_plane_relationship == Plane_Relationship.FrontofPlane ||
-                        surface_index < original_surface_count)
+                    if (surface_plane_relationship == Plane_Relationship.BackofPlane || surface_plane_relationship == Plane_Relationship.FrontofPlane)
                         break;
+                    if (surface_index < original_surface_count)
+                    {
+                        surface_plane_relationship = Plane_Relationship.Unknown;
+                        break;
+                    }                       
                 }          
             }
 
@@ -1466,7 +1475,7 @@ namespace TagTool.Commands.CollisionModels
             //loop through free surfaces to see how effectively their associated planes split the remaining surfaces. Find the one that most effectively splits the remaining surfaces.
             for (int i = 0; i < surface_array.free_count; i++)
             {
-                int current_plane_index = (int)((short)Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFF);
+                int current_plane_index = (int)(Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFF);
                 plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, current_plane_index, new RealPlane3d());
                 if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                 {
