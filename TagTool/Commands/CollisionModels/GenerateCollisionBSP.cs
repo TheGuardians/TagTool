@@ -168,7 +168,7 @@ namespace TagTool.Commands.CollisionModels
             int new_surfaces_count = surface_counts.free_count + surface_counts.used_count;
             new_surface_array.used_count = new_surfaces_count;
 
-            if (surface_plane_fits_negative * 4.0 <= surface_plane_fits_positive)
+            if (surface_plane_fits_negative * 4.0f <= surface_plane_fits_positive)
             {
                 surface_array = new_surface_array.DeepClone();
                 return 3;
@@ -292,8 +292,8 @@ namespace TagTool.Commands.CollisionModels
                 case 1: //construct bsp3d nodes
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
                     //these arrays need to be initialized with empty elements so that specific indices can be directly assigned
-                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
-                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
+                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.BackSurfaceCount + splitting_parameters.BackSurfaceUsedCount]) };
+                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.FrontSurfaceCount + splitting_parameters.FrontSurfaceUsedCount]) };
 
                     //here we are going to preserve the current counts of the various geometry primitives, so that they can be reset later
                     int vertex_block_count = Bsp.Vertices.Count;
@@ -1505,7 +1505,7 @@ namespace TagTool.Commands.CollisionModels
             plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
             lowest_plane_splitting_parameters.plane_splitting_effectiveness = double.MaxValue;
 
-            int best_axis_index = 0;
+            int best_axis_index = -1;
             double desired_plane_distance = 0;
 
             //check X, Y, and Z axes
@@ -1567,27 +1567,34 @@ namespace TagTool.Commands.CollisionModels
 
                 int front_count = surface_array.free_count;
                 int back_count = 0;
-                for (int extent_index = 0; extent_index < extents_table.Count; extent_index++)
+                for (int extent_index = 1; extent_index < extents_table.Count; extent_index++)
                 {
-                    if (extents_table[extent_index].is_max_coord)
+                    if (extents_table[extent_index - 1].is_max_coord)
                     {
-                        front_count--;
+                        if (--front_count < 0)
+                        {
+                            Console.WriteLine("###ERROR negative plane front count!");
+                        }
                     }
                     else
                     {
-                        back_count++;
+                        if(++back_count > surface_array.free_count)
+                        {
+                            Console.WriteLine("###ERROR back count greater than surface free count!");
+                        }
                     }
                     double current_splitting_effectiveness = Math.Abs(back_count - front_count) + 2 * (front_count + back_count);
                     if (current_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                     {
                         lowest_plane_splitting_parameters.plane_splitting_effectiveness = current_splitting_effectiveness;
                         best_axis_index = current_test_axis;
-                        if(extent_index == 0)
-                            desired_plane_distance = extents_table[extent_index].coordinate;
-                        else
-                            desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
+                        desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
                     }
                 }
+            }
+            if(best_axis_index == -1)
+            {
+                Console.WriteLine("###ERROR: Failed to find best axis index!");
             }
             //generate a plane based on the ideal plane characteristics calculated above
             RealPlane3d best_plane = new RealPlane3d();
