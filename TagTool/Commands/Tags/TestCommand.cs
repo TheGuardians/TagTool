@@ -159,6 +159,10 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
+            var mainmenuCache = (GameCacheGen2)GameCache.Open(new FileInfo(Path.Combine(Cache.Directory.FullName, "mainmenu.map")));
+            var sharedCache = (GameCacheGen2)GameCache.Open(new FileInfo(Path.Combine(Cache.Directory.FullName, "shared.map")));
+            var spSharedCache = (GameCacheGen2)GameCache.Open(new FileInfo(Path.Combine(Cache.Directory.FullName, "single_player_shared.map")));
+
             var tag = Cache.TagCache.GetTag("objects\\weapons\\pistol\\magnum\\magnum", "mode");
 
             using(var stream = Cache.OpenCacheRead())

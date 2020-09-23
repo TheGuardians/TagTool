@@ -19,6 +19,7 @@ namespace TagTool.Cache.Gen2
             this.ID = ID;
             Offset = address;
             Size = size;
+            IsExternal = isExternal;
         }
     }
 }

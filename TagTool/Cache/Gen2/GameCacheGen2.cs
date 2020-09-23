@@ -16,6 +16,8 @@ namespace TagTool.Cache
 
         public TagCacheGen2 TagCacheGen2;
         public StringTableGen2 StringTableGen2;
+        public CacheFileType SharedCacheType;
+        public string SharedCacheName;
 
         public override TagCache TagCache => TagCacheGen2;
         public override StringTable StringTable => StringTableGen2;
@@ -34,12 +36,27 @@ namespace TagTool.Cache
             DisplayName = mapFile.Header.Name + ".map";
             Directory = file.Directory;
 
+            switch (BaseMapFile.Header.CacheType)
+            {
+                case CacheFileType.Campaign:
+                    SharedCacheType = CacheFileType.SharedCampaign;
+                    SharedCacheName = "single_player_shared.map";
+                    break;
+                case CacheFileType.Multiplayer:
+                case CacheFileType.MainMenu:    // see if this is necessary
+                    SharedCacheType = CacheFileType.Shared;
+                    SharedCacheName = "shared.map";
+                    break;
+            }
+
+
             using (var cacheStream = OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, Endianness))
             {
                 TagCacheGen2 = new TagCacheGen2(reader, mapFile);
                 StringTableGen2 = new StringTableGen2(reader, mapFile);
             }
+
         }
 
         #region Serialization
