@@ -80,7 +80,7 @@ namespace TagTool.Cache.Gen2
                 if (tag.Value == -1 || tag.Value == 0 || size == -1 || address == 0xFFFFFFFF || ID == 0 || ID == 0xFFFFFFFF)
                     Tags.Add(null);
                 else
-                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(tag), address, size, null));
+                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(tag), address, size, null, (address == 0 || ID == 0xFFFFFFFF)));
             }
 
             reader.SeekTo(mapFile.Header.TagNameIndicesOffset);

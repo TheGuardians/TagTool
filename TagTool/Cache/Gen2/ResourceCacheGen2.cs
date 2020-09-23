@@ -15,10 +15,63 @@ namespace TagTool.Cache.Gen2
     {
         public GameCacheGen2 Cache;
 
-        public ResourceCacheGen2(GameCacheGen2 cache, bool load = false)
+        public ResourceCacheGen2(GameCacheGen2 cache)
         {
             Cache = cache;
         }
+
+        private static DatumHandle GetHandleFromTagResourceReference(TagResourceReference resourceReference)
+        {
+            return resourceReference.Gen2ResourceID;
+        }
+
+        public byte[] GetResourceDataFromHandle(TagResourceReference resourceReference, int dataLength)
+        {
+            var datumHandle = GetHandleFromTagResourceReference(resourceReference);
+            if (datumHandle == null)
+                return null;
+
+            var cacheFileType = (datumHandle.Value & 0xC0000000) >> 30;
+            int fileOffset = (int)(datumHandle.Value & 0x3FFFFFFF);
+
+
+            GameCacheGen2 sourceCache;
+
+            if(cacheFileType != 0)
+            {
+                string filename = "";
+                switch (cacheFileType)
+                {
+                    case 1:
+                        filename = Path.Combine(Cache.Directory.FullName, "mainmenu.map");
+                        break;
+                    case 2:
+                        filename = Path.Combine(Cache.Directory.FullName, "shared.map");
+                        break;
+                    case 3:
+                        filename = Path.Combine(Cache.Directory.FullName, "single_player_shared.map");
+                        break;
+
+                }
+                // TODO: make this a function call with a stored reference to caches in the base cache or something better than this
+                sourceCache = (GameCacheGen2)GameCache.Open(new FileInfo(filename));
+            }
+            else
+                sourceCache = Cache;
+
+            var stream = sourceCache.OpenCacheRead();
+
+            var reader = new EndianReader(stream, Cache.Endianness);
+
+            reader.SeekTo(fileOffset);
+            var data = reader.ReadBytes(dataLength);
+
+            reader.Close();
+
+            return data;
+        }
+
+
 
         public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
         {
