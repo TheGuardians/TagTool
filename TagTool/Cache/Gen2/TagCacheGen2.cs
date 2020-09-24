@@ -183,7 +183,7 @@ namespace TagTool.Cache.Gen2
                 var tag = cache2.Tags[i];
                 if (i >= 10000)
                 {
-                    if (i > result.Tags.Count)
+                    if (i >= result.Tags.Count)
                         result.Tags.Add(tag);
                     else
                         result.Tags[i] = tag;
