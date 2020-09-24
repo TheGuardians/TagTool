@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public int Checksum;
 
         [TagField(Flags = Padding, Length = 8)]
-        public byte[] Unused1 = new byte[8];
+        public byte[] Unused1 = new byte[8];            // import info block
 
         public List<RenderGeometryCompression> Compression;
         
@@ -39,8 +39,8 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<MarkerGroup> MarkerGroups;
         public List<RenderMaterial> Materials;
 
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Unused;
+        [TagField(Flags = Padding, Length = 8)]
+        public byte[] Unused;       // error block
 
         public float DontDrawOverCameraCosineAngle;
 

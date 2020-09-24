@@ -263,6 +263,7 @@
     <Compile Include="Cache\Gen1\TagGroupGen1.cs" />
     <Compile Include="Cache\Gen2\CachedTagGen2.cs" />
     <Compile Include="Cache\Gen2\ResourceCacheGen2.cs" />
+    <Compile Include="Cache\Gen2\StringIdResolverHalo2.cs" />
     <Compile Include="Cache\Gen2\TagGroupGen2.cs" />
     <Compile Include="Cache\Gen2\StringTableGen2.cs" />
     <Compile Include="Cache\Gen2\GameCacheGen2.cs" />

@@ -159,15 +159,19 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            var mainmenuCache = (GameCacheGen2)GameCache.Open(new FileInfo(Path.Combine(Cache.Directory.FullName, "mainmenu.map")));
-            var sharedCache = (GameCacheGen2)GameCache.Open(new FileInfo(Path.Combine(Cache.Directory.FullName, "shared.map")));
-            var spSharedCache = (GameCacheGen2)GameCache.Open(new FileInfo(Path.Combine(Cache.Directory.FullName, "single_player_shared.map")));
+            var size = TagStructure.GetStructureSize(typeof(TagTool.Tags.Definitions.Gen2.RenderModel), CacheVersion.Halo2Vista);
 
-            var tag = Cache.TagCache.GetTag("objects\\weapons\\pistol\\magnum\\magnum", "mode");
-
-            using(var stream = Cache.OpenCacheRead())
+            using (var stream = Cache.OpenCacheRead())
             {
-                var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
+                foreach(var tag in Cache.TagCache.NonNull())
+                {
+                    if (tag.IsInGroup("mode"))
+                    {
+                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
+                        var name = Cache.StringTable.GetString(modeTag.Name);
+                        Console.WriteLine(name);
+                    }
+                }
             }
 
             return true;

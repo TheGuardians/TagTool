@@ -14,6 +14,8 @@ namespace TagTool.Cache.Gen2
     {
         public StringTableGen2(EndianReader reader, MapFile baseMapFile) : base()
         {
+            Resolver = new StringIdResolverHalo2();
+
             //
             // Read offsets
             //
