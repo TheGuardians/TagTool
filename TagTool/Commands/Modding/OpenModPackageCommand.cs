@@ -42,6 +42,9 @@ namespace TagTool.Commands.Modding
 			else
 				path = args[0];
 
+			if (!args[0].Contains(".pak"))
+				path += ".pak";
+
 			var file = new FileInfo(path);
 
             if (!file.Exists)
