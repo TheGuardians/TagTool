@@ -79,6 +79,8 @@ namespace TagTool.Commands.CollisionModels
                     logStream.Attach();
                     model = importer.ImportFile(filepath,
                         PostProcessSteps.OptimizeMeshes |
+                        PostProcessSteps.RemoveComponent |
+                        PostProcessSteps.Debone |
                         PostProcessSteps.FindDegenerates |
                         PostProcessSteps.OptimizeGraph |
                         PostProcessSteps.PreTransformVertices |
@@ -209,8 +211,8 @@ namespace TagTool.Commands.CollisionModels
         {
             foreach (var vertex in Vertices)
             {
-                //the Y and Z axes are swapped in Halo, don't ask me why
-                Bsp.Vertices.Add(new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue });
+                //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
+                Bsp.Vertices.Add(new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue });
             }
             int index_buffer_index = 0;
             while (index_buffer_index < Indices.Length)

@@ -1255,12 +1255,7 @@ namespace TagTool.Commands.CollisionModels
                 if (surface_edge_index == surface_block.FirstEdge)
                     break;
             }
-
-            if(surface_index == 4417 && surface_plane_relationship == Plane_Relationship.Unknown)
-            {
-                Console.Write("yay");
-            }
-
+            
             //split surfaces may become very small and be hard to work with. To get clarity, we can use the parent surface of the split surface
             if(surface_plane_relationship == Plane_Relationship.Unknown && surface_index >= original_surface_count)
             {
