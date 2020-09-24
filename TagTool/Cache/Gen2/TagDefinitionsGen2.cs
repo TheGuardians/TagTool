@@ -44,7 +44,7 @@ namespace TagTool.Cache.Gen2
             { new TagGroupGen2("cin*"), null },
             { new TagGroupGen2("clu*"), null },
             { new TagGroupGen2("clwd"), null },
-            { new TagGroupGen2("coll"), null },
+            { new TagGroupGen2("coll"), typeof(CollisionModel) },
             { new TagGroupGen2("coln"), null },
             { new TagGroupGen2("colo"), null },
             { new TagGroupGen2("cont"), null },

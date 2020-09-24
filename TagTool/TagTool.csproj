@@ -651,6 +651,7 @@
     <Compile Include="Cache\Gen1\TagDefinitionsGen1.cs" />
     <Compile Include="Cache\Gen2\TagDefinitionsGen2.cs" />
     <Compile Include="Cache\Gen3\TagDefinitionsGen3.cs" />
+    <Compile Include="Tags\Definitions\Gen2\CollisionModel.cs" />
     <Compile Include="Tags\Definitions\Gen2\RenderModel.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />

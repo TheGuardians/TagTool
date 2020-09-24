@@ -165,11 +165,9 @@ namespace TagTool.Commands
             {
                 foreach(var tag in Cache.TagCache.NonNull())
                 {
-                    if (tag.IsInGroup("mode"))
+                    if (tag.IsInGroup("coll"))
                     {
-                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
-                        var name = Cache.StringTable.GetString(modeTag.Name);
-                        Console.WriteLine(name);
+                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.CollisionModel>(stream, tag);
                     }
                 }
             }
