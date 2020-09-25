@@ -110,7 +110,7 @@ namespace TagTool.Commands.Editing
             var boundsType = bounds.GetType();
             var lower = boundsType.GetProperty("Lower").GetValue(bounds);
             var upper = boundsType.GetProperty("Upper").GetValue(bounds);
-            return $"{FormatValue(lower)} {FormatValue(lower)}";
+            return $"{FormatValue(lower)} {FormatValue(upper)}";
         }
 
         private string FormatRealMatrix4x3(RealMatrix4x3 matrix)
