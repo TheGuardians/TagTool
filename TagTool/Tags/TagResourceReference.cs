@@ -9,7 +9,7 @@ namespace TagTool.Tags
     {
 
         [TagField(Gen = CacheGeneration.Second)]
-        public DatumHandle Gen2ResourceID;
+        public uint Gen2ResourceAddress;
 
         /// <summary>
         /// ID is an index in ResourceGestalt.TagResources

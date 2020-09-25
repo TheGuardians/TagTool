@@ -20,20 +20,17 @@ namespace TagTool.Cache.Gen2
             Cache = cache;
         }
 
-        private static DatumHandle GetHandleFromTagResourceReference(TagResourceReference resourceReference)
+        private static uint GetAddressTagResourceReference(TagResourceReference resourceReference)
         {
-            return resourceReference.Gen2ResourceID;
+            return resourceReference.Gen2ResourceAddress;
         }
 
         public byte[] GetResourceDataFromHandle(TagResourceReference resourceReference, int dataLength)
         {
-            var datumHandle = GetHandleFromTagResourceReference(resourceReference);
-            if (datumHandle == null)
-                return null;
+            var resourceAddress = GetAddressTagResourceReference(resourceReference);
 
-            var cacheFileType = (datumHandle.Value & 0xC0000000) >> 30;
-            int fileOffset = (int)(datumHandle.Value & 0x3FFFFFFF);
-
+            var cacheFileType = (resourceAddress & 0xC0000000) >> 30;
+            int fileOffset = (int)(resourceAddress & 0x3FFFFFFF);
 
             GameCacheGen2 sourceCache;
 
