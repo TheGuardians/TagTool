@@ -48,7 +48,7 @@ namespace TagTool.Commands.Porting.Gen2
 
         public CachedTag ConvertTag(Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag gen2Tag)
         {
-            if(Gen2Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen2Tag.Group.Tag) == null ||
+            if (Gen2Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen2Tag.Group.Tag) == null ||
                 Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen2Tag.Group.Tag) == null)
             {
                 Console.WriteLine($"ERROR: Failed to convert tag '{gen2Tag}' Group not supported. Returning null");
@@ -73,6 +73,9 @@ namespace TagTool.Commands.Porting.Gen2
 
             if (definition != null)
                 Cache.Serialize(cacheStream, tag, definition);
+
+            Console.WriteLine($"['{tag.Group.Tag}', 0x{tag.Index:X4}] {tag}");
+
             return tag;
         }
 
@@ -88,7 +91,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case string _:  // no conversion necessary
                     return data;
                 case CachedTag tag:
-                        return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
+                    return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
                 case Array _:
                 case IList _: // All arrays and List<T> implement IList, so we should just use that
                     data = ConvertCollection(cacheStream, gen2CacheStream, resourceStreams, data as IList, definition, blamTagName);

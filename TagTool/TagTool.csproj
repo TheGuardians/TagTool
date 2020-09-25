@@ -992,6 +992,7 @@
   <ItemGroup>
     <Content Include="TagTool.ico" />
     <None Include="App.config" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Collision.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JsonMoppNet">

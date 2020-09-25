@@ -5,6 +5,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
 using static TagTool.Tags.TagFieldFlags;
+using CMoppBvTreeShapeGen2 = TagTool.Havok.Gen2.CMoppBvTreeShape;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
@@ -41,7 +42,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public StringId Name;
 
                 public List<Bsp> Bsps;
-                public List<CollisionBspPhysicsDefinition> BspPhysics;
+                public List<CollisionBspPhysicsDefinitionGen2> BspPhysics;
 
                 [TagStructure(Size = 0x44)]
                 public class Bsp : TagStructure
