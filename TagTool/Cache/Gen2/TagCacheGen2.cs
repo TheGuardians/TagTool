@@ -31,7 +31,7 @@ namespace TagTool.Cache.Gen2
         /// <summary>
         /// Address in memory (xbox) of the tag data. For Halo 2 Vista, this values turns out to be 0. Every address in the tag data is converted to an offset using this value.
         /// </summary>
-        public uint BaseTagAddress;
+        public uint VirtualAddress;
 
         public TagCacheGen2Header Header;
         public List<CachedTagGen2> Tags = new List<CachedTagGen2>();
@@ -52,14 +52,14 @@ namespace TagTool.Cache.Gen2
             var deserializer = new TagDeserializer(mapFile.Version);
             Header = deserializer.Deserialize<TagCacheGen2Header>(dataContext);
 
-            BaseTagAddress = (Header.TagGroupsOffset - 0x20);
+            uint tagCacheVirtualAddress = (Header.TagGroupsOffset - 0x20);
 
             //
             // Read tag groups
             //
 
             //seek to the tag groups offset, seems to be contiguous to the header
-            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - BaseTagAddress);   // TODO: check how halo 2 xbox uses this
+            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - tagCacheVirtualAddress);   // TODO: check how halo 2 xbox uses this
 
             for(int i = 0; i < Header.TagGroupCount; i++)
             {
@@ -72,7 +72,7 @@ namespace TagTool.Cache.Gen2
             // Read cached tags
             //
 
-            reader.SeekTo(tagDataSectionOffset + Header.TagsOffset - BaseTagAddress);
+            reader.SeekTo(tagDataSectionOffset + Header.TagsOffset - tagCacheVirtualAddress);
 
             for (int i = 0; i < Header.TagCount; i++)
             {
@@ -119,6 +119,16 @@ namespace TagTool.Cache.Gen2
             HardcodedTags[scnrTag.Group.Tag] = (CachedTagGen2)scnrTag;
             var globalTag = GetTag(Header.GlobalsID);
             HardcodedTags[globalTag.Group.Tag] = (CachedTagGen2)globalTag;
+
+            //
+            // Update virtual address if on Xbox
+            //
+
+            if (Version == CacheVersion.Halo2Xbox)
+                VirtualAddress = Tags[0].Offset;
+            else
+                VirtualAddress = mapFile.Header.VirtualAddress;
+
         }
 
         private TagCacheGen2() { }
@@ -169,7 +179,7 @@ namespace TagTool.Cache.Gen2
             var result = new TagCacheGen2()
             {
                 Header = cache1.Header,
-                BaseTagAddress = cache1.BaseTagAddress,
+                VirtualAddress = cache1.VirtualAddress,
                 HardcodedTags = cache1.HardcodedTags,
                 Version = cache1.Version,
                 TagDefinitions = cache1.TagDefinitions,

@@ -159,15 +159,16 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            var size = TagStructure.GetStructureSize(typeof(TagTool.Tags.Definitions.Gen2.RenderModel), CacheVersion.Halo2Vista);
+            var size = TagStructure.GetStructureSize(typeof(TagTool.Tags.Definitions.Gen2.RenderModel), CacheVersion.Halo2Xbox);
 
             using (var stream = Cache.OpenCacheRead())
             {
-                foreach(var tag in Cache.TagCache.NonNull())
+                foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    if (tag.IsInGroup("coll"))
+                    if (tag.IsInGroup("mode"))
                     {
-                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.CollisionModel>(stream, tag);
+                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
+                        Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
                     }
                 }
             }

@@ -34,13 +34,16 @@ namespace TagTool.Serialization
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return (uint)(address - GameCache.BaseMapFile.Header.VirtualAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            if(GameCache.Version == CacheVersion.Halo2Vista)
+                return GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
+            else
+                return GameCache.BaseMapFile.Header.MemoryBufferOffset + GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
             var reader = new EndianReader(Stream, GameCache.BaseMapFile.EndianFormat);
-            reader.SeekTo(Tag.Offset - GameCache.BaseMapFile.Header.VirtualAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            reader.SeekTo(AddressToOffset(0, Tag.DefinitionOffset));
             return reader;
         }
 
