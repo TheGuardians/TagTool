@@ -82,11 +82,8 @@ namespace TagTool.Commands.CollisionModels
                         PostProcessSteps.OptimizeMeshes |
                         PostProcessSteps.RemoveComponent |
                         PostProcessSteps.Debone |
-                        PostProcessSteps.FindDegenerates |
                         PostProcessSteps.OptimizeGraph |
-                        PostProcessSteps.PreTransformVertices |
-                        PostProcessSteps.Triangulate |
-                        PostProcessSteps.FixInFacingNormals);
+                        PostProcessSteps.Triangulate);
                     logStream.Detach();
                 }
 
@@ -268,7 +265,7 @@ namespace TagTool.Commands.CollisionModels
         public int add_vertex(Vector3D vertex)
         {
             //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
-            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue };
+            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue };
             for(int i = 0; i < Bsp.Vertices.Count; i++)
             {
                 Vertex testvertex = Bsp.Vertices[i];
