@@ -148,7 +148,8 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new ForEachCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new SaveTagChangesCommand(cache, tag, definition));
-            
+            commandContext.AddCommand(new ExportCommandsCommand(cache, definition as TagStructure));
+
             commandContext.AddCommand(new ExitToCommand(contextStack));
 
             if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, cache.Version))

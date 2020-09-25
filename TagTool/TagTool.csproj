@@ -397,6 +397,7 @@
     <Compile Include="Commands\Porting\PortingContext.cs" />
     <Compile Include="Commands\Porting\PortingContextFactory.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.PortingOptions.cs" />
+    <Compile Include="Commands\Editing\ExportCommandsCommand.cs" />
     <Compile Include="Commands\Tags\ListDuplicateTagsCommand.cs" />
     <Compile Include="Commands\Tags\CreateTagCommand.cs" />
     <Compile Include="Commands\Tags\DeleteTagCommand.cs" />
