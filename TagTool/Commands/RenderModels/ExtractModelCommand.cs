@@ -49,6 +49,9 @@ namespace TagTool.Commands.RenderModels
             else
                 return new TagToolError(CommandError.ArgCount);
 
+			if (!modelFileName.Contains("."))
+				modelFileName += "." + fileType;
+
             switch (fileType)
             {
                 case "obj":
