@@ -30,10 +30,22 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
-                return new TagToolError(CommandError.ArgCount);
 
-            var file = new FileInfo(args[0]);
+			var path = Cache.Directory.FullName;
+			path = path.Substring(0, path.Length - 4);
+
+			if (args.Count != 1)
+				return new TagToolError(CommandError.ArgCount);
+
+			if (!args[0].Contains("/") && !args[0].Contains("\\"))
+				path += "mods\\downloads\\" + args[0];
+			else
+				path = args[0];
+
+			if (!args[0].Contains(".pak"))
+				path += ".pak";
+
+			var file = new FileInfo(path);
 
             if (!file.Exists)
                 return new TagToolError(CommandError.FileNotFound, $"\"{args[0]}\"");

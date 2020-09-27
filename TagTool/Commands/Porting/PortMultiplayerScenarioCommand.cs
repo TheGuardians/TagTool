@@ -31,12 +31,14 @@ namespace TagTool.Commands.Porting
             Objects = (1 << 1),
             [Description("Preserve device objects (control, machine)")]
             DeviceObjects = (1 << 2),
-            [Description("Add a spawn point at (0,0,0)")]
+			[Description("Keep biped palette and placements")]
+			Bipeds = (1 << 3),
+			[Description("Add a spawn point at (0,0,0)")]
             SpawnPoint = (1 << 5),
             [Description("Keep path finding data")]
             PathFinding = (1 << 6),
 
-            Default = Objects | DeviceObjects | SpawnPoint
+			Default = Objects | DeviceObjects | SpawnPoint
         }
 
         public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag) :
@@ -121,8 +123,8 @@ namespace TagTool.Commands.Porting
                 if (int.TryParse(mapIdInput, out tmpMapId))
                 {
                     if (tmpMapId < kMinMapId || tmpMapId > kMaxMapId)
-                        return new TagToolError(CommandError.CustomMessage, "Map id out of range");
-                }
+                        return new TagToolError(CommandError.CustomMessage, "Map ID out of range");
+				}
                 else
                 {
                     tmpMapId = -1;
@@ -837,7 +839,6 @@ namespace TagTool.Commands.Porting
             private void ConvertScenarioObjects()
             {
                 ConvertScenarioObject(Scenario.Scenery, Scenario.SceneryPalette);
-                ConvertScenarioObject(Scenario.Bipeds, Scenario.BipedPalette);
                 ConvertScenarioObject(Scenario.Vehicles, Scenario.VehiclePalette);
                 ConvertScenarioObject(Scenario.Equipment, Scenario.EquipmentPalette);
                 ConvertScenarioObject(Scenario.Weapons, Scenario.WeaponPalette);
@@ -847,7 +848,7 @@ namespace TagTool.Commands.Porting
                     ConvertScenarioObject(Scenario.Machines, Scenario.MachinePalette);
                     ConvertScenarioObject(Scenario.Controls, Scenario.ControlPalette);
                 }
-                else
+				else
                 {
                     Scenario.Machines.Clear();
                     Scenario.MachinePalette.Clear();
@@ -855,8 +856,17 @@ namespace TagTool.Commands.Porting
                     Scenario.ControlPalette.Clear();
                     Scenario.DeviceGroups.Clear();
                 }
+				if (ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Bipeds))
+				{
+					ConvertScenarioObject(Scenario.Bipeds, Scenario.BipedPalette);
+				}
+				else
+				{
+					Scenario.Bipeds.Clear();
+					Scenario.BipedPalette.Clear();
+				}
 
-                ConvertScenarioObject(Scenario.Terminals, Scenario.TerminalPalette);
+				ConvertScenarioObject(Scenario.Terminals, Scenario.TerminalPalette);
                 ConvertScenarioObject(Scenario.SoundScenery, Scenario.SoundSceneryPalette);
                 ConvertScenarioObject(Scenario.Giants, Scenario.GiantPalette);
                 ConvertScenarioObject(Scenario.EffectScenery, Scenario.EffectSceneryPalette);
