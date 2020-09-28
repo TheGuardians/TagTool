@@ -215,9 +215,9 @@ namespace TagTool.Commands.CollisionModels
             for (int i = 0; i < Indices.Length; i += 3)
             {
                 //the normals in Halo seem to be the opposite by convention when compared to other editing software
-                triangle newtriangle = new triangle{ a = Indices[i + 2], b = Indices[i + 1], c = Indices[i] };
-                Vector3D point0 = Vertices[Indices[i]];
-                Vector3D point1 = Vertices[Indices[i + 1]];
+                triangle newtriangle = new triangle{ a = Indices[i + 1], b = Indices[i], c = Indices[i + 2] };
+                Vector3D point0 = Vertices[Indices[i + 1]];
+                Vector3D point1 = Vertices[Indices[i]];
                 Vector3D point2 = Vertices[Indices[i + 2]];
                 float xdiff_1_0 = point1.X - point0.X;
                 float ydiff_1_0 = point1.Y - point0.Y;
