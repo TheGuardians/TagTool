@@ -55,6 +55,7 @@ namespace TagTool.Commands.CollisionModels
         {
             CollisionModel.Region.Permutation Permutation = Definition.Regions[0].Permutations[0];
             Bsp = Definition.Regions[0].Permutations[0].Bsps[0].Geometry;
+            Console.WriteLine("NOOOO you can't just generate mopps with that shitty code! (begin mopp generation)");
             if (!generate_mopp_codes(ref Permutation))
             {
                 Console.WriteLine("ERROR: Failed to build mopps!");
@@ -62,7 +63,7 @@ namespace TagTool.Commands.CollisionModels
             }
             else
             {
-                Console.WriteLine("Mopps built successfully!");
+                Console.WriteLine("HAHA mopps go BRRRRRRR (Mopps built successfully!)");
                 Definition.Regions[0].Permutations[0] = Permutation;
             }           
             return true;

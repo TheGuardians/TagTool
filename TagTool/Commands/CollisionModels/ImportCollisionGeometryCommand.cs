@@ -214,7 +214,8 @@ namespace TagTool.Commands.CollisionModels
             List<triangle> Trianglelist = new List<triangle>();
             for (int i = 0; i < Indices.Length; i += 3)
             {
-                triangle newtriangle = new triangle{ a = Indices[i], b = Indices[i + 1], c = Indices[i + 2] };
+                //the normals in Halo seem to be the opposite by convention when compared to other editing software
+                triangle newtriangle = new triangle{ a = Indices[i + 2], b = Indices[i + 1], c = Indices[i] };
                 Vector3D point0 = Vertices[Indices[i]];
                 Vector3D point1 = Vertices[Indices[i + 1]];
                 Vector3D point2 = Vertices[Indices[i + 2]];
@@ -265,7 +266,8 @@ namespace TagTool.Commands.CollisionModels
         public int add_vertex(Vector3D vertex)
         {
             //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
-            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue };
+            //we also need to scale everything down by 1/100 to account for editing software conventions
+            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = -vertex.Z * 0.01f, Z = vertex.Y * 0.01f }, FirstEdge = ushort.MaxValue };
             for(int i = 0; i < Bsp.Vertices.Count; i++)
             {
                 Vertex testvertex = Bsp.Vertices[i];
