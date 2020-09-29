@@ -14,7 +14,7 @@ namespace TagTool.BlamFile
     /// <summary>
     /// Generates a map variant blf given a scenario and metadata
     /// </summary>
-    class MapVariantGenerator
+    public class MapVariantGenerator
     {
         // TODO: add a definition cache
 
@@ -314,7 +314,7 @@ namespace TagTool.BlamFile
                 properties.SpawnTime = (byte)scrnMultiplayerProperties.SpawnTime;
 
             properties.TeamAffiliation = (MapVariantGameTeam)scrnMultiplayerProperties.Team;
-            properties.Shape = new MultiplayerObjectBoundaryShape();
+
             if (scrnMultiplayerProperties.Shape > MultiplayerObjectProperties.ShapeValue.None)
             {
                 properties.Shape.Type = (MultiplayerObjectShapeType)scrnMultiplayerProperties.Shape;
