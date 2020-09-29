@@ -56,9 +56,14 @@ namespace TagTool.Cache
             {
                 TagCacheGen2 = new TagCacheGen2(reader, mapFile);
                 StringTableGen2 = new StringTableGen2(reader, mapFile);
+
+                LoadSharedCache();
+
+                if (Version == CacheVersion.Halo2Xbox)
+                    TagCacheGen2.FixupStructureBspTagsForXbox(reader, mapFile);
             }
 
-            LoadSharedCache();
+            
         }
 
         private void LoadSharedCache()

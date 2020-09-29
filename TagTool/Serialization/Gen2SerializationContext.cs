@@ -37,7 +37,12 @@ namespace TagTool.Serialization
             if(GameCache.Version == CacheVersion.Halo2Vista)
                 return GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
             else
-                return GameCache.BaseMapFile.Header.MemoryBufferOffset + GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
+            {
+                if (Tag.IsInGroup("sbsp") || Tag.IsInGroup("ltmp"))
+                    return (address - GameCache.TagCacheGen2.StructureBspHeaderAddress) + GameCache.TagCacheGen2.StructureBspHeaderFileOffset;
+                else
+                    return GameCache.BaseMapFile.Header.MemoryBufferOffset + GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
+            }
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)

@@ -9,6 +9,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions.Gen2;
 
 namespace TagTool.Cache.Gen2
 {
@@ -32,6 +33,17 @@ namespace TagTool.Cache.Gen2
         /// Address in memory (xbox) of the tag data. For Halo 2 Vista, this values turns out to be 0. Every address in the tag data is converted to an offset using this value.
         /// </summary>
         public uint VirtualAddress;
+
+        /// <summary>
+        /// Address in memory (xbox) of the cache file globals structure bsp header
+        /// </summary>
+        public uint StructureBspHeaderAddress;
+
+        /// <summary>
+        /// File offset (xbox) of the cache file globals structure bsp header
+        /// </summary>
+        public uint StructureBspHeaderFileOffset;
+
 
         public TagCacheGen2Header Header;
         public List<CachedTagGen2> Tags = new List<CachedTagGen2>();
@@ -115,10 +127,10 @@ namespace TagTool.Cache.Gen2
             // Set hardcoded tags from the header
             //
 
-            var scnrTag = GetTag(Header.ScenarioID);
-            HardcodedTags[scnrTag.Group.Tag] = (CachedTagGen2)scnrTag;
-            var globalTag = GetTag(Header.GlobalsID);
-            HardcodedTags[globalTag.Group.Tag] = (CachedTagGen2)globalTag;
+            var scnrTag = (CachedTagGen2)GetTag(Header.ScenarioID);
+            HardcodedTags[scnrTag.Group.Tag] = scnrTag;
+            var globalTag = (CachedTagGen2)GetTag(Header.GlobalsID);
+            HardcodedTags[globalTag.Group.Tag] = globalTag;
 
             //
             // Update virtual address if on Xbox
@@ -129,6 +141,54 @@ namespace TagTool.Cache.Gen2
             else
                 VirtualAddress = mapFile.Header.VirtualAddress;
 
+        }
+
+        public void FixupStructureBspTagsForXbox(EndianReader reader, MapFile mapFile)
+        {
+            var scnrTag = (CachedTagGen2)GetTag(Header.ScenarioID);
+
+            uint magic = mapFile.Header.TagsHeaderAddress32 + mapFile.Header.MemoryBufferOffset - VirtualAddress;
+
+            // seek to the sbsp reference block
+            reader.BaseStream.Position = scnrTag.Offset + magic + 0x210;
+
+            // read the sbsp reference block
+            int sbspCount = reader.ReadInt32();
+            uint sbspsRefsAddress = reader.ReadUInt32();
+
+            for (uint i = 0u; i < sbspCount; i++)
+            {
+                // seek to the sbsp reference offset
+                uint sbspRefSize = TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspReference), mapFile.Version);
+                reader.BaseStream.Position = (sbspsRefsAddress + i * sbspRefSize) + magic;
+
+                // read the tag data addresses from the cache file globals sbsp header
+                StructureBspHeaderFileOffset =  reader.ReadUInt32();
+                uint bufferSize = reader.ReadUInt32();
+                StructureBspHeaderAddress = reader.ReadUInt32();
+
+                reader.BaseStream.Position = StructureBspHeaderFileOffset + 4;
+
+                uint sbspTagAddress = reader.ReadUInt32();
+                uint ltmpTagAddress = reader.ReadUInt32();
+
+                // read the tag ids from the sbsp reference block
+                reader.BaseStream.Position = (sbspsRefsAddress + magic) + 0x14;
+                uint sbspTagId = reader.ReadUInt32();
+                reader.BaseStream.Position = (sbspsRefsAddress + magic) + 0x1C;
+                uint ltmpTagId = reader.ReadUInt32();
+
+                // fixup the tag data addresse
+                var sbspTag = (CachedTagGen2)GetTag(sbspTagId);
+                if (sbspTag != null)
+                {
+                    sbspTag.Offset = sbspTagAddress;
+                    sbspTag.Size = 0x23C;
+                } 
+                var ltmpTag = (CachedTagGen2)GetTag(ltmpTagId);
+                if (ltmpTag != null)
+                    ltmpTag.Offset = ltmpTagAddress;
+            }
         }
 
         private TagCacheGen2() { }
