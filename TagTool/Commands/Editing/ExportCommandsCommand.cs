@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
 
@@ -10,8 +11,16 @@ namespace TagTool.Commands.Editing
 {
     public class ExportCommandsCommand : Command
     {
+        [Flags]
+        public enum ExportFlags
+        {
+            None = 0,
+            NoDefault = (1 << 0),
+        }
+
         private GameCache Cache;
         private TagStructure Structure;
+        private ExportFlags Flags;
 
         public ExportCommandsCommand(GameCache cache, TagStructure structure)
             : base(false,
@@ -19,8 +28,8 @@ namespace TagTool.Commands.Editing
                   "ExportCommands",
                   "Exports the commands needed to generate the current tag structure",
 
-                  "ExportCommands",
-                  "Exports the commands needed to generate the tag structure")
+                  "ExportCommands [NoDefault]",
+                  "Exports the commands needed to generate the tag structure. Specify option 'nodefault' to omit default values.")
         {
             Cache = cache;
             Structure = structure;
@@ -28,12 +37,20 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
+            ExportFlags flags = ExportFlags.None;
+            if (args.Count > 0 && !ParseExportFlags(args, out flags))
+                return new TagToolError(CommandError.ArgInvalid, $"Unknown option specified '{args[0]}'");
+
+            Flags = flags;
             DumpCommands(Console.Out, Cache, Structure);
             return true;
         }
 
         private void DumpCommands(TextWriter writer, GameCache cache, object data, string fieldName = null)
         {
+            if (Flags.HasFlag(ExportFlags.NoDefault) && IsDefaultValue(data))
+                return;
+
             switch (data)
             {
                 case TagStructure tagStruct:
@@ -100,6 +117,8 @@ namespace TagTool.Commands.Editing
                     return FormatBounds(bounds);
                 case DatumHandle datumHandle:
                     return $"{datumHandle.Salt} {datumHandle.Index}";
+                case StringId stringId:
+                    return Cache.StringTable.GetString(stringId);
                 default:
                     return $"{value}";
             }
@@ -120,6 +139,68 @@ namespace TagTool.Commands.Editing
                 $"{matrix.m21} {matrix.m22} {matrix.m23}" +
                 $"{matrix.m31} {matrix.m32} {matrix.m33}" +
                 $"{matrix.m41} {matrix.m42} {matrix.m43}";
+        }
+
+        private static object GetDefaultValue(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                var valueProperty = type.GetProperty("Value");
+                type = valueProperty.PropertyType;
+            }
+
+            return type.IsValueType ? Activator.CreateInstance(type) : null;
+        }
+
+        private static object GetDefaultValue(object value)
+        {
+            if (value == null)
+                return null;
+            if (value is StringId)
+                return StringId.Invalid;
+
+            return GetDefaultValue(value.GetType());
+        }
+
+        private static bool IsDefaultValue(object value)
+        {
+            var defaultValue = GetDefaultValue(value);
+            if (value == null)
+                return defaultValue == null;
+            if (value is string s)
+                return string.IsNullOrEmpty(s);
+
+            return value.Equals(defaultValue);
+        }
+
+        private static bool ParseExportFlags(List<string> args, out ExportFlags flags)
+        {
+            flags = ExportFlags.None;
+
+            var names = Enum.GetNames(typeof(ExportFlags));
+            var values = Enum.GetValues(typeof(ExportFlags));
+            while (args.Count > 0)
+            {
+                var arg = args[0];
+                bool not = arg.StartsWith("!");
+                if (not) arg = arg.Substring(1);
+
+                for (int i = 0; i < names.Length; i++)
+                {
+                    if (string.Equals(arg, names[i], StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (not)
+                            flags &= ~(ExportFlags)values.GetValue(i);
+                        else
+                            flags |= (ExportFlags)values.GetValue(i);
+
+                        args.RemoveAt(0);
+                    }
+                }
+                if (args.Count > 0)
+                    return false;
+            }
+            return true;
         }
     }
 }
