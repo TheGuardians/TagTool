@@ -97,12 +97,14 @@ namespace TagTool.Havok
         public uint VfTableAddress;
     }
 
-    [TagStructure(Size = 0x10)]
+    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
     public class HkpShape : TagStructure
     {
         public uint VfTableAddress;
         public HkpReferencedObject ReferencedObject;
         public uint UserDataAddress;
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Type;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ReachUnknown1;
@@ -158,12 +160,67 @@ namespace TagTool.Havok
     public class HkpReferencedObject : TagStructure
     {
         public ushort SizeAndFlags;
-        public ushort ReferenceCount;
+        public ushort ReferenceCount = 128;
     }
 
     [TagStructure(Size = 0x10)]
     public class CodeInfo : TagStructure
     {
         public RealQuaternion Offset; // actually vector4, refactor quaternion stuff later
+    }
+
+    
+}
+namespace TagTool.Havok.Gen2
+{
+    [TagStructure(Size = 0x4)]
+    public class HkShape : TagStructure
+    {
+        public uint VfTableAddress;
+        public HkpReferencedObject ReferencedObject;
+        public uint UserData;
+    }
+
+    [TagStructure(Size = 0x4)]
+    public class HkConvexWelderShape : HkpShape
+    {
+        public uint ShapeAddress;
+    }
+
+    [TagStructure(Size = 0x4)]
+    public class HkSingleShapeContainer : TagStructure
+    {
+        public uint ShapeAddress;
+    }
+
+    [TagStructure(Size = 0x8)]
+    public class HkMoppBvTreeShape : HkpShape
+    {
+        public HkSingleShapeContainer Child;
+        public uint MoppCodeAddress;
+    }
+
+    [TagStructure]
+    public class CMoppBvTreeShape : HkMoppBvTreeShape
+    {
+        
+    }
+
+    [TagStructure(Size = 0x30)]
+    public class HkMoppCode
+    {
+        public RealQuaternion Offset;
+        public int ByteOrdering;
+        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public HkpReferencedObject ReferencedObject;
+        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+    }
+
+    [TagStructure(Size = 4)]
+    public class CConvexWelderShape : HkpShape
+    {
+        public uint ShapeAddress;
     }
 }

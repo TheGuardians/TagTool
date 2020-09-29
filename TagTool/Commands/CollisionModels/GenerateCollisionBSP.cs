@@ -17,6 +17,8 @@ namespace TagTool.Commands.CollisionModels
         private CollisionModel Definition { get; }
         private CollisionGeometry Bsp { get; set; }
         private bool debug = false;
+        private int original_surface_count = 0;
+        private List<int> surface_addendums = new List<int>();
 
     public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
@@ -60,8 +62,15 @@ namespace TagTool.Commands.CollisionModels
 
             if (!verify_collision_geometry())
             {
-                Console.WriteLine($"### Failed to verify collision geometry!");
+                Console.WriteLine($"###Failed to verify collision geometry!");
                 return false;
+            }
+
+            //populate surface_addendums list for usage later on
+            original_surface_count = Bsp.Surfaces.Count;
+            for(int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+            {
+                surface_addendums.Add(surface_index);
             }
 
             //allocate surface array before starting the bsp build
@@ -77,12 +86,12 @@ namespace TagTool.Commands.CollisionModels
             int bsp3dnode_index = -1;
             if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
             {
-                Console.WriteLine($"### Collision bsp R{region_index}P{permutation_index}B{bsp_index} built successfully!");
+                Console.WriteLine($"###Collision bsp R{region_index}P{permutation_index}B{bsp_index} built successfully!");
                 Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = Bsp;
             }
             else
             {
-                Console.WriteLine($"### Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
+                Console.WriteLine($"###Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
             return true;
@@ -159,7 +168,7 @@ namespace TagTool.Commands.CollisionModels
             int new_surfaces_count = surface_counts.free_count + surface_counts.used_count;
             new_surface_array.used_count = new_surfaces_count;
 
-            if (surface_plane_fits_negative * 4.0 <= surface_plane_fits_positive)
+            if (surface_plane_fits_negative * 4.0f <= surface_plane_fits_positive)
             {
                 surface_array = new_surface_array.DeepClone();
                 return 3;
@@ -283,8 +292,8 @@ namespace TagTool.Commands.CollisionModels
                 case 1: //construct bsp3d nodes
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
                     //these arrays need to be initialized with empty elements so that specific indices can be directly assigned
-                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
-                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[surface_array.surface_array.Count]) };
+                    surface_array_definition back_surface_array = new surface_array_definition {free_count = splitting_parameters.BackSurfaceCount, used_count = splitting_parameters.BackSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.BackSurfaceCount + splitting_parameters.BackSurfaceUsedCount]) };
+                    surface_array_definition front_surface_array = new surface_array_definition { free_count = splitting_parameters.FrontSurfaceCount, used_count = splitting_parameters.FrontSurfaceUsedCount, surface_array = new List<int>(new int[splitting_parameters.FrontSurfaceCount + splitting_parameters.FrontSurfaceUsedCount]) };
 
                     //here we are going to preserve the current counts of the various geometry primitives, so that they can be reset later
                     int vertex_block_count = Bsp.Vertices.Count;
@@ -292,8 +301,11 @@ namespace TagTool.Commands.CollisionModels
                     int edges_block_count = Bsp.Edges.Count;
 
                     if (!split_object_surfaces_with_plane(surface_array, splitting_parameters.plane_index, ref back_surface_array, ref front_surface_array))
+                    {
+                        Console.WriteLine("###ERROR Failed to split surface!");
                         return false;
-                    Bsp.Bsp3dNodes.Add(new Bsp3dNode {FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF });
+                    }
+                    Bsp.Bsp3dNodes.Add(new Bsp3dNode { FrontChild = -1, BackChild = -1 });
                     int current_bsp3dnode_index = Bsp.Bsp3dNodes.Count - 1;
                     int back_child_node_index = -1;
                     int front_child_node_index = -1;
@@ -340,25 +352,28 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode{ Value = bsp3dnode_value };
 
                         bsp3dnode_index = current_bsp3dnode_index;
-
-                        //here we are going to reset the counts of the various geometry primitives to their prior state
-                        while (Bsp.Vertices.Count > vertex_block_count)
-                            Bsp.Vertices.RemoveAt(Bsp.Vertices.Count - 1);
-                        while (Bsp.Surfaces.Count > surface_block_count)
-                            Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
-                        while (Bsp.Edges.Count > edges_block_count)
-                            Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
                     }
                     else
                     {
-                        Console.WriteLine("### ERROR couldn't build surface lists.");
+                        Console.WriteLine("###ERROR couldn't build surface lists.");
                         return false;
                     }
+
+                    //here we are going to reset the counts of the various geometry primitives to their prior state
+                    while (Bsp.Vertices.Count > vertex_block_count)
+                        Bsp.Vertices.RemoveAt(Bsp.Vertices.Count - 1);
+                    while (Bsp.Surfaces.Count > surface_block_count)
+                        Bsp.Surfaces.RemoveAt(Bsp.Surfaces.Count - 1);
+                    while (Bsp.Edges.Count > edges_block_count)
+                        Bsp.Edges.RemoveAt(Bsp.Edges.Count - 1);
+                    while (surface_addendums.Count > surface_block_count)
+                        surface_addendums.RemoveAt(surface_addendums.Count - 1);
+
                     return true;
                 case 2: //build leaves
-                    if(set_used_surface_flags(ref surface_array) == -1)
+                    if(surfaces_reset_for_leaf_building(ref surface_array) == -1)
                     {
-                        Console.WriteLine("### ERROR tried to build leaves while there are free surfaces.");
+                        Console.WriteLine("###ERROR tried to build leaves while there are free surfaces.");
                         return false;
                     }
                     int leaf_index = -1;
@@ -369,25 +384,30 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Console.WriteLine("### ERROR couldn't build leaf.");
+                        Console.WriteLine("###ERROR couldn't build leaf.");
                         return false;
                     }
                 case 3: //all done!
                     bsp3dnode_index = -1;
                     return true;
                 default:
-                    Console.WriteLine("### ERROR couldn't decide what to build.");
+                    Console.WriteLine("###ERROR couldn't decide what to build.");
                     return false;
             }
         }
 
-        public int set_used_surface_flags(ref surface_array_definition surface_array)
+        public int surfaces_reset_for_leaf_building(ref surface_array_definition surface_array)
         {
             if (surface_array.free_count > 0)
                 return -1;
             for(int surface_index_index = 0; surface_index_index < surface_array.used_count; surface_index_index++)
             {
-                surface_array.surface_array[surface_index_index] = (int)(surface_array.surface_array[surface_index_index] | 0x80000000);
+                int surface_index = surface_array.surface_array[surface_index_index] & 0x7FFFFFFF;
+                while(surface_index >= original_surface_count)
+                {
+                    surface_index = surface_addendums[surface_index];
+                }
+                surface_array.surface_array[surface_index_index] = (int)(surface_index | 0x80000000);
             }
             return surface_array.used_count;
         }
@@ -461,11 +481,11 @@ namespace TagTool.Commands.CollisionModels
             }
             if (front_surface_count != splitting_parameters.FrontSurfaceCount)
             {
-                Console.WriteLine("### ERROR: BSP2D front_surface_index_index!=front_surface_index_count");
+                Console.WriteLine("###ERROR BSP2D front_surface_index_index!=front_surface_index_count");
             }
             if (back_surface_count != splitting_parameters.BackSurfaceCount)
             {
-                Console.WriteLine("### ERROR: BSP2D back_surface_index_index!=back_surface_index_count");
+                Console.WriteLine("###ERROR BSP2D back_surface_index_index!=back_surface_index_count");
             }
         }
 
@@ -510,7 +530,7 @@ namespace TagTool.Commands.CollisionModels
                 }
                 return bsp2dnode_index;
             }
-            Console.WriteLine("### ERROR couldn't build bsp because of overlapping surfaces.");
+            Console.WriteLine("###ERROR couldn't build bsp because of overlapping surfaces.");
             return bsp2dnode_index;
         }
 
@@ -562,7 +582,7 @@ namespace TagTool.Commands.CollisionModels
                         Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = bsp2dnodeindex < 0 ? (short)(bsp2dnodeindex | 0x8000) : (short)bsp2dnodeindex;
                         if (bsp2dnodeindex == -1)
                         {
-                            Console.WriteLine("### ERROR couldn't build bsp2d.");
+                            Console.WriteLine("###ERROR couldn't build bsp2d.");
                             result = false;
                         }
                     }
@@ -571,7 +591,7 @@ namespace TagTool.Commands.CollisionModels
             return result;
         }
 
-        public bool divide_surface_into_two_surfaces(int original_surface_index, int plane_index, ref int new_surface_index_A, ref int new_surface_index_B)
+        public bool divide_surface_into_two_surfaces(int original_surface_index, int plane_index, int new_surface_index_A, int new_surface_index_B)
         {
             RealPlane3d plane_block = Bsp.Planes[plane_index].Value;
             Surface original_surface = Bsp.Surfaces[original_surface_index];
@@ -587,6 +607,10 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Surfaces[new_surface_index_B].FirstEdge = ushort.MaxValue; //0xFFFF
 
             ushort surface_edge_index = original_surface.FirstEdge;
+
+            //some debugging tools
+            int total_edge_count = surface_count_edges(original_surface_index);
+            List<Plane_Relationship> edge_plane_relationships = new List<Plane_Relationship>();
 
             int dividing_edge_index = -1;
             int previous_new_edge_index = -1;
@@ -620,6 +644,7 @@ namespace TagTool.Commands.CollisionModels
 
                 //check if there is a vertex on both sides of the plane
                 Plane_Relationship edge_plane_relationship = vertex_plane_relationship_A | vertex_plane_relationship_B;
+                edge_plane_relationships.Add(edge_plane_relationship);
 
                 //if this edge spans the plane, then create a new dividing edge
                 if(edge_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
@@ -656,7 +681,7 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if(Bsp.Edges[dividing_edge_index].EndVertex != ushort.MaxValue)
                         {
-                            Console.WriteLine("### ERROR: Dividing Edge EndVertex should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge EndVertex should be -1");
                             return false;
                         }
 
@@ -664,7 +689,7 @@ namespace TagTool.Commands.CollisionModels
 
                         if (Bsp.Edges[dividing_edge_index].ForwardEdge != ushort.MaxValue)
                         {
-                            Console.WriteLine("### ERROR: Dividing Edge ForwardEdge should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge ForwardEdge should be -1");
                             return false;
                         }
 
@@ -769,13 +794,13 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if (Bsp.Edges[dividing_edge_index].EndVertex != ushort.MaxValue)
                         {
-                            Console.WriteLine("### ERROR: Dividing Edge EndVertex should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge EndVertex should be -1");
                             return false;
                         }
                         Bsp.Edges[dividing_edge_index].EndVertex = (ushort)edge_vertex_A_index;
                         if (Bsp.Edges[dividing_edge_index].ForwardEdge != ushort.MaxValue)
                         {
-                            Console.WriteLine("### ERROR: Dividing Edge ForwardEdge should be -1");
+                            Console.WriteLine("###ERROR Dividing Edge ForwardEdge should be -1");
                             return false;
                         }
                         Bsp.Edges[dividing_edge_index].ForwardEdge = (ushort)new_edge_index_E;
@@ -807,10 +832,24 @@ namespace TagTool.Commands.CollisionModels
                     surface_edge_index = surface_edge_block.ForwardEdge;
                 //break the loop if we have finished circulating the surface
                 if (surface_edge_index == original_surface.FirstEdge)
+                {
+                    //check for errors before exiting loop
+                    if (first_new_edge_index == -1 || previous_new_edge_index == -1)
+                    {
+                        Console.WriteLine("###ERROR First New Edge index or Previous New Edge Index value not set!");
+                        return false;
+                    }
+                    if (dividing_edge_index == -1)
+                    {
+                        Console.WriteLine("###ERROR Dividing Edge index value not set!");
+                        return false;
+                    }
                     break;
+                }
             }
             //connect loose ends and set first edge of new surfaces
             Bsp.Edges[previous_new_edge_index].ForwardEdge = (ushort)first_new_edge_index;
+
             Bsp.Surfaces[new_surface_index_A].FirstEdge = (ushort)dividing_edge_index;
             Bsp.Surfaces[new_surface_index_B].FirstEdge = (ushort)dividing_edge_index;
             return true;
@@ -908,12 +947,16 @@ namespace TagTool.Commands.CollisionModels
                             Bsp.Surfaces.Add(new Surface());
                             int new_surface_A_index = Bsp.Surfaces.Count - 2;
                             int new_surface_B_index = Bsp.Surfaces.Count - 1;
-
+                           
                             //split surface into two new surfaces, one on each side of the plane
-                            if(!divide_surface_into_two_surfaces(absolute_surface_index, plane_index, ref new_surface_A_index, ref new_surface_B_index))
+                            if(!divide_surface_into_two_surfaces(absolute_surface_index, plane_index, new_surface_A_index, new_surface_B_index))
                             {
                                 return false;
                             }
+
+                            //here we will record the parent surface index for these child surfaces for use later on
+                            surface_addendums.Add(absolute_surface_index);
+                            surface_addendums.Add(absolute_surface_index);
 
                             //propagate surface index flags to child surfaces
                             if (surface_index_less_than_0)
@@ -930,7 +973,6 @@ namespace TagTool.Commands.CollisionModels
                             //add child surfaces to appropriate arrays
                             if (surface_is_free)
                             {
-                                //free surfaces need to come first in the list
                                 if (back_surface_index != -1)
                                 {
                                     back_surfaces_array.surface_array[back_free_count] = back_surface_index;
@@ -965,7 +1007,7 @@ namespace TagTool.Commands.CollisionModels
                             }
                             if(!surface_is_free || (current_surface_plane_index & 0x7FFF) != plane_index)
                             {
-                                Console.WriteLine("### ERROR Surface on plane does not have matching plane index!");
+                                Console.WriteLine("###ERROR Surface on plane does not have matching plane index!");
                             }
                             if (!surface_is_double_sided) //surface is NOT double sided
                             {
@@ -1015,22 +1057,22 @@ namespace TagTool.Commands.CollisionModels
             
             if (back_free_count != back_surfaces_array.free_count)
             {
-                Console.WriteLine("###ERROR: back_free_count != back_surfaces->free_count");
+                Console.WriteLine("###ERROR back_free_count != back_surfaces->free_count");
                 return false;
             }
             if (back_used_count != back_surfaces_array.used_count)
             {
-                Console.WriteLine("###ERROR: back_used_count != back_surfaces->used_count");
+                Console.WriteLine("###ERROR back_used_count != back_surfaces->used_count");
                 return false;
             }
             if (front_free_count != front_surfaces_array.free_count)
             {
-                Console.WriteLine("###ERROR: front_free_count != front_surfaces->free_count");
+                Console.WriteLine("###ERROR front_free_count != front_surfaces->free_count");
                 return false;
             }
             if (front_used_count != front_surfaces_array.used_count)
             {
-                Console.WriteLine("###ERROR: front_used_count != front_surfaces->used_count");
+                Console.WriteLine("###ERROR front_used_count != front_surfaces->used_count");
                 return false;
             }
             return true;
@@ -1063,7 +1105,7 @@ namespace TagTool.Commands.CollisionModels
 
         public Plane_Relationship determine_vertex_plane_relationship(RealPoint3d vertex, RealPlane3d plane)
         {
-            float plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
+            double plane_equation_vertex_input = vertex.X * plane.I + vertex.Y * plane.J + vertex.Z * plane.K - plane.D;
 
             if (plane_equation_vertex_input >= -0.00024414062)
             {
@@ -1164,7 +1206,7 @@ namespace TagTool.Commands.CollisionModels
 
             if (debug)
             {
-                Console.WriteLine("### WARNING found possible T-junction.");
+                Console.WriteLine("###WARNING found possible T-junction.");
                 Console.WriteLine($"Plane:{bsp2dnodeblock.Plane}");
                 foreach(var point in pointlist)
                     Console.WriteLine($"Vertex:{point}");
@@ -1213,8 +1255,23 @@ namespace TagTool.Commands.CollisionModels
                 if (surface_edge_index == surface_block.FirstEdge)
                     break;
             }
-
-            //there is code here to deal with unclear results, but it appears that it will lead to an infinite loop, not sure how it works yet
+            
+            //split surfaces may become very small and be hard to work with. To get clarity, we can use the parent surface of the split surface
+            if(surface_plane_relationship == Plane_Relationship.Unknown && surface_index >= original_surface_count)
+            {
+                while (true)
+                {
+                    surface_index = surface_addendums[surface_index];
+                    surface_plane_relationship = determine_surface_plane_relationship(surface_index, plane_index, plane_block);
+                    if (surface_plane_relationship == Plane_Relationship.BackofPlane || surface_plane_relationship == Plane_Relationship.FrontofPlane)
+                        break;
+                    if (surface_index < original_surface_count)
+                    {
+                        surface_plane_relationship = Plane_Relationship.Unknown;
+                        break;
+                    }                       
+                }          
+            }
 
             return surface_plane_relationship;
         }
@@ -1272,7 +1329,7 @@ namespace TagTool.Commands.CollisionModels
                     {
                         if (!surface_is_free)
                         {
-                            Console.WriteLine("###ERROR: Surface should be free!");
+                            Console.WriteLine("###ERROR Plane matching surface should be free!");
                         }
                         if(surface_index < 0)
                         {
@@ -1413,7 +1470,7 @@ namespace TagTool.Commands.CollisionModels
             //loop through free surfaces to see how effectively their associated planes split the remaining surfaces. Find the one that most effectively splits the remaining surfaces.
             for (int i = 0; i < surface_array.free_count; i++)
             {
-                int current_plane_index = (int)((short)Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFF);
+                int current_plane_index = (int)(Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFF);
                 plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, current_plane_index, new RealPlane3d());
                 if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                 {
@@ -1452,7 +1509,7 @@ namespace TagTool.Commands.CollisionModels
             plane_splitting_parameters lowest_plane_splitting_parameters = new plane_splitting_parameters();
             lowest_plane_splitting_parameters.plane_splitting_effectiveness = double.MaxValue;
 
-            int best_axis_index = 0;
+            int best_axis_index = -1;
             double desired_plane_distance = 0;
 
             //check X, Y, and Z axes
@@ -1514,27 +1571,34 @@ namespace TagTool.Commands.CollisionModels
 
                 int front_count = surface_array.free_count;
                 int back_count = 0;
-                for (int extent_index = 0; extent_index < extents_table.Count; extent_index++)
+                for (int extent_index = 1; extent_index < extents_table.Count; extent_index++)
                 {
-                    if (extents_table[extent_index].is_max_coord)
+                    if (extents_table[extent_index - 1].is_max_coord)
                     {
-                        front_count--;
+                        if (--front_count < 0)
+                        {
+                            Console.WriteLine("###ERROR negative plane front count!");
+                        }
                     }
                     else
                     {
-                        back_count++;
+                        if(++back_count > surface_array.free_count)
+                        {
+                            Console.WriteLine("###ERROR back count greater than surface free count!");
+                        }
                     }
                     double current_splitting_effectiveness = Math.Abs(back_count - front_count) + 2 * (front_count + back_count);
                     if (current_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                     {
                         lowest_plane_splitting_parameters.plane_splitting_effectiveness = current_splitting_effectiveness;
                         best_axis_index = current_test_axis;
-                        if(extent_index == 0)
-                            desired_plane_distance = extents_table[extent_index].coordinate;
-                        else
-                            desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
+                        desired_plane_distance = (extents_table[extent_index].coordinate + extents_table[extent_index - 1].coordinate) * 0.5;
                     }
                 }
+            }
+            if(best_axis_index == -1)
+            {
+                Console.WriteLine("###ERROR: Failed to find best axis index!");
             }
             //generate a plane based on the ideal plane characteristics calculated above
             RealPlane3d best_plane = new RealPlane3d();
@@ -1756,43 +1820,43 @@ namespace TagTool.Commands.CollisionModels
                     Edge edge_block = Bsp.Edges[edge_index];
                     if(edge_block.StartVertex < 0 || edge_block.StartVertex >= Bsp.Vertices.Count)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} has a bad start vertex index.");
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad start vertex index.");
                         return false;
                     }
                     if (edge_block.EndVertex < 0 || edge_block.EndVertex >= Bsp.Vertices.Count)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} has a bad end vertex index.");
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad end vertex index.");
                         return false;
                     }
                     if(edge_block.StartVertex == edge_block.EndVertex)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} references only one vertex.");
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one vertex.");
                         return false;
                     }
                     if(edge_get_length(edge_index) < 0.001)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} is too short.");
+                        Console.WriteLine($"###ERROR edge {edge_index} is too short.");
                         return false;
                     }
 
                     if (edge_block.ForwardEdge < 0 || edge_block.ForwardEdge >= Bsp.Edges.Count)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} has a bad forward edge index.");
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad forward edge index.");
                         return false;
                     }
                     if (edge_block.ReverseEdge < 0 || edge_block.ReverseEdge >= Bsp.Edges.Count)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} has a bad reverse edge index.");
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad reverse edge index.");
                         return false;
                     }
                     if (edge_block.ForwardEdge == edge_index || edge_block.ReverseEdge == edge_index)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} references itself.");
+                        Console.WriteLine($"###ERROR edge {edge_index} references itself.");
                         return false;
                     }
                     if (edge_block.ForwardEdge == edge_block.ReverseEdge)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} references only one edge.");
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one edge.");
                         return false;
                     }
                     for(int direction = 0; direction < 2; direction++)
@@ -1805,23 +1869,23 @@ namespace TagTool.Commands.CollisionModels
                          && (next_edge_block.EndVertex != test_vertex || next_edge_block.RightSurface != test_surface))
                         {
                             string directionstring = direction == 0 ? "forward" : "reverse";
-                            Console.WriteLine($"### ERROR edge {edge_index} doesn't share a vertex or surface with its {directionstring} edge.");
+                            Console.WriteLine($"###ERROR edge {edge_index} doesn't share a vertex or surface with its {directionstring} edge.");
                             return false;
                         }
                     }
                     if (edge_block.LeftSurface < 0 || edge_block.LeftSurface >= Bsp.Surfaces.Count)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} has a bad left surface index.");
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad left surface index.");
                         return false;
                     }
                     if (edge_block.RightSurface < 0 || edge_block.RightSurface >= Bsp.Surfaces.Count)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} has a bad right surface index.");
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad right surface index.");
                         return false;
                     }
                     if (edge_block.LeftSurface == edge_block.RightSurface)
                     {
-                        Console.WriteLine($"### ERROR edge {edge_index} references only one surface.");
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one surface.");
                         return false;
                     }
                 }
@@ -1830,12 +1894,12 @@ namespace TagTool.Commands.CollisionModels
                     Surface surface_block = Bsp.Surfaces[surface_index];
                     if(surface_block.FirstEdge < 0 || surface_block.FirstEdge >= Bsp.Edges.Count)
                     {
-                        Console.WriteLine($"### ERROR surface {surface_index} has a bad first edge index");
+                        Console.WriteLine($"###ERROR surface {surface_index} has a bad first edge index");
                         return false;
                     }
                     if(surface_count_edges(surface_index) > 8)
                     {
-                        Console.WriteLine($"### ERROR surface {surface_index} has too many edges");
+                        Console.WriteLine($"###ERROR surface {surface_index} has too many edges");
                         return false;
                     }
                 }

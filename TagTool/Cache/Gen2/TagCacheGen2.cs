@@ -31,16 +31,20 @@ namespace TagTool.Cache.Gen2
         /// <summary>
         /// Address in memory (xbox) of the tag data. For Halo 2 Vista, this values turns out to be 0. Every address in the tag data is converted to an offset using this value.
         /// </summary>
-        public uint BaseTagAddress;
+        public uint VirtualAddress;
 
         public TagCacheGen2Header Header;
         public List<CachedTagGen2> Tags = new List<CachedTagGen2>();
         public Dictionary<Tag, CachedTagGen2> HardcodedTags = new Dictionary<Tag, CachedTagGen2>();
+        public readonly bool IsShared = false;
 
         public TagCacheGen2(EndianReader reader, MapFile mapFile)
         {
             Version = mapFile.Version;
             TagDefinitions = new TagDefinitionsGen2();
+            IsShared = mapFile.Header.CacheType == CacheFileType.Shared || 
+                        mapFile.Header.CacheType == CacheFileType.SharedCampaign;
+
             var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
             reader.SeekTo(tagDataSectionOffset);
 
@@ -48,14 +52,14 @@ namespace TagTool.Cache.Gen2
             var deserializer = new TagDeserializer(mapFile.Version);
             Header = deserializer.Deserialize<TagCacheGen2Header>(dataContext);
 
-            BaseTagAddress = (Header.TagGroupsOffset - 0x20);
+            uint tagCacheVirtualAddress = (Header.TagGroupsOffset - 0x20);
 
             //
             // Read tag groups
             //
 
             //seek to the tag groups offset, seems to be contiguous to the header
-            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - BaseTagAddress);   // TODO: check how halo 2 xbox uses this
+            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - tagCacheVirtualAddress);   // TODO: check how halo 2 xbox uses this
 
             for(int i = 0; i < Header.TagGroupCount; i++)
             {
@@ -68,7 +72,7 @@ namespace TagTool.Cache.Gen2
             // Read cached tags
             //
 
-            reader.SeekTo(tagDataSectionOffset + Header.TagsOffset - BaseTagAddress);
+            reader.SeekTo(tagDataSectionOffset + Header.TagsOffset - tagCacheVirtualAddress);
 
             for (int i = 0; i < Header.TagCount; i++)
             {
@@ -80,7 +84,7 @@ namespace TagTool.Cache.Gen2
                 if (tag.Value == -1 || tag.Value == 0 || size == -1 || address == 0xFFFFFFFF || ID == 0 || ID == 0xFFFFFFFF)
                     Tags.Add(null);
                 else
-                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(tag), address, size, null));
+                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(tag), address, size, null, IsShared));
             }
 
             reader.SeekTo(mapFile.Header.TagNameIndicesOffset);
@@ -115,8 +119,19 @@ namespace TagTool.Cache.Gen2
             HardcodedTags[scnrTag.Group.Tag] = (CachedTagGen2)scnrTag;
             var globalTag = GetTag(Header.GlobalsID);
             HardcodedTags[globalTag.Group.Tag] = (CachedTagGen2)globalTag;
+
+            //
+            // Update virtual address if on Xbox
+            //
+
+            if (Version == CacheVersion.Halo2Xbox)
+                VirtualAddress = Tags[0].Offset;
+            else
+                VirtualAddress = mapFile.Header.VirtualAddress;
+
         }
 
+        private TagCacheGen2() { }
 
         public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
@@ -149,10 +164,43 @@ namespace TagTool.Cache.Gen2
         {
             foreach (var tag in Tags)
             {
-                if (tag != null && groupTag == tag.Group.Tag && name == tag.Name)
+                if (tag == null || tag.Group is null)
+                    continue;
+
+                if (groupTag == tag.Group.Tag && name == tag.Name)
                     return tag;
             }
             return null;
+        }
+
+        public static TagCacheGen2 Combine(TagCacheGen2 cache1, TagCacheGen2 cache2)
+        {
+            // copy from cache1 for now
+            var result = new TagCacheGen2()
+            {
+                Header = cache1.Header,
+                VirtualAddress = cache1.VirtualAddress,
+                HardcodedTags = cache1.HardcodedTags,
+                Version = cache1.Version,
+                TagDefinitions = cache1.TagDefinitions,
+            };
+
+            result.Tags.AddRange(cache1.Tags);
+
+            // h2 hardcodes a main cache tag limit of 10k. Everything after that is a shared tag
+            for (int i = 0; i < cache2.Tags.Count; i++)
+            {
+                var tag = cache2.Tags[i];
+                if (i >= 10000)
+                {
+                    if (i >= result.Tags.Count)
+                        result.Tags.Add(tag);
+                    else
+                        result.Tags[i] = tag;
+                }
+            }
+
+            return result;
         }
     }
 }

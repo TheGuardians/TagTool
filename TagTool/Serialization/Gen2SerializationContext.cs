@@ -18,20 +18,32 @@ namespace TagTool.Serialization
 
         public Gen2SerializationContext(Stream stream, GameCacheGen2 gameCache, CachedTagGen2 tag)
         {
-            GameCache = gameCache;
             Tag = tag;
-            Stream = stream;
+
+            if (tag.IsShared)
+            {
+                GameCache = gameCache.SharedCache;
+                Stream = ((GameCacheGen2.Gen2CacheStream)stream).SharedStream;
+            }
+            else
+            {
+                GameCache = gameCache;
+                Stream = stream;
+            }
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return (uint)(address - GameCache.TagCacheGen2.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            if(GameCache.Version == CacheVersion.Halo2Vista)
+                return GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
+            else
+                return GameCache.BaseMapFile.Header.MemoryBufferOffset + GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
             var reader = new EndianReader(Stream, GameCache.BaseMapFile.EndianFormat);
-            reader.SeekTo(Tag.Offset - GameCache.TagCacheGen2.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            reader.SeekTo(AddressToOffset(0, Tag.DefinitionOffset));
             return reader;
         }
 

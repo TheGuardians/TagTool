@@ -141,7 +141,7 @@ namespace TagTool.Serialization
         /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
         /// <param name="valueType">The type of the value to deserialize.</param>
         /// <returns>The deserialized value.</returns>
-        public object DeserializeValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
+        public virtual object DeserializeValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
         {
             if (valueType.IsPrimitive)
                 return DeserializePrimitiveValue(reader, valueType);

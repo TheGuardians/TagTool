@@ -640,9 +640,9 @@ namespace TagTool.Geometry
             _stream.WriteFloat1(v.Unknown9);
         }
 
-        public WorldVertex ReadWorldWaterVertex()
+        public WorldWaterVertex ReadWorldWaterVertex()
         {
-            return new WorldVertex
+            return new WorldWaterVertex
             {
                 Position = _stream.ReadFloat4(),
                 Texcoord = _stream.ReadFloat2(),
@@ -650,7 +650,7 @@ namespace TagTool.Geometry
             };
         }
 
-        public void WriteWorldWaterVertex(WorldVertex v)
+        public void WriteWorldWaterVertex(WorldWaterVertex v)
         {
             _stream.WriteFloat4(v.Position);
             _stream.WriteFloat2(v.Texcoord);

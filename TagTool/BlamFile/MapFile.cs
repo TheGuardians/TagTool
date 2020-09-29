@@ -85,7 +85,8 @@ namespace TagTool.BlamFile
         private static bool IsHalo2Vista(EndianReader reader)
         {
             reader.SeekTo(0x24);
-            if (reader.ReadInt32() == -1)
+            var unknownValue = reader.ReadInt32();
+            if (unknownValue == -1 || unknownValue == 0xB165400)
                 return true;
             else
                 return false;

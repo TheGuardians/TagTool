@@ -159,33 +159,21 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            RenameMS30Shaders();
+            var size = TagStructure.GetStructureSize(typeof(TagTool.Tags.Definitions.Gen2.RenderModel), CacheVersion.Halo2Xbox);
+
+            using (var stream = Cache.OpenCacheRead())
+            {
+                foreach (var tag in Cache.TagCache.NonNull())
+                {
+                    if (tag.IsInGroup("mode"))
+                    {
+                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
+                        Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
+                    }
+                }
+            }
 
             return true;
-
-            /*
-            using (var stream = Cache.OpenCacheReadWrite())
-            {
-                var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, Cache.TagCache.GetTag(@"shaders\shader", "rmdf"));
-                var glps = Cache.Deserialize<GlobalPixelShader>(stream, Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps"));
-                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs"));
-
-                var generator = new HaloShaderGenerator.Shader.ShaderGenerator(Albedo.Default, Bump_Mapping.Standard, Alpha_Test.Off, Specular_Mask.Specular_Mask_From_Diffuse,
-                    Material_Model.Two_Lobe_Phong, Environment_Mapping.Dynamic, Self_Illumination.Off, Blend_Mode.Opaque, Parallax.Off, Misc.First_Person_Never, Distortion.Off);
-
-                var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, @"shaders\generated_test_shader");
-                var rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(@"shaders\generated_test_shader");
-                Cache.Serialize(stream, rmt2Tag, rmt2);
-
-                Cache.SaveStrings();
-                (Cache as GameCacheHaloOnline).SaveTagNames();
-
-                var guardianRmshTag = Cache.TagCache.GetTag(@"levels\multi\guardian\shaders\guardian_metal_b", "rmsh");
-                var rmsh = Cache.Deserialize<Shader>(stream, guardianRmshTag);
-                rmsh.ShaderProperties[0].Template = rmt2Tag;
-                Cache.Serialize(stream, guardianRmshTag, rmsh);
-            }
-            */
         }
     }
 }

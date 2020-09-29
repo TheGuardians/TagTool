@@ -19,8 +19,10 @@ namespace TagTool.Commands.CollisionModels
         private CollisionGeometry Bsp { get; set; }
         private List<Assimp.Vector3D> Vertices { get; set; }
         private int[] Indices { get; set; }
+        private List<triangle> Triangles { get; set; }
         private bool debug = false;
-        private int max_surface_edges = 3;
+        private int max_surface_edges = 8;
+        private bool buildmopp = false;
 
         public ImportCollisionGeometryCommand(GameCacheHaloOnlineBase cache)
             : base(false,
@@ -28,7 +30,7 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry <filepath> <tagname>",
+                  "ImportCollisionGeometry [mopp] <filepath> <tagname>",
                   
                   "Import an obj file as a collision model tag")
         {
@@ -41,8 +43,24 @@ namespace TagTool.Commands.CollisionModels
             if (args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            var filepath = args[0];
-            var tagName = args[1];
+            string filepath;
+            string tagName;
+
+            if(args.Count == 3 && args[0] == "mopp")
+            {
+                buildmopp = true;
+                //mopp generation can only accept triangles
+                max_surface_edges = 3;
+                filepath = args[1];
+                tagName = args[2];
+            }
+            else
+            {
+                buildmopp = false;
+                max_surface_edges = 8;
+                filepath = args[0];
+                tagName = args[1];
+            }
 
             CachedTag tag;
 
@@ -62,11 +80,10 @@ namespace TagTool.Commands.CollisionModels
                     logStream.Attach();
                     model = importer.ImportFile(filepath,
                         PostProcessSteps.OptimizeMeshes |
-                        PostProcessSteps.FindDegenerates |
+                        PostProcessSteps.RemoveComponent |
+                        PostProcessSteps.Debone |
                         PostProcessSteps.OptimizeGraph |
-                        PostProcessSteps.PreTransformVertices |
-                        PostProcessSteps.Triangulate |
-                        PostProcessSteps.FixInFacingNormals);
+                        PostProcessSteps.Triangulate);
                     logStream.Detach();
                 }
 
@@ -121,8 +138,11 @@ namespace TagTool.Commands.CollisionModels
                 Leaves = new TagBlock<Leaf>()
             };
             Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
-            if (!join_identical_vertices() || !collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() 
-                || !generate_surface_planes() || !reduce_collision_geometry())
+
+            //sort triangles before adding them
+            Triangles = sort_triangles();
+
+            if (!collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() || !reduce_collision_geometry())
             {
                 Console.WriteLine("### Failed to import collision geometry!");
                 return false;
@@ -133,9 +153,22 @@ namespace TagTool.Commands.CollisionModels
             if (!bsp_builder.generate_bsp(0, 0, 0))
                 return false;
 
-            GenerateBspPhysics moppgenerator = new GenerateBspPhysics();
-            moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
-            moppgenerator.generate_mopp_codes();
+            if (buildmopp)
+            {
+                GenerateBspPhysicsCommand moppgenerator = new GenerateBspPhysicsCommand(ref collisionModel);
+                moppgenerator.Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
+                CollisionModel.Region.Permutation temp_permutation = collisionModel.Regions[0].Permutations[0];
+                if(!moppgenerator.generate_mopp_codes(ref temp_permutation))
+                {
+                    Console.WriteLine("ERROR: Failed to build mopps!");
+                    return false;
+                }
+                else
+                {
+                    Console.WriteLine("Mopps built successfully!");
+                    collisionModel.Regions[0].Permutations[0] = temp_permutation;
+                }
+            }
 
             tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"), tagName);
 
@@ -150,6 +183,60 @@ namespace TagTool.Commands.CollisionModels
             Console.WriteLine($"Successfully imported collision model to: {tag.Name}.coll");
 
             return true;
+        }
+
+        public struct triangle
+        {
+            public int a;
+            public int b;
+            public int c;
+            public float sorting_parameter;
+        }
+
+        public class triangle_list_qsort_compar : IComparer<triangle>
+        {
+            public int Compare(triangle element1, triangle element2)
+            {
+                int result = 0;
+                float v2 = element2.sorting_parameter;
+                if (element1.sorting_parameter <= v2)
+                    result = v2 > element1.sorting_parameter ? 1 : 0;
+                else
+                    result = -1;
+                return result;
+            }
+        }
+
+        public List<triangle> sort_triangles()
+        {
+            //this code calculates the ?perimeter of each triangle, and sorts them. 
+            //This will effect the efficiency of bsp generation later as it is better to use smaller surface planes to split larger surfaces
+            List<triangle> Trianglelist = new List<triangle>();
+            for (int i = 0; i < Indices.Length; i += 3)
+            {
+                //the normals in Halo seem to be the opposite by convention when compared to other editing software
+                triangle newtriangle = new triangle{ a = Indices[i + 1], b = Indices[i], c = Indices[i + 2] };
+                Vector3D point0 = Vertices[Indices[i + 1]];
+                Vector3D point1 = Vertices[Indices[i]];
+                Vector3D point2 = Vertices[Indices[i + 2]];
+                float xdiff_1_0 = point1.X - point0.X;
+                float ydiff_1_0 = point1.Y - point0.Y;
+                float zdiff_1_0 = point1.Z - point0.Z;
+                float xdiff_2_0 = point2.X - point0.X;
+                float ydiff_2_0 = point2.Y - point0.Y;
+                float zdiff_2_0 = point2.Z - point0.Z;
+
+                float v11 = xdiff_1_0 * ydiff_2_0 - xdiff_2_0 * ydiff_1_0;
+                float v12 = xdiff_1_0 * ydiff_2_0 - xdiff_2_0 * ydiff_1_0;
+                float v13 = zdiff_2_0 * ydiff_1_0 - ydiff_2_0 * zdiff_1_0;
+                float v14 = zdiff_1_0 * xdiff_2_0 - zdiff_2_0 * xdiff_1_0;
+
+                newtriangle.sorting_parameter = (float)Math.Sqrt((v11 * v12 + v14 * v14 + v13 * v13) * 0.5);
+                Trianglelist.Add(newtriangle);
+            }
+            triangle_list_qsort_compar sorter = new triangle_list_qsort_compar();
+            Trianglelist.Sort(sorter);
+            return Trianglelist;
         }
 
         public bool join_identical_vertices()
@@ -176,28 +263,37 @@ namespace TagTool.Commands.CollisionModels
            return true;
         }
 
+        public int add_vertex(Vector3D vertex)
+        {
+            //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
+            //we also need to scale everything down by 1/100 to account for editing software conventions
+            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = -vertex.Z * 0.01f, Z = vertex.Y * 0.01f }, FirstEdge = ushort.MaxValue };
+            for(int i = 0; i < Bsp.Vertices.Count; i++)
+            {
+                Vertex testvertex = Bsp.Vertices[i];
+                if (newvertex.Point == testvertex.Point)
+                    return i;
+            }
+                            
+            Bsp.Vertices.Add(newvertex);
+            return Bsp.Vertices.Count - 1;
+        }
+
         public bool collision_geometry_add_surfaces()
         {
-            foreach (var vertex in Vertices)
+            foreach(triangle newtriangle in Triangles)
             {
-                //the Y and Z axes are swapped in Halo, don't ask me why
-                Bsp.Vertices.Add(new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X, Y = vertex.Z, Z = vertex.Y }, FirstEdge = ushort.MaxValue });
-            }
-            int index_buffer_index = 0;
-            while (index_buffer_index < Indices.Length)
-            {
-                List<int> triangle = new List<int>();
-                triangle.Add(Indices[index_buffer_index]);
-                triangle.Add(Indices[index_buffer_index + 1]);
-                triangle.Add(Indices[index_buffer_index + 2]);
-                index_buffer_index += 3;
-                Bsp.Surfaces.Add(new Surface {BreakableSurfaceIndex = -1});
+                Bsp.Surfaces.Add(new Surface());
                 int surface_index = Bsp.Surfaces.Count - 1;
                 Bsp.Surfaces[surface_index].Plane = ushort.MaxValue;
 
-                int edge_index0 = collision_geometry_add_edge(triangle[0], triangle[1], surface_index);
-                int edge_index1 = collision_geometry_add_edge(triangle[1], triangle[2], surface_index);
-                int edge_index2 = collision_geometry_add_edge(triangle[2], triangle[0], surface_index);
+                int point0 = add_vertex(Vertices[newtriangle.a]);
+                int point1 = add_vertex(Vertices[newtriangle.b]);
+                int point2 = add_vertex(Vertices[newtriangle.c]);
+
+                int edge_index0 = collision_geometry_add_edge(point0, point1, surface_index);
+                int edge_index1 = collision_geometry_add_edge(point1, point2, surface_index);
+                int edge_index2 = collision_geometry_add_edge(point2, point0, surface_index);
 
                 if (edge_index0 == -1 || edge_index1 == -1 || edge_index2 == -1)
                     return false;
@@ -234,12 +330,18 @@ namespace TagTool.Commands.CollisionModels
                     Bsp.Edges[edge_index2].ForwardEdge = (ushort)edge_index0;
 
                 //set point first edges
-                if (Bsp.Vertices[triangle[0]].FirstEdge == ushort.MaxValue)
-                    Bsp.Vertices[triangle[0]].FirstEdge = (ushort)edge_index0;
-                if (Bsp.Vertices[triangle[1]].FirstEdge == ushort.MaxValue)
-                    Bsp.Vertices[triangle[1]].FirstEdge = (ushort)edge_index1;
-                if (Bsp.Vertices[triangle[2]].FirstEdge == ushort.MaxValue)
-                    Bsp.Vertices[triangle[2]].FirstEdge = (ushort)edge_index2;
+                if (Bsp.Vertices[point0].FirstEdge == ushort.MaxValue)
+                    Bsp.Vertices[point0].FirstEdge = (ushort)edge_index0;
+                if (Bsp.Vertices[point1].FirstEdge == ushort.MaxValue)
+                    Bsp.Vertices[point1].FirstEdge = (ushort)edge_index1;
+                if (Bsp.Vertices[point2].FirstEdge == ushort.MaxValue)
+                    Bsp.Vertices[point2].FirstEdge = (ushort)edge_index2;
+
+                //generate surface plane
+                if (!generate_surface_plane(surface_index))
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -292,7 +394,9 @@ namespace TagTool.Commands.CollisionModels
                 Edge edge = Bsp.Edges[edge_index];
                 if(edge.RightSurface == ushort.MaxValue)
                 {
-                    Console.WriteLine($"###ERROR: Edge {edge_index} is open!");
+                    Console.WriteLine($"###ERROR: Edge with below vertices is open!");
+                    Console.WriteLine($"{Bsp.Vertices[edge.StartVertex].Point}");
+                    Console.WriteLine($"{Bsp.Vertices[edge.EndVertex].Point}");
                     result = false;
                 }
             }
@@ -387,6 +491,9 @@ namespace TagTool.Commands.CollisionModels
 
         public bool reduce_collision_geometry()
         {
+            if (max_surface_edges == 3)
+                return true;
+
             if (Bsp.Edges.Count > 0 && Bsp.Surfaces.Count > 0)
             {
                 List<edge_array_element> edge_array = new List<edge_array_element>();
@@ -655,8 +762,7 @@ namespace TagTool.Commands.CollisionModels
 
             int surfaces_removed = surface_starting_count - Bsp.Surfaces.Count;
             int edges_removed = edge_starting_count - Bsp.Edges.Count;
-            if (debug)
-                Console.WriteLine($"Successfully removed {surfaces_removed} surfaces and {edges_removed} edges!");
+            Console.WriteLine($"Successfully removed {surfaces_removed} surfaces and {edges_removed} edges!");
 
             return true;
         }
@@ -664,6 +770,70 @@ namespace TagTool.Commands.CollisionModels
         ///////////////////////////////////////////
         //plane generation stuff stored down here
         ///////////////////////////////////////////
+
+        public bool generate_surface_plane(int surface_index)
+        {
+            List<RealPoint3d> pointlist = new List<RealPoint3d>();
+            Surface surface_block = Bsp.Surfaces[surface_index];
+
+            int surface_edge_index = surface_block.FirstEdge;
+            //collect vertices on the plane
+            while (true)
+            {
+                Edge surface_edge_block = Bsp.Edges[surface_edge_index];
+                if (surface_edge_block.RightSurface == surface_index)
+                {
+                    pointlist.Add(Bsp.Vertices[surface_edge_block.EndVertex].Point);
+                    surface_edge_index = surface_edge_block.ReverseEdge;
+                }
+                else
+                {
+                    pointlist.Add(Bsp.Vertices[surface_edge_block.StartVertex].Point);
+                    surface_edge_index = surface_edge_block.ForwardEdge;
+                }
+                //break the loop if we have finished circulating the surface
+                if (surface_edge_index == surface_block.FirstEdge)
+                    break;
+            }
+            if (pointlist.Count < 3 || !plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
+            {
+                Console.WriteLine("###ERROR: Surface invalid for plane generation!");
+                return false;
+            }
+            else
+            {
+                int plane_index = -1;
+                for (int test_plane_index = 0; test_plane_index < Bsp.Planes.Count; test_plane_index++)
+                {
+                    RealPlane3d existing_plane = Bsp.Planes[test_plane_index].Value;
+                    if (plane_test_points(existing_plane, pointlist))
+                    {
+                        plane_index = test_plane_index;
+                        if (plane_is_mirrored(pointlist[0], pointlist[1], pointlist[2], existing_plane))
+                            Bsp.Surfaces[surface_index].Plane = (ushort)(plane_index | 0x8000);
+                        else
+                            Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
+                        break;
+                    }
+                }
+                if (plane_index == -1)
+                {
+                    RealPlane3d newplane = generate_plane_from_3_points(pointlist[0], pointlist[1], pointlist[2]);
+                    if (plane_test_points(newplane, new List<RealPoint3d> { pointlist[0], pointlist[1], pointlist[2] }))
+                    {
+                        Bsp.Planes.Add(new TagTool.Geometry.BspCollisionGeometry.Plane { Value = newplane });
+                        plane_index = Bsp.Planes.Count - 1;
+                        Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
+                    }
+                    else
+                    {
+                        Console.WriteLine("###ERROR: Did not produce valid plane from points!");
+                        return false;
+                    }                                        
+                }
+            }
+            return true;
+        }
 
         public bool generate_surface_planes()
         {
@@ -678,15 +848,15 @@ namespace TagTool.Commands.CollisionModels
                 {
                     Edge surface_edge_block = Bsp.Edges[surface_edge_index];
                     if (surface_edge_block.RightSurface == surface_index)
+                    {
                         pointlist.Add(Bsp.Vertices[surface_edge_block.EndVertex].Point);
-                    else
-                        pointlist.Add(Bsp.Vertices[surface_edge_block.StartVertex].Point);
-
-
-                    if (surface_edge_block.RightSurface == surface_index)
                         surface_edge_index = surface_edge_block.ReverseEdge;
+                    }
                     else
+                    {
+                        pointlist.Add(Bsp.Vertices[surface_edge_block.StartVertex].Point);
                         surface_edge_index = surface_edge_block.ForwardEdge;
+                    }
                     //break the loop if we have finished circulating the surface
                     if (surface_edge_index == surface_block.FirstEdge)
                         break;
@@ -699,12 +869,13 @@ namespace TagTool.Commands.CollisionModels
                 else
                 {
                     int plane_index = -1;
-                    foreach (TagTool.Geometry.BspCollisionGeometry.Plane existing_plane in Bsp.Planes)
+                    for(int test_plane_index = 0; test_plane_index < Bsp.Planes.Count; test_plane_index++)
                     {
-                        if (plane_test_points(existing_plane.Value, pointlist))
+                        RealPlane3d existing_plane = Bsp.Planes[test_plane_index].Value;
+                        if (plane_test_points(existing_plane, pointlist))
                         {
                             plane_index = Bsp.Planes.IndexOf(existing_plane);
-                            if (plane_is_mirrored(pointlist[0], pointlist[1], pointlist[2], existing_plane.Value))
+                            if (plane_is_mirrored(pointlist[0], pointlist[1], pointlist[2], existing_plane))
                                 Bsp.Surfaces[surface_index].Plane = (ushort)(plane_index | 0x8000);
                             else
                                 Bsp.Surfaces[surface_index].Plane = (ushort)plane_index;
@@ -754,7 +925,7 @@ namespace TagTool.Commands.CollisionModels
         {
             foreach (var point in pointlist)
             {
-                float plane_fit = point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D;
+                double plane_fit = point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D;
                 if (plane_fit < -0.00024414062 || plane_fit > 0.00024414062)
                     return false;
             }

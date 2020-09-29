@@ -255,17 +255,17 @@ namespace TagTool.Geometry
             long originalPos = reader.BaseStream.Position;
             for (uint i = 0; i < count; ++i)
             {
-                var bsp3dNode = new Bsp3dNode();
                 reader.BaseStream.Position = originalPos + (i * BSP3DNODE_SIZE);
 
-                bsp3dNode.Plane = BitConverter.ToInt16(reader.ReadBytes(2).Reverse().ToArray(), 0);
-                bsp3dNode.FrontChildLower = reader.ReadBytes(1)[0];
-                bsp3dNode.FrontChildMid = reader.ReadBytes(1)[0];
-                bsp3dNode.FrontChildUpper = reader.ReadBytes(1)[0];
-                bsp3dNode.BackChildLower = reader.ReadBytes(1)[0];
-                bsp3dNode.BackChildMid = reader.ReadBytes(1)[0];
-                bsp3dNode.BackChildUpper = reader.ReadBytes(1)[0];
+                var plane = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
+                var frontChild = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
+                var backChild = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
 
+                // Convert to small bsp3d node designator (lossy)
+                var bsp3dNode = new Bsp3dNode();
+                bsp3dNode.Plane = plane;
+                bsp3dNode.FrontChild = Bsp3dNode.CreateChild((Bsp3dNode.ChildType)((frontChild >> 31) & 1), frontChild);
+                bsp3dNode.BackChild = Bsp3dNode.CreateChild((Bsp3dNode.ChildType)((backChild >> 31) & 1), backChild);
                 bsp.Geometry.Bsp3dNodes.Add(bsp3dNode);
             }
 
