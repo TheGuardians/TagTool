@@ -2,38 +2,39 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "hud_message_text", Tag = "hmt ", Size = 0x80)]
+    [TagStructure(Name = "hud_message_text", Tag = "hmt ", Size = 0x6C)]
     public class HudMessageText : TagStructure
     {
         public byte[] TextData;
-        public List<HudStateMessageElement> MessageElements;
-        public List<HudStateMessageDefinition> Messages;
-        [TagField(Flags = Padding, Length = 84)]
-        public byte[] Padding1;
+        public List<HudMessageElementsBlock> MessageElements;
+        public List<HudMessagesBlock> Messages;
+        [TagField(Length = 0x54, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         
         [TagStructure(Size = 0x2)]
-        public class HudStateMessageElement : TagStructure
+        public class HudMessageElementsBlock : TagStructure
         {
             public sbyte Type;
             public sbyte Data;
         }
         
         [TagStructure(Size = 0x40)]
-        public class HudStateMessageDefinition : TagStructure
+        public class HudMessagesBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public short StartIndexIntoTextBlob;
             public short StartIndexOfMessageBlock;
             public sbyte PanelCount;
-            [TagField(Flags = Padding, Length = 3)]
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 24)]
-            public byte[] Padding2;
         }
     }
 }

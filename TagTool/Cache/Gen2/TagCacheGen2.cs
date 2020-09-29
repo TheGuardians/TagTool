@@ -159,7 +159,7 @@ namespace TagTool.Cache.Gen2
             for (uint i = 0u; i < sbspCount; i++)
             {
                 // seek to the sbsp reference offset
-                uint sbspRefSize = TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspReference), mapFile.Version);
+                uint sbspRefSize = TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspReferenceBlock), mapFile.Version);
                 reader.BaseStream.Position = (sbspsRefsAddress + i * sbspRefSize) + magic;
 
                 // read the tag data addresses from the cache file globals sbsp header

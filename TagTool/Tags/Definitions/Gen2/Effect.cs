@@ -2,28 +2,27 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "effect", Tag = "effe", Size = 0x40)]
+    [TagStructure(Name = "effect", Tag = "effe", Size = 0x30)]
     public class Effect : TagStructure
     {
         public FlagsValue Flags;
         public short LoopStartEvent;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unknown1;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding1;
-        public List<EffectLocationDefinition> Locations;
-        public List<EffectEventDefinition> Events;
-        /// <summary>
-        /// Looping Sound
-        /// </summary>
+        [TagField(Length = 0x2)]
+        public byte[] Unknown;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public List<EffectLocationsBlock> Locations;
+        public List<EffectEventBlock> Events;
+        [TagField(ValidTags = new [] { "lsnd" })]
         public CachedTag LoopingSound;
         public short Location;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unknown2;
+        [TagField(Length = 0x2)]
+        public byte[] Unknown1;
         public float AlwaysPlayDistance;
         public float NeverPlayDistance;
         
@@ -34,54 +33,68 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x4)]
-        public class EffectLocationDefinition : TagStructure
+        public class EffectLocationsBlock : TagStructure
         {
             /// <summary>
-            /// MARKER NAMES
-            /// </summary>
-            /// <remarks>
             /// In addition to the marker in the render model there are several special marker names:
             /// 
             /// replace
-            /// Replace allows you to use the same effect with different markers. Damage transition effects support this for example.
+            /// Replace allows you to use
+            /// the same effect with different markers. Damage transition effects support this for example.
             /// 
             /// gravity, up
-            /// The direction of gravity (down) and the opposite direction (up).  Always supplied
+            /// The direction of
+            /// gravity (down) and the opposite direction (up).  Always supplied
             /// 
             /// normal
-            /// Vector pointing directly away from the surface you collided with. Supplied for effects from collision.
+            /// Vector pointing directly away from the surface
+            /// you collided with. Supplied for effects from collision.
             /// 
             /// forward
-            /// The 'negative incident' vector i.e. the direction the object is moving in. Most commonly used to generated decals. Supplied for effects from collision.
+            /// The 'negative incident' vector i.e. the direction the
+            /// object is moving in. Most commonly used to generated decals. Supplied for effects from collision.
             /// 
             /// backward
-            /// The 'incident' vector i.e. the opposite of the direction the object is moving in. Supplied for effects from collision.
+            /// The
+            /// 'incident' vector i.e. the opposite of the direction the object is moving in. Supplied for effects from
+            /// collision.
             /// 
             /// reflection
-            /// The way the effect would reflect off the surface it hit. Supplied for effects from collision.
+            /// The way the effect would reflect off the surface it hit. Supplied for effects from
+            /// collision.
             /// 
             /// root
             /// The object root (pivot). These can used for all effects which are associated with an object.
             /// 
             /// impact
-            /// The location of a havok impact.
+            /// The
+            /// location of a havok impact.
             /// 
             /// 
-            /// </remarks>
+            /// </summary>
             public StringId MarkerName;
         }
         
-        [TagStructure(Size = 0x48)]
-        public class EffectEventDefinition : TagStructure
+        [TagStructure(Size = 0x38)]
+        public class EffectEventBlock : TagStructure
         {
             public FlagsValue Flags;
-            public float SkipFraction; // chance that this event will be skipped entirely
+            /// <summary>
+            /// chance that this event will be skipped entirely
+            /// </summary>
+            public float SkipFraction;
+            /// <summary>
+            /// delay before this event takes place
+            /// </summary>
             public Bounds<float> DelayBounds; // seconds
+            /// <summary>
+            /// duration of this event
+            /// </summary>
             public Bounds<float> DurationBounds; // seconds
-            public List<EffectPartDefinition> Parts;
-            public List<BeamDefinition> Beams;
-            public List<EffectAccelerationDefinition> Accelerations;
-            public List<ParticleSystemDefinition> ParticleSystems;
+            public List<EffectPartBlock> Parts;
+            public List<BeamBlock> Beams;
+            public List<EffectAccelerationsBlock> Accelerations;
+            public List<ParticleSystemDefinitionBlockNew> ParticleSystems;
             
             [Flags]
             public enum FlagsValue : uint
@@ -89,23 +102,27 @@ namespace TagTool.Tags.Definitions.Gen2
                 DisabledForDebugging = 1 << 0
             }
             
-            [TagStructure(Size = 0x40)]
-            public class EffectPartDefinition : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class EffectPartBlock : TagStructure
             {
                 public CreateInValue CreateIn;
-                public CreateInValue CreateIn1;
+                public CreateInValue1 CreateIn1;
                 public short Location;
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(ValidTags = new [] { "jpt!","obje","snd!","deca","coln","ligh","MGS2","tdtl","lens" })]
                 public CachedTag Type;
+                /// <summary>
+                /// initial velocity along the location's forward, for decals the distance at which decal is created (defaults to 0.5)
+                /// </summary>
                 public Bounds<float> VelocityBounds; // world units per second
+                /// <summary>
+                /// initial velocity will be inside the cone defined by this angle.
+                /// </summary>
                 public Angle VelocityConeAngle; // degrees
                 public Bounds<Angle> AngularVelocityBounds; // degrees per second
                 public Bounds<float> RadiusModifierBounds;
-                /// <summary>
-                /// SCALE MODIFIERS
-                /// </summary>
                 public AScalesValuesValue AScalesValues;
                 public BScalesValuesValue BScalesValues;
                 
@@ -115,6 +132,13 @@ namespace TagTool.Tags.Definitions.Gen2
                     AirOnly,
                     WaterOnly,
                     SpaceOnly
+                }
+                
+                public enum CreateInValue1 : short
+                {
+                    EitherMode,
+                    ViolentModeOnly,
+                    NonviolentModeOnly
                 }
                 
                 [Flags]
@@ -150,71 +174,156 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x5C)]
-            public class BeamDefinition : TagStructure
+            [TagStructure(Size = 0x3C)]
+            public class BeamBlock : TagStructure
             {
+                [TagField(ValidTags = new [] { "shad" })]
                 public CachedTag Shader;
                 public short Location;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 /// <summary>
-                /// COLOR
-                /// </summary>
-                /// <remarks>
                 /// tint color of the beam
-                /// </remarks>
-                public FunctionDefinition Color;
-                /// <summary>
-                /// ALPHA
                 /// </summary>
-                /// <remarks>
+                public ColorFunctionStructBlock Color;
+                /// <summary>
                 /// how much to fade out beam
-                /// </remarks>
-                public FunctionDefinition Alpha;
-                /// <summary>
-                /// WIDTH
                 /// </summary>
-                /// <remarks>
+                public ScalarFunctionStructBlock Alpha;
+                /// <summary>
                 /// how wide in world units
-                /// </remarks>
-                public FunctionDefinition Width;
-                /// <summary>
-                /// LENGTH
                 /// </summary>
-                /// <remarks>
+                public ScalarFunctionStructBlock1 Width;
+                /// <summary>
                 /// how long in world units
-                /// </remarks>
-                public FunctionDefinition Length;
-                /// <summary>
-                /// YAW
                 /// </summary>
-                /// <remarks>
-                /// rotate the marker
-                /// </remarks>
-                public FunctionDefinition Yaw;
+                public ScalarFunctionStructBlock2 Length;
                 /// <summary>
-                /// PITCH
-                /// </summary>
-                /// <remarks>
                 /// rotate the marker
-                /// </remarks>
-                public FunctionDefinition Pitch;
+                /// </summary>
+                public ScalarFunctionStructBlock3 Yaw;
+                /// <summary>
+                /// rotate the marker
+                /// </summary>
+                public ScalarFunctionStructBlock4 Pitch;
                 
-                [TagStructure(Size = 0xC)]
-                public class FunctionDefinition : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class ColorFunctionStructBlock : TagStructure
                 {
-                    public FunctionDefinition Function;
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock1 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock2 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock3 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock4 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
                 }
             }
             
             [TagStructure(Size = 0x14)]
-            public class EffectAccelerationDefinition : TagStructure
+            public class EffectAccelerationsBlock : TagStructure
             {
                 public CreateInValue CreateIn;
-                public CreateInValue CreateIn1;
+                public CreateInValue1 CreateIn1;
                 public short Location;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float Acceleration;
                 public float InnerConeAngle; // degrees
                 public float OuterConeAngle; // degrees
@@ -226,28 +335,51 @@ namespace TagTool.Tags.Definitions.Gen2
                     WaterOnly,
                     SpaceOnly
                 }
+                
+                public enum CreateInValue1 : short
+                {
+                    EitherMode,
+                    ViolentModeOnly,
+                    NonviolentModeOnly
+                }
             }
             
-            [TagStructure(Size = 0x44)]
-            public class ParticleSystemDefinition : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class ParticleSystemDefinitionBlockNew : TagStructure
             {
+                [TagField(ValidTags = new [] { "prt3","PRTM" })]
                 public CachedTag Particle;
                 public int Location;
                 public CoordinateSystemValue CoordinateSystem;
                 public EnvironmentValue Environment;
                 public DispositionValue Disposition;
                 public CameraModeValue CameraMode;
-                public short SortBias; // use values between -10 and 10 to move closer and farther from camera (positive is closer)
+                /// <summary>
+                /// use values between -10 and 10 to move closer and farther from camera (positive is closer)
+                /// </summary>
+                public short SortBias;
                 public FlagsValue Flags;
-                public float LodInDistance; // defaults to 0.0
-                public float LodFeatherInDelta; // defaults to 0.0
-                [TagField(Flags = Padding, Length = 4)]
+                /// <summary>
+                /// defaults to 0.0
+                /// </summary>
+                public float LodInDistance;
+                /// <summary>
+                /// defaults to 0.0
+                /// </summary>
+                public float LodFeatherInDelta;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown;
+                /// <summary>
+                /// defaults to 30.0
+                /// </summary>
+                public float LodOutDistance;
+                /// <summary>
+                /// defaults to 10.0
+                /// </summary>
+                public float LodFeatherOutDelta;
+                [TagField(Length = 0x4)]
                 public byte[] Unknown1;
-                public float LodOutDistance; // defaults to 30.0
-                public float LodFeatherOutDelta; // defaults to 10.0
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown2;
-                public List<ParticleEmitterDefinition> Emitters;
+                public List<ParticleSystemEmitterDefinitionBlock> Emitters;
                 
                 public enum CoordinateSystemValue : short
                 {
@@ -294,63 +426,37 @@ namespace TagTool.Tags.Definitions.Gen2
                     ExpensiveVisibility = 1 << 9
                 }
                 
-                [TagStructure(Size = 0xE4)]
-                public class ParticleEmitterDefinition : TagStructure
+                [TagStructure(Size = 0xB8)]
+                public class ParticleSystemEmitterDefinitionBlock : TagStructure
                 {
+                    [TagField(ValidTags = new [] { "pmov" })]
                     public CachedTag ParticlePhysics;
-                    /// <summary>
-                    /// particle emission rate (particles/tick)
-                    /// </summary>
-                    public ParticleProperty ParticleEmissionRate;
-                    /// <summary>
-                    /// particle lifespan(seconds)
-                    /// </summary>
-                    public ParticleProperty ParticleLifespan;
-                    /// <summary>
-                    /// particle velocity(world units/second)
-                    /// </summary>
-                    public ParticleProperty ParticleVelocity;
-                    /// <summary>
-                    /// particle angular velocity(degrees/second)
-                    /// </summary>
-                    public ParticleProperty ParticleAngularVelocity;
-                    /// <summary>
-                    /// particle size(world units)
-                    /// </summary>
-                    public ParticleProperty ParticleSize;
-                    /// <summary>
-                    /// particle tint
-                    /// </summary>
-                    public ParticleProperty ParticleTint;
-                    /// <summary>
-                    /// particle alpha
-                    /// </summary>
-                    public ParticleProperty ParticleAlpha;
-                    /// <summary>
-                    /// EMISSION SETTINGS
-                    /// </summary>
+                    public ParticlePropertyScalarStructNewBlock ParticleEmissionRate;
+                    public ParticlePropertyScalarStructNewBlock1 ParticleLifespan;
+                    public ParticlePropertyScalarStructNewBlock2 ParticleVelocity;
+                    public ParticlePropertyScalarStructNewBlock3 ParticleAngularVelocity;
+                    public ParticlePropertyScalarStructNewBlock4 ParticleSize;
+                    public ParticlePropertyColorStructNewBlock ParticleTint;
+                    public ParticlePropertyScalarStructNewBlock5 ParticleAlpha;
                     public EmissionShapeValue EmissionShape;
-                    /// <summary>
-                    /// emission radius(world units)
-                    /// </summary>
-                    public ParticleProperty EmissionRadius;
-                    /// <summary>
-                    /// emission angle(degrees)
-                    /// </summary>
-                    public ParticleProperty EmissionAngle;
+                    public ParticlePropertyScalarStructNewBlock6 EmissionRadius;
+                    public ParticlePropertyScalarStructNewBlock7 EmissionAngle;
                     public RealPoint3d TranslationalOffset;
-                    public RealEulerAngles2d RelativeDirection; // particle initial velocity direction relative to the location's forward
-                    [TagField(Flags = Padding, Length = 8)]
-                    public byte[] Padding1;
+                    /// <summary>
+                    /// particle initial velocity direction relative to the location's forward
+                    /// </summary>
+                    public RealEulerAngles2d RelativeDirection;
+                    [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
-                    [TagStructure(Size = 0x14)]
-                    public class ParticleProperty : TagStructure
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock : TagStructure
                     {
                         public InputVariableValue InputVariable;
                         public RangeVariableValue RangeVariable;
                         public OutputModifierValue OutputModifier;
                         public OutputModifierInputValue OutputModifierInput;
-                        public FunctionDefinition Mapping;
+                        public MappingFunctionBlock Mapping;
                         
                         public enum InputVariableValue : short
                         {
@@ -396,7 +502,7 @@ namespace TagTool.Tags.Definitions.Gen2
                         
                         public enum OutputModifierValue : short
                         {
-                            Unknown0,
+                            Unknown,
                             Plus,
                             Times
                         }
@@ -422,13 +528,565 @@ namespace TagTool.Tags.Definitions.Gen2
                             LocationRandom
                         }
                         
-                        [TagStructure(Size = 0xC)]
-                        public class FunctionDefinition : TagStructure
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
                         {
-                            public List<Byte> Data;
+                            public List<ByteBlock> Data;
                             
                             [TagStructure(Size = 0x1)]
-                            public class Byte : TagStructure
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock1 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock2 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock3 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock4 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyColorStructNewBlock : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock5 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
                             {
                                 public sbyte Value;
                             }
@@ -447,6 +1105,190 @@ namespace TagTool.Tags.Definitions.Gen2
                         ImpactArea,
                         Debris,
                         Line
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock6 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x10)]
+                    public class ParticlePropertyScalarStructNewBlock7 : TagStructure
+                    {
+                        public InputVariableValue InputVariable;
+                        public RangeVariableValue RangeVariable;
+                        public OutputModifierValue OutputModifier;
+                        public OutputModifierInputValue OutputModifierInput;
+                        public MappingFunctionBlock Mapping;
+                        
+                        public enum InputVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum RangeVariableValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        public enum OutputModifierValue : short
+                        {
+                            Unknown,
+                            Plus,
+                            Times
+                        }
+                        
+                        public enum OutputModifierInputValue : short
+                        {
+                            ParticleAge,
+                            ParticleEmitTime,
+                            ParticleRandom1,
+                            ParticleRandom2,
+                            EmitterAge,
+                            EmitterRandom1,
+                            EmitterRandom2,
+                            SystemLod,
+                            GameTime,
+                            EffectAScale,
+                            EffectBScale,
+                            ParticleRotation,
+                            ExplosionAnimation,
+                            ExplosionRotation,
+                            ParticleRandom3,
+                            ParticleRandom4,
+                            LocationRandom
+                        }
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
                     }
                 }
             }

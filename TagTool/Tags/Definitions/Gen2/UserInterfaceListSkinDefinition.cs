@@ -2,42 +2,40 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "user_interface_list_skin_definition", Tag = "skin", Size = 0x58)]
+    [TagStructure(Name = "user_interface_list_skin_definition", Tag = "skin", Size = 0x3C)]
     public class UserInterfaceListSkinDefinition : TagStructure
     {
         public ListFlagsValue ListFlags;
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag ArrowsBitmap;
         public Point2d UpArrowsOffset; // from bot-left of 1st item
         public Point2d DownArrowsOffset; // from bot-left of 1st item
         /// <summary>
-        /// Item Animations
-        /// </summary>
-        /// <remarks>
         /// Animations ordered as follows:
         /// 0) list item focused
         /// 1) list item unfocused
         /// 2) list item ambient
         /// 3) list item hovered
-        /// 4) list item unhovered
-        /// 5) list item clicked (hovered-focused)
-        /// 6) list item unfocused back to hovered state (focused-hovered)
+        /// 4)
+        /// list item unhovered
+        /// 5) list item clicked (hovered->focused)
+        /// 6) list item unfocused back to hovered state
+        /// (focused->hovered)
         /// 
-        /// </remarks>
-        public List<SingleAnimationReference> ItemAnimations;
-        public List<TextBlockReference> TextBlocks;
-        /// <summary>
-        /// NOTE:
         /// </summary>
-        /// <remarks>
+        public List<SingleAnimationReferenceBlock> ItemAnimations;
+        public List<TextBlockReferenceBlock> TextBlocks;
+        /// <summary>
         /// the bitmap block top-left is actually bottom-left here in list skin land!
-        /// </remarks>
-        public List<BitmapBlockReference> BitmapBlocks;
-        public List<HudBlockReference> HudBlocks;
-        public List<PlayerBlockReference> PlayerBlocks;
+        /// </summary>
+        public List<BitmapBlockReferenceBlock> BitmapBlocks;
+        public List<HudBlockReferenceBlock> HudBlocks;
+        public List<PlayerBlockReferenceBlock> PlayerBlocks;
         
         [Flags]
         public enum ListFlagsValue : uint
@@ -45,12 +43,12 @@ namespace TagTool.Tags.Definitions.Gen2
             Unused = 1 << 0
         }
         
-        [TagStructure(Size = 0x14)]
-        public class SingleAnimationReference : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class SingleAnimationReferenceBlock : TagStructure
         {
             public FlagsValue Flags;
             public int AnimationPeriod; // milliseconds
-            public List<AnimationKeyframeReference> Keyframes;
+            public List<ScreenAnimationKeyframeReferenceBlock> Keyframes;
             
             [Flags]
             public enum FlagsValue : uint
@@ -59,30 +57,30 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x14)]
-            public class AnimationKeyframeReference : TagStructure
+            public class ScreenAnimationKeyframeReferenceBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float Alpha;
                 public RealPoint3d Position;
             }
         }
         
         [TagStructure(Size = 0x2C)]
-        public class TextBlockReference : TagStructure
+        public class TextBlockReferenceBlock : TagStructure
         {
             public TextFlagsValue TextFlags;
             public AnimationIndexValue AnimationIndex;
             public short IntroAnimationDelayMilliseconds;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public CustomFontValue CustomFont;
             public RealArgbColor TextColor;
             public Rectangle2d TextBounds;
             public StringId StringId;
             public short RenderDepthBias;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [Flags]
             public enum TextFlagsValue : uint
@@ -180,8 +178,8 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x40)]
-        public class BitmapBlockReference : TagStructure
+        [TagStructure(Size = 0x38)]
+        public class BitmapBlockReferenceBlock : TagStructure
         {
             public FlagsValue Flags;
             public AnimationIndexValue AnimationIndex;
@@ -191,10 +189,11 @@ namespace TagTool.Tags.Definitions.Gen2
             public Point2d TopLeft;
             public float HorizTextureWrapsSecond;
             public float VertTextureWrapsSecond;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag BitmapTag;
             public short RenderDepthBias;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float SpriteAnimationSpeedFps;
             public Point2d ProgressBottomLeft;
             public StringId StringIdentifier;
@@ -285,15 +284,17 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x34)]
-        public class HudBlockReference : TagStructure
+        [TagStructure(Size = 0x24)]
+        public class HudBlockReferenceBlock : TagStructure
         {
             public FlagsValue Flags;
             public AnimationIndexValue AnimationIndex;
             public short IntroAnimationDelayMilliseconds;
             public short RenderDepthBias;
             public short StartingBitmapSequenceIndex;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag Bitmap;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag Shader;
             public Rectangle2d Bounds;
             
@@ -374,11 +375,12 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x20)]
-        public class PlayerBlockReference : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class PlayerBlockReferenceBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(ValidTags = new [] { "skin" })]
             public CachedTag Skin;
             public Point2d BottomLeft;
             public TableOrderValue TableOrder;

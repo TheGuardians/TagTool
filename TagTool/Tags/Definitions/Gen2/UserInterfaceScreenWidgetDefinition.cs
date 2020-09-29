@@ -2,101 +2,77 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "user_interface_screen_widget_definition", Tag = "wgit", Size = 0x8C)]
+    [TagStructure(Name = "user_interface_screen_widget_definition", Tag = "wgit", Size = 0x70)]
     public class UserInterfaceScreenWidgetDefinition : TagStructure
     {
         /// <summary>
-        /// Notes on screen widgets:
-        /// </summary>
-        /// <remarks>
         /// - the widget coordinate system is a left-handed system (+x to the right, +y up, +z into the screen)
-        ///   with the origin centered in the display (regardless of display size)
-        /// - for widget component placement, all coordinates you define in the tag specifiy the object's
+        ///   with the origin
+        /// centered in the display (regardless of display size)
+        /// - for widget component placement, all coordinates you define in the
+        /// tag specifiy the object's
         ///   placement prior to the application of any animation
-        /// - all coordinates you define are local to that object
+        /// - all coordinates you define are local to
+        /// that object
         /// - all text specific to objects in the screen comes from the screen's string list tag
-        ///   all of the string indices you may need to specify will refer to the screen's string list tag
-        /// - a pane may contain either buttons OR a list OR a table-view, but never a combination of those
+        ///   all of the string
+        /// indices you may need to specify will refer to the screen's string list tag
+        /// - a pane may contain either buttons OR a list
+        /// OR a table-view, but never a combination of those
         ///   (widget won't function correctly if you try that)
-        /// - all text is centered unless you specify otherwise
-        /// </remarks>
-        /// <summary>
-        /// Flags
+        /// - all text is
+        /// centered unless you specify otherwise
         /// </summary>
-        /// <remarks>
+        /// <summary>
         /// Set misc. screen behavior here
-        /// </remarks>
+        /// </summary>
         public FlagsValue Flags;
         public ScreenIdValue ScreenId;
         /// <summary>
-        /// Button Key
-        /// </summary>
-        /// <remarks>
         /// The labels here are just a guide; the actual string used comes from the Nth position
-        /// of this button key entry as found in the ui globals button key string list tag
-        /// </remarks>
+        /// of this button key entry as found in
+        /// the ui globals button key string list tag
+        /// </summary>
         public ButtonKeyTypeValue ButtonKeyType;
         /// <summary>
-        /// Default Text Color
-        /// </summary>
-        /// <remarks>
         /// Any ui elements that don't explicitly set a text color will use this color
-        /// </remarks>
+        /// </summary>
         public RealArgbColor TextColor;
         /// <summary>
-        /// Screen Text
-        /// </summary>
-        /// <remarks>
         /// All text specific to this screen
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag StringListTag;
         /// <summary>
-        /// Panes
-        /// </summary>
-        /// <remarks>
         /// Define the screen's panes here (normal screens have 1 pane, tab-view screens have 2+ panes)
-        /// </remarks>
-        public List<WindowPaneReference> Panes;
-        /// <summary>
-        /// Shape Group
         /// </summary>
-        /// <remarks>
+        public List<WindowPaneReferenceBlock> Panes;
+        /// <summary>
         /// If the screen is to have a shape group, specify it here (references group in user interface globals tag)
-        /// </remarks>
-        public ShapeGroupValue ShapeGroup;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
-        /// <summary>
-        /// More Screen Parameters
         /// </summary>
-        /// <remarks>
+        public ShapeGroupValue ShapeGroup;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        /// <summary>
         /// These are down here because they got added on later. Have a nice day.
-        /// </remarks>
+        /// </summary>
         public StringId HeaderStringId;
         /// <summary>
-        /// Local strings
-        /// </summary>
-        /// <remarks>
         /// String IDs here allow defining new string ids that are visible only to this screen.
-        /// </remarks>
-        public List<LocalStringIdListSectionReference> LocalStrings;
-        /// <summary>
-        /// Local bitmaps
         /// </summary>
-        /// <remarks>
+        public List<LocalStringIdListSectionReferenceBlock> LocalStrings;
+        /// <summary>
         /// Bitmaps here allow adding a bitmap that's accessible in code for use in this screen.
-        /// </remarks>
-        public List<LocalBitmapReference> LocalBitmaps;
-        /// <summary>
-        /// LEVEL LOAD PROGRESS FIELDS
         /// </summary>
-        /// <remarks>
+        public List<LocalBitmapReferenceBlock> LocalBitmaps;
+        /// <summary>
         /// These are used only for level load progress bitmaps
-        /// </remarks>
+        /// </summary>
         public RealRgbColor SourceColor;
         public RealRgbColor DestinationColor;
         public float AccumulateZoomScaleX;
@@ -104,11 +80,9 @@ namespace TagTool.Tags.Definitions.Gen2
         public float RefractionScaleX;
         public float RefractionScaleY;
         /// <summary>
-        /// Mouse cursors
-        /// </summary>
-        /// <remarks>
         /// The mouse cursor definition for this screen.
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "mcsr" })]
         public CachedTag MouseCursorDefinition;
         
         [Flags]
@@ -124,11 +98,26 @@ namespace TagTool.Tags.Definitions.Gen2
         
         public enum ScreenIdValue : short
         {
+            /// <summary>
+            /// 1
+            /// </summary>
             Test,
-            Test0,
+            /// <summary>
+            /// 2
+            /// </summary>
             Test1,
+            /// <summary>
+            /// 3
+            /// </summary>
             Test2,
+            /// <summary>
+            /// 4
+            /// </summary>
             Test3,
+            /// <summary>
+            /// 5
+            /// </summary>
+            Test4,
             GameShellBackground,
             MainMenu,
             ErrorDialogOkCancel,
@@ -292,7 +281,7 @@ namespace TagTool.Tags.Definitions.Gen2
             EditItemOptions,
             EditIndicatorOptions,
             VirtualKeyboard,
-            CustomGameMenu4,
+            CustomGameMenu1,
             SlayerQuickOptions,
             KothQuickOptions,
             RaceQuickOptions,
@@ -409,51 +398,36 @@ namespace TagTool.Tags.Definitions.Gen2
             AOk
         }
         
-        [TagStructure(Size = 0x70)]
-        public class WindowPaneReference : TagStructure
+        [TagStructure(Size = 0x4C)]
+        public class WindowPaneReferenceBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public AnimationIndexValue AnimationIndex;
             /// <summary>
-            /// Button Definitions
-            /// </summary>
-            /// <remarks>
             /// If the pane contains buttons, define them here
-            /// </remarks>
-            public List<ButtonWidgetReference> Buttons;
-            /// <summary>
-            /// List Definition
             /// </summary>
-            /// <remarks>
+            public List<ButtonWidgetReferenceBlock> Buttons;
+            /// <summary>
             /// If the pane contains a list, define it here
-            /// </remarks>
-            public List<ListReference> ListBlock;
-            /// <summary>
-            /// OBSOLETE Table View Definition
             /// </summary>
-            /// <remarks>
+            public List<ListReferenceBlock> ListBlock;
+            /// <summary>
             /// If the pane contains a table-view, define it here
-            /// </remarks>
-            public List<TableViewListReferenceObsolete> TableView;
-            /// <summary>
-            /// Flavor Item Blocks
             /// </summary>
-            /// <remarks>
+            public List<TableViewListReferenceBlock> TableView;
+            /// <summary>
             /// Define additional flavor items here
-            /// </remarks>
-            public List<TextBlockReference> TextBlocks;
-            public List<BitmapBlockReference> BitmapBlocks;
-            public List<UiModelSceneReference> ModelSceneBlocks;
-            /// <summary>
-            /// UNUSED
             /// </summary>
-            /// <remarks>
+            public List<TextBlockReferenceBlock> TextBlocks;
+            public List<BitmapBlockReferenceBlock> BitmapBlocks;
+            public List<UiModelSceneReferenceBlock> ModelSceneBlocks;
+            /// <summary>
             /// these are all OBSOLETE
-            /// </remarks>
-            public List<TextValuePairBlockUnused> TextValueBlocks;
-            public List<HudBlockReference> HudBlocks;
-            public List<PlayerBlockReference> PlayerBlocks;
+            /// </summary>
+            public List<STextValuePairBlocksBlockUnused> TextValueBlocks;
+            public List<HudBlockReferenceBlock> HudBlocks;
+            public List<PlayerBlockReferenceBlock> PlayerBlocks;
             
             public enum AnimationIndexValue : short
             {
@@ -524,19 +498,23 @@ namespace TagTool.Tags.Definitions.Gen2
                 _63
             }
             
-            [TagStructure(Size = 0x44)]
-            public class ButtonWidgetReference : TagStructure
+            [TagStructure(Size = 0x3C)]
+            public class ButtonWidgetReferenceBlock : TagStructure
             {
                 public TextFlagsValue TextFlags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public CustomFontValue CustomFont;
                 public RealArgbColor TextColor;
                 public Rectangle2d Bounds;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag Bitmap;
-                public Point2d BitmapOffset; // from top-left
+                /// <summary>
+                /// from top-left
+                /// </summary>
+                public Point2d BitmapOffset;
                 public StringId StringId;
                 public short RenderDepthBias;
                 public short MouseRegionTopOffset;
@@ -645,8 +623,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x1C)]
-            public class ListReference : TagStructure
+            [TagStructure(Size = 0x18)]
+            public class ListReferenceBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public SkinIndexValue SkinIndex;
@@ -655,12 +633,9 @@ namespace TagTool.Tags.Definitions.Gen2
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
                 /// <summary>
-                /// UNUSED
-                /// </summary>
-                /// <remarks>
                 /// This is unused
-                /// </remarks>
-                public List<TextValuePairReferenceUnused> Unused;
+                /// </summary>
+                public List<STextValuePairReferenceBlockUnused> Unused;
                 
                 [Flags]
                 public enum FlagsValue : uint
@@ -775,32 +750,24 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x14)]
-                public class TextValuePairReferenceUnused : TagStructure
+                public class STextValuePairReferenceBlockUnused : TagStructure
                 {
                     /// <summary>
-                    /// OBSOLETE
-                    /// </summary>
-                    /// <remarks>
                     /// this is all obsolete
-                    /// </remarks>
+                    /// </summary>
                     public ValueTypeValue ValueType;
                     /// <summary>
-                    /// Value
-                    /// </summary>
-                    /// <remarks>
                     /// Enter the value in the box corresponding to the value type you specified above
-                    /// </remarks>
+                    /// </summary>
                     public BooleanValueValue BooleanValue;
                     public int IntegerValue;
                     public float FpValue;
                     public StringId TextValueStringId;
                     /// <summary>
-                    /// Text Label
-                    /// </summary>
-                    /// <remarks>
                     /// This is text string associated with data when it has the value specified above.
-                    /// The string comes from the screen's string list tag.
-                    /// </remarks>
+                    /// The string comes from the screen's string
+                    /// list tag.
+                    /// </summary>
                     public StringId TextLabelStringId;
                     
                     public enum ValueTypeValue : short
@@ -819,18 +786,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x2C)]
-            public class TableViewListReferenceObsolete : TagStructure
+            [TagStructure(Size = 0x28)]
+            public class TableViewListReferenceBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
                 public CustomFontValue CustomFont;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public RealArgbColor TextColor;
                 public Point2d TopLeft;
-                public List<TableViewListRowReferenceObsolete> TableRows;
+                public List<TableViewListRowReferenceBlock> TableRows;
                 
                 [Flags]
                 public enum FlagsValue : uint
@@ -923,14 +890,14 @@ namespace TagTool.Tags.Definitions.Gen2
                     TextChatFont
                 }
                 
-                [TagStructure(Size = 0x14)]
-                public class TableViewListRowReferenceObsolete : TagStructure
+                [TagStructure(Size = 0x10)]
+                public class TableViewListRowReferenceBlock : TagStructure
                 {
                     public FlagsValue Flags;
                     public short RowHeight;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
-                    public List<TableViewListCellReferenceObsolete> RowCells;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
+                    public List<TableViewListItemReferenceBlock> RowCells;
                     
                     [Flags]
                     public enum FlagsValue : uint
@@ -938,19 +905,20 @@ namespace TagTool.Tags.Definitions.Gen2
                         Unused = 1 << 0
                     }
                     
-                    [TagStructure(Size = 0x24)]
-                    public class TableViewListCellReferenceObsolete : TagStructure
+                    [TagStructure(Size = 0x1C)]
+                    public class TableViewListItemReferenceBlock : TagStructure
                     {
                         public TextFlagsValue TextFlags;
                         public short CellWidth;
-                        [TagField(Flags = Padding, Length = 2)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                         public Point2d BitmapTopLeft; // if there is a bitmap
+                        [TagField(ValidTags = new [] { "bitm" })]
                         public CachedTag BitmapTag;
                         public StringId StringId;
                         public short RenderDepthBias;
-                        [TagField(Flags = Padding, Length = 2)]
-                        public byte[] Padding2;
+                        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding1;
                         
                         [Flags]
                         public enum TextFlagsValue : uint
@@ -966,20 +934,20 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x2C)]
-            public class TextBlockReference : TagStructure
+            public class TextBlockReferenceBlock : TagStructure
             {
                 public TextFlagsValue TextFlags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public CustomFontValue CustomFont;
                 public RealArgbColor TextColor;
                 public Rectangle2d TextBounds;
                 public StringId StringId;
                 public short RenderDepthBias;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 [Flags]
                 public enum TextFlagsValue : uint
@@ -1077,8 +1045,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x40)]
-            public class BitmapBlockReference : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class BitmapBlockReferenceBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
@@ -1088,10 +1056,11 @@ namespace TagTool.Tags.Definitions.Gen2
                 public Point2d TopLeft;
                 public float HorizTextureWrapsSecond;
                 public float VertTextureWrapsSecond;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag BitmapTag;
                 public short RenderDepthBias;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float SpriteAnimationSpeedFps;
                 public Point2d ProgressBottomLeft;
                 public StringId StringIdentifier;
@@ -1182,27 +1151,26 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x54)]
-            public class UiModelSceneReference : TagStructure
+            [TagStructure(Size = 0x4C)]
+            public class UiModelSceneReferenceBlock : TagStructure
             {
                 /// <summary>
-                /// NOTE on coordinate systems
-                /// </summary>
-                /// <remarks>
                 /// Halo y-axis=ui z-axis, and Halo z-axis=ui y-axis.
-                /// As a convention, let's always place objects in the ui scenario such that
+                /// As a convention, let's always place objects in the ui scenario such
+                /// that
                 /// they are facing in the '-y' direction, and the camera such that is is
-                /// facing the '+y' direction. This way the ui animation for models (which
+                /// facing the '+y' direction. This way the ui
+                /// animation for models (which
                 /// gets applied to the camera) will always be consisitent.
-                /// </remarks>
+                /// </summary>
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
                 public short RenderDepthBias;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                public List<UiObjectReference> Objects;
-                public List<UiLightReference> Lights;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<UiObjectReferenceBlock> Objects;
+                public List<UiLightReferenceBlock> Lights;
                 public RealVector3d AnimationScaleFactor;
                 public RealPoint3d CameraPosition;
                 public float FovDegress;
@@ -1287,60 +1255,49 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class UiObjectReference : TagStructure
+                public class UiObjectReferenceBlock : TagStructure
                 {
                     [TagField(Length = 32)]
                     public string Name;
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class UiLightReference : TagStructure
+                public class UiLightReferenceBlock : TagStructure
                 {
                     [TagField(Length = 32)]
                     public string Name;
                 }
             }
             
-            [TagStructure(Size = 0x2C)]
-            public class TextValuePairBlockUnused : TagStructure
+            [TagStructure(Size = 0x28)]
+            public class STextValuePairBlocksBlockUnused : TagStructure
             {
                 /// <summary>
-                /// OBSOLETE
-                /// </summary>
-                /// <remarks>
                 /// this is all obsolete
-                /// </remarks>
+                /// </summary>
                 [TagField(Length = 32)]
                 public string Name;
-                public List<TextValuePairReferenceUnused> TextValuePairs;
+                public List<STextValuePairReferenceBlockUnused> TextValuePairs;
                 
                 [TagStructure(Size = 0x14)]
-                public class TextValuePairReferenceUnused : TagStructure
+                public class STextValuePairReferenceBlockUnused : TagStructure
                 {
                     /// <summary>
-                    /// OBSOLETE
-                    /// </summary>
-                    /// <remarks>
                     /// this is all obsolete
-                    /// </remarks>
+                    /// </summary>
                     public ValueTypeValue ValueType;
                     /// <summary>
-                    /// Value
-                    /// </summary>
-                    /// <remarks>
                     /// Enter the value in the box corresponding to the value type you specified above
-                    /// </remarks>
+                    /// </summary>
                     public BooleanValueValue BooleanValue;
                     public int IntegerValue;
                     public float FpValue;
                     public StringId TextValueStringId;
                     /// <summary>
-                    /// Text Label
-                    /// </summary>
-                    /// <remarks>
                     /// This is text string associated with data when it has the value specified above.
-                    /// The string comes from the screen's string list tag.
-                    /// </remarks>
+                    /// The string comes from the screen's string
+                    /// list tag.
+                    /// </summary>
                     public StringId TextLabelStringId;
                     
                     public enum ValueTypeValue : short
@@ -1359,15 +1316,17 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x34)]
-            public class HudBlockReference : TagStructure
+            [TagStructure(Size = 0x24)]
+            public class HudBlockReferenceBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
                 public short RenderDepthBias;
                 public short StartingBitmapSequenceIndex;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag Bitmap;
+                [TagField(ValidTags = new [] { "shad" })]
                 public CachedTag Shader;
                 public Rectangle2d Bounds;
                 
@@ -1448,11 +1407,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x20)]
-            public class PlayerBlockReference : TagStructure
+            [TagStructure(Size = 0x18)]
+            public class PlayerBlockReferenceBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(ValidTags = new [] { "skin" })]
                 public CachedTag Skin;
                 public Point2d BottomLeft;
                 public TableOrderValue TableOrder;
@@ -1507,22 +1467,23 @@ namespace TagTool.Tags.Definitions.Gen2
             _31
         }
         
-        [TagStructure(Size = 0x10)]
-        public class LocalStringIdListSectionReference : TagStructure
+        [TagStructure(Size = 0xC)]
+        public class LocalStringIdListSectionReferenceBlock : TagStructure
         {
             public StringId SectionName;
-            public List<LocalStringIdListReference> LocalStringSectionReferences;
+            public List<LocalStringIdListStringReferenceBlock> LocalStringSectionReferences;
             
             [TagStructure(Size = 0x4)]
-            public class LocalStringIdListReference : TagStructure
+            public class LocalStringIdListStringReferenceBlock : TagStructure
             {
                 public StringId StringId;
             }
         }
         
-        [TagStructure(Size = 0x10)]
-        public class LocalBitmapReference : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class LocalBitmapReferenceBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag Bitmap;
         }
     }

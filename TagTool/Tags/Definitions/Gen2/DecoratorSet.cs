@@ -2,42 +2,50 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "decorator_set", Tag = "DECR", Size = 0x8C)]
+    [TagStructure(Name = "decorator_set", Tag = "DECR", Size = 0x70)]
     public class DecoratorSet : TagStructure
     {
-        public List<DecoratorShaderReference> Shaders;
-        public float LightingMinScale; // 0.0 defaults to 0.4
-        public float LightingMaxScale; // 0.0 defaults to 2.0
-        public List<DecoratorClassDefinition> Classes;
-        public List<DecoratorModelDefinition> Models;
-        public List<DecoratorModelVertex> RawVertices;
-        public List<Word> Indices;
+        public List<DecoratorShaderReferenceBlock> Shaders;
+        /// <summary>
+        /// 0.0 defaults to 0.4
+        /// </summary>
+        public float LightingMinScale;
+        /// <summary>
+        /// 0.0 defaults to 2.0
+        /// </summary>
+        public float LightingMaxScale;
+        public List<DecoratorClassesBlock> Classes;
+        public List<DecoratorModelsBlock> Models;
+        public List<DecoratorModelVerticesBlock> RawVertices;
+        public List<DecoratorModelIndicesBlock> Indices;
         public List<CachedDataBlock> CachedData;
-        public GeometryBlockInfo GeometrySectionInfo;
-        [TagField(Flags = Padding, Length = 16)]
+        public GlobalGeometryBlockInfoStructBlock GeometrySectionInfo;
+        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
         public byte[] Padding1;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding2;
         
-        [TagStructure(Size = 0x10)]
-        public class DecoratorShaderReference : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class DecoratorShaderReferenceBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag Shader;
         }
         
-        [TagStructure(Size = 0x18)]
-        public class DecoratorClassDefinition : TagStructure
+        [TagStructure(Size = 0x14)]
+        public class DecoratorClassesBlock : TagStructure
         {
             public StringId Name;
             public TypeValue Type;
-            [TagField(Flags = Padding, Length = 3)]
-            public byte[] Padding1;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float Scale;
-            public List<DecoratorPermutationDefinition> Permutations;
+            public List<DecoratorPermutationsBlock> Permutations;
             
             public enum TypeValue : sbyte
             {
@@ -50,12 +58,12 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x28)]
-            public class DecoratorPermutationDefinition : TagStructure
+            public class DecoratorPermutationsBlock : TagStructure
             {
                 public StringId Name;
                 public sbyte Shader;
-                [TagField(Flags = Padding, Length = 3)]
-                public byte[] Padding1;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public FlagsValue Flags;
                 public FadeDistanceValue FadeDistance;
                 public sbyte Index;
@@ -85,7 +93,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x8)]
-        public class DecoratorModelDefinition : TagStructure
+        public class DecoratorModelsBlock : TagStructure
         {
             public StringId ModelName;
             public short IndexStart;
@@ -93,7 +101,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x38)]
-        public class DecoratorModelVertex : TagStructure
+        public class DecoratorModelVerticesBlock : TagStructure
         {
             public RealPoint3d Position;
             public RealVector3d Normal;
@@ -103,7 +111,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x2)]
-        public class Word : TagStructure
+        public class DecoratorModelIndicesBlock : TagStructure
         {
             public short Index;
         }
@@ -114,31 +122,28 @@ namespace TagTool.Tags.Definitions.Gen2
             public VertexBuffer VertexBuffer;
         }
         
-        [TagStructure(Size = 0x28)]
-        public class GeometryBlockInfo : TagStructure
+        [TagStructure(Size = 0x24)]
+        public class GlobalGeometryBlockInfoStructBlock : TagStructure
         {
-            /// <summary>
-            /// BLOCK INFO
-            /// </summary>
             public int BlockOffset;
             public int BlockSize;
             public int SectionDataSize;
             public int ResourceDataSize;
-            public List<GeometryBlockResource> Resources;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public List<GlobalGeometryBlockResourceBlock> Resources;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short OwnerTagSectionOffset;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding3;
             
             [TagStructure(Size = 0x10)]
-            public class GeometryBlockResource : TagStructure
+            public class GlobalGeometryBlockResourceBlock : TagStructure
             {
                 public TypeValue Type;
-                [TagField(Flags = Padding, Length = 3)]
-                public byte[] Padding1;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short PrimaryLocator;
                 public short SecondaryLocator;
                 public int ResourceDataSize;

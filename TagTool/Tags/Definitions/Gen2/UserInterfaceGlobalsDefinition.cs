@@ -2,45 +2,38 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "user_interface_globals_definition", Tag = "wgtz", Size = 0x3C)]
+    [TagStructure(Name = "user_interface_globals_definition", Tag = "wgtz", Size = 0x20)]
     public class UserInterfaceGlobalsDefinition : TagStructure
     {
         /// <summary>
-        /// Shared Globals
-        /// </summary>
-        /// <remarks>
         /// This is a reference to the ui shared globals tag
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "wigl" })]
         public CachedTag SharedGlobals;
         /// <summary>
-        /// Screen Widgets
-        /// </summary>
-        /// <remarks>
         /// These are the screen widgets
-        /// </remarks>
-        public List<UserInterfaceWidgetReference> ScreenWidgets;
-        /// <summary>
-        /// Multiplayer Variant Settings Interface
         /// </summary>
-        /// <remarks>
+        public List<UserInterfaceWidgetReferenceBlock> ScreenWidgets;
+        /// <summary>
         /// This blob defines the ui for setting multiplayer game variant parameters
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "goof" })]
         public CachedTag MpVariantSettingsUi;
         /// <summary>
-        /// Game Hopper Localization Strings
-        /// </summary>
-        /// <remarks>
         /// This is for the loc game hopper strings
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag GameHopperDescriptions;
         
-        [TagStructure(Size = 0x10)]
-        public class UserInterfaceWidgetReference : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class UserInterfaceWidgetReferenceBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "wgit" })]
             public CachedTag WidgetTag;
         }
     }

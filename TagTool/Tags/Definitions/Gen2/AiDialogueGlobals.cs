@@ -2,50 +2,84 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "ai_dialogue_globals", Tag = "adlg", Size = 0x3C)]
+    [TagStructure(Name = "ai_dialogue_globals", Tag = "adlg", Size = 0x2C)]
     public class AiDialogueGlobals : TagStructure
     {
-        public List<Vocalization> Vocalizations;
-        public List<VocalizationPattern> Patterns;
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Padding1;
+        public List<VocalizationDefinitionsBlock0> Vocalizations;
+        public List<VocalizationPatternsBlock> Patterns;
+        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public List<DialogueDataBlock> DialogueData;
         public List<InvoluntaryDataBlock> InvoluntaryData;
         
-        [TagStructure(Size = 0x68)]
-        public class Vocalization : TagStructure
+        [TagStructure(Size = 0x60)]
+        public class VocalizationDefinitionsBlock0 : TagStructure
         {
-            public StringId VocalizationVal;
+            public StringId Vocalization;
             public StringId ParentVocalization;
             public short ParentIndex;
             public PriorityValue Priority;
             public FlagsValue Flags;
-            public GlanceBehaviorValue GlanceBehavior; // how does the speaker of this vocalization direct his gaze?
-            public GlanceRecipientBehaviorValue GlanceRecipientBehavior; // how does someone who hears me behave?
+            /// <summary>
+            /// how does the speaker of this vocalization direct his gaze?
+            /// </summary>
+            public GlanceBehaviorValue GlanceBehavior;
+            /// <summary>
+            /// how does someone who hears me behave?
+            /// </summary>
+            public GlanceRecipientBehaviorValue GlanceRecipientBehavior;
             public PerceptionTypeValue PerceptionType;
             public MaxCombatStatusValue MaxCombatStatus;
             public AnimationImpulseValue AnimationImpulse;
             public OverlapPriorityValue OverlapPriority;
+            /// <summary>
+            /// Minimum delay time between playing the same permutation
+            /// </summary>
             public float SoundRepetitionDelay; // minutes
+            /// <summary>
+            /// How long to wait to actually start the vocalization
+            /// </summary>
             public float AllowableQueueDelay; // seconds
+            /// <summary>
+            /// How long to wait to actually start the vocalization
+            /// </summary>
             public float PreVocDelay; // seconds
+            /// <summary>
+            /// How long into the vocalization the AI should be notified
+            /// </summary>
             public float NotificationDelay; // seconds
+            /// <summary>
+            /// How long speech is suppressed in the speaking unit after vocalizing
+            /// </summary>
             public float PostVocDelay; // seconds
+            /// <summary>
+            /// How long before the same vocalization can be repeated
+            /// </summary>
             public float RepeatDelay; // seconds
+            /// <summary>
+            /// Inherent weight of this vocalization
+            /// </summary>
             public float Weight; // [0-1]
-            public float SpeakerFreezeTime; // speaker won't move for the given amount of time
-            public float ListenerFreezeTime; // listener won't move for the given amount of time (from start of vocalization)
+            /// <summary>
+            /// speaker won't move for the given amount of time
+            /// </summary>
+            public float SpeakerFreezeTime;
+            /// <summary>
+            /// listener won't move for the given amount of time (from start of vocalization)
+            /// </summary>
+            public float ListenerFreezeTime;
             public SpeakerEmotionValue SpeakerEmotion;
             public ListenerEmotionValue ListenerEmotion;
             public float PlayerSkipFraction;
             public float SkipFraction;
             public StringId SampleLine;
-            public List<Response> Reponses;
-            public List<Vocalization> Children;
+            public List<ResponseBlock> Reponses;
+            public List<VocalizationDefinitionsBlock1> Children;
             
             public enum PriorityValue : short
             {
@@ -191,7 +225,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0xC)]
-            public class Response : TagStructure
+            public class ResponseBlock : TagStructure
             {
                 public StringId VocalizationName;
                 public FlagsValue Flags;
@@ -215,65 +249,1252 @@ namespace TagTool.Tags.Definitions.Gen2
                     Peer
                 }
             }
+            
+            [TagStructure(Size = 0x60)]
+            public class VocalizationDefinitionsBlock1 : TagStructure
+            {
+                public StringId Vocalization;
+                public StringId ParentVocalization;
+                public short ParentIndex;
+                public PriorityValue Priority;
+                public FlagsValue Flags;
+                /// <summary>
+                /// how does the speaker of this vocalization direct his gaze?
+                /// </summary>
+                public GlanceBehaviorValue GlanceBehavior;
+                /// <summary>
+                /// how does someone who hears me behave?
+                /// </summary>
+                public GlanceRecipientBehaviorValue GlanceRecipientBehavior;
+                public PerceptionTypeValue PerceptionType;
+                public MaxCombatStatusValue MaxCombatStatus;
+                public AnimationImpulseValue AnimationImpulse;
+                public OverlapPriorityValue OverlapPriority;
+                /// <summary>
+                /// Minimum delay time between playing the same permutation
+                /// </summary>
+                public float SoundRepetitionDelay; // minutes
+                /// <summary>
+                /// How long to wait to actually start the vocalization
+                /// </summary>
+                public float AllowableQueueDelay; // seconds
+                /// <summary>
+                /// How long to wait to actually start the vocalization
+                /// </summary>
+                public float PreVocDelay; // seconds
+                /// <summary>
+                /// How long into the vocalization the AI should be notified
+                /// </summary>
+                public float NotificationDelay; // seconds
+                /// <summary>
+                /// How long speech is suppressed in the speaking unit after vocalizing
+                /// </summary>
+                public float PostVocDelay; // seconds
+                /// <summary>
+                /// How long before the same vocalization can be repeated
+                /// </summary>
+                public float RepeatDelay; // seconds
+                /// <summary>
+                /// Inherent weight of this vocalization
+                /// </summary>
+                public float Weight; // [0-1]
+                /// <summary>
+                /// speaker won't move for the given amount of time
+                /// </summary>
+                public float SpeakerFreezeTime;
+                /// <summary>
+                /// listener won't move for the given amount of time (from start of vocalization)
+                /// </summary>
+                public float ListenerFreezeTime;
+                public SpeakerEmotionValue SpeakerEmotion;
+                public ListenerEmotionValue ListenerEmotion;
+                public float PlayerSkipFraction;
+                public float SkipFraction;
+                public StringId SampleLine;
+                public List<ResponseBlock> Reponses;
+                public List<VocalizationDefinitionsBlock2> Children;
+                
+                public enum PriorityValue : short
+                {
+                    None,
+                    Recall,
+                    Idle,
+                    Comment,
+                    IdleResponse,
+                    Postcombat,
+                    Combat,
+                    Status,
+                    Respond,
+                    Warn,
+                    Act,
+                    React,
+                    Involuntary,
+                    Scream,
+                    Scripted,
+                    Death
+                }
+                
+                [Flags]
+                public enum FlagsValue : uint
+                {
+                    Immediate = 1 << 0,
+                    Interrupt = 1 << 1,
+                    CancelLowPriority = 1 << 2
+                }
+                
+                public enum GlanceBehaviorValue : short
+                {
+                    None,
+                    GlanceSubjectShort,
+                    GlanceSubjectLong,
+                    GlanceCauseShort,
+                    GlanceCauseLong,
+                    GlanceFriendShort,
+                    GlanceFriendLong
+                }
+                
+                public enum GlanceRecipientBehaviorValue : short
+                {
+                    None,
+                    GlanceSubjectShort,
+                    GlanceSubjectLong,
+                    GlanceCauseShort,
+                    GlanceCauseLong,
+                    GlanceFriendShort,
+                    GlanceFriendLong
+                }
+                
+                public enum PerceptionTypeValue : short
+                {
+                    None,
+                    Speaker,
+                    Listener
+                }
+                
+                public enum MaxCombatStatusValue : short
+                {
+                    Asleep,
+                    Idle,
+                    Alert,
+                    Active,
+                    Uninspected,
+                    Definite,
+                    Certain,
+                    Visible,
+                    ClearLos,
+                    Dangerous
+                }
+                
+                public enum AnimationImpulseValue : short
+                {
+                    None,
+                    Shakefist,
+                    Cheer,
+                    SurpriseFront,
+                    SurpriseBack,
+                    Taunt,
+                    Brace,
+                    Point,
+                    Hold,
+                    Wave,
+                    Advance,
+                    Fallback
+                }
+                
+                public enum OverlapPriorityValue : short
+                {
+                    None,
+                    Recall,
+                    Idle,
+                    Comment,
+                    IdleResponse,
+                    Postcombat,
+                    Combat,
+                    Status,
+                    Respond,
+                    Warn,
+                    Act,
+                    React,
+                    Involuntary,
+                    Scream,
+                    Scripted,
+                    Death
+                }
+                
+                public enum SpeakerEmotionValue : short
+                {
+                    None,
+                    Asleep,
+                    Amorous,
+                    Happy,
+                    Inquisitive,
+                    Repulsed,
+                    Disappointed,
+                    Shocked,
+                    Scared,
+                    Arrogant,
+                    Annoyed,
+                    Angry,
+                    Pensive,
+                    Pain
+                }
+                
+                public enum ListenerEmotionValue : short
+                {
+                    None,
+                    Asleep,
+                    Amorous,
+                    Happy,
+                    Inquisitive,
+                    Repulsed,
+                    Disappointed,
+                    Shocked,
+                    Scared,
+                    Arrogant,
+                    Annoyed,
+                    Angry,
+                    Pensive,
+                    Pain
+                }
+                
+                [TagStructure(Size = 0xC)]
+                public class ResponseBlock : TagStructure
+                {
+                    public StringId VocalizationName;
+                    public FlagsValue Flags;
+                    public short VocalizationIndexPostProcess;
+                    public ResponseTypeValue ResponseType;
+                    public short DialogueIndexImport;
+                    
+                    [Flags]
+                    public enum FlagsValue : ushort
+                    {
+                        Nonexclusive = 1 << 0,
+                        TriggerResponse = 1 << 1
+                    }
+                    
+                    public enum ResponseTypeValue : short
+                    {
+                        Friend,
+                        Enemy,
+                        Listener,
+                        Joint,
+                        Peer
+                    }
+                }
+                
+                [TagStructure(Size = 0x60)]
+                public class VocalizationDefinitionsBlock2 : TagStructure
+                {
+                    public StringId Vocalization;
+                    public StringId ParentVocalization;
+                    public short ParentIndex;
+                    public PriorityValue Priority;
+                    public FlagsValue Flags;
+                    /// <summary>
+                    /// how does the speaker of this vocalization direct his gaze?
+                    /// </summary>
+                    public GlanceBehaviorValue GlanceBehavior;
+                    /// <summary>
+                    /// how does someone who hears me behave?
+                    /// </summary>
+                    public GlanceRecipientBehaviorValue GlanceRecipientBehavior;
+                    public PerceptionTypeValue PerceptionType;
+                    public MaxCombatStatusValue MaxCombatStatus;
+                    public AnimationImpulseValue AnimationImpulse;
+                    public OverlapPriorityValue OverlapPriority;
+                    /// <summary>
+                    /// Minimum delay time between playing the same permutation
+                    /// </summary>
+                    public float SoundRepetitionDelay; // minutes
+                    /// <summary>
+                    /// How long to wait to actually start the vocalization
+                    /// </summary>
+                    public float AllowableQueueDelay; // seconds
+                    /// <summary>
+                    /// How long to wait to actually start the vocalization
+                    /// </summary>
+                    public float PreVocDelay; // seconds
+                    /// <summary>
+                    /// How long into the vocalization the AI should be notified
+                    /// </summary>
+                    public float NotificationDelay; // seconds
+                    /// <summary>
+                    /// How long speech is suppressed in the speaking unit after vocalizing
+                    /// </summary>
+                    public float PostVocDelay; // seconds
+                    /// <summary>
+                    /// How long before the same vocalization can be repeated
+                    /// </summary>
+                    public float RepeatDelay; // seconds
+                    /// <summary>
+                    /// Inherent weight of this vocalization
+                    /// </summary>
+                    public float Weight; // [0-1]
+                    /// <summary>
+                    /// speaker won't move for the given amount of time
+                    /// </summary>
+                    public float SpeakerFreezeTime;
+                    /// <summary>
+                    /// listener won't move for the given amount of time (from start of vocalization)
+                    /// </summary>
+                    public float ListenerFreezeTime;
+                    public SpeakerEmotionValue SpeakerEmotion;
+                    public ListenerEmotionValue ListenerEmotion;
+                    public float PlayerSkipFraction;
+                    public float SkipFraction;
+                    public StringId SampleLine;
+                    public List<ResponseBlock> Reponses;
+                    public List<VocalizationDefinitionsBlock3> Children;
+                    
+                    public enum PriorityValue : short
+                    {
+                        None,
+                        Recall,
+                        Idle,
+                        Comment,
+                        IdleResponse,
+                        Postcombat,
+                        Combat,
+                        Status,
+                        Respond,
+                        Warn,
+                        Act,
+                        React,
+                        Involuntary,
+                        Scream,
+                        Scripted,
+                        Death
+                    }
+                    
+                    [Flags]
+                    public enum FlagsValue : uint
+                    {
+                        Immediate = 1 << 0,
+                        Interrupt = 1 << 1,
+                        CancelLowPriority = 1 << 2
+                    }
+                    
+                    public enum GlanceBehaviorValue : short
+                    {
+                        None,
+                        GlanceSubjectShort,
+                        GlanceSubjectLong,
+                        GlanceCauseShort,
+                        GlanceCauseLong,
+                        GlanceFriendShort,
+                        GlanceFriendLong
+                    }
+                    
+                    public enum GlanceRecipientBehaviorValue : short
+                    {
+                        None,
+                        GlanceSubjectShort,
+                        GlanceSubjectLong,
+                        GlanceCauseShort,
+                        GlanceCauseLong,
+                        GlanceFriendShort,
+                        GlanceFriendLong
+                    }
+                    
+                    public enum PerceptionTypeValue : short
+                    {
+                        None,
+                        Speaker,
+                        Listener
+                    }
+                    
+                    public enum MaxCombatStatusValue : short
+                    {
+                        Asleep,
+                        Idle,
+                        Alert,
+                        Active,
+                        Uninspected,
+                        Definite,
+                        Certain,
+                        Visible,
+                        ClearLos,
+                        Dangerous
+                    }
+                    
+                    public enum AnimationImpulseValue : short
+                    {
+                        None,
+                        Shakefist,
+                        Cheer,
+                        SurpriseFront,
+                        SurpriseBack,
+                        Taunt,
+                        Brace,
+                        Point,
+                        Hold,
+                        Wave,
+                        Advance,
+                        Fallback
+                    }
+                    
+                    public enum OverlapPriorityValue : short
+                    {
+                        None,
+                        Recall,
+                        Idle,
+                        Comment,
+                        IdleResponse,
+                        Postcombat,
+                        Combat,
+                        Status,
+                        Respond,
+                        Warn,
+                        Act,
+                        React,
+                        Involuntary,
+                        Scream,
+                        Scripted,
+                        Death
+                    }
+                    
+                    public enum SpeakerEmotionValue : short
+                    {
+                        None,
+                        Asleep,
+                        Amorous,
+                        Happy,
+                        Inquisitive,
+                        Repulsed,
+                        Disappointed,
+                        Shocked,
+                        Scared,
+                        Arrogant,
+                        Annoyed,
+                        Angry,
+                        Pensive,
+                        Pain
+                    }
+                    
+                    public enum ListenerEmotionValue : short
+                    {
+                        None,
+                        Asleep,
+                        Amorous,
+                        Happy,
+                        Inquisitive,
+                        Repulsed,
+                        Disappointed,
+                        Shocked,
+                        Scared,
+                        Arrogant,
+                        Annoyed,
+                        Angry,
+                        Pensive,
+                        Pain
+                    }
+                    
+                    [TagStructure(Size = 0xC)]
+                    public class ResponseBlock : TagStructure
+                    {
+                        public StringId VocalizationName;
+                        public FlagsValue Flags;
+                        public short VocalizationIndexPostProcess;
+                        public ResponseTypeValue ResponseType;
+                        public short DialogueIndexImport;
+                        
+                        [Flags]
+                        public enum FlagsValue : ushort
+                        {
+                            Nonexclusive = 1 << 0,
+                            TriggerResponse = 1 << 1
+                        }
+                        
+                        public enum ResponseTypeValue : short
+                        {
+                            Friend,
+                            Enemy,
+                            Listener,
+                            Joint,
+                            Peer
+                        }
+                    }
+                    
+                    [TagStructure(Size = 0x60)]
+                    public class VocalizationDefinitionsBlock3 : TagStructure
+                    {
+                        public StringId Vocalization;
+                        public StringId ParentVocalization;
+                        public short ParentIndex;
+                        public PriorityValue Priority;
+                        public FlagsValue Flags;
+                        /// <summary>
+                        /// how does the speaker of this vocalization direct his gaze?
+                        /// </summary>
+                        public GlanceBehaviorValue GlanceBehavior;
+                        /// <summary>
+                        /// how does someone who hears me behave?
+                        /// </summary>
+                        public GlanceRecipientBehaviorValue GlanceRecipientBehavior;
+                        public PerceptionTypeValue PerceptionType;
+                        public MaxCombatStatusValue MaxCombatStatus;
+                        public AnimationImpulseValue AnimationImpulse;
+                        public OverlapPriorityValue OverlapPriority;
+                        /// <summary>
+                        /// Minimum delay time between playing the same permutation
+                        /// </summary>
+                        public float SoundRepetitionDelay; // minutes
+                        /// <summary>
+                        /// How long to wait to actually start the vocalization
+                        /// </summary>
+                        public float AllowableQueueDelay; // seconds
+                        /// <summary>
+                        /// How long to wait to actually start the vocalization
+                        /// </summary>
+                        public float PreVocDelay; // seconds
+                        /// <summary>
+                        /// How long into the vocalization the AI should be notified
+                        /// </summary>
+                        public float NotificationDelay; // seconds
+                        /// <summary>
+                        /// How long speech is suppressed in the speaking unit after vocalizing
+                        /// </summary>
+                        public float PostVocDelay; // seconds
+                        /// <summary>
+                        /// How long before the same vocalization can be repeated
+                        /// </summary>
+                        public float RepeatDelay; // seconds
+                        /// <summary>
+                        /// Inherent weight of this vocalization
+                        /// </summary>
+                        public float Weight; // [0-1]
+                        /// <summary>
+                        /// speaker won't move for the given amount of time
+                        /// </summary>
+                        public float SpeakerFreezeTime;
+                        /// <summary>
+                        /// listener won't move for the given amount of time (from start of vocalization)
+                        /// </summary>
+                        public float ListenerFreezeTime;
+                        public SpeakerEmotionValue SpeakerEmotion;
+                        public ListenerEmotionValue ListenerEmotion;
+                        public float PlayerSkipFraction;
+                        public float SkipFraction;
+                        public StringId SampleLine;
+                        public List<ResponseBlock> Reponses;
+                        public List<VocalizationDefinitionsBlock4> Children;
+                        
+                        public enum PriorityValue : short
+                        {
+                            None,
+                            Recall,
+                            Idle,
+                            Comment,
+                            IdleResponse,
+                            Postcombat,
+                            Combat,
+                            Status,
+                            Respond,
+                            Warn,
+                            Act,
+                            React,
+                            Involuntary,
+                            Scream,
+                            Scripted,
+                            Death
+                        }
+                        
+                        [Flags]
+                        public enum FlagsValue : uint
+                        {
+                            Immediate = 1 << 0,
+                            Interrupt = 1 << 1,
+                            CancelLowPriority = 1 << 2
+                        }
+                        
+                        public enum GlanceBehaviorValue : short
+                        {
+                            None,
+                            GlanceSubjectShort,
+                            GlanceSubjectLong,
+                            GlanceCauseShort,
+                            GlanceCauseLong,
+                            GlanceFriendShort,
+                            GlanceFriendLong
+                        }
+                        
+                        public enum GlanceRecipientBehaviorValue : short
+                        {
+                            None,
+                            GlanceSubjectShort,
+                            GlanceSubjectLong,
+                            GlanceCauseShort,
+                            GlanceCauseLong,
+                            GlanceFriendShort,
+                            GlanceFriendLong
+                        }
+                        
+                        public enum PerceptionTypeValue : short
+                        {
+                            None,
+                            Speaker,
+                            Listener
+                        }
+                        
+                        public enum MaxCombatStatusValue : short
+                        {
+                            Asleep,
+                            Idle,
+                            Alert,
+                            Active,
+                            Uninspected,
+                            Definite,
+                            Certain,
+                            Visible,
+                            ClearLos,
+                            Dangerous
+                        }
+                        
+                        public enum AnimationImpulseValue : short
+                        {
+                            None,
+                            Shakefist,
+                            Cheer,
+                            SurpriseFront,
+                            SurpriseBack,
+                            Taunt,
+                            Brace,
+                            Point,
+                            Hold,
+                            Wave,
+                            Advance,
+                            Fallback
+                        }
+                        
+                        public enum OverlapPriorityValue : short
+                        {
+                            None,
+                            Recall,
+                            Idle,
+                            Comment,
+                            IdleResponse,
+                            Postcombat,
+                            Combat,
+                            Status,
+                            Respond,
+                            Warn,
+                            Act,
+                            React,
+                            Involuntary,
+                            Scream,
+                            Scripted,
+                            Death
+                        }
+                        
+                        public enum SpeakerEmotionValue : short
+                        {
+                            None,
+                            Asleep,
+                            Amorous,
+                            Happy,
+                            Inquisitive,
+                            Repulsed,
+                            Disappointed,
+                            Shocked,
+                            Scared,
+                            Arrogant,
+                            Annoyed,
+                            Angry,
+                            Pensive,
+                            Pain
+                        }
+                        
+                        public enum ListenerEmotionValue : short
+                        {
+                            None,
+                            Asleep,
+                            Amorous,
+                            Happy,
+                            Inquisitive,
+                            Repulsed,
+                            Disappointed,
+                            Shocked,
+                            Scared,
+                            Arrogant,
+                            Annoyed,
+                            Angry,
+                            Pensive,
+                            Pain
+                        }
+                        
+                        [TagStructure(Size = 0xC)]
+                        public class ResponseBlock : TagStructure
+                        {
+                            public StringId VocalizationName;
+                            public FlagsValue Flags;
+                            public short VocalizationIndexPostProcess;
+                            public ResponseTypeValue ResponseType;
+                            public short DialogueIndexImport;
+                            
+                            [Flags]
+                            public enum FlagsValue : ushort
+                            {
+                                Nonexclusive = 1 << 0,
+                                TriggerResponse = 1 << 1
+                            }
+                            
+                            public enum ResponseTypeValue : short
+                            {
+                                Friend,
+                                Enemy,
+                                Listener,
+                                Joint,
+                                Peer
+                            }
+                        }
+                        
+                        [TagStructure(Size = 0x60)]
+                        public class VocalizationDefinitionsBlock4 : TagStructure
+                        {
+                            public StringId Vocalization;
+                            public StringId ParentVocalization;
+                            public short ParentIndex;
+                            public PriorityValue Priority;
+                            public FlagsValue Flags;
+                            /// <summary>
+                            /// how does the speaker of this vocalization direct his gaze?
+                            /// </summary>
+                            public GlanceBehaviorValue GlanceBehavior;
+                            /// <summary>
+                            /// how does someone who hears me behave?
+                            /// </summary>
+                            public GlanceRecipientBehaviorValue GlanceRecipientBehavior;
+                            public PerceptionTypeValue PerceptionType;
+                            public MaxCombatStatusValue MaxCombatStatus;
+                            public AnimationImpulseValue AnimationImpulse;
+                            public OverlapPriorityValue OverlapPriority;
+                            /// <summary>
+                            /// Minimum delay time between playing the same permutation
+                            /// </summary>
+                            public float SoundRepetitionDelay; // minutes
+                            /// <summary>
+                            /// How long to wait to actually start the vocalization
+                            /// </summary>
+                            public float AllowableQueueDelay; // seconds
+                            /// <summary>
+                            /// How long to wait to actually start the vocalization
+                            /// </summary>
+                            public float PreVocDelay; // seconds
+                            /// <summary>
+                            /// How long into the vocalization the AI should be notified
+                            /// </summary>
+                            public float NotificationDelay; // seconds
+                            /// <summary>
+                            /// How long speech is suppressed in the speaking unit after vocalizing
+                            /// </summary>
+                            public float PostVocDelay; // seconds
+                            /// <summary>
+                            /// How long before the same vocalization can be repeated
+                            /// </summary>
+                            public float RepeatDelay; // seconds
+                            /// <summary>
+                            /// Inherent weight of this vocalization
+                            /// </summary>
+                            public float Weight; // [0-1]
+                            /// <summary>
+                            /// speaker won't move for the given amount of time
+                            /// </summary>
+                            public float SpeakerFreezeTime;
+                            /// <summary>
+                            /// listener won't move for the given amount of time (from start of vocalization)
+                            /// </summary>
+                            public float ListenerFreezeTime;
+                            public SpeakerEmotionValue SpeakerEmotion;
+                            public ListenerEmotionValue ListenerEmotion;
+                            public float PlayerSkipFraction;
+                            public float SkipFraction;
+                            public StringId SampleLine;
+                            public List<ResponseBlock> Reponses;
+                            public List<VocalizationDefinitionsBlock5> Children;
+                            
+                            public enum PriorityValue : short
+                            {
+                                None,
+                                Recall,
+                                Idle,
+                                Comment,
+                                IdleResponse,
+                                Postcombat,
+                                Combat,
+                                Status,
+                                Respond,
+                                Warn,
+                                Act,
+                                React,
+                                Involuntary,
+                                Scream,
+                                Scripted,
+                                Death
+                            }
+                            
+                            [Flags]
+                            public enum FlagsValue : uint
+                            {
+                                Immediate = 1 << 0,
+                                Interrupt = 1 << 1,
+                                CancelLowPriority = 1 << 2
+                            }
+                            
+                            public enum GlanceBehaviorValue : short
+                            {
+                                None,
+                                GlanceSubjectShort,
+                                GlanceSubjectLong,
+                                GlanceCauseShort,
+                                GlanceCauseLong,
+                                GlanceFriendShort,
+                                GlanceFriendLong
+                            }
+                            
+                            public enum GlanceRecipientBehaviorValue : short
+                            {
+                                None,
+                                GlanceSubjectShort,
+                                GlanceSubjectLong,
+                                GlanceCauseShort,
+                                GlanceCauseLong,
+                                GlanceFriendShort,
+                                GlanceFriendLong
+                            }
+                            
+                            public enum PerceptionTypeValue : short
+                            {
+                                None,
+                                Speaker,
+                                Listener
+                            }
+                            
+                            public enum MaxCombatStatusValue : short
+                            {
+                                Asleep,
+                                Idle,
+                                Alert,
+                                Active,
+                                Uninspected,
+                                Definite,
+                                Certain,
+                                Visible,
+                                ClearLos,
+                                Dangerous
+                            }
+                            
+                            public enum AnimationImpulseValue : short
+                            {
+                                None,
+                                Shakefist,
+                                Cheer,
+                                SurpriseFront,
+                                SurpriseBack,
+                                Taunt,
+                                Brace,
+                                Point,
+                                Hold,
+                                Wave,
+                                Advance,
+                                Fallback
+                            }
+                            
+                            public enum OverlapPriorityValue : short
+                            {
+                                None,
+                                Recall,
+                                Idle,
+                                Comment,
+                                IdleResponse,
+                                Postcombat,
+                                Combat,
+                                Status,
+                                Respond,
+                                Warn,
+                                Act,
+                                React,
+                                Involuntary,
+                                Scream,
+                                Scripted,
+                                Death
+                            }
+                            
+                            public enum SpeakerEmotionValue : short
+                            {
+                                None,
+                                Asleep,
+                                Amorous,
+                                Happy,
+                                Inquisitive,
+                                Repulsed,
+                                Disappointed,
+                                Shocked,
+                                Scared,
+                                Arrogant,
+                                Annoyed,
+                                Angry,
+                                Pensive,
+                                Pain
+                            }
+                            
+                            public enum ListenerEmotionValue : short
+                            {
+                                None,
+                                Asleep,
+                                Amorous,
+                                Happy,
+                                Inquisitive,
+                                Repulsed,
+                                Disappointed,
+                                Shocked,
+                                Scared,
+                                Arrogant,
+                                Annoyed,
+                                Angry,
+                                Pensive,
+                                Pain
+                            }
+                            
+                            [TagStructure(Size = 0xC)]
+                            public class ResponseBlock : TagStructure
+                            {
+                                public StringId VocalizationName;
+                                public FlagsValue Flags;
+                                public short VocalizationIndexPostProcess;
+                                public ResponseTypeValue ResponseType;
+                                public short DialogueIndexImport;
+                                
+                                [Flags]
+                                public enum FlagsValue : ushort
+                                {
+                                    Nonexclusive = 1 << 0,
+                                    TriggerResponse = 1 << 1
+                                }
+                                
+                                public enum ResponseTypeValue : short
+                                {
+                                    Friend,
+                                    Enemy,
+                                    Listener,
+                                    Joint,
+                                    Peer
+                                }
+                            }
+                            
+                            [TagStructure(Size = 0x60)]
+                            public class VocalizationDefinitionsBlock5 : TagStructure
+                            {
+                                public StringId Vocalization;
+                                public StringId ParentVocalization;
+                                public short ParentIndex;
+                                public PriorityValue Priority;
+                                public FlagsValue Flags;
+                                /// <summary>
+                                /// how does the speaker of this vocalization direct his gaze?
+                                /// </summary>
+                                public GlanceBehaviorValue GlanceBehavior;
+                                /// <summary>
+                                /// how does someone who hears me behave?
+                                /// </summary>
+                                public GlanceRecipientBehaviorValue GlanceRecipientBehavior;
+                                public PerceptionTypeValue PerceptionType;
+                                public MaxCombatStatusValue MaxCombatStatus;
+                                public AnimationImpulseValue AnimationImpulse;
+                                public OverlapPriorityValue OverlapPriority;
+                                /// <summary>
+                                /// Minimum delay time between playing the same permutation
+                                /// </summary>
+                                public float SoundRepetitionDelay; // minutes
+                                /// <summary>
+                                /// How long to wait to actually start the vocalization
+                                /// </summary>
+                                public float AllowableQueueDelay; // seconds
+                                /// <summary>
+                                /// How long to wait to actually start the vocalization
+                                /// </summary>
+                                public float PreVocDelay; // seconds
+                                /// <summary>
+                                /// How long into the vocalization the AI should be notified
+                                /// </summary>
+                                public float NotificationDelay; // seconds
+                                /// <summary>
+                                /// How long speech is suppressed in the speaking unit after vocalizing
+                                /// </summary>
+                                public float PostVocDelay; // seconds
+                                /// <summary>
+                                /// How long before the same vocalization can be repeated
+                                /// </summary>
+                                public float RepeatDelay; // seconds
+                                /// <summary>
+                                /// Inherent weight of this vocalization
+                                /// </summary>
+                                public float Weight; // [0-1]
+                                /// <summary>
+                                /// speaker won't move for the given amount of time
+                                /// </summary>
+                                public float SpeakerFreezeTime;
+                                /// <summary>
+                                /// listener won't move for the given amount of time (from start of vocalization)
+                                /// </summary>
+                                public float ListenerFreezeTime;
+                                public SpeakerEmotionValue SpeakerEmotion;
+                                public ListenerEmotionValue ListenerEmotion;
+                                public float PlayerSkipFraction;
+                                public float SkipFraction;
+                                public StringId SampleLine;
+                                public List<ResponseBlock> Reponses;
+                                public List<GNullBlock> Unknown;
+                                
+                                public enum PriorityValue : short
+                                {
+                                    None,
+                                    Recall,
+                                    Idle,
+                                    Comment,
+                                    IdleResponse,
+                                    Postcombat,
+                                    Combat,
+                                    Status,
+                                    Respond,
+                                    Warn,
+                                    Act,
+                                    React,
+                                    Involuntary,
+                                    Scream,
+                                    Scripted,
+                                    Death
+                                }
+                                
+                                [Flags]
+                                public enum FlagsValue : uint
+                                {
+                                    Immediate = 1 << 0,
+                                    Interrupt = 1 << 1,
+                                    CancelLowPriority = 1 << 2
+                                }
+                                
+                                public enum GlanceBehaviorValue : short
+                                {
+                                    None,
+                                    GlanceSubjectShort,
+                                    GlanceSubjectLong,
+                                    GlanceCauseShort,
+                                    GlanceCauseLong,
+                                    GlanceFriendShort,
+                                    GlanceFriendLong
+                                }
+                                
+                                public enum GlanceRecipientBehaviorValue : short
+                                {
+                                    None,
+                                    GlanceSubjectShort,
+                                    GlanceSubjectLong,
+                                    GlanceCauseShort,
+                                    GlanceCauseLong,
+                                    GlanceFriendShort,
+                                    GlanceFriendLong
+                                }
+                                
+                                public enum PerceptionTypeValue : short
+                                {
+                                    None,
+                                    Speaker,
+                                    Listener
+                                }
+                                
+                                public enum MaxCombatStatusValue : short
+                                {
+                                    Asleep,
+                                    Idle,
+                                    Alert,
+                                    Active,
+                                    Uninspected,
+                                    Definite,
+                                    Certain,
+                                    Visible,
+                                    ClearLos,
+                                    Dangerous
+                                }
+                                
+                                public enum AnimationImpulseValue : short
+                                {
+                                    None,
+                                    Shakefist,
+                                    Cheer,
+                                    SurpriseFront,
+                                    SurpriseBack,
+                                    Taunt,
+                                    Brace,
+                                    Point,
+                                    Hold,
+                                    Wave,
+                                    Advance,
+                                    Fallback
+                                }
+                                
+                                public enum OverlapPriorityValue : short
+                                {
+                                    None,
+                                    Recall,
+                                    Idle,
+                                    Comment,
+                                    IdleResponse,
+                                    Postcombat,
+                                    Combat,
+                                    Status,
+                                    Respond,
+                                    Warn,
+                                    Act,
+                                    React,
+                                    Involuntary,
+                                    Scream,
+                                    Scripted,
+                                    Death
+                                }
+                                
+                                public enum SpeakerEmotionValue : short
+                                {
+                                    None,
+                                    Asleep,
+                                    Amorous,
+                                    Happy,
+                                    Inquisitive,
+                                    Repulsed,
+                                    Disappointed,
+                                    Shocked,
+                                    Scared,
+                                    Arrogant,
+                                    Annoyed,
+                                    Angry,
+                                    Pensive,
+                                    Pain
+                                }
+                                
+                                public enum ListenerEmotionValue : short
+                                {
+                                    None,
+                                    Asleep,
+                                    Amorous,
+                                    Happy,
+                                    Inquisitive,
+                                    Repulsed,
+                                    Disappointed,
+                                    Shocked,
+                                    Scared,
+                                    Arrogant,
+                                    Annoyed,
+                                    Angry,
+                                    Pensive,
+                                    Pain
+                                }
+                                
+                                [TagStructure(Size = 0xC)]
+                                public class ResponseBlock : TagStructure
+                                {
+                                    public StringId VocalizationName;
+                                    public FlagsValue Flags;
+                                    public short VocalizationIndexPostProcess;
+                                    public ResponseTypeValue ResponseType;
+                                    public short DialogueIndexImport;
+                                    
+                                    [Flags]
+                                    public enum FlagsValue : ushort
+                                    {
+                                        Nonexclusive = 1 << 0,
+                                        TriggerResponse = 1 << 1
+                                    }
+                                    
+                                    public enum ResponseTypeValue : short
+                                    {
+                                        Friend,
+                                        Enemy,
+                                        Listener,
+                                        Joint,
+                                        Peer
+                                    }
+                                }
+                                
+                                [TagStructure()]
+                                public class GNullBlock : TagStructure
+                                {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         [TagStructure(Size = 0x40)]
-        public class VocalizationPattern : TagStructure
+        public class VocalizationPatternsBlock : TagStructure
         {
             public DialogueTypeValue DialogueType;
             public short VocalizationIndex;
             public StringId VocalizationName;
             public SpeakerTypeValue SpeakerType;
             public FlagsValue Flags;
-            public ListenerTargetValue ListenerTarget; // who/what am I speaking to/of?
-            [TagField(Flags = Padding, Length = 2)]
+            /// <summary>
+            /// who/what am I speaking to/of?
+            /// </summary>
+            public ListenerTargetValue ListenerTarget;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
-            public HostilityValue Hostility; // The relationship between the subject and the cause
+            /// <summary>
+            /// The relationship between the subject and the cause
+            /// </summary>
+            public HostilityValue Hostility;
             public DamageTypeValue DamageType;
-            public DangerLevelValue DangerLevel; // Speaker must have danger level of at least this much
+            /// <summary>
+            /// Speaker must have danger level of at least this much
+            /// </summary>
+            public DangerLevelValue DangerLevel;
             public AttitudeValue Attitude;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding3;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             public SubjectActorTypeValue SubjectActorType;
             public CauseActorTypeValue CauseActorType;
             public CauseTypeValue CauseType;
             public SubjectTypeValue SubjectType;
             public StringId CauseAiTypeName;
-            public SpatialRelationValue SpatialRelation; // with respect to the subject, the cause is ...
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding4;
+            /// <summary>
+            /// with respect to the subject, the cause is ...
+            /// </summary>
+            public SpatialRelationValue SpatialRelation;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             public StringId SubjectAiTypeName;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding5;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
             public ConditionsValue Conditions;
             
             public enum DialogueTypeValue : short
             {
                 Death,
                 Unused,
-                Unused0,
+                Unused1,
                 Damage,
                 DamageUnused1,
                 DamageUnused2,
                 SightedNew,
                 SightedNewMajor,
-                Unused1,
+                Unused2,
                 SightedOld,
                 SightedFirst,
                 SightedSpecial,
-                Unused2,
-                HeardNew,
                 Unused3,
-                HeardOld,
+                HeardNew,
                 Unused4,
+                HeardOld,
                 Unused5,
                 Unused6,
-                AcknowledgeMultiple,
                 Unused7,
+                AcknowledgeMultiple,
                 Unused8,
                 Unused9,
+                Unused10,
                 FoundUnit,
                 FoundUnitPresearch,
                 FoundUnitPursuit,
@@ -285,14 +1506,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 Charging,
                 SuppressingFire,
                 GrenadeUncover,
-                Unused10,
                 Unused11,
+                Unused12,
                 Dive,
                 Evade,
                 Avoid,
                 Surprised,
-                Unused12,
                 Unused13,
+                Unused14,
                 Presearch,
                 PresearchStart,
                 Search,
@@ -319,31 +1540,31 @@ namespace TagTool.Tags.Definitions.Gen2
                 RetreatFromLowShield,
                 Flee,
                 Cowering,
-                Unused14,
                 Unused15,
                 Unused16,
+                Unused17,
                 Cover,
                 Covered,
-                Unused17,
                 Unused18,
                 Unused19,
+                Unused20,
                 PursuitStart,
                 PursuitSyncStart,
                 PursuitSyncJoin,
                 PursuitSyncQuorum,
                 Melee,
-                Unused20,
                 Unused21,
                 Unused22,
+                Unused23,
                 VehicleFalling,
                 VehicleWoohoo,
                 VehicleScared,
                 VehicleCrazy,
-                Unused23,
                 Unused24,
-                Leap,
                 Unused25,
+                Leap,
                 Unused26,
+                Unused27,
                 PostcombatWin,
                 PostcombatLose,
                 PostcombatNeutral,
@@ -351,7 +1572,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 PostcombatStart,
                 InspectBodyStart,
                 PostcombatStatus,
-                Unused27,
+                Unused28,
                 VehicleEntryStartDriver,
                 VehicleEnter,
                 VehicleEntryStartGun,
@@ -360,8 +1581,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 EvictDriver,
                 EvictGunner,
                 EvictPassenger,
-                Unused28,
                 Unused29,
+                Unused30,
                 NewOrderAdvance,
                 NewOrderCharge,
                 NewOrderFallback,
@@ -373,7 +1594,6 @@ namespace TagTool.Tags.Definitions.Gen2
                 NewOrderFllplr,
                 NewOrderLeaveplr,
                 NewOrderSupport,
-                Unused30,
                 Unused31,
                 Unused32,
                 Unused33,
@@ -385,24 +1605,24 @@ namespace TagTool.Tags.Definitions.Gen2
                 Unused39,
                 Unused40,
                 Unused41,
-                Emerge,
                 Unused42,
+                Emerge,
                 Unused43,
                 Unused44,
-                Curse,
                 Unused45,
+                Curse,
                 Unused46,
                 Unused47,
-                Threaten,
                 Unused48,
+                Threaten,
                 Unused49,
                 Unused50,
-                CoverFriend,
                 Unused51,
+                CoverFriend,
                 Unused52,
                 Unused53,
-                Strike,
                 Unused54,
+                Strike,
                 Unused55,
                 Unused56,
                 Unused57,
@@ -410,47 +1630,48 @@ namespace TagTool.Tags.Definitions.Gen2
                 Unused59,
                 Unused60,
                 Unused61,
-                Gloat,
                 Unused62,
+                Gloat,
                 Unused63,
                 Unused64,
-                Greet,
                 Unused65,
+                Greet,
                 Unused66,
                 Unused67,
                 Unused68,
+                Unused69,
                 PlayerLook,
                 PlayerLookLongtime,
-                Unused69,
                 Unused70,
                 Unused71,
                 Unused72,
-                PanicGrenadeAttached,
                 Unused73,
+                PanicGrenadeAttached,
                 Unused74,
                 Unused75,
                 Unused76,
-                HelpResponse,
                 Unused77,
+                HelpResponse,
                 Unused78,
                 Unused79,
-                Remind,
                 Unused80,
+                Remind,
                 Unused81,
                 Unused82,
                 Unused83,
+                Unused84,
                 WeaponTradeBetter,
                 WeaponTradeWorse,
                 WeaponReadeEqual,
-                Unused84,
                 Unused85,
                 Unused86,
-                Betray,
                 Unused87,
-                Forgive,
+                Betray,
                 Unused88,
+                Forgive,
+                Unused89,
                 Reanimate,
-                Unused89
+                Unused90
             }
             
             public enum SpeakerTypeValue : short
@@ -563,7 +1784,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 CarrierForm,
                 Monitor,
                 Sentinel,
-                None0,
+                None1,
                 MountedWeapon,
                 Brute,
                 Prophet,
@@ -588,7 +1809,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 CarrierForm,
                 Monitor,
                 Sentinel,
-                None0,
+                None1,
                 MountedWeapon,
                 Brute,
                 Prophet,
@@ -698,8 +1919,8 @@ namespace TagTool.Tags.Definitions.Gen2
         public class InvoluntaryDataBlock : TagStructure
         {
             public short InvoluntaryVocalizationIndex;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
     }
 }

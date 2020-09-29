@@ -2,81 +2,87 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "model", Tag = "hlmt", Size = 0x15C)]
+    [TagStructure(Name = "model", Tag = "hlmt", Size = 0xFC)]
     public class Model : TagStructure
     {
-        /// <summary>
-        /// MODEL
-        /// </summary>
+        [TagField(ValidTags = new [] { "mode" })]
         public CachedTag RenderModel;
+        [TagField(ValidTags = new [] { "coll" })]
         public CachedTag CollisionModel;
+        [TagField(ValidTags = new [] { "jmad" })]
         public CachedTag Animation;
+        [TagField(ValidTags = new [] { "phys" })]
         public CachedTag Physics;
+        [TagField(ValidTags = new [] { "phmo" })]
         public CachedTag PhysicsModel;
         /// <summary>
-        /// level of detail
-        /// </summary>
-        /// <remarks>
         /// If a model is further away than the LOD reduction distance, it will be reduced to that LOD.
-        /// So the L1 reduction distance should be really long and the L5 reduction distance should be really short.
-        /// This means distances should be in descending order, e.g. 5 4 3 2 1.
+        /// So the L1 reduction distance
+        /// should be really long and the L5 reduction distance should be really short.
+        /// This means distances should be in descending
+        /// order, e.g. 5 4 3 2 1.
         /// 
-        /// Note that if we run out of memory or too many models are on screen at once, the engine may reduce
+        /// Note that if we run out of memory or too many models are on screen at once, the engine may
+        /// reduce
         /// models to a lower LOD BEFORE they reach the reduction distance for that LOD.
         /// 
-        /// If a model has a begin fade distance and disappear distance, it will begin fading out at that distance,
-        /// reaching zero alpha and disappearing at the disappear distance. These distances should be greater than all
+        /// If a model has a begin fade distance
+        /// and disappear distance, it will begin fading out at that distance,
+        /// reaching zero alpha and disappearing at the disappear
+        /// distance. These distances should be greater than all
         /// of the LOD reduction distances.
         /// 
-        /// </remarks>
+        /// </summary>
         public float DisappearDistance; // world units
         public float BeginFadeDistance; // world units
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding1;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public float ReduceToL1; // world units (super low)
         public float ReduceToL2; // world units (low)
         public float ReduceToL3; // world units (medium)
         public float ReduceToL4; // world units (high)
         public float ReduceToL5; // world units (super high)
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Unknown2;
+        [TagField(Length = 0x4)]
+        public byte[] Unknown;
         public ShadowFadeDistanceValue ShadowFadeDistance;
-        [TagField(Flags = Padding, Length = 2)]
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        public List<ModelVariantBlock> Variants;
+        public List<ModelMaterialBlock> Materials;
+        public List<GlobalDamageInfoBlock> NewDamageInfo;
+        public List<ModelTargetBlock> Targets;
+        public List<ModelRegionBlock> Unknown1;
+        public List<ModelNodeBlock> Unknown2;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
         public byte[] Padding2;
-        public List<ModelVariant> Variants;
-        public List<ModelMaterial> Materials;
-        public List<ModelDamageInfo> NewDamageInfo;
-        public List<ModelTarget> Targets;
-        public List<ModelRegion> Unknown3;
-        public List<ModelNode> Unknown4;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding3;
         public List<ModelObjectDataBlock> ModelObjectData;
         /// <summary>
-        /// more stuff
+        /// The default dialogue tag for this model (overriden by variants)
         /// </summary>
-        public CachedTag DefaultDialogue; // The default dialogue tag for this model (overriden by variants)
+        [TagField(ValidTags = new [] { "udlg" })]
+        public CachedTag DefaultDialogue;
+        [TagField(ValidTags = new [] { "shad" })]
         public CachedTag Unused;
         public FlagsValue Flags;
-        public StringId DefaultDialogueEffect; // The default dialogue tag for this model (overriden by variants)
-        public sbyte Unknown5;
-        [TagField(Length = 32)]
-        public sbyte RenderOnlyNodeFlags;
-        public sbyte Unknown7;
-        [TagField(Length = 32)]
-        public sbyte RenderOnlySectionFlags;
-        public RuntimeFlagsValue RuntimeFlags;
-        public List<ScenarioLoadParametersBlock> ScenarioLoadParameters;
         /// <summary>
-        /// HOLOGRAM
+        /// The default dialogue tag for this model (overriden by variants)
         /// </summary>
-        /// <remarks>
+        public StringId DefaultDialogueEffect;
+        [TagField(Length = 32)]
+        public sbyte[] Unknown3;
+        [TagField(Length = 32)]
+        public sbyte[] Unknown4;
+        public RuntimeFlagsValue RuntimeFlags;
+        public List<GlobalScenarioLoadParametersBlock> ScenarioLoadParameters;
+        /// <summary>
         /// hologram shader is applied whenever the control function from it's object is non-zero
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "shad" })]
         public CachedTag HologramShader;
         public StringId HologramControlFunction;
         
@@ -90,48 +96,52 @@ namespace TagTool.Tags.Definitions.Gen2
             FadeNever
         }
         
-        [TagStructure(Size = 0x48)]
-        public class ModelVariant : TagStructure
+        [TagStructure(Size = 0x38)]
+        public class ModelVariantBlock : TagStructure
         {
             public StringId Name;
-            [TagField(Flags = Padding, Length = 16)]
+            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<ModelVariantRegionBlock> Regions;
+            public List<ModelVariantObjectBlock> Objects;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            public List<ModelVariantRegion> Regions;
-            public List<ModelVariantObject> Objects;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding2;
             public StringId DialogueSoundEffect;
+            [TagField(ValidTags = new [] { "udlg" })]
             public CachedTag Dialogue;
             
-            [TagStructure(Size = 0x18)]
-            public class ModelVariantRegion : TagStructure
+            [TagStructure(Size = 0x14)]
+            public class ModelVariantRegionBlock : TagStructure
             {
                 public StringId RegionName; // must match region name in render_model
-                [TagField(Flags = Padding, Length = 1)]
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding2;
                 public short ParentVariant;
-                public List<ModelVariantPermutation> Permutations;
-                public SortOrderValue SortOrder; // negative values mean closer to the camera
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding3;
+                public List<ModelVariantPermutationBlock> Permutations;
+                /// <summary>
+                /// negative values mean closer to the camera
+                /// </summary>
+                public SortOrderValue SortOrder;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
                 
-                [TagStructure(Size = 0x24)]
-                public class ModelVariantPermutation : TagStructure
+                [TagStructure(Size = 0x20)]
+                public class ModelVariantPermutationBlock : TagStructure
                 {
                     public StringId PermutationName;
-                    [TagField(Flags = Padding, Length = 1)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public FlagsValue Flags;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding2;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
                     public float Probability; // (0,+inf)
-                    public List<ModelVariantState> States;
-                    [TagField(Flags = Padding, Length = 5)]
+                    public List<ModelVariantStateBlock> States;
+                    [TagField(Length = 0x5, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding2;
+                    [TagField(Length = 0x7, Flags = TagFieldFlags.Padding)]
                     public byte[] Padding3;
-                    [TagField(Flags = Padding, Length = 7)]
-                    public byte[] Padding4;
                     
                     [Flags]
                     public enum FlagsValue : byte
@@ -139,15 +149,19 @@ namespace TagTool.Tags.Definitions.Gen2
                         CopyStatesToAllPermutations = 1 << 0
                     }
                     
-                    [TagStructure(Size = 0x20)]
-                    public class ModelVariantState : TagStructure
+                    [TagStructure(Size = 0x18)]
+                    public class ModelVariantStateBlock : TagStructure
                     {
                         public StringId PermutationName;
-                        [TagField(Flags = Padding, Length = 1)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                         public PropertyFlagsValue PropertyFlags;
                         public StateValue State;
-                        public CachedTag LoopingEffect; // played while the model is in this state
+                        /// <summary>
+                        /// played while the model is in this state
+                        /// </summary>
+                        [TagField(ValidTags = new [] { "effe" })]
+                        public CachedTag LoopingEffect;
                         public StringId LoopingEffectMarkerName;
                         public float InitialProbability;
                         
@@ -179,36 +193,37 @@ namespace TagTool.Tags.Definitions.Gen2
                     _2,
                     _1,
                     _0SameAsModel,
-                    _10,
+                    _11,
                     _21,
-                    _32,
-                    _43,
+                    _31,
+                    _41,
                     _5Farthest
                 }
             }
             
-            [TagStructure(Size = 0x18)]
-            public class ModelVariantObject : TagStructure
+            [TagStructure(Size = 0x10)]
+            public class ModelVariantObjectBlock : TagStructure
             {
                 public StringId ParentMarker;
                 public StringId ChildMarker;
+                [TagField(ValidTags = new [] { "obje" })]
                 public CachedTag ChildObject;
             }
         }
         
         [TagStructure(Size = 0x14)]
-        public class ModelMaterial : TagStructure
+        public class ModelMaterialBlock : TagStructure
         {
             public StringId MaterialName;
             public MaterialTypeValue MaterialType;
             public short DamageSection;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
             public StringId GlobalMaterialName;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding3;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             
             public enum MaterialTypeValue : short
             {
@@ -248,62 +263,90 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x140)]
-        public class ModelDamageInfo : TagStructure
+        [TagStructure(Size = 0xF8)]
+        public class GlobalDamageInfoBlock : TagStructure
         {
             public FlagsValue Flags;
-            public StringId GlobalIndirectMaterialName; // absorbes AOE or child damage
-            public short IndirectDamageSection; // absorbes AOE or child damage
-            [TagField(Flags = Padding, Length = 2)]
+            /// <summary>
+            /// absorbes AOE or child damage
+            /// </summary>
+            public StringId GlobalIndirectMaterialName;
+            /// <summary>
+            /// absorbes AOE or child damage
+            /// </summary>
+            public short IndirectDamageSection;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
             public CollisionDamageReportingTypeValue CollisionDamageReportingType;
             public ResponseDamageReportingTypeValue ResponseDamageReportingType;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
             public byte[] Padding3;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding4;
-            /// <summary>
-            /// body
-            /// </summary>
             public float MaximumVitality;
-            public float MinimumStunDamage; // the minimum damage required to stun this object's health
+            /// <summary>
+            /// the minimum damage required to stun this object's health
+            /// </summary>
+            public float MinimumStunDamage;
+            /// <summary>
+            /// the length of time the health stay stunned (do not recharge) after taking damage
+            /// </summary>
             public float StunTime; // seconds
+            /// <summary>
+            /// the length of time it would take for the shields to fully recharge after being completely depleted
+            /// </summary>
             public float RechargeTime; // seconds
-            public float RechargeFraction; // 0 defaults to 1 - to what maximum level the body health will be allowed to recharge
-            [TagField(Flags = Padding, Length = 64)]
-            public byte[] Padding5;
             /// <summary>
-            /// shield
+            /// 0 defaults to 1 - to what maximum level the body health will be allowed to recharge
             /// </summary>
+            public float RechargeFraction;
+            [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag ShieldDamagedFirstPersonShader;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag ShieldDamagedShader;
-            public float MaximumShieldVitality; // the default initial and maximum shield vitality of this object
-            public StringId GlobalShieldMaterialName;
-            public float MinimumStunDamage1; // the minimum damage required to stun this object's shields
-            public float StunTime2; // seconds
-            public float RechargeTime3; // seconds
-            public float ShieldDamagedThreshold;
-            public CachedTag ShieldDamagedEffect;
-            public CachedTag ShieldDepletedEffect;
-            public CachedTag ShieldRechargingEffect;
-            public List<ModelDamageSection> DamageSections;
-            public List<DamageNode> Nodes;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding6;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding7;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding8;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding9;
-            public List<DamageSeatInfo> DamageSeats;
-            public List<DamageConstraintInfo> DamageConstraints;
             /// <summary>
-            /// overshield
+            /// the default initial and maximum shield vitality of this object
             /// </summary>
+            public float MaximumShieldVitality;
+            public StringId GlobalShieldMaterialName;
+            /// <summary>
+            /// the minimum damage required to stun this object's shields
+            /// </summary>
+            public float MinimumStunDamage1;
+            /// <summary>
+            /// the length of time the shields stay stunned (do not recharge) after taking damage
+            /// </summary>
+            public float StunTime1; // seconds
+            /// <summary>
+            /// the length of time it would take for the shields to fully recharge after being completely depleted
+            /// </summary>
+            public float RechargeTime1; // seconds
+            public float ShieldDamagedThreshold;
+            [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag ShieldDamagedEffect;
+            [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag ShieldDepletedEffect;
+            [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag ShieldRechargingEffect;
+            public List<GlobalDamageSectionBlock> DamageSections;
+            public List<GlobalDamageNodesBlock> Nodes;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding6;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding7;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding8;
+            public List<DamageSeatInfoBlock> DamageSeats;
+            public List<DamageConstraintInfoBlock> DamageConstraints;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag OvershieldFirstPersonShader;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag OvershieldShader;
             
             [Flags]
@@ -412,30 +455,31 @@ namespace TagTool.Tags.Definitions.Gen2
                 Teleporter
             }
             
-            [TagStructure(Size = 0x44)]
-            public class ModelDamageSection : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class GlobalDamageSectionBlock : TagStructure
             {
                 public StringId Name;
                 /// <summary>
-                /// damage section flags
-                /// </summary>
-                /// <remarks>
                 /// * absorbs body damage: damage to this section does not count against body vitality
-                /// * headshottable: takes extra headshot damage when shot
+                /// * headshottable: takes extra headshot
+                /// damage when shot
                 /// * ignores shields: damage to this section bypasses shields
-                /// </remarks>
+                /// </summary>
                 public FlagsValue Flags;
+                /// <summary>
+                /// percentage of total object vitality
+                /// </summary>
                 public float VitalityPercentage; // [0.1]
-                public List<InstantaneousDamageResponse> InstantResponses;
-                public List<GNullBlock> Unknown1;
-                public List<GNullBlock> Unknown2;
+                public List<InstantaneousDamageRepsonseBlock> InstantResponses;
+                public List<GNullBlock> Unknown;
+                public List<GNullBlock1> Unknown1;
                 public float StunTime; // seconds
                 public float RechargeTime; // seconds
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public StringId ResurrectionRestoredRegionName;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding2;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 [Flags]
                 public enum FlagsValue : uint
@@ -446,87 +490,79 @@ namespace TagTool.Tags.Definitions.Gen2
                     TakesFullDmgWhenObjDstryd = 1 << 3,
                     RestoredOnRessurection = 1 << 4,
                     Unused = 1 << 5,
-                    Unused0 = 1 << 6,
+                    Unused1 = 1 << 6,
                     Heatshottable = 1 << 7,
                     IgnoresShields = 1 << 8
                 }
                 
-                [TagStructure(Size = 0x68)]
-                public class InstantaneousDamageResponse : TagStructure
+                [TagStructure(Size = 0x50)]
+                public class InstantaneousDamageRepsonseBlock : TagStructure
                 {
                     public ResponseTypeValue ResponseType;
                     /// <summary>
-                    /// Constraint damage type
-                    /// </summary>
-                    /// <remarks>
                     /// * if you specify a constraint group name (see lower section of this block)
                     ///   you can specify a constraint damage
-                    /// * loosening a constraint takes it out of the rigid state - activates it
-                    /// * destroying a constraint sets the attached body free
-                    /// </remarks>
+                    /// *
+                    /// loosening a constraint takes it out of the rigid state - activates it
+                    /// * destroying a constraint sets the attached body
+                    /// free
+                    /// </summary>
                     public ConstraintDamageTypeValue ConstraintDamageType;
                     /// <summary>
-                    /// Damage response flags
-                    /// </summary>
-                    /// <remarks>
                     /// * kills object: when the response fires the object dies regardless of its current health
-                    /// * inhibits x: from halo 1 - disallows basic behaviors for a unit
+                    /// * inhibits x: from halo 1 -
+                    /// disallows basic behaviors for a unit
                     /// * forces drop weapon: from halo 1 - makes the unit drop its current weapon
-                    /// * kills weapon x trigger: destroys the x trigger on the unit's current weapon
-                    /// * destroys object: when the response fires the object is destroyed
-                    /// </remarks>
+                    /// * kills
+                    /// weapon x trigger: destroys the x trigger on the unit's current weapon
+                    /// * destroys object: when the response fires the
+                    /// object is destroyed
+                    /// </summary>
                     public FlagsValue Flags;
-                    public float DamageThreshold; // repsonse fires after crossing this threshold.  1=full health
+                    /// <summary>
+                    /// repsonse fires after crossing this threshold.  1=full health
+                    /// </summary>
+                    public float DamageThreshold;
+                    [TagField(ValidTags = new [] { "effe" })]
                     public CachedTag TransitionEffect;
-                    public TagReference DamageEffect;
+                    public InstantaneousResponseDamageEffectStructBlock DamageEffect;
                     public StringId Region;
                     public NewStateValue NewState;
                     public short RuntimeRegionIndex;
                     public StringId EffectMarkerName;
-                    public StringId DamageEffectMarker;
+                    public InstantaneousResponseDamageEffectMarkerStructBlock DamageEffectMarker;
                     /// <summary>
-                    /// Response delay
+                    /// If desired, you can specify a delay until the response fires.This delay is pre-empted if another timed response for the
+                    /// same section fires.The delay effect plays while the timer is counting down
                     /// </summary>
-                    /// <remarks>
-                    /// If desired, you can specify a delay until the response fires.This delay is pre-empted if another timed response for the same section fires.The delay effect plays while the timer is counting down
-                    /// </remarks>
-                    public float ResponseDelay; // in seconds
+                    /// <summary>
+                    /// in seconds
+                    /// </summary>
+                    public float ResponseDelay;
+                    [TagField(ValidTags = new [] { "effe" })]
                     public CachedTag DelayEffect;
                     public StringId DelayEffectMarkerName;
                     /// <summary>
-                    /// Constraint destruction
-                    /// </summary>
-                    /// <remarks>
                     /// - a response can destroy a single constraint by naming it explicitly.
-                    /// - alternatively it can randomly destroy a single constraint from a specified group if the "destroy one group constraint" flag is set
-                    /// - also it can destroy all constraints in a specified group if the "destroy all group constraints" flag is set
+                    /// - alternatively it can randomly destroy a single
+                    /// constraint from a specified group if the "destroy one group constraint" flag is set
+                    /// - also it can destroy all constraints
+                    /// in a specified group if the "destroy all group constraints" flag is set
                     /// 
-                    /// </remarks>
-                    public StringId ConstraintGroupName;
-                    /// <summary>
-                    /// seat ejaculation
                     /// </summary>
+                    public StringId ConstraintGroupName;
                     public StringId EjectingSeatLabel;
                     /// <summary>
-                    /// skip fraction
-                    /// </summary>
-                    /// <remarks>
                     /// 0.0 always fires, 1.0 never fires
-                    /// </remarks>
+                    /// </summary>
                     public float SkipFraction;
                     /// <summary>
-                    /// destroyed child object marker name
-                    /// </summary>
-                    /// <remarks>
                     /// when this response fires, any children objects created at the supplied marker name will be destroyed
-                    /// </remarks>
+                    /// </summary>
                     public StringId DestroyedChildObjectMarkerName;
                     /// <summary>
-                    /// total damage threshold
-                    /// </summary>
-                    /// <remarks>
                     /// scale on total damage section vitality
-                    /// </remarks>
+                    /// </summary>
                     public float TotalDamageThreshold;
                     
                     public enum ResponseTypeValue : short
@@ -575,9 +611,10 @@ namespace TagTool.Tags.Definitions.Gen2
                         OnlyNotOnSpecialDeath = 1 << 24
                     }
                     
-                    [TagStructure(Size = 0x10)]
-                    public class TagReference : TagStructure
+                    [TagStructure(Size = 0x8)]
+                    public class InstantaneousResponseDamageEffectStructBlock : TagStructure
                     {
+                        [TagField(ValidTags = new [] { "jpt!" })]
                         public CachedTag TransitionDamageEffect;
                     }
                     
@@ -591,7 +628,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x4)]
-                    public class StringId : TagStructure
+                    public class InstantaneousResponseDamageEffectMarkerStructBlock : TagStructure
                     {
                         public StringId DamageEffectMarkerName;
                     }
@@ -601,58 +638,81 @@ namespace TagTool.Tags.Definitions.Gen2
                 public class GNullBlock : TagStructure
                 {
                 }
+                
+                [TagStructure()]
+                public class GNullBlock1 : TagStructure
+                {
+                }
             }
             
             [TagStructure(Size = 0x10)]
-            public class DamageNode : TagStructure
+            public class GlobalDamageNodesBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding3;
             }
             
             [TagStructure(Size = 0x14)]
-            public class DamageSeatInfo : TagStructure
+            public class DamageSeatInfoBlock : TagStructure
             {
                 public StringId SeatLabel;
-                public float DirectDamageScale; // 0==no damage, 1==full damage
+                /// <summary>
+                /// 0==no damage, 1==full damage
+                /// </summary>
+                public float DirectDamageScale;
                 public float DamageTransferFallOffRadius;
                 public float MaximumTransferDamageScale;
                 public float MinimumTransferDamageScale;
             }
             
             [TagStructure(Size = 0x14)]
-            public class DamageConstraintInfo : TagStructure
+            public class DamageConstraintInfoBlock : TagStructure
             {
                 public StringId PhysicsModelConstraintName;
                 public StringId DamageConstraintName;
                 public StringId DamageConstraintGroupName;
                 public float GroupProbabilityScale;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x1C)]
-        public class ModelTarget : TagStructure
+        public class ModelTargetBlock : TagStructure
         {
-            public StringId MarkerName; // multiple markers become multiple spheres of the same radius
-            public float Size; // sphere radius
-            public Angle ConeAngle; // the target is only visible when viewed within this angle of the marker's x axis
-            public short DamageSection; // the target is associated with this damage section
-            public short Variant; // the target will only appear with this variant
-            public float TargetingRelevance; // higher relevances turn into stronger magnetisms
-            public ModelTargetLockOnData LockOnData;
+            /// <summary>
+            /// multiple markers become multiple spheres of the same radius
+            /// </summary>
+            public StringId MarkerName;
+            /// <summary>
+            /// sphere radius
+            /// </summary>
+            public float Size;
+            /// <summary>
+            /// the target is only visible when viewed within this angle of the marker's x axis
+            /// </summary>
+            public Angle ConeAngle;
+            /// <summary>
+            /// the target is associated with this damage section
+            /// </summary>
+            public short DamageSection;
+            /// <summary>
+            /// the target will only appear with this variant
+            /// </summary>
+            public short Variant;
+            /// <summary>
+            /// higher relevances turn into stronger magnetisms
+            /// </summary>
+            public float TargetingRelevance;
+            public ModelTargetLockOnDataStructBlock LockOnData;
             
             [TagStructure(Size = 0x8)]
-            public class ModelTargetLockOnData : TagStructure
+            public class ModelTargetLockOnDataStructBlock : TagStructure
             {
-                /// <summary>
-                /// lock-on fields
-                /// </summary>
                 public FlagsValue Flags;
                 public float LockOnDistance;
                 
@@ -668,24 +728,24 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x14)]
-        public class ModelRegion : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class ModelRegionBlock : TagStructure
         {
             public StringId Name;
             public sbyte CollisionRegionIndex;
             public sbyte PhysicsRegionIndex;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public List<ModelPermutation> Permutations;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<ModelPermutationBlock> Permutations;
             
             [TagStructure(Size = 0x8)]
-            public class ModelPermutation : TagStructure
+            public class ModelPermutationBlock : TagStructure
             {
                 public StringId Name;
                 public FlagsValue Flags;
                 public sbyte CollisionPermutationIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum FlagsValue : byte
@@ -696,14 +756,14 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x5C)]
-        public class ModelNode : TagStructure
+        public class ModelNodeBlock : TagStructure
         {
             public StringId Name;
             public short ParentNode;
             public short FirstChildNode;
             public short NextSiblingNode;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public RealPoint3d DefaultTranslation;
             public RealQuaternion DefaultRotation;
             public float DefaultInverseScale;
@@ -717,8 +777,8 @@ namespace TagTool.Tags.Definitions.Gen2
         public class ModelObjectDataBlock : TagStructure
         {
             public TypeValue Type;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public RealPoint3d Offset;
             public float Radius;
             
@@ -744,22 +804,21 @@ namespace TagTool.Tags.Definitions.Gen2
             ContainsRunTimeNodes = 1 << 0
         }
         
-        [TagStructure(Size = 0x44)]
-        public class ScenarioLoadParametersBlock : TagStructure
+        [TagStructure(Size = 0x30)]
+        public class GlobalScenarioLoadParametersBlock : TagStructure
         {
             /// <summary>
-            /// SCENARIO LOAD PARAMETERS
-            /// </summary>
-            /// <remarks>
             /// strip-variant variant-name
             /// strips a given variant out of the model tag
             /// strip-dialogue
-            /// strips all the dialogue for this model i.e. cinematic only
-            /// </remarks>
+            /// strips all the dialogue for this
+            /// model i.e. cinematic only
+            /// </summary>
+            [TagField(ValidTags = new [] { "scnr" })]
             public CachedTag Scenario;
             public byte[] Parameters;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding1;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
     }
 }

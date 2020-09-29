@@ -744,6 +744,7 @@
     <Compile Include="Tags\Definitions\Gen2\ShaderPass.cs" />
     <Compile Include="Tags\Definitions\Gen2\ShaderTemplate.cs" />
     <Compile Include="Tags\Definitions\Gen2\Sky.cs" />
+    <Compile Include="Tags\Definitions\Gen2\Sound.cs" />
     <Compile Include="Tags\Definitions\Gen2\SoundCacheFileGestalt.cs" />
     <Compile Include="Tags\Definitions\Gen2\SoundClasses.cs" />
     <Compile Include="Tags\Definitions\Gen2\SoundDialogueConstants.cs" />

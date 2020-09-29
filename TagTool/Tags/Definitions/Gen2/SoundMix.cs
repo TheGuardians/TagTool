@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
@@ -10,76 +11,46 @@ namespace TagTool.Tags.Definitions.Gen2
     public class SoundMix : TagStructure
     {
         /// <summary>
-        /// first person left side mix
-        /// </summary>
-        /// <remarks>
         /// for first person sounds to the left of you
-        /// </remarks>
+        /// </summary>
         public float LeftStereoGain; // dB
         public float RightStereoGain; // dB
         /// <summary>
-        /// first person middle mix
-        /// </summary>
-        /// <remarks>
         /// for first person sounds between your ears
-        /// </remarks>
+        /// </summary>
         public float LeftStereoGain1; // dB
-        public float RightStereoGain2; // dB
+        public float RightStereoGain1; // dB
         /// <summary>
-        /// first person right side mix
-        /// </summary>
-        /// <remarks>
         /// for first person sounds to the right of you
-        /// </remarks>
-        public float LeftStereoGain3; // dB
-        public float RightStereoGain4; // dB
-        /// <summary>
-        /// first person stereo mix
         /// </summary>
+        public float LeftStereoGain2; // dB
+        public float RightStereoGain2; // dB
         public float FrontSpeakerGain; // dB
         public float RearSpeakerGain; // dB
-        /// <summary>
-        /// ambient stereo mix
-        /// </summary>
-        public float FrontSpeakerGain5; // dB
-        public float RearSpeakerGain6; // dB
-        /// <summary>
-        /// global mix
-        /// </summary>
-        public SoundGlobalMixConfiguration GlobalMix;
+        public float FrontSpeakerGain1; // dB
+        public float RearSpeakerGain1; // dB
+        public SoundGlobalMixStructBlock GlobalMix;
         
         [TagStructure(Size = 0x30)]
-        public class SoundGlobalMixConfiguration : TagStructure
+        public class SoundGlobalMixStructBlock : TagStructure
         {
             public float MonoUnspatializedGain; // dB
             public float StereoTo3dGain; // dB
             public float RearSurroundToFrontStereoGain; // dB
             /// <summary>
-            /// surround center mix
-            /// </summary>
-            /// <remarks>
             /// for sounds that use the center speaker
-            /// </remarks>
+            /// </summary>
             public float FrontSpeakerGain; // dB
             public float CenterSpeakerGain; // dB
             /// <summary>
-            /// stereo center mix
-            /// </summary>
-            /// <remarks>
             /// for sounds that use the center speaker
-            /// </remarks>
+            /// </summary>
             public float FrontSpeakerGain1; // dB
-            public float CenterSpeakerGain2; // dB
+            public float CenterSpeakerGain1; // dB
             /// <summary>
-            /// more sound lovin'
-            /// </summary>
-            /// <remarks>
             /// for sounds that use the center speaker
-            /// </remarks>
-            public float StereoUnspatializedGain; // dB
-            /// <summary>
-            /// last minute values
             /// </summary>
+            public float StereoUnspatializedGain; // dB
             public float SoloPlayerFadeOutDelay; //  seconds
             public float SoloPlayerFadeOutTime; //  seconds
             public float SoloPlayerFadeInTime; //  seconds

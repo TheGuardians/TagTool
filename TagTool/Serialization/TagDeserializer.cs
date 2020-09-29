@@ -484,9 +484,10 @@ namespace TagTool.Serialization
             var result = context.GetTagByIndex(reader.ReadInt32());
 
             if (result != null && valueInfo != null && valueInfo.ValidTags != null)
-                foreach (string tag in valueInfo.ValidTags)
-                    if (!result.IsInGroup(tag))
-                        throw new Exception($"Invalid group for tag reference: {result.Group.Tag}");
+            {
+                if(!valueInfo.ValidTags.Any(x => result.IsInGroup(x)))
+                    throw new Exception($"Invalid group for tag reference: {result.Group.Tag}");
+            }
 
             return result;
         }

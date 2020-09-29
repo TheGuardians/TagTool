@@ -2,50 +2,69 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "light", Tag = "ligh", Size = 0x110)]
+    [TagStructure(Name = "light", Tag = "ligh", Size = 0xE4)]
     public class Light : TagStructure
     {
         public FlagsValue Flags;
         /// <summary>
-        /// SHAPE
-        /// </summary>
-        /// <remarks>
         /// overall shape of the light
-        /// </remarks>
-        public TypeValue Type;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
-        public Bounds<float> SizeModifer; // how the light's size changes with external scale
-        public float ShadowQualityBias; // larger positive numbers improve quality, larger negative numbers improve speed
-        public ShadowTapBiasValue ShadowTapBias; // the less taps you use, the faster the light (but edges can look worse)
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding2;
-        /// <summary>
-        /// SPHERE LIGHT
         /// </summary>
-        /// <remarks>
+        public TypeValue Type;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        /// <summary>
+        /// how the light's size changes with external scale
+        /// </summary>
+        public Bounds<float> SizeModifer;
+        /// <summary>
+        /// larger positive numbers improve quality, larger negative numbers improve speed
+        /// </summary>
+        public float ShadowQualityBias;
+        /// <summary>
+        /// the less taps you use, the faster the light (but edges can look worse)
+        /// </summary>
+        public ShadowTapBiasValue ShadowTapBias;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        /// <summary>
         /// default shape parameters for spherical lights
-        /// </remarks>
+        /// </summary>
+        /// <summary>
+        /// the radius at which illumination falls off to zero
+        /// </summary>
         public float Radius; // world units
+        /// <summary>
+        /// the radius at which specular highlights fall off to zero (if zero, same as maximum radius)
+        /// </summary>
         public float SpecularRadius; // world units
         /// <summary>
-        /// FRUSTUM LIGHT
-        /// </summary>
-        /// <remarks>
         /// default shape parameters for frustum lights (orthogonal, projective or pyramid types)
-        /// </remarks>
-        public float NearWidth; // world units
-        public float HeightStretch; // how much the gel is stretched vertically (0.0 or 1.0 = aspect ratio same as gel)
-        public float FieldOfView; // degrees
-        public float FalloffDistance; // distance from near plane to where the light falloff starts
-        public float CutoffDistance; // distance from near plane to where illumination falls off to zero
-        /// <summary>
-        /// COLOR
         /// </summary>
+        /// <summary>
+        /// width of the frustum light at its near plane
+        /// </summary>
+        public float NearWidth; // world units
+        /// <summary>
+        /// how much the gel is stretched vertically (0.0 or 1.0 = aspect ratio same as gel)
+        /// </summary>
+        public float HeightStretch;
+        /// <summary>
+        /// horizontal angle that the frustum light covers (0.0 = no spread, a parallel beam)
+        /// </summary>
+        public float FieldOfView; // degrees
+        /// <summary>
+        /// distance from near plane to where the light falloff starts
+        /// </summary>
+        public float FalloffDistance;
+        /// <summary>
+        /// distance from near plane to where illumination falls off to zero
+        /// </summary>
+        public float CutoffDistance;
         public InterpolationFlagsValue InterpolationFlags;
         public Bounds<float> BloomBounds; // [0..2]
         public RealRgbColor SpecularLowerBound;
@@ -54,97 +73,128 @@ namespace TagTool.Tags.Definitions.Gen2
         public RealRgbColor DiffuseUpperBound;
         public Bounds<float> BrightnessBounds; // [0..2]
         /// <summary>
-        /// GEL
-        /// </summary>
-        /// <remarks>
         /// the gel map tints the light's illumination per-pixel
-        /// </remarks>
-        public CachedTag GelMap; // must be a cubemap for spherical light and a 2d texture for frustum light
-        public SpecularMaskValue SpecularMask;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding3;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding4;
-        /// <summary>
-        /// FALLOFF
         /// </summary>
+        /// <summary>
+        /// must be a cubemap for spherical light and a 2d texture for frustum light
+        /// </summary>
+        [TagField(ValidTags = new [] { "bitm" })]
+        public CachedTag GelMap;
+        public SpecularMaskValue SpecularMask;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
         public FalloffFunctionValue FalloffFunction;
         public DiffuseContrastValue DiffuseContrast;
         public SpecularContrastValue SpecularContrast;
         public FalloffGeometryValue FalloffGeometry;
         /// <summary>
-        /// LENS FLARE
-        /// </summary>
-        /// <remarks>
         /// optional lens flare and light volume associated with this light
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "lens" })]
         public CachedTag LensFlare;
+        /// <summary>
+        /// used to generate a bounding radius for lensflare-only lights
+        /// </summary>
         public float BoundingRadius; // world units
+        [TagField(ValidTags = new [] { "MGS2" })]
         public CachedTag LightVolume;
         /// <summary>
-        /// RADIOSITY
-        /// </summary>
-        /// <remarks>
         /// how the light affects the lightmaps (ignored for dynamic lights)
-        /// </remarks>
+        /// </summary>
         public DefaultLightmapSettingValue DefaultLightmapSetting;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding5;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding4;
         public float LightmapHalfLife;
         public float LightmapLightScale;
         /// <summary>
-        /// EFFECT PARAMETERS
-        /// </summary>
-        /// <remarks>
         /// if the light is created by an effect, it will animate itself as follows
-        /// </remarks>
-        public float Duration; // seconds
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding6;
-        public FalloffFunctionValue FalloffFunction1; // the scale of the light will diminish over time according to this function
-        /// <summary>
-        /// DISTANCE FADING PARAMETERS
         /// </summary>
-        /// <remarks>
+        /// <summary>
+        /// the light will last this long when created by an effect
+        /// </summary>
+        public float Duration; // seconds
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding5;
+        /// <summary>
+        /// the scale of the light will diminish over time according to this function
+        /// </summary>
+        public FalloffFunctionValue1 FalloffFunction1;
+        /// <summary>
         /// To fade the light's illumination and shadow casting abilities
-        /// </remarks>
+        /// </summary>
         public IlluminationFadeValue IlluminationFade;
         public ShadowFadeValue ShadowFade;
         public SpecularFadeValue SpecularFade;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding7;
-        /// <summary>
-        /// ANIMATION PARAMETERS
-        /// </summary>
-        public FlagsValue Flags2;
-        public List<LightBrightnessAnimationParameters> BrightnessAnimation;
-        public List<LightColorAnimationParameters> ColorAnimation;
-        public List<LightGelAnimationParameters> GelAnimation;
-        /// <summary>
-        /// SHADER
-        /// </summary>
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding6;
+        public FlagsValue1 Flags1;
+        public List<LightBrightnessAnimationBlock> BrightnessAnimation;
+        public List<LightColorAnimationBlock> ColorAnimation;
+        public List<LightGelAnimationBlock> GelAnimation;
+        [TagField(ValidTags = new [] { "shad" })]
         public CachedTag Shader;
         
         [Flags]
         public enum FlagsValue : uint
         {
+            /// <summary>
+            /// don't cast any per-pixel dynamic light
+            /// </summary>
             NoIllumination = 1 << 0,
+            /// <summary>
+            /// don't cast any specular highlights
+            /// </summary>
             NoSpecular = 1 << 1,
             ForceCastEnvironmentShadowsThroughPortals = 1 << 2,
+            /// <summary>
+            /// don't cast any stencil shadows
+            /// </summary>
             NoShadow = 1 << 3,
             ForceFrustumVisibilityOnSmallLight = 1 << 4,
             OnlyRenderInFirstPerson = 1 << 5,
             OnlyRenderInThirdPerson = 1 << 6,
+            /// <summary>
+            /// don't fade out this light when under active-camouflage
+            /// </summary>
             DonTFadeWhenInvisible = 1 << 7,
+            /// <summary>
+            /// don't turn off in multiplayer
+            /// </summary>
             MultiplayerOverride = 1 << 8,
             AnimatedGel = 1 << 9,
+            /// <summary>
+            /// only draw this light in dynamic reflection maps
+            /// </summary>
             OnlyInDynamicEnvmap = 1 << 10,
+            /// <summary>
+            /// don't illuminate or shadow the single object we are attached to
+            /// </summary>
             IgnoreParentObject = 1 << 11,
+            /// <summary>
+            /// don't shadow the object we are attached to
+            /// </summary>
             DonTShadowParent = 1 << 12,
+            /// <summary>
+            /// don't illuminate or shadow all the way up to our parent object
+            /// </summary>
             IgnoreAllParents = 1 << 13,
+            /// <summary>
+            /// don't click this unless you know what you're doing
+            /// </summary>
             MarchMilestoneHack = 1 << 14,
+            /// <summary>
+            /// every update will push light back inside the world
+            /// </summary>
             ForceLightInsideWorld = 1 << 15,
+            /// <summary>
+            /// environment in this light will not cast stencil shadows
+            /// </summary>
             EnvironmentDoesntCastStencilShadows = 1 << 16,
+            /// <summary>
+            /// objects in this light will not cast stencil shadows
+            /// </summary>
             ObjectsDonTCastStencilShadows = 1 << 17,
             FirstPersonFromCamera = 1 << 18,
             TextureCameraGel = 1 << 19,
@@ -171,7 +221,13 @@ namespace TagTool.Tags.Definitions.Gen2
         [Flags]
         public enum InterpolationFlagsValue : uint
         {
+            /// <summary>
+            /// blends colors in hsv rather than rgb space
+            /// </summary>
             BlendInHsv = 1 << 0,
+            /// <summary>
+            /// blends colors through more hues (goes the long way around the color wheel)
+            /// </summary>
             MoreColors = 1 << 1
         }
         
@@ -221,6 +277,18 @@ namespace TagTool.Tags.Definitions.Gen2
             LightmapsOnly
         }
         
+        public enum FalloffFunctionValue1 : short
+        {
+            Linear,
+            Late,
+            VeryLate,
+            Early,
+            VeryEarly,
+            Cosine,
+            Zero,
+            One
+        }
+        
         public enum IlluminationFadeValue : short
         {
             FadeVeryFar,
@@ -248,55 +316,73 @@ namespace TagTool.Tags.Definitions.Gen2
             FadeVeryClose
         }
         
-        [TagStructure(Size = 0xC)]
-        public class LightBrightnessAnimationParameters : TagStructure
+        [Flags]
+        public enum FlagsValue1 : uint
         {
-            public FunctionDefinition Function;
+            Synchronized = 1 << 0
+        }
+        
+        [TagStructure(Size = 0x8)]
+        public class LightBrightnessAnimationBlock : TagStructure
+        {
+            public MappingFunctionBlock Function;
             
-            [TagStructure(Size = 0xC)]
-            public class FunctionDefinition : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class MappingFunctionBlock : TagStructure
             {
-                public List<Byte> Data;
+                public List<ByteBlock> Data;
                 
                 [TagStructure(Size = 0x1)]
-                public class Byte : TagStructure
+                public class ByteBlock : TagStructure
                 {
                     public sbyte Value;
                 }
             }
         }
         
-        [TagStructure(Size = 0xC)]
-        public class LightColorAnimationParameters : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class LightColorAnimationBlock : TagStructure
         {
-            public FunctionDefinition Function;
+            public MappingFunctionBlock Function;
             
-            [TagStructure(Size = 0xC)]
-            public class FunctionDefinition : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class MappingFunctionBlock : TagStructure
             {
-                public List<Byte> Data;
+                public List<ByteBlock> Data;
                 
                 [TagStructure(Size = 0x1)]
-                public class Byte : TagStructure
+                public class ByteBlock : TagStructure
                 {
                     public sbyte Value;
                 }
             }
         }
         
-        [TagStructure(Size = 0x18)]
-        public class LightGelAnimationParameters : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class LightGelAnimationBlock : TagStructure
         {
-            public FunctionDefinition Dx;
-            public FunctionDefinition Dy;
+            public MappingFunctionBlock Dx;
+            public MappingFunctionBlock1 Dy;
             
-            [TagStructure(Size = 0xC)]
-            public class FunctionDefinition : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class MappingFunctionBlock : TagStructure
             {
-                public List<Byte> Data;
+                public List<ByteBlock> Data;
                 
                 [TagStructure(Size = 0x1)]
-                public class Byte : TagStructure
+                public class ByteBlock : TagStructure
+                {
+                    public sbyte Value;
+                }
+            }
+            
+            [TagStructure(Size = 0x8)]
+            public class MappingFunctionBlock1 : TagStructure
+            {
+                public List<ByteBlock> Data;
+                
+                [TagStructure(Size = 0x1)]
+                public class ByteBlock : TagStructure
                 {
                     public sbyte Value;
                 }

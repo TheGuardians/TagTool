@@ -1,29 +1,11 @@
-using TagTool.Cache;
-using TagTool.IO;
-using System.Collections.Generic;
-using System.IO;
-using System;
-using TagTool.Common;
-using TagTool.Tags.Definitions;
-using TagTool.Tags;
-using TagTool.Serialization;
-using TagTool.Bitmaps;
-using TagTool.Tags.Resources;
-using TagTool.Bitmaps.Utils;
-using TagTool.Bitmaps.DDS;
-using TagTool.Geometry;
-using TagTool.BlamFile;
-using TagTool.Cache.HaloOnline;
-using TagTool.Havok;
-using System.Linq;
-using System.IO.Compression;
-using TagTool.Tools.Geometry;
-using TagTool.Shaders;
-using TagTool.Shaders.ShaderGenerator;
-using TagTool.Commands.Shaders;
-using System.Diagnostics;
-using HaloShaderGenerator.Shader;
 using HaloShaderGenerator.Globals;
+using System;
+using System.Collections.Generic;
+using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
+using TagTool.Common;
+using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands
 {
