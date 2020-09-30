@@ -161,11 +161,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public short RigidNode;
             public SectionFlags Flags;
             public List<Mesh> Meshes;
-            public TagResourceReference BlockOffset;
-            public int BlockSize;
-            public uint SectionDataSize;
-            public uint ResourceDataSize;
-            public List<TagResourceGen2> Resources;
+            public CacheFileResourceGen2 Resource;
 
             [TagField(Flags = Short)]
             public CachedTag Original;
@@ -304,22 +300,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public List<LodInfoBlock> LodInfo;
             public List<ClusterBasisBlock> ClusterBasis;
             public List<RawPcaDatum> RawPcaData;
-            public List<Mesh.VertexBuffer> VertexBuffers;
-            public TagResourceReference BlockOffset;
-            public int BlockSize;
-            public uint SectionDataSize;
-            public uint ResourceDataSize;
-            public List<TagResourceGen2> Resources;
-
-            [TagField(Flags = Short)]
-            public CachedTag Original;
-
-            public short OwnerTagSectionOffset;
-            public byte RuntimeLinked;
-            public byte RuntimeLoaded;
-
-            [TagField(Flags = Short)]
-            public CachedTag Runtime;
+            public List<Gen2ResourceMesh.VertexBuffer> VertexBuffers;
+            public CacheFileResourceGen2 Resource;
 
             [TagStructure(Size = 0xC)]
             public class LodInfoBlock : TagStructure

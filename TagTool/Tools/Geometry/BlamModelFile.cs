@@ -606,7 +606,7 @@ namespace TagTool.Tools.Geometry
         [TagField(Length = Constants.StringLength, ForceNullTerminated = true)]
         public string Name;
 
-        public Mesh.Part.PartTypeNew DrawType = Mesh.Part.PartTypeNew.OpaqueShadowCasting;
+        public Part.PartTypeNew DrawType = Part.PartTypeNew.OpaqueShadowCasting;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
         public byte[] Padding;

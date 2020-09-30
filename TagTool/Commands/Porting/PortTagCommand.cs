@@ -985,7 +985,7 @@ namespace TagTool.Commands.Porting
 					renderGeometry = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderGeometry, definition, blamTagName);
 					return renderGeometry;
 
-				case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
+				case Part part when BlamCache.Version < CacheVersion.Halo3Retail:
 					part = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, part, definition, blamTagName);
 					if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
 						throw new NotSupportedException(part.TypeOld.ToString());
@@ -1044,7 +1044,7 @@ namespace TagTool.Commands.Porting
 
             switch (data)
             {
-                case Mesh.Part part:
+                case Part part:
                     if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
                         throw new NotSupportedException(part.TypeOld.ToString());
                     break;

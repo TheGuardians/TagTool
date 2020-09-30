@@ -24,8 +24,8 @@ namespace TagTool.Geometry
         private RenderModel.Region.Permutation _currentPermutation;
         private MeshData _currentMesh;
         public readonly List<MeshData> Meshes = new List<MeshData>();
-        private Mesh.Part _currentPart;
-        private readonly List<Mesh.SubPart> _subparts = new List<Mesh.SubPart>();
+        private Part _currentPart;
+        private readonly List<SubPart> _subparts = new List<SubPart>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderModelBuilder"/> class for a particular engine version.
@@ -177,8 +177,8 @@ namespace TagTool.Geometry
             {
                 Mesh = new Mesh
                 {
-                    Parts = new List<Mesh.Part>(),
-                    SubParts = new List<Mesh.SubPart>(),
+                    Parts = new List<Part>(),
+                    SubParts = new List<SubPart>(),
                     VertexBufferIndices = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 },
                     IndexBufferIndices = new short[2] { -1, -1 },
                     Flags = MeshFlags.None,
@@ -287,7 +287,7 @@ namespace TagTool.Geometry
             if (_currentMesh == null)
                 throw new InvalidOperationException("Cannot define a part if no mesh is active");
 
-            _currentPart = new Mesh.Part
+            _currentPart = new Part
             {
                 MaterialIndex = materialIndex,
                 TransparentSortingIndex = -1,
@@ -329,7 +329,7 @@ namespace TagTool.Geometry
                 throw new InvalidOperationException("Cannot define a part if no mesh is active");
 
             _currentMesh.Mesh.SubParts.Add(
-                new Mesh.SubPart
+                new SubPart
                 {
                     FirstIndex = firstIndex,
                     IndexCount = indexCount,

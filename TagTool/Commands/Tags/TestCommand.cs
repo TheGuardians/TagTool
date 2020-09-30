@@ -69,75 +69,45 @@ namespace TagTool.Commands
             }
         }
 
-        public void RenameMS30Shaders()
+        public byte[] GetCacheRawData(uint resourceAddress, int size)
         {
-            using (var stream = Cache.OpenCacheReadWrite())
+            var cacheFileType = (resourceAddress & 0xC0000000) >> 30;
+            int fileOffset = (int)(resourceAddress & 0x3FFFFFFF);
+
+            GameCacheGen2 sourceCache;
+
+            if (cacheFileType != 0)
             {
-                int newNameCount = 0;
-                foreach (var tag in Cache.TagCache.NonNull())
+                string filename = "";
+                switch (cacheFileType)
                 {
-                    var tagGroups = new Tag[] { "rm  ", new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-                    if (tag.IsInGroup(tagGroups))
-                    {
-                        CachedTagHaloOnline hoTag = tag as CachedTagHaloOnline;
-                        foreach (var dep in hoTag.Dependencies)
-                        {
-                            var depName = Cache.TagCache.GetTag(dep).Name;
-                            if (depName.Contains("ms30"))
-                            {
-                                if (!tag.Name.StartsWith("ms30"))
-                                {
-                                    Console.WriteLine(tag.Name);
-                                    tag.Name = "ms30\\" + tag.Name;
-                                    newNameCount += 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    case 1:
+                        filename = Path.Combine(Cache.Directory.FullName, "mainmenu.map");
+                        break;
+                    case 2:
+                        filename = Path.Combine(Cache.Directory.FullName, "shared.map");
+                        break;
+                    case 3:
+                        filename = Path.Combine(Cache.Directory.FullName, "single_player_shared.map");
+                        break;
+
                 }
-
-                Console.WriteLine($"Added ms30 prefix to {newNameCount} tags.");
-                var hoCache = Cache as GameCacheHaloOnline;
-                hoCache.SaveTagNames();
-
-                /*
-                foreach (var file in Cache.Directory.GetFiles("*.map"))
-                {
-                    using (var mapFileStream = file.Open(FileMode.Open, FileAccess.ReadWrite))
-                    {
-                        var reader = new EndianReader(mapFileStream);
-                        var writer = new EndianWriter(mapFileStream);
-
-                        var mapFile = new MapFile();
-                        mapFile.Read(reader);
-
-                        if (mapFile.MapFileBlf.MapVariant == null)
-                            continue;
-
-                        var tagNamesChunk = mapFile.MapFileBlf.MapVariantTagNames;
-                        var palette = mapFile.MapFileBlf.MapVariant.MapVariant.Palette;
-                        for (int i = 0; i < palette.Length; i++)
-                        {
-                            if (palette[i].TagIndex == -1)
-                                continue;
-
-                            var name = tagNamesChunk.Names[i].Name;
-                            string newName = $"ms30\\{name}";
-                            if (Cache.TagCache.TryGetTag(newName, out CachedTag tag))
-                            {
-                                tagNamesChunk.Names[i].Name = newName;
-                                Console.WriteLine($"Prefixed '{tag}'");
-                            }
-                        }
-
-                        mapFileStream.Position = 0;
-                        mapFile.Write(writer);
-                    }
-                }
-                */
-
+                // TODO: make this a function call with a stored reference to caches in the base cache or something better than this
+                sourceCache = (GameCacheGen2)GameCache.Open(new FileInfo(filename));
             }
+            else
+                sourceCache = (GameCacheGen2)Cache;
+
+            var stream = sourceCache.OpenCacheRead();
+
+            var reader = new EndianReader(stream, Cache.Endianness);
+
+            reader.SeekTo(fileOffset);
+            var data = reader.ReadBytes(size);
+
+            reader.Close();
+
+            return data;
         }
 
         public override object Execute(List<string> args)
@@ -155,6 +125,42 @@ namespace TagTool.Commands
                     {
                         var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
                         Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
+
+                        var section = modeTag.Sections[0];
+                        var resource = section.Resource;
+
+
+                        using (var resourceStream = new MemoryStream((Cache as GameCacheGen2).GetCacheRawData(resource.BlockOffset, (int)resource.BlockSize)))
+                        using (var reader = new EndianReader(resourceStream, Cache.Endianness))
+                        using (var writer = new EndianWriter(resourceStream, Cache.Endianness))
+                        {
+                            foreach (var tagResource in resource.TagResources)
+                            {
+                                resourceStream.Position = tagResource.FieldOffset;
+
+                                switch (tagResource.Type)
+                                {
+                                    case TagResourceTypeGen2.TagBlock:
+                                        writer.Write(tagResource.ResoureDataSize / tagResource.SecondaryLocator);
+                                        writer.Write(8 + resource.SectionDataSize + tagResource.ResourceDataOffset);
+                                        break;
+
+                                    case TagResourceTypeGen2.TagData:
+                                        writer.Write(tagResource.ResoureDataSize);
+                                        writer.Write(8 + resource.SectionDataSize + tagResource.ResourceDataOffset);
+                                        break;
+
+                                    case TagResourceTypeGen2.VertexBuffer:
+                                        break;
+                                }
+                            }
+
+                            resourceStream.Position = 0;
+
+                            var dataContext = new DataSerializationContext(reader);
+                            var mesh = Cache.Deserializer.Deserialize<Gen2ResourceMesh>(dataContext);
+
+                        }
                     }
                 }
             }

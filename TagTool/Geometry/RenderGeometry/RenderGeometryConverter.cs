@@ -151,7 +151,7 @@ namespace TagTool.Geometry
                         for (int j = 0; j < mesh.Parts.Count(); j++)
                         {
                             var part = mesh.Parts[j];
-                            if(part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.IsWaterPart))
+                            if(part.FlagsNew.HasFlag(Part.PartFlagsNew.IsWaterPart))
                                 waterData.PartData.Add(new Tuple<int, int>(part.FirstIndexOld, part.IndexCountOld));
                         }
 
