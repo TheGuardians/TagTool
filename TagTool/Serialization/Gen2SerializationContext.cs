@@ -22,7 +22,7 @@ namespace TagTool.Serialization
 
             if (tag.IsShared)
             {
-                GameCache = gameCache.SharedCache;
+                GameCache = gameCache.VistaSharedTagCache;
                 Stream = ((GameCacheGen2.Gen2CacheStream)stream).SharedStream;
             }
             else

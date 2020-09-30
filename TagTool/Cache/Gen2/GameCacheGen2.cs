@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen2;
@@ -17,9 +18,11 @@ namespace TagTool.Cache
         public TagCacheGen2 TagCacheGen2;
         public StringTableGen2 StringTableGen2;
         public CacheFileType SharedCacheType = CacheFileType.None;
-        public string SharedCacheName;
-        public FileInfo SharedCacheFile;
-        public GameCacheGen2 SharedCache;
+        public string VistaSharedTagCacheName;
+        public FileInfo VistaSharedTagCacheFile;
+        public GameCacheGen2 VistaSharedTagCache;
+
+        public Dictionary<string, GameCacheGen2> ResourceCacheReferences = new Dictionary<string, GameCacheGen2>();
 
         public override TagCache TagCache => TagCacheGen2;
         public override StringTable StringTable => StringTableGen2;
@@ -42,14 +45,16 @@ namespace TagTool.Cache
             {
                 case CacheFileType.Campaign:
                     SharedCacheType = CacheFileType.SharedCampaign;
-                    SharedCacheName = "single_player_shared.map";
+                    VistaSharedTagCacheName = "single_player_shared.map";
                     break;
                 case CacheFileType.Multiplayer:
                 case CacheFileType.MainMenu:    // see if this is necessary
                     SharedCacheType = CacheFileType.Shared;
-                    SharedCacheName = "shared.map";
+                    VistaSharedTagCacheName = "shared.map";
                     break;
             }
+
+            LoadSharedResourceCaches();
 
             using (var cacheStream = OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, Endianness))
@@ -57,23 +62,106 @@ namespace TagTool.Cache
                 TagCacheGen2 = new TagCacheGen2(reader, mapFile);
                 StringTableGen2 = new StringTableGen2(reader, mapFile);
 
-                LoadSharedCache();
-
                 if (Version == CacheVersion.Halo2Xbox)
                     TagCacheGen2.FixupStructureBspTagsForXbox(reader, mapFile);
+                else
+                    if (LoadVistaSharedTagCache())
+                        TagCacheGen2 = TagCacheGen2.Combine(TagCacheGen2, VistaSharedTagCache.TagCacheGen2);
             }
 
             
         }
 
-        private void LoadSharedCache()
+        private bool LoadVistaSharedTagCache()
         {
             if (SharedCacheType == CacheFileType.None)
+                return false;
+
+            VistaSharedTagCacheFile = new FileInfo(Path.Combine(Directory.FullName, VistaSharedTagCacheName));
+            VistaSharedTagCache = (GameCacheGen2)GameCache.Open(VistaSharedTagCacheFile);
+            return true;
+        }
+
+        private void LoadSharedResourceCaches()
+        {
+
+            // TODO: prevent recursive calls here
+
+            var thisName = BaseMapFile.Header.Name + ".map";
+
+            if (thisName == "shared.map" || thisName == "single_player_shared.map")
                 return;
-            
-            SharedCacheFile = new FileInfo(Path.Combine(Directory.FullName, SharedCacheName));
-            SharedCache = (GameCacheGen2)GameCache.Open(SharedCacheFile);
-            TagCacheGen2 = TagCacheGen2.Combine(TagCacheGen2, SharedCache.TagCacheGen2);
+
+
+            GameCacheGen2 mainmenuCache;
+            if (thisName == "mainmenu.map")
+                mainmenuCache = this;
+            else
+            {
+                var mainmenuFile = new FileInfo(Path.Combine(Directory.FullName, "mainmenu.map"));
+                mainmenuCache = (GameCacheGen2)GameCache.Open(mainmenuFile);
+            }
+            ResourceCacheReferences.Add("mainmenu.map", mainmenuCache);
+
+            GameCacheGen2 sharedCache;
+            if (thisName == "shared.map")
+                sharedCache = this;
+            else
+            {
+                var sharedFile = new FileInfo(Path.Combine(Directory.FullName, "shared.map"));
+                sharedCache = (GameCacheGen2)GameCache.Open(sharedFile);
+            }
+            ResourceCacheReferences.Add("shared.map", sharedCache);
+
+            GameCacheGen2 spSharedCache;
+            if (thisName == "single_player_shared.map")
+                spSharedCache = this;
+            else
+            {
+                var spSharedFile = new FileInfo(Path.Combine(Directory.FullName, "single_player_shared.map"));
+                spSharedCache = (GameCacheGen2)GameCache.Open(spSharedFile);
+            }
+            ResourceCacheReferences.Add("single_player_shared.map", spSharedCache);
+        }
+
+        public byte[] GetCacheRawData(uint address, int size)
+        {
+            var cacheFileType = (address & 0xC0000000) >> 30;
+            int fileOffset = (int)(address & 0x3FFFFFFF);
+
+            GameCacheGen2 sourceCache = null;
+            switch (cacheFileType)
+            {
+                case 0:
+                    sourceCache = this;
+                    break;
+                case 1:
+                    sourceCache = ResourceCacheReferences["mainmenu.map"];
+                    break;
+                case 2:
+                    sourceCache = ResourceCacheReferences["shared.map"];
+                    break;
+                case 3:
+                    sourceCache = ResourceCacheReferences["single_player_shared.map"];
+                    break;
+
+            }
+            if(sourceCache == null)
+            {
+                Console.WriteLine($"Failed to get shared cache type {cacheFileType}");
+                return null;
+            }
+
+            var stream = sourceCache.OpenCacheRead();
+
+            var reader = new EndianReader(stream, Endianness);
+
+            reader.SeekTo(fileOffset);
+            var data = reader.ReadBytes(size);
+
+            reader.Close();
+
+            return data;
         }
 
         #region Serialization
@@ -116,7 +204,7 @@ namespace TagTool.Cache
         #endregion
 
 
-        public override Stream OpenCacheRead() => new Gen2CacheStream(CacheFile.OpenRead(), SharedCache?.OpenCacheRead());
+        public override Stream OpenCacheRead() => new Gen2CacheStream(CacheFile.OpenRead(), VistaSharedTagCache?.OpenCacheRead());
 
         public override Stream OpenCacheReadWrite()
         {

@@ -1,9 +1,13 @@
 using HaloShaderGenerator.Globals;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using TagTool.Cache;
 using TagTool.Cache.HaloOnline;
 using TagTool.Common;
+using TagTool.Geometry;
+using TagTool.IO;
+using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
