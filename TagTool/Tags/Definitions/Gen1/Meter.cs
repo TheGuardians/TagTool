@@ -47,6 +47,7 @@ namespace TagTool.Tags.Definitions.Gen1
         public byte[] Padding4;
         public byte[] EncodedStencil;
         
+        [Flags]
         public enum FlagsValue : uint
         {
         }

@@ -42,11 +42,12 @@ namespace TagTool.Tags.Definitions.Gen1
         public List<ModelGeometryBlock> Geometries;
         public List<ModelShaderReferenceBlock> Shaders;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            BlendSharedNormals,
-            PartsHaveLocalNodes,
-            IgnoreSkinning
+            BlendSharedNormals = 1 << 0,
+            PartsHaveLocalNodes = 1 << 1,
+            IgnoreSkinning = 1 << 2
         }
         
         [TagStructure(Size = 0x40)]
@@ -119,9 +120,10 @@ namespace TagTool.Tags.Definitions.Gen1
                 public byte[] Padding1;
                 public List<ModelRegionPermutationMarkerBlock> Markers;
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    CannotBeChosenRandomly
+                    CannotBeChosenRandomly = 1 << 0
                 }
                 
                 [TagStructure(Size = 0x50)]
@@ -148,6 +150,7 @@ namespace TagTool.Tags.Definitions.Gen1
             public byte[] Padding;
             public List<ModelGeometryPartBlock> Parts;
             
+            [Flags]
             public enum FlagsValue : uint
             {
             }
@@ -172,10 +175,11 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(Length = 0x10)]
                 public byte[] Padding1;
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    StrippedInternal,
-                    Zoner //  _model_part_local_nodes
+                    StrippedInternal = 1 << 0,
+                    Zoner = 1 << 1 //  _model_part_local_nodes
                 }
                 
                 [TagStructure(Size = 0x44)]

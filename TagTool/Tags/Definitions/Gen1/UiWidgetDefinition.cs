@@ -153,24 +153,25 @@ namespace TagTool.Tags.Definitions.Gen1
             AnyPlayer
         }
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            PassUnhandledEventsToFocusedChild,
-            PauseGameTime,
-            FlashBackgroundBitmap,
-            DpadUpDownTabsThruChildren,
-            DpadLeftRightTabsThruChildren,
-            DpadUpDownTabsThruListItems,
-            DpadLeftRightTabsThruListItems,
-            DontFocusASpecificChildWidget,
-            PassUnhandledEventsToAllChildren,
-            RenderRegardlessOfControllerIndex,
-            PassHandledEventsToAllChildren,
-            ReturnToMainMenuIfNoHistory,
-            AlwaysUseTagControllerIndex,
-            AlwaysUseNiftyRenderFx,
-            DonTPushHistory,
-            ForceHandleMouse
+            PassUnhandledEventsToFocusedChild = 1 << 0,
+            PauseGameTime = 1 << 1,
+            FlashBackgroundBitmap = 1 << 2,
+            DpadUpDownTabsThruChildren = 1 << 3,
+            DpadLeftRightTabsThruChildren = 1 << 4,
+            DpadUpDownTabsThruListItems = 1 << 5,
+            DpadLeftRightTabsThruListItems = 1 << 6,
+            DontFocusASpecificChildWidget = 1 << 7,
+            PassUnhandledEventsToAllChildren = 1 << 8,
+            RenderRegardlessOfControllerIndex = 1 << 9,
+            PassHandledEventsToAllChildren = 1 << 10,
+            ReturnToMainMenuIfNoHistory = 1 << 11,
+            AlwaysUseTagControllerIndex = 1 << 12,
+            AlwaysUseNiftyRenderFx = 1 << 13,
+            DonTPushHistory = 1 << 14,
+            ForceHandleMouse = 1 << 15
         }
         
         [TagStructure(Size = 0x24)]
@@ -262,20 +263,21 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 32)]
             public string Script;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                CloseCurrentWidget,
-                CloseOtherWidget,
-                CloseAllWidgets,
-                OpenWidget,
-                ReloadSelf,
-                ReloadOtherWidget,
-                GiveFocusToWidget,
-                RunFunction,
-                ReplaceSelfWWidget,
-                GoBackToPreviousWidget,
-                RunScenarioScript,
-                TryToBranchOnFailure
+                CloseCurrentWidget = 1 << 0,
+                CloseOtherWidget = 1 << 1,
+                CloseAllWidgets = 1 << 2,
+                OpenWidget = 1 << 3,
+                ReloadSelf = 1 << 4,
+                ReloadOtherWidget = 1 << 5,
+                GiveFocusToWidget = 1 << 6,
+                RunFunction = 1 << 7,
+                ReplaceSelfWWidget = 1 << 8,
+                GoBackToPreviousWidget = 1 << 9,
+                RunScenarioScript = 1 << 10,
+                TryToBranchOnFailure = 1 << 11
             }
             
             public enum EventTypeValue : short
@@ -534,20 +536,22 @@ namespace TagTool.Tags.Definitions.Gen1
             CenterJustify
         }
         
+        [Flags]
         public enum Flags1Value : uint
         {
-            Editable,
-            Password,
-            Flashing,
-            DonTDoThatWeirdFocusTest
+            Editable = 1 << 0,
+            Password = 1 << 1,
+            Flashing = 1 << 2,
+            DonTDoThatWeirdFocusTest = 1 << 3
         }
         
+        [Flags]
         public enum Flags2Value : uint
         {
-            ListItemsGeneratedInCode,
-            ListItemsFromStringListTag,
-            ListItemsOnlyOneTooltip,
-            ListSinglePreviewNoScroll
+            ListItemsGeneratedInCode = 1 << 0,
+            ListItemsFromStringListTag = 1 << 1,
+            ListItemsOnlyOneTooltip = 1 << 2,
+            ListSinglePreviewNoScroll = 1 << 3
         }
         
         [TagStructure(Size = 0x50)]
@@ -562,9 +566,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x1A)]
             public byte[] Padding;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                LoadIfEventHandlerFunctionFails
+                LoadIfEventHandlerFunctionFails = 1 << 0
             }
         }
         
@@ -582,9 +587,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x16)]
             public byte[] Padding;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                UseCustomControllerIndex
+                UseCustomControllerIndex = 1 << 0
             }
         }
     }

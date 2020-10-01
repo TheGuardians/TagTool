@@ -148,12 +148,13 @@ namespace TagTool.Tags.Definitions.Gen1
             VectorMap
         }
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            EnableDiffusionDithering,
-            DisableHeightMapCompression,
-            UniformSpriteSequences,
-            FilthySpriteBugFix
+            EnableDiffusionDithering = 1 << 0,
+            DisableHeightMapCompression = 1 << 1,
+            UniformSpriteSequences = 1 << 2,
+            FilthySpriteBugFix = 1 << 3
         }
         
         public enum SpriteBudgetSizeValue : short
@@ -262,14 +263,15 @@ namespace TagTool.Tags.Definitions.Gen1
                 P8Bump
             }
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                PowerOfTwoDimensions,
-                Compressed,
-                Palettized,
-                Swizzled,
-                Linear,
-                V16u16
+                PowerOfTwoDimensions = 1 << 0,
+                Compressed = 1 << 1,
+                Palettized = 1 << 2,
+                Swizzled = 1 << 3,
+                Linear = 1 << 4,
+                V16u16 = 1 << 5
             }
         }
     }

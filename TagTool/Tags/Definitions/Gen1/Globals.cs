@@ -644,9 +644,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag DistanceAttenuation2d;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                TintEdgeDensity
+                TintEdgeDensity = 1 << 0
             }
         }
         
@@ -916,10 +917,11 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(Length = 0x1C)]
                 public byte[] Padding3;
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    InterpolateColorInHsv,
-                    MoreColors
+                    InterpolateColorInHsv = 1 << 0,
+                    MoreColors = 1 << 1
                 }
             }
         }

@@ -87,12 +87,13 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0xA8)]
         public byte[] Padding9;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            DoesNotCastShadow,
-            TransparentSelfOcclusion,
-            BrighterThanItShouldBe,
-            NotAPathfindingObstacle
+            DoesNotCastShadow = 1 << 0,
+            TransparentSelfOcclusion = 1 << 1,
+            BrighterThanItShouldBe = 1 << 2,
+            NotAPathfindingObstacle = 1 << 3
         }
         
         public enum AInValue : short
@@ -416,17 +417,18 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 32)]
             public string Usage;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// result of function is one minus actual result
                 /// </summary>
-                Invert,
-                Additive,
+                Invert = 1 << 0,
+                Additive = 1 << 1,
                 /// <summary>
                 /// function does not deactivate when at or below lower bound
                 /// </summary>
-                AlwaysActive
+                AlwaysActive = 1 << 2
             }
             
             public enum ScalePeriodByValue : short
@@ -567,16 +569,17 @@ namespace TagTool.Tags.Definitions.Gen1
                 DOut
             }
             
+            [Flags]
             public enum ScaleFlagsValue : uint
             {
                 /// <summary>
                 /// blends colors in hsv rather than rgb space
                 /// </summary>
-                BlendInHsv,
+                BlendInHsv = 1 << 0,
                 /// <summary>
                 /// blends colors through more hues (goes the long way around the color wheel)
                 /// </summary>
-                MoreColors
+                MoreColors = 1 << 1
             }
             
             [TagStructure(Size = 0x1C)]
@@ -602,11 +605,12 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum Flags1Value : uint
         {
-            AlwaysMaintainsZUp,
-            DestroyedByExplosions,
-            UnaffectedByGravity
+            AlwaysMaintainsZUp = 1 << 0,
+            DestroyedByExplosions = 1 << 1,
+            UnaffectedByGravity = 1 << 2
         }
         
         public enum AIn1Value : short

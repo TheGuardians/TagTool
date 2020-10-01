@@ -92,18 +92,20 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x78)]
         public byte[] Padding10;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            IsWater,
-            AtmosphereDominant,
-            FogScreenOnly
+            IsWater = 1 << 0,
+            AtmosphereDominant = 1 << 1,
+            FogScreenOnly = 1 << 2
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
-            NoEnvironmentMultipass,
-            NoModelMultipass,
-            NoTextureBasedFalloff
+            NoEnvironmentMultipass = 1 << 0,
+            NoModelMultipass = 1 << 1,
+            NoTextureBasedFalloff = 1 << 2
         }
     }
 }

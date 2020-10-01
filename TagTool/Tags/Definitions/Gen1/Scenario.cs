@@ -112,16 +112,17 @@ namespace TagTool.Tags.Definitions.Gen1
             MainMenu
         }
         
+        [Flags]
         public enum FlagsValue : ushort
         {
             /// <summary>
             /// sort cortana in front of other transparent geometry
             /// </summary>
-            CortanaHack,
+            CortanaHack = 1 << 0,
             /// <summary>
             /// uses alternate UI collection for demo
             /// </summary>
-            UseDemoUi
+            UseDemoUi = 1 << 1
         }
         
         [TagStructure(Size = 0x20)]
@@ -218,21 +219,22 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x10)]
             public byte[] Padding4;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// the level script will set this value; the other settings here will be ignored.
                 /// </summary>
-                Scripted,
+                Scripted = 1 << 0,
                 /// <summary>
                 /// result of function is one minus actual result
                 /// </summary>
-                Invert,
-                Additive,
+                Invert = 1 << 1,
+                Additive = 1 << 2,
                 /// <summary>
                 /// function does not deactivate when at or below lower bound
                 /// </summary>
-                AlwaysActive
+                AlwaysActive = 1 << 3
             }
             
             public enum FunctionValue : short
@@ -325,12 +327,13 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x8)]
             public byte[] Padding3;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
         }
         
@@ -371,17 +374,19 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x20)]
             public byte[] Padding5;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                Dead
+                Dead = 1 << 0
             }
         }
         
@@ -429,85 +434,88 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x1C)]
             public byte[] Padding6;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                Dead
+                Dead = 1 << 0
             }
             
+            [Flags]
             public enum MultiplayerSpawnFlagsValue : ushort
             {
                 /// <summary>
                 /// vehicle will spawn when default vehicle set is used in a slayer game
                 /// </summary>
-                SlayerDefault,
+                SlayerDefault = 1 << 0,
                 /// <summary>
                 /// vehicle will spawn when default vehicle set is used in a ctf game
                 /// </summary>
-                CtfDefault,
+                CtfDefault = 1 << 1,
                 /// <summary>
                 /// vehicle will spawn when default vehicle set is used in a king game
                 /// </summary>
-                KingDefault,
+                KingDefault = 1 << 2,
                 /// <summary>
                 /// vehicle will spawn when default vehicle set is used in a oddball game
                 /// </summary>
-                OddballDefault,
+                OddballDefault = 1 << 3,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused,
+                Unused = 1 << 4,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused1,
+                Unused1 = 1 << 5,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused2,
+                Unused2 = 1 << 6,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused3,
+                Unused3 = 1 << 7,
                 /// <summary>
                 /// vehicle can spawn in a slayer game
                 /// </summary>
-                SlayerAllowed,
+                SlayerAllowed = 1 << 8,
                 /// <summary>
                 /// vehicle can spawn in a ctf game
                 /// </summary>
-                CtfAllowed,
+                CtfAllowed = 1 << 9,
                 /// <summary>
                 /// vehicle can spawn in a king game
                 /// </summary>
-                KingAllowed,
+                KingAllowed = 1 << 10,
                 /// <summary>
                 /// vehicle can spawn in a oddball game
                 /// </summary>
-                OddballAllowed,
+                OddballAllowed = 1 << 11,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused4,
+                Unused4 = 1 << 12,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused5,
+                Unused5 = 1 << 13,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused6,
+                Unused6 = 1 << 14,
                 /// <summary>
                 /// unused
                 /// </summary>
-                Unused7
+                Unused7 = 1 << 15
             }
         }
         
@@ -539,19 +547,21 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x4)]
             public byte[] Padding1;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum MiscFlagsValue : ushort
             {
-                InitiallyAtRestDoesnTFall,
-                Obsolete,
-                DoesAccelerateMovesDueToExplosions
+                InitiallyAtRestDoesnTFall = 1 << 0,
+                Obsolete = 1 << 1,
+                DoesAccelerateMovesDueToExplosions = 1 << 2
             }
         }
         
@@ -593,19 +603,21 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0xC)]
             public byte[] Padding5;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                InitiallyAtRestDoesnTFall,
-                Obsolete,
-                DoesAccelerateMovesDueToExplosions
+                InitiallyAtRestDoesnTFall = 1 << 0,
+                Obsolete = 1 << 1,
+                DoesAccelerateMovesDueToExplosions = 1 << 2
             }
         }
         
@@ -628,9 +640,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0xC)]
             public byte[] Padding;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                CanChangeOnlyOnce
+                CanChangeOnlyOnce = 1 << 0
             }
         }
         
@@ -656,29 +669,32 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0xC)]
             public byte[] Padding1;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                InitiallyOpen10,
-                InitiallyOff00,
-                CanChangeOnlyOnce,
-                PositionReversed,
-                NotUsableFromAnySide
+                InitiallyOpen10 = 1 << 0,
+                InitiallyOff00 = 1 << 1,
+                CanChangeOnlyOnce = 1 << 2,
+                PositionReversed = 1 << 3,
+                NotUsableFromAnySide = 1 << 4
             }
             
+            [Flags]
             public enum Flags1Value : uint
             {
-                DoesNotOperateAutomatically,
-                OneSided,
-                NeverAppearsLocked,
-                OpenedByMeleeAttack
+                DoesNotOperateAutomatically = 1 << 0,
+                OneSided = 1 << 1,
+                NeverAppearsLocked = 1 << 2,
+                OpenedByMeleeAttack = 1 << 3
             }
         }
         
@@ -716,26 +732,29 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x8)]
             public byte[] Padding2;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                InitiallyOpen10,
-                InitiallyOff00,
-                CanChangeOnlyOnce,
-                PositionReversed,
-                NotUsableFromAnySide
+                InitiallyOpen10 = 1 << 0,
+                InitiallyOff00 = 1 << 1,
+                CanChangeOnlyOnce = 1 << 2,
+                PositionReversed = 1 << 3,
+                NotUsableFromAnySide = 1 << 4
             }
             
+            [Flags]
             public enum Flags1Value : uint
             {
-                UsableFromBothSides
+                UsableFromBothSides = 1 << 0
             }
         }
         
@@ -773,21 +792,23 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x10)]
             public byte[] Padding1;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                InitiallyOpen10,
-                InitiallyOff00,
-                CanChangeOnlyOnce,
-                PositionReversed,
-                NotUsableFromAnySide
+                InitiallyOpen10 = 1 << 0,
+                InitiallyOff00 = 1 << 1,
+                CanChangeOnlyOnce = 1 << 2,
+                PositionReversed = 1 << 3,
+                NotUsableFromAnySide = 1 << 4
             }
         }
         
@@ -816,12 +837,13 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x8)]
             public byte[] Padding;
             
+            [Flags]
             public enum NotPlacedValue : ushort
             {
-                Automatically,
-                OnEasy,
-                OnNormal,
-                OnHard
+                Automatically = 1 << 0,
+                OnEasy = 1 << 1,
+                OnNormal = 1 << 2,
+                OnHard = 1 << 3
             }
         }
         
@@ -1022,9 +1044,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x30)]
             public byte[] Padding1;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                Levitate
+                Levitate = 1 << 0
             }
             
             public enum Type0Value : short
@@ -1129,10 +1152,11 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x30)]
             public byte[] Padding1;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                NoGrenades,
-                PlasmaGrenades
+                NoGrenades = 1 << 0,
+                PlasmaGrenades = 1 << 1
             }
             
             public enum Type0Value : short
@@ -1280,15 +1304,16 @@ namespace TagTool.Tags.Definitions.Gen1
             public List<FiringPositionsBlock> FiringPositions;
             public List<ScenarioPlayersBlock> PlayerStartingLocations;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                NotInitiallyCreated,
-                RespawnEnabled,
-                InitiallyBlind,
-                InitiallyDeaf,
-                InitiallyBraindead,
-                _3dFiringPositions,
-                ManualBspIndexSpecified
+                NotInitiallyCreated = 1 << 0,
+                RespawnEnabled = 1 << 1,
+                InitiallyBlind = 1 << 2,
+                InitiallyDeaf = 1 << 3,
+                InitiallyBraindead = 1 << 4,
+                _3dFiringPositions = 1 << 5,
+                ManualBspIndexSpecified = 1 << 6
             }
             
             public enum TeamIndexValue : short
@@ -1420,14 +1445,15 @@ namespace TagTool.Tags.Definitions.Gen1
                     Fleeing
                 }
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    Unused,
-                    NeverSearch,
-                    StartTimerImmediately,
-                    NoTimerDelayForever,
-                    MagicSightAfterTimer,
-                    AutomaticMigration
+                    Unused = 1 << 0,
+                    NeverSearch = 1 << 1,
+                    StartTimerImmediately = 1 << 2,
+                    NoTimerDelayForever = 1 << 3,
+                    MagicSightAfterTimer = 1 << 4,
+                    AutomaticMigration = 1 << 5
                 }
                 
                 public enum UniqueLeaderTypeValue : short
@@ -1439,214 +1465,221 @@ namespace TagTool.Tags.Definitions.Gen1
                     SgtLehto
                 }
                 
+                [Flags]
                 public enum AttackingValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
+                [Flags]
                 public enum AttackingSearchValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
+                [Flags]
                 public enum AttackingGuardValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
+                [Flags]
                 public enum DefendingValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
+                [Flags]
                 public enum DefendingSearchValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
+                [Flags]
                 public enum DefendingGuardValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
+                [Flags]
                 public enum PursuingValue : uint
                 {
-                    A,
-                    B,
-                    C,
-                    D,
-                    E,
-                    F,
-                    G,
-                    H,
-                    I,
-                    J,
-                    K,
-                    L,
-                    M,
-                    N,
-                    O,
-                    P,
-                    Q,
-                    R,
-                    S,
-                    T,
-                    U,
-                    V,
-                    W,
-                    X,
-                    Y,
-                    Z
+                    A = 1 << 0,
+                    B = 1 << 1,
+                    C = 1 << 2,
+                    D = 1 << 3,
+                    E = 1 << 4,
+                    F = 1 << 5,
+                    G = 1 << 6,
+                    H = 1 << 7,
+                    I = 1 << 8,
+                    J = 1 << 9,
+                    K = 1 << 10,
+                    L = 1 << 11,
+                    M = 1 << 12,
+                    N = 1 << 13,
+                    O = 1 << 14,
+                    P = 1 << 15,
+                    Q = 1 << 16,
+                    R = 1 << 17,
+                    S = 1 << 18,
+                    T = 1 << 19,
+                    U = 1 << 20,
+                    V = 1 << 21,
+                    W = 1 << 22,
+                    X = 1 << 23,
+                    Y = 1 << 24,
+                    Z = 1 << 25
                 }
                 
                 public enum MajorUpgradeValue : short
@@ -1701,9 +1734,10 @@ namespace TagTool.Tags.Definitions.Gen1
                     public short ActorType;
                     public short CommandList;
                     
+                    [Flags]
                     public enum FlagsValue : byte
                     {
-                        Required
+                        Required = 1 << 0
                     }
                     
                     public enum ReturnStateValue : short
@@ -1765,11 +1799,12 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(Length = 0x24)]
                 public byte[] Padding6;
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    FleeWhenManeuvering,
-                    SayAdvancingWhenManeuver,
-                    StartInDefendingState
+                    FleeWhenManeuvering = 1 << 0,
+                    SayAdvancingWhenManeuver = 1 << 1,
+                    StartInDefendingState = 1 << 2
                 }
                 
                 public enum ChangeAttackingDefendingStateWhenValue : short
@@ -1952,33 +1987,34 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x18)]
             public byte[] Padding2;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// lets an actor decide to stop following its commands and attack an enemy
                 /// </summary>
-                AllowInitiative,
+                AllowInitiative = 1 << 0,
                 /// <summary>
                 /// lets an actor shoot at enemies while following its commands
                 /// </summary>
-                AllowTargeting,
+                AllowTargeting = 1 << 1,
                 /// <summary>
                 /// stops an actor from turning, stopping or looking around in response to stimuli received while
                 /// following its commands
                 /// </summary>
-                DisableLooking,
+                DisableLooking = 1 << 2,
                 /// <summary>
                 /// stops an actor from communicating while following its commands
                 /// </summary>
-                DisableCommunication,
+                DisableCommunication = 1 << 3,
                 /// <summary>
                 /// makes an actor not take any damage from falling while following its commands
                 /// </summary>
-                DisableFallingDamage,
+                DisableFallingDamage = 1 << 4,
                 /// <summary>
                 /// set if the command list is manually attached to a specific bsp
                 /// </summary>
-                ManualBspIndex
+                ManualBspIndex = 1 << 5
             }
             
             [TagStructure(Size = 0x20)]
@@ -2096,40 +2132,41 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0xC)]
             public byte[] Padding2;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
                 /// <summary>
                 /// this conversation will be aborted if any participant dies
                 /// </summary>
-                StopIfDeath,
+                StopIfDeath = 1 << 0,
                 /// <summary>
                 /// an actor will abort this conversation if they are damaged
                 /// </summary>
-                StopIfDamaged,
+                StopIfDamaged = 1 << 1,
                 /// <summary>
                 /// an actor will abort this conversation if they see an enemy
                 /// </summary>
-                StopIfVisibleEnemy,
+                StopIfVisibleEnemy = 1 << 2,
                 /// <summary>
                 /// an actor will abort this conversation if they suspect an enemy
                 /// </summary>
-                StopIfAlertedToEnemy,
+                StopIfAlertedToEnemy = 1 << 3,
                 /// <summary>
                 /// this conversation cannot take place unless the participants can _see_ a nearby player
                 /// </summary>
-                PlayerMustBeVisible,
+                PlayerMustBeVisible = 1 << 4,
                 /// <summary>
                 /// participants stop doing whatever they were doing in order to perform this conversation
                 /// </summary>
-                StopOtherActions,
+                StopOtherActions = 1 << 5,
                 /// <summary>
                 /// if this conversation fails initially, it will keep testing to see when it can play
                 /// </summary>
-                KeepTryingToPlay,
+                KeepTryingToPlay = 1 << 6,
                 /// <summary>
                 /// this conversation will not start until the player is looking at one of the participants
                 /// </summary>
-                PlayerMustBeLooking
+                PlayerMustBeLooking = 1 << 7
             }
             
             [TagStructure(Size = 0x54)]
@@ -2159,22 +2196,23 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(Length = 0xC)]
                 public byte[] Padding4;
                 
+                [Flags]
                 public enum FlagsValue : ushort
                 {
                     /// <summary>
                     /// the conversation can continue even if nobody for this participant was found
                     /// </summary>
-                    Optional,
+                    Optional = 1 << 0,
                     /// <summary>
                     /// if nobody for this participant can be found, we use a participant marked as 'is alternate' instead,
                     /// e.g. someone from over the radio
                     /// </summary>
-                    HasAlternate,
+                    HasAlternate = 1 << 1,
                     /// <summary>
                     /// this participant is only used if some participant in this conversation was marked as 'has alternate'
                     /// could not be found
                     /// </summary>
-                    IsAlternate
+                    IsAlternate = 1 << 2
                 }
                 
                 public enum SelectionTypeValue : short
@@ -2238,14 +2276,15 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant6;
                 
+                [Flags]
                 public enum FlagsValue : ushort
                 {
-                    AddresseeLookAtSpeaker,
-                    EveryoneLookAtSpeaker,
-                    EveryoneLookAtAddressee,
-                    WaitAfterUntilToldToAdvance,
-                    WaitUntilSpeakerNearby,
-                    WaitUntilEveryoneNearby
+                    AddresseeLookAtSpeaker = 1 << 0,
+                    EveryoneLookAtSpeaker = 1 << 1,
+                    EveryoneLookAtAddressee = 1 << 2,
+                    WaitAfterUntilToldToAdvance = 1 << 3,
+                    WaitUntilSpeakerNearby = 1 << 4,
+                    WaitUntilEveryoneNearby = 1 << 5
                 }
                 
                 public enum AddresseeValue : short

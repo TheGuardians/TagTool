@@ -270,12 +270,13 @@ namespace TagTool.Tags.Definitions.Gen1
         public List<MagazinesBlock> Magazines;
         public List<TriggersBlock> Triggers;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            DoesNotCastShadow,
-            TransparentSelfOcclusion,
-            BrighterThanItShouldBe,
-            NotAPathfindingObstacle
+            DoesNotCastShadow = 1 << 0,
+            TransparentSelfOcclusion = 1 << 1,
+            BrighterThanItShouldBe = 1 << 2,
+            NotAPathfindingObstacle = 1 << 3
         }
         
         public enum AInValue : short
@@ -599,17 +600,18 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 32)]
             public string Usage;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// result of function is one minus actual result
                 /// </summary>
-                Invert,
-                Additive,
+                Invert = 1 << 0,
+                Additive = 1 << 1,
                 /// <summary>
                 /// function does not deactivate when at or below lower bound
                 /// </summary>
-                AlwaysActive
+                AlwaysActive = 1 << 2
             }
             
             public enum ScalePeriodByValue : short
@@ -750,16 +752,17 @@ namespace TagTool.Tags.Definitions.Gen1
                 DOut
             }
             
+            [Flags]
             public enum ScaleFlagsValue : uint
             {
                 /// <summary>
                 /// blends colors in hsv rather than rgb space
                 /// </summary>
-                BlendInHsv,
+                BlendInHsv = 1 << 0,
                 /// <summary>
                 /// blends colors through more hues (goes the long way around the color wheel)
                 /// </summary>
-                MoreColors
+                MoreColors = 1 << 1
             }
             
             [TagStructure(Size = 0x1C)]
@@ -785,11 +788,12 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum Flags1Value : uint
         {
-            AlwaysMaintainsZUp,
-            DestroyedByExplosions,
-            UnaffectedByGravity
+            AlwaysMaintainsZUp = 1 << 0,
+            DestroyedByExplosions = 1 << 1,
+            UnaffectedByGravity = 1 << 2
         }
         
         public enum AIn1Value : short
@@ -812,24 +816,25 @@ namespace TagTool.Tags.Definitions.Gen1
             None
         }
         
+        [Flags]
         public enum Flags2Value : uint
         {
-            VerticalHeatDisplay,
-            MutuallyExclusiveTriggers,
-            AttacksAutomaticallyOnBump,
-            MustBeReadied,
-            DoesnTCountTowardMaximum,
-            AimAssistsOnlyWhenZoomed,
-            PreventsGrenadeThrowing,
-            MustBePickedUp,
-            HoldsTriggersWhenDropped,
-            PreventsMeleeAttack,
-            DetonatesWhenDropped,
-            CannotFireAtMaximumAge,
-            SecondaryTriggerOverridesGrenades,
-            ObsoleteDoesNotDepowerActiveCamoInMultilplayer,
-            EnablesIntegratedNightVision,
-            AisUseWeaponMeleeDamage
+            VerticalHeatDisplay = 1 << 0,
+            MutuallyExclusiveTriggers = 1 << 1,
+            AttacksAutomaticallyOnBump = 1 << 2,
+            MustBeReadied = 1 << 3,
+            DoesnTCountTowardMaximum = 1 << 4,
+            AimAssistsOnlyWhenZoomed = 1 << 5,
+            PreventsGrenadeThrowing = 1 << 6,
+            MustBePickedUp = 1 << 7,
+            HoldsTriggersWhenDropped = 1 << 8,
+            PreventsMeleeAttack = 1 << 9,
+            DetonatesWhenDropped = 1 << 10,
+            CannotFireAtMaximumAge = 1 << 11,
+            SecondaryTriggerOverridesGrenades = 1 << 12,
+            ObsoleteDoesNotDepowerActiveCamoInMultilplayer = 1 << 13,
+            EnablesIntegratedNightVision = 1 << 14,
+            AisUseWeaponMeleeDamage = 1 << 15
         }
         
         public enum SecondaryTriggerModeValue : short
@@ -982,10 +987,11 @@ namespace TagTool.Tags.Definitions.Gen1
             public byte[] Padding4;
             public List<MagazineObjects> Magazines1;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                WastesRoundsWhenReloaded,
-                EveryRoundMustBeChambered
+                WastesRoundsWhenReloaded = 1 << 0,
+                EveryRoundMustBeChambered = 1 << 1
             }
             
             [TagStructure(Size = 0x1C)]
@@ -1133,52 +1139,53 @@ namespace TagTool.Tags.Definitions.Gen1
             /// </summary>
             public List<TriggerFiringEffectBlock> FiringEffects;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// poo poo ca ca pee pee
                 /// </summary>
-                TracksFiredProjectile,
+                TracksFiredProjectile = 1 << 0,
                 /// <summary>
                 /// rather than being chosen sequentially, firing effects are picked randomly
                 /// </summary>
-                RandomFiringEffects,
+                RandomFiringEffects = 1 << 1,
                 /// <summary>
                 /// allows a weapon to be fired as long as there is a non-zero amount of ammunition loaded
                 /// </summary>
-                CanFireWithPartialAmmo,
+                CanFireWithPartialAmmo = 1 << 2,
                 /// <summary>
                 /// once fired, this trigger must be released and pressed to fire again
                 /// </summary>
-                DoesNotRepeatAutomatically,
+                DoesNotRepeatAutomatically = 1 << 3,
                 /// <summary>
                 /// once depressed, this trigger must be released and pressed again to turn it off (and likewise to turn
                 /// it back on)
                 /// </summary>
-                LocksInOnOffState,
+                LocksInOnOffState = 1 << 4,
                 /// <summary>
                 /// instead of coming out of the magic first person camera origin, the projectiles for this weapon
                 /// actually come out of the gun
                 /// </summary>
-                ProjectilesUseWeaponOrigin,
+                ProjectilesUseWeaponOrigin = 1 << 5,
                 /// <summary>
                 /// if this trigger is pressed when its owner drops the weapon (for whatever reason) this trigger stays
                 /// down
                 /// </summary>
-                SticksWhenDropped,
+                SticksWhenDropped = 1 << 6,
                 /// <summary>
                 /// this trigger's ejection port is started during the key frame of its chamber animation
                 /// </summary>
-                EjectsDuringChamber,
-                DischargingSpews,
-                AnalogRateOfFire,
-                UseErrorWhenUnzoomed,
+                EjectsDuringChamber = 1 << 7,
+                DischargingSpews = 1 << 8,
+                AnalogRateOfFire = 1 << 9,
+                UseErrorWhenUnzoomed = 1 << 10,
                 /// <summary>
                 /// projectiles fired by this weapon cannot have their direction adjusted by the AI to hit the target
                 /// </summary>
-                ProjectileVectorCannotBeAdjusted,
-                ProjectilesHaveIdenticalError,
-                ProjectileIsClientSideOnly
+                ProjectileVectorCannotBeAdjusted = 1 << 11,
+                ProjectilesHaveIdenticalError = 1 << 12,
+                ProjectileIsClientSideOnly = 1 << 13
             }
             
             public enum FiringNoiseValue : short

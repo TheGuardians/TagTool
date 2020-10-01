@@ -49,6 +49,7 @@ namespace TagTool.Tags.Definitions.Gen1
         /// </summary>
         public List<FlagAttachmentPointBlock> AttachmentPoints;
         
+        [Flags]
         public enum FlagsValue : uint
         {
         }

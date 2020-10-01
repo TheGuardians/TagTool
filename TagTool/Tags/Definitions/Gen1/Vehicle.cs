@@ -200,12 +200,13 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(ValidTags = new [] { "effe" })]
         public CachedTag Effect;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            DoesNotCastShadow,
-            TransparentSelfOcclusion,
-            BrighterThanItShouldBe,
-            NotAPathfindingObstacle
+            DoesNotCastShadow = 1 << 0,
+            TransparentSelfOcclusion = 1 << 1,
+            BrighterThanItShouldBe = 1 << 2,
+            NotAPathfindingObstacle = 1 << 3
         }
         
         public enum AInValue : short
@@ -529,17 +530,18 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 32)]
             public string Usage;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// result of function is one minus actual result
                 /// </summary>
-                Invert,
-                Additive,
+                Invert = 1 << 0,
+                Additive = 1 << 1,
                 /// <summary>
                 /// function does not deactivate when at or below lower bound
                 /// </summary>
-                AlwaysActive
+                AlwaysActive = 1 << 2
             }
             
             public enum ScalePeriodByValue : short
@@ -680,16 +682,17 @@ namespace TagTool.Tags.Definitions.Gen1
                 DOut
             }
             
+            [Flags]
             public enum ScaleFlagsValue : uint
             {
                 /// <summary>
                 /// blends colors in hsv rather than rgb space
                 /// </summary>
-                BlendInHsv,
+                BlendInHsv = 1 << 0,
                 /// <summary>
                 /// blends colors through more hues (goes the long way around the color wheel)
                 /// </summary>
-                MoreColors
+                MoreColors = 1 << 1
             }
             
             [TagStructure(Size = 0x1C)]
@@ -715,33 +718,34 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum Flags1Value : uint
         {
-            CircularAiming,
-            DestroyedAfterDying,
-            HalfSpeedInterpolation,
-            FiresFromCamera,
-            EntranceInsideBoundingSphere,
-            Unused,
-            CausesPassengerDialogue,
-            ResistsPings,
-            MeleeAttackIsFatal,
-            DonTRefaceDuringPings,
-            HasNoAiming,
-            SimpleCreature,
-            ImpactMeleeAttachesToUnit,
-            ImpactMeleeDiesOnShields,
-            CannotOpenDoorsAutomatically,
-            MeleeAttackersCannotAttach,
-            NotInstantlyKilledByMelee,
-            ShieldSapping,
-            RunsAroundFlaming,
-            Inconsequential,
-            SpecialCinematicUnit,
-            IgnoredByAutoaiming,
-            ShieldsFryInfectionForms,
-            IntegratedLightCntrlsWeapon,
-            IntegratedLightLastsForever
+            CircularAiming = 1 << 0,
+            DestroyedAfterDying = 1 << 1,
+            HalfSpeedInterpolation = 1 << 2,
+            FiresFromCamera = 1 << 3,
+            EntranceInsideBoundingSphere = 1 << 4,
+            Unused = 1 << 5,
+            CausesPassengerDialogue = 1 << 6,
+            ResistsPings = 1 << 7,
+            MeleeAttackIsFatal = 1 << 8,
+            DonTRefaceDuringPings = 1 << 9,
+            HasNoAiming = 1 << 10,
+            SimpleCreature = 1 << 11,
+            ImpactMeleeAttachesToUnit = 1 << 12,
+            ImpactMeleeDiesOnShields = 1 << 13,
+            CannotOpenDoorsAutomatically = 1 << 14,
+            MeleeAttackersCannotAttach = 1 << 15,
+            NotInstantlyKilledByMelee = 1 << 16,
+            ShieldSapping = 1 << 17,
+            RunsAroundFlaming = 1 << 18,
+            Inconsequential = 1 << 19,
+            SpecialCinematicUnit = 1 << 20,
+            IgnoredByAutoaiming = 1 << 21,
+            ShieldsFryInfectionForms = 1 << 22,
+            IntegratedLightCntrlsWeapon = 1 << 23,
+            IntegratedLightLastsForever = 1 << 24
         }
         
         public enum DefaultTeamValue : short
@@ -916,19 +920,20 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x14)]
             public byte[] Padding4;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                Invisible,
-                Locked,
-                Driver,
-                Gunner,
-                ThirdPersonCamera,
-                AllowsWeapons,
-                ThirdPersonOnEnter,
-                FirstPersonCameraSlavedToGun,
-                AllowVehicleCommunicationAnimations,
-                NotValidWithoutDriver,
-                AllowAiNoncombatants
+                Invisible = 1 << 0,
+                Locked = 1 << 1,
+                Driver = 1 << 2,
+                Gunner = 1 << 3,
+                ThirdPersonCamera = 1 << 4,
+                AllowsWeapons = 1 << 5,
+                ThirdPersonOnEnter = 1 << 6,
+                FirstPersonCameraSlavedToGun = 1 << 7,
+                AllowVehicleCommunicationAnimations = 1 << 8,
+                NotValidWithoutDriver = 1 << 9,
+                AllowAiNoncombatants = 1 << 10
             }
             
             [TagStructure(Size = 0x1C)]
@@ -950,23 +955,24 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum Flags2Value : uint
         {
-            SpeedWakesPhysics,
-            TurnWakesPhysics,
-            DriverPowerWakesPhysics,
-            GunnerPowerWakesPhysics,
-            ControlOppositeSpeedSetsBrake,
-            SlideWakesPhysics,
-            KillsRidersAtTerminalVelocity,
-            CausesCollisionDamage,
-            AiWeaponCannotRotate,
-            AiDoesNotRequireDriver,
-            AiUnused,
-            AiDriverEnable,
-            AiDriverFlying,
-            AiDriverCanSidestep,
-            AiDriverHovering
+            SpeedWakesPhysics = 1 << 0,
+            TurnWakesPhysics = 1 << 1,
+            DriverPowerWakesPhysics = 1 << 2,
+            GunnerPowerWakesPhysics = 1 << 3,
+            ControlOppositeSpeedSetsBrake = 1 << 4,
+            SlideWakesPhysics = 1 << 5,
+            KillsRidersAtTerminalVelocity = 1 << 6,
+            CausesCollisionDamage = 1 << 7,
+            AiWeaponCannotRotate = 1 << 8,
+            AiDoesNotRequireDriver = 1 << 9,
+            AiUnused = 1 << 10,
+            AiDriverEnable = 1 << 11,
+            AiDriverFlying = 1 << 12,
+            AiDriverCanSidestep = 1 << 13,
+            AiDriverHovering = 1 << 14
         }
         
         public enum TypeValue : short

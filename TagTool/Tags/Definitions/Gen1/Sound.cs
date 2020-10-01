@@ -84,10 +84,11 @@ namespace TagTool.Tags.Definitions.Gen1
         /// </summary>
         public List<SoundPitchRangeBlock> PitchRanges;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            FitToAdpcmBlocksize,
-            SplitLongSoundIntoPermutations
+            FitToAdpcmBlocksize = 1 << 0,
+            SplitLongSoundIntoPermutations = 1 << 1
         }
         
         public enum ClassValue : short

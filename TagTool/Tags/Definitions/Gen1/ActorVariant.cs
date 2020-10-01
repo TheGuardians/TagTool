@@ -352,16 +352,17 @@ namespace TagTool.Tags.Definitions.Gen1
         public byte[] Padding13;
         public List<ActorVariantChangeColorsBlock> ChangeColors;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            CanShootWhileFlying,
-            InterpolateColorInHsv,
-            HasUnlimitedGrenades,
-            MoveswitchStayWFriends,
-            ActiveCamouflage,
-            SuperActiveCamouflage,
-            CannotUseRangedWeapons,
-            PreferPassengerSeat
+            CanShootWhileFlying = 1 << 0,
+            InterpolateColorInHsv = 1 << 1,
+            HasUnlimitedGrenades = 1 << 2,
+            MoveswitchStayWFriends = 1 << 3,
+            ActiveCamouflage = 1 << 4,
+            SuperActiveCamouflage = 1 << 5,
+            CannotUseRangedWeapons = 1 << 6,
+            PreferPassengerSeat = 1 << 7
         }
         
         public enum MovementTypeValue : short

@@ -116,29 +116,31 @@ namespace TagTool.Tags.Definitions.Gen1
         public byte[] Padding5;
         public List<ContrailPointStatesBlock> PointStates;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            FirstPointUnfaded,
-            LastPointUnfaded,
-            PointsStartPinnedToMedia,
-            PointsStartPinnedToGround,
-            PointsAlwaysPinnedToMedia,
-            PointsAlwaysPinnedToGround,
-            EdgeEffectFadesSlowly
+            FirstPointUnfaded = 1 << 0,
+            LastPointUnfaded = 1 << 1,
+            PointsStartPinnedToMedia = 1 << 2,
+            PointsStartPinnedToGround = 1 << 3,
+            PointsAlwaysPinnedToMedia = 1 << 4,
+            PointsAlwaysPinnedToGround = 1 << 5,
+            EdgeEffectFadesSlowly = 1 << 6
         }
         
+        [Flags]
         public enum ScaleFlagsValue : ushort
         {
-            PointGenerationRate,
-            PointVelocity,
-            PointVelocityDelta,
-            PointVelocityConeAngle,
-            InheritedVelocityFraction,
-            SequenceAnimationRate,
-            TextureScaleU,
-            TextureScaleV,
-            TextureAnimationU,
-            TextureAnimationV
+            PointGenerationRate = 1 << 0,
+            PointVelocity = 1 << 1,
+            PointVelocityDelta = 1 << 2,
+            PointVelocityConeAngle = 1 << 3,
+            InheritedVelocityFraction = 1 << 4,
+            SequenceAnimationRate = 1 << 5,
+            TextureScaleU = 1 << 6,
+            TextureScaleV = 1 << 7,
+            TextureAnimationU = 1 << 8,
+            TextureAnimationV = 1 << 9
         }
         
         public enum RenderTypeValue : short
@@ -151,11 +153,12 @@ namespace TagTool.Tags.Definitions.Gen1
             DoubleMarkerLinked
         }
         
+        [Flags]
         public enum ShaderFlagsValue : ushort
         {
-            SortBias,
-            NonlinearTint,
-            DonTOverdrawFpWeapon
+            SortBias = 1 << 0,
+            NonlinearTint = 1 << 1,
+            DonTOverdrawFpWeapon = 1 << 2
         }
         
         public enum FramebufferBlendFunctionValue : short
@@ -177,9 +180,10 @@ namespace TagTool.Tags.Definitions.Gen1
             FadeWhenParallel
         }
         
+        [Flags]
         public enum MapFlagsValue : ushort
         {
-            Unfiltered
+            Unfiltered = 1 << 0
         }
         
         public enum AnchorValue : short
@@ -189,9 +193,10 @@ namespace TagTool.Tags.Definitions.Gen1
             Zsprite
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
-            Unfiltered
+            Unfiltered = 1 << 0
         }
         
         public enum UAnimationSourceValue : short
@@ -301,14 +306,15 @@ namespace TagTool.Tags.Definitions.Gen1
             /// </summary>
             public ScaleFlagsValue ScaleFlags;
             
+            [Flags]
             public enum ScaleFlagsValue : uint
             {
-                Duration,
-                DurationDelta,
-                TransitionDuration,
-                TransitionDurationDelta,
-                Width,
-                Color
+                Duration = 1 << 0,
+                DurationDelta = 1 << 1,
+                TransitionDuration = 1 << 2,
+                TransitionDurationDelta = 1 << 3,
+                Width = 1 << 4,
+                Color = 1 << 5
             }
         }
     }

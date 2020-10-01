@@ -15,6 +15,7 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x20)]
         public byte[] Padding;
         
+        [Flags]
         public enum FlagsValue : uint
         {
         }

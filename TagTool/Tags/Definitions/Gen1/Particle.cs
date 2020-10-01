@@ -124,23 +124,24 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x14)]
         public byte[] Padding9;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            CanAnimateBackwards,
-            AnimationStopsAtRest,
-            AnimationStartsOnRandomFrame,
-            AnimateOncePerFrame,
-            DiesAtRest,
-            DiesOnContactWithStructure,
-            TintFromDiffuseTexture,
-            DiesOnContactWithWater,
-            DiesOnContactWithAir,
+            CanAnimateBackwards = 1 << 0,
+            AnimationStopsAtRest = 1 << 1,
+            AnimationStartsOnRandomFrame = 1 << 2,
+            AnimateOncePerFrame = 1 << 3,
+            DiesAtRest = 1 << 4,
+            DiesOnContactWithStructure = 1 << 5,
+            TintFromDiffuseTexture = 1 << 6,
+            DiesOnContactWithWater = 1 << 7,
+            DiesOnContactWithAir = 1 << 8,
             /// <summary>
             /// don't cast world-lights onto this particle
             /// </summary>
-            SelfIlluminated,
-            RandomHorizontalMirroring,
-            RandomVerticalMirroring
+            SelfIlluminated = 1 << 9,
+            RandomHorizontalMirroring = 1 << 10,
+            RandomVerticalMirroring = 1 << 11
         }
         
         public enum OrientationValue : short
@@ -150,11 +151,12 @@ namespace TagTool.Tags.Definitions.Gen1
             PerpendicularToDirection
         }
         
+        [Flags]
         public enum ShaderFlagsValue : ushort
         {
-            SortBias,
-            NonlinearTint,
-            DonTOverdrawFpWeapon
+            SortBias = 1 << 0,
+            NonlinearTint = 1 << 1,
+            DonTOverdrawFpWeapon = 1 << 2
         }
         
         public enum FramebufferBlendFunctionValue : short
@@ -176,9 +178,10 @@ namespace TagTool.Tags.Definitions.Gen1
             FadeWhenParallel
         }
         
+        [Flags]
         public enum MapFlagsValue : ushort
         {
-            Unfiltered
+            Unfiltered = 1 << 0
         }
         
         public enum AnchorValue : short
@@ -188,9 +191,10 @@ namespace TagTool.Tags.Definitions.Gen1
             Zsprite
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
-            Unfiltered
+            Unfiltered = 1 << 0
         }
         
         public enum UAnimationSourceValue : short

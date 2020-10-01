@@ -461,51 +461,53 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x30)]
         public byte[] Padding24;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            CanSeeInDarkness,
-            SneakUncoveringTarget,
-            SneakUncoveringPursuitPosition,
-            Unused,
-            ShootAtTargetSLastLocation,
-            TryToStayStillWhenCrouched,
-            CrouchWhenNotInCombat,
-            CrouchWhenGuarding,
-            Unused1,
-            MustCrouchToShoot,
-            PanicWhenSurprised,
-            AlwaysChargeAtEnemies,
-            GetsInVehiclesWithPlayer,
-            StartFiringBeforeAligned,
-            StandingMustMoveForward,
-            CrouchingMustMoveForward,
-            DefensiveCrouchWhileCharging,
-            UseStalkingBehavior,
-            StalkingFreezeIfExposed,
-            AlwaysBerserkInAttackingMode,
-            BerserkingUsesPanickedMovement,
-            Flying,
-            PanickedByUnopposableEnemy,
-            CrouchWhenHidingFromUnopposable,
-            AlwaysChargeInAttackingMode,
-            DiveOffLedges,
-            Swarm,
-            SuicidalMeleeAttack,
-            CannotMoveWhileCrouching,
-            FixedCrouchFacing,
-            CrouchWhenInLineOfFire,
-            AvoidFriendsLineOfFire
+            CanSeeInDarkness = 1 << 0,
+            SneakUncoveringTarget = 1 << 1,
+            SneakUncoveringPursuitPosition = 1 << 2,
+            Unused = 1 << 3,
+            ShootAtTargetSLastLocation = 1 << 4,
+            TryToStayStillWhenCrouched = 1 << 5,
+            CrouchWhenNotInCombat = 1 << 6,
+            CrouchWhenGuarding = 1 << 7,
+            Unused1 = 1 << 8,
+            MustCrouchToShoot = 1 << 9,
+            PanicWhenSurprised = 1 << 10,
+            AlwaysChargeAtEnemies = 1 << 11,
+            GetsInVehiclesWithPlayer = 1 << 12,
+            StartFiringBeforeAligned = 1 << 13,
+            StandingMustMoveForward = 1 << 14,
+            CrouchingMustMoveForward = 1 << 15,
+            DefensiveCrouchWhileCharging = 1 << 16,
+            UseStalkingBehavior = 1 << 17,
+            StalkingFreezeIfExposed = 1 << 18,
+            AlwaysBerserkInAttackingMode = 1 << 19,
+            BerserkingUsesPanickedMovement = 1 << 20,
+            Flying = 1 << 21,
+            PanickedByUnopposableEnemy = 1 << 22,
+            CrouchWhenHidingFromUnopposable = 1 << 23,
+            AlwaysChargeInAttackingMode = 1 << 24,
+            DiveOffLedges = 1 << 25,
+            Swarm = 1 << 26,
+            SuicidalMeleeAttack = 1 << 27,
+            CannotMoveWhileCrouching = 1 << 28,
+            FixedCrouchFacing = 1 << 29,
+            CrouchWhenInLineOfFire = 1 << 30,
+            AvoidFriendsLineOfFire = 1u << 31
         }
         
+        [Flags]
         public enum MoreFlagsValue : uint
         {
-            AvoidAllEnemyAttackVectors,
-            MustStandToFire,
-            MustStopToFire,
-            DisallowVehicleCombat,
-            PathfindingIgnoresDanger,
-            PanicInGroups,
-            NoCorpseShooting
+            AvoidAllEnemyAttackVectors = 1 << 0,
+            MustStandToFire = 1 << 1,
+            MustStopToFire = 1 << 2,
+            DisallowVehicleCombat = 1 << 3,
+            PathfindingIgnoresDanger = 1 << 4,
+            PanicInGroups = 1 << 5,
+            NoCorpseShooting = 1 << 6
         }
         
         public enum TypeValue : short

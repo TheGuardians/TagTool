@@ -54,17 +54,18 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x8)]
         public byte[] Padding3;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
             /// <summary>
             /// lightmap texture parametrization should correspond to diffuse texture parametrization
             /// </summary>
-            SimpleParameterization,
+            SimpleParameterization = 1 << 0,
             /// <summary>
             /// light independent of normals (trees)
             /// </summary>
-            IgnoreNormals,
-            TransparentLit
+            IgnoreNormals = 1 << 1,
+            TransparentLit = 1 << 2
         }
         
         public enum DetailLevelValue : short
@@ -75,6 +76,7 @@ namespace TagTool.Tags.Definitions.Gen1
             Turd
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
         }
@@ -116,16 +118,17 @@ namespace TagTool.Tags.Definitions.Gen1
             HunterShield
         }
         
+        [Flags]
         public enum Flags2Value : byte
         {
-            AlphaTested,
-            Decal,
-            TwoSided,
-            FirstMapIsInScreenspace,
-            DrawBeforeWater,
-            IgnoreEffect,
-            ScaleFirstMapWithDistance,
-            Numeric
+            AlphaTested = 1 << 0,
+            Decal = 1 << 1,
+            TwoSided = 1 << 2,
+            FirstMapIsInScreenspace = 1 << 3,
+            DrawBeforeWater = 1 << 4,
+            IgnoreEffect = 1 << 5,
+            ScaleFirstMapWithDistance = 1 << 6,
+            Numeric = 1 << 7
         }
         
         public enum FirstMapTypeValue : short
@@ -240,12 +243,13 @@ namespace TagTool.Tags.Definitions.Gen1
             public float RotationAnimationScale; // degrees
             public RealPoint2d RotationAnimationCenter;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                Unfiltered,
-                AlphaReplicate,
-                UClamped,
-                VClamped
+                Unfiltered = 1 << 0,
+                AlphaReplicate = 1 << 1,
+                UClamped = 1 << 2,
+                VClamped = 1 << 3
             }
             
             public enum ColorFunctionValue : short
@@ -358,10 +362,11 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum ExtraFlagsValue : uint
         {
-            DonTFadeActiveCamouflage,
-            NumericCountdownTimer
+            DonTFadeActiveCamouflage = 1 << 0,
+            NumericCountdownTimer = 1 << 1
         }
     }
 }

@@ -125,39 +125,41 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x5C)]
         public byte[] Padding11;
         
+        [Flags]
         public enum FlagsValue : uint
         {
             /// <summary>
             /// dynamically illuminate interiors
             /// </summary>
-            Dynamic,
+            Dynamic = 1 << 0,
             /// <summary>
             /// for dynamic lights, cast only diffuse light.
             /// </summary>
-            NoSpecular,
+            NoSpecular = 1 << 1,
             /// <summary>
             /// for dynamic lights, don't light the object that the light is attached to.
             /// </summary>
-            DonTLightOwnObject,
+            DonTLightOwnObject = 1 << 2,
             /// <summary>
             /// for dynamic lights, light every environment surface if this light is on the gun of the current
             /// window.
             /// </summary>
-            SupersizeInFirstPerson,
-            FirstPersonFlashlight,
-            DonTFadeActiveCamouflage
+            SupersizeInFirstPerson = 1 << 3,
+            FirstPersonFlashlight = 1 << 4,
+            DonTFadeActiveCamouflage = 1 << 5
         }
         
+        [Flags]
         public enum InterpolationFlagsValue : uint
         {
             /// <summary>
             /// blends colors in hsv rather than rgb space
             /// </summary>
-            BlendInHsv,
+            BlendInHsv = 1 << 0,
             /// <summary>
             /// blends colors through more hues (goes the long way around the color wheel)
             /// </summary>
-            MoreColors
+            MoreColors = 1 << 1
         }
         
         public enum TextureAnimationFunctionValue : short

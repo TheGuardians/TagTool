@@ -124,9 +124,10 @@ namespace TagTool.Tags.Definitions.Gen1
                 public short Bsp2dReferenceCount;
                 public int FirstBsp2dReference;
                 
+                [Flags]
                 public enum FlagsValue : ushort
                 {
-                    ContainsDoubleSidedSurfaces
+                    ContainsDoubleSidedSurfaces = 1 << 0
                 }
             }
             
@@ -154,12 +155,13 @@ namespace TagTool.Tags.Definitions.Gen1
                 public sbyte BreakableSurface;
                 public short Material;
                 
+                [Flags]
                 public enum FlagsValue : byte
                 {
-                    TwoSided,
-                    Invisible,
-                    Climbable,
-                    Breakable
+                    TwoSided = 1 << 0,
+                    Invisible = 1 << 1,
+                    Climbable = 1 << 2,
+                    Breakable = 1 << 3
                 }
             }
             
@@ -257,10 +259,11 @@ namespace TagTool.Tags.Definitions.Gen1
                 public byte[] UncompressedVertices;
                 public byte[] CompressedVertices;
                 
+                [Flags]
                 public enum FlagsValue : ushort
                 {
-                    Coplanar,
-                    FogPlane
+                    Coplanar = 1 << 0,
+                    FogPlane = 1 << 1
                 }
                 
                 [TagStructure(Size = 0x14)]
@@ -386,9 +389,10 @@ namespace TagTool.Tags.Definitions.Gen1
             public byte[] Padding;
             public List<StructureBspClusterPortalVertexBlock> Vertices;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                AiCanTHearThroughThisShit
+                AiCanTHearThroughThisShit = 1 << 0
             }
             
             [TagStructure(Size = 0xC)]

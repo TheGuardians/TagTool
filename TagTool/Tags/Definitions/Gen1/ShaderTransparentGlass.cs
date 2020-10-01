@@ -110,17 +110,18 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x1C)]
         public byte[] Padding10;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
             /// <summary>
             /// lightmap texture parametrization should correspond to diffuse texture parametrization
             /// </summary>
-            SimpleParameterization,
+            SimpleParameterization = 1 << 0,
             /// <summary>
             /// light independent of normals (trees)
             /// </summary>
-            IgnoreNormals,
-            TransparentLit
+            IgnoreNormals = 1 << 1,
+            TransparentLit = 1 << 2
         }
         
         public enum DetailLevelValue : short
@@ -131,6 +132,7 @@ namespace TagTool.Tags.Definitions.Gen1
             Turd
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
         }
@@ -172,12 +174,13 @@ namespace TagTool.Tags.Definitions.Gen1
             HunterShield
         }
         
+        [Flags]
         public enum Flags2Value : ushort
         {
-            AlphaTested,
-            Decal,
-            TwoSided,
-            BumpMapIsSpecularMask
+            AlphaTested = 1 << 0,
+            Decal = 1 << 1,
+            TwoSided = 1 << 2,
+            BumpMapIsSpecularMask = 1 << 3
         }
         
         public enum ReflectionTypeValue : short

@@ -69,9 +69,10 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x30)]
         public byte[] Padding7;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            UseParentHudFlashingParameters
+            UseParentHudFlashingParameters = 1 << 0
         }
         
         public enum AnchorValue : short
@@ -142,16 +143,18 @@ namespace TagTool.Tags.Definitions.Gen1
                 Multiplayer
             }
             
+            [Flags]
             public enum ScalingFlagsValue : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlashFlagsValue : ushort
             {
-                ReverseDefaultFlashingColors
+                ReverseDefaultFlashingColors = 1 << 0
             }
             
             [TagStructure(Size = 0x1E0)]
@@ -429,20 +432,22 @@ namespace TagTool.Tags.Definitions.Gen1
                 Multiplayer
             }
             
+            [Flags]
             public enum ScalingFlagsValue : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlagsValue : byte
             {
-                UseMinMaxForStateChanges,
-                InterpolateBetweenMinMaxFlashColorsAsStateChanges,
-                InterpolateColorAlongHsvSpace,
-                MoreColorsForHsvInterpolation,
-                InvertInterpolation
+                UseMinMaxForStateChanges = 1 << 0,
+                InterpolateBetweenMinMaxFlashColorsAsStateChanges = 1 << 1,
+                InterpolateColorAlongHsvSpace = 1 << 2,
+                MoreColorsForHsvInterpolation = 1 << 3,
+                InvertInterpolation = 1 << 4
             }
         }
         
@@ -507,28 +512,32 @@ namespace TagTool.Tags.Definitions.Gen1
                 Multiplayer
             }
             
+            [Flags]
             public enum ScalingFlagsValue : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlashFlagsValue : ushort
             {
-                ReverseDefaultFlashingColors
+                ReverseDefaultFlashingColors = 1 << 0
             }
             
+            [Flags]
             public enum FlagsValue : byte
             {
-                ShowLeadingZeros,
-                OnlyShowWhenZoomed,
-                DrawATrailingM
+                ShowLeadingZeros = 1 << 0,
+                OnlyShowWhenZoomed = 1 << 1,
+                DrawATrailingM = 1 << 2
             }
             
+            [Flags]
             public enum WeaponSpecificFlagsValue : ushort
             {
-                DivideNumberByClipSize
+                DivideNumberByClipSize = 1 << 0
             }
         }
         
@@ -606,27 +615,30 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(Length = 0x20)]
                 public byte[] Padding3;
                 
+                [Flags]
                 public enum ScalingFlagsValue : ushort
                 {
-                    DonTScaleOffset,
-                    DonTScaleSize,
-                    UseHighResScale
+                    DonTScaleOffset = 1 << 0,
+                    DonTScaleSize = 1 << 1,
+                    UseHighResScale = 1 << 2
                 }
                 
+                [Flags]
                 public enum FlashFlagsValue : ushort
                 {
-                    ReverseDefaultFlashingColors
+                    ReverseDefaultFlashingColors = 1 << 0
                 }
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    FlashesWhenActive,
-                    NotASprite,
-                    ShowOnlyWhenZoomed,
-                    ShowSniperData,
-                    HideAreaOutsideReticle,
-                    OneZoomLevel,
-                    DonTShowWhenZoomed
+                    FlashesWhenActive = 1 << 0,
+                    NotASprite = 1 << 1,
+                    ShowOnlyWhenZoomed = 1 << 2,
+                    ShowSniperData = 1 << 3,
+                    HideAreaOutsideReticle = 1 << 4,
+                    OneZoomLevel = 1 << 5,
+                    DonTShowWhenZoomed = 1 << 6
                 }
             }
         }
@@ -699,30 +711,34 @@ namespace TagTool.Tags.Definitions.Gen1
                 [TagField(Length = 0x28)]
                 public byte[] Padding5;
                 
+                [Flags]
                 public enum ScalingFlagsValue : ushort
                 {
-                    DonTScaleOffset,
-                    DonTScaleSize,
-                    UseHighResScale
+                    DonTScaleOffset = 1 << 0,
+                    DonTScaleSize = 1 << 1,
+                    UseHighResScale = 1 << 2
                 }
                 
+                [Flags]
                 public enum FlashFlagsValue : ushort
                 {
-                    ReverseDefaultFlashingColors
+                    ReverseDefaultFlashingColors = 1 << 0
                 }
                 
+                [Flags]
                 public enum TypeValue : ushort
                 {
-                    ShowOnFlashing,
-                    ShowOnEmpty,
-                    ShowOnReloadOverheating,
-                    ShowOnDefault,
-                    ShowAlways
+                    ShowOnFlashing = 1 << 0,
+                    ShowOnEmpty = 1 << 1,
+                    ShowOnReloadOverheating = 1 << 2,
+                    ShowOnDefault = 1 << 3,
+                    ShowAlways = 1 << 4
                 }
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    FlashesWhenActive
+                    FlashesWhenActive = 1 << 0
                 }
             }
         }
@@ -774,37 +790,42 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x18)]
             public byte[] Padding7;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                OnlyWhenZoomed
+                OnlyWhenZoomed = 1 << 0
             }
             
+            [Flags]
             public enum Flags1Value : ushort
             {
-                OnlyWhenZoomed
+                OnlyWhenZoomed = 1 << 0
             }
             
+            [Flags]
             public enum Flags2Value : ushort
             {
-                OnlyWhenZoomed,
-                ConnectToFlashlight,
-                Masked
+                OnlyWhenZoomed = 1 << 0,
+                ConnectToFlashlight = 1 << 1,
+                Masked = 1 << 2
             }
             
+            [Flags]
             public enum Flags3Value : ushort
             {
-                OnlyWhenZoomed,
-                ConnectToFlashlight,
-                Additive,
-                Masked
+                OnlyWhenZoomed = 1 << 0,
+                ConnectToFlashlight = 1 << 1,
+                Additive = 1 << 2,
+                Masked = 1 << 3
             }
         }
         
+        [Flags]
         public enum Flags1Value : byte
         {
-            UseTextFromStringListInstead,
-            OverrideDefaultColor,
-            WidthOffsetIsAbsoluteIconWidth
+            UseTextFromStringListInstead = 1 << 0,
+            OverrideDefaultColor = 1 << 1,
+            WidthOffsetIsAbsoluteIconWidth = 1 << 2
         }
     }
 }

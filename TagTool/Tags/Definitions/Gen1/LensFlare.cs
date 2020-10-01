@@ -72,9 +72,10 @@ namespace TagTool.Tags.Definitions.Gen1
             None
         }
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            Sun
+            Sun = 1 << 0
         }
         
         public enum RotationFunctionValue : short
@@ -150,12 +151,13 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x4)]
             public byte[] Padding6;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                AlignRotationWithScreenCenter,
-                RadiusNotScaledByDistance,
-                RadiusScaledByOcclusionFactor,
-                OccludedBySolidObjects
+                AlignRotationWithScreenCenter = 1 << 0,
+                RadiusNotScaledByDistance = 1 << 1,
+                RadiusScaledByOcclusionFactor = 1 << 2,
+                OccludedBySolidObjects = 1 << 3
             }
             
             public enum RadiusScaledByValue : short
@@ -174,10 +176,11 @@ namespace TagTool.Tags.Definitions.Gen1
                 DistanceFromCenter
             }
             
+            [Flags]
             public enum Flags1Value : ushort
             {
-                InterpolateColorInHsv,
-                MoreColors
+                InterpolateColorInHsv = 1 << 0,
+                MoreColors = 1 << 1
             }
             
             public enum AnimationFunctionValue : short

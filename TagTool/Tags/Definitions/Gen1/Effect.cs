@@ -18,10 +18,11 @@ namespace TagTool.Tags.Definitions.Gen1
         public List<EffectLocationsBlock> Locations;
         public List<EffectEventBlock> Events;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            DeletedWhenAttachmentDeactivates,
-            RequiredForGameplayCannotOptimizeOut
+            DeletedWhenAttachmentDeactivates = 1 << 0,
+            RequiredForGameplayCannotOptimizeOut = 1 << 1
         }
         
         [TagStructure(Size = 0x20)]
@@ -96,29 +97,32 @@ namespace TagTool.Tags.Definitions.Gen1
                     NonviolentModeOnly
                 }
                 
+                [Flags]
                 public enum FlagsValue : ushort
                 {
-                    FaceDownRegardlessOfLocationDecals
+                    FaceDownRegardlessOfLocationDecals = 1 << 0
                 }
                 
+                [Flags]
                 public enum AScalesValuesValue : uint
                 {
-                    Velocity,
-                    VelocityDelta,
-                    VelocityConeAngle,
-                    AngularVelocity,
-                    AngularVelocityDelta,
-                    TypeSpecificScale
+                    Velocity = 1 << 0,
+                    VelocityDelta = 1 << 1,
+                    VelocityConeAngle = 1 << 2,
+                    AngularVelocity = 1 << 3,
+                    AngularVelocityDelta = 1 << 4,
+                    TypeSpecificScale = 1 << 5
                 }
                 
+                [Flags]
                 public enum BScalesValuesValue : uint
                 {
-                    Velocity,
-                    VelocityDelta,
-                    VelocityConeAngle,
-                    AngularVelocity,
-                    AngularVelocityDelta,
-                    TypeSpecificScale
+                    Velocity = 1 << 0,
+                    VelocityDelta = 1 << 1,
+                    VelocityConeAngle = 1 << 2,
+                    AngularVelocity = 1 << 3,
+                    AngularVelocityDelta = 1 << 4,
+                    TypeSpecificScale = 1 << 5
                 }
             }
             
@@ -211,13 +215,14 @@ namespace TagTool.Tags.Definitions.Gen1
                     InFirstPersonIfPossible
                 }
                 
+                [Flags]
                 public enum FlagsValue : uint
                 {
-                    StayAttachedToMarker,
-                    RandomInitialAngle,
-                    TintFromObjectColor,
-                    InterpolateTintAsHsv,
-                    AcrossTheLongHuePath
+                    StayAttachedToMarker = 1 << 0,
+                    RandomInitialAngle = 1 << 1,
+                    TintFromObjectColor = 1 << 2,
+                    InterpolateTintAsHsv = 1 << 3,
+                    AcrossTheLongHuePath = 1 << 4
                 }
                 
                 public enum DistributionFunctionValue : short
@@ -230,36 +235,38 @@ namespace TagTool.Tags.Definitions.Gen1
                     BuildupAndFalloff
                 }
                 
+                [Flags]
                 public enum AScalesValuesValue : uint
                 {
-                    Velocity,
-                    VelocityDelta,
-                    VelocityConeAngle,
-                    AngularVelocity,
-                    AngularVelocityDelta,
-                    Count,
-                    CountDelta,
-                    DistributionRadius,
-                    DistributionRadiusDelta,
-                    ParticleRadius,
-                    ParticleRadiusDelta,
-                    Tint
+                    Velocity = 1 << 0,
+                    VelocityDelta = 1 << 1,
+                    VelocityConeAngle = 1 << 2,
+                    AngularVelocity = 1 << 3,
+                    AngularVelocityDelta = 1 << 4,
+                    Count = 1 << 5,
+                    CountDelta = 1 << 6,
+                    DistributionRadius = 1 << 7,
+                    DistributionRadiusDelta = 1 << 8,
+                    ParticleRadius = 1 << 9,
+                    ParticleRadiusDelta = 1 << 10,
+                    Tint = 1 << 11
                 }
                 
+                [Flags]
                 public enum BScalesValuesValue : uint
                 {
-                    Velocity,
-                    VelocityDelta,
-                    VelocityConeAngle,
-                    AngularVelocity,
-                    AngularVelocityDelta,
-                    Count,
-                    CountDelta,
-                    DistributionRadius,
-                    DistributionRadiusDelta,
-                    ParticleRadius,
-                    ParticleRadiusDelta,
-                    Tint
+                    Velocity = 1 << 0,
+                    VelocityDelta = 1 << 1,
+                    VelocityConeAngle = 1 << 2,
+                    AngularVelocity = 1 << 3,
+                    AngularVelocityDelta = 1 << 4,
+                    Count = 1 << 5,
+                    CountDelta = 1 << 6,
+                    DistributionRadius = 1 << 7,
+                    DistributionRadiusDelta = 1 << 8,
+                    ParticleRadius = 1 << 9,
+                    ParticleRadiusDelta = 1 << 10,
+                    Tint = 1 << 11
                 }
             }
         }

@@ -195,17 +195,18 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x20)]
         public byte[] Padding16;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
             /// <summary>
             /// lightmap texture parametrization should correspond to diffuse texture parametrization
             /// </summary>
-            SimpleParameterization,
+            SimpleParameterization = 1 << 0,
             /// <summary>
             /// light independent of normals (trees)
             /// </summary>
-            IgnoreNormals,
-            TransparentLit
+            IgnoreNormals = 1 << 1,
+            TransparentLit = 1 << 2
         }
         
         public enum DetailLevelValue : short
@@ -216,6 +217,7 @@ namespace TagTool.Tags.Definitions.Gen1
             Turd
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
         }
@@ -257,14 +259,15 @@ namespace TagTool.Tags.Definitions.Gen1
             HunterShield
         }
         
+        [Flags]
         public enum Flags2Value : ushort
         {
-            DetailAfterReflection,
-            TwoSided,
-            NotAlphaTested,
-            AlphaBlendedDecal,
-            TrueAtmosphericFog,
-            DisableTwoSidedCulling
+            DetailAfterReflection = 1 << 0,
+            TwoSided = 1 << 1,
+            NotAlphaTested = 1 << 2,
+            AlphaBlendedDecal = 1 << 3,
+            TrueAtmosphericFog = 1 << 4,
+            DisableTwoSidedCulling = 1 << 5
         }
         
         public enum ChangeColorSourceValue : short
@@ -276,9 +279,10 @@ namespace TagTool.Tags.Definitions.Gen1
             D
         }
         
+        [Flags]
         public enum Flags3Value : ushort
         {
-            NoRandomPhase
+            NoRandomPhase = 1 << 0
         }
         
         public enum ColorSourceValue : short

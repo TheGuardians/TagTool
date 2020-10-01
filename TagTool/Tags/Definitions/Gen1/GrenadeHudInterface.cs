@@ -126,16 +126,18 @@ namespace TagTool.Tags.Definitions.Gen1
             Center
         }
         
+        [Flags]
         public enum ScalingFlagsValue : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlagsValue : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
         [TagStructure(Size = 0x1E0)]
@@ -351,35 +353,40 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum ScalingFlags1Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlags1Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum ScalingFlags2Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlags2Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum FlagsValue : byte
         {
-            ShowLeadingZeros,
-            OnlyShowWhenZoomed,
-            DrawATrailingM
+            ShowLeadingZeros = 1 << 0,
+            OnlyShowWhenZoomed = 1 << 1,
+            DrawATrailingM = 1 << 2
         }
         
         [TagStructure(Size = 0x88)]
@@ -412,29 +419,33 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x28)]
             public byte[] Padding4;
             
+            [Flags]
             public enum ScalingFlagsValue : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlashFlagsValue : ushort
             {
-                ReverseDefaultFlashingColors
+                ReverseDefaultFlashingColors = 1 << 0
             }
             
+            [Flags]
             public enum TypeValue : ushort
             {
-                ShowOnFlashing,
-                ShowOnEmpty,
-                ShowOnDefault,
-                ShowAlways
+                ShowOnFlashing = 1 << 0,
+                ShowOnEmpty = 1 << 1,
+                ShowOnDefault = 1 << 2,
+                ShowAlways = 1 << 3
             }
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                FlashesWhenActive
+                FlashesWhenActive = 1 << 0
             }
         }
         
@@ -448,19 +459,21 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x20)]
             public byte[] Padding;
             
+            [Flags]
             public enum LatchedToValue : uint
             {
-                LowGrenadeCount,
-                NoGrenadesLeft,
-                ThrowOnNoGrenades
+                LowGrenadeCount = 1 << 0,
+                NoGrenadesLeft = 1 << 1,
+                ThrowOnNoGrenades = 1 << 2
             }
         }
         
+        [Flags]
         public enum Flags1Value : byte
         {
-            UseTextFromStringListInstead,
-            OverrideDefaultColor,
-            WidthOffsetIsAbsoluteIconWidth
+            UseTextFromStringListInstead = 1 << 0,
+            OverrideDefaultColor = 1 << 1,
+            WidthOffsetIsAbsoluteIconWidth = 1 << 2
         }
     }
 }

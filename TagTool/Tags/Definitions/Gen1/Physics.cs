@@ -64,15 +64,16 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x44)]
             public byte[] Padding;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                GroundFriction,
-                WaterFriction,
-                AirFriction,
-                WaterLift,
-                AirLift,
-                Thrust,
-                Antigrav
+                GroundFriction = 1 << 0,
+                WaterFriction = 1 << 1,
+                AirFriction = 1 << 2,
+                WaterLift = 1 << 3,
+                AirLift = 1 << 4,
+                Thrust = 1 << 5,
+                Antigrav = 1 << 6
             }
         }
         
@@ -100,9 +101,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x14)]
             public byte[] Padding1;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                Metallic
+                Metallic = 1 << 0
             }
             
             public enum FrictionTypeValue : short

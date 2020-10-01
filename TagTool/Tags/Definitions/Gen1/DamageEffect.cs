@@ -207,9 +207,10 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x1C)]
         public byte[] Padding28;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            DonTScaleDamageByDistance
+            DonTScaleDamageByDistance = 1 << 0
         }
         
         public enum TypeValue : short
@@ -321,21 +322,22 @@ namespace TagTool.Tags.Definitions.Gen1
             Shotgun
         }
         
+        [Flags]
         public enum Flags1Value : uint
         {
-            DoesNotHurtOwner,
-            CanCauseHeadshots,
-            PingsResistantUnits,
-            DoesNotHurtFriends,
-            DoesNotPingUnits,
-            DetonatesExplosives,
-            OnlyHurtsShields,
-            CausesFlamingDeath,
-            DamageIndicatorsAlwaysPointDown,
-            SkipsShields,
-            OnlyHurtsOneInfectionForm,
-            CanCauseMultiplayerHeadshots,
-            InfectionFormPop
+            DoesNotHurtOwner = 1 << 0,
+            CanCauseHeadshots = 1 << 1,
+            PingsResistantUnits = 1 << 2,
+            DoesNotHurtFriends = 1 << 3,
+            DoesNotPingUnits = 1 << 4,
+            DetonatesExplosives = 1 << 5,
+            OnlyHurtsShields = 1 << 6,
+            CausesFlamingDeath = 1 << 7,
+            DamageIndicatorsAlwaysPointDown = 1 << 8,
+            SkipsShields = 1 << 9,
+            OnlyHurtsOneInfectionForm = 1 << 10,
+            CanCauseMultiplayerHeadshots = 1 << 11,
+            InfectionFormPop = 1 << 12
         }
     }
 }

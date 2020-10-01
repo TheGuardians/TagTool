@@ -79,17 +79,18 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x8)]
         public byte[] Padding12;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            GeometryInheritedByNextDecalInChain,
-            InterpolateColorInHsv,
-            MoreColors,
-            NoRandomRotation,
-            WaterEffect,
-            SapienSnapToAxis,
-            SapienIncrementalCounter,
-            AnimationLoop,
-            PreserveAspect
+            GeometryInheritedByNextDecalInChain = 1 << 0,
+            InterpolateColorInHsv = 1 << 1,
+            MoreColors = 1 << 2,
+            NoRandomRotation = 1 << 3,
+            WaterEffect = 1 << 4,
+            SapienSnapToAxis = 1 << 5,
+            SapienIncrementalCounter = 1 << 6,
+            AnimationLoop = 1 << 7,
+            PreserveAspect = 1 << 8
         }
         
         public enum TypeValue : short

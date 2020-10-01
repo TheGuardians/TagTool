@@ -38,20 +38,21 @@ namespace TagTool.Tags.Definitions.Gen1
         /// </summary>
         public List<LoopingSoundDetailBlock> DetailSounds;
         
+        [Flags]
         public enum FlagsValue : uint
         {
             /// <summary>
             /// when used as a background stereo track, causes nearby AIs to be unable to hear
             /// </summary>
-            DeafeningToAis,
+            DeafeningToAis = 1 << 0,
             /// <summary>
             /// this is a collection of permutations strung together that should play once then stop.
             /// </summary>
-            NotALoop,
+            NotALoop = 1 << 1,
             /// <summary>
             /// all other music loops will stop when this one starts.
             /// </summary>
-            StopsMusic
+            StopsMusic = 1 << 2
         }
         
         [TagStructure(Size = 0xA0)]
@@ -76,20 +77,21 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(ValidTags = new [] { "snd!" })]
             public CachedTag AlternateEnd;
             
+            [Flags]
             public enum FlagsValue : uint
             {
                 /// <summary>
                 /// the loop sound should fade in while the start sound is playing.
                 /// </summary>
-                FadeInAtStart,
+                FadeInAtStart = 1 << 0,
                 /// <summary>
                 /// the loop sound should fade out while the stop sound is playing.
                 /// </summary>
-                FadeOutAtStop,
+                FadeOutAtStop = 1 << 1,
                 /// <summary>
                 /// when the sound changes to the alternate version,  .
                 /// </summary>
-                FadeInAlternate
+                FadeInAlternate = 1 << 2
             }
         }
         
@@ -126,10 +128,11 @@ namespace TagTool.Tags.Definitions.Gen1
             /// </summary>
             public Bounds<float> DistanceBounds; // world units
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                DonTPlayWithAlternate,
-                DonTPlayWithoutAlternate
+                DonTPlayWithAlternate = 1 << 0,
+                DonTPlayWithoutAlternate = 1 << 1
             }
         }
     }

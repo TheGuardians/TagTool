@@ -22,9 +22,10 @@ namespace TagTool.Tags.Definitions.Gen1
             FullProfileDefinition
         }
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            Unused
+            Unused = 1 << 0
         }
     }
 }

@@ -100,9 +100,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x4C)]
             public byte[] Padding3;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                NotConnectedToNextMarker
+                NotConnectedToNextMarker = 1 << 0
             }
         }
         
@@ -128,11 +129,12 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x1C)]
             public byte[] Padding6;
             
+            [Flags]
             public enum ShaderFlagsValue : ushort
             {
-                SortBias,
-                NonlinearTint,
-                DonTOverdrawFpWeapon
+                SortBias = 1 << 0,
+                NonlinearTint = 1 << 1,
+                DonTOverdrawFpWeapon = 1 << 2
             }
             
             public enum FramebufferBlendFunctionValue : short
@@ -154,9 +156,10 @@ namespace TagTool.Tags.Definitions.Gen1
                 FadeWhenParallel
             }
             
+            [Flags]
             public enum MapFlagsValue : ushort
             {
-                Unfiltered
+                Unfiltered = 1 << 0
             }
         }
     }

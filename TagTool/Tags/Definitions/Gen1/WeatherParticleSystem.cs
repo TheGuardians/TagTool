@@ -15,6 +15,7 @@ namespace TagTool.Tags.Definitions.Gen1
         public byte[] Padding;
         public List<WeatherParticleTypeBlock> ParticleTypes;
         
+        [Flags]
         public enum FlagsValue : uint
         {
         }
@@ -140,11 +141,12 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x14)]
             public byte[] Padding8;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                InterpolateColorsInHsv,
-                AlongLongHuePath,
-                RandomRotation
+                InterpolateColorsInHsv = 1 << 0,
+                AlongLongHuePath = 1 << 1,
+                RandomRotation = 1 << 2
             }
             
             public enum RenderModeValue : short
@@ -160,11 +162,12 @@ namespace TagTool.Tags.Definitions.Gen1
                 FromAcceleration
             }
             
+            [Flags]
             public enum ShaderFlagsValue : ushort
             {
-                SortBias,
-                NonlinearTint,
-                DonTOverdrawFpWeapon
+                SortBias = 1 << 0,
+                NonlinearTint = 1 << 1,
+                DonTOverdrawFpWeapon = 1 << 2
             }
             
             public enum FramebufferBlendFunctionValue : short
@@ -186,9 +189,10 @@ namespace TagTool.Tags.Definitions.Gen1
                 FadeWhenParallel
             }
             
+            [Flags]
             public enum MapFlagsValue : ushort
             {
-                Unfiltered
+                Unfiltered = 1 << 0
             }
             
             public enum AnchorValue : short
@@ -198,9 +202,10 @@ namespace TagTool.Tags.Definitions.Gen1
                 Zsprite
             }
             
+            [Flags]
             public enum Flags1Value : ushort
             {
-                Unfiltered
+                Unfiltered = 1 << 0
             }
             
             public enum UAnimationSourceValue : short

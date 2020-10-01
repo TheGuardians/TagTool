@@ -253,10 +253,11 @@ namespace TagTool.Tags.Definitions.Gen1
             public byte[] Padding;
         }
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            CompressAllAnimations,
-            ForceIdleCompression
+            CompressAllAnimations = 1 << 0,
+            ForceIdleCompression = 1 << 1
         }
         
         [TagStructure(Size = 0x40)]
@@ -275,11 +276,12 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x4)]
             public byte[] Padding1;
             
+            [Flags]
             public enum NodeJointFlagsValue : uint
             {
-                BallSocket,
-                Hinge,
-                NoMovement
+                BallSocket = 1 << 0,
+                Hinge = 1 << 1,
+                NoMovement = 1 << 2
             }
         }
         
@@ -340,11 +342,12 @@ namespace TagTool.Tags.Definitions.Gen1
                 DxDyDzDyaw
             }
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                CompressedData,
-                WorldRelative,
-                _25hzPal
+                CompressedData = 1 << 0,
+                WorldRelative = 1 << 1,
+                _25hzPal = 1 << 2
             }
         }
     }

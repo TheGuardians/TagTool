@@ -138,10 +138,11 @@ namespace TagTool.Tags.Definitions.Gen1
             /// </summary>
             public Angle Diameter;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                AffectsExteriors,
-                AffectsInteriors
+                AffectsExteriors = 1 << 0,
+                AffectsInteriors = 1 << 1
             }
         }
     }

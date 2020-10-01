@@ -32,6 +32,7 @@ namespace TagTool.Tags.Definitions.Gen1
             Explosion
         }
         
+        [Flags]
         public enum PhysicsFlagsValue : uint
         {
         }
@@ -71,30 +72,31 @@ namespace TagTool.Tags.Definitions.Gen1
             public List<ParticleSystemTypeStatesBlock> States;
             public List<ParticleSystemTypeParticleStatesBlock> ParticleStates;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                TypeStatesLoop,
-                ForwardBackward,
-                ParticleStatesLoop,
-                ForwardBackward1,
-                ParticlesDieInWater,
-                ParticlesDieInAir,
-                ParticlesDieOnGround,
+                TypeStatesLoop = 1 << 0,
+                ForwardBackward = 1 << 1,
+                ParticleStatesLoop = 1 << 2,
+                ForwardBackward1 = 1 << 3,
+                ParticlesDieInWater = 1 << 4,
+                ParticlesDieInAir = 1 << 5,
+                ParticlesDieOnGround = 1 << 6,
                 /// <summary>
                 /// if the complex sprite mode is rotational and this flag is set, the sideways sequence is contains an
                 /// animation rather than a set of permutations.
                 /// </summary>
-                RotationalSpritesAnimateSideways,
-                Disabled,
-                TintByEffectColor,
-                InitialCountScalesWithEffect,
-                MinimumCountScalesWithEffect,
-                CreationRateScalesWithEffect,
-                ScaleScalesWithEffect,
-                AnimationRateScalesWithEffect,
-                RotationRateScalesWithEffect,
-                DonTDrawInFirstPerson,
-                DonTDrawInThirdPerson
+                RotationalSpritesAnimateSideways = 1 << 7,
+                Disabled = 1 << 8,
+                TintByEffectColor = 1 << 9,
+                InitialCountScalesWithEffect = 1 << 10,
+                MinimumCountScalesWithEffect = 1 << 11,
+                CreationRateScalesWithEffect = 1 << 12,
+                ScaleScalesWithEffect = 1 << 13,
+                AnimationRateScalesWithEffect = 1 << 14,
+                RotationRateScalesWithEffect = 1 << 15,
+                DonTDrawInFirstPerson = 1 << 16,
+                DonTDrawInThirdPerson = 1 << 17
             }
             
             public enum ComplexSpriteRenderModesValue : short
@@ -110,6 +112,7 @@ namespace TagTool.Tags.Definitions.Gen1
                 Jet
             }
             
+            [Flags]
             public enum PhysicsFlagsValue : uint
             {
             }
@@ -298,11 +301,12 @@ namespace TagTool.Tags.Definitions.Gen1
                 public byte[] Padding6;
                 public List<ParticleSystemPhysicsConstantsBlock> PhysicsConstants;
                 
+                [Flags]
                 public enum ShaderFlagsValue : ushort
                 {
-                    SortBias,
-                    NonlinearTint,
-                    DonTOverdrawFpWeapon
+                    SortBias = 1 << 0,
+                    NonlinearTint = 1 << 1,
+                    DonTOverdrawFpWeapon = 1 << 2
                 }
                 
                 public enum FramebufferBlendFunctionValue : short
@@ -324,9 +328,10 @@ namespace TagTool.Tags.Definitions.Gen1
                     FadeWhenParallel
                 }
                 
+                [Flags]
                 public enum MapFlagsValue : ushort
                 {
-                    Unfiltered
+                    Unfiltered = 1 << 0
                 }
                 
                 public enum AnchorValue : short
@@ -336,9 +341,10 @@ namespace TagTool.Tags.Definitions.Gen1
                     Zsprite
                 }
                 
+                [Flags]
                 public enum FlagsValue : ushort
                 {
-                    Unfiltered
+                    Unfiltered = 1 << 0
                 }
                 
                 public enum UAnimationSourceValue : short

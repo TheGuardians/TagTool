@@ -50,23 +50,24 @@ namespace TagTool.Tags.Definitions.Gen1
         /// 
         /// </summary>
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            FlamethrowerParticleCollision,
-            CollidesWithStructures,
-            CollidesWithWaterSurface,
+            FlamethrowerParticleCollision = 1 << 0,
+            CollidesWithStructures = 1 << 1,
+            CollidesWithWaterSurface = 1 << 2,
             /// <summary>
             /// the wind on this point won't have high-frequency variations
             /// </summary>
-            UsesSimpleWind,
+            UsesSimpleWind = 1 << 3,
             /// <summary>
             /// the wind on this point will be artificially slow
             /// </summary>
-            UsesDampedWind,
+            UsesDampedWind = 1 << 4,
             /// <summary>
             /// the point is not affected by gravity
             /// </summary>
-            NoGravity
+            NoGravity = 1 << 5
         }
     }
 }

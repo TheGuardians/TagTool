@@ -249,16 +249,18 @@ namespace TagTool.Tags.Definitions.Gen1
             Center
         }
         
+        [Flags]
         public enum ScalingFlagsValue : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlagsValue : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
         [TagStructure(Size = 0x1E0)]
@@ -474,91 +476,104 @@ namespace TagTool.Tags.Definitions.Gen1
             }
         }
         
+        [Flags]
         public enum ScalingFlags1Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlags1Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum ScalingFlags2Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlagsValue : byte
         {
-            UseMinMaxForStateChanges,
-            InterpolateBetweenMinMaxFlashColorsAsStateChanges,
-            InterpolateColorAlongHsvSpace,
-            MoreColorsForHsvInterpolation,
-            InvertInterpolation
+            UseMinMaxForStateChanges = 1 << 0,
+            InterpolateBetweenMinMaxFlashColorsAsStateChanges = 1 << 1,
+            InterpolateColorAlongHsvSpace = 1 << 2,
+            MoreColorsForHsvInterpolation = 1 << 3,
+            InvertInterpolation = 1 << 4
         }
         
+        [Flags]
         public enum ScalingFlags3Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlags2Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum ScalingFlags4Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum Flags1Value : byte
         {
-            UseMinMaxForStateChanges,
-            InterpolateBetweenMinMaxFlashColorsAsStateChanges,
-            InterpolateColorAlongHsvSpace,
-            MoreColorsForHsvInterpolation,
-            InvertInterpolation
+            UseMinMaxForStateChanges = 1 << 0,
+            InterpolateBetweenMinMaxFlashColorsAsStateChanges = 1 << 1,
+            InterpolateColorAlongHsvSpace = 1 << 2,
+            MoreColorsForHsvInterpolation = 1 << 3,
+            InvertInterpolation = 1 << 4
         }
         
+        [Flags]
         public enum ScalingFlags5Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlags3Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum ScalingFlags6Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
+        [Flags]
         public enum FlashFlags4Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum ScalingFlags7Value : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
         public enum Anchor1Value : short
@@ -604,16 +619,18 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x18)]
             public byte[] Padding5;
             
+            [Flags]
             public enum ScalingFlagsValue : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlashFlagsValue : ushort
             {
-                ReverseDefaultFlashingColors
+                ReverseDefaultFlashingColors = 1 << 0
             }
             
             [TagStructure(Size = 0x1E0)]
@@ -834,9 +851,10 @@ namespace TagTool.Tags.Definitions.Gen1
                 TeamIcon
             }
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                UseTeamColor
+                UseTeamColor = 1 << 0
             }
         }
         
@@ -850,16 +868,17 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x20)]
             public byte[] Padding;
             
+            [Flags]
             public enum LatchedToValue : uint
             {
-                ShieldRecharging,
-                ShieldDamaged,
-                ShieldLow,
-                ShieldEmpty,
-                HealthLow,
-                HealthEmpty,
-                HealthMinorDamage,
-                HealthMajorDamage
+                ShieldRecharging = 1 << 0,
+                ShieldDamaged = 1 << 1,
+                ShieldLow = 1 << 2,
+                ShieldEmpty = 1 << 3,
+                HealthLow = 1 << 4,
+                HealthEmpty = 1 << 5,
+                HealthMinorDamage = 1 << 6,
+                HealthMajorDamage = 1 << 7
             }
         }
         
@@ -937,16 +956,18 @@ namespace TagTool.Tags.Definitions.Gen1
                 IntegratedLight
             }
             
+            [Flags]
             public enum ScalingFlagsValue : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlashFlagsValue : ushort
             {
-                ReverseDefaultFlashingColors
+                ReverseDefaultFlashingColors = 1 << 0
             }
             
             [TagStructure(Size = 0x1E0)]
@@ -1162,26 +1183,29 @@ namespace TagTool.Tags.Definitions.Gen1
                 }
             }
             
+            [Flags]
             public enum ScalingFlags1Value : ushort
             {
-                DonTScaleOffset,
-                DonTScaleSize,
-                UseHighResScale
+                DonTScaleOffset = 1 << 0,
+                DonTScaleSize = 1 << 1,
+                UseHighResScale = 1 << 2
             }
             
+            [Flags]
             public enum FlagsValue : byte
             {
-                UseMinMaxForStateChanges,
-                InterpolateBetweenMinMaxFlashColorsAsStateChanges,
-                InterpolateColorAlongHsvSpace,
-                MoreColorsForHsvInterpolation,
-                InvertInterpolation
+                UseMinMaxForStateChanges = 1 << 0,
+                InterpolateBetweenMinMaxFlashColorsAsStateChanges = 1 << 1,
+                InterpolateColorAlongHsvSpace = 1 << 2,
+                MoreColorsForHsvInterpolation = 1 << 3,
+                InvertInterpolation = 1 << 4
             }
             
+            [Flags]
             public enum Flags1Value : uint
             {
-                ShowOnlyWhenActive,
-                FlashOnceIfActivatedWhileDisabled
+                ShowOnlyWhenActive = 1 << 0,
+                FlashOnceIfActivatedWhileDisabled = 1 << 1
             }
         }
     }

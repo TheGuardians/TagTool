@@ -268,17 +268,18 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x10)]
         public byte[] Padding32;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
             /// <summary>
             /// lightmap texture parametrization should correspond to diffuse texture parametrization
             /// </summary>
-            SimpleParameterization,
+            SimpleParameterization = 1 << 0,
             /// <summary>
             /// light independent of normals (trees)
             /// </summary>
-            IgnoreNormals,
-            TransparentLit
+            IgnoreNormals = 1 << 1,
+            TransparentLit = 1 << 2
         }
         
         public enum DetailLevelValue : short
@@ -289,6 +290,7 @@ namespace TagTool.Tags.Definitions.Gen1
             Turd
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
         }
@@ -330,11 +332,12 @@ namespace TagTool.Tags.Definitions.Gen1
             HunterShield
         }
         
+        [Flags]
         public enum Flags2Value : ushort
         {
-            AlphaTested,
-            BumpMapIsSpecularMask,
-            TrueAtmosphericFog
+            AlphaTested = 1 << 0,
+            BumpMapIsSpecularMask = 1 << 1,
+            TrueAtmosphericFog = 1 << 2
         }
         
         public enum TypeValue : short
@@ -344,10 +347,11 @@ namespace TagTool.Tags.Definitions.Gen1
             BlendedBaseSpecular
         }
         
+        [Flags]
         public enum Flags3Value : ushort
         {
-            RescaleDetailMaps,
-            RescaleBumpMap
+            RescaleDetailMaps = 1 << 0,
+            RescaleBumpMap = 1 << 1
         }
         
         public enum DetailMapFunctionValue : short
@@ -396,9 +400,10 @@ namespace TagTool.Tags.Definitions.Gen1
             Spark
         }
         
+        [Flags]
         public enum Flags4Value : ushort
         {
-            Unfiltered
+            Unfiltered = 1 << 0
         }
         
         public enum PrimaryAnimationFunctionValue : short
@@ -449,16 +454,18 @@ namespace TagTool.Tags.Definitions.Gen1
             Spark
         }
         
+        [Flags]
         public enum Flags5Value : ushort
         {
-            Overbright,
-            ExtraShiny,
-            LightmapIsSpecular
+            Overbright = 1 << 0,
+            ExtraShiny = 1 << 1,
+            LightmapIsSpecular = 1 << 2
         }
         
+        [Flags]
         public enum Flags6Value : ushort
         {
-            DynamicMirror
+            DynamicMirror = 1 << 0
         }
         
         public enum Type1Value : short

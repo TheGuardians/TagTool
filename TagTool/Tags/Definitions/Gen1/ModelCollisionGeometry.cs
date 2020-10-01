@@ -122,15 +122,16 @@ namespace TagTool.Tags.Definitions.Gen1
         public List<Sphere> PathfindingSpheres;
         public List<Node> Nodes;
         
+        [Flags]
         public enum FlagsValue : uint
         {
-            TakesShieldDamageForChildren,
-            TakesBodyDamageForChildren,
-            AlwaysShieldsFriendlyDamage,
-            PassesAreaDamageToChildren,
-            ParentNeverTakesBodyDamageForUs,
-            OnlyDamagedByExplosives,
-            OnlyDamagedWhileOccupied
+            TakesShieldDamageForChildren = 1 << 0,
+            TakesBodyDamageForChildren = 1 << 1,
+            AlwaysShieldsFriendlyDamage = 1 << 2,
+            PassesAreaDamageToChildren = 1 << 3,
+            ParentNeverTakesBodyDamageForUs = 1 << 4,
+            OnlyDamagedByExplosives = 1 << 5,
+            OnlyDamagedWhileOccupied = 1 << 6
         }
         
         public enum ShieldMaterialTypeValue : short
@@ -203,9 +204,10 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x8)]
             public byte[] Padding2;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                Head
+                Head = 1 << 0
             }
             
             public enum MaterialTypeValue : short
@@ -264,18 +266,19 @@ namespace TagTool.Tags.Definitions.Gen1
             public CachedTag DestroyedEffect;
             public List<DamagePermutationsBlock> Permutations;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                LivesUntilObjectDies,
-                ForcesObjectToDie,
-                DiesWhenObjectDies,
-                DiesWhenObjectIsDamaged,
-                DisappearsWhenShieldIsOff,
-                InhibitsMeleeAttack,
-                InhibitsWeaponAttack,
-                InhibitsWalking,
-                ForcesDropWeapon,
-                CausesHeadMaimedScream
+                LivesUntilObjectDies = 1 << 0,
+                ForcesObjectToDie = 1 << 1,
+                DiesWhenObjectDies = 1 << 2,
+                DiesWhenObjectIsDamaged = 1 << 3,
+                DisappearsWhenShieldIsOff = 1 << 4,
+                InhibitsMeleeAttack = 1 << 5,
+                InhibitsWeaponAttack = 1 << 6,
+                InhibitsWalking = 1 << 7,
+                ForcesDropWeapon = 1 << 8,
+                CausesHeadMaimedScream = 1 << 9
             }
             
             [TagStructure(Size = 0x20)]
@@ -351,9 +354,10 @@ namespace TagTool.Tags.Definitions.Gen1
                     public short Bsp2dReferenceCount;
                     public int FirstBsp2dReference;
                     
+                    [Flags]
                     public enum FlagsValue : ushort
                     {
-                        ContainsDoubleSidedSurfaces
+                        ContainsDoubleSidedSurfaces = 1 << 0
                     }
                 }
                 
@@ -381,12 +385,13 @@ namespace TagTool.Tags.Definitions.Gen1
                     public sbyte BreakableSurface;
                     public short Material;
                     
+                    [Flags]
                     public enum FlagsValue : byte
                     {
-                        TwoSided,
-                        Invisible,
-                        Climbable,
-                        Breakable
+                        TwoSided = 1 << 0,
+                        Invisible = 1 << 1,
+                        Climbable = 1 << 2,
+                        Breakable = 1 << 3
                     }
                 }
                 

@@ -54,12 +54,13 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x4)]
             public byte[] Padding3;
             
+            [Flags]
             public enum TypeFlagsValue : byte
             {
-                Unused,
-                Unused1,
-                InterpolateColorInHsv,
-                MoreColors
+                Unused = 1 << 0,
+                Unused1 = 1 << 1,
+                InterpolateColorInHsv = 1 << 2,
+                MoreColors = 1 << 3
             }
         }
     }

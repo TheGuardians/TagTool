@@ -179,14 +179,15 @@ namespace TagTool.Tags.Definitions.Gen1
             EmitRandomly
         }
         
+        [Flags]
         public enum GlowFlagsValue : uint
         {
-            ModifyParticleColorInRange,
-            ParticlesMoveBackwards,
-            ParticesMoveInBothDirections,
-            TrailingParticlesFadeOverTime,
-            TrailingParticlesShrinkOverTime,
-            TrailingParticlesSlowOverTime
+            ModifyParticleColorInRange = 1 << 0,
+            ParticlesMoveBackwards = 1 << 1,
+            ParticesMoveInBothDirections = 1 << 2,
+            TrailingParticlesFadeOverTime = 1 << 3,
+            TrailingParticlesShrinkOverTime = 1 << 4,
+            TrailingParticlesSlowOverTime = 1 << 5
         }
         
         public enum AttachmentValue : short

@@ -144,11 +144,12 @@ namespace TagTool.Tags.Definitions.Gen1
             Center
         }
         
+        [Flags]
         public enum ScalingFlagsValue : ushort
         {
-            DonTScaleOffset,
-            DonTScaleSize,
-            UseHighResScale
+            DonTScaleOffset = 1 << 0,
+            DonTScaleSize = 1 << 1,
+            UseHighResScale = 1 << 2
         }
         
         [TagStructure(Size = 0x10)]
@@ -168,22 +169,25 @@ namespace TagTool.Tags.Definitions.Gen1
             public FlagsValue Flags;
             public short TextIndex;
             
+            [Flags]
             public enum FlagsValue : byte
             {
-                UseTextFromStringListInstead,
-                OverrideDefaultColor,
-                WidthOffsetIsAbsoluteIconWidth
+                UseTextFromStringListInstead = 1 << 0,
+                OverrideDefaultColor = 1 << 1,
+                WidthOffsetIsAbsoluteIconWidth = 1 << 2
             }
         }
         
+        [Flags]
         public enum FlashFlagsValue : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum FlashFlags1Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
         [TagStructure(Size = 0x68)]
@@ -207,20 +211,23 @@ namespace TagTool.Tags.Definitions.Gen1
             [TagField(Length = 0x18)]
             public byte[] Padding3;
             
+            [Flags]
             public enum FlagsValue : uint
             {
-                DonTRotateWhenPointingOffscreen
+                DonTRotateWhenPointingOffscreen = 1 << 0
             }
         }
         
+        [Flags]
         public enum FlashFlags2Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
         
+        [Flags]
         public enum FlashFlags3Value : ushort
         {
-            ReverseDefaultFlashingColors
+            ReverseDefaultFlashingColors = 1 << 0
         }
     }
 }

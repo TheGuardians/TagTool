@@ -51,17 +51,18 @@ namespace TagTool.Tags.Definitions.Gen1
         public List<ShaderTransparentGenericMapBlock> Maps;
         public List<ShaderTransparentGenericStageBlock> Stages;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
             /// <summary>
             /// lightmap texture parametrization should correspond to diffuse texture parametrization
             /// </summary>
-            SimpleParameterization,
+            SimpleParameterization = 1 << 0,
             /// <summary>
             /// light independent of normals (trees)
             /// </summary>
-            IgnoreNormals,
-            TransparentLit
+            IgnoreNormals = 1 << 1,
+            TransparentLit = 1 << 2
         }
         
         public enum DetailLevelValue : short
@@ -72,6 +73,7 @@ namespace TagTool.Tags.Definitions.Gen1
             Turd
         }
         
+        [Flags]
         public enum Flags1Value : ushort
         {
         }
@@ -113,16 +115,17 @@ namespace TagTool.Tags.Definitions.Gen1
             HunterShield
         }
         
+        [Flags]
         public enum Flags2Value : byte
         {
-            AlphaTested,
-            Decal,
-            TwoSided,
-            FirstMapIsInScreenspace,
-            DrawBeforeWater,
-            IgnoreEffect,
-            ScaleFirstMapWithDistance,
-            Numeric
+            AlphaTested = 1 << 0,
+            Decal = 1 << 1,
+            TwoSided = 1 << 2,
+            FirstMapIsInScreenspace = 1 << 3,
+            DrawBeforeWater = 1 << 4,
+            IgnoreEffect = 1 << 5,
+            ScaleFirstMapWithDistance = 1 << 6,
+            Numeric = 1 << 7
         }
         
         public enum FirstMapTypeValue : short
@@ -223,11 +226,12 @@ namespace TagTool.Tags.Definitions.Gen1
             public float RotationAnimationScale; // degrees
             public RealPoint2d RotationAnimationCenter;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                Unfiltered,
-                UClamped,
-                VClamped
+                Unfiltered = 1 << 0,
+                UClamped = 1 << 1,
+                VClamped = 1 << 2
             }
             
             public enum UAnimationSourceValue : short
@@ -352,11 +356,12 @@ namespace TagTool.Tags.Definitions.Gen1
             public OutputAbCdMuxSum1Value OutputAbCdMuxSum1;
             public OutputMapping1Value OutputMapping1;
             
+            [Flags]
             public enum FlagsValue : ushort
             {
-                ColorMux,
-                AlphaMux,
-                AOutControlsColor0Animation
+                ColorMux = 1 << 0,
+                AlphaMux = 1 << 1,
+                AOutControlsColor0Animation = 1 << 2
             }
             
             public enum Color0SourceValue : short

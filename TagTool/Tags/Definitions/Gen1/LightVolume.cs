@@ -84,10 +84,11 @@ namespace TagTool.Tags.Definitions.Gen1
         [TagField(Length = 0x20)]
         public byte[] Padding8;
         
+        [Flags]
         public enum FlagsValue : ushort
         {
-            InterpolateColorInHsv,
-            MoreColors
+            InterpolateColorInHsv = 1 << 0,
+            MoreColors = 1 << 1
         }
         
         public enum BrightnessScaleSourceValue : short
