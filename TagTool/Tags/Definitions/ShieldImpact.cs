@@ -102,42 +102,41 @@ namespace TagTool.Tags.Definitions
             public ShieldImpactFunction PlasmaEdgeColor;
             public ShieldImpactFunction PlasmaEdgeIntensity;
         }
-        //
-        // Values for H3/ODST.  Needs more reversing
-        //
-        [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-        public class H3ValuesBlock : TagStructure
-		{
-            public CachedTag Bitmap1;
-            public CachedTag Bitmap2;
 
-            public float Unknown1;
-            public float Unknown2;
+        [TagStructure(Size = 0xA8, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xA4, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
+        public class H3ValuesBlock : TagStructure
+        {
+            public CachedTag NoiseTexture1;
+            public CachedTag NoiseTexture2;
+
+            public float Extrusion;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown3;
+            public float OvershieldNoiseUVScale;
+            [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
+            public float NoiseUVScale;
 
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
+            public float UVScrollRate;
+            public float AmbientSharpness;
+            public float AmbientIntensity;
+            public float AmbientFalloff;
+            public float Sharpness;
+            public float Intensity;
+            public float Falloff;
 
-            public RealRgbColor Color1;
-            public float Magnitude1;
-            public RealRgbColor Color2;
-            public float Magnitude2;
-            public RealRgbColor Color3;
-            public float Magnitude3;
-            public RealRgbColor Color4;
-            public float Magnitude4;
-            public RealRgbColor Color5;
-            public float Magnitude5;
-            public RealRgbColor Color6;
-            public float Magnitude6;
+            public RealRgbColor OvershieldAmbientColor;
+            public float OvershieldAmbientMagnitude;
+            public RealRgbColor OvershieldColor1;
+            public float OvershieldColor1Magnitude;
+            public RealRgbColor OvershieldColor2;
+            public float OvershieldColor2Magnitude;
+            public RealRgbColor ShieldImpactAmbientColor;
+            public float ShieldImpactAmbientColorMagnitude;
+            public RealRgbColor ShieldImpactColor1;
+            public float ShieldImpactColor1Magnitude;
+            public RealRgbColor ShieldImpactColor2;
+            public float ShieldImpactColor2Magnitude;
         }
 
         /// <summary>

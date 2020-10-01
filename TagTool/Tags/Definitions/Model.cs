@@ -928,10 +928,11 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum FlagsValue : int
         {
+            // todo: flags versioning
             None = 0,
             ActiveCamoAlwaysOn = 1 << 0,
             ActiveCamoAlwaysMerge = 1 << 1,
-            ActiveCamoNeverMerge = 1 << 2,
+            ActiveCamoNeverMerge = 1 << 2, // <-- in H3, enables shield_impact on the model
             InconsequentialTarget = 1 << 3,
             LockedPrecomputedProbes = 1 << 4,
             ModelIsBigBattleObject = 1 << 5,
