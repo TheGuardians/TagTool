@@ -350,7 +350,7 @@ namespace TagTool.Serialization
             if (count == 0)
             {
                 // Null tag block
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+                reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0xC : 0x8);
                 return result;
             }
 
@@ -368,7 +368,7 @@ namespace TagTool.Serialization
                 addMethod.Invoke(result, new[] { element });
             }
 
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+            reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0xC : 0x8);
 
             return result;
         }
@@ -393,7 +393,7 @@ namespace TagTool.Serialization
             if (count == 0)
             {
                 // Null tag block
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+                reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0xC : 0x8);
                 return result;
             }
 
@@ -413,7 +413,7 @@ namespace TagTool.Serialization
                 addMethod.Invoke(result, new[] { element });
             }
 
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+            reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0xC : 0x8);
 
             return result;
         }
@@ -479,14 +479,14 @@ namespace TagTool.Serialization
         public CachedTag DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
         {
             if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
-                reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
+                reader.BaseStream.Position += (Version != CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
             
             var result = context.GetTagByIndex(reader.ReadInt32());
 
             if (result != null && valueInfo != null && valueInfo.ValidTags != null)
             {
                 if(!valueInfo.ValidTags.Any(x => result.IsInGroup(x)))
-                    throw new Exception($"Invalid group for tag reference: {result.Group.Tag}");
+                    Console.WriteLine($"WARNING: Invalid group for tag reference: {result.Group.Tag}");
             }
 
             return result;
@@ -503,21 +503,21 @@ namespace TagTool.Serialization
             // Read size and pointer
             var startOffset = reader.BaseStream.Position;
             var size = reader.ReadInt32();
-            if (Version > CacheVersion.Halo2Vista)
+            if (Version != CacheVersion.Halo2Vista)
                 reader.BaseStream.Position = startOffset + 0xC;
             var pointer = reader.ReadUInt32();
             if (pointer == 0)
             {
                 // Null data reference
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+                reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0x14 : 0x8);
                 return new byte[0];
             }
 
             // Read the data
             var result = new byte[size];
-            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
+            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version != CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
             reader.Read(result, 0, size);
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+            reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0x14 : 0x8);
             return result;
         }
 
@@ -526,21 +526,21 @@ namespace TagTool.Serialization
             // Read size and pointer
             var startOffset = reader.BaseStream.Position;
             var size = reader.ReadInt32();
-            if (Version > CacheVersion.Halo2Vista)
+            if (Version != CacheVersion.Halo2Vista)
                 reader.BaseStream.Position = startOffset + 0xC;
             var pointer = reader.ReadUInt32();
             if (pointer == 0)
             {
                 // Null data reference
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+                reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0x14 : 0x8);
                 return new TagData();
             }
 
             // Read the data
             var result = new byte[size];
-            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
+            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version != CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
             reader.Read(result, 0, size);
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+            reader.BaseStream.Position = startOffset + (Version != CacheVersion.Halo2Vista ? 0x14 : 0x8);
 
             var tagData = new TagData();
 
