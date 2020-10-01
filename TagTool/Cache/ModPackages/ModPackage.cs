@@ -355,13 +355,12 @@ namespace TagTool.Cache
                 StreamUtil.Align(writer.BaseStream, 4);
 
                 // seek to the table and update size and offset
+                long originalPos = writer.BaseStream.Position;
                 writer.BaseStream.Seek(mapEntry.TableOffset + cacheMapEntrySize * i + sectionOffset, SeekOrigin.Begin);
                 var tableEntry = new CacheMapTableEntry(size, offset - sectionOffset, MapToCacheMapping[i], MapIds[i]);
                 tableEntry.Write(writer);
-                writer.BaseStream.Seek(0, SeekOrigin.End);
+                writer.BaseStream.Seek(originalPos, SeekOrigin.Begin);
             }
-
-            writer.BaseStream.Seek(0, SeekOrigin.End);
         }
 
         private void WriteTagsSection(EndianWriter writer, DataSerializationContext context, TagSerializer serializer)
@@ -386,10 +385,11 @@ namespace TagTool.Cache
 
                 uint size = (uint)(writer.BaseStream.Position - offset);
 
+                long originalPos = writer.BaseStream.Position;
                 writer.BaseStream.Seek(tagCachesEntry.TableOffset + tagCacheEntrySize * i + sectionOffset, SeekOrigin.Begin);
                 var tableEntry = new CacheTableEntry(size, offset - sectionOffset, CacheNames[i]);
                 serializer.Serialize(context, tableEntry);
-                writer.BaseStream.Seek(0, SeekOrigin.End);
+                writer.BaseStream.Seek(originalPos, SeekOrigin.Begin);
             }
         }
 
@@ -421,10 +421,11 @@ namespace TagTool.Cache
 
                 uint size = (uint)(writer.BaseStream.Position - offset);
 
+                long originalPos = writer.BaseStream.Position;
                 writer.BaseStream.Seek(tagNameFileEntry.TableOffset + tableEntrySize * i + sectionOffset, SeekOrigin.Begin);
                 var tableEntry = new GenericTableEntry(size, offset - sectionOffset);
                 tableEntry.Write(writer);
-                writer.BaseStream.Seek(0, SeekOrigin.End);
+                writer.BaseStream.Position = originalPos;
             }
             
         }
@@ -491,8 +492,6 @@ namespace TagTool.Cache
 
             for(int i = 0; i < cacheCount; i++)
             {
-                var tagStream = new MemoryStream();
-
                 reader.BaseStream.Position = entry.TableOffset + tagCacheEntrySize * i + section.Offset;
                 var tableEntry = deserializer.Deserialize<CacheTableEntry>(context);
                 CacheNames.Add(tableEntry.CacheName);
@@ -500,11 +499,9 @@ namespace TagTool.Cache
 
                 if (tableEntry.Size > int.MaxValue)
                     throw new Exception("Tag cache size not supported");
-                int size = (int)tableEntry.Size;
 
-                byte[] data = new byte[size];
-                reader.Read(data, 0, size);
-                tagStream.Write(data, 0, size);
+                var tagStream = new MemoryStream();
+                StreamUtil.Copy(reader.BaseStream, tagStream, (int)tableEntry.Size);
                 tagStream.Position = 0;
                 TagCachesStreams.Add(new ModPackageStream(tagStream));
             }
@@ -771,12 +768,14 @@ namespace TagTool.Cache
                 var version = Version.Parse(Console.ReadLine());
                 Metadata.VersionMajor = (short)version.Major;
                 Metadata.VersionMinor = (short)version.Minor;
+                if (version.Major == 0 && version.Minor == 0)
+                    throw new ArgumentException(nameof(version));
             }
             catch(ArgumentException e)
             {
                 Console.WriteLine(e.Message);
-                Console.WriteLine("ERROR: Failed to parse version number, setting it to 0.");
-                Metadata.VersionMajor = 0;
+                Console.WriteLine("ERROR: Failed to parse version number, setting it to default");
+                Metadata.VersionMajor = 1;
                 Metadata.VersionMinor = 0;
             }
 
