@@ -21,13 +21,24 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-			var path = Cache.BaseCacheReference.Directory.FullName;
-			path = path.Substring(0, path.Length - 4);
+            string path;
+            if (Cache.BaseCacheReference.Directory != null)
+            {
+                path = Cache.BaseCacheReference.Directory.FullName;
+                path = path.Substring(0, path.Length - 4);
 
-			if (args.Count != 0)
-				path = args[0];
-			else
-				path += "mods\\downloads\\" + Cache.BaseModPackage.Metadata.Name + ".pak";
+                if (args.Count != 0)
+                    path = args[0];
+                else
+                    path += "mods\\downloads\\" + Cache.BaseModPackage.Metadata.Name + ".pak";
+            }
+            else
+            {
+                if (args.Count < 1)
+                    return new TagToolError(CommandError.ArgInvalid, "Expected path to save to");
+
+                path = args[0];
+            }
 
 			var file = new System.IO.FileInfo(path);
 
