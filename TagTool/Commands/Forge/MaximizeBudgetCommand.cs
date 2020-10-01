@@ -96,6 +96,11 @@ namespace TagTool.Commands.Forge
                 };
 
                 var generator = new MapVariantGenerator();
+                generator.ObjectTypeMask |= 
+                    (1 << (int)GameObjectTypeHalo3ODST.Machine) |
+                    (1 << (int)GameObjectTypeHalo3ODST.Control) |
+                    (1 << (int)GameObjectTypeHalo3ODST.EffectScenery);
+
                 // Generate a map variant from the current scenario first
                 var oldBlf = generator.Generate(cacheStream, Cache, scenario, metadata);
                 // Generate a list of placements for objects that are in the forge palette
