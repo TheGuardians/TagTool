@@ -34,17 +34,6 @@ namespace TagTool.Cache.Gen2
         /// </summary>
         public uint VirtualAddress;
 
-        /// <summary>
-        /// Address in memory (xbox) of the cache file globals structure bsp header
-        /// </summary>
-        public uint StructureBspHeaderAddress;
-
-        /// <summary>
-        /// File offset (xbox) of the cache file globals structure bsp header
-        /// </summary>
-        public uint StructureBspHeaderFileOffset;
-
-
         public TagCacheGen2Header Header;
         public List<CachedTagGen2> Tags = new List<CachedTagGen2>();
         public Dictionary<Tag, CachedTagGen2> HardcodedTags = new Dictionary<Tag, CachedTagGen2>();
@@ -163,12 +152,11 @@ namespace TagTool.Cache.Gen2
                 reader.BaseStream.Position = (sbspsRefsAddress + i * sbspRefSize) + magic;
 
                 // read the tag data addresses from the cache file globals sbsp header
-                StructureBspHeaderFileOffset =  reader.ReadUInt32();
+                uint sbsHeaderOffset =  reader.ReadUInt32();
                 uint bufferSize = reader.ReadUInt32();
-                StructureBspHeaderAddress = reader.ReadUInt32();
+                uint sbspHeaderAddress = reader.ReadUInt32();
 
-                reader.BaseStream.Position = StructureBspHeaderFileOffset + 4;
-
+                reader.BaseStream.Position = sbsHeaderOffset + 4;
                 uint sbspTagAddress = reader.ReadUInt32();
                 uint ltmpTagAddress = reader.ReadUInt32();
 
@@ -178,16 +166,21 @@ namespace TagTool.Cache.Gen2
                 reader.BaseStream.Position = (sbspsRefsAddress + magic) + 0x1C;
                 uint ltmpTagId = reader.ReadUInt32();
 
+                CachedTag.AddressToOffsetOverrideDelegate sbspAddressToOffset = (currentOffset, address) => (address - sbspHeaderAddress) + sbsHeaderOffset;
+
                 // fixup the tag data addresse
                 var sbspTag = (CachedTagGen2)GetTag(sbspTagId);
                 if (sbspTag != null)
                 {
                     sbspTag.Offset = sbspTagAddress;
-                    sbspTag.Size = 0x23C;
+                    sbspTag.AddressToOffsetOverride = sbspAddressToOffset;
                 } 
                 var ltmpTag = (CachedTagGen2)GetTag(ltmpTagId);
                 if (ltmpTag != null)
+                {
                     ltmpTag.Offset = ltmpTagAddress;
+                    ltmpTag.AddressToOffsetOverride = sbspAddressToOffset;
+                }
             }
         }
 
