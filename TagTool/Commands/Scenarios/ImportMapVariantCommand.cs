@@ -58,7 +58,11 @@ namespace TagTool.Commands.Scenarios
                 if (importingIntoMapFile)
                     ImportIntoMapFile(blf);
                 else
+                {
+                    if (blf.MapVariant.MapVariant.MapId != Definition.MapId)
+                        throw new InvalidOperationException("Tried to import a map variant into a scenario with a different map id");
                     ImportIntoScenario(blf);
+                }
             }
 
             Console.WriteLine("Done.");
@@ -121,16 +125,14 @@ namespace TagTool.Commands.Scenarios
             if (mapFile.MapFileBlf == null)
                 throw new InvalidOperationException("Not a valid map file. Missing blf data");
 
-            if (mapVariantBlf.MapVariant.MapVariant.MapId != Definition.MapId)
-                throw new InvalidOperationException("Tried to import a map variant into a scenario with a different map id");
-
+            mapVariantBlf.MapVariant.MapVariant.MapId = Definition.MapId;
             if (mapFile.MapFileBlf.Scenario != null)
             {
                 UpdateMetadata(mapVariantBlf.ContentHeader.Metadata, mapFile.MapFileBlf.Scenario);
                 UpdateMetadata(mapVariantBlf.MapVariant.MapVariant.Metadata, mapFile.MapFileBlf.Scenario);
             }
-
-            mapFile.MapFileBlf.MapVariant = mapVariantBlf.MapVariant;
+            
+            mapFile.MapFileBlf.MapVariant = mapVariantBlf.MapVariant;     
             mapFile.MapFileBlf.ContentFlags |= BlfFileContentFlags.MapVariant;
             mapFile.MapFileBlf.MapVariantTagNames = mapVariantBlf.MapVariantTagNames;
             mapFile.MapFileBlf.ContentFlags |= BlfFileContentFlags.MapVariantTagNames;
@@ -141,6 +143,7 @@ namespace TagTool.Commands.Scenarios
 
         private void UpdateMetadata(ContentItemMetadata metadata, BlfScenario blfScenario)
         {
+            metadata.MapId = Definition.MapId;
             metadata.Name = blfScenario.Names[0].Name;
             metadata.Description = blfScenario.Descriptions[0].Name;
         }
