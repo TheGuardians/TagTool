@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions.Gen1;
 
 namespace TagTool.Cache.Gen1
 {
@@ -136,7 +137,7 @@ namespace TagTool.Cache.Gen1
 
             for (var i = 0u; i < sbspRefsCount; i++)
             {
-                uint sbspRefOffset = AddressToOffset(sbspRefsAddress + i * 0x20);
+                uint sbspRefOffset = AddressToOffset(sbspRefsAddress + i * TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspsBlock), Version));
 
                 reader.BaseStream.Position = sbspRefOffset;
                 uint sbspHeaderOffset = reader.ReadUInt32();
