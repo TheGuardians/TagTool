@@ -93,9 +93,18 @@ namespace TagTool.Cache
 
         public void AddMap(Stream mapStream, int mapId, int cacheIndex)
         {
-            MapFileStreams.Add(mapStream);
-            MapToCacheMapping.Add(MapFileStreams.Count - 1, cacheIndex);
-            MapIds.Add(mapId);
+            var mapFileIndex = MapIds.IndexOf(mapId);
+            if (mapFileIndex != -1)
+            {
+                mapStream.Position = 0;
+                MapFileStreams[mapFileIndex] = mapStream;
+            }
+            else
+            {
+                MapFileStreams.Add(mapStream);
+                MapToCacheMapping.Add(MapFileStreams.Count - 1, cacheIndex);
+                MapIds.Add(mapId);
+            }
         }
 
         public void Load(FileInfo file)
