@@ -124,6 +124,12 @@ namespace TagTool.Commands.Scenarios
             if (mapVariantBlf.MapVariant.MapVariant.MapId != Definition.MapId)
                 throw new InvalidOperationException("Tried to import a map variant into a scenario with a different map id");
 
+            if (mapFile.MapFileBlf.Scenario != null)
+            {
+                UpdateMetadata(mapVariantBlf.ContentHeader.Metadata, mapFile.MapFileBlf.Scenario);
+                UpdateMetadata(mapVariantBlf.MapVariant.MapVariant.Metadata, mapFile.MapFileBlf.Scenario);
+            }
+
             mapFile.MapFileBlf.MapVariant = mapVariantBlf.MapVariant;
             mapFile.MapFileBlf.ContentFlags |= BlfFileContentFlags.MapVariant;
             mapFile.MapFileBlf.MapVariantTagNames = mapVariantBlf.MapVariantTagNames;
@@ -131,6 +137,12 @@ namespace TagTool.Commands.Scenarios
 
             writer.BaseStream.Position = 0;
             mapFile.Write(writer);
+        }
+
+        private void UpdateMetadata(ContentItemMetadata metadata, BlfScenario blfScenario)
+        {
+            metadata.Name = blfScenario.Names[0].Name;
+            metadata.Description = blfScenario.Descriptions[0].Name;
         }
 
         class MapVariantImporter
