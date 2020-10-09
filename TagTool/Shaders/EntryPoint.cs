@@ -54,4 +54,33 @@ namespace TagTool.Shaders
         Z_Only = 1 << 18,
         Sfx_Distort = 1 << 19,
     }
+
+    [Flags]
+    public enum EntryPointBitMaskMs30 : int
+    {
+        Default = 1 << 0,
+        Albedo = 1 << 1,
+        Albedo_Low = 1 << 2,
+        Static_Default = 1 << 3,
+        Static_Per_Pixel = 1 << 4,
+        Static_Per_Vertex = 1 << 5,
+        Static_Sh = 1 << 6,
+        Static_Prt_Ambient = 1 << 7,
+        Static_Prt_Linear = 1 << 8,
+        Static_Prt_Quadratic = 1 << 9,
+        Static_Per_Pixel_Low = 1 << 10,
+        Static_Per_Vertex_Low = 1 << 11,
+        Static_Sh_Low = 1 << 12,
+        Dynamic_Light = 1 << 13,
+        Shadow_Generate = 1 << 14,
+        Shadow_Apply = 1 << 15,
+        Active_Camo = 1 << 16,
+        Lightmap_Debug_Mode = 1 << 17,
+        Static_Per_Vertex_Color = 1 << 18,
+        Water_Tessellation = 1 << 19,
+        Water_Shading = 1 << 20,
+        Dynamic_Light_Cinematic = 1 << 21,
+        Z_Only = 1 << 22,
+        Sfx_Distort = 1 << 23
+    }
 }

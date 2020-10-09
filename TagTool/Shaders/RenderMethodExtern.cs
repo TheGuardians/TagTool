@@ -57,7 +57,8 @@ namespace TagTool.Shaders
         scene_hdr_texture,
         water_memory_export_address,
         tree_animation_timer,
-        emblem_player_shoulder_texture,
-        emblem_clan_chest_texture,
+        emblem_player_shoulder_texture, // global_depth_constants in ODST
+        emblem_clan_chest_texture, // global_camera_forward in ODST
+        // texture_global_target_ibr = 51, // MS30
     }
 }
