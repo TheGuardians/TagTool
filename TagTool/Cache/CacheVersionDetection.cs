@@ -56,6 +56,8 @@ namespace TagTool.Cache
                     return CacheVersion.HaloPC;
                 case "01.00.00.0609":
                     return CacheVersion.HaloCustomEdition;
+                case "02.06.28.07902":
+                    return CacheVersion.Halo2Beta;
                 case "02.09.27.09809":
                     return CacheVersion.Halo2Xbox;
                 case "11081.07.04.30.0934.main":
@@ -127,6 +129,8 @@ namespace TagTool.Cache
                     return "01.00.00.0564";
                 case CacheVersion.HaloCustomEdition:
                     return "01.00.00.0609";
+                case CacheVersion.Halo2Beta:
+                    return "02.06.28.07902";
                 case CacheVersion.Halo2Xbox:
                     return "02.09.27.09809";
                 case CacheVersion.Halo2Vista:
@@ -197,6 +201,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloXbox:
                 case CacheVersion.HaloPC:
                 case CacheVersion.HaloCustomEdition:
+                case CacheVersion.Halo2Beta:
 				case CacheVersion.Halo2Xbox:
 				case CacheVersion.Halo2Vista:
 				case CacheVersion.HaloOnline106708:
@@ -310,6 +315,7 @@ namespace TagTool.Cache
             {
                 case CacheVersion.HaloXbox:
                 case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Beta:
                     return platform.HasFlag(CachePlatform.Xbox);
 
                 case CacheVersion.Halo3Beta:
@@ -366,6 +372,7 @@ namespace TagTool.Cache
 
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Beta:
                     return CacheGeneration.Second;
 
                 case CacheVersion.Halo3Beta:
@@ -443,6 +450,7 @@ namespace TagTool.Cache
         HaloXbox,
         HaloPC,
         HaloCustomEdition,
+        Halo2Beta,
         Halo2Xbox,
         Halo2Vista,
         Halo3Beta,

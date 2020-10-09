@@ -13,17 +13,49 @@ using TagTool.Tags.Definitions.Gen2;
 
 namespace TagTool.Cache.Gen2
 {
-    [TagStructure(Size = 0x20)]
+    [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Beta)]
+    [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo2Xbox)]
     public class TagCacheGen2Header : TagStructure
     {
+        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public uint TagGroupsOffset;
+
+        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public int TagGroupCount;
+
         public uint TagsOffset;
         public uint ScenarioID;
+
+        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public uint GlobalsID;
+
         public int CRC;
         public int TagCount;
         public Tag Tags;
+    }
+
+    [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Beta)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo2Xbox)]
+    public class TagTableEntryGen2 : TagStructure
+    {
+        public Tag Tag;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Beta)]
+        public Tag ParentTag;
+        [TagField(MaxVersion = CacheVersion.Halo2Beta)]
+        public Tag GrandParentTag;
+
+        public uint ID;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Beta)]
+        public uint TagNameAddress;
+
+        public uint Address;
+
+        public int Size;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Beta)]
+        public uint Unknown2;
     }
 
 
@@ -53,20 +85,30 @@ namespace TagTool.Cache.Gen2
             var deserializer = new TagDeserializer(mapFile.Version);
             Header = deserializer.Deserialize<TagCacheGen2Header>(dataContext);
 
-            uint tagCacheVirtualAddress = (Header.TagGroupsOffset - 0x20);
+
+
+            uint tagCacheVirtualAddress;
+            var headerSize = TagStructure.GetStructureSize(typeof(TagCacheGen2Header), Version);
+            if (Version > CacheVersion.Halo2Beta)
+                tagCacheVirtualAddress = (Header.TagGroupsOffset - headerSize);
+            else
+                tagCacheVirtualAddress = (Header.TagsOffset - headerSize);
 
             //
             // Read tag groups
             //
 
-            //seek to the tag groups offset, seems to be contiguous to the header
-            reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - tagCacheVirtualAddress);   // TODO: check how halo 2 xbox uses this
-
-            for(int i = 0; i < Header.TagGroupCount; i++)
+            if(Version > CacheVersion.Halo2Beta)
             {
-                var group = new TagGroupGen2(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
-                if (!TagDefinitions.TagDefinitionExists(group))
-                    Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
+                //seek to the tag groups offset, seems to be contiguous to the header
+                reader.SeekTo(tagDataSectionOffset + Header.TagGroupsOffset - tagCacheVirtualAddress);   // TODO: check how halo 2 xbox uses this
+
+                for (int i = 0; i < Header.TagGroupCount; i++)
+                {
+                    var group = new TagGroupGen2(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
+                    if (!TagDefinitions.TagDefinitionExists(group))
+                        Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
+                }
             }
 
             //
@@ -77,39 +119,52 @@ namespace TagTool.Cache.Gen2
 
             for (int i = 0; i < Header.TagCount; i++)
             {
-                var tag = new Tag(reader.ReadInt32());
+                var entry = deserializer.Deserialize<TagTableEntryGen2>(dataContext);
+                string name = null;
+                if (Version < CacheVersion.Halo2Xbox)
+                {
+                    var group = new TagGroupGen2(entry.Tag, entry.ParentTag, entry.GrandParentTag);
+                    if (!TagDefinitions.TagDefinitionExists(group))
+                        Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
 
-                uint ID = reader.ReadUInt32();
-                uint address = reader.ReadUInt32();
-                int size = reader.ReadInt32();
-                if (tag.Value == -1 || tag.Value == 0 || size == -1 || address == 0xFFFFFFFF || ID == 0 || ID == 0xFFFFFFFF)
+
+                    var streamPosition = reader.BaseStream.Position;
+                    reader.SeekTo(tagDataSectionOffset +  entry.TagNameAddress - tagCacheVirtualAddress);
+                    name = reader.ReadNullTerminatedString();
+                    reader.SeekTo(streamPosition);
+                }
+
+                if (entry.Tag.Value == -1 || entry.Tag.Value == 0 || entry.Size == -1 || entry.Address == 0xFFFFFFFF || entry.ID == 0 || entry.ID == 0xFFFFFFFF)
                     Tags.Add(null);
                 else
-                    Tags.Add(new CachedTagGen2((int)(ID & 0xFFFF), ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(tag), address, size, null, IsShared));
+                    Tags.Add(new CachedTagGen2((int)(entry.ID & 0xFFFF), entry.ID, (TagGroupGen2)TagDefinitions.GetTagGroupFromTag(entry.Tag), entry.Address, entry.Size, name, IsShared));
             }
-
-            reader.SeekTo(mapFile.Header.TagNameIndicesOffset);
-            var tagNamesOffset = new int[Header.TagCount];
-            for (int i = 0; i < Header.TagCount; i++)
-                tagNamesOffset[i] = reader.ReadInt32();
 
             //
             // Read tag names
             //
 
-            reader.SeekTo(mapFile.Header.TagNamesBufferOffset);
-
-            for (int i = 0; i < tagNamesOffset.Length; i++)
+            if(Version > CacheVersion.Halo2Beta)
             {
-                if (Tags[i] == null)
-                    continue;
+                reader.SeekTo(mapFile.Header.TagNameIndicesOffset);
+                var tagNamesOffset = new int[Header.TagCount];
+                for (int i = 0; i < Header.TagCount; i++)
+                    tagNamesOffset[i] = reader.ReadInt32();
 
-                if (tagNamesOffset[i] == -1)
-                    continue;
+                reader.SeekTo(mapFile.Header.TagNamesBufferOffset);
 
-                reader.SeekTo(tagNamesOffset[i] + mapFile.Header.TagNamesBufferOffset);
+                for (int i = 0; i < tagNamesOffset.Length; i++)
+                {
+                    if (Tags[i] == null)
+                        continue;
 
-                Tags[i].Name = reader.ReadNullTerminatedString();
+                    if (tagNamesOffset[i] == -1)
+                        continue;
+
+                    reader.SeekTo(tagNamesOffset[i] + mapFile.Header.TagNamesBufferOffset);
+
+                    Tags[i].Name = reader.ReadNullTerminatedString();
+                }
             }
 
             //
@@ -118,16 +173,20 @@ namespace TagTool.Cache.Gen2
 
             var scnrTag = (CachedTagGen2)GetTag(Header.ScenarioID);
             HardcodedTags[scnrTag.Group.Tag] = scnrTag;
-            var globalTag = (CachedTagGen2)GetTag(Header.GlobalsID);
-            HardcodedTags[globalTag.Group.Tag] = globalTag;
+
+            if (Version > CacheVersion.Halo2Beta)
+            {
+                var globalTag = (CachedTagGen2)GetTag(Header.GlobalsID);
+                HardcodedTags[globalTag.Group.Tag] = globalTag;
+            }
 
             //
             // Update virtual address if on Xbox
             //
 
-            if (Version == CacheVersion.Halo2Xbox)
+            if (Version <= CacheVersion.Halo2Xbox)
                 VirtualAddress = Tags[0].Offset;
-            else
+            else if (Version == CacheVersion.Halo2Vista)
                 VirtualAddress = mapFile.Header.VirtualAddress;
 
         }

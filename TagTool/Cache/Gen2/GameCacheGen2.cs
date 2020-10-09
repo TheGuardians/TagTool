@@ -62,7 +62,7 @@ namespace TagTool.Cache
                 TagCacheGen2 = new TagCacheGen2(reader, mapFile);
                 StringTableGen2 = new StringTableGen2(reader, mapFile);
 
-                if (Version == CacheVersion.Halo2Xbox)
+                if (Version <= CacheVersion.Halo2Xbox)
                     TagCacheGen2.FixupStructureBspTagsForXbox(reader, mapFile);
                 else
                     if (LoadVistaSharedTagCache())
@@ -78,15 +78,19 @@ namespace TagTool.Cache
                 return false;
 
             VistaSharedTagCacheFile = new FileInfo(Path.Combine(Directory.FullName, VistaSharedTagCacheName));
+
+            if (!File.Exists(VistaSharedTagCacheFile.Name))
+            {
+                Console.WriteLine($"Warning, shared map file required to load tags not found: {VistaSharedTagCacheName}");
+                return false;
+            }
+
             VistaSharedTagCache = (GameCacheGen2)GameCache.Open(VistaSharedTagCacheFile);
             return true;
         }
 
         private void LoadSharedResourceCaches()
         {
-
-            // TODO: prevent recursive calls here
-
             var thisName = BaseMapFile.Header.Name + ".map";
 
             if (thisName == "shared.map" || thisName == "single_player_shared.map")
@@ -113,15 +117,20 @@ namespace TagTool.Cache
             }
             ResourceCacheReferences.Add("shared.map", sharedCache);
 
-            GameCacheGen2 spSharedCache;
-            if (thisName == "single_player_shared.map")
-                spSharedCache = this;
-            else
+
+            if(Version > CacheVersion.Halo2Beta)
             {
-                var spSharedFile = new FileInfo(Path.Combine(Directory.FullName, "single_player_shared.map"));
-                spSharedCache = (GameCacheGen2)GameCache.Open(spSharedFile);
+                GameCacheGen2 spSharedCache;
+                if (thisName == "single_player_shared.map")
+                    spSharedCache = this;
+                else
+                {
+                    var spSharedFile = new FileInfo(Path.Combine(Directory.FullName, "single_player_shared.map"));
+                    spSharedCache = (GameCacheGen2)GameCache.Open(spSharedFile);
+                }
+                ResourceCacheReferences.Add("single_player_shared.map", spSharedCache);
             }
-            ResourceCacheReferences.Add("single_player_shared.map", spSharedCache);
+            
         }
 
         public byte[] GetCacheRawData(uint address, int size)

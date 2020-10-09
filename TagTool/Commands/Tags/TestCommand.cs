@@ -125,11 +125,10 @@ namespace TagTool.Commands
                     {
                         var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
                         Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
+                        continue;
 
                         var section = modeTag.Sections[0];
                         var resource = section.Resource;
-
-
                         using (var resourceStream = new MemoryStream((Cache as GameCacheGen2).GetCacheRawData(resource.BlockOffset, (int)resource.BlockSize)))
                         using (var reader = new EndianReader(resourceStream, Cache.Endianness))
                         using (var writer = new EndianWriter(resourceStream, Cache.Endianness))

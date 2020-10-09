@@ -20,7 +20,7 @@ namespace TagTool.Serialization
         {
             Tag = tag;
 
-            if (tag.IsShared)
+            if (tag.IsShared && gameCache.Version == CacheVersion.Halo2Vista)
             {
                 GameCache = gameCache.VistaSharedTagCache;
                 Stream = ((GameCacheGen2.Gen2CacheStream)stream).SharedStream;

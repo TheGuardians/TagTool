@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Tag = "mode", Size = 0x84, MinVersion = CacheVersion.Halo2Xbox)]
+    [TagStructure(Tag = "mode", Size = 0x84)]
     public class RenderModel : TagStructure
 	{
         public StringId Name;
