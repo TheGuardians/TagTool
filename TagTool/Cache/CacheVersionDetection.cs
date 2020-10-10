@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TagTool.Tags;
 
 namespace TagTool.Cache
@@ -13,15 +14,15 @@ namespace TagTool.Cache
         /// <returns>The engine version if the timestamp matched directly, otherwise <see cref="CacheVersion.Unknown"/>.</returns>
         public static CacheVersion DetectFromTimestamp(long timestamp, out CacheVersion closestGuess)
         {
-            var index = Array.BinarySearch(VersionTimestamps, timestamp);
-            if (index >= 0)
+            if (HaloOnlineTimestampMapping.ContainsKey(timestamp))
             {
-                // Version matches a timestamp directly
-                closestGuess = (CacheVersion)index;
+                closestGuess = HaloOnlineTimestampMapping[timestamp];
                 return closestGuess;
             }
 
+            // (INACCURATE)
             // Match the closest timestamp
+            var index = Array.BinarySearch(VersionTimestamps, timestamp);
             index = Math.Max(0, Math.Min(~index - 1, VersionTimestamps.Length - 1));
             closestGuess = (CacheVersion)index;
             return CacheVersion.Unknown;
@@ -406,6 +407,29 @@ namespace TagTool.Cache
                     return CacheGeneration.Unknown;
             }
         }
+
+        /// <summary>
+        /// tags.dat timestamps for each halo online game version.
+        /// Timestamps in here map directly to a <see cref="CacheVersion"/> value.
+        /// </summary>
+        private static readonly Dictionary<long, CacheVersion> HaloOnlineTimestampMapping = new Dictionary<long, CacheVersion>
+        {
+            [130713360239499012] = CacheVersion.HaloOnline106708,
+            [130772932862346058] = CacheVersion.HaloOnline235640,
+            [130785901486445524] = CacheVersion.HaloOnline301003,
+            [130800445160458507] = CacheVersion.HaloOnline327043,
+            [130814318396118255] = CacheVersion.HaloOnline372731,
+            [130829123589114103] = CacheVersion.HaloOnline416097,
+            [130834294034159845] = CacheVersion.HaloOnline430475,
+            [130844512316254660] = CacheVersion.HaloOnline454665,
+            [130851642645809862] = CacheVersion.HaloOnline449175,
+            [130858473716879375] = CacheVersion.HaloOnline498295,
+            [130868891945946004] = CacheVersion.HaloOnline530605,
+            [130869644198634503] = CacheVersion.HaloOnline532911,
+            [130879952719550501] = CacheVersion.HaloOnline554482,
+            [130881889330693956] = CacheVersion.HaloOnline571627,
+            [130930071628935939] = CacheVersion.HaloOnline700123
+        };
 
         /// <summary>
         /// tags.dat timestamps for each game version.

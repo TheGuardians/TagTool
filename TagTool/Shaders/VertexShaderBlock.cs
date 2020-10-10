@@ -3,16 +3,31 @@ using TagTool.Tags;
 
 namespace TagTool.Shaders
 {
-    [TagStructure(Size = 0x50)]
+    [TagStructure(Size = 0x50, MaxVersion = Cache.CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x58, MinVersion = Cache.CacheVersion.HaloReach)]
     public class VertexShaderBlock : TagStructure
 	{
-        public byte[] Unknown;
+        [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
+        public uint ContainsConstantData; // pixl only
+
+        public byte[] XboxShaderBytecode;
         public byte[] PCShaderBytecode;
+
         public List<ShaderParameter> XboxParameters;
-        public uint Unknown6;
+        public ShaderType XboxShaderType;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x3)]
+        public byte[] Padding0;
+
         public List<ShaderParameter> PCParameters;
-        public uint Unknown8;
+        public ShaderType PCShaderType;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x3)]
+        public byte[] Padding1;
+
         public uint Unknown9;
-        public VertexShaderReference XboxShaderReference;
+
+        [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
+        public int GlobalCachePixelShaderIndex; // pixl only
+
+        public PixelShaderReference XboxShaderReference;
     }
 }
