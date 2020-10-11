@@ -170,8 +170,10 @@ namespace TagTool.Geometry
         [TagField(Flags = Runtime)]
         public IndexBufferDefinition[] ResourceIndexBuffers;
 
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail, MaxVersion = HaloOnline700123)]
         public MeshFlags Flags;
+        [TagField(MinVersion = HaloReach)]
+        public short FlagsReach;
 
         [TagField(MinVersion = Halo3Retail, Format = nameof(Flags))]
         public sbyte RigidNodeIndex;
@@ -182,17 +184,27 @@ namespace TagTool.Geometry
         [TagField(MinVersion = Halo3Retail)]
         public PrtSHType PrtType;
 
+        [TagField(MinVersion = HaloReach)]
+        public byte LightingPolicy;
+
         [TagField(MinVersion = Halo3Retail)]
         public PrimitiveType IndexBufferType;
 
-        [TagField(Flags = Padding, Length = 3, MinVersion = Halo3Retail)]
+        [TagField(Flags = Padding, Length = 3, MinVersion = Halo3Retail, MaxVersion = HaloOnline700123)]
         public byte[] Unused3;
+        [TagField(Flags = Padding, Length = 1, MinVersion = HaloReach)]
+        public byte[] Unused4;
 
         [TagField(MinVersion = Halo3Retail)]
         public List<InstancedGeometryBlock> InstancedGeometry;
 
         [TagField(MinVersion = Halo3Retail)]
         public List<WaterBlock> Water;
+
+        [TagField(MinVersion = HaloReach)]
+        public float RuntimeBoundingRadius;
+        [TagField(MinVersion = HaloReach)]
+        public RealPoint3d RuntimeBoundingOffset;
 
         [TagStructure(Size = 0x10)]
         public class InstancedGeometryBlock : TagStructure

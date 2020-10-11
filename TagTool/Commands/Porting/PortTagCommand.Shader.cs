@@ -346,26 +346,29 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].BlendFlags = newShaderProperty.BlendFlags;
 
             // fixup runtime queryable properties
-            for (int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
+            if (BlamCache.Version < CacheVersion.HaloReach)
             {
-                if (finalRm.ShaderProperties[0].QueryableProperties[i] == -1)
-                    continue;
-
-                switch (i)
+                for (int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
                 {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 5:
-                        finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edMaps.IndexOf(bmMaps[finalRm.ShaderProperties[0].QueryableProperties[i]]);
-                        break;
-                    case 4:
-                        finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edRealConstants.IndexOf(bmRealConstants[finalRm.ShaderProperties[0].QueryableProperties[i]]);
-                        break;
-                    default:
-                        finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
-                        break;
+                    if (finalRm.ShaderProperties[0].QueryableProperties[i] == -1)
+                        continue;
+
+                    switch (i)
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 5:
+                            finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edMaps.IndexOf(bmMaps[finalRm.ShaderProperties[0].QueryableProperties[i]]);
+                            break;
+                        case 4:
+                            finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edRealConstants.IndexOf(bmRealConstants[finalRm.ShaderProperties[0].QueryableProperties[i]]);
+                            break;
+                        default:
+                            finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
+                            break;
+                    }
                 }
             }
 
@@ -388,7 +391,7 @@ namespace TagTool.Commands.Porting
             }*/
 
             // fixup rm animations
-            if (finalRm.ShaderProperties[0].Functions.Count > 0)
+            if (finalRm.ShaderProperties[0].Functions.Count > 0 && BlamCache.Version < CacheVersion.HaloReach)
                 RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
 
             // build new rm option indices

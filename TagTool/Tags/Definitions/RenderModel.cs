@@ -7,7 +7,8 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x258, MinVersion = CacheVersion.HaloReach)]
     public class RenderModel : TagStructure
 	{
         public StringId Name;
@@ -40,6 +41,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderGeometry Geometry = new RenderGeometry();
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<short> NodeMapMapping;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<TagBlock17> UnknownE8;
 
@@ -49,6 +52,9 @@ namespace TagTool.Tags.Definitions
         public float[] SHGreen = new float[SphericalHarmonics.Order3Count];
         [TagField(Length = 16, MinVersion = CacheVersion.Halo3Retail)]
         public float[] SHBlue = new float[SphericalHarmonics.Order3Count];
+
+        [TagField(Length = 26, MinVersion = CacheVersion.HaloReach)]
+        public float[] Unknown19;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<UnknownSHProbe> UnknownSHProbes;

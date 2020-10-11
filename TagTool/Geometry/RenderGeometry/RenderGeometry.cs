@@ -7,7 +7,8 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Geometry
 {
-    [TagStructure(Name = "render_geometry", Size = 0x84)]
+    [TagStructure(Name = "render_geometry", Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "render_geometry", Size = 0x9C, MinVersion = CacheVersion.HaloReach)]
     public class RenderGeometry : TagStructure
 	{
         /// <summary>
@@ -46,12 +47,18 @@ namespace TagTool.Geometry
         /// </summary>
         public List<PerMeshSubpartVisibilityBlock> PerMeshSubpartVisibility;
 
+        // TODO: review reach definitions
+
         public uint Unknown7;
         public uint Unknown8;
         public uint Unknown9;
 
-
         public List<StaticPerPixelLighting> InstancedGeometryPerPixelLighting;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<short> Unknown10;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<WaterBoundingBox> WaterBoundingBoxes;
 
         public TagResourceReference Resource;
 
@@ -101,6 +108,15 @@ namespace TagTool.Geometry
         public class PerMeshSubpartVisibilityBlock : TagStructure
 		{
             public List<BoundingSphere> BoundingSpheres;
+        }
+
+        [TagStructure(Size = 0x1C)]
+        public class WaterBoundingBox : TagStructure
+        {
+            public short MeshIndex;
+            public short PartIndex;
+            public RealPoint3d PositionBoundLower;
+            public RealPoint3d PositionBoundUpper;
         }
 
         [TagStructure(Size = 0x10)]
