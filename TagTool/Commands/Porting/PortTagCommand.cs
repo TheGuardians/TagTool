@@ -1397,6 +1397,9 @@ namespace TagTool.Commands.Porting
                     else
                         value = damageReportingType.Halo3Retail.ToString();
 					break;
+                case CacheVersion.HaloReach:
+                    value = damageReportingType.HaloReach.ToString();
+                    break;
 			}
 
 			if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
