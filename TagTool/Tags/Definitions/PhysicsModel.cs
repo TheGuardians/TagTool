@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
 	{
         public PhysicsModelFlags Flags;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown;
+        public float MassScale;
         public float Mass;
         public float LowFrequencyDeactivationScale;
         public float HighFrequencyDeactivationScale;
@@ -55,19 +55,19 @@ namespace TagTool.Tags.Definitions
         public List<RagdollConstraint> RagdollConstraints;
         public List<Region> Regions;
         public List<Node> Nodes;
-        public uint Unknown11;
-        public uint Unknown12;
-        public uint Unknown13;
-        public uint Unknown14;
-        public uint Unknown15;
-        public uint Unknown16;
+
+        [TagField(Flags = Padding, Length = 12)]
+        public byte[] UnusedErrors;
+        [TagField(Flags = Padding, Length = 12)]
+        public byte[] UnusedPointToPathCurves;
+
         public List<LimitedHingeConstraint> LimitedHingeConstraints;
 
         [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedBallAndSocketConstraints;
 
         [TagField(Flags = Padding, Length = 12)]
-        public byte[] UnusedStiffSprintConstraints;
+        public byte[] UnusedStiffSpringConstraints;
 
         [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedPrismaticConstraints;
@@ -76,7 +76,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown17;
-
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown18;
 
