@@ -89,6 +89,8 @@ namespace TagTool.Geometry
 
     public class ParticleVertex
     {
+        public RealVector2d Position { get; set; }
+        public RealVector2d Texcoord { get; set; }
     }
 
     public class ContrailVertex

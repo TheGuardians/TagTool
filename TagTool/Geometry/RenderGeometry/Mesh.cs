@@ -178,8 +178,11 @@ namespace TagTool.Geometry
         [TagField(MinVersion = Halo3Retail, Format = nameof(Flags))]
         public sbyte RigidNodeIndex;
 
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         public VertexType Type;
+
+        [TagField(MinVersion = HaloReach)]
+        public VertexTypeReach ReachType;
 
         [TagField(MinVersion = Halo3Retail)]
         public PrtSHType PrtType;

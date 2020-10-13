@@ -35,6 +35,10 @@ namespace TagTool.Geometry
         Unknown1B,            // Size = 0x24
         Unknown1C,            // Size = 0x80
         Unused1D,             // Invalid
-        World2                // Size = 0x38 (1.235640+ only)
+        World2,               // Size = 0x38 (1.235640+ only)
+
+        RigidCompressed = 0x24,    // Size 0x10
+        SkinnedCompressed = 0x25,  // Size = 0x18
+
     }
 }

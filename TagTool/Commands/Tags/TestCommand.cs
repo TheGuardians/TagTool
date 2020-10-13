@@ -115,7 +115,8 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            var size = TagStructure.GetStructureSize(typeof(TagTool.Tags.Definitions.Gen2.RenderModel), CacheVersion.Halo2Xbox);
+            var HOCache = GameCache.Open(new FileInfo("D:\\halo online test\\maps\\tags.dat"));
+
 
             using (var stream = Cache.OpenCacheRead())
             {
@@ -123,43 +124,18 @@ namespace TagTool.Commands
                 {
                     if (tag.IsInGroup("mode"))
                     {
-                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
+                        var modeTag = Cache.Deserialize<RenderModel>(stream, tag);
+
                         Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
-                        continue;
 
-                        var section = modeTag.Sections[0];
-                        var resource = section.Resource;
-                        using (var resourceStream = new MemoryStream((Cache as GameCacheGen2).GetCacheRawData(resource.BlockOffset, (int)resource.BlockSize)))
-                        using (var reader = new EndianReader(resourceStream, Cache.Endianness))
-                        using (var writer = new EndianWriter(resourceStream, Cache.Endianness))
-                        {
-                            foreach (var tagResource in resource.TagResources)
-                            {
-                                resourceStream.Position = tagResource.FieldOffset;
+                        var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(modeTag.Geometry.Resource);
 
-                                switch (tagResource.Type)
-                                {
-                                    case TagResourceTypeGen2.TagBlock:
-                                        writer.Write(tagResource.ResoureDataSize / tagResource.SecondaryLocator);
-                                        writer.Write(8 + resource.SectionDataSize + tagResource.ResourceDataOffset);
-                                        break;
+                        if (resource == null)
+                            continue;
 
-                                    case TagResourceTypeGen2.TagData:
-                                        writer.Write(tagResource.ResoureDataSize);
-                                        writer.Write(8 + resource.SectionDataSize + tagResource.ResourceDataOffset);
-                                        break;
+                        var converter = new RenderGeometryConverter(HOCache, Cache);
+                        var newResource = converter.Convert(modeTag.Geometry, resource);
 
-                                    case TagResourceTypeGen2.VertexBuffer:
-                                        break;
-                                }
-                            }
-
-                            resourceStream.Position = 0;
-
-                            var dataContext = new DataSerializationContext(reader);
-                            var mesh = Cache.Deserializer.Deserialize<Gen2ResourceMesh>(dataContext);
-
-                        }
                     }
                 }
             }
