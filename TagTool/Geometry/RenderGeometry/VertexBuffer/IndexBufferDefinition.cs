@@ -8,7 +8,7 @@ namespace TagTool.Geometry
     /// Defines an index buffer in model data.
     /// </summary>
     [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
     [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     public class IndexBufferDefinition : TagStructure
     {
@@ -16,6 +16,9 @@ namespace TagTool.Geometry
         /// The primitive type to use for the index buffer.
         /// </summary>
         public IndexBufferFormat Format;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown;
 
         /// <summary>
         /// The reference to the data for the index buffer.

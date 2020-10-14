@@ -474,10 +474,28 @@ namespace TagTool.Geometry
                     mesh.PrtType = PrtSHType.None;
                     mesh.Type = ConvertReachVertexType(mesh.ReachType);
 
-                    foreach (var vertexBuffer in mesh.ResourceVertexBuffers)
+
+                    for(int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
                     {
+                        var vertexBuffer = mesh.ResourceVertexBuffers[i];
+
                         if (vertexBuffer == null)
                             continue;
+
+                        // Skip any kind of prt for now (VMF->SH basis conversion required), ambient also requires the fix for the vertex count
+                        if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt || vertexBuffer.Format == VertexBufferFormat.LinearPrt || vertexBuffer.Format == VertexBufferFormat.QuadraticPrt)
+                        {
+                            mesh.ResourceVertexBuffers[i] = null;
+                            continue;
+                        }
+
+                        // Skip all lightmap related buffers due to VMF incompability with SH. StaticPerVertexColor is fine though.
+                        if(vertexBuffer.Format == VertexBufferFormat.StaticPerPixel || vertexBuffer.Format == VertexBufferFormat.StaticPerVertex)
+                        {
+                            mesh.ResourceVertexBuffers[i] = null;
+                            continue;
+                        }
+
                         VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, vertexBuffer);
                     }
 

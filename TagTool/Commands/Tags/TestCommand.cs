@@ -134,7 +134,14 @@ namespace TagTool.Commands
                             continue;
 
                         var converter = new RenderGeometryConverter(HOCache, Cache);
-                        var newResource = converter.Convert(modeTag.Geometry, resource);
+                        try
+                        {
+                            var newResource = converter.Convert(modeTag.Geometry, resource);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine($"Failed to convert geometry for {tag.Name}, {e.Message}");
+                        }
 
                     }
                 }
