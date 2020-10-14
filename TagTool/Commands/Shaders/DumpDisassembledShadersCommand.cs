@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace TagTool.Commands.Shaders
 {
-
+    // TODO: Support Reach gpix
     public class DumpDisassembledShadersCommand : Command
     {
         GameCache Cache;
@@ -26,15 +26,40 @@ namespace TagTool.Commands.Shaders
             if (args.Count > 0)
                 return new TagToolError(CommandError.ArgCount);
 
+            if (Cache.GetType() == typeof(GameCacheGen3) && UseXSDCommand.XSDFileInfo == null)
+                return new TagToolError(CommandError.CustomError, "You must use the \"UseXSD\" command first!");
+
+            Type entryPointEnum = typeof(EntryPoint);
+            if (Cache.Version >= CacheVersion.HaloReach)
+                entryPointEnum = typeof(EntryPointReach);
+            else if (Cache.Version >= CacheVersion.HaloOnline301003 && Cache.Version <= CacheVersion.HaloOnline700123)
+                entryPointEnum = typeof(EntryPointMs30);
+
             using (var stream = Cache.OpenCacheRead())
             {
-                List<string> shaderTypes = new List<string> { "beam", "contrail", "decal", "foliage", "halogram", "light_volume", "particle", "screen", "terrain", "water", "shader" };
+                List<string> shaderTypes = new List<string>();
+
+                foreach (var tag in Cache.TagCache.NonNull())
+                {
+                    if (tag.Name == null || tag.Name == "" || tag.Group.Tag != "rmdf")
+                        continue;
+                    if (Cache.Version == CacheVersion.HaloOnline106708 && tag.Name.StartsWith("ms30\\"))
+                        continue; // ignore ms30 in ms23, disassemble from ms30 directly instead
+                    var pieces = tag.Name.Split('\\');
+                    shaderTypes.Add(pieces[pieces.Length - 1]);
+                }
+
                 foreach (var shaderType in shaderTypes)
                 {
                     var glvsTagName = $"shaders\\{shaderType}_shared_vertex_shaders.glvs";
                     var glpsTagName = $"shaders\\{shaderType}_shared_pixel_shaders.glps";
-                    var glvsTag = Cache.TagCache.GetTag(glvsTagName);
-                    var glpsTag = Cache.TagCache.GetTag(glpsTagName);
+
+                    if (!Cache.TagCache.TryGetTag(glvsTagName, out CachedTag glvsTag) || !Cache.TagCache.TryGetTag(glpsTagName, out CachedTag glpsTag))
+                    {
+                        Console.WriteLine($"WARNING: Cache \"{Cache.DisplayName}\" has invalid shader type \"{shaderType}\"");
+                        continue;
+                    }
+
                     var glvs = Cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
                     var glps = Cache.Deserialize<GlobalPixelShader>(stream, glpsTag);
 
@@ -46,18 +71,27 @@ namespace TagTool.Commands.Shaders
                             var tagName = tag.Name;
                             var rmt2Tag = Cache.TagCache.GetTag(tagName, "rmt2");
                             var rmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
+
+                            if (rmt2.PixelShader == null)
+                            {
+                                Console.WriteLine("ERROR: Template pixel shader was null");
+                                continue;
+                            }
+
                             var pixl = Cache.Deserialize<PixelShader>(stream, rmt2.PixelShader);
 
-                            Directory.CreateDirectory(tagName);
+                            Directory.CreateDirectory(Cache.Version.ToString() + "\\" + tagName);
 
 
-                            foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
+                            foreach (var entry in Enum.GetValues(entryPointEnum))
                             {
-                                if ((int)entry < pixl.EntryPointShaders.Count)
-                                {
-                                    var entryShader = pixl.EntryPointShaders[(int)entry].Offset;
+                                int entryIndex = GetEntryPointIndex(entry);
 
-                                    if (pixl.EntryPointShaders[(int)entry].Count != 0)
+                                if (entryIndex < pixl.EntryPointShaders.Count)
+                                {
+                                    var entryShader = pixl.EntryPointShaders[entryIndex].Offset;
+
+                                    if (pixl.EntryPointShaders[entryIndex].Count != 0)
                                     {
                                         string entryName = entry.ToString().ToLower() + ".pixel_shader";
                                         string pixelShaderFilename = Path.Combine(tagName, entryName);
@@ -70,12 +104,14 @@ namespace TagTool.Commands.Shaders
                     }
 
                     // glps
-                    Directory.CreateDirectory(glpsTagName);
-                    foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
+                    Directory.CreateDirectory(Cache.Version.ToString() + "\\" + glpsTagName);
+                    foreach (var entry in Enum.GetValues(entryPointEnum))
                     {
-                        if ((int)entry < glps.EntryPoints.Count)
+                        int entryIndex = GetEntryPointIndex(entry);
+
+                        if (entryIndex < glps.EntryPoints.Count)
                         {
-                            var entryShader = glps.EntryPoints[(int)entry].ShaderIndex;
+                            var entryShader = glps.EntryPoints[entryIndex].ShaderIndex;
                             if (entryShader != -1)
                             {
                                 string entryName = entry.ToString().ToLower() + ".shared_pixel_shader";
@@ -83,9 +119,9 @@ namespace TagTool.Commands.Shaders
 
                                 DisassembleShader(glps, entryShader, pixelShaderFilename, Cache);
                             }
-                            else if(glps.EntryPoints[(int)entry].Option.Count > 0)
+                            else if(glps.EntryPoints[entryIndex].Option.Count > 0)
                             {
-                                foreach(var option in glps.EntryPoints[(int)entry].Option)
+                                foreach(var option in glps.EntryPoints[entryIndex].Option)
                                 {
                                     var methodIndex = option.RenderMethodOptionIndex;
                                     for(int i = 0; i < option.OptionMethodShaderIndices.Count; i++)
@@ -97,32 +133,31 @@ namespace TagTool.Commands.Shaders
                                     }
                                 }
                             }
-
                         }
                     }
 
                     // glvs
-
                     foreach (VertexType vert in Enum.GetValues(typeof(VertexType)))
                     {
                         if ((int)vert < glvs.VertexTypes.Count)
                         {
                             var vertexFormat = glvs.VertexTypes[(int)vert];
                             var dirName = Path.Combine(glvsTagName, vert.ToString().ToLower());
-                            foreach (EntryPoint entry in Enum.GetValues(typeof(EntryPoint)))
+                            foreach (var entry in Enum.GetValues(entryPointEnum))
                             {
-                                if ((int)entry < vertexFormat.DrawModes.Count)
+                                int entryIndex = GetEntryPointIndex(entry);
+
+                                if (entryIndex < vertexFormat.DrawModes.Count)
                                 {
-                                    var entryShader = vertexFormat.DrawModes[(int)entry].ShaderIndex;
+                                    var entryShader = vertexFormat.DrawModes[entryIndex].ShaderIndex;
                                     if (entryShader != -1)
                                     {
-                                        Directory.CreateDirectory(dirName);
+                                        Directory.CreateDirectory(Cache.Version.ToString() + "\\" + dirName);
                                         string entryName = entry.ToString().ToLower() + ".shared_vertex_shader";
                                         string vertexShaderFileName = Path.Combine(dirName, entryName);
 
                                         DisassembleShader(glvs, entryShader, vertexShaderFileName, Cache);
                                     }
-
                                 }
                             }
                         }
@@ -134,13 +169,16 @@ namespace TagTool.Commands.Shaders
 
         private string DisassembleShader(object definition, int shaderIndex, string filename, GameCache cache)
         {
+            //version the directory
+            string path = $"{cache.Version.ToString()}\\{filename}";
+
             if (cache.GetType() == typeof(GameCacheGen3))
             {
-                return DisassembleGen3Shader(definition, shaderIndex, filename);
+                return DisassembleGen3Shader(definition, shaderIndex, path);
             }
             else if (Cache.GetType() == typeof(GameCacheHaloOnline))
             {
-                return DisassembleHaloOnlineShader(definition, shaderIndex, filename);
+                return DisassembleHaloOnlineShader(definition, shaderIndex, path);
             }
             return null;
         }
@@ -454,6 +492,16 @@ namespace TagTool.Commands.Shaders
             }
 
             return disassembly;
+        }
+
+        private int GetEntryPointIndex(object input)
+        {
+            if (Cache.Version >= CacheVersion.HaloReach)
+                return (int)((EntryPointReach)input);
+            else if (Cache.Version >= CacheVersion.HaloOnline301003 && Cache.Version <= CacheVersion.HaloOnline700123)
+                return (int)((EntryPointMs30)input);
+            else
+                return (int)((EntryPoint)input);
         }
     }
 }

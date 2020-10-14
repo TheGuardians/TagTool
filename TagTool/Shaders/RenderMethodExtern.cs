@@ -59,6 +59,44 @@ namespace TagTool.Shaders
         tree_animation_timer,
         emblem_player_shoulder_texture, // global_depth_constants in ODST
         emblem_clan_chest_texture, // global_camera_forward in ODST
-        // texture_global_target_ibr = 51, // MS30
+        texture_global_target_ibr, // MS30
+    }
+
+    public enum RenderMethodExternReach : int
+    {
+        none,
+        texture_global_target_texaccum,
+        texture_global_target_normal,
+        texture_global_target_z,
+        texture_global_target_shadow_mask,
+        texture_global_target_shadow_buffer1,
+        texture_global_target_shadow_buffer2,
+        texture_global_target_shadow_buffer3,
+        texture_global_target_shadow_buffer4,
+        texture_global_target_texture_camera,
+        texture_global_target_reflection,
+        texture_global_target_refraction,
+        object_change_color_primary,
+        object_change_color_secondary,
+        object_change_color_tertiary,
+        object_change_color_quaternary,
+        object_emblem_bitmap_and_data,
+        object_emblem_color_background,
+        object_emblem_color_primary,
+        object_emblem_color_secondary,
+        texture_dynamic_light_gel_0,
+        flat_envmap_matrix_x,
+        flat_envmap_matrix_y,
+        flat_envmap_matrix_z,
+        debug_tint,
+        screen_constants,
+        active_camo_distortion_texture,
+        scene_ldr_texture,
+        water_memory_export_address,
+        tree_animation_timer,
+        depth_constants,
+        camera_forward,
+        wrinkle_weights_a,
+        wrinkle_weights_b,
     }
 }
