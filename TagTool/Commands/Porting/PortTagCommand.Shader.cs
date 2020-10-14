@@ -381,17 +381,17 @@ namespace TagTool.Commands.Porting
 
             finalRm.BaseRenderMethod = rmdfInstance;
 
-            // remove emblem animations (prevents crash)
-            /*if (edRmt2Descriptor.Type == "decal" && emblemTagNames.Contains(blamTagName))
+            // TODO
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 finalRm.ShaderProperties[0].EntryPoints.Clear();
                 finalRm.ShaderProperties[0].ParameterTables.Clear();
                 finalRm.ShaderProperties[0].Parameters.Clear();
                 finalRm.ShaderProperties[0].Functions.Clear();
-            }*/
+            }
 
             // fixup rm animations
-            if (finalRm.ShaderProperties[0].Functions.Count > 0 && BlamCache.Version < CacheVersion.HaloReach)
+            if (finalRm.ShaderProperties[0].Functions.Count > 0)
                 RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
 
             // build new rm option indices

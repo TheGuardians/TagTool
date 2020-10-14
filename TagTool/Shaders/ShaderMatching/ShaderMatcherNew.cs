@@ -145,7 +145,7 @@ namespace TagTool.Shaders.ShaderMatching
             foreach (var rmt2Tag in BaseCache.TagCache.NonNull().Where(tag => tag.IsInGroup("rmt2")))
             {
                 Rmt2Descriptor destRmt2Desc;
-                if (!Rmt2Descriptor.TryParse(rmt2Tag.Name, out destRmt2Desc))
+                if (rmt2Tag.Name == null || rmt2Tag.Name == "" || !Rmt2Descriptor.TryParse(rmt2Tag.Name, out destRmt2Desc))
                     continue;
 
                 // ignore ms30 templates if desired
@@ -275,12 +275,12 @@ namespace TagTool.Shaders.ShaderMatching
 
             if (rmt2Desc.Type == "shader")
             {
-                string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}_0";
+                string tagName = $"shaders\\shader_templates\\_{string.Join("_", rmt2Desc.Options)}";
 
                 // needs unapply rotation for misc3 + parallax
                 bool miscUnsupported = rmt2Desc.Options[9] == 3 && rmt2Desc.Options[8] != 0;
 
-                if ((Material_Model)rmt2Desc.Options[4] != Material_Model.Organism && rmt2Desc.Options[4] != 8 && !miscUnsupported) // 8 is hair in odst
+                if (rmt2Desc.Options[4] != 8 && !miscUnsupported) // 8 is hair in odst
                 {
                     var generator = new HaloShaderGenerator.Shader.ShaderGenerator((Albedo)rmt2Desc.Options[0], (Bump_Mapping)rmt2Desc.Options[1], (Alpha_Test)rmt2Desc.Options[2], (Specular_Mask)rmt2Desc.Options[3], (Material_Model)rmt2Desc.Options[4], (Environment_Mapping)rmt2Desc.Options[5], (Self_Illumination)rmt2Desc.Options[6], (Blend_Mode)rmt2Desc.Options[7], (Parallax)rmt2Desc.Options[8], (Misc)rmt2Desc.Options[9], 0);
 
@@ -539,15 +539,9 @@ namespace TagTool.Shaders.ShaderMatching
         /// </summary>
         private Rmt2Descriptor RebuildRmt2Options(Rmt2Descriptor srcRmt2Descriptor, Stream baseStream, Stream portingStream)
         {
-            // TODO: support reach
-
-            // ignore black, it has no options
-            if (srcRmt2Descriptor.Type != "black" && PortingCache.Version >= CacheVersion.Halo3Beta && PortingCache.Version <= CacheVersion.Halo3ODST)
-            { 
+            if (srcRmt2Descriptor.Type != "black" && PortingCache.Version >= CacheVersion.Halo3Beta)
+            {
                 string rmdfName = $"shaders\\{srcRmt2Descriptor.Type}.rmdf";
-                if (UseMs30)
-                    rmdfName = "ms30\\" + rmdfName;
-
                 if (!BaseCache.TagCache.TryGetTag(rmdfName, out var baseRmdfTag) || !PortingCache.TagCache.TryGetTag(rmdfName, out var portingRmdfTag))
                     return srcRmt2Descriptor;
 
@@ -556,30 +550,55 @@ namespace TagTool.Shaders.ShaderMatching
 
                 List<byte> newOptions = new List<byte>();
 
-                // turn options into strings
-                for (int i = 0; i < srcRmt2Descriptor.Options.Length; i++)
+                // get option indices (if we loop by basecache rmdf, the options will always be correct length and index)
+                for (int i = 0; i < baseRmdfDefinition.Methods.Count; i++)
                 {
-                    StringId portingType = portingRmdfDefinition.Methods[i].ShaderOptions[srcRmt2Descriptor.Options[i]].Type;
-                    string portingTypeString = PortingCache.StringTable.GetString(portingType);
+                    byte option = 0;
 
-                    bool optionFound = false;
+                    string methodName = BaseCache.StringTable.GetString(baseRmdfDefinition.Methods[i].Type);
 
-                    // match string with option in base cache
-                    for (int index = 0; index < baseRmdfDefinition.Methods[i].ShaderOptions.Count; index++)
+                    for (int j = 0; j < portingRmdfDefinition.Methods.Count; j++)
                     {
-                        StringId baseType = baseRmdfDefinition.Methods[i].ShaderOptions[index].Type;
-                        string baseTypeString = BaseCache.StringTable.GetString(baseType);
+                        if (methodName != PortingCache.StringTable.GetString(portingRmdfDefinition.Methods[j].Type))
+                            continue;
 
-                        if (portingTypeString == baseTypeString)
+                        int portingOptionIndex = srcRmt2Descriptor.Options[j];
+                        string optionName = PortingCache.StringTable.GetString(portingRmdfDefinition.Methods[j].ShaderOptions[portingOptionIndex].Type);
+
+                        // TODO: fill this switch, Reach shadergen might take some time...
+                        // fixup names (remove when full rmdf + shader generation for each gen3 game)
+                        switch ($"{methodName}\\{optionName}")
                         {
-                            optionFound = true;
-                            newOptions.Add((byte)index);
-                            break;
+                            case @"albedo\palettized_2d_plasma":
+                                optionName = "palettized_plasma";
+                                break;
+                            case @"lighting\per_pixel_smooth":
+                            case @"lighting\smoke_lighting":
+                                optionName = "per_pixel_ravi_order_3";
+                                break;
+                            case @"lighting\per_vertex_ambient":
+                                optionName = "per_vertex_ravi_order_0";
+                                break;
+                            case @"depth_fade\low_res":
+                            case @"depth_fade\palette_shift":
+                                optionName = "on";
+                                break;
                         }
+
+                        // get basecache option index
+                        for (int k = 0; k < baseRmdfDefinition.Methods[i].ShaderOptions.Count; k++)
+                        {
+                            if (optionName == BaseCache.StringTable.GetString(baseRmdfDefinition.Methods[i].ShaderOptions[k].Type))
+                            {
+                                option = (byte)k;
+                                break;
+                            }
+                        }
+
+                        break;
                     }
 
-                    if (!optionFound) // some rmdf's have additional options, add a 0 if no match is found
-                        newOptions.Add(0);
+                    newOptions.Add(option);
                 }
 
                 srcRmt2Descriptor.Options = newOptions.ToArray();
