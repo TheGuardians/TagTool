@@ -23,8 +23,10 @@ namespace TagTool.Geometry
             {
                 var inVertexStream = VertexStreamFactory.Create(inVersion, inputStream);
                 var outVertexStream = VertexStreamFactory.Create(outVersion, outputStream);
-                var reachVertexStream = (VertexStreamReach)inVertexStream;
 
+                VertexStreamReach reachVertexStream = null;
+                if (inVersion >= CacheVersion.HaloReach)
+                    reachVertexStream = (VertexStreamReach)inVertexStream;
 
                 var count = vertexBuffer.Count;
 
