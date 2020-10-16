@@ -383,6 +383,25 @@ namespace TagTool.Geometry
         private RenderGeometryApiResourceDefinition ConvertHaloReach(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
             //
+            // Update Mesh.Parts
+            //
+
+            foreach(var mesh in geometry.Meshes)
+            {
+                foreach(var part in mesh.Parts)
+                {
+                    part.FirstIndexOld = (ushort)part.FirstIndexNew;
+                    part.IndexCountOld = (ushort)part.IndexCountNew;
+
+                    if(part.IndexCountNew > 0xFFFF || part.FirstIndexNew > 0xFFFF)
+                    {
+                        Console.WriteLine("Warning: downgrade from uint to ushort for index count/first index in Mesh.Part exceeded ushort range. Unexpected behavior.");
+                    }
+                }
+            }
+
+
+            //
             // Convert byte[] of UnknownBlock
             //
 
