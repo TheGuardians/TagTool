@@ -37,7 +37,12 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = ConvertVectorSpace(v.Binormal);
+
+                            if(inVersion == CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                            else
+                                v.Binormal = ConvertVectorSpace(v.Binormal);
+
                             outVertexStream.WriteWorldVertex(v);
                         });
                         break;
@@ -47,7 +52,12 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = ConvertVectorSpace(v.Binormal);
+
+                            if (inVersion == CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                            else
+                                v.Binormal = ConvertVectorSpace(v.Binormal);
+
                             outVertexStream.WriteRigidVertex(v);
                         });
                         break;
@@ -57,7 +67,12 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = ConvertVectorSpace(v.Binormal);
+
+                            if (inVersion == CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                            else
+                                v.Binormal = ConvertVectorSpace(v.Binormal);
+
                             outVertexStream.WriteSkinnedVertex(v);
                         });
                         break;
@@ -134,7 +149,7 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = RealVector3d.CrossProduct(v.Normal, v.Tangent.IJK);
+                            v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
                             outVertexStream.WriteRigidVertex(v);
                         });
                         vertexBuffer.Format = VertexBufferFormat.Rigid;
@@ -145,7 +160,7 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = RealVector3d.CrossProduct(v.Normal, v.Tangent.IJK);
+                            v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
                             outVertexStream.WriteSkinnedVertex(v);
                         });
                         vertexBuffer.Format = VertexBufferFormat.Skinned;
@@ -257,6 +272,11 @@ namespace TagTool.Geometry
         public static RealVector3d ConvertPositionShort(RealVector3d position)
         {
             return new RealVector3d(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))).ToArray());
+        }
+
+        public static RealVector3d GenerateReachBinormals(RealVector2d uv, RealVector3d tangent, RealVector3d normal)
+        {
+            return Math.Sign(uv.I - 0.5) * RealVector3d.CrossProduct(normal, tangent);
         }
     }
 }
