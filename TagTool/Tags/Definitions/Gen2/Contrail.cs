@@ -2,78 +2,120 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "contrail", Tag = "cont", Size = 0x104)]
+    [TagStructure(Name = "contrail", Tag = "cont", Size = 0xF0)]
     public class Contrail : TagStructure
     {
         public FlagsValue Flags;
-        public ScaleFlagsValue ScaleFlags; // these flags determine which fields are scaled by the contrail density
         /// <summary>
-        /// point creation
+        /// these flags determine which fields are scaled by the contrail density
+        /// </summary>
+        public ScaleFlagsValue ScaleFlags;
+        /// <summary>
+        /// this many points are generated per second
         /// </summary>
         public float PointGenerationRate; // points per second
-        public Bounds<float> PointVelocity; // world units per second
-        public Angle PointVelocityConeAngle; // degrees
-        public float InheritedVelocityFraction; // fraction of parent object's velocity that is inherited by contrail points.
         /// <summary>
-        /// rendering
+        /// velocity added to each point's initial velocity
         /// </summary>
-        public RenderTypeValue RenderType; // this specifies how the contrail is oriented in space
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
-        public float TextureRepeatsU; // texture repeats per contrail segment
-        public float TextureRepeatsV; // texture repeats across contrail width
+        public Bounds<float> PointVelocity; // world units per second
+        /// <summary>
+        /// initial velocity is inside the cone defined by the marker's forward vector and this angle
+        /// </summary>
+        public Angle PointVelocityConeAngle; // degrees
+        /// <summary>
+        /// fraction of parent object's velocity that is inherited by contrail points.
+        /// </summary>
+        public float InheritedVelocityFraction;
+        /// <summary>
+        /// this specifies how the contrail is oriented in space
+        /// </summary>
+        public RenderTypeValue RenderType;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        /// <summary>
+        /// texture repeats per contrail segment
+        /// </summary>
+        public float TextureRepeatsU;
+        /// <summary>
+        /// texture repeats across contrail width
+        /// </summary>
+        public float TextureRepeatsV;
+        /// <summary>
+        /// the texture along the contrail is animated by this value
+        /// </summary>
         public float TextureAnimationU; // repeats per second
+        /// <summary>
+        /// the texture across the contrail is animated by this value
+        /// </summary>
         public float TextureAnimationV; // repeats per second
         public float AnimationRate; // frames per second
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag Bitmap;
         public short FirstSequenceIndex;
         public short SequenceCount;
-        [TagField(Flags = Padding, Length = 40)]
-        public byte[] Padding2;
+        [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public ShaderFlagsValue ShaderFlags;
         public FramebufferBlendFunctionValue FramebufferBlendFunction;
         public FramebufferFadeModeValue FramebufferFadeMode;
         public MapFlagsValue MapFlags;
-        [TagField(Flags = Padding, Length = 28)]
-        public byte[] Padding3;
+        [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
         /// <summary>
-        /// Secondary Map
-        /// </summary>
-        /// <remarks>
         /// Optional multitextured second map
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag Bitmap1;
         public AnchorValue Anchor;
-        public FlagsValue Flags2;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding4;
+        public FlagsValue1 Flags1;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
         public UAnimationFunctionValue UAnimationFunction;
+        /// <summary>
+        /// 0 defaults to 1
+        /// </summary>
         public float UAnimationPeriod; // seconds
         public float UAnimationPhase;
+        /// <summary>
+        /// 0 defaults to 1
+        /// </summary>
         public float UAnimationScale; // repeats
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding5;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding4;
         public VAnimationFunctionValue VAnimationFunction;
+        /// <summary>
+        /// 0 defaults to 1
+        /// </summary>
         public float VAnimationPeriod; // seconds
         public float VAnimationPhase;
+        /// <summary>
+        /// 0 defaults to 1
+        /// </summary>
         public float VAnimationScale; // repeats
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding6;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding5;
         public RotationAnimationFunctionValue RotationAnimationFunction;
+        /// <summary>
+        /// 0 defaults to 1
+        /// </summary>
         public float RotationAnimationPeriod; // seconds
         public float RotationAnimationPhase;
+        /// <summary>
+        /// 0 defaults to 360
+        /// </summary>
         public float RotationAnimationScale; // degrees
         public RealPoint2d RotationAnimationCenter;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding7;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding6;
         public float ZspriteRadiusScale;
-        [TagField(Flags = Padding, Length = 20)]
-        public byte[] Padding8;
-        public List<ContrailPointState> PointStates;
+        [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding7;
+        public List<ContrailPointStatesBlock> PointStates;
         
         [Flags]
         public enum FlagsValue : ushort
@@ -156,6 +198,12 @@ namespace TagTool.Tags.Definitions.Gen2
             Zsprite
         }
         
+        [Flags]
+        public enum FlagsValue1 : ushort
+        {
+            Unfiltered = 1 << 0
+        }
+        
         public enum UAnimationFunctionValue : short
         {
             One,
@@ -204,22 +252,35 @@ namespace TagTool.Tags.Definitions.Gen2
             Spark
         }
         
-        [TagStructure(Size = 0x48)]
-        public class ContrailPointState : TagStructure
+        [TagStructure(Size = 0x40)]
+        public class ContrailPointStatesBlock : TagStructure
         {
             /// <summary>
-            /// state timing
+            /// the time a point spends in this state
             /// </summary>
             public Bounds<float> Duration; // seconds:seconds
-            public Bounds<float> TransitionDuration; // seconds
             /// <summary>
-            /// point variables
+            /// the time a point takes to transition to the next state
             /// </summary>
+            public Bounds<float> TransitionDuration; // seconds
+            [TagField(ValidTags = new [] { "pphy" })]
             public CachedTag Physics;
+            /// <summary>
+            /// contrail width at this point
+            /// </summary>
             public float Width; // world units
-            public RealArgbColor ColorLowerBound; // contrail color at this point
-            public RealArgbColor ColorUpperBound; // contrail color at this point
-            public ScaleFlagsValue ScaleFlags; // these flags determine which fields are scaled by the contrail density
+            /// <summary>
+            /// contrail color at this point
+            /// </summary>
+            public RealArgbColor ColorLowerBound;
+            /// <summary>
+            /// contrail color at this point
+            /// </summary>
+            public RealArgbColor ColorUpperBound;
+            /// <summary>
+            /// these flags determine which fields are scaled by the contrail density
+            /// </summary>
+            public ScaleFlagsValue ScaleFlags;
             
             [Flags]
             public enum ScaleFlagsValue : uint

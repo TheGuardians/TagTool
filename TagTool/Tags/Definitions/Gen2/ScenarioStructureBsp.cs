@@ -2,75 +2,89 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x318)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x23C)]
     public class ScenarioStructureBsp : TagStructure
     {
-        public List<TagImportInfo> ImportInfo;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding1;
-        public List<StructureCollisionMaterial> CollisionMaterials;
-        public List<CollisionBspBlock> CollisionBsp;
+        public List<GlobalTagImportInfoBlock> ImportInfo;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public List<StructureCollisionMaterialsBlock> CollisionMaterials;
+        public List<GlobalCollisionBspBlock> CollisionBsp;
+        /// <summary>
+        /// Height below which vehicles get pushed up by an unstoppable force.
+        /// </summary>
         public float VehicleFloor; // World Units
+        /// <summary>
+        /// Height above which vehicles get pushed down by an unstoppable force.
+        /// </summary>
         public float VehicleCeiling; // World Units
-        public List<UnusedStructureNode> UnusedNodes;
-        public List<StructureLeaf> Leaves;
+        public List<UnusedStructureBspNodeBlock> UnusedNodes;
+        public List<StructureBspLeafBlock> Leaves;
         public Bounds<float> WorldBoundsX;
         public Bounds<float> WorldBoundsY;
         public Bounds<float> WorldBoundsZ;
-        public List<StructureSurfaceReference> SurfaceReferences;
+        public List<StructureBspSurfaceReferenceBlock> SurfaceReferences;
         public byte[] ClusterData;
-        public List<ClusterPortal> ClusterPortals;
-        public List<StructureFogPlane> FogPlanes;
-        [TagField(Flags = Padding, Length = 24)]
-        public byte[] Padding2;
-        public List<StructureWeatherPaletteEntry> WeatherPalette;
-        public List<StructureWeatherPolyhedron> WeatherPolyhedra;
-        public List<StructureDetailObjectData> DetailObjects;
-        public List<StructureCluster> Clusters;
-        public List<GeometryMaterial> Materials;
-        public List<SkyOwnerClusterBlock> SkyOwnerCluster;
-        public List<StructureConveyorSurface> ConveyorSurfaces;
-        public List<StructureBreakableSurface> BreakableSurfaces;
+        public List<StructureBspClusterPortalBlock> ClusterPortals;
+        public List<StructureBspFogPlaneBlock> FogPlanes;
+        [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        public List<StructureBspWeatherPaletteBlock> WeatherPalette;
+        public List<StructureBspWeatherPolyhedronBlock> WeatherPolyhedra;
+        public List<StructureBspDetailObjectDataBlock> DetailObjects;
+        public List<StructureBspClusterBlock> Clusters;
+        public List<GlobalGeometryMaterialBlock> Materials;
+        public List<StructureBspSkyOwnerClusterBlock> SkyOwnerCluster;
+        public List<StructureBspConveyorSurfaceBlock> ConveyorSurfaces;
+        public List<StructureBspBreakableSurfaceBlock> BreakableSurfaces;
         public List<PathfindingDataBlock> PathfindingData;
-        public List<Byte> PathfindingEdges;
-        public List<StructureBackgroundSoundPaletteEntry> BackgroundSoundPalette;
-        public List<StructureSoundEnvironmentPaletteEntry> SoundEnvironmentPalette;
+        public List<StructureBspPathfindingEdgesBlock> PathfindingEdges;
+        public List<StructureBspBackgroundSoundPaletteBlock> BackgroundSoundPalette;
+        public List<StructureBspSoundEnvironmentPaletteBlock> SoundEnvironmentPalette;
         public byte[] SoundPasData;
-        public List<StructureMarker> Markers;
-        public List<StructureRuntimeDecal> RuntimeDecals;
-        public List<StructureEnvironmentObjectPaletteEntry> EnvironmentObjectPalette;
-        public List<StructureEnvironmentObject> EnvironmentObjects;
-        public List<StructureLightmapData> Lightmaps;
-        [TagField(Flags = Padding, Length = 4)]
+        public List<StructureBspMarkerBlock> Markers;
+        public List<StructureBspRuntimeDecalBlock> RuntimeDecals;
+        public List<StructureBspEnvironmentObjectPaletteBlock> EnvironmentObjectPalette;
+        public List<StructureBspEnvironmentObjectBlock> EnvironmentObjects;
+        public List<StructureBspLightmapDataBlock> Lightmaps;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+        public List<GlobalMapLeafBlock> LeafMapLeaves;
+        public List<GlobalLeafConnectionBlock> LeafMapConnections;
+        public List<GlobalErrorReportCategoriesBlock> Errors;
+        public List<StructureBspPrecomputedLightingBlock> PrecomputedLighting;
+        public List<StructureBspInstancedGeometryDefinitionBlock> InstancedGeometriesDefinitions;
+        public List<StructureBspInstancedGeometryInstancesBlock> InstancedGeometryInstances;
+        public List<StructureBspSoundClusterBlock> AmbienceSoundClusters;
+        public List<StructureBspSoundClusterBlock1> ReverbSoundClusters;
+        public List<TransparentPlanesBlock> TransparentPlanes;
+        [TagField(Length = 0x60, Flags = TagFieldFlags.Padding)]
         public byte[] Padding3;
-        public List<MapLeaf> LeafMapLeaves;
-        public List<LeafConnection> LeafMapConnections;
-        public List<ErrorReportCategory> Errors;
-        public List<StructurePrecomputedLighting> PrecomputedLighting;
-        public List<StructureInstancedGeometryDefinition> InstancedGeometriesDefinitions;
-        public List<StructureInstancedGeometryInstance> InstancedGeometryInstances;
-        public List<StructureSoundCluster> AmbienceSoundClusters;
-        public List<StructureSoundCluster> ReverbSoundClusters;
-        public List<TransparentPlane> TransparentPlanes;
-        [TagField(Flags = Padding, Length = 96)]
-        public byte[] Padding4;
-        public float VehicleSpericalLimitRadius; // Distances this far and longer from limit origin will pull you back in.
-        public RealPoint3d VehicleSpericalLimitCenter; // Center of space in which vehicle can move.
-        public List<StructureDebugInfo> DebugInfo;
+        /// <summary>
+        /// Distances this far and longer from limit origin will pull you back in.
+        /// </summary>
+        public float VehicleSpericalLimitRadius;
+        /// <summary>
+        /// Center of space in which vehicle can move.
+        /// </summary>
+        public RealPoint3d VehicleSpericalLimitCenter;
+        public List<StructureBspDebugInfoBlock> DebugInfo;
+        [TagField(ValidTags = new [] { "DECP" })]
         public CachedTag Decorators;
-        public StructurePhysicsStruct StructurePhysics;
-        public List<WaterDefinition> WaterDefinitions;
-        public List<StructurePortalDeviceMap> PortalDeviceMapping;
-        public List<StructureAudibility> Audibility;
-        public List<ObjectFakeLightprobe> ObjectFakeLightprobes;
-        public List<DecoratorPlacementDefinition> Decorators1;
+        public GlobalStructurePhysicsStructBlock StructurePhysics;
+        public List<GlobalWaterDefinitionsBlock> WaterDefinitions;
+        public List<StructurePortalDeviceMappingBlock> PortalDeviceMapping;
+        public List<StructureBspAudibilityBlock> Audibility;
+        public List<StructureBspFakeLightprobesBlock> ObjectFakeLightprobes;
+        public List<DecoratorPlacementDefinitionBlock> Decorators1;
         
-        [TagStructure(Size = 0x254)]
-        public class TagImportInfo : TagStructure
+        [TagStructure(Size = 0x250)]
+        public class GlobalTagImportInfoBlock : TagStructure
         {
             public int Build;
             [TagField(Length = 256)]
@@ -79,72 +93,74 @@ namespace TagTool.Tags.Definitions.Gen2
             public string ImportDate;
             [TagField(Length = 32)]
             public string Culprit;
-            [TagField(Flags = Padding, Length = 96)]
-            public byte[] Padding1;
+            [TagField(Length = 0x60, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             [TagField(Length = 32)]
             public string ImportTime;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public List<TagImportFileBlock> Files;
+            [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            public List<TagImportFile> Files;
-            [TagField(Flags = Padding, Length = 128)]
-            public byte[] Padding3;
             
-            [TagStructure(Size = 0x21C)]
-            public class TagImportFile : TagStructure
+            [TagStructure(Size = 0x210)]
+            public class TagImportFileBlock : TagStructure
             {
                 [TagField(Length = 256)]
                 public string Path;
                 [TagField(Length = 32)]
                 public string ModificationDate;
-                [TagField(Flags = Padding, Length = 8)]
-                public byte[] Unknown1;
-                [TagField(Flags = Padding, Length = 88)]
-                public byte[] Padding1;
+                [TagField(Length = 0x8)]
+                public byte[] Unknown;
+                [TagField(Length = 0x58, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public int Checksum; // crc32
                 public int Size; // bytes
                 public byte[] ZippedData;
-                [TagField(Flags = Padding, Length = 128)]
-                public byte[] Padding2;
+                [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
             }
         }
         
-        [TagStructure(Size = 0x24)]
-        public class StructureCollisionMaterial : TagStructure
+        [TagStructure(Size = 0x14)]
+        public class StructureCollisionMaterialsBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag OldShader;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short ConveyorSurfaceIndex;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag NewShader;
         }
         
-        [TagStructure(Size = 0x60)]
-        public class CollisionBspBlock : TagStructure
+        [TagStructure(Size = 0x40)]
+        public class GlobalCollisionBspBlock : TagStructure
         {
-            public List<Bsp3dNode> Bsp3dNodes;
-            public List<RealPlane3d> Planes;
-            public List<CollisionLeaf> Leaves;
-            public List<Bsp2dReference> Bsp2dReferences;
-            public List<Bsp2dNode> Bsp2dNodes;
-            public List<CollisionSurface> Surfaces;
-            public List<CollisionEdge> Edges;
-            public List<CollisionVertex> Vertices;
+            public List<Bsp3dNodesBlock> Bsp3dNodes;
+            public List<PlanesBlock> Planes;
+            public List<LeavesBlock> Leaves;
+            public List<Bsp2dReferencesBlock> Bsp2dReferences;
+            public List<Bsp2dNodesBlock> Bsp2dNodes;
+            public List<SurfacesBlock> Surfaces;
+            public List<EdgesBlock> Edges;
+            public List<VerticesBlock> Vertices;
             
             [TagStructure(Size = 0x8)]
-            public class Bsp3dNode : TagStructure
+            public class Bsp3dNodesBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 8)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x8)]
+                public byte[] Unknown;
             }
             
             [TagStructure(Size = 0x10)]
-            public class RealPlane3d : TagStructure
+            public class PlanesBlock : TagStructure
             {
                 public RealPlane3d Plane;
             }
             
             [TagStructure(Size = 0x4)]
-            public class CollisionLeaf : TagStructure
+            public class LeavesBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public sbyte Bsp2dReferenceCount;
@@ -158,14 +174,14 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class Bsp2dReference : TagStructure
+            public class Bsp2dReferencesBlock : TagStructure
             {
                 public short Plane;
                 public short Bsp2dNode;
             }
             
             [TagStructure(Size = 0x10)]
-            public class Bsp2dNode : TagStructure
+            public class Bsp2dNodesBlock : TagStructure
             {
                 public RealPlane2d Plane;
                 public short LeftChild;
@@ -173,7 +189,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class CollisionSurface : TagStructure
+            public class SurfacesBlock : TagStructure
             {
                 public short Plane;
                 public short FirstEdge;
@@ -194,7 +210,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0xC)]
-            public class CollisionEdge : TagStructure
+            public class EdgesBlock : TagStructure
             {
                 public short StartVertex;
                 public short EndVertex;
@@ -205,24 +221,24 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x10)]
-            public class CollisionVertex : TagStructure
+            public class VerticesBlock : TagStructure
             {
                 public RealPoint3d Point;
                 public short FirstEdge;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x6)]
-        public class UnusedStructureNode : TagStructure
+        public class UnusedStructureBspNodeBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 6)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x6)]
+            public byte[] Unknown;
         }
         
         [TagStructure(Size = 0x8)]
-        public class StructureLeaf : TagStructure
+        public class StructureBspLeafBlock : TagStructure
         {
             public short Cluster;
             public short SurfaceReferenceCount;
@@ -230,15 +246,15 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x8)]
-        public class StructureSurfaceReference : TagStructure
+        public class StructureBspSurfaceReferenceBlock : TagStructure
         {
             public short StripIndex;
             public short LightmapTriangleIndex;
             public int BspNodeIndex;
         }
         
-        [TagStructure(Size = 0x28)]
-        public class ClusterPortal : TagStructure
+        [TagStructure(Size = 0x24)]
+        public class StructureBspClusterPortalBlock : TagStructure
         {
             public short BackCluster;
             public short FrontCluster;
@@ -246,7 +262,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public RealPoint3d Centroid;
             public float BoundingRadius;
             public FlagsValue Flags;
-            public List<RealPoint3d> Vertices;
+            public List<StructureBspClusterPortalVertexBlock> Vertices;
             
             [Flags]
             public enum FlagsValue : uint
@@ -260,18 +276,18 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0xC)]
-            public class RealPoint3d : TagStructure
+            public class StructureBspClusterPortalVertexBlock : TagStructure
             {
                 public RealPoint3d Point;
             }
         }
         
         [TagStructure(Size = 0x18)]
-        public class StructureFogPlane : TagStructure
+        public class StructureBspFogPlaneBlock : TagStructure
         {
             public short ScenarioPlanarFogIndex;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public RealPlane3d Plane;
             public FlagsValue Flags;
             public short Priority;
@@ -285,102 +301,101 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x98)]
-        public class StructureWeatherPaletteEntry : TagStructure
+        [TagStructure(Size = 0x88)]
+        public class StructureBspWeatherPaletteBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            [TagField(ValidTags = new [] { "weat" })]
             public CachedTag WeatherSystem;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding3;
+            [TagField(ValidTags = new [] { "wind" })]
             public CachedTag Wind;
             public RealVector3d WindDirection;
             public float WindMagnitude;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding4;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             [TagField(Length = 32)]
             public string WindScaleFunction;
         }
         
-        [TagStructure(Size = 0x1C)]
-        public class StructureWeatherPolyhedron : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class StructureBspWeatherPolyhedronBlock : TagStructure
         {
             public RealPoint3d BoundingSphereCenter;
             public float BoundingSphereRadius;
-            public List<RealPlane3d> Planes;
+            public List<StructureBspWeatherPolyhedronPlaneBlock> Planes;
             
             [TagStructure(Size = 0x10)]
-            public class RealPlane3d : TagStructure
+            public class StructureBspWeatherPolyhedronPlaneBlock : TagStructure
             {
                 public RealPlane3d Plane;
             }
         }
         
-        [TagStructure(Size = 0x34)]
-        public class StructureDetailObjectData : TagStructure
+        [TagStructure(Size = 0x24)]
+        public class StructureBspDetailObjectDataBlock : TagStructure
         {
-            public List<DetailObjectCellDefinition> Cells;
-            public List<DetailObject> Instances;
-            public List<DetailObjectCount> Counts;
-            public List<RealVector4d> ZReferenceVectors;
-            [TagField(Flags = Padding, Length = 1)]
+            public List<GlobalDetailObjectCellsBlock> Cells;
+            public List<GlobalDetailObjectBlock> Instances;
+            public List<GlobalDetailObjectCountsBlock> Counts;
+            public List<GlobalZReferenceVectorBlock> ZReferenceVectors;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 3)]
-            public byte[] Padding2;
             
             [TagStructure(Size = 0x20)]
-            public class DetailObjectCellDefinition : TagStructure
+            public class GlobalDetailObjectCellsBlock : TagStructure
             {
+                public short Unknown;
                 public short Unknown1;
                 public short Unknown2;
                 public short Unknown3;
-                public short Unknown4;
+                public int Unknown4;
                 public int Unknown5;
                 public int Unknown6;
-                public int Unknown7;
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding1;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
             
             [TagStructure(Size = 0x6)]
-            public class DetailObject : TagStructure
+            public class GlobalDetailObjectBlock : TagStructure
             {
+                public sbyte Unknown;
                 public sbyte Unknown1;
                 public sbyte Unknown2;
                 public sbyte Unknown3;
-                public sbyte Unknown4;
-                public short Unknown5;
+                public short Unknown4;
             }
             
             [TagStructure(Size = 0x2)]
-            public class DetailObjectCount : TagStructure
+            public class GlobalDetailObjectCountsBlock : TagStructure
             {
-                public short Unknown1;
+                public short Unknown;
             }
             
             [TagStructure(Size = 0x10)]
-            public class RealVector4d : TagStructure
+            public class GlobalZReferenceVectorBlock : TagStructure
             {
+                public float Unknown;
                 public float Unknown1;
                 public float Unknown2;
                 public float Unknown3;
-                public float Unknown4;
             }
         }
         
-        [TagStructure(Size = 0xD8)]
-        public class StructureCluster : TagStructure
+        [TagStructure(Size = 0xB0)]
+        public class StructureBspClusterBlock : TagStructure
         {
-            public GeometrySectionInfo SectionInfo;
-            public GeometryBlockInfoStruct GeometryBlockInfo;
-            public List<StructureClusterData> ClusterData;
-            /// <summary>
-            /// CLUSTER INFO
-            /// </summary>
+            public GlobalGeometrySectionInfoStructBlock SectionInfo;
+            public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+            public List<StructureBspClusterDataBlockNew> ClusterData;
             public Bounds<float> BoundsX;
             public Bounds<float> BoundsY;
             public Bounds<float> BoundsZ;
@@ -394,26 +409,23 @@ namespace TagTool.Tags.Definitions.Gen2
             public short SoundEnvironment;
             public short Weather;
             public short TransitionStructureBsp;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding3;
-            public List<PredictedResource> PredictedResources;
-            public List<PortalsBlock> Portals;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+            public List<PredictedResourceBlock> PredictedResources;
+            public List<StructureBspClusterPortalIndexBlock> Portals;
             public int ChecksumFromStructure;
-            public List<Word> InstancedGeometryIndices;
-            public List<Word> IndexReorderTable;
+            public List<StructureBspClusterInstancedGeometryIndexBlock> InstancedGeometryIndices;
+            public List<GlobalGeometrySectionStripIndexBlock> IndexReorderTable;
             public byte[] CollisionMoppCode;
             
-            [TagStructure(Size = 0x2C)]
-            public class GeometrySectionInfo : TagStructure
+            [TagStructure(Size = 0x28)]
+            public class GlobalGeometrySectionInfoStructBlock : TagStructure
             {
-                /// <summary>
-                /// SECTION INFO
-                /// </summary>
                 public short TotalVertexCount;
                 public short TotalTriangleCount;
                 public short TotalPartCount;
@@ -427,7 +439,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public short ShadowCastingRigidTriangleCount;
                 public GeometryClassificationValue GeometryClassification;
                 public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                public List<GeometryCompressionInfo> Unknown1;
+                public List<GlobalGeometryCompressionInfoBlock> Unknown;
                 public sbyte HardwareNodeCount;
                 public sbyte NodeMapSize;
                 public short SoftwarePlaneCount;
@@ -452,7 +464,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x38)]
-                public class GeometryCompressionInfo : TagStructure
+                public class GlobalGeometryCompressionInfoBlock : TagStructure
                 {
                     public Bounds<float> PositionBoundsX;
                     public Bounds<float> PositionBoundsY;
@@ -473,31 +485,28 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x28)]
-            public class GeometryBlockInfoStruct : TagStructure
+            [TagStructure(Size = 0x24)]
+            public class GlobalGeometryBlockInfoStructBlock : TagStructure
             {
-                /// <summary>
-                /// BLOCK INFO
-                /// </summary>
                 public int BlockOffset;
                 public int BlockSize;
                 public int SectionDataSize;
                 public int ResourceDataSize;
-                public List<GeometryBlockResource> Resources;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                public List<GlobalGeometryBlockResourceBlock> Resources;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short OwnerTagSectionOffset;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding3;
                 
                 [TagStructure(Size = 0x10)]
-                public class GeometryBlockResource : TagStructure
+                public class GlobalGeometryBlockResourceBlock : TagStructure
                 {
                     public TypeValue Type;
-                    [TagField(Flags = Padding, Length = 3)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public short PrimaryLocator;
                     public short SecondaryLocator;
                     public int ResourceDataSize;
@@ -512,27 +521,27 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x6C)]
-            public class StructureClusterData : TagStructure
+            [TagStructure(Size = 0x44)]
+            public class StructureBspClusterDataBlockNew : TagStructure
             {
-                public GeometrySection Section;
+                public GlobalGeometrySectionStructBlock Section;
                 
-                [TagStructure(Size = 0x6C)]
-                public class GeometrySection : TagStructure
+                [TagStructure(Size = 0x44)]
+                public class GlobalGeometrySectionStructBlock : TagStructure
                 {
-                    public List<GeometryPart> Parts;
-                    public List<GeometrySubpart> Subparts;
-                    public List<GeometryVisibility> VisibilityBounds;
-                    public List<GeometryVertex> RawVertices;
-                    public List<Word> StripIndices;
+                    public List<GlobalGeometryPartBlockNew> Parts;
+                    public List<GlobalSubpartsBlock> Subparts;
+                    public List<GlobalVisibilityBoundsBlock> VisibilityBounds;
+                    public List<GlobalGeometrySectionRawVertexBlock> RawVertices;
+                    public List<GlobalGeometrySectionStripIndexBlock> StripIndices;
                     public byte[] VisibilityMoppCode;
-                    public List<Word> MoppReorderTable;
-                    public List<RasterizerVertexBuffer> VertexBuffers;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Padding1;
+                    public List<GlobalGeometrySectionStripIndexBlock1> MoppReorderTable;
+                    public List<GlobalGeometrySectionVertexBufferBlock> VertexBuffers;
+                    [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
                     [TagStructure(Size = 0x48)]
-                    public class GeometryPart : TagStructure
+                    public class GlobalGeometryPartBlockNew : TagStructure
                     {
                         public TypeValue Type;
                         public FlagsValue Flags;
@@ -543,19 +552,14 @@ namespace TagTool.Tags.Definitions.Gen2
                         public short SubpartCount;
                         public sbyte MaxNodesVertex;
                         public sbyte ContributingCompoundNodeCount;
-                        /// <summary>
-                        /// CENTROID
-                        /// </summary>
                         public RealPoint3d Position;
-                        public sbyte NodeIndex;
                         [TagField(Length = 4)]
-                        public sbyte NodeIndices;
-                        public float NodeWeight;
+                        public sbyte[] NodeIndex;
                         [TagField(Length = 3)]
-                        public float NodeWeights;
+                        public float[] NodeWeight;
                         public float LodMipmapMagicNumber;
-                        [TagField(Flags = Padding, Length = 24)]
-                        public byte[] Unknown3;
+                        [TagField(Length = 0x18)]
+                        public byte[] Unknown;
                         
                         public enum TypeValue : short
                         {
@@ -579,7 +583,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x8)]
-                    public class GeometrySubpart : TagStructure
+                    public class GlobalSubpartsBlock : TagStructure
                     {
                         public short IndicesStartIndex;
                         public short IndicesLength;
@@ -588,30 +592,27 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x14)]
-                    public class GeometryVisibility : TagStructure
+                    public class GlobalVisibilityBoundsBlock : TagStructure
                     {
                         public float PositionX;
                         public float PositionY;
                         public float PositionZ;
                         public float Radius;
                         public sbyte Node0;
-                        [TagField(Flags = Padding, Length = 3)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                     }
                     
                     [TagStructure(Size = 0xC4)]
-                    public class GeometryVertex : TagStructure
+                    public class GlobalGeometrySectionRawVertexBlock : TagStructure
                     {
                         public RealPoint3d Position;
-                        public int NodeIndexOld;
                         [TagField(Length = 4)]
-                        public int NodeIndicesOld;
-                        public float NodeWeight;
+                        public int[] NodeIndexOld;
                         [TagField(Length = 4)]
-                        public float NodeWeights;
-                        public int NodeIndexNew;
+                        public float[] NodeWeight;
                         [TagField(Length = 4)]
-                        public int NodeIndicesNew;
+                        public int[] NodeIndexNew;
                         public int UseNewNodeIndices;
                         public int AdjustedCompoundNodeIndex;
                         public RealPoint2d Texcoord;
@@ -623,22 +624,28 @@ namespace TagTool.Tags.Definitions.Gen2
                         public RealRgbColor PrimaryLightmapColor;
                         public RealPoint2d PrimaryLightmapTexcoord;
                         public RealVector3d PrimaryLightmapIncidentDirection;
-                        [TagField(Flags = Padding, Length = 12)]
+                        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
+                        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
                         public byte[] Padding1;
-                        [TagField(Flags = Padding, Length = 8)]
+                        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                         public byte[] Padding2;
-                        [TagField(Flags = Padding, Length = 12)]
-                        public byte[] Padding3;
                     }
                     
                     [TagStructure(Size = 0x2)]
-                    public class Word : TagStructure
+                    public class GlobalGeometrySectionStripIndexBlock : TagStructure
+                    {
+                        public short Index;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class GlobalGeometrySectionStripIndexBlock1 : TagStructure
                     {
                         public short Index;
                     }
                     
                     [TagStructure(Size = 0x20)]
-                    public class RasterizerVertexBuffer : TagStructure
+                    public class GlobalGeometrySectionVertexBufferBlock : TagStructure
                     {
                         public VertexBuffer VertexBuffer;
                     }
@@ -655,7 +662,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class PredictedResource : TagStructure
+            public class PredictedResourceBlock : TagStructure
             {
                 public TypeValue Type;
                 public short ResourceIndex;
@@ -676,32 +683,40 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x2)]
-            public class PortalsBlock : TagStructure
+            public class StructureBspClusterPortalIndexBlock : TagStructure
             {
                 public short PortalIndex;
             }
             
             [TagStructure(Size = 0x2)]
-            public class Word : TagStructure
+            public class StructureBspClusterInstancedGeometryIndexBlock : TagStructure
             {
                 public short InstancedGeometryIndex;
             }
+            
+            [TagStructure(Size = 0x2)]
+            public class GlobalGeometrySectionStripIndexBlock : TagStructure
+            {
+                public short Index;
+            }
         }
         
-        [TagStructure(Size = 0x34)]
-        public class GeometryMaterial : TagStructure
+        [TagStructure(Size = 0x20)]
+        public class GlobalGeometryMaterialBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag OldShader;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag Shader;
-            public List<GeometryMaterialProperty> Properties;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public List<GlobalGeometryMaterialPropertyBlock> Properties;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public sbyte BreakableSurfaceIndex;
-            [TagField(Flags = Padding, Length = 3)]
-            public byte[] Padding2;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [TagStructure(Size = 0x8)]
-            public class GeometryMaterialProperty : TagStructure
+            public class GlobalGeometryMaterialPropertyBlock : TagStructure
             {
                 public TypeValue Type;
                 public short IntValue;
@@ -718,20 +733,20 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x2)]
-        public class SkyOwnerClusterBlock : TagStructure
+        public class StructureBspSkyOwnerClusterBlock : TagStructure
         {
             public short ClusterOwner;
         }
         
         [TagStructure(Size = 0x18)]
-        public class StructureConveyorSurface : TagStructure
+        public class StructureBspConveyorSurfaceBlock : TagStructure
         {
             public RealVector3d U;
             public RealVector3d V;
         }
         
         [TagStructure(Size = 0x18)]
-        public class StructureBreakableSurface : TagStructure
+        public class StructureBspBreakableSurfaceBlock : TagStructure
         {
             public short InstancedGeometryInstance;
             public short BreakableSurfaceIndex;
@@ -740,25 +755,25 @@ namespace TagTool.Tags.Definitions.Gen2
             public int CollisionSurfaceIndex;
         }
         
-        [TagStructure(Size = 0x9C)]
+        [TagStructure(Size = 0x74)]
         public class PathfindingDataBlock : TagStructure
         {
-            public List<Sector> Sectors;
-            public List<SectorLink> Links;
-            public List<Bsp2dRef> Refs;
-            public List<LargeBsp2dNode> Bsp2dNodes;
-            public List<LongSurfaceFlags> SurfaceFlags;
-            public List<SectorVertex> Vertices;
-            public List<EnvironmentObjectReference> ObjectRefs;
-            public List<PathfindingHintData> PathfindingHints;
-            public List<InstancedGeometryReference> InstancedGeometryRefs;
+            public List<SectorBlock> Sectors;
+            public List<SectorLinkBlock> Links;
+            public List<RefBlock> Refs;
+            public List<SectorBsp2dNodesBlock> Bsp2dNodes;
+            public List<SurfaceFlagsBlock> SurfaceFlags;
+            public List<SectorVertexBlock> Vertices;
+            public List<EnvironmentObjectRefs> ObjectRefs;
+            public List<PathfindingHintsBlock> PathfindingHints;
+            public List<InstancedGeometryReferenceBlock> InstancedGeometryRefs;
             public int StructureChecksum;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding1;
-            public List<UserHintData> UserPlacedHints;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<UserHintBlock> UserPlacedHints;
             
             [TagStructure(Size = 0x8)]
-            public class Sector : TagStructure
+            public class SectorBlock : TagStructure
             {
                 public PathFindingSectorFlagsValue PathFindingSectorFlags;
                 public short HintIndex;
@@ -785,7 +800,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x10)]
-            public class SectorLink : TagStructure
+            public class SectorLinkBlock : TagStructure
             {
                 public short Vertex1;
                 public short Vertex2;
@@ -817,13 +832,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class Bsp2dRef : TagStructure
+            public class RefBlock : TagStructure
             {
                 public int NodeRefOrSectorRef;
             }
             
             [TagStructure(Size = 0x14)]
-            public class LargeBsp2dNode : TagStructure
+            public class SectorBsp2dNodesBlock : TagStructure
             {
                 public RealPlane2d Plane;
                 public int LeftChild;
@@ -831,27 +846,27 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class LongSurfaceFlags : TagStructure
+            public class SurfaceFlagsBlock : TagStructure
             {
                 public int Flags;
             }
             
             [TagStructure(Size = 0xC)]
-            public class SectorVertex : TagStructure
+            public class SectorVertexBlock : TagStructure
             {
                 public RealPoint3d Point;
             }
             
-            [TagStructure(Size = 0x24)]
-            public class EnvironmentObjectReference : TagStructure
+            [TagStructure(Size = 0x1C)]
+            public class EnvironmentObjectRefs : TagStructure
             {
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public int FirstSector;
                 public int LastSector;
-                public List<EnvironmentObjectBspReference> Bsps;
-                public List<EnvironmentObjectNodeReference> Nodes;
+                public List<EnvironmentObjectBspRefs> Bsps;
+                public List<EnvironmentObjectNodes> Nodes;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -860,18 +875,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class EnvironmentObjectBspReference : TagStructure
+                public class EnvironmentObjectBspRefs : TagStructure
                 {
                     public int BspReference;
                     public int FirstSector;
                     public int LastSector;
                     public short NodeIndex;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class EnvironmentObjectNodeReference : TagStructure
+                public class EnvironmentObjectNodes : TagStructure
                 {
                     public short ReferenceFrameIndex;
                     public sbyte ProjectionAxis;
@@ -886,7 +901,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x14)]
-            public class PathfindingHintData : TagStructure
+            public class PathfindingHintsBlock : TagStructure
             {
                 public HintTypeValue HintType;
                 public short NextHintIndex;
@@ -913,57 +928,57 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class InstancedGeometryReference : TagStructure
+            public class InstancedGeometryReferenceBlock : TagStructure
             {
                 public short PathfindingObjectIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
             
-            [TagStructure(Size = 0x6C)]
-            public class UserHintData : TagStructure
+            [TagStructure(Size = 0x48)]
+            public class UserHintBlock : TagStructure
             {
-                public List<UserHintPoint> PointGeometry;
-                public List<UserHintRay> RayGeometry;
-                public List<UserHintLineSegment> LineSegmentGeometry;
-                public List<UserHintParallelogram> ParallelogramGeometry;
-                public List<UserHintPolygon> PolygonGeometry;
-                public List<UserHintJump> JumpHints;
-                public List<UserHintClimb> ClimbHints;
-                public List<UserHintWell> WellHints;
-                public List<UserFlightHint> FlightHints;
+                public List<UserHintPointBlock> PointGeometry;
+                public List<UserHintRayBlock> RayGeometry;
+                public List<UserHintLineSegmentBlock> LineSegmentGeometry;
+                public List<UserHintParallelogramBlock> ParallelogramGeometry;
+                public List<UserHintPolygonBlock> PolygonGeometry;
+                public List<UserHintJumpBlock> JumpHints;
+                public List<UserHintClimbBlock> ClimbHints;
+                public List<UserHintWellBlock> WellHints;
+                public List<UserHintFlightBlock> FlightHints;
                 
                 [TagStructure(Size = 0x10)]
-                public class UserHintPoint : TagStructure
+                public class UserHintPointBlock : TagStructure
                 {
                     public RealPoint3d Point;
                     public short ReferenceFrame;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                 }
                 
                 [TagStructure(Size = 0x1C)]
-                public class UserHintRay : TagStructure
+                public class UserHintRayBlock : TagStructure
                 {
                     public RealPoint3d Point;
                     public short ReferenceFrame;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public RealVector3d Vector;
                 }
                 
                 [TagStructure(Size = 0x24)]
-                public class UserHintLineSegment : TagStructure
+                public class UserHintLineSegmentBlock : TagStructure
                 {
                     public FlagsValue Flags;
                     public RealPoint3d Point0;
                     public short ReferenceFrame;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public RealPoint3d Point1;
                     public short ReferenceFrame1;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding2;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
                     
                     [Flags]
                     public enum FlagsValue : uint
@@ -974,25 +989,25 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x44)]
-                public class UserHintParallelogram : TagStructure
+                public class UserHintParallelogramBlock : TagStructure
                 {
                     public FlagsValue Flags;
                     public RealPoint3d Point0;
                     public short ReferenceFrame;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public RealPoint3d Point1;
                     public short ReferenceFrame1;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding2;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
                     public RealPoint3d Point2;
                     public short ReferenceFrame2;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding3;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding2;
                     public RealPoint3d Point3;
                     public short ReferenceFrame3;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding4;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding3;
                     
                     [Flags]
                     public enum FlagsValue : uint
@@ -1002,11 +1017,11 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                 }
                 
-                [TagStructure(Size = 0x10)]
-                public class UserHintPolygon : TagStructure
+                [TagStructure(Size = 0xC)]
+                public class UserHintPolygonBlock : TagStructure
                 {
                     public FlagsValue Flags;
-                    public List<UserHintPoint> Points;
+                    public List<UserHintPointBlock> Points;
                     
                     [Flags]
                     public enum FlagsValue : uint
@@ -1016,17 +1031,17 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x10)]
-                    public class UserHintPoint : TagStructure
+                    public class UserHintPointBlock : TagStructure
                     {
                         public RealPoint3d Point;
                         public short ReferenceFrame;
-                        [TagField(Flags = Padding, Length = 2)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                     }
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class UserHintJump : TagStructure
+                public class UserHintJumpBlock : TagStructure
                 {
                     public FlagsValue Flags;
                     public short GeometryIndex;
@@ -1060,7 +1075,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class UserHintClimb : TagStructure
+                public class UserHintClimbBlock : TagStructure
                 {
                     public FlagsValue Flags;
                     public short GeometryIndex;
@@ -1073,11 +1088,11 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                 }
                 
-                [TagStructure(Size = 0x10)]
-                public class UserHintWell : TagStructure
+                [TagStructure(Size = 0xC)]
+                public class UserHintWellBlock : TagStructure
                 {
                     public FlagsValue Flags;
-                    public List<UserHintWellPoint> Points;
+                    public List<UserHintWellPointBlock> Points;
                     
                     [Flags]
                     public enum FlagsValue : uint
@@ -1086,15 +1101,15 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x20)]
-                    public class UserHintWellPoint : TagStructure
+                    public class UserHintWellPointBlock : TagStructure
                     {
                         public TypeValue Type;
-                        [TagField(Flags = Padding, Length = 2)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                         public RealVector3d Point;
                         public short ReferenceFrame;
-                        [TagField(Flags = Padding, Length = 2)]
-                        public byte[] Padding2;
+                        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding1;
                         public int SectorIndex;
                         public RealEulerAngles2d Normal;
                         
@@ -1107,13 +1122,13 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                 }
                 
-                [TagStructure(Size = 0xC)]
-                public class UserFlightHint : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class UserHintFlightBlock : TagStructure
                 {
-                    public List<UserHintFlightPoint> Points;
+                    public List<UserHintFlightPointBlock> Points;
                     
                     [TagStructure(Size = 0xC)]
-                    public class UserHintFlightPoint : TagStructure
+                    public class UserHintFlightPointBlock : TagStructure
                     {
                         public RealVector3d Point;
                     }
@@ -1122,28 +1137,33 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x1)]
-        public class Byte : TagStructure
+        public class StructureBspPathfindingEdgesBlock : TagStructure
         {
             public sbyte Midpoint;
         }
         
-        [TagStructure(Size = 0x74)]
-        public class StructureBackgroundSoundPaletteEntry : TagStructure
+        [TagStructure(Size = 0x64)]
+        public class StructureBspBackgroundSoundPaletteBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            [TagField(ValidTags = new [] { "lsnd" })]
             public CachedTag BackgroundSound;
-            public CachedTag InsideClusterSound; // Play only when player is inside cluster.
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding1;
+            /// <summary>
+            /// Play only when player is inside cluster.
+            /// </summary>
+            [TagField(ValidTags = new [] { "lsnd" })]
+            public CachedTag InsideClusterSound;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float CutoffDistance;
             public ScaleFlagsValue ScaleFlags;
             public float InteriorScale;
             public float PortalScale;
             public float ExteriorScale;
             public float InterpolationSpeed; // 1/sec
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding2;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [Flags]
             public enum ScaleFlagsValue : uint
@@ -1155,20 +1175,21 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x50)]
-        public class StructureSoundEnvironmentPaletteEntry : TagStructure
+        [TagStructure(Size = 0x48)]
+        public class StructureBspSoundEnvironmentPaletteBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            [TagField(ValidTags = new [] { "snde" })]
             public CachedTag SoundEnvironment;
             public float CutoffDistance;
             public float InterpolationSpeed; // 1/sec
-            [TagField(Flags = Padding, Length = 24)]
-            public byte[] Padding1;
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x3C)]
-        public class StructureMarker : TagStructure
+        public class StructureBspMarkerBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
@@ -1177,99 +1198,102 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x10)]
-        public class StructureRuntimeDecal : TagStructure
+        public class StructureBspRuntimeDecalBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 16)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x10)]
+            public byte[] Unknown;
         }
         
-        [TagStructure(Size = 0x24)]
-        public class StructureEnvironmentObjectPaletteEntry : TagStructure
+        [TagStructure(Size = 0x14)]
+        public class StructureBspEnvironmentObjectPaletteBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "scen" })]
             public CachedTag Definition;
+            [TagField(ValidTags = new [] { "mode" })]
             public CachedTag Model;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x68)]
-        public class StructureEnvironmentObject : TagStructure
+        public class StructureBspEnvironmentObjectBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public RealQuaternion Rotation;
             public RealPoint3d Translation;
             public short PaletteIndex;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public int UniqueId;
             public Tag ExportedObjectType;
             [TagField(Length = 32)]
             public string ScenarioObjectName;
         }
         
-        [TagStructure(Size = 0x10)]
-        public class StructureLightmapData : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class StructureBspLightmapDataBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag BitmapGroup;
         }
         
-        [TagStructure(Size = 0x18)]
-        public class MapLeaf : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class GlobalMapLeafBlock : TagStructure
         {
-            public List<MapLeafFace> Faces;
-            public List<ConnectionIndicesBlock> ConnectionIndices;
+            public List<MapLeafFaceBlock> Faces;
+            public List<MapLeafConnectionIndexBlock> ConnectionIndices;
             
-            [TagStructure(Size = 0x10)]
-            public class MapLeafFace : TagStructure
+            [TagStructure(Size = 0xC)]
+            public class MapLeafFaceBlock : TagStructure
             {
                 public int NodeIndex;
-                public List<RealPoint3d> Vertices;
+                public List<MapLeafFaceVertexBlock> Vertices;
                 
                 [TagStructure(Size = 0xC)]
-                public class RealPoint3d : TagStructure
+                public class MapLeafFaceVertexBlock : TagStructure
                 {
                     public RealPoint3d Vertex;
                 }
             }
             
             [TagStructure(Size = 0x4)]
-            public class ConnectionIndicesBlock : TagStructure
+            public class MapLeafConnectionIndexBlock : TagStructure
             {
                 public int ConnectionIndex;
             }
         }
         
-        [TagStructure(Size = 0x1C)]
-        public class LeafConnection : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class GlobalLeafConnectionBlock : TagStructure
         {
             public int PlaneIndex;
             public int BackLeafIndex;
             public int FrontLeafIndex;
-            public List<RealPoint3d> Vertices;
+            public List<LeafConnectionVertexBlock> Vertices;
             public float Area;
             
             [TagStructure(Size = 0xC)]
-            public class RealPoint3d : TagStructure
+            public class LeafConnectionVertexBlock : TagStructure
             {
                 public RealPoint3d Vertex;
             }
         }
         
-        [TagStructure(Size = 0x2A8)]
-        public class ErrorReportCategory : TagStructure
+        [TagStructure(Size = 0x2A4)]
+        public class GlobalErrorReportCategoriesBlock : TagStructure
         {
             [TagField(Length = 256)]
             public string Name;
             public ReportTypeValue ReportType;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x194, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 404)]
-            public byte[] Padding3;
-            public List<ErrorReport> Reports;
+            public List<ErrorReportsBlock> Reports;
             
             public enum ReportTypeValue : short
             {
@@ -1289,8 +1313,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 ReportKeyIsValid = 1 << 4
             }
             
-            [TagStructure(Size = 0x284)]
-            public class ErrorReport : TagStructure
+            [TagStructure(Size = 0x260)]
+            public class ErrorReportsBlock : TagStructure
             {
                 public TypeValue Type;
                 public FlagsValue Flags;
@@ -1298,22 +1322,22 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagField(Length = 32)]
                 public string SourceFilename;
                 public int SourceLineNumber;
-                public List<ErrorReportVertex> Vertices;
-                public List<ErrorReportVector> Vectors;
-                public List<ErrorReportLine> Lines;
-                public List<ErrorReportTriangle> Triangles;
-                public List<ErrorReportQuad> Quads;
-                public List<ErrorReportComment> Comments;
-                [TagField(Flags = Padding, Length = 380)]
-                public byte[] Padding1;
+                public List<ErrorReportVerticesBlock> Vertices;
+                public List<ErrorReportVectorsBlock> Vectors;
+                public List<ErrorReportLinesBlock> Lines;
+                public List<ErrorReportTrianglesBlock> Triangles;
+                public List<ErrorReportQuadsBlock> Quads;
+                public List<ErrorReportCommentsBlock> Comments;
+                [TagField(Length = 0x17C, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public int ReportKey;
                 public int NodeIndex;
                 public Bounds<float> BoundsX;
                 public Bounds<float> BoundsY;
                 public Bounds<float> BoundsZ;
                 public RealArgbColor Color;
-                [TagField(Flags = Padding, Length = 84)]
-                public byte[] Padding2;
+                [TagField(Length = 0x54, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 public enum TypeValue : short
                 {
@@ -1334,103 +1358,88 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x34)]
-                public class ErrorReportVertex : TagStructure
+                public class ErrorReportVerticesBlock : TagStructure
                 {
                     public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     public RealArgbColor Color;
                     public float ScreenSize;
                 }
                 
                 [TagStructure(Size = 0x40)]
-                public class ErrorReportVector : TagStructure
+                public class ErrorReportVectorsBlock : TagStructure
                 {
                     public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     public RealArgbColor Color;
                     public RealVector3d Normal;
                     public float ScreenLength;
                 }
                 
-                [TagStructure(Size = 0x50)]
-                public class ErrorReportLine : TagStructure
+                [TagStructure(Size = 0x3C)]
+                public class ErrorReportLinesBlock : TagStructure
                 {
-                    public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     [TagField(Length = 2)]
-                    public RealPoint3d Points;
+                    public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
                 
-                [TagStructure(Size = 0x70)]
-                public class ErrorReportTriangle : TagStructure
+                [TagStructure(Size = 0x48)]
+                public class ErrorReportTrianglesBlock : TagStructure
                 {
-                    public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     [TagField(Length = 3)]
-                    public RealPoint3d Points;
+                    public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
                 
-                [TagStructure(Size = 0x90)]
-                public class ErrorReportQuad : TagStructure
+                [TagStructure(Size = 0x54)]
+                public class ErrorReportQuadsBlock : TagStructure
                 {
-                    public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     [TagField(Length = 4)]
-                    public RealPoint3d Points;
+                    public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
                 
-                [TagStructure(Size = 0x44)]
-                public class ErrorReportComment : TagStructure
+                [TagStructure(Size = 0x38)]
+                public class ErrorReportCommentsBlock : TagStructure
                 {
                     public byte[] Text;
                     public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     public RealArgbColor Color;
                 }
             }
         }
         
-        [TagStructure(Size = 0x60)]
-        public class StructurePrecomputedLighting : TagStructure
+        [TagStructure(Size = 0x30)]
+        public class StructureBspPrecomputedLightingBlock : TagStructure
         {
             public int Index;
             public LightTypeValue LightType;
             public sbyte AttachmentIndex;
             public sbyte ObjectType;
-            public StructurePrecomputedLightingVisiblity Visibility;
+            public VisibilityStructBlock Visibility;
             
             public enum LightTypeValue : short
             {
@@ -1439,14 +1448,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 AttachedToStructureObject
             }
             
-            [TagStructure(Size = 0x58)]
-            public class StructurePrecomputedLightingVisiblity : TagStructure
+            [TagStructure(Size = 0x28)]
+            public class VisibilityStructBlock : TagStructure
             {
                 public short ProjectionCount;
                 public short ClusterCount;
                 public short VolumeCount;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public byte[] Projections;
                 public byte[] VisibilityClusters;
                 public byte[] ClusterRemapTable;
@@ -1454,32 +1463,29 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x104)]
-        public class StructureInstancedGeometryDefinition : TagStructure
+        [TagStructure(Size = 0xC8)]
+        public class StructureBspInstancedGeometryDefinitionBlock : TagStructure
         {
-            public StructureInstancedGeometryRenderInfo RenderInfo;
+            public StructureInstancedGeometryRenderInfoStructBlock RenderInfo;
             public int Checksum;
             public RealPoint3d BoundingSphereCenter;
             public float BoundingSphereRadius;
-            public CollisionBsp CollisionInfo;
-            public List<CollisionBspPhysicsDefinition> BspPhysics;
-            public List<StructureLeaf> RenderLeaves;
-            public List<StructureSurfaceReference> SurfaceReferences;
+            public GlobalCollisionBspStructBlock CollisionInfo;
+            public List<CollisionBspPhysicsBlock> BspPhysics;
+            public List<StructureBspLeafBlock> RenderLeaves;
+            public List<StructureBspSurfaceReferenceBlock> SurfaceReferences;
             
-            [TagStructure(Size = 0x6C)]
-            public class StructureInstancedGeometryRenderInfo : TagStructure
+            [TagStructure(Size = 0x5C)]
+            public class StructureInstancedGeometryRenderInfoStructBlock : TagStructure
             {
-                public GeometrySectionInfo SectionInfo;
-                public GeometryBlockInfoStruct GeometryBlockInfo;
-                public List<StructureClusterData> RenderData;
-                public List<Word> IndexReorderTable;
+                public GlobalGeometrySectionInfoStructBlock SectionInfo;
+                public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+                public List<StructureBspClusterDataBlockNew> RenderData;
+                public List<GlobalGeometrySectionStripIndexBlock> IndexReorderTable;
                 
-                [TagStructure(Size = 0x2C)]
-                public class GeometrySectionInfo : TagStructure
+                [TagStructure(Size = 0x28)]
+                public class GlobalGeometrySectionInfoStructBlock : TagStructure
                 {
-                    /// <summary>
-                    /// SECTION INFO
-                    /// </summary>
                     public short TotalVertexCount;
                     public short TotalTriangleCount;
                     public short TotalPartCount;
@@ -1493,7 +1499,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public short ShadowCastingRigidTriangleCount;
                     public GeometryClassificationValue GeometryClassification;
                     public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                    public List<GeometryCompressionInfo> Unknown1;
+                    public List<GlobalGeometryCompressionInfoBlock> Unknown;
                     public sbyte HardwareNodeCount;
                     public sbyte NodeMapSize;
                     public short SoftwarePlaneCount;
@@ -1518,7 +1524,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x38)]
-                    public class GeometryCompressionInfo : TagStructure
+                    public class GlobalGeometryCompressionInfoBlock : TagStructure
                     {
                         public Bounds<float> PositionBoundsX;
                         public Bounds<float> PositionBoundsY;
@@ -1539,31 +1545,28 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                 }
                 
-                [TagStructure(Size = 0x28)]
-                public class GeometryBlockInfoStruct : TagStructure
+                [TagStructure(Size = 0x24)]
+                public class GlobalGeometryBlockInfoStructBlock : TagStructure
                 {
-                    /// <summary>
-                    /// BLOCK INFO
-                    /// </summary>
                     public int BlockOffset;
                     public int BlockSize;
                     public int SectionDataSize;
                     public int ResourceDataSize;
-                    public List<GeometryBlockResource> Resources;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Padding1;
+                    public List<GlobalGeometryBlockResourceBlock> Resources;
+                    [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public short OwnerTagSectionOffset;
-                    [TagField(Flags = Padding, Length = 2)]
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
+                    [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                     public byte[] Padding2;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Padding3;
                     
                     [TagStructure(Size = 0x10)]
-                    public class GeometryBlockResource : TagStructure
+                    public class GlobalGeometryBlockResourceBlock : TagStructure
                     {
                         public TypeValue Type;
-                        [TagField(Flags = Padding, Length = 3)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                         public short PrimaryLocator;
                         public short SecondaryLocator;
                         public int ResourceDataSize;
@@ -1578,27 +1581,27 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                 }
                 
-                [TagStructure(Size = 0x6C)]
-                public class StructureClusterData : TagStructure
+                [TagStructure(Size = 0x44)]
+                public class StructureBspClusterDataBlockNew : TagStructure
                 {
-                    public GeometrySection Section;
+                    public GlobalGeometrySectionStructBlock Section;
                     
-                    [TagStructure(Size = 0x6C)]
-                    public class GeometrySection : TagStructure
+                    [TagStructure(Size = 0x44)]
+                    public class GlobalGeometrySectionStructBlock : TagStructure
                     {
-                        public List<GeometryPart> Parts;
-                        public List<GeometrySubpart> Subparts;
-                        public List<GeometryVisibility> VisibilityBounds;
-                        public List<GeometryVertex> RawVertices;
-                        public List<Word> StripIndices;
+                        public List<GlobalGeometryPartBlockNew> Parts;
+                        public List<GlobalSubpartsBlock> Subparts;
+                        public List<GlobalVisibilityBoundsBlock> VisibilityBounds;
+                        public List<GlobalGeometrySectionRawVertexBlock> RawVertices;
+                        public List<GlobalGeometrySectionStripIndexBlock> StripIndices;
                         public byte[] VisibilityMoppCode;
-                        public List<Word> MoppReorderTable;
-                        public List<RasterizerVertexBuffer> VertexBuffers;
-                        [TagField(Flags = Padding, Length = 4)]
-                        public byte[] Padding1;
+                        public List<GlobalGeometrySectionStripIndexBlock1> MoppReorderTable;
+                        public List<GlobalGeometrySectionVertexBufferBlock> VertexBuffers;
+                        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                         
                         [TagStructure(Size = 0x48)]
-                        public class GeometryPart : TagStructure
+                        public class GlobalGeometryPartBlockNew : TagStructure
                         {
                             public TypeValue Type;
                             public FlagsValue Flags;
@@ -1609,19 +1612,14 @@ namespace TagTool.Tags.Definitions.Gen2
                             public short SubpartCount;
                             public sbyte MaxNodesVertex;
                             public sbyte ContributingCompoundNodeCount;
-                            /// <summary>
-                            /// CENTROID
-                            /// </summary>
                             public RealPoint3d Position;
-                            public sbyte NodeIndex;
                             [TagField(Length = 4)]
-                            public sbyte NodeIndices;
-                            public float NodeWeight;
+                            public sbyte[] NodeIndex;
                             [TagField(Length = 3)]
-                            public float NodeWeights;
+                            public float[] NodeWeight;
                             public float LodMipmapMagicNumber;
-                            [TagField(Flags = Padding, Length = 24)]
-                            public byte[] Unknown3;
+                            [TagField(Length = 0x18)]
+                            public byte[] Unknown;
                             
                             public enum TypeValue : short
                             {
@@ -1645,7 +1643,7 @@ namespace TagTool.Tags.Definitions.Gen2
                         }
                         
                         [TagStructure(Size = 0x8)]
-                        public class GeometrySubpart : TagStructure
+                        public class GlobalSubpartsBlock : TagStructure
                         {
                             public short IndicesStartIndex;
                             public short IndicesLength;
@@ -1654,30 +1652,27 @@ namespace TagTool.Tags.Definitions.Gen2
                         }
                         
                         [TagStructure(Size = 0x14)]
-                        public class GeometryVisibility : TagStructure
+                        public class GlobalVisibilityBoundsBlock : TagStructure
                         {
                             public float PositionX;
                             public float PositionY;
                             public float PositionZ;
                             public float Radius;
                             public sbyte Node0;
-                            [TagField(Flags = Padding, Length = 3)]
-                            public byte[] Padding1;
+                            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                            public byte[] Padding;
                         }
                         
                         [TagStructure(Size = 0xC4)]
-                        public class GeometryVertex : TagStructure
+                        public class GlobalGeometrySectionRawVertexBlock : TagStructure
                         {
                             public RealPoint3d Position;
-                            public int NodeIndexOld;
                             [TagField(Length = 4)]
-                            public int NodeIndicesOld;
-                            public float NodeWeight;
+                            public int[] NodeIndexOld;
                             [TagField(Length = 4)]
-                            public float NodeWeights;
-                            public int NodeIndexNew;
+                            public float[] NodeWeight;
                             [TagField(Length = 4)]
-                            public int NodeIndicesNew;
+                            public int[] NodeIndexNew;
                             public int UseNewNodeIndices;
                             public int AdjustedCompoundNodeIndex;
                             public RealPoint2d Texcoord;
@@ -1689,22 +1684,28 @@ namespace TagTool.Tags.Definitions.Gen2
                             public RealRgbColor PrimaryLightmapColor;
                             public RealPoint2d PrimaryLightmapTexcoord;
                             public RealVector3d PrimaryLightmapIncidentDirection;
-                            [TagField(Flags = Padding, Length = 12)]
+                            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                            public byte[] Padding;
+                            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
                             public byte[] Padding1;
-                            [TagField(Flags = Padding, Length = 8)]
+                            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                             public byte[] Padding2;
-                            [TagField(Flags = Padding, Length = 12)]
-                            public byte[] Padding3;
                         }
                         
                         [TagStructure(Size = 0x2)]
-                        public class Word : TagStructure
+                        public class GlobalGeometrySectionStripIndexBlock : TagStructure
+                        {
+                            public short Index;
+                        }
+                        
+                        [TagStructure(Size = 0x2)]
+                        public class GlobalGeometrySectionStripIndexBlock1 : TagStructure
                         {
                             public short Index;
                         }
                         
                         [TagStructure(Size = 0x20)]
-                        public class RasterizerVertexBuffer : TagStructure
+                        public class GlobalGeometrySectionVertexBufferBlock : TagStructure
                         {
                             public VertexBuffer VertexBuffer;
                         }
@@ -1712,39 +1713,39 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x2)]
-                public class Word : TagStructure
+                public class GlobalGeometrySectionStripIndexBlock : TagStructure
                 {
                     public short Index;
                 }
             }
             
-            [TagStructure(Size = 0x60)]
-            public class CollisionBsp : TagStructure
+            [TagStructure(Size = 0x40)]
+            public class GlobalCollisionBspStructBlock : TagStructure
             {
-                public List<Bsp3dNode> Bsp3dNodes;
-                public List<RealPlane3d> Planes;
-                public List<CollisionLeaf> Leaves;
-                public List<Bsp2dReference> Bsp2dReferences;
-                public List<Bsp2dNode> Bsp2dNodes;
-                public List<CollisionSurface> Surfaces;
-                public List<CollisionEdge> Edges;
-                public List<CollisionVertex> Vertices;
+                public List<Bsp3dNodesBlock> Bsp3dNodes;
+                public List<PlanesBlock> Planes;
+                public List<LeavesBlock> Leaves;
+                public List<Bsp2dReferencesBlock> Bsp2dReferences;
+                public List<Bsp2dNodesBlock> Bsp2dNodes;
+                public List<SurfacesBlock> Surfaces;
+                public List<EdgesBlock> Edges;
+                public List<VerticesBlock> Vertices;
                 
                 [TagStructure(Size = 0x8)]
-                public class Bsp3dNode : TagStructure
+                public class Bsp3dNodesBlock : TagStructure
                 {
-                    [TagField(Flags = Padding, Length = 8)]
-                    public byte[] Unknown1;
+                    [TagField(Length = 0x8)]
+                    public byte[] Unknown;
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class RealPlane3d : TagStructure
+                public class PlanesBlock : TagStructure
                 {
                     public RealPlane3d Plane;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class CollisionLeaf : TagStructure
+                public class LeavesBlock : TagStructure
                 {
                     public FlagsValue Flags;
                     public sbyte Bsp2dReferenceCount;
@@ -1758,14 +1759,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class Bsp2dReference : TagStructure
+                public class Bsp2dReferencesBlock : TagStructure
                 {
                     public short Plane;
                     public short Bsp2dNode;
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class Bsp2dNode : TagStructure
+                public class Bsp2dNodesBlock : TagStructure
                 {
                     public RealPlane2d Plane;
                     public short LeftChild;
@@ -1773,7 +1774,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class CollisionSurface : TagStructure
+                public class SurfacesBlock : TagStructure
                 {
                     public short Plane;
                     public short FirstEdge;
@@ -1794,7 +1795,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0xC)]
-                public class CollisionEdge : TagStructure
+                public class EdgesBlock : TagStructure
                 {
                     public short StartVertex;
                     public short EndVertex;
@@ -1805,53 +1806,53 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class CollisionVertex : TagStructure
+                public class VerticesBlock : TagStructure
                 {
                     public RealPoint3d Point;
                     public short FirstEdge;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                 }
             }
             
-            [TagStructure(Size = 0x80)]
-            public class CollisionBspPhysicsDefinition : TagStructure
+            [TagStructure(Size = 0x74)]
+            public class CollisionBspPhysicsBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown;
                 public short Size;
                 public short Count;
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Length = 0x4)]
+                public byte[] Unknown1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x20)]
                 public byte[] Unknown2;
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 32)]
+                [TagField(Length = 0x4)]
                 public byte[] Unknown3;
-                [TagField(Flags = Padding, Length = 16)]
-                public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown4;
                 public short Size1;
-                public short Count2;
-                [TagField(Flags = Padding, Length = 4)]
+                public short Count1;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown4;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
+                [TagField(Length = 0x4)]
                 public byte[] Unknown5;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding3;
-                [TagField(Flags = Padding, Length = 4)]
+                public short Size2;
+                public short Count2;
+                [TagField(Length = 0x4)]
                 public byte[] Unknown6;
-                public short Size3;
-                public short Count4;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown7;
-                [TagField(Flags = Padding, Length = 8)]
-                public byte[] Padding4;
+                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding3;
                 public byte[] MoppCodeData;
-                [TagField(Flags = Padding, Length = 8)]
-                public byte[] Padding5;
+                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding4;
             }
             
             [TagStructure(Size = 0x8)]
-            public class StructureLeaf : TagStructure
+            public class StructureBspLeafBlock : TagStructure
             {
                 public short Cluster;
                 public short SurfaceReferenceCount;
@@ -1859,7 +1860,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class StructureSurfaceReference : TagStructure
+            public class StructureBspSurfaceReferenceBlock : TagStructure
             {
                 public short StripIndex;
                 public short LightmapTriangleIndex;
@@ -1868,7 +1869,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x58)]
-        public class StructureInstancedGeometryInstance : TagStructure
+        public class StructureBspInstancedGeometryInstancesBlock : TagStructure
         {
             public float Scale;
             public RealVector3d Forward;
@@ -1877,12 +1878,12 @@ namespace TagTool.Tags.Definitions.Gen2
             public RealPoint3d Position;
             public short InstanceDefinition;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 12)]
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0xC)]
+            public byte[] Unknown;
+            [TagField(Length = 0x4)]
             public byte[] Unknown1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
             public int Checksum;
             public StringId Name;
             public PathfindingPolicyValue PathfindingPolicy;
@@ -1908,58 +1909,81 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x1C)]
-        public class StructureSoundCluster : TagStructure
+        [TagStructure(Size = 0x14)]
+        public class StructureBspSoundClusterBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
-            public List<EnclosingPortalDesignatorsBlock> EnclosingPortalDesignators;
-            public List<InteriorClusterIndicesBlock> InteriorClusterIndices;
+            public List<StructureSoundClusterPortalDesignators> EnclosingPortalDesignators;
+            public List<StructureSoundClusterInteriorClusterIndices> InteriorClusterIndices;
             
             [TagStructure(Size = 0x2)]
-            public class EnclosingPortalDesignatorsBlock : TagStructure
+            public class StructureSoundClusterPortalDesignators : TagStructure
             {
                 public short PortalDesignator;
             }
             
             [TagStructure(Size = 0x2)]
-            public class InteriorClusterIndicesBlock : TagStructure
+            public class StructureSoundClusterInteriorClusterIndices : TagStructure
             {
                 public short InteriorClusterIndex;
             }
         }
         
         [TagStructure(Size = 0x14)]
-        public class TransparentPlane : TagStructure
+        public class StructureBspSoundClusterBlock1 : TagStructure
+        {
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public List<StructureSoundClusterPortalDesignators> EnclosingPortalDesignators;
+            public List<StructureSoundClusterInteriorClusterIndices> InteriorClusterIndices;
+            
+            [TagStructure(Size = 0x2)]
+            public class StructureSoundClusterPortalDesignators : TagStructure
+            {
+                public short PortalDesignator;
+            }
+            
+            [TagStructure(Size = 0x2)]
+            public class StructureSoundClusterInteriorClusterIndices : TagStructure
+            {
+                public short InteriorClusterIndex;
+            }
+        }
+        
+        [TagStructure(Size = 0x14)]
+        public class TransparentPlanesBlock : TagStructure
         {
             public short SectionIndex;
             public short PartIndex;
             public RealPlane3d Plane;
         }
         
-        [TagStructure(Size = 0x64)]
-        public class StructureDebugInfo : TagStructure
+        [TagStructure(Size = 0x58)]
+        public class StructureBspDebugInfoBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 64)]
-            public byte[] Padding1;
-            public List<StructureClusterDebugInfo> Clusters;
-            public List<StructureFogPlaneDebugInfo> FogPlanes;
-            public List<StructureFogZoneDebugInfo> FogZones;
+            [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<StructureBspClusterDebugInfoBlock> Clusters;
+            public List<StructureBspFogPlaneDebugInfoBlock> FogPlanes;
+            public List<StructureBspFogZoneDebugInfoBlock> FogZones;
             
-            [TagStructure(Size = 0x5C)]
-            public class StructureClusterDebugInfo : TagStructure
+            [TagStructure(Size = 0x48)]
+            public class StructureBspClusterDebugInfoBlock : TagStructure
             {
                 public ErrorsValue Errors;
                 public WarningsValue Warnings;
-                [TagField(Flags = Padding, Length = 28)]
-                public byte[] Padding1;
-                public List<StructureDebugInfoRenderLine> Lines;
-                public List<FogPlaneIndicesBlock> FogPlaneIndices;
-                public List<VisibleFogPlaneIndicesBlock> VisibleFogPlaneIndices;
-                public List<VisFogOmissionClusterIndicesBlock> VisFogOmissionClusterIndices;
-                public List<ContainingFogZoneIndicesBlock> ContainingFogZoneIndices;
+                [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<StructureBspDebugInfoRenderLineBlock> Lines;
+                public List<StructureBspDebugInfoIndicesBlock> FogPlaneIndices;
+                public List<StructureBspDebugInfoIndicesBlock1> VisibleFogPlaneIndices;
+                public List<StructureBspDebugInfoIndicesBlock2> VisFogOmissionClusterIndices;
+                public List<StructureBspDebugInfoIndicesBlock3> ContainingFogZoneIndices;
                 
                 [Flags]
                 public enum ErrorsValue : ushort
@@ -1978,13 +2002,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class StructureDebugInfoRenderLine : TagStructure
+                public class StructureBspDebugInfoRenderLineBlock : TagStructure
                 {
                     public TypeValue Type;
                     public short Code;
                     public short PadThai;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public RealPoint3d Point0;
                     public RealPoint3d Point1;
                     
@@ -2001,49 +2025,49 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class FogPlaneIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock : TagStructure
                 {
                     public int Index;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class VisibleFogPlaneIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock1 : TagStructure
                 {
                     public int Index;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class VisFogOmissionClusterIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock2 : TagStructure
                 {
                     public int Index;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class ContainingFogZoneIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock3 : TagStructure
                 {
                     public int Index;
                 }
             }
             
-            [TagStructure(Size = 0x44)]
-            public class StructureFogPlaneDebugInfo : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class StructureBspFogPlaneDebugInfoBlock : TagStructure
             {
                 public int FogZoneIndex;
-                [TagField(Flags = Padding, Length = 24)]
-                public byte[] Padding1;
+                [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public int ConnectedPlaneDesignator;
-                public List<StructureDebugInfoRenderLine> Lines;
-                public List<IntersectedClusterIndicesBlock> IntersectedClusterIndices;
-                public List<InfExtentClusterIndicesBlock> InfExtentClusterIndices;
+                public List<StructureBspDebugInfoRenderLineBlock> Lines;
+                public List<StructureBspDebugInfoIndicesBlock> IntersectedClusterIndices;
+                public List<StructureBspDebugInfoIndicesBlock1> InfExtentClusterIndices;
                 
                 [TagStructure(Size = 0x20)]
-                public class StructureDebugInfoRenderLine : TagStructure
+                public class StructureBspDebugInfoRenderLineBlock : TagStructure
                 {
                     public TypeValue Type;
                     public short Code;
                     public short PadThai;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public RealPoint3d Point0;
                     public RealPoint3d Point1;
                     
@@ -2060,38 +2084,38 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class IntersectedClusterIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock : TagStructure
                 {
                     public int Index;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class InfExtentClusterIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock1 : TagStructure
                 {
                     public int Index;
                 }
             }
             
-            [TagStructure(Size = 0x50)]
-            public class StructureFogZoneDebugInfo : TagStructure
+            [TagStructure(Size = 0x40)]
+            public class StructureBspFogZoneDebugInfoBlock : TagStructure
             {
                 public int MediaIndex; // Scenario Fog Plane*
                 public int BaseFogPlaneIndex;
-                [TagField(Flags = Padding, Length = 24)]
-                public byte[] Padding1;
-                public List<StructureDebugInfoRenderLine> Lines;
-                public List<ImmersedClusterIndicesBlock> ImmersedClusterIndices;
-                public List<BoundingFogPlaneIndicesBlock> BoundingFogPlaneIndices;
-                public List<CollisionFogPlaneIndicesBlock> CollisionFogPlaneIndices;
+                [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<StructureBspDebugInfoRenderLineBlock> Lines;
+                public List<StructureBspDebugInfoIndicesBlock> ImmersedClusterIndices;
+                public List<StructureBspDebugInfoIndicesBlock1> BoundingFogPlaneIndices;
+                public List<StructureBspDebugInfoIndicesBlock2> CollisionFogPlaneIndices;
                 
                 [TagStructure(Size = 0x20)]
-                public class StructureDebugInfoRenderLine : TagStructure
+                public class StructureBspDebugInfoRenderLineBlock : TagStructure
                 {
                     public TypeValue Type;
                     public short Code;
                     public short PadThai;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public RealPoint3d Point0;
                     public RealPoint3d Point1;
                     
@@ -2108,38 +2132,38 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class ImmersedClusterIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock : TagStructure
                 {
                     public int Index;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class BoundingFogPlaneIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock1 : TagStructure
                 {
                     public int Index;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class CollisionFogPlaneIndicesBlock : TagStructure
+                public class StructureBspDebugInfoIndicesBlock2 : TagStructure
                 {
                     public int Index;
                 }
             }
         }
         
-        [TagStructure(Size = 0x50)]
-        public class StructurePhysicsStruct : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class GlobalStructurePhysicsStructBlock : TagStructure
         {
             public byte[] MoppCode;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public RealPoint3d MoppBoundsMin;
             public RealPoint3d MoppBoundsMax;
             public byte[] BreakableSurfacesMoppCode;
-            public List<StrucurePhysicsBreakableSurfaceKeyValue> BreakableSurfaceKeyTable;
+            public List<BreakableSurfaceKeyTableBlock> BreakableSurfaceKeyTable;
             
             [TagStructure(Size = 0x20)]
-            public class StrucurePhysicsBreakableSurfaceKeyValue : TagStructure
+            public class BreakableSurfaceKeyTableBlock : TagStructure
             {
                 public short InstancedGeometryIndex;
                 public short BreakableSurfaceIndex;
@@ -2153,12 +2177,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0xBC)]
-        public class WaterDefinition : TagStructure
+        [TagStructure(Size = 0xAC)]
+        public class GlobalWaterDefinitionsBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag Shader;
-            public List<WaterGeometryData> Section;
-            public GeometryBlockInfoStruct GeometryBlockInfo;
+            public List<WaterGeometrySectionBlock> Section;
+            public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
             public RealRgbColor SunSpotColor;
             public RealRgbColor ReflectionTint;
             public RealRgbColor RefractionTint;
@@ -2180,27 +2205,27 @@ namespace TagTool.Tags.Definitions.Gen2
             public float FogFar;
             public float DynamicHeightBias;
             
-            [TagStructure(Size = 0x6C)]
-            public class WaterGeometryData : TagStructure
+            [TagStructure(Size = 0x44)]
+            public class WaterGeometrySectionBlock : TagStructure
             {
-                public GeometrySection Section;
+                public GlobalGeometrySectionStructBlock Section;
                 
-                [TagStructure(Size = 0x6C)]
-                public class GeometrySection : TagStructure
+                [TagStructure(Size = 0x44)]
+                public class GlobalGeometrySectionStructBlock : TagStructure
                 {
-                    public List<GeometryPart> Parts;
-                    public List<GeometrySubpart> Subparts;
-                    public List<GeometryVisibility> VisibilityBounds;
-                    public List<GeometryVertex> RawVertices;
-                    public List<Word> StripIndices;
+                    public List<GlobalGeometryPartBlockNew> Parts;
+                    public List<GlobalSubpartsBlock> Subparts;
+                    public List<GlobalVisibilityBoundsBlock> VisibilityBounds;
+                    public List<GlobalGeometrySectionRawVertexBlock> RawVertices;
+                    public List<GlobalGeometrySectionStripIndexBlock> StripIndices;
                     public byte[] VisibilityMoppCode;
-                    public List<Word> MoppReorderTable;
-                    public List<RasterizerVertexBuffer> VertexBuffers;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Padding1;
+                    public List<GlobalGeometrySectionStripIndexBlock1> MoppReorderTable;
+                    public List<GlobalGeometrySectionVertexBufferBlock> VertexBuffers;
+                    [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
                     [TagStructure(Size = 0x48)]
-                    public class GeometryPart : TagStructure
+                    public class GlobalGeometryPartBlockNew : TagStructure
                     {
                         public TypeValue Type;
                         public FlagsValue Flags;
@@ -2211,19 +2236,14 @@ namespace TagTool.Tags.Definitions.Gen2
                         public short SubpartCount;
                         public sbyte MaxNodesVertex;
                         public sbyte ContributingCompoundNodeCount;
-                        /// <summary>
-                        /// CENTROID
-                        /// </summary>
                         public RealPoint3d Position;
-                        public sbyte NodeIndex;
                         [TagField(Length = 4)]
-                        public sbyte NodeIndices;
-                        public float NodeWeight;
+                        public sbyte[] NodeIndex;
                         [TagField(Length = 3)]
-                        public float NodeWeights;
+                        public float[] NodeWeight;
                         public float LodMipmapMagicNumber;
-                        [TagField(Flags = Padding, Length = 24)]
-                        public byte[] Unknown3;
+                        [TagField(Length = 0x18)]
+                        public byte[] Unknown;
                         
                         public enum TypeValue : short
                         {
@@ -2247,7 +2267,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x8)]
-                    public class GeometrySubpart : TagStructure
+                    public class GlobalSubpartsBlock : TagStructure
                     {
                         public short IndicesStartIndex;
                         public short IndicesLength;
@@ -2256,30 +2276,27 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x14)]
-                    public class GeometryVisibility : TagStructure
+                    public class GlobalVisibilityBoundsBlock : TagStructure
                     {
                         public float PositionX;
                         public float PositionY;
                         public float PositionZ;
                         public float Radius;
                         public sbyte Node0;
-                        [TagField(Flags = Padding, Length = 3)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                     }
                     
                     [TagStructure(Size = 0xC4)]
-                    public class GeometryVertex : TagStructure
+                    public class GlobalGeometrySectionRawVertexBlock : TagStructure
                     {
                         public RealPoint3d Position;
-                        public int NodeIndexOld;
                         [TagField(Length = 4)]
-                        public int NodeIndicesOld;
-                        public float NodeWeight;
+                        public int[] NodeIndexOld;
                         [TagField(Length = 4)]
-                        public float NodeWeights;
-                        public int NodeIndexNew;
+                        public float[] NodeWeight;
                         [TagField(Length = 4)]
-                        public int NodeIndicesNew;
+                        public int[] NodeIndexNew;
                         public int UseNewNodeIndices;
                         public int AdjustedCompoundNodeIndex;
                         public RealPoint2d Texcoord;
@@ -2291,53 +2308,56 @@ namespace TagTool.Tags.Definitions.Gen2
                         public RealRgbColor PrimaryLightmapColor;
                         public RealPoint2d PrimaryLightmapTexcoord;
                         public RealVector3d PrimaryLightmapIncidentDirection;
-                        [TagField(Flags = Padding, Length = 12)]
+                        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
+                        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
                         public byte[] Padding1;
-                        [TagField(Flags = Padding, Length = 8)]
+                        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                         public byte[] Padding2;
-                        [TagField(Flags = Padding, Length = 12)]
-                        public byte[] Padding3;
                     }
                     
                     [TagStructure(Size = 0x2)]
-                    public class Word : TagStructure
+                    public class GlobalGeometrySectionStripIndexBlock : TagStructure
+                    {
+                        public short Index;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class GlobalGeometrySectionStripIndexBlock1 : TagStructure
                     {
                         public short Index;
                     }
                     
                     [TagStructure(Size = 0x20)]
-                    public class RasterizerVertexBuffer : TagStructure
+                    public class GlobalGeometrySectionVertexBufferBlock : TagStructure
                     {
                         public VertexBuffer VertexBuffer;
                     }
                 }
             }
             
-            [TagStructure(Size = 0x28)]
-            public class GeometryBlockInfoStruct : TagStructure
+            [TagStructure(Size = 0x24)]
+            public class GlobalGeometryBlockInfoStructBlock : TagStructure
             {
-                /// <summary>
-                /// BLOCK INFO
-                /// </summary>
                 public int BlockOffset;
                 public int BlockSize;
                 public int SectionDataSize;
                 public int ResourceDataSize;
-                public List<GeometryBlockResource> Resources;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                public List<GlobalGeometryBlockResourceBlock> Resources;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short OwnerTagSectionOffset;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding3;
                 
                 [TagStructure(Size = 0x10)]
-                public class GeometryBlockResource : TagStructure
+                public class GlobalGeometryBlockResourceBlock : TagStructure
                 {
                     public TypeValue Type;
-                    [TagField(Flags = Padding, Length = 3)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public short PrimaryLocator;
                     public short SecondaryLocator;
                     public int ResourceDataSize;
@@ -2353,21 +2373,21 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x18)]
-        public class StructurePortalDeviceMap : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class StructurePortalDeviceMappingBlock : TagStructure
         {
-            public List<StructurePortalDeviceMachineAssociation> DevicePortalAssociations;
-            public List<GamePortalToPortalMapBlock> GamePortalToPortalMap;
+            public List<StructureDevicePortalAssociationBlock> DevicePortalAssociations;
+            public List<GamePortalToPortalMappingBlock> GamePortalToPortalMap;
             
             [TagStructure(Size = 0xC)]
-            public class StructurePortalDeviceMachineAssociation : TagStructure
+            public class StructureDevicePortalAssociationBlock : TagStructure
             {
-                public ObjectIdentifier DeviceId;
+                public ScenarioObjectIdStructBlock DeviceId;
                 public short FirstGamePortalIndex;
                 public short GamePortalCount;
                 
                 [TagStructure(Size = 0x8)]
-                public class ObjectIdentifier : TagStructure
+                public class ScenarioObjectIdStructBlock : TagStructure
                 {
                     public int UniqueId;
                     public short OriginBspIndex;
@@ -2402,50 +2422,62 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x2)]
-            public class GamePortalToPortalMapBlock : TagStructure
+            public class GamePortalToPortalMappingBlock : TagStructure
             {
                 public short PortalIndex;
             }
         }
         
-        [TagStructure(Size = 0x48)]
-        public class StructureAudibility : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class StructureBspAudibilityBlock : TagStructure
         {
             public int DoorPortalCount;
             public Bounds<float> ClusterDistanceBounds;
-            public List<Dword> EncodedDoorPas;
-            public List<Dword> ClusterDoorPortalEncodedPas;
-            public List<Dword> AiDeafeningPas;
-            public List<Byte> ClusterDistances;
-            public List<MachineDoorMappingBlock> MachineDoorMapping;
+            public List<DoorEncodedPasBlock> EncodedDoorPas;
+            public List<ClusterDoorPortalEncodedPasBlock> ClusterDoorPortalEncodedPas;
+            public List<AiDeafeningEncodedPasBlock> AiDeafeningPas;
+            public List<EncodedClusterDistancesBlock> ClusterDistances;
+            public List<OccluderToMachineDoorMapping> MachineDoorMapping;
             
             [TagStructure(Size = 0x4)]
-            public class Dword : TagStructure
+            public class DoorEncodedPasBlock : TagStructure
             {
-                public int Unknown1;
+                public int Unknown;
+            }
+            
+            [TagStructure(Size = 0x4)]
+            public class ClusterDoorPortalEncodedPasBlock : TagStructure
+            {
+                public int Unknown;
+            }
+            
+            [TagStructure(Size = 0x4)]
+            public class AiDeafeningEncodedPasBlock : TagStructure
+            {
+                public int Unknown;
             }
             
             [TagStructure(Size = 0x1)]
-            public class Byte : TagStructure
+            public class EncodedClusterDistancesBlock : TagStructure
             {
-                public sbyte Unknown1;
+                public sbyte Unknown;
             }
             
             [TagStructure(Size = 0x1)]
-            public class MachineDoorMappingBlock : TagStructure
+            public class OccluderToMachineDoorMapping : TagStructure
             {
                 public sbyte MachineDoorIndex;
             }
         }
         
         [TagStructure(Size = 0x5C)]
-        public class ObjectFakeLightprobe : TagStructure
+        public class StructureBspFakeLightprobesBlock : TagStructure
         {
-            public ObjectIdentifierStruct ObjectIdentifier;
-            public RenderLightingStruct RenderLighting;
+            public ScenarioObjectIdStructBlock ObjectIdentifier;
+            public RenderLightingStructBlock RenderLighting;
             
             [TagStructure(Size = 0x8)]
-            public class ObjectIdentifierStruct : TagStructure
+            public class ScenarioObjectIdStructBlock : TagStructure
             {
                 public int UniqueId;
                 public short OriginBspIndex;
@@ -2479,7 +2511,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x54)]
-            public class RenderLightingStruct : TagStructure
+            public class RenderLightingStructBlock : TagStructure
             {
                 public RealRgbColor Ambient;
                 public RealVector3d ShadowDirection;
@@ -2490,56 +2522,53 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealRgbColor SecondaryDirectionColor;
                 public RealVector3d SecondaryDirection;
                 public short ShIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
-        [TagStructure(Size = 0x40)]
-        public class DecoratorPlacementDefinition : TagStructure
+        [TagStructure(Size = 0x30)]
+        public class DecoratorPlacementDefinitionBlock : TagStructure
         {
             public RealPoint3d GridOrigin;
             public int CellCountPerDimension;
-            public List<DecoratorCacheBlock> CacheBlocks;
-            public List<DecoratorGroup> Groups;
-            public List<DecoratorCellCollection> Cells;
-            public List<DecoratorProjectedDecal> Decals;
+            public List<DecoratorCacheBlockBlock> CacheBlocks;
+            public List<DecoratorGroupBlock> Groups;
+            public List<DecoratorCellCollectionBlock> Cells;
+            public List<DecoratorProjectedDecalBlock> Decals;
             
-            [TagStructure(Size = 0x3C)]
-            public class DecoratorCacheBlock : TagStructure
+            [TagStructure(Size = 0x34)]
+            public class DecoratorCacheBlockBlock : TagStructure
             {
-                public GeometryBlockInfoStruct GeometryBlockInfo;
-                public List<DecoratorCacheBlockData> CacheBlockData;
-                [TagField(Flags = Padding, Length = 4)]
+                public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+                public List<DecoratorCacheBlockDataBlock> CacheBlockData;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding2;
                 
-                [TagStructure(Size = 0x28)]
-                public class GeometryBlockInfoStruct : TagStructure
+                [TagStructure(Size = 0x24)]
+                public class GlobalGeometryBlockInfoStructBlock : TagStructure
                 {
-                    /// <summary>
-                    /// BLOCK INFO
-                    /// </summary>
                     public int BlockOffset;
                     public int BlockSize;
                     public int SectionDataSize;
                     public int ResourceDataSize;
-                    public List<GeometryBlockResource> Resources;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Padding1;
+                    public List<GlobalGeometryBlockResourceBlock> Resources;
+                    [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public short OwnerTagSectionOffset;
-                    [TagField(Flags = Padding, Length = 2)]
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
+                    [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                     public byte[] Padding2;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Padding3;
                     
                     [TagStructure(Size = 0x10)]
-                    public class GeometryBlockResource : TagStructure
+                    public class GlobalGeometryBlockResourceBlock : TagStructure
                     {
                         public TypeValue Type;
-                        [TagField(Flags = Padding, Length = 3)]
-                        public byte[] Padding1;
+                        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                        public byte[] Padding;
                         public short PrimaryLocator;
                         public short SecondaryLocator;
                         public int ResourceDataSize;
@@ -2554,23 +2583,23 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                 }
                 
-                [TagStructure(Size = 0x9C)]
-                public class DecoratorCacheBlockData : TagStructure
+                [TagStructure(Size = 0x88)]
+                public class DecoratorCacheBlockDataBlock : TagStructure
                 {
-                    public List<DecoratorPlacement> Placements;
-                    public List<RasterizerVertexDecoratorDecal> DecalVertices;
-                    public List<Word> DecalIndices;
+                    public List<DecoratorPlacementBlock> Placements;
+                    public List<DecalVerticesBlock> DecalVertices;
+                    public List<IndicesBlock> DecalIndices;
                     public VertexBuffer DecalVertexBuffer;
-                    [TagField(Flags = Padding, Length = 16)]
-                    public byte[] Padding1;
-                    public List<RasterizerVertexDecoratorSprite> SpriteVertices;
-                    public List<Word> SpriteIndices;
+                    [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
+                    public List<SpriteVerticesBlock> SpriteVertices;
+                    public List<IndicesBlock1> SpriteIndices;
                     public VertexBuffer SpriteVertexBuffer;
-                    [TagField(Flags = Padding, Length = 16)]
-                    public byte[] Padding2;
+                    [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
                     
                     [TagStructure(Size = 0x18)]
-                    public class DecoratorPlacement : TagStructure
+                    public class DecoratorPlacementBlock : TagStructure
                     {
                         public int InternalData1;
                         public int CompressedPosition;
@@ -2581,7 +2610,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x20)]
-                    public class RasterizerVertexDecoratorDecal : TagStructure
+                    public class DecalVerticesBlock : TagStructure
                     {
                         public RealPoint3d Position;
                         public RealPoint2d Texcoord0;
@@ -2590,13 +2619,13 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x2)]
-                    public class Word : TagStructure
+                    public class IndicesBlock : TagStructure
                     {
                         public short Index;
                     }
                     
                     [TagStructure(Size = 0x30)]
-                    public class RasterizerVertexDecoratorSprite : TagStructure
+                    public class SpriteVerticesBlock : TagStructure
                     {
                         public RealPoint3d Position;
                         public RealVector3d Offset;
@@ -2604,11 +2633,17 @@ namespace TagTool.Tags.Definitions.Gen2
                         public RealPoint2d Texcoord;
                         public ArgbColor Color;
                     }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class IndicesBlock1 : TagStructure
+                    {
+                        public short Index;
+                    }
                 }
             }
             
             [TagStructure(Size = 0x18)]
-            public class DecoratorGroup : TagStructure
+            public class DecoratorGroupBlock : TagStructure
             {
                 public sbyte DecoratorSet;
                 public DecoratorTypeValue DecoratorType;
@@ -2636,18 +2671,17 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x18)]
-            public class DecoratorCellCollection : TagStructure
+            public class DecoratorCellCollectionBlock : TagStructure
             {
-                public short ChildIndex;
                 [TagField(Length = 8)]
-                public short ChildIndices;
+                public short[] ChildIndex;
                 public short CacheBlockIndex;
                 public short GroupCount;
                 public int GroupStartIndex;
             }
             
             [TagStructure(Size = 0x40)]
-            public class DecoratorProjectedDecal : TagStructure
+            public class DecoratorProjectedDecalBlock : TagStructure
             {
                 public sbyte DecoratorSet;
                 public sbyte DecoratorClass;

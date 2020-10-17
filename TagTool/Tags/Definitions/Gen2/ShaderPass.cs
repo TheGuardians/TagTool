@@ -2,35 +2,37 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "shader_pass", Tag = "spas", Size = 0x3C)]
+    [TagStructure(Name = "shader_pass", Tag = "spas", Size = 0x24)]
     public class ShaderPass : TagStructure
     {
         public byte[] Documentation;
-        public List<ShaderPassParameter> Parameters;
-        [TagField(Flags = Padding, Length = 2)]
+        public List<ShaderPassParameterBlock> Parameters;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding1;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding2;
-        public List<ShaderPassImplementation> Implementations;
-        public List<ShaderPassPostprocessDefinitionNew> PostprocessDefinition;
+        public List<ShaderPassImplementationBlock> Implementations;
+        public List<ShaderPassPostprocessDefinitionNewBlock> PostprocessDefinition;
         
-        [TagStructure(Size = 0x40)]
-        public class ShaderPassParameter : TagStructure
+        [TagStructure(Size = 0x2C)]
+        public class ShaderPassParameterBlock : TagStructure
         {
             public StringId Name;
             public byte[] Explanation;
             public TypeValue Type;
             public FlagsValue Flags;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag DefaultBitmap;
             public float DefaultConstValue;
             public RealRgbColor DefaultConstColor;
             public SourceExternValue SourceExtern;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             
             public enum TypeValue : short
             {
@@ -50,131 +52,127 @@ namespace TagTool.Tags.Definitions.Gen2
             public enum SourceExternValue : short
             {
                 None,
-                GlobalEyeForwardVectorZ,
-                GlobalEyeRightVectorX,
-                GlobalEyeUpVectorY,
-                ObjectPrimaryColor,
-                ObjectSecondaryColor,
-                ObjectFunctionValue,
-                LightDiffuseColor,
-                LightSpecularColor,
-                LightForwardVectorZ,
-                LightRightVectorX,
-                LightUpVectorY,
-                LightObjectRelativeForwardVectorZ,
-                LightObjectRelativeRightVectorX,
-                LightObjectRelativeUpVectorY,
-                LightObjectFalloffValue,
-                LightObjectGelColor,
-                LightmapObjectAmbientFactor,
-                LightmapObjectDirectVector,
-                LightmapObjectDirectColor,
-                LightmapObjectIndirectVector,
-                LightmapObjectIndirectColor,
-                OldFogAtmosphericColor,
-                OldFogAtmosphericMaxDensity,
-                OldFogPlanarColor,
-                OldFogPlanarMaxDensity,
-                OldFogAtmosphericPlanarBlendValue,
-                OldFogObjectAtmosphericDensity,
-                OldFogObjectPlanarDensity,
-                OldFogObjectColor,
-                OldFogObjectDensity,
-                ObjectModelAlpha,
-                ObjectShadowAlpha,
-                LightOverbrightenDiffuseShift,
-                LightOverbrightenSpecularShift,
-                LightDiffuseContrast,
-                LightSpecularGel,
-                ShaderSpecularType,
+                Global, //  Eye Forward Vector (z)
+                Global1, //  Eye Right Vector (x)
+                Global2, //  Eye Up Vector (y)
+                Object, //  Primary Color
+                Object1, //  Secondary Color
+                Object2, //  Function Value
+                Light, //  Diffuse Color
+                Light1, //  Specular Color
+                Light2, //  Forward Vector (z)
+                Light3, //  Right Vector (x)
+                Light4, //  Up Vector (y)
+                Light5, //  Object-Relative Forward Vector (z)
+                Light6, //  Object-Relative Right Vector (x)
+                Light7, //  Object-Relative Up Vector (y)
+                Light8, //  Object Falloff Value
+                Light9, //  Object Gel Color
+                Lightmap, //  Object Ambient Factor
+                Lightmap1, //  Object Direct Vector
+                Lightmap2, //  Object Direct Color
+                Lightmap3, //  Object Indirect Vector
+                Lightmap4, //  Object Indirect Color
+                OldFog, //  Atmospheric Color
+                OldFog1, //  Atmospheric Max Density
+                OldFog2, //  Planar Color
+                OldFog3, //  Planar Max Density
+                OldFog4, //  Atmospheric Planar Blend Value
+                OldFog5, //  Object Atmospheric Density
+                OldFog6, //  Object Planar Density
+                OldFog7, //  Object Color
+                OldFog8, //  Object Density
+                Object3, //  Model Alpha
+                Object4, //  Shadow Alpha
+                Light10, //  Overbrighten Diffuse Shift
+                Light11, //  Overbrighten Specular Shift
+                Light12, //  Diffuse Contrast
+                Light13, //  Specular Gel
+                Shader, //  Specular Type
                 Pad3,
                 Pad3Scale,
                 PadThai,
                 TacoSalad,
                 AnisotropicBinormal,
-                ObjectLightShadowFade,
-                LightShadowFade,
-                OldFogAtmosphericDensity,
-                OldFogPlanarDensity,
-                OldFogPlanarDensityInvert,
-                ObjectChangeColorTertiary,
-                ObjectChangeColorQuaternary,
-                LightmapObjectSpecularColor,
-                ShaderLightmapType,
-                LightmapObjectAmbientColor,
-                ShaderLightmapSpecularBrightness,
-                GlobalLightmapShadowDarkening,
-                LightmapObjectEnvBrightness,
-                FogAtmosphericMaxDensity,
-                FogAtmosphericColor,
-                FogAtmosphericColorAdj,
-                FogAtmosphericPlanarBlend,
-                FogAtmosphericPlanarBlendAdjInv,
-                FogAtmosphericPlanarBlendAdj,
-                FogSecondaryMaxDensity,
-                FogSecondaryColor,
-                FogSecondaryColorAdj,
-                FogAtmosphericSecondaryBlend,
-                FogAtmosphericSecondaryBlendAdjInv,
-                FogAtmosphericSecondaryBlendAdj,
-                FogSkyDensity,
-                FogSkyColor,
-                FogSkyColorAdj,
-                FogPlanarMaxDensity,
-                FogPlanarColor,
-                FogPlanarColorAdj,
-                FogPlanarEyeDensity,
-                FogPlanarEyeDensityAdjInv,
-                FogPlanarEyeDensityAdj,
-                HudWaypointPrimaryColor,
-                HudWaypointSecondaryColor,
-                LightmapObjectSpecularColorTimesOneHalf,
-                LightSpecularEnabled,
-                LightDefinitionSpecularEnabled,
-                ObjectActiveCamoAmount,
-                ObjectSuperCamoAmount,
-                HudCustomColor1,
-                HudCustomColor2,
-                HudCustomColor3,
-                HudCustomColor4,
-                ObjectActiveCamoRgb,
-                FogPatchyPlaneNXyz,
-                FogPatchyPlaneDW,
-                HudGlobalFade,
-                ScreenEffectPrimary,
-                ScreenEffectSecondary
+                ObjectLight, //  Shadow Fade
+                Light14, //  Shadow Fade
+                OldFog9, //  Atmospheric Density
+                OldFog10, //  Planar Density
+                OldFog11, //  Planar Density Invert
+                Object5, //  Change Color Tertiary
+                Object6, //  Change Color Quaternary
+                Lightmap5, //  Object Specular Color
+                Shader1, //  Lightmap Type
+                Lightmap6, //  Object Ambient Color
+                Shader2, //  Lightmap Specular Brightness
+                Global3, //  Lightmap Shadow Darkening
+                Lightmap7, //  Object Env Brightness
+                Fog, //  Atmospheric Max Density
+                Fog1, //  Atmospheric Color
+                Fog2, //  Atmospheric Color Adj
+                Fog3, //  Atmospheric Planar Blend
+                Fog4, //  Atmospheric Planar Blend Adj Inv
+                Fog5, //  Atmospheric Planar Blend Adj
+                Fog6, //  Secondary Max Density
+                Fog7, //  Secondary Color
+                Fog8, //  Secondary Color Adj
+                Fog9, //  Atmospheric Secondary Blend
+                Fog10, //  Atmospheric Secondary Blend Adj Inv
+                Fog11, //  Atmospheric Secondary Blend Adj
+                Fog12, //  Sky Density
+                Fog13, //  Sky Color
+                Fog14, //  Sky Color Adj
+                Fog15, //  Planar Max Density
+                Fog16, //  Planar Color
+                Fog17, //  Planar Color Adj
+                Fog18, //  Planar Eye Density
+                Fog19, //  Planar Eye Density Adj Inv
+                Fog20, //  Planar Eye Density Adj
+                Hud, //  Waypoint Primary Color
+                Hud1, //  Waypoint Secondary Color
+                Lightmap8, //  Object Specular Color Times One Half
+                Light15, //  Specular Enabled
+                Light16, //  Definition Specular Enabled
+                Object7, //  Active Camo Amount
+                Object8, //  Super Camo Amount
+                Hud2, //  Custom Color 1
+                Hud3, //  Custom Color 2
+                Hud4, //  Custom Color 3
+                Hud5, //  Custom Color 4
+                Object9, //  Active Camo RGB
+                Fog21, //  Patchy Plane n(xyz)
+                Fog22, //  Patchy Plane d(w)
+                Hud6, //  Global Fade
+                ScreenEffect, //  Primary
+                ScreenEffect1 //  Secondary
             }
         }
         
-        [TagStructure(Size = 0xB8)]
-        public class ShaderPassImplementation : TagStructure
+        [TagStructure(Size = 0x74)]
+        public class ShaderPassImplementationBlock : TagStructure
         {
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public List<ShaderPassTexture> Textures;
-            /// <summary>
-            /// VERTEX SHADER
-            /// </summary>
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<ShaderPassTextureBlock> Textures;
+            [TagField(ValidTags = new [] { "vrtx" })]
             public CachedTag VertexShader;
-            public List<ShaderPassConstant> VsConstants;
+            public List<ShaderPassVertexShaderConstantBlock> VsConstants;
             public byte[] PixelShaderCodeNoLongerUsed;
-            /// <summary>
-            /// STATE
-            /// </summary>
             public ChannelsValue Channels;
             public AlphaBlendValue AlphaBlend;
             public DepthValue Depth;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
-            public List<ShaderStateChannelsState> ChannelState;
-            public List<ShaderStateAlphaBlendState> AlphaBlendState;
-            public List<ShaderStateAlphaTestState> AlphaTestState;
-            public List<ShaderStateDepthState> DepthState;
-            public List<ShaderStateCullState> CullState;
-            public List<ShaderStateFillState> FillState;
-            public List<ShaderStateMiscState> MiscState;
-            public List<ShaderStateConstant> Constants;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public List<ShaderStateChannelsStateBlock> ChannelState;
+            public List<ShaderStateAlphaBlendStateBlock> AlphaBlendState;
+            public List<ShaderStateAlphaTestStateBlock> AlphaTestState;
+            public List<ShaderStateDepthStateBlock> DepthState;
+            public List<ShaderStateCullStateBlock> CullState;
+            public List<ShaderStateFillStateBlock> FillState;
+            public List<ShaderStateMiscStateBlock> MiscState;
+            public List<ShaderStateConstantBlock> Constants;
+            [TagField(ValidTags = new [] { "pixl" })]
             public CachedTag PixelShader;
             
             [Flags]
@@ -184,58 +182,58 @@ namespace TagTool.Tags.Definitions.Gen2
                 Critical = 1 << 1
             }
             
-            [TagStructure(Size = 0x50)]
-            public class ShaderPassTexture : TagStructure
+            [TagStructure(Size = 0x3C)]
+            public class ShaderPassTextureBlock : TagStructure
             {
                 public StringId SourceParameter;
                 public SourceExternValue SourceExtern;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x2)]
+                public byte[] Unknown;
                 public ModeValue Mode;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 public DotMappingValue DotMapping;
                 public short InputStage; // [0,3]
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding3;
-                public List<ShaderTextureStateAddressState> AddressState;
-                public List<ShaderTextureStateFilterState> FilterState;
-                public List<ShaderTextureStateKillState> KillState;
-                public List<ShaderTextureStateMiscState> MiscState;
-                public List<ShaderStateConstant> Constants;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
+                public List<ShaderTextureStateAddressStateBlock> AddressState;
+                public List<ShaderTextureStateFilterStateBlock> FilterState;
+                public List<ShaderTextureStateKillStateBlock> KillState;
+                public List<ShaderTextureStateMiscStateBlock> MiscState;
+                public List<ShaderTextureStateConstantBlock> Constants;
                 
                 public enum SourceExternValue : short
                 {
                     None,
-                    GlobalVectorNormalization,
+                    Global, //  Vector Normalization
                     Unused,
-                    GlobalTargetTexaccum,
-                    Unused0,
-                    GlobalTargetFrameBuffer,
-                    GlobaTargetZ,
+                    Global1, //  Target texaccum
                     Unused1,
-                    GlobalTargetShadow,
-                    LightFalloff,
-                    LightGel,
-                    Lightmap,
+                    Global2, //  Target Frame Buffer
+                    Globa, //  Target z
                     Unused2,
-                    GlobalShadowBuffer,
-                    GlobalGradientSeparate,
-                    GlobalGradientProduct,
-                    HudBitmap,
-                    GlobalActiveCamo,
-                    GlobalTextureCamera,
-                    GlobalWaterReflection,
-                    GlobalWaterRefraction,
-                    GlobalAux1,
-                    GlobalAux2,
-                    GlobalParticleDistortion,
-                    GlobalConvolution1,
-                    GlobalConvolution2,
-                    ShaderActiveCamoBump,
-                    FirstPersonScope
+                    Global3, //  Target Shadow
+                    Light, //  Falloff
+                    Light1, //  Gel
+                    Lightmap,
+                    Unused3,
+                    Global4, //  Shadow Buffer
+                    Global5, //  Gradient Separate
+                    Global6, //  Gradient Product
+                    Hud, //  Bitmap
+                    Global7, //  active camo
+                    Global8, //  Texture Camera
+                    Global9, //  Water Reflection
+                    Global10, //  Water Refraction
+                    Global11, //  Aux 1
+                    Global12, //  Aux 2
+                    Global13, //  Particle Distortion
+                    Global14, //  Convolution 1
+                    Global15, //  Convolution 2
+                    Shader, //  Active Camo Bump
+                    FirstPerson //  Scope
                 }
                 
                 public enum ModeValue : short
@@ -267,20 +265,20 @@ namespace TagTool.Tags.Definitions.Gen2
                     SignedD3d,
                     SignedGl,
                     SignedNv,
-                    Hilo0To1,
-                    HiloSignedHemisphereD3d,
-                    HiloSignedHemisphereGl,
-                    HiloSignedHemisphereNv
+                    Hilo, //  0 to 1
+                    Hilo1, //  Signed Hemisphere D3D
+                    Hilo2, //  Signed Hemisphere GL
+                    Hilo3 //  Signed Hemisphere NV
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class ShaderTextureStateAddressState : TagStructure
+                public class ShaderTextureStateAddressStateBlock : TagStructure
                 {
                     public UAddressModeValue UAddressMode;
                     public VAddressModeValue VAddressMode;
                     public WAddressModeValue WAddressMode;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
                     public enum UAddressModeValue : short
                     {
@@ -311,15 +309,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class ShaderTextureStateFilterState : TagStructure
+                public class ShaderTextureStateFilterStateBlock : TagStructure
                 {
                     public MagFilterValue MagFilter;
                     public MinFilterValue MinFilter;
                     public MipFilterValue MipFilter;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public float MipmapBias;
-                    public short MaxMipmapIndex; // 0 means all mipmap levels are used
+                    /// <summary>
+                    /// 0 means all mipmap levels are used
+                    /// </summary>
+                    public short MaxMipmapIndex;
                     public AnisotropyValue Anisotropy;
                     
                     public enum MagFilterValue : short
@@ -362,14 +363,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0xC)]
-                public class ShaderTextureStateKillState : TagStructure
+                public class ShaderTextureStateKillStateBlock : TagStructure
                 {
                     public FlagsValue Flags;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public ColorkeyModeValue ColorkeyMode;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding2;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
                     public ArgbColor ColorkeyColor;
                     
                     [Flags]
@@ -388,11 +389,11 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class ShaderTextureStateMiscState : TagStructure
+                public class ShaderTextureStateMiscStateBlock : TagStructure
                 {
                     public ComponentSignFlagsValue ComponentSignFlags;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public ArgbColor BorderColor;
                     
                     [Flags]
@@ -406,11 +407,11 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class ShaderStateConstant : TagStructure
+                public class ShaderTextureStateConstantBlock : TagStructure
                 {
                     public StringId SourceParameter;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public ConstantValue Constant;
                     
                     public enum ConstantValue : short
@@ -430,7 +431,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0xC)]
-            public class ShaderPassConstant : TagStructure
+            public class ShaderPassVertexShaderConstantBlock : TagStructure
             {
                 public StringId SourceParameter;
                 public ScaleByTextureStageValue ScaleByTextureStage;
@@ -509,11 +510,11 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class ShaderStateChannelsState : TagStructure
+            public class ShaderStateChannelsStateBlock : TagStructure
             {
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -526,17 +527,17 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x10)]
-            public class ShaderStateAlphaBlendState : TagStructure
+            public class ShaderStateAlphaBlendStateBlock : TagStructure
             {
                 public BlendFunctionValue BlendFunction;
                 public BlendSrcFactorValue BlendSrcFactor;
                 public BlendDstFactorValue BlendDstFactor;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public ArgbColor BlendColor;
                 public LogicOpFlagsValue LogicOpFlags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 public enum BlendFunctionValue : short
                 {
@@ -599,13 +600,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class ShaderStateAlphaTestState : TagStructure
+            public class ShaderStateAlphaTestStateBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public AlphaCompareFunctionValue AlphaCompareFunction;
                 public short AlphaTestRef; // [0,255]
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -629,13 +630,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x10)]
-            public class ShaderStateDepthState : TagStructure
+            public class ShaderStateDepthStateBlock : TagStructure
             {
                 public ModeValue Mode;
                 public DepthCompareFunctionValue DepthCompareFunction;
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float DepthBiasSlopeScale;
                 public float DepthBias;
                 
@@ -671,7 +672,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class ShaderStateCullState : TagStructure
+            public class ShaderStateCullStateBlock : TagStructure
             {
                 public ModeValue Mode;
                 public FrontFaceValue FrontFace;
@@ -691,13 +692,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0xC)]
-            public class ShaderStateFillState : TagStructure
+            public class ShaderStateFillStateBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public FillModeValue FillMode;
                 public BackFillModeValue BackFillMode;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float LineWidth;
                 
                 [Flags]
@@ -723,11 +724,11 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class ShaderStateMiscState : TagStructure
+            public class ShaderStateMiscStateBlock : TagStructure
             {
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public ArgbColor FogColor;
                 
                 [Flags]
@@ -740,11 +741,11 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class ShaderStateConstant : TagStructure
+            public class ShaderStateConstantBlock : TagStructure
             {
                 public StringId SourceParameter;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public ConstantValue Constant;
                 
                 public enum ConstantValue : short
@@ -760,96 +761,193 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x84)]
-        public class ShaderPassPostprocessDefinitionNew : TagStructure
+        [TagStructure(Size = 0x58)]
+        public class ShaderPassPostprocessDefinitionNewBlock : TagStructure
         {
-            public List<ShaderPassPostprocessImplementationNew> Implementations;
-            public List<ShaderPassPostprocessTextureNew> Textures;
-            public List<RenderState> RenderStates;
-            public List<ShaderPassPostprocessTextureState> TextureStates;
-            public List<PixelShaderFragment> PsFragments;
-            public List<PixelShaderPermutationNew> PsPermutations;
-            public List<PixelShaderCombiner> PsCombiners;
-            public List<ShaderPassPostprocessExternNew> Externs;
-            public List<ShaderPassPostprocessConstantNew> Constants;
-            public List<ShaderPassPostprocessConstantInfoNew> ConstantInfo;
-            public List<ShaderPassPostprocessImplementation> OldImplementations;
+            public List<ShaderPassPostprocessImplementationNewBlock> Implementations;
+            public List<ShaderPassPostprocessTextureNewBlock> Textures;
+            public List<RenderStateBlock> RenderStates;
+            public List<ShaderPassPostprocessTextureStateBlock> TextureStates;
+            public List<PixelShaderFragmentBlock> PsFragments;
+            public List<PixelShaderPermutationNewBlock> PsPermutations;
+            public List<PixelShaderCombinerBlock> PsCombiners;
+            public List<ShaderPassPostprocessExternNewBlock> Externs;
+            public List<ShaderPassPostprocessConstantNewBlock> Constants;
+            public List<ShaderPassPostprocessConstantInfoNewBlock> ConstantInfo;
+            public List<ShaderPassPostprocessImplementationBlock> OldImplementations;
             
-            [TagStructure(Size = 0x15E)]
-            public class ShaderPassPostprocessImplementationNew : TagStructure
+            [TagStructure(Size = 0x14A)]
+            public class ShaderPassPostprocessImplementationNewBlock : TagStructure
             {
-                public TagBlockIndex Textures;
-                public TagBlockIndex RenderStates;
-                public TagBlockIndex TextureStates;
-                [TagField(Flags = Padding, Length = 240)]
-                public byte[] Unknown1;
-                public TagBlockIndex PsFragments;
-                public TagBlockIndex PsPermutations;
-                public TagBlockIndex PsCombiners;
+                public TagBlockIndexStructBlock Textures;
+                public TagBlockIndexStructBlock1 RenderStates;
+                public TagBlockIndexStructBlock2 TextureStates;
+                [TagField(Length = 0xF0)]
+                public byte[] Unknown;
+                public TagBlockIndexStructBlock3 PsFragments;
+                public TagBlockIndexStructBlock4 PsPermutations;
+                public TagBlockIndexStructBlock5 PsCombiners;
+                [TagField(ValidTags = new [] { "vrtx" })]
                 public CachedTag VertexShader;
-                [TagField(Flags = Padding, Length = 8)]
+                [TagField(Length = 0x8)]
+                public byte[] Unknown1;
+                [TagField(Length = 0x8)]
                 public byte[] Unknown2;
-                [TagField(Flags = Padding, Length = 8)]
+                [TagField(Length = 0x4)]
                 public byte[] Unknown3;
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Length = 0x4)]
                 public byte[] Unknown4;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown5;
-                public TagBlockIndex DefaultRenderStates;
-                public TagBlockIndex RenderStateExterns;
-                public TagBlockIndex TextureStateExterns;
-                public TagBlockIndex PixelConstantExterns;
-                public TagBlockIndex VertexConstantExterns;
-                public TagBlockIndex PsConstants;
-                public TagBlockIndex VsConstants;
-                public TagBlockIndex PixelConstantInfo;
-                public TagBlockIndex VertexConstantInfo;
-                public TagBlockIndex RenderStateInfo;
-                public TagBlockIndex TextureStateInfo;
-                public List<PixelShaderBlock> PixelShader;
-                public List<PixelShaderExternMap> PixelShaderSwitchExternMap;
-                public List<PixelShaderIndex> PixelShaderIndexBlock;
+                public TagBlockIndexStructBlock6 DefaultRenderStates;
+                public TagBlockIndexStructBlock7 RenderStateExterns;
+                public TagBlockIndexStructBlock8 TextureStateExterns;
+                public TagBlockIndexStructBlock9 PixelConstantExterns;
+                public TagBlockIndexStructBlock10 VertexConstantExterns;
+                public TagBlockIndexStructBlock11 PsConstants;
+                public TagBlockIndexStructBlock12 VsConstants;
+                public TagBlockIndexStructBlock13 PixelConstantInfo;
+                public TagBlockIndexStructBlock14 VertexConstantInfo;
+                public TagBlockIndexStructBlock15 RenderStateInfo;
+                public TagBlockIndexStructBlock16 TextureStateInfo;
+                public List<ShaderPostprocessPixelShader> PixelShader;
+                public List<PixelShaderExternMapBlock> PixelShaderSwitchExternMap;
+                public List<PixelShaderIndexBlock> PixelShaderIndexBlock1;
                 
                 [TagStructure(Size = 0x2)]
-                public class TagBlockIndex : TagStructure
+                public class TagBlockIndexStructBlock : TagStructure
                 {
                     public short BlockIndexData;
                 }
                 
-                [TagStructure(Size = 0x54)]
-                public class PixelShaderBlock : TagStructure
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock1 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock2 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock3 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock4 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock5 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock6 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock7 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock8 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock9 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock10 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock11 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock12 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock13 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock14 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock15 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock16 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2C)]
+                public class ShaderPostprocessPixelShader : TagStructure
                 {
                     public int PixelShaderHandleRuntime;
                     public int PixelShaderHandleRuntime1;
                     public int PixelShaderHandleRuntime2;
-                    public List<PixelShaderConstantDefaults> ConstantRegisterDefaults;
+                    public List<ShaderPostprocessPixelShaderConstantDefaults> ConstantRegisterDefaults;
                     public byte[] CompiledShader;
-                    public byte[] CompiledShader3;
-                    public byte[] CompiledShader4;
+                    public byte[] CompiledShader1;
+                    public byte[] CompiledShader2;
                     
                     [TagStructure(Size = 0x4)]
-                    public class PixelShaderConstantDefaults : TagStructure
+                    public class ShaderPostprocessPixelShaderConstantDefaults : TagStructure
                     {
                         public int Defaults;
                     }
                 }
                 
                 [TagStructure(Size = 0x2)]
-                public class PixelShaderExternMap : TagStructure
+                public class PixelShaderExternMapBlock : TagStructure
                 {
                     public sbyte SwitchParameter;
                     public sbyte CaseScalar;
                 }
                 
                 [TagStructure(Size = 0x1)]
-                public class PixelShaderIndex : TagStructure
+                public class PixelShaderIndexBlock : TagStructure
                 {
-                    public sbyte PixelShaderIndexVal;
+                    public sbyte PixelShaderIndex;
                 }
             }
             
             [TagStructure(Size = 0x4)]
-            public class ShaderPassPostprocessTextureNew : TagStructure
+            public class ShaderPassPostprocessTextureNewBlock : TagStructure
             {
                 public sbyte BitmapParameterIndex;
                 public sbyte BitmapExternIndex;
@@ -858,51 +956,51 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x5)]
-            public class RenderState : TagStructure
+            public class RenderStateBlock : TagStructure
             {
                 public sbyte StateIndex;
                 public int StateValue;
             }
             
             [TagStructure(Size = 0x18)]
-            public class ShaderPassPostprocessTextureState : TagStructure
+            public class ShaderPassPostprocessTextureStateBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 24)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x18)]
+                public byte[] Unknown;
             }
             
             [TagStructure(Size = 0x3)]
-            public class PixelShaderFragment : TagStructure
+            public class PixelShaderFragmentBlock : TagStructure
             {
                 public sbyte SwitchParameterIndex;
-                public TagBlockIndex PermutationsIndex;
+                public TagBlockIndexStructBlock PermutationsIndex;
                 
                 [TagStructure(Size = 0x2)]
-                public class TagBlockIndex : TagStructure
+                public class TagBlockIndexStructBlock : TagStructure
                 {
                     public short BlockIndexData;
                 }
             }
             
             [TagStructure(Size = 0x6)]
-            public class PixelShaderPermutationNew : TagStructure
+            public class PixelShaderPermutationNewBlock : TagStructure
             {
                 public short EnumIndex;
                 public short Flags;
-                public TagBlockIndex Combiners;
+                public TagBlockIndexStructBlock Combiners;
                 
                 [TagStructure(Size = 0x2)]
-                public class TagBlockIndex : TagStructure
+                public class TagBlockIndexStructBlock : TagStructure
                 {
                     public short BlockIndexData;
                 }
             }
             
             [TagStructure(Size = 0x20)]
-            public class PixelShaderCombiner : TagStructure
+            public class PixelShaderCombinerBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 16)]
-                public byte[] Padding1;
+                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public ArgbColor ConstantColor0;
                 public ArgbColor ConstantColor1;
                 public sbyte ColorARegisterPtrIndex;
@@ -916,15 +1014,15 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class ShaderPassPostprocessExternNew : TagStructure
+            public class ShaderPassPostprocessExternNewBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 3)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x3)]
+                public byte[] Unknown;
                 public sbyte ExternIndex;
             }
             
             [TagStructure(Size = 0x7)]
-            public class ShaderPassPostprocessConstantNew : TagStructure
+            public class ShaderPassPostprocessConstantNewBlock : TagStructure
             {
                 public StringId ParameterName;
                 public sbyte ComponentMask;
@@ -933,66 +1031,67 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x7)]
-            public class ShaderPassPostprocessConstantInfoNew : TagStructure
+            public class ShaderPassPostprocessConstantInfoNewBlock : TagStructure
             {
                 public StringId ParameterName;
-                [TagField(Flags = Padding, Length = 3)]
-                public byte[] Padding1;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
             
-            [TagStructure(Size = 0x1F6)]
-            public class ShaderPassPostprocessImplementation : TagStructure
+            [TagStructure(Size = 0x1B6)]
+            public class ShaderPassPostprocessImplementationBlock : TagStructure
             {
-                public ShaderGpuState GpuState;
-                public ShaderGpuStateReference GpuConstantState;
-                public ShaderGpuStateReference GpuVolatileState;
-                public ShaderGpuStateReference GpuDefaultState;
+                public ShaderGpuStateStructBlock GpuState;
+                public ShaderGpuStateReferenceStructBlock GpuConstantState;
+                public ShaderGpuStateReferenceStructBlock1 GpuVolatileState;
+                public ShaderGpuStateReferenceStructBlock2 GpuDefaultState;
+                [TagField(ValidTags = new [] { "vrtx" })]
                 public CachedTag VertexShader;
-                [TagField(Flags = Padding, Length = 8)]
+                [TagField(Length = 0x8)]
+                public byte[] Unknown;
+                [TagField(Length = 0x8)]
                 public byte[] Unknown1;
-                [TagField(Flags = Padding, Length = 8)]
+                [TagField(Length = 0x4)]
                 public byte[] Unknown2;
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Length = 0x4)]
                 public byte[] Unknown3;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown4;
-                public List<ExternReference> ValueExterns;
-                public List<ExternReference> ColorExterns;
-                public List<ExternReference> SwitchExterns;
+                public List<ExternReferenceBlock> ValueExterns;
+                public List<ExternReferenceBlock1> ColorExterns;
+                public List<ExternReferenceBlock2> SwitchExterns;
                 public short BitmapParameterCount;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 240)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0xF0)]
+                public byte[] Unknown4;
+                public List<PixelShaderFragmentBlock> PixelShaderFragments;
+                public List<PixelShaderPermutationBlock> PixelShaderPermutations;
+                public List<PixelShaderCombinerBlock> PixelShaderCombiners;
+                public List<PixelShaderConstantBlock> PixelShaderConstants;
+                [TagField(Length = 0x4)]
                 public byte[] Unknown5;
-                public List<PixelShaderFragment> PixelShaderFragments;
-                public List<PixelShaderPermutation> PixelShaderPermutations;
-                public List<PixelShaderCombiner> PixelShaderCombiners;
-                public List<PixelShaderConstant> PixelShaderConstants;
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Length = 0x4)]
                 public byte[] Unknown6;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown7;
                 
-                [TagStructure(Size = 0x54)]
-                public class ShaderGpuState : TagStructure
+                [TagStructure(Size = 0x38)]
+                public class ShaderGpuStateStructBlock : TagStructure
                 {
-                    public List<RenderState> RenderStates;
-                    public List<TextureStageState> TextureStageStates;
-                    public List<RenderStateParameter> RenderStateParameters;
-                    public List<TextureStageStateParameter> TextureStageParameters;
-                    public List<Texture> Textures;
-                    public List<VertexShaderConstant> VnConstants;
-                    public List<VertexShaderConstant> CnConstants;
+                    public List<RenderStateBlock> RenderStates;
+                    public List<TextureStageStateBlock> TextureStageStates;
+                    public List<RenderStateParameterBlock> RenderStateParameters;
+                    public List<TextureStageStateParameterBlock> TextureStageParameters;
+                    public List<TextureBlock> Textures;
+                    public List<VertexShaderConstantBlock> VnConstants;
+                    public List<VertexShaderConstantBlock1> CnConstants;
                     
                     [TagStructure(Size = 0x5)]
-                    public class RenderState : TagStructure
+                    public class RenderStateBlock : TagStructure
                     {
                         public sbyte StateIndex;
                         public int StateValue;
                     }
                     
                     [TagStructure(Size = 0x6)]
-                    public class TextureStageState : TagStructure
+                    public class TextureStageStateBlock : TagStructure
                     {
                         public sbyte StateIndex;
                         public sbyte StageIndex;
@@ -1000,7 +1099,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x3)]
-                    public class RenderStateParameter : TagStructure
+                    public class RenderStateParameterBlock : TagStructure
                     {
                         public sbyte ParameterIndex;
                         public sbyte ParameterType;
@@ -1008,7 +1107,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x4)]
-                    public class TextureStageStateParameter : TagStructure
+                    public class TextureStageStateParameterBlock : TagStructure
                     {
                         public sbyte ParameterIndex;
                         public sbyte ParameterType;
@@ -1017,7 +1116,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x4)]
-                    public class Texture : TagStructure
+                    public class TextureBlock : TagStructure
                     {
                         public sbyte StageIndex;
                         public sbyte ParameterIndex;
@@ -1026,7 +1125,16 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x4)]
-                    public class VertexShaderConstant : TagStructure
+                    public class VertexShaderConstantBlock : TagStructure
+                    {
+                        public sbyte RegisterIndex;
+                        public sbyte ParameterIndex;
+                        public sbyte DestinationMask;
+                        public sbyte ScaleByTextureStage;
+                    }
+                    
+                    [TagStructure(Size = 0x4)]
+                    public class VertexShaderConstantBlock1 : TagStructure
                     {
                         public sbyte RegisterIndex;
                         public sbyte ParameterIndex;
@@ -1036,54 +1144,212 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0xE)]
-                public class ShaderGpuStateReference : TagStructure
+                public class ShaderGpuStateReferenceStructBlock : TagStructure
                 {
-                    public TagBlockIndex RenderStates;
-                    public TagBlockIndex TextureStageStates;
-                    public TagBlockIndex RenderStateParameters;
-                    public TagBlockIndex TextureStageParameters;
-                    public TagBlockIndex Textures;
-                    public TagBlockIndex VnConstants;
-                    public TagBlockIndex CnConstants;
+                    public TagBlockIndexStructBlock RenderStates;
+                    public TagBlockIndexStructBlock1 TextureStageStates;
+                    public TagBlockIndexStructBlock2 RenderStateParameters;
+                    public TagBlockIndexStructBlock3 TextureStageParameters;
+                    public TagBlockIndexStructBlock4 Textures;
+                    public TagBlockIndexStructBlock5 VnConstants;
+                    public TagBlockIndexStructBlock6 CnConstants;
                     
                     [TagStructure(Size = 0x2)]
-                    public class TagBlockIndex : TagStructure
+                    public class TagBlockIndexStructBlock : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock1 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock2 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock3 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock4 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock5 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock6 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                }
+                
+                [TagStructure(Size = 0xE)]
+                public class ShaderGpuStateReferenceStructBlock1 : TagStructure
+                {
+                    public TagBlockIndexStructBlock RenderStates;
+                    public TagBlockIndexStructBlock1 TextureStageStates;
+                    public TagBlockIndexStructBlock2 RenderStateParameters;
+                    public TagBlockIndexStructBlock3 TextureStageParameters;
+                    public TagBlockIndexStructBlock4 Textures;
+                    public TagBlockIndexStructBlock5 VnConstants;
+                    public TagBlockIndexStructBlock6 CnConstants;
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock1 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock2 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock3 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock4 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock5 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock6 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                }
+                
+                [TagStructure(Size = 0xE)]
+                public class ShaderGpuStateReferenceStructBlock2 : TagStructure
+                {
+                    public TagBlockIndexStructBlock RenderStates;
+                    public TagBlockIndexStructBlock1 TextureStageStates;
+                    public TagBlockIndexStructBlock2 RenderStateParameters;
+                    public TagBlockIndexStructBlock3 TextureStageParameters;
+                    public TagBlockIndexStructBlock4 Textures;
+                    public TagBlockIndexStructBlock5 VnConstants;
+                    public TagBlockIndexStructBlock6 CnConstants;
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock1 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock2 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock3 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock4 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock5 : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock6 : TagStructure
                     {
                         public short BlockIndexData;
                     }
                 }
                 
                 [TagStructure(Size = 0x2)]
-                public class ExternReference : TagStructure
+                public class ExternReferenceBlock : TagStructure
+                {
+                    public sbyte ParameterIndex;
+                    public sbyte ExternIndex;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class ExternReferenceBlock1 : TagStructure
+                {
+                    public sbyte ParameterIndex;
+                    public sbyte ExternIndex;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class ExternReferenceBlock2 : TagStructure
                 {
                     public sbyte ParameterIndex;
                     public sbyte ExternIndex;
                 }
                 
                 [TagStructure(Size = 0x3)]
-                public class PixelShaderFragment : TagStructure
+                public class PixelShaderFragmentBlock : TagStructure
                 {
                     public sbyte SwitchParameterIndex;
-                    public TagBlockIndex PermutationsIndex;
+                    public TagBlockIndexStructBlock PermutationsIndex;
                     
                     [TagStructure(Size = 0x2)]
-                    public class TagBlockIndex : TagStructure
+                    public class TagBlockIndexStructBlock : TagStructure
                     {
                         public short BlockIndexData;
                     }
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class PixelShaderPermutation : TagStructure
+                public class PixelShaderPermutationBlock : TagStructure
                 {
                     public short EnumIndex;
                     public FlagsValue Flags;
-                    public TagBlockIndex Constants;
-                    public TagBlockIndex Combiners;
-                    [TagField(Flags = Padding, Length = 4)]
+                    public TagBlockIndexStructBlock Constants;
+                    public TagBlockIndexStructBlock1 Combiners;
+                    [TagField(Length = 0x4)]
+                    public byte[] Unknown;
+                    [TagField(Length = 0x4)]
                     public byte[] Unknown1;
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Unknown2;
                     
                     [Flags]
                     public enum FlagsValue : ushort
@@ -1092,17 +1358,23 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x2)]
-                    public class TagBlockIndex : TagStructure
+                    public class TagBlockIndexStructBlock : TagStructure
+                    {
+                        public short BlockIndexData;
+                    }
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class TagBlockIndexStructBlock1 : TagStructure
                     {
                         public short BlockIndexData;
                     }
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class PixelShaderCombiner : TagStructure
+                public class PixelShaderCombinerBlock : TagStructure
                 {
-                    [TagField(Flags = Padding, Length = 16)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public ArgbColor ConstantColor0;
                     public ArgbColor ConstantColor1;
                     public sbyte ColorARegisterPtrIndex;
@@ -1116,16 +1388,16 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x6)]
-                public class PixelShaderConstant : TagStructure
+                public class PixelShaderConstantBlock : TagStructure
                 {
                     public ParameterTypeValue ParameterType;
                     public sbyte CombinerIndex;
                     public sbyte RegisterIndex;
                     public ComponentMaskValue ComponentMask;
-                    [TagField(Flags = Padding, Length = 1)]
+                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
+                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
                     public byte[] Padding1;
-                    [TagField(Flags = Padding, Length = 1)]
-                    public byte[] Padding2;
                     
                     public enum ParameterTypeValue : sbyte
                     {

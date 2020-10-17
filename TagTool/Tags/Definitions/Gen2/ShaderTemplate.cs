@@ -2,53 +2,50 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "shader_template", Tag = "stem", Size = 0x9C)]
+    [TagStructure(Name = "shader_template", Tag = "stem", Size = 0x60)]
     public class ShaderTemplate : TagStructure
     {
         public byte[] Documentation;
         public StringId DefaultMaterialName;
         /// <summary>
-        /// FLAGS
-        /// </summary>
-        /// <remarks>
         /// * Force Active Camo: Should be used with cautuion, as this causes a backbuffer copy when this shader is rendered.
-        /// * Water: ???.
-        /// * Foliage: Used with lightmapped foliage (two-sided lighting) shaders. It affects importing but not rendering.
-        /// </remarks>
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
+        /// *
+        /// Water: ???.
+        /// * Foliage: Used with lightmapped foliage (two-sided lighting) shaders. It affects importing but not
+        /// rendering.
+        /// </summary>
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public FlagsValue Flags;
-        public List<ShaderTemplateProperty> Properties;
-        public List<ShaderTemplateCategory> Categories;
+        public List<ShaderTemplatePropertyBlock> Properties;
+        public List<ShaderTemplateCategoryBlock> Categories;
         /// <summary>
-        /// LIGHT RESPONSE
-        /// </summary>
-        /// <remarks>
         /// Not used anymore.
-        /// </remarks>
-        public CachedTag LightResponse;
-        public List<ShaderTemplateLevelOfDetail> Lods;
-        public List<ShaderTemplateRuntimeExternalLightResponseIndexBlock> Unknown1;
-        public List<ShaderTemplateRuntimeExternalLightResponseIndexBlock> Unknown2;
-        /// <summary>
-        /// RECURSIVE RENDERING
         /// </summary>
-        /// <remarks>
+        [TagField(ValidTags = new [] { "slit" })]
+        public CachedTag LightResponse;
+        public List<ShaderTemplateLevelOfDetailBlock> Lods;
+        public List<ShaderTemplateRuntimeExternalLightResponseIndexBlock> Unknown;
+        public List<ShaderTemplateRuntimeExternalLightResponseIndexBlock1> Unknown1;
+        /// <summary>
         /// Really cool stuff.
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "shad" })]
         public CachedTag Aux1Shader;
         public Aux1LayerValue Aux1Layer;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding2;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        [TagField(ValidTags = new [] { "shad" })]
         public CachedTag Aux2Shader;
         public Aux2LayerValue Aux2Layer;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding3;
-        public List<ShaderTemplatePostprocessDefinitionNew> PostprocessDefinition;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+        public List<ShaderTemplatePostprocessDefinitionNewBlock> PostprocessDefinition;
         
         [Flags]
         public enum FlagsValue : ushort
@@ -60,11 +57,11 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x8)]
-        public class ShaderTemplateProperty : TagStructure
+        public class ShaderTemplatePropertyBlock : TagStructure
         {
             public PropertyValue Property;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public StringId ParameterName;
             
             public enum PropertyValue : short
@@ -86,28 +83,29 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x10)]
-        public class ShaderTemplateCategory : TagStructure
+        [TagStructure(Size = 0xC)]
+        public class ShaderTemplateCategoryBlock : TagStructure
         {
             public StringId Name;
-            public List<ShaderTemplateParameter> Parameters;
+            public List<ShaderTemplateParameterBlock> Parameters;
             
-            [TagStructure(Size = 0x48)]
-            public class ShaderTemplateParameter : TagStructure
+            [TagStructure(Size = 0x34)]
+            public class ShaderTemplateParameterBlock : TagStructure
             {
                 public StringId Name;
                 public byte[] Explanation;
                 public TypeValue Type;
                 public FlagsValue Flags;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag DefaultBitmap;
                 public float DefaultConstValue;
                 public RealRgbColor DefaultConstColor;
                 public BitmapTypeValue BitmapType;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public BitmapAnimationFlagsValue BitmapAnimationFlags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 public float BitmapScale;
                 
                 public enum TypeValue : short
@@ -144,21 +142,22 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x10)]
-        public class ShaderTemplateLevelOfDetail : TagStructure
+        [TagStructure(Size = 0xC)]
+        public class ShaderTemplateLevelOfDetailBlock : TagStructure
         {
             public float ProjectedDiameter; // pixels
-            public List<ShaderTemplatePassReference> Pass;
+            public List<ShaderTemplatePassReferenceBlock> Pass;
             
-            [TagStructure(Size = 0x20)]
-            public class ShaderTemplatePassReference : TagStructure
+            [TagStructure(Size = 0x18)]
+            public class ShaderTemplatePassReferenceBlock : TagStructure
             {
                 public LayerValue Layer;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(ValidTags = new [] { "spas" })]
                 public CachedTag Pass;
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding2;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 public enum LayerValue : short
                 {
@@ -188,7 +187,13 @@ namespace TagTool.Tags.Definitions.Gen2
         [TagStructure(Size = 0x4)]
         public class ShaderTemplateRuntimeExternalLightResponseIndexBlock : TagStructure
         {
-            public int Unknown1;
+            public int Unknown;
+        }
+        
+        [TagStructure(Size = 0x4)]
+        public class ShaderTemplateRuntimeExternalLightResponseIndexBlock1 : TagStructure
+        {
+            public int Unknown;
         }
         
         public enum Aux1LayerValue : short
@@ -237,67 +242,86 @@ namespace TagTool.Tags.Definitions.Gen2
             LightAlbedo
         }
         
-        [TagStructure(Size = 0x3C)]
-        public class ShaderTemplatePostprocessDefinitionNew : TagStructure
+        [TagStructure(Size = 0x28)]
+        public class ShaderTemplatePostprocessDefinitionNewBlock : TagStructure
         {
-            public List<ShaderTemplatePostprocessLevelOfDetailNew> LevelsOfDetail;
-            public List<TagBlockIndex> Layers;
-            public List<ShaderTemplatePostprocessPassNew> Passes;
-            public List<ShaderTemplatePostprocessImplementationNew> Implementations;
-            public List<ShaderTemplatePostprocessRemappingNew> Remappings;
+            public List<ShaderTemplatePostprocessLevelOfDetailNewBlock> LevelsOfDetail;
+            public List<TagBlockIndexBlock> Layers;
+            public List<ShaderTemplatePostprocessPassNewBlock> Passes;
+            public List<ShaderTemplatePostprocessImplementationNewBlock> Implementations;
+            public List<ShaderTemplatePostprocessRemappingNewBlock> Remappings;
             
             [TagStructure(Size = 0xA)]
-            public class ShaderTemplatePostprocessLevelOfDetailNew : TagStructure
+            public class ShaderTemplatePostprocessLevelOfDetailNewBlock : TagStructure
             {
-                public TagBlockIndex Layers;
+                public TagBlockIndexStructBlock Layers;
                 public int AvailableLayers;
                 public float ProjectedHeightPercentage;
                 
                 [TagStructure(Size = 0x2)]
-                public class TagBlockIndex : TagStructure
+                public class TagBlockIndexStructBlock : TagStructure
                 {
                     public short BlockIndexData;
                 }
             }
             
             [TagStructure(Size = 0x2)]
-            public class TagBlockIndex : TagStructure
+            public class TagBlockIndexBlock : TagStructure
             {
-                public TagBlockIndex Indices;
-            }
-            
-            [TagStructure(Size = 0x12)]
-            public class ShaderTemplatePostprocessPassNew : TagStructure
-            {
-                public CachedTag Pass;
-                public TagBlockIndex Implementations;
+                public TagBlockIndexStructBlock Indices;
                 
                 [TagStructure(Size = 0x2)]
-                public class TagBlockIndex : TagStructure
+                public class TagBlockIndexStructBlock : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+            }
+            
+            [TagStructure(Size = 0xA)]
+            public class ShaderTemplatePostprocessPassNewBlock : TagStructure
+            {
+                [TagField(ValidTags = new [] { "spas" })]
+                public CachedTag Pass;
+                public TagBlockIndexStructBlock Implementations;
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock : TagStructure
                 {
                     public short BlockIndexData;
                 }
             }
             
             [TagStructure(Size = 0x6)]
-            public class ShaderTemplatePostprocessImplementationNew : TagStructure
+            public class ShaderTemplatePostprocessImplementationNewBlock : TagStructure
             {
-                public TagBlockIndex Bitmaps;
-                public TagBlockIndex PixelConstants;
-                public TagBlockIndex VertexConstants;
+                public TagBlockIndexStructBlock Bitmaps;
+                public TagBlockIndexStructBlock1 PixelConstants;
+                public TagBlockIndexStructBlock2 VertexConstants;
                 
                 [TagStructure(Size = 0x2)]
-                public class TagBlockIndex : TagStructure
+                public class TagBlockIndexStructBlock : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock1 : TagStructure
+                {
+                    public short BlockIndexData;
+                }
+                
+                [TagStructure(Size = 0x2)]
+                public class TagBlockIndexStructBlock2 : TagStructure
                 {
                     public short BlockIndexData;
                 }
             }
             
             [TagStructure(Size = 0x4)]
-            public class ShaderTemplatePostprocessRemappingNew : TagStructure
+            public class ShaderTemplatePostprocessRemappingNewBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 3)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x3)]
+                public byte[] Unknown;
                 public sbyte SourceIndex;
             }
         }

@@ -8,13 +8,25 @@ using static TagTool.Tags.Definitions.RenderMethodTemplate;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40)]
+    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x54, MinVersion = CacheVersion.HaloReach)]
     public class RenderMethod : TagStructure
     {
         public CachedTag BaseRenderMethod;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Reference;
+
         public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
         public List<ImportDatum> ImportData;
         public List<ShaderProperty> ShaderProperties;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint IsTemplate;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int LockedOptions;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<LockedParameter> LockedParameters;
+
         public RenderMethodRenderFlags RenderFlags;
         public SortingLayerValue SortingLayer;
         public byte Version;
@@ -75,7 +87,8 @@ namespace TagTool.Tags.Definitions
             public List<ShaderFunction> Functions;
         }
 
-        [TagStructure(Size = 0x84)]
+        [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach)]
         public class ShaderProperty : TagStructure
         {
             public CachedTag Template;
@@ -90,8 +103,12 @@ namespace TagTool.Tags.Definitions
             public AlphaBlendModeValue AlphaBlendMode;
             public BlendModeFlags BlendFlags;
             public uint Unknown8; // unused?
-            [TagField(Length = 8)]
-            public short[] QueryableProperties; // Indices of constants. TODO: create an enum
+
+            // Indices of constants. TODO: create an enum
+            [TagField(Length = 8, MaxVersion = CacheVersion.HaloOnline700123)]
+            public short[] QueryableProperties; 
+            [TagField(Length = 0x1C, MinVersion = CacheVersion.HaloReach)]
+            public short[] QueryablePropertiesReach;
 
             public enum AlphaBlendModeValue : uint
             {
@@ -228,6 +245,14 @@ namespace TagTool.Tags.Definitions
                 public byte FunctionIndex;
                 public byte SourceIndex;
             }
+        }
+
+        [TagStructure(Size = 0xC)]
+        public class LockedParameter : TagStructure
+        {
+            public StringId Name;
+            public RenderMethodOption.OptionBlock.OptionDataType Type;
+            public uint Flags;
         }
 
         [Flags]

@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
@@ -10,26 +11,30 @@ namespace TagTool.Tags.Definitions.Gen2
     public class PointPhysics : TagStructure
     {
         public FlagsValue Flags;
-        [TagField(Flags = Padding, Length = 28)]
-        public byte[] Padding1;
+        [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public float Density; // g/mL
         public float AirFriction;
         public float WaterFriction;
-        public float SurfaceFriction; // when hitting the ground or interior, percentage of velocity lost in one collision
-        public float Elasticity; // 0.0 is inelastic collisions (no bounce) 1.0 is perfectly elastic (reflected velocity equals incoming velocity)
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Padding2;
         /// <summary>
-        /// Densities (g/mL)
+        /// when hitting the ground or interior, percentage of velocity lost in one collision
         /// </summary>
-        /// <remarks>
+        public float SurfaceFriction;
+        /// <summary>
+        /// 0.0 is inelastic collisions (no bounce) 1.0 is perfectly elastic (reflected velocity equals incoming velocity)
+        /// </summary>
+        public float Elasticity;
+        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        /// <summary>
         /// air        0.0011 (g/mL)
         /// snow       0.128
         /// cork       0.24
         /// cedar      0.43
         /// oak        0.866
         /// ice        0.897
-        /// water      1.0
+        /// water     
+        /// 1.0
         /// soil       1.1
         /// cotton     1.491
         /// dry earth  1.52
@@ -37,12 +42,13 @@ namespace TagTool.Tags.Definitions.Gen2
         /// granite    2.4
         /// glass      2.5
         /// iron       7.65
-        /// steel      7.77
+        /// steel   
+        /// 7.77
         /// lead       11.37
         /// uranium    18.74
         /// gold       19.3
         /// 
-        /// </remarks>
+        /// </summary>
         
         [Flags]
         public enum FlagsValue : uint
@@ -50,8 +56,17 @@ namespace TagTool.Tags.Definitions.Gen2
             Unused = 1 << 0,
             CollidesWithStructures = 1 << 1,
             CollidesWithWaterSurface = 1 << 2,
+            /// <summary>
+            /// the wind on this point won't have high-frequency variations
+            /// </summary>
             UsesSimpleWind = 1 << 3,
+            /// <summary>
+            /// the wind on this point will be artificially slow
+            /// </summary>
             UsesDampedWind = 1 << 4,
+            /// <summary>
+            /// the point is not affected by gravity
+            /// </summary>
             NoGravity = 1 << 5
         }
     }

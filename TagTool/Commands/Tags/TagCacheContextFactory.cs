@@ -53,6 +53,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ExtractBitmapsCommand(cache));
             context.AddCommand(new ExtractBlfImageCommand());
             context.AddCommand(new CreateBlfImageCommand());
+            context.AddCommand(new DumpDisassembledShadersCommand(cache));
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)
@@ -71,7 +72,6 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ExtractTagCommand(hoCache));
                 context.AddCommand(new ExtractAllTagsCommand(hoCache));
                 context.AddCommand(new ExportTagModCommand(hoCache));
-                context.AddCommand(new DumpDisassembledShadersCommand(hoCache));
                 context.AddCommand(new GenerateShaderCommand(hoCache));
                 context.AddCommand(new GenerateRenderMethodCommand(hoCache));
 

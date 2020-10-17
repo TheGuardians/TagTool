@@ -17,16 +17,20 @@ namespace TagTool.Tags.Definitions
         {
             public StringId Name;
             public OptionDataType Type;
-            public RenderMethodExtern RenderMethodExtern;
-            public CachedTag DefaultSamplerBitmap;
 
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public RenderMethodExtern RenderMethodExtern;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public RenderMethodExternReach RenderMethodExternReach;
+
+            public CachedTag DefaultSamplerBitmap;
             public float DefaultFloatArgument;
             public uint DefaultIntBoolArgument;
 
             public short Flags;
             public DefaultFilterModeValue DefaultFilterMode;
             public DefaultAddressModeValue DefaultAddressMode;
-            public short AnisotropyAmount; // this is set in-engine for HO/H3/ODST -- i think it comes from the bitmap in use
+            public short AnisotropyAmount; // might just be padding in h3\odst\ho, anisotropy appears to come from the filter mode
 
             public ArgbColor DefaultColor;
             public float DefaultBitmapScale;

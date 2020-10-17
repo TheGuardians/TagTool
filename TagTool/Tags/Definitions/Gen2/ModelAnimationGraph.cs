@@ -2,37 +2,33 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0xEC)]
+    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0xAC)]
     public class ModelAnimationGraph : TagStructure
     {
-        public AnimationGraphResources Resources;
-        public ModelAnimationGraphContents Content;
-        public ModelAnimationRuntimeData RunTimeData;
-        /// <summary>
-        /// RESULTS OF THE LAST IMPORT
-        /// </summary>
+        public AnimationGraphResourcesStructBlock Resources;
+        public AnimationGraphContentsStructBlock Content;
+        public ModelAnimationRuntimeDataStructBlock RunTimeData;
         public byte[] LastImportResults;
         public List<AdditionalNodeDataBlock> AdditionalNodeData;
         
-        [TagStructure(Size = 0x50)]
-        public class AnimationGraphResources : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class AnimationGraphResourcesStructBlock : TagStructure
         {
-            /// <summary>
-            /// GRAPH DATA
-            /// </summary>
+            [TagField(ValidTags = new [] { "jmad" })]
             public CachedTag ParentAnimationGraph;
             public InheritanceFlagsValue InheritanceFlags;
             public PrivateFlagsValue PrivateFlags;
             public short AnimationCodecPack;
-            public List<AnimationGraphNode> SkeletonNodesAbcdcc;
-            public List<AnimationGraphSoundReference> SoundReferencesAbcdcc;
-            public List<AnimationGraphEffectReference> EffectReferencesAbcdcc;
-            public List<AnimationBlendScreen> BlendScreensAbcdcc;
-            public List<ModelAnimation> AnimationsAbcdcc;
+            public List<AnimationGraphNodeBlock> SkeletonNodesAbcdcc;
+            public List<AnimationGraphSoundReferenceBlock> SoundReferencesAbcdcc;
+            public List<AnimationGraphEffectReferenceBlock> EffectReferencesAbcdcc;
+            public List<AnimationBlendScreenBlock> BlendScreensAbcdcc;
+            public List<AnimationPoolBlock> AnimationsAbcdcc;
             
             [Flags]
             public enum InheritanceFlagsValue : byte
@@ -53,7 +49,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x20)]
-            public class AnimationGraphNode : TagStructure
+            public class AnimationGraphNodeBlock : TagStructure
             {
                 public StringId Name;
                 public short NextSiblingNodeIndex;
@@ -85,13 +81,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x14)]
-            public class AnimationGraphSoundReference : TagStructure
+            [TagStructure(Size = 0xC)]
+            public class AnimationGraphSoundReferenceBlock : TagStructure
             {
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Sound;
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -105,13 +102,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x14)]
-            public class AnimationGraphEffectReference : TagStructure
+            [TagStructure(Size = 0xC)]
+            public class AnimationGraphEffectReferenceBlock : TagStructure
             {
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag Effect;
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -126,13 +124,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x1C)]
-            public class AnimationBlendScreen : TagStructure
+            public class AnimationBlendScreenBlock : TagStructure
             {
                 public StringId Label;
-                public AnimationAimingScreenBounds AimingScreen;
+                public AnimationAimingScreenStructBlock AimingScreen;
                 
                 [TagStructure(Size = 0x18)]
-                public class AnimationAimingScreenBounds : TagStructure
+                public class AnimationAimingScreenStructBlock : TagStructure
                 {
                     public Angle RightYawPerFrame;
                     public Angle LeftYawPerFrame;
@@ -145,8 +143,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x7C)]
-            public class ModelAnimation : TagStructure
+            [TagStructure(Size = 0x60)]
+            public class AnimationPoolBlock : TagStructure
             {
                 public StringId Name;
                 public int NodeListChecksum;
@@ -164,16 +162,16 @@ namespace TagTool.Tags.Definitions.Gen2
                 public CurrentCompressionValue CurrentCompression;
                 public float Weight;
                 public short LoopFrameIndex;
+                public short Unknown;
                 public short Unknown1;
-                public short Unknown2;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                public byte[] Unknown3;
-                public AnimationDataSizes Unknown4;
-                public List<FrameEvent> FrameEventsAbcdcc;
-                public List<SoundEvent> SoundEventsAbcdcc;
-                public List<EffectEvent> EffectEventsAbcdcc;
-                public List<ObjectSpaceNodeData> ObjectSpaceParentNodesAbcdcc;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public byte[] Unknown2;
+                public PackedDataSizesStructBlock Unknown3;
+                public List<AnimationFrameEventBlock> FrameEventsAbcdcc;
+                public List<AnimationSoundEventBlock> SoundEventsAbcdcc;
+                public List<AnimationEffectEventBlock> EffectEventsAbcdcc;
+                public List<ObjectSpaceNodeDataBlock> ObjectSpaceParentNodesAbcdcc;
                 
                 public enum TypeValue : sbyte
                 {
@@ -244,19 +242,19 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class AnimationDataSizes : TagStructure
+                public class PackedDataSizesStructBlock : TagStructure
                 {
+                    public sbyte Unknown;
                     public sbyte Unknown1;
-                    public sbyte Unknown2;
+                    public short Unknown2;
                     public short Unknown3;
                     public short Unknown4;
-                    public short Unknown5;
+                    public int Unknown5;
                     public int Unknown6;
-                    public int Unknown7;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class FrameEvent : TagStructure
+                public class AnimationFrameEventBlock : TagStructure
                 {
                     public TypeValue Type;
                     public short Frame;
@@ -278,7 +276,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class SoundEvent : TagStructure
+                public class AnimationSoundEventBlock : TagStructure
                 {
                     public short Sound;
                     public short Frame;
@@ -286,18 +284,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class EffectEvent : TagStructure
+                public class AnimationEffectEventBlock : TagStructure
                 {
                     public short Effect;
                     public short Frame;
                 }
                 
                 [TagStructure(Size = 0x1C)]
-                public class ObjectSpaceNodeData : TagStructure
+                public class ObjectSpaceNodeDataBlock : TagStructure
                 {
                     public short NodeIndex;
                     public ComponentFlagsValue ComponentFlags;
-                    public QuantizedOrientation Orientation;
+                    public QuantizedOrientationStructBlock Orientation;
                     
                     [Flags]
                     public enum ComponentFlagsValue : ushort
@@ -308,7 +306,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     }
                     
                     [TagStructure(Size = 0x18)]
-                    public class QuantizedOrientation : TagStructure
+                    public class QuantizedOrientationStructBlock : TagStructure
                     {
                         public short RotationX;
                         public short RotationY;
@@ -321,111 +319,156 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x24)]
-        public class ModelAnimationGraphContents : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class AnimationGraphContentsStructBlock : TagStructure
         {
-            /// <summary>
-            /// MODE-n-STATE GRAPH
-            /// </summary>
-            public List<AnimationMode> ModesAabbcc;
-            /// <summary>
-            /// SPECIAL CASE ANIMS
-            /// </summary>
-            public List<VehicleSuspension> VehicleSuspensionCcaabb;
-            public List<ObjectOverlay> ObjectOverlaysCcaabb;
+            public List<AnimationModeBlock> ModesAabbcc;
+            public List<VehicleSuspensionBlock> VehicleSuspensionCcaabb;
+            public List<ObjectAnimationBlock> ObjectOverlaysCcaabb;
             
-            [TagStructure(Size = 0x1C)]
-            public class AnimationMode : TagStructure
+            [TagStructure(Size = 0x14)]
+            public class AnimationModeBlock : TagStructure
             {
                 public StringId Label;
-                public List<WeaponClass> WeaponClassAabbcc;
-                public List<AnimationIkPoint> ModeIkAabbcc;
+                public List<WeaponClassBlock> WeaponClassAabbcc;
+                public List<AnimationIkBlock> ModeIkAabbcc;
                 
-                [TagStructure(Size = 0x1C)]
-                public class WeaponClass : TagStructure
+                [TagStructure(Size = 0x14)]
+                public class WeaponClassBlock : TagStructure
                 {
                     public StringId Label;
-                    public List<WeaponType> WeaponTypeAabbcc;
-                    public List<AnimationIkPoint> WeaponIkAabbcc;
+                    public List<WeaponTypeBlock> WeaponTypeAabbcc;
+                    public List<AnimationIkBlock> WeaponIkAabbcc;
                     
-                    [TagStructure(Size = 0x4C)]
-                    public class WeaponType : TagStructure
+                    [TagStructure(Size = 0x34)]
+                    public class WeaponTypeBlock : TagStructure
                     {
                         public StringId Label;
-                        public List<AnimationEntry> ActionsAabbcc;
-                        public List<AnimationEntry> OverlaysAabbcc;
-                        public List<AnimationDamageActions> DeathAndDamageAabbcc;
-                        public List<AnimationTransitionSource> TransitionsAabbcc;
-                        public List<HighPrecacheCccccBlock> HighPrecacheCcccc;
-                        public List<LowPrecacheCccccBlock> LowPrecacheCcccc;
+                        public List<AnimationEntryBlock> ActionsAabbcc;
+                        public List<AnimationEntryBlock1> OverlaysAabbcc;
+                        public List<DamageAnimationBlock> DeathAndDamageAabbcc;
+                        public List<AnimationTransitionBlock> TransitionsAabbcc;
+                        public List<PrecacheListBlock> HighPrecacheCcccc;
+                        public List<PrecacheListBlock1> LowPrecacheCcccc;
                         
                         [TagStructure(Size = 0x8)]
-                        public class AnimationEntry : TagStructure
+                        public class AnimationEntryBlock : TagStructure
                         {
                             public StringId Label;
-                            public AnimationId Animation;
+                            public AnimationIndexStructBlock Animation;
                             
                             [TagStructure(Size = 0x4)]
-                            public class AnimationId : TagStructure
+                            public class AnimationIndexStructBlock : TagStructure
                             {
                                 public short GraphIndex;
                                 public short Animation;
                             }
                         }
                         
-                        [TagStructure(Size = 0x10)]
-                        public class AnimationDamageActions : TagStructure
+                        [TagStructure(Size = 0x8)]
+                        public class AnimationEntryBlock1 : TagStructure
                         {
                             public StringId Label;
-                            public List<AnimationDamageDirection> DirectionsAabbcc;
+                            public AnimationIndexStructBlock Animation;
                             
-                            [TagStructure(Size = 0xC)]
-                            public class AnimationDamageDirection : TagStructure
+                            [TagStructure(Size = 0x4)]
+                            public class AnimationIndexStructBlock : TagStructure
                             {
-                                public List<AnimationId> RegionsAabbcc;
+                                public short GraphIndex;
+                                public short Animation;
+                            }
+                        }
+                        
+                        [TagStructure(Size = 0xC)]
+                        public class DamageAnimationBlock : TagStructure
+                        {
+                            public StringId Label;
+                            public List<DamageDirectionBlock> DirectionsAabbcc;
+                            
+                            [TagStructure(Size = 0x8)]
+                            public class DamageDirectionBlock : TagStructure
+                            {
+                                public List<DamageRegionBlock> RegionsAabbcc;
                                 
                                 [TagStructure(Size = 0x4)]
-                                public class AnimationId : TagStructure
+                                public class DamageRegionBlock : TagStructure
                                 {
-                                    public AnimationId Animation;
+                                    public AnimationIndexStructBlock Animation;
+                                    
+                                    [TagStructure(Size = 0x4)]
+                                    public class AnimationIndexStructBlock : TagStructure
+                                    {
+                                        public short GraphIndex;
+                                        public short Animation;
+                                    }
                                 }
                             }
                         }
                         
-                        [TagStructure(Size = 0x18)]
-                        public class AnimationTransitionSource : TagStructure
+                        [TagStructure(Size = 0x14)]
+                        public class AnimationTransitionBlock : TagStructure
                         {
-                            public StringId FullName; // name of the mode & state of the source
-                            public AnimationTransitionState StateInfo;
-                            public List<AnimationTransitionDestination> DestinationsAabbcc;
+                            /// <summary>
+                            /// name of the mode &amp; state of the source
+                            /// </summary>
+                            public StringId FullName;
+                            public AnimationTransitionStateStructBlock StateInfo;
+                            public List<AnimationTransitionDestinationBlock> DestinationsAabbcc;
                             
                             [TagStructure(Size = 0x8)]
-                            public class AnimationTransitionState : TagStructure
+                            public class AnimationTransitionStateStructBlock : TagStructure
                             {
-                                public StringId StateName; // name of the state
-                                [TagField(Flags = Padding, Length = 2)]
-                                public byte[] Padding1;
-                                public sbyte IndexA; // first level sub-index into state
-                                public sbyte IndexB; // second level sub-index into state
+                                /// <summary>
+                                /// name of the state
+                                /// </summary>
+                                public StringId StateName;
+                                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                                public byte[] Padding;
+                                /// <summary>
+                                /// first level sub-index into state
+                                /// </summary>
+                                public sbyte IndexA;
+                                /// <summary>
+                                /// second level sub-index into state
+                                /// </summary>
+                                public sbyte IndexB;
                             }
                             
                             [TagStructure(Size = 0x14)]
-                            public class AnimationTransitionDestination : TagStructure
+                            public class AnimationTransitionDestinationBlock : TagStructure
                             {
-                                public StringId FullName; // name of the mode & state this transitions to
-                                public StringId Mode; // name of the mode
-                                public AnimationTransitionState StateInfo;
-                                public AnimationId Animation;
+                                /// <summary>
+                                /// name of the mode &amp; state this transitions to
+                                /// </summary>
+                                public StringId FullName;
+                                /// <summary>
+                                /// name of the mode
+                                /// </summary>
+                                public StringId Mode;
+                                public AnimationDestinationStateStructBlock StateInfo;
+                                public AnimationIndexStructBlock Animation;
                                 
                                 [TagStructure(Size = 0x8)]
-                                public class AnimationTransitionState : TagStructure
+                                public class AnimationDestinationStateStructBlock : TagStructure
                                 {
-                                    public StringId StateName; // name of the state
-                                    public FrameEventLinkValue FrameEventLink; // which frame event to link to
-                                    [TagField(Flags = Padding, Length = 1)]
-                                    public byte[] Padding1;
-                                    public sbyte IndexA; // first level sub-index into state
-                                    public sbyte IndexB; // second level sub-index into state
+                                    /// <summary>
+                                    /// name of the state
+                                    /// </summary>
+                                    public StringId StateName;
+                                    /// <summary>
+                                    /// which frame event to link to
+                                    /// </summary>
+                                    public FrameEventLinkValue FrameEventLink;
+                                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                                    public byte[] Padding;
+                                    /// <summary>
+                                    /// first level sub-index into state
+                                    /// </summary>
+                                    public sbyte IndexA;
+                                    /// <summary>
+                                    /// second level sub-index into state
+                                    /// </summary>
+                                    public sbyte IndexB;
                                     
                                     public enum FrameEventLinkValue : sbyte
                                     {
@@ -438,7 +481,7 @@ namespace TagTool.Tags.Definitions.Gen2
                                 }
                                 
                                 [TagStructure(Size = 0x4)]
-                                public class AnimationId : TagStructure
+                                public class AnimationIndexStructBlock : TagStructure
                                 {
                                     public short GraphIndex;
                                     public short Animation;
@@ -447,56 +490,65 @@ namespace TagTool.Tags.Definitions.Gen2
                         }
                         
                         [TagStructure(Size = 0x4)]
-                        public class HighPrecacheCccccBlock : TagStructure
+                        public class PrecacheListBlock : TagStructure
                         {
                             public int CacheBlockIndex;
                         }
                         
                         [TagStructure(Size = 0x4)]
-                        public class LowPrecacheCccccBlock : TagStructure
+                        public class PrecacheListBlock1 : TagStructure
                         {
                             public int CacheBlockIndex;
                         }
                     }
                     
                     [TagStructure(Size = 0x8)]
-                    public class AnimationIkPoint : TagStructure
+                    public class AnimationIkBlock : TagStructure
                     {
-                        public StringId Marker; // the marker name on the object being attached
-                        public StringId AttachToMarker; // the marker name object (weapon, vehicle, etc.) the above marker is being attached to
+                        /// <summary>
+                        /// the marker name on the object being attached
+                        /// </summary>
+                        public StringId Marker;
+                        /// <summary>
+                        /// the marker name object (weapon, vehicle, etc.) the above marker is being attached to
+                        /// </summary>
+                        public StringId AttachToMarker;
                     }
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class AnimationIkPoint : TagStructure
+                public class AnimationIkBlock : TagStructure
                 {
-                    public StringId Marker; // the marker name on the object being attached
-                    public StringId AttachToMarker; // the marker name object (weapon, vehicle, etc.) the above marker is being attached to
+                    /// <summary>
+                    /// the marker name on the object being attached
+                    /// </summary>
+                    public StringId Marker;
+                    /// <summary>
+                    /// the marker name object (weapon, vehicle, etc.) the above marker is being attached to
+                    /// </summary>
+                    public StringId AttachToMarker;
                 }
             }
             
             [TagStructure(Size = 0x28)]
-            public class VehicleSuspension : TagStructure
+            public class VehicleSuspensionBlock : TagStructure
             {
                 public StringId Label;
-                public AnimationId Animation;
+                public AnimationIndexStructBlock Animation;
                 public StringId MarkerName;
                 public float MassPointOffset;
                 public float FullExtensionGroundDepth;
                 public float FullCompressionGroundDepth;
                 /// <summary>
-                /// Destroyed Suspension
-                /// </summary>
-                /// <remarks>
                 /// Only Necessary for suspensions with a destroyed state
-                /// </remarks>
+                /// </summary>
                 public StringId RegionName;
                 public float DestroyedMassPointOffset;
                 public float DestroyedFullExtensionGroundDepth;
                 public float DestroyedFullCompressionGroundDepth;
                 
                 [TagStructure(Size = 0x4)]
-                public class AnimationId : TagStructure
+                public class AnimationIndexStructBlock : TagStructure
                 {
                     public short GraphIndex;
                     public short Animation;
@@ -504,19 +556,19 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x14)]
-            public class ObjectOverlay : TagStructure
+            public class ObjectAnimationBlock : TagStructure
             {
                 public StringId Label;
-                public AnimationId Animation;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                public AnimationIndexStructBlock Animation;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public FunctionControlsValue FunctionControls;
                 public StringId Function;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding2;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 [TagStructure(Size = 0x4)]
-                public class AnimationId : TagStructure
+                public class AnimationIndexStructBlock : TagStructure
                 {
                     public short GraphIndex;
                     public short Animation;
@@ -530,43 +582,41 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x58)]
-        public class ModelAnimationRuntimeData : TagStructure
+        [TagStructure(Size = 0x50)]
+        public class ModelAnimationRuntimeDataStructBlock : TagStructure
         {
-            /// <summary>
-            /// RUN-TIME DATA
-            /// </summary>
-            public List<AnimationInheritence> InheritenceListBbaaaa;
-            public List<WeaponClassListing> WeaponListBbaaaa;
-            [TagField(Flags = Padding, Length = 32)]
+            public List<InheritedAnimationBlock> InheritenceListBbaaaa;
+            public List<WeaponClassLookupBlock> WeaponListBbaaaa;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding2;
             
-            [TagStructure(Size = 0x30)]
-            public class AnimationInheritence : TagStructure
+            [TagStructure(Size = 0x20)]
+            public class InheritedAnimationBlock : TagStructure
             {
+                [TagField(ValidTags = new [] { "jmad" })]
                 public CachedTag InheritedGraph;
-                public List<NodeMapBlock> NodeMap;
-                public List<NodeMapFlagsBlock> NodeMapFlags;
+                public List<InheritedAnimationNodeMapBlock> NodeMap;
+                public List<InheritedAnimationNodeMapFlagBlock> NodeMapFlags;
                 public float RootZOffset;
                 public int InheritanceFlags;
                 
                 [TagStructure(Size = 0x2)]
-                public class NodeMapBlock : TagStructure
+                public class InheritedAnimationNodeMapBlock : TagStructure
                 {
                     public short LocalNode;
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class NodeMapFlagsBlock : TagStructure
+                public class InheritedAnimationNodeMapFlagBlock : TagStructure
                 {
                     public int LocalNodeFlags;
                 }
             }
             
             [TagStructure(Size = 0x8)]
-            public class WeaponClassListing : TagStructure
+            public class WeaponClassLookupBlock : TagStructure
             {
                 public StringId WeaponName;
                 public StringId WeaponClass;

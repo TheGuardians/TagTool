@@ -708,10 +708,13 @@ namespace TagTool.Commands.Porting
 
                 case Particle particle:
                     if (BlamCache.Version == CacheVersion.Halo3Retail) // Shift all flags above 2 by 1.
-					    particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
-                    // temp prevent odst prt3 using static_default entry point
-                    if ((particle.Flags >> 5 & 1) == 1)
-                        particle.Flags &= ~(1 << 5);
+                    {
+                        int flagsH3 = (int)particle.FlagsH3;
+                        particle.Flags = (Particle.FlagsValue)((flagsH3 & 0x3) + ((int)(flagsH3 & 0xFFFFFFFC) << 1));
+                    }
+                    // temp prevent odst prt3 using cheap shader as we dont have the entry point shader
+                    if (particle.Flags.HasFlag(Particle.FlagsValue.UsesCheapShader))
+                        particle.Flags &= ~Particle.FlagsValue.UsesCheapShader;
                     break;
 
 				case ParticleModel particleModel:
@@ -862,7 +865,7 @@ namespace TagTool.Commands.Porting
                     if (particleSystem.Particle != null)// yucky hack-fix for some particles taking over the screen
                     {
                         var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
-                        if ((prt3Definition.Flags & (1 << 7)) != 0) // flag bit is always 7 -- this is a post porting fixup
+                        if (prt3Definition.Flags.HasFlag(Particle.FlagsValue.HasAttachment)) // flag bit is always 7 -- this is a post porting fixup
                         {
                             foreach (var attachment in prt3Definition.Attachments)
                             {
@@ -985,7 +988,7 @@ namespace TagTool.Commands.Porting
 					renderGeometry = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderGeometry, definition, blamTagName);
 					return renderGeometry;
 
-				case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
+				case Part part when BlamCache.Version < CacheVersion.Halo3Retail:
 					part = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, part, definition, blamTagName);
 					if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
 						throw new NotSupportedException(part.TypeOld.ToString());
@@ -1044,7 +1047,7 @@ namespace TagTool.Commands.Porting
 
             switch (data)
             {
-                case Mesh.Part part:
+                case Part part:
                     if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
                         throw new NotSupportedException(part.TypeOld.ToString());
                     break;
@@ -1397,6 +1400,9 @@ namespace TagTool.Commands.Porting
                     else
                         value = damageReportingType.Halo3Retail.ToString();
 					break;
+                case CacheVersion.HaloReach:
+                    value = damageReportingType.HaloReach.ToString();
+                    break;
 			}
 
 			if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))

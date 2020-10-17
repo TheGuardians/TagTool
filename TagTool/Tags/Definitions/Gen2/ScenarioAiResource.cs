@@ -2,41 +2,43 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "scenario_ai_resource", Tag = "ai**", Size = 0xE4)]
+    [TagStructure(Name = "scenario_ai_resource", Tag = "ai**", Size = 0x98)]
     public class ScenarioAiResource : TagStructure
     {
-        public List<StylePaletteEntry> StylePalette;
-        public List<SquadGroupDefinition> SquadGroups;
-        public List<SquadDefinition> Squads;
-        public List<ZoneDefinition> Zones;
-        public List<CharacterPaletteEntry> CharacterPalette;
-        public List<AiAnimationReferenceDefinition> AiAnimationReferences;
-        public List<AiScriptReferenceDefinition> AiScriptReferences;
-        public List<AiRecordingReferenceDefinition> AiRecordingReferences;
-        public List<AiConversation> AiConversations;
-        public List<CsScriptData> ScriptingData;
-        public List<OrdersDefinition> Orders;
-        public List<TriggerDefinition> Triggers;
-        public List<ScenarioStructureBspReference> BspPreferences;
-        public List<ScenarioObjectPaletteEntry> WeaponReferences;
-        public List<ScenarioObjectPaletteEntry> VehicleReferences;
-        public List<ScenarioVehicle> VehicleDatumReferences;
-        public List<AiScene> MissionDialogueScenes;
-        public List<FlockDefinition> Flocks;
-        public List<ScenarioTriggerVolume> TriggerVolumeReferences;
+        public List<StylePaletteBlock> StylePalette;
+        public List<SquadGroupsBlock> SquadGroups;
+        public List<SquadsBlock> Squads;
+        public List<ZoneBlock> Zones;
+        public List<CharacterPaletteBlock> CharacterPalette;
+        public List<AiAnimationReferenceBlock> AiAnimationReferences;
+        public List<AiScriptReferenceBlock> AiScriptReferences;
+        public List<AiRecordingReferenceBlock> AiRecordingReferences;
+        public List<AiConversationBlock> AiConversations;
+        public List<CsScriptDataBlock> ScriptingData;
+        public List<OrdersBlock> Orders;
+        public List<TriggersBlock> Triggers;
+        public List<ScenarioStructureBspReferenceBlock> BspPreferences;
+        public List<ScenarioWeaponPaletteBlock> WeaponReferences;
+        public List<ScenarioVehiclePaletteBlock> VehicleReferences;
+        public List<ScenarioVehicleBlock> VehicleDatumReferences;
+        public List<AiSceneBlock> MissionDialogueScenes;
+        public List<FlockDefinitionBlock> Flocks;
+        public List<ScenarioTriggerVolumeBlock> TriggerVolumeReferences;
         
-        [TagStructure(Size = 0x10)]
-        public class StylePaletteEntry : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class StylePaletteBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "styl" })]
             public CachedTag Reference;
         }
         
         [TagStructure(Size = 0x24)]
-        public class SquadGroupDefinition : TagStructure
+        public class SquadGroupsBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
@@ -44,8 +46,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public short InitialOrders;
         }
         
-        [TagStructure(Size = 0x78)]
-        public class SquadDefinition : TagStructure
+        [TagStructure(Size = 0x74)]
+        public class SquadsBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
@@ -53,34 +55,37 @@ namespace TagTool.Tags.Definitions.Gen2
             public TeamValue Team;
             public short Parent;
             public float SquadDelayTime; // seconds
-            public short NormalDiffCount; // initial number of actors on normal difficulty
-            public short InsaneDiffCount; // initial number of actors on insane difficulty (hard difficulty is midway between normal and insane)
-            public MajorUpgradeValue MajorUpgrade;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
             /// <summary>
-            /// Actor defaults
+            /// initial number of actors on normal difficulty
             /// </summary>
-            /// <remarks>
+            public short NormalDiffCount;
+            /// <summary>
+            /// initial number of actors on insane difficulty (hard difficulty is midway between normal and insane)
+            /// </summary>
+            public short InsaneDiffCount;
+            public MajorUpgradeValue MajorUpgrade;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            /// <summary>
             /// The following default values are used for spawned actors
-            /// </remarks>
+            /// </summary>
             public short VehicleType;
             public short CharacterType;
             public short InitialZone;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             public short InitialWeapon;
             public short InitialSecondaryWeapon;
             public GrenadeTypeValue GrenadeType;
             public short InitialOrder;
             public StringId VehicleVariant;
-            public List<ActorStartingLocationDefinition> StartingLocations;
+            public List<ActorStartingLocationsBlock> StartingLocations;
             [TagField(Length = 32)]
             public string PlacementScript;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown2;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding3;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             
             [Flags]
             public enum FlagsValue : uint
@@ -138,35 +143,41 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x64)]
-            public class ActorStartingLocationDefinition : TagStructure
+            public class ActorStartingLocationsBlock : TagStructure
             {
                 public StringId Name;
                 public RealPoint3d Position;
                 public short ReferenceFrame;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public RealEulerAngles2d FacingYawPitch; // degrees
                 public FlagsValue Flags;
                 public short CharacterType;
                 public short InitialWeapon;
                 public short InitialSecondaryWeapon;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 public short VehicleType;
                 public SeatTypeValue SeatType;
                 public GrenadeTypeValue GrenadeType;
-                public short SwarmCount; // number of cretures in swarm if a swarm is spawned at this location
+                /// <summary>
+                /// number of cretures in swarm if a swarm is spawned at this location
+                /// </summary>
+                public short SwarmCount;
                 public StringId ActorVariantName;
                 public StringId VehicleVariantName;
-                public float InitialMovementDistance; // before doing anything else, the actor will travel the given distance in its forward direction
+                /// <summary>
+                /// before doing anything else, the actor will travel the given distance in its forward direction
+                /// </summary>
+                public float InitialMovementDistance;
                 public short EmitterVehicle;
                 public InitialMovementModeValue InitialMovementMode;
                 [TagField(Length = 32)]
                 public string PlacementScript;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Unknown1;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding3;
+                [TagField(Length = 0x2)]
+                public byte[] Unknown;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
                 
                 [Flags]
                 public enum FlagsValue : uint
@@ -206,17 +217,17 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x40)]
-        public class ZoneDefinition : TagStructure
+        [TagStructure(Size = 0x38)]
+        public class ZoneBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public FlagsValue Flags;
             public short ManualBsp;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public List<FiringPositionDefinition> FiringPositions;
-            public List<AreaDefinition> Areas;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<FiringPositionsBlock> FiringPositions;
+            public List<AreasBlock> Areas;
             
             [Flags]
             public enum FlagsValue : uint
@@ -225,21 +236,18 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x20)]
-            public class FiringPositionDefinition : TagStructure
+            public class FiringPositionsBlock : TagStructure
             {
                 /// <summary>
-                /// CONTROLS~
-                /// </summary>
-                /// <remarks>
                 /// Ctrl-N: Creates a new area and assigns it to the current selection of firing points.
-                /// </remarks>
+                /// </summary>
                 public RealPoint3d PositionLocal;
                 public short ReferenceFrame;
                 public FlagsValue Flags;
                 public short Area;
                 public short ClusterIndex;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown1;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown;
                 public RealEulerAngles2d Normal;
                 
                 [Flags]
@@ -256,22 +264,22 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x8C)]
-            public class AreaDefinition : TagStructure
+            [TagStructure(Size = 0x88)]
+            public class AreasBlock : TagStructure
             {
                 [TagField(Length = 32)]
                 public string Name;
                 public AreaFlagsValue AreaFlags;
-                [TagField(Flags = Padding, Length = 20)]
+                [TagField(Length = 0x14)]
+                public byte[] Unknown;
+                [TagField(Length = 0x4)]
                 public byte[] Unknown1;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown2;
-                [TagField(Flags = Padding, Length = 64)]
-                public byte[] Padding1;
+                [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short ManualReferenceFrame;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
-                public List<FlightHintReference> FlightHints;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                public List<FlightReferenceBlock> FlightHints;
                 
                 [Flags]
                 public enum AreaFlagsValue : uint
@@ -282,7 +290,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class FlightHintReference : TagStructure
+                public class FlightReferenceBlock : TagStructure
                 {
                     public short FlightHintIndex;
                     public short PoitIndex;
@@ -290,105 +298,156 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x10)]
-        public class CharacterPaletteEntry : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class CharacterPaletteBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "char" })]
             public CachedTag Reference;
         }
         
-        [TagStructure(Size = 0x3C)]
-        public class AiAnimationReferenceDefinition : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class AiAnimationReferenceBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string AnimationName;
-            public CachedTag AnimationGraph; // leave this blank to use the unit's normal animation graph
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Padding1;
+            /// <summary>
+            /// leave this blank to use the unit's normal animation graph
+            /// </summary>
+            [TagField(ValidTags = new [] { "jmad" })]
+            public CachedTag AnimationGraph;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x28)]
-        public class AiScriptReferenceDefinition : TagStructure
+        public class AiScriptReferenceBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string ScriptName;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding1;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x28)]
-        public class AiRecordingReferenceDefinition : TagStructure
+        public class AiRecordingReferenceBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string RecordingName;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding1;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
-        [TagStructure(Size = 0x74)]
-        public class AiConversation : TagStructure
+        [TagStructure(Size = 0x68)]
+        public class AiConversationBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            /// <summary>
+            /// distance the player must enter before the conversation can trigger
+            /// </summary>
             public float TriggerDistance; // world units
+            /// <summary>
+            /// if the 'involves player' flag is set, when triggered the conversation's participant(s) will run to within this distance
+            /// of the player
+            /// </summary>
             public float RunToPlayerDist; // world units
-            [TagField(Flags = Padding, Length = 36)]
-            public byte[] Padding2;
-            public List<AiConversationParticipant> Participants;
-            public List<AiConversationLine> Lines;
-            public List<GNullBlock> Unknown1;
+            [TagField(Length = 0x24, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public List<AiConversationParticipantBlock> Participants;
+            public List<AiConversationLineBlock> Lines;
+            public List<GNullBlock> Unknown;
             
             [Flags]
             public enum FlagsValue : ushort
             {
+                /// <summary>
+                /// this conversation will be aborted if any participant dies
+                /// </summary>
                 StopIfDeath = 1 << 0,
+                /// <summary>
+                /// an actor will abort this conversation if they are damaged
+                /// </summary>
                 StopIfDamaged = 1 << 1,
+                /// <summary>
+                /// an actor will abort this conversation if they see an enemy
+                /// </summary>
                 StopIfVisibleEnemy = 1 << 2,
+                /// <summary>
+                /// an actor will abort this conversation if they suspect an enemy
+                /// </summary>
                 StopIfAlertedToEnemy = 1 << 3,
+                /// <summary>
+                /// this conversation cannot take place unless the participants can _see_ a nearby player
+                /// </summary>
                 PlayerMustBeVisible = 1 << 4,
+                /// <summary>
+                /// participants stop doing whatever they were doing in order to perform this conversation
+                /// </summary>
                 StopOtherActions = 1 << 5,
+                /// <summary>
+                /// if this conversation fails initially, it will keep testing to see when it can play
+                /// </summary>
                 KeepTryingToPlay = 1 << 6,
+                /// <summary>
+                /// this conversation will not start until the player is looking at one of the participants
+                /// </summary>
                 PlayerMustBeLooking = 1 << 7
             }
             
             [TagStructure(Size = 0x54)]
-            public class AiConversationParticipant : TagStructure
+            public class AiConversationParticipantBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 8)]
+                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                /// <summary>
+                /// if a unit with this name exists, we try to pick them to start the conversation
+                /// </summary>
+                public short UseThisObject;
+                /// <summary>
+                /// once we pick a unit, we name it this
+                /// </summary>
+                public short SetNewName;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                public short UseThisObject; // if a unit with this name exists, we try to pick them to start the conversation
-                public short SetNewName; // once we pick a unit, we name it this
-                [TagField(Flags = Padding, Length = 12)]
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding3;
                 [TagField(Length = 32)]
                 public string EncounterName;
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding3;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding4;
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding5;
             }
             
-            [TagStructure(Size = 0x7C)]
-            public class AiConversationLine : TagStructure
+            [TagStructure(Size = 0x4C)]
+            public class AiConversationLineBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public short Participant;
                 public AddresseeValue Addressee;
-                public short AddresseeParticipant; // this field is only used if the addressee type is 'participant'
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                /// <summary>
+                /// this field is only used if the addressee type is 'participant'
+                /// </summary>
+                public short AddresseeParticipant;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float LineDelayTime;
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding2;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant1;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant2;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant3;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant4;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant5;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Variant6;
                 
                 [Flags]
@@ -416,32 +475,32 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x84)]
-        public class CsScriptData : TagStructure
+        [TagStructure(Size = 0x80)]
+        public class CsScriptDataBlock : TagStructure
         {
-            public List<CsPointSet> PointSets;
-            [TagField(Flags = Padding, Length = 120)]
-            public byte[] Padding1;
+            public List<CsPointSetBlock> PointSets;
+            [TagField(Length = 0x78, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             
-            [TagStructure(Size = 0x34)]
-            public class CsPointSet : TagStructure
+            [TagStructure(Size = 0x30)]
+            public class CsPointSetBlock : TagStructure
             {
                 [TagField(Length = 32)]
                 public string Name;
-                public List<CsPoint> Points;
+                public List<CsPointBlock> Points;
                 public short BspIndex;
                 public short ManualReferenceFrame;
                 public FlagsValue Flags;
                 
                 [TagStructure(Size = 0x3C)]
-                public class CsPoint : TagStructure
+                public class CsPointBlock : TagStructure
                 {
                     [TagField(Length = 32)]
                     public string Name;
                     public RealPoint3d Position;
                     public short ReferenceFrame;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public int SurfaceIndex;
                     public RealEulerAngles2d FacingDirection;
                 }
@@ -455,29 +514,29 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x90)]
-        public class OrdersDefinition : TagStructure
+        [TagStructure(Size = 0x7C)]
+        public class OrdersBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public short Style;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public FlagsValue Flags;
             public ForceCombatStatusValue ForceCombatStatus;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             [TagField(Length = 32)]
             public string EntryScript;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short FollowSquad;
             public float FollowRadius;
-            public List<OrdersAreaReferenceDefinition> PrimaryAreaSet;
-            public List<OrdersAreaReferenceDefinition> SecondaryAreaSet;
-            public List<SecondarySetTriggers> SecondarySetTrigger;
-            public List<SpecialMovementDefinition> SpecialMovement;
-            public List<OrderEndingDefinition> OrderEndings;
+            public List<ZoneSetBlock> PrimaryAreaSet;
+            public List<SecondaryZoneSetBlock> SecondaryAreaSet;
+            public List<SecondarySetTriggerBlock> SecondarySetTrigger;
+            public List<SpecialMovementBlock> SpecialMovement;
+            public List<OrderEndingBlock> OrderEndings;
             
             [Flags]
             public enum FlagsValue : uint
@@ -503,11 +562,11 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class OrdersAreaReferenceDefinition : TagStructure
+            public class ZoneSetBlock : TagStructure
             {
                 public AreaTypeValue AreaType;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short Zone;
                 public short Area;
                 
@@ -519,12 +578,32 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x10)]
-            public class SecondarySetTriggers : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class SecondaryZoneSetBlock : TagStructure
+            {
+                public AreaTypeValue AreaType;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public short Zone;
+                public short Area;
+                
+                public enum AreaTypeValue : short
+                {
+                    Deault,
+                    Search,
+                    Goal
+                }
+            }
+            
+            [TagStructure(Size = 0xC)]
+            public class SecondarySetTriggerBlock : TagStructure
             {
                 public CombinationRuleValue CombinationRule;
-                public DialogueTypeValue DialogueType; // when this ending is triggered, launch a dialogue event of the given type
-                public List<OrderTriggerReference> Triggers;
+                /// <summary>
+                /// when this ending is triggered, launch a dialogue event of the given type
+                /// </summary>
+                public DialogueTypeValue DialogueType;
+                public List<TriggerReferences> Triggers;
                 
                 public enum CombinationRuleValue : short
                 {
@@ -549,12 +628,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class OrderTriggerReference : TagStructure
+                public class TriggerReferences : TagStructure
                 {
                     public TriggerFlagsValue TriggerFlags;
                     public short Trigger;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
                     [Flags]
                     public enum TriggerFlagsValue : uint
@@ -565,7 +644,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x4)]
-            public class SpecialMovementDefinition : TagStructure
+            public class SpecialMovementBlock : TagStructure
             {
                 public SpecialMovement1Value SpecialMovement1;
                 
@@ -582,16 +661,19 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x18)]
-            public class OrderEndingDefinition : TagStructure
+            [TagStructure(Size = 0x14)]
+            public class OrderEndingBlock : TagStructure
             {
                 public short NextOrder;
                 public CombinationRuleValue CombinationRule;
                 public float DelayTime;
-                public DialogueTypeValue DialogueType; // when this ending is triggered, launch a dialogue event of the given type
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                public List<OrderTriggerReference> Triggers;
+                /// <summary>
+                /// when this ending is triggered, launch a dialogue event of the given type
+                /// </summary>
+                public DialogueTypeValue DialogueType;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<TriggerReferences> Triggers;
                 
                 public enum CombinationRuleValue : short
                 {
@@ -616,12 +698,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class OrderTriggerReference : TagStructure
+                public class TriggerReferences : TagStructure
                 {
                     public TriggerFlagsValue TriggerFlags;
                     public short Trigger;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
                     [Flags]
                     public enum TriggerFlagsValue : uint
@@ -632,16 +714,16 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x34)]
-        public class TriggerDefinition : TagStructure
+        [TagStructure(Size = 0x30)]
+        public class TriggersBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public TriggerFlagsValue TriggerFlags;
             public CombinationRuleValue CombinationRule;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public List<OrderCompletionConditionDefinition> Conditions;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<OrderCompletionCondition> Conditions;
             
             [Flags]
             public enum TriggerFlagsValue : uint
@@ -656,7 +738,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x38)]
-            public class OrderCompletionConditionDefinition : TagStructure
+            public class OrderCompletionCondition : TagStructure
             {
                 public RuleTypeValue RuleType;
                 public short Squad;
@@ -664,13 +746,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 public short A;
                 public float X;
                 public short TriggerVolume;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 [TagField(Length = 32)]
                 public string ExitConditionScript;
-                public short Unknown1;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                public short Unknown;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 public FlagsValue Flags;
                 
                 public enum RuleTypeValue : short
@@ -706,28 +788,30 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x54)]
-        public class ScenarioStructureBspReference : TagStructure
+        [TagStructure(Size = 0x44)]
+        public class ScenarioStructureBspReferenceBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 16)]
-            public byte[] Padding1;
+            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(ValidTags = new [] { "sbsp" })]
             public CachedTag StructureBsp;
+            [TagField(ValidTags = new [] { "ltmp" })]
             public CachedTag StructureLightmap;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             public float UnusedRadianceEstSearchDistance;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding3;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             public float UnusedLuminelsPerWorldUnit;
             public float UnusedOutputWhiteReference;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding4;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding5;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
             public short DefaultSky;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding6;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -736,36 +820,46 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x30)]
-        public class ScenarioObjectPaletteEntry : TagStructure
+        [TagStructure(Size = 0x28)]
+        public class ScenarioWeaponPaletteBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag Name;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding1;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+        }
+        
+        [TagStructure(Size = 0x28)]
+        public class ScenarioVehiclePaletteBlock : TagStructure
+        {
+            [TagField(ValidTags = new [] { "vehi" })]
+            public CachedTag Name;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x54)]
-        public class ScenarioVehicle : TagStructure
+        public class ScenarioVehicleBlock : TagStructure
         {
             public short Type;
             public short Name;
-            public ScenarioObjectDatum ObjectData;
-            public ScenarioObjectPermutation PermutationData;
-            public ScenarioUnitDatum UnitData;
+            public ScenarioObjectDatumStructBlock ObjectData;
+            public ScenarioObjectPermutationStructBlock PermutationData;
+            public ScenarioUnitStructBlock UnitData;
             
             [TagStructure(Size = 0x30)]
-            public class ScenarioObjectDatum : TagStructure
+            public class ScenarioObjectDatumStructBlock : TagStructure
             {
                 public PlacementFlagsValue PlacementFlags;
                 public RealPoint3d Position;
                 public RealEulerAngles3d Rotation;
                 public float Scale;
                 public TransformFlagsValue TransformFlags;
-                public ushort[] ManualBspFlags;
-                public ObjectIdentifier ObjectId;
+                public ushort ManualBspFlags;
+                public ScenarioObjectIdStructBlock ObjectId;
                 public BspPolicyValue BspPolicy;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding1;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short EditorFolder;
                 
                 [Flags]
@@ -773,8 +867,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 {
                     NotAutomatically = 1 << 0,
                     Unused = 1 << 1,
-                    Unused0 = 1 << 2,
-                    Unused1 = 1 << 3,
+                    Unused1 = 1 << 2,
+                    Unused2 = 1 << 3,
                     LockTypeToEnvObject = 1 << 4,
                     LockTransformToEnvObject = 1 << 5,
                     NeverPlaced = 1 << 6,
@@ -789,7 +883,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class ObjectIdentifier : TagStructure
+                public class ScenarioObjectIdStructBlock : TagStructure
                 {
                     public int UniqueId;
                     public short OriginBspIndex;
@@ -831,7 +925,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutation : TagStructure
+            public class ScenarioObjectPermutationStructBlock : TagStructure
             {
                 public StringId VariantName;
                 public ActiveChangeColorsValue ActiveChangeColors;
@@ -851,7 +945,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x8)]
-            public class ScenarioUnitDatum : TagStructure
+            public class ScenarioUnitStructBlock : TagStructure
             {
                 public float BodyVitality; // [0,1]
                 public FlagsValue Flags;
@@ -866,13 +960,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x20)]
-        public class AiScene : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class AiSceneBlock : TagStructure
         {
             public StringId Name;
             public FlagsValue Flags;
-            public List<AiSceneTrigger> TriggerConditions;
-            public List<AiSceneRole> Roles;
+            public List<AiSceneTriggerBlock> TriggerConditions;
+            public List<AiSceneRoleBlock> Roles;
             
             [Flags]
             public enum FlagsValue : uint
@@ -881,13 +975,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 EnableCombatDialogue = 1 << 1
             }
             
-            [TagStructure(Size = 0x10)]
-            public class AiSceneTrigger : TagStructure
+            [TagStructure(Size = 0xC)]
+            public class AiSceneTriggerBlock : TagStructure
             {
                 public CombinationRuleValue CombinationRule;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                public List<OrderTriggerReference> Triggers;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<TriggerReferences> Triggers;
                 
                 public enum CombinationRuleValue : short
                 {
@@ -896,12 +990,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class OrderTriggerReference : TagStructure
+                public class TriggerReferences : TagStructure
                 {
                     public TriggerFlagsValue TriggerFlags;
                     public short Trigger;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     
                     [Flags]
                     public enum TriggerFlagsValue : uint
@@ -911,14 +1005,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x14)]
-            public class AiSceneRole : TagStructure
+            [TagStructure(Size = 0x10)]
+            public class AiSceneRoleBlock : TagStructure
             {
                 public StringId Name;
                 public GroupValue Group;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                public List<AiSceneRoleVariant> RoleVariants;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<AiSceneRoleVariantsBlock> RoleVariants;
                 
                 public enum GroupValue : short
                 {
@@ -928,76 +1022,131 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class AiSceneRoleVariant : TagStructure
+                public class AiSceneRoleVariantsBlock : TagStructure
                 {
                     public StringId VariantDesignation;
                 }
             }
         }
         
-        [TagStructure(Size = 0x94)]
-        public class FlockDefinition : TagStructure
+        [TagStructure(Size = 0x84)]
+        public class FlockDefinitionBlock : TagStructure
         {
             public short Bsp;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short BoundingVolume;
             public FlagsValue Flags;
+            /// <summary>
+            /// distance from ecology boundary that creature begins to be repulsed
+            /// </summary>
             public float EcologyMargin; // wus
-            public List<FlockSource> Sources;
-            public List<FlockSink> Sinks;
+            public List<FlockSourceBlock> Sources;
+            public List<FlockSinkBlock> Sinks;
+            /// <summary>
+            /// How frequently boids are produced at one of the sources (limited by the max boid count)
+            /// </summary>
             public float ProductionFrequency; // boids/sec
             public Bounds<float> Scale;
+            [TagField(ValidTags = new [] { "crea" })]
             public CachedTag Creature;
             public Bounds<short> BoidCount;
             /// <summary>
-            /// Flock parameters
-            /// </summary>
-            /// <remarks>
             /// Recommended initial values (for a sentinel-sized unit): 
             /// 	neighborhood radius= 6.0 
             /// 	avoidance radius= 3 
-            ///  forward scale= 0.5 
+            ///  forward scale=
+            /// 0.5 
             ///  alignment scale= 0.5 
             ///  avoidance scale= 1.0 
             ///  leveling force scale= 0.1 
             ///  perception angle= 120 
-            ///  average throttle= 0.75 
+            ///  average throttle=
+            /// 0.75 
             ///  maximum throttle= 1.0 
             ///  position scale= 1.0 
             ///  position min radius= 3 
             ///  position max radius = 9
-            /// </remarks>
-            /// <summary>
-            /// Let me give you a piece of free advice.
             /// </summary>
-            /// <remarks>
-            /// Flocks with a neighborhood radius of 0 don't FLOCK, per se (in the creature-creature interaction kind of way), but they are much cheaper. The best thing is to have a non-zero radius for small flocks, and a zero radius for large flocks (or for 'flow-flocks', ones with sources and sinks that are intended to create a steady flow of something). Note also that for flocks with a 0 neighborhood radius, the parameters for avoidance, alignment, position and perception angle are ignored entirely.
-            /// </remarks>
+            /// <summary>
+            /// Flocks with a neighborhood radius of 0 don't FLOCK, per se (in the creature-creature interaction kind of way), but they
+            /// are much cheaper. The best thing is to have a non-zero radius for small flocks, and a zero radius for large flocks (or
+            /// for 'flow-flocks', ones with sources and sinks that are intended to create a steady flow of something). Note also that
+            /// for flocks with a 0 neighborhood radius, the parameters for avoidance, alignment, position and perception angle are
+            /// ignored entirely.
+            /// </summary>
+            /// <summary>
+            /// distance within which one boid is affected by another
+            /// </summary>
             public float NeighborhoodRadius; // world units
-            public float AvoidanceRadius; // world units
-            public float ForwardScale; // [0..1]
-            public float AlignmentScale; // [0..1]
-            public float AvoidanceScale; // [0..1]
-            public float LevelingForceScale; // [0..1]
-            public float SinkScale; // [0..1]
-            public Angle PerceptionAngle; // degrees
-            public float AverageThrottle; // [0..1]
-            public float MaximumThrottle; // [0..1]
-            public float PositionScale; // [0..1]
-            public float PositionMinRadius; // wus
-            public float PositionMaxRadius; // wus
-            public float MovementWeightThreshold; // The threshold of accumulated weight over which movement occurs
-            public float DangerRadius; // wus
-            public float DangerScale; // weight given to boid's desire to avoid danger
             /// <summary>
-            /// Perlin noise parameters
+            /// distance that a boid tries to maintain from another
             /// </summary>
-            /// <remarks>
+            public float AvoidanceRadius; // world units
+            /// <summary>
+            /// weight given to boid's desire to fly straight ahead
+            /// </summary>
+            public float ForwardScale; // [0..1]
+            /// <summary>
+            /// weight given to boid's desire to align itself with neighboring boids
+            /// </summary>
+            public float AlignmentScale; // [0..1]
+            /// <summary>
+            /// weight given to boid's desire to avoid collisions with other boids, when within the avoidance radius
+            /// </summary>
+            public float AvoidanceScale; // [0..1]
+            /// <summary>
+            /// weight given to boids desire to fly level
+            /// </summary>
+            public float LevelingForceScale; // [0..1]
+            /// <summary>
+            /// weight given to boid's desire to fly towards its sinks
+            /// </summary>
+            public float SinkScale; // [0..1]
+            /// <summary>
+            /// angle-from-forward within which one boid can perceive and react to another
+            /// </summary>
+            public Angle PerceptionAngle; // degrees
+            /// <summary>
+            /// throttle at which boids will naturally fly
+            /// </summary>
+            public float AverageThrottle; // [0..1]
+            /// <summary>
+            /// maximum throttle applicable
+            /// </summary>
+            public float MaximumThrottle; // [0..1]
+            /// <summary>
+            /// weight given to boid's desire to be near flock center
+            /// </summary>
+            public float PositionScale; // [0..1]
+            /// <summary>
+            /// distance to flock center beyond which an attracting force is applied
+            /// </summary>
+            public float PositionMinRadius; // wus
+            /// <summary>
+            /// distance to flock center at which the maximum attracting force is applied
+            /// </summary>
+            public float PositionMaxRadius; // wus
+            /// <summary>
+            /// The threshold of accumulated weight over which movement occurs
+            /// </summary>
+            public float MovementWeightThreshold;
+            /// <summary>
+            /// distance within which boids will avoid a dangerous object (e.g. the player)
+            /// </summary>
+            public float DangerRadius; // wus
+            /// <summary>
+            /// weight given to boid's desire to avoid danger
+            /// </summary>
+            public float DangerScale;
+            /// <summary>
             /// Recommended initial values: 
             /// 	random offset scale= 0.2 
             /// 	offset period bounds= 1, 3
-            /// </remarks>
+            /// </summary>
+            /// <summary>
+            /// weight given to boid's random heading offset
+            /// </summary>
             public float RandomOffsetScale; // [0..1]
             public Bounds<float> RandomOffsetPeriod; // seconds
             public StringId FlockName;
@@ -1010,16 +1159,19 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x1C)]
-            public class FlockSource : TagStructure
+            public class FlockSourceBlock : TagStructure
             {
                 public RealVector3d Position;
                 public RealEulerAngles2d StartingYawPitch; // degrees
                 public float Radius;
-                public float Weight; // probability of producing at this source
+                /// <summary>
+                /// probability of producing at this source
+                /// </summary>
+                public float Weight;
             }
             
             [TagStructure(Size = 0x10)]
-            public class FlockSink : TagStructure
+            public class FlockSinkBlock : TagStructure
             {
                 public RealVector3d Position;
                 public float Radius;
@@ -1027,23 +1179,22 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x44)]
-        public class ScenarioTriggerVolume : TagStructure
+        public class ScenarioTriggerVolumeBlock : TagStructure
         {
             public StringId Name;
             public short ObjectName;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public StringId NodeName;
-            public float Unknown3;
             [TagField(Length = 6)]
-            public float EmptyString;
+            public float[] Unknown1;
             public RealPoint3d Position;
             public RealPoint3d Extents;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short KillTriggerVolume;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
         }
     }
 }

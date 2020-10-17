@@ -81,7 +81,7 @@ namespace TagTool.Shaders.ShaderGenerator
             {
                 PCShaderBytecode = result.Bytecode,
                 PCParameters = GenerateShaderParametersFromGenerator(cache, result),
-                Unknown8 = 1
+                PCShaderType = ShaderType.PixelShader
             };
 
             return pixelShaderBlock;
@@ -94,7 +94,8 @@ namespace TagTool.Shaders.ShaderGenerator
             var vertexShaderBlock = new VertexShaderBlock
             {
                 PCShaderBytecode = result.Bytecode,
-                PCParameters = GenerateShaderParametersFromGenerator(cache, result)
+                PCParameters = GenerateShaderParametersFromGenerator(cache, result),
+                PCShaderType = ShaderType.VertexShader
             };
 
             return vertexShaderBlock;

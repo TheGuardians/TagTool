@@ -2,88 +2,87 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "cellular_automata2d", Tag = "whip", Size = 0x22C)]
+    [TagStructure(Name = "cellular_automata2d", Tag = "whip", Size = 0x220)]
     public class CellularAutomata2d : TagStructure
     {
-        /// <summary>
-        /// properties
-        /// </summary>
         public short UpdatesPerSecond; // Hz
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public float DeadCellPenalty;
         public float LiveCellBonus;
-        [TagField(Flags = Padding, Length = 80)]
-        public byte[] Padding2;
-        /// <summary>
-        /// height map
-        /// </summary>
+        [TagField(Length = 0x50, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public short Width; // cells
         public short Height; // cells
         public float CellWidth; // world units
         public float Height1; // world units
         public RealVector2d Velocity; // cells/update
-        [TagField(Flags = Padding, Length = 28)]
-        public byte[] Padding3;
+        [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
         public StringId Marker;
         public InterpolationFlagsValue InterpolationFlags;
         public RealRgbColor BaseColor;
         public RealRgbColor PeakColor;
-        [TagField(Flags = Padding, Length = 76)]
+        [TagField(Length = 0x4C, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
+        public short Width1; // cells
+        public short Height2; // cells
+        public float CellWidth1; // world units
+        public RealVector2d Velocity1; // cells/update
+        [TagField(Length = 0x30, Flags = TagFieldFlags.Padding)]
         public byte[] Padding4;
-        /// <summary>
-        /// detail map
-        /// </summary>
-        public short Width2; // cells
-        public short Height3; // cells
-        public float CellWidth4; // world units
-        public RealVector2d Velocity5; // cells/update
-        [TagField(Flags = Padding, Length = 48)]
-        public byte[] Padding5;
-        public StringId Marker6;
+        public StringId Marker1;
         public short TextureWidth; // cells
-        [TagField(Flags = Padding, Length = 2)]
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding5;
+        [TagField(Length = 0x30, Flags = TagFieldFlags.Padding)]
         public byte[] Padding6;
-        [TagField(Flags = Padding, Length = 48)]
-        public byte[] Padding7;
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag Texture;
-        [TagField(Flags = Padding, Length = 160)]
-        public byte[] Padding8;
-        public List<Ca2dRule> Rules;
+        [TagField(Length = 0xA0, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding7;
+        public List<RulesBlock> Rules;
         
         [Flags]
         public enum InterpolationFlagsValue : uint
         {
+            /// <summary>
+            /// blends colors in hsv rather than rgb space
+            /// </summary>
             BlendInHsv = 1 << 0,
+            /// <summary>
+            /// blends colors through more hues (goes the long way around the color wheel)
+            /// </summary>
             MoreColors = 1 << 1
         }
         
-        [TagStructure(Size = 0x58)]
-        public class Ca2dRule : TagStructure
+        [TagStructure(Size = 0x54)]
+        public class RulesBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
             public RealRgbColor TintColor;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding1;
-            public List<Ca2dRuleState> States;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<StatesBlock> States;
             
             [TagStructure(Size = 0x60)]
-            public class Ca2dRuleState : TagStructure
+            public class StatesBlock : TagStructure
             {
                 [TagField(Length = 32)]
                 public string Name;
                 public RealRgbColor Color;
                 public short CountsAs; // neighbors
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float InitialPlacementWeight;
-                [TagField(Flags = Padding, Length = 24)]
-                public byte[] Padding2;
+                [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 public short Zero;
                 public short One;
                 public short Two;
@@ -93,8 +92,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 public short Six;
                 public short Seven;
                 public short Eight;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding3;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
             }
         }
     }

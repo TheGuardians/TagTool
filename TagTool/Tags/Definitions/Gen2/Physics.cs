@@ -2,14 +2,18 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "physics", Tag = "phys", Size = 0x80)]
+    [TagStructure(Name = "physics", Tag = "phys", Size = 0x74)]
     public class Physics : TagStructure
     {
-        public float Radius; // positive uses old inferior physics, negative uses new improved physics
+        /// <summary>
+        /// positive uses old inferior physics, negative uses new improved physics
+        /// </summary>
+        public float Radius;
         public float MomentScale;
         public float Mass;
         public RealPoint3d CenterOfMass;
@@ -20,25 +24,25 @@ namespace TagTool.Tags.Definitions.Gen2
         public float GroundDampFraction;
         public float GroundNormalK1;
         public float GroundNormalK0;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding1;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public float WaterFriction;
         public float WaterDepth;
         public float WaterDensity;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding2;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public float AirFriction;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding3;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
         public float XxMoment;
         public float YyMoment;
         public float ZzMoment;
-        public List<RealMatrix3x3> InertialMatrixAndInverse;
-        public List<PoweredMassPointDefinition> PoweredMassPoints;
-        public List<MassPointDefinition> MassPoints;
+        public List<InertialMatrixBlock> InertialMatrixAndInverse;
+        public List<PoweredMassPointBlock> PoweredMassPoints;
+        public List<MassPointBlock> MassPoints;
         
         [TagStructure(Size = 0x24)]
-        public class RealMatrix3x3 : TagStructure
+        public class InertialMatrixBlock : TagStructure
         {
             public RealVector3d YyZzXyZx;
             public RealVector3d XyZzXxYz;
@@ -46,7 +50,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x80)]
-        public class PoweredMassPointDefinition : TagStructure
+        public class PoweredMassPointBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
@@ -58,8 +62,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public float AntigravNormalK1;
             public float AntigravNormalK0;
             public StringId DamageSourceRegionName;
-            [TagField(Flags = Padding, Length = 64)]
-            public byte[] Padding1;
+            [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             
             [Flags]
             public enum FlagsValue : uint
@@ -76,7 +80,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x80)]
-        public class MassPointDefinition : TagStructure
+        public class MassPointBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
@@ -91,13 +95,13 @@ namespace TagTool.Tags.Definitions.Gen2
             public RealVector3d Forward;
             public RealVector3d Up;
             public FrictionTypeValue FrictionType;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float FrictionParallelScale;
             public float FrictionPerpendicularScale;
             public float Radius;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding2;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [Flags]
             public enum FlagsValue : uint

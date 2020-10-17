@@ -345,18 +345,22 @@ namespace TagTool.Tags.Definitions
                 public FlagsValue Flags;
                 public sbyte LivesPerRound;
                 public sbyte SharedTeamLives;
+
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public byte Unknown;
+
                 public byte RespawnTime;
                 public byte SuicidePenalty;
                 public byte BetrayalPenalty;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public byte UnknownPenalty;
                 public byte RespawnTimeGrowth;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public sbyte Unknown;
+                public sbyte Unknown1;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public sbyte Unknown2;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public sbyte Unknown3;
+
                 public StringId RespawnTraitProfile;
                 public sbyte RespawnTraitDuration;
                 public sbyte Unknown4;

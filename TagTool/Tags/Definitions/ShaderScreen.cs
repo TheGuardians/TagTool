@@ -1,19 +1,18 @@
 using TagTool.Cache;
+using TagTool.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "shader_screen", Tag = "rmss", Size = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "shader_screen", Tag = "rmss", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "shader_screen", Tag = "rmss", Size = 0x8)]
     public class ShaderScreen : RenderMethod
     {
-        public uint Unknown8;
-        public byte Unknown9;
-        public byte Unknown10;
-        public byte Unknown11;
-        public byte Unknown12;
+        public StringId Material;
+        public byte Layer;
+        public byte SortingOrder;
+        public byte Flags;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused2;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x1)]
+        public byte[] Padding;
     }
 }

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.BlamFile;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions.Gen1;
 
 namespace TagTool.Cache.Gen1
 {
@@ -55,13 +54,13 @@ namespace TagTool.Cache.Gen1
                 BaseTagAddress = 0x803A6000;
             else
                 BaseTagAddress = 0x40440000;
-            
+
             //
             // Read all tags offsets are all broken, need some proper look
             //
 
             reader.SeekTo(Header.CachedTagArrayAddress - BaseTagAddress + tagDataSectionOffset);
-            
+
             for (int i = 0; i < Header.TagCount; i++)
             {
                 var group = new TagGroupGen1(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
@@ -84,6 +83,8 @@ namespace TagTool.Cache.Gen1
                 var unused = reader.ReadUInt32();
                 Tags.Add(new CachedTagGen1((int)(tagID & 0xFFFF), tagID, group, tagDataAddress, name));
             }
+
+            FixupStructureBsps(reader, mapFile);
         }
 
         public override CachedTag AllocateTag(TagGroup type, string name = null)
@@ -121,6 +122,40 @@ namespace TagTool.Cache.Gen1
                     return tag;
             }
             return null;
+        }
+
+        private void FixupStructureBsps(EndianReader reader, MapFile mapFile)
+        {
+            uint AddressToOffset(uint address) => (address - BaseTagAddress) + mapFile.Header.TagsHeaderAddress32;
+
+            var scnrTag = (CachedTagGen1)GetTag(Header.ScenarioTagID);
+
+            reader.BaseStream.Position = AddressToOffset(scnrTag.Offset) + 0x5A4;
+
+            uint sbspRefsCount = reader.ReadUInt32();
+            uint sbspRefsAddress = reader.ReadUInt32();
+
+            for (var i = 0u; i < sbspRefsCount; i++)
+            {
+                uint sbspRefOffset = AddressToOffset(sbspRefsAddress + i * TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspsBlock), Version));
+
+                reader.BaseStream.Position = sbspRefOffset;
+                uint sbspHeaderOffset = reader.ReadUInt32();
+                uint sbspDataSize = reader.ReadUInt32();
+                uint sbspHeaderAddress = reader.ReadUInt32();
+
+                reader.BaseStream.Position = sbspHeaderOffset;
+                uint sbspDataAddress = reader.ReadUInt32();
+
+                reader.BaseStream.Position = sbspRefOffset + 0x1C;
+                var sbspTag = (CachedTagGen1)GetTag(reader.ReadUInt32());
+
+                if (sbspTag != null)
+                {
+                    sbspTag.Offset = sbspDataAddress;
+                    sbspTag.AddressToOffsetOverride = (currentOffset, address) => address - sbspHeaderAddress + sbspHeaderOffset;
+                }
+            }
         }
     }
 }

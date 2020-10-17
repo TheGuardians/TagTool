@@ -67,6 +67,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("glvs", "global_vertex_shader"), typeof(GlobalVertexShader) },
             { new TagGroupGen3("goof", "multiplayer_variant_settings_interface_definition"), typeof(MultiplayerVariantSettingsInterfaceDefinition) },
             { new TagGroupGen3("gpdt", "game_progression"), typeof(GameProgression) },
+            { new TagGroupGen3("gpix", "global_cache_file_pixel_shaders"), typeof(GlobalCacheFilePixelShaders) },
             { new TagGroupGen3("grup", "gui_group_widget_definition"), typeof(GuiGroupWidgetDefinition) },
             { new TagGroupGen3("hlmt", "model"), typeof(Model) },
             { new TagGroupGen3("inpg", "input_globals"), typeof(InputGlobals) },

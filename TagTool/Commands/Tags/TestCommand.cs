@@ -1,29 +1,15 @@
-using TagTool.Cache;
-using TagTool.IO;
+using HaloShaderGenerator.Globals;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
-using TagTool.Common;
-using TagTool.Tags.Definitions;
-using TagTool.Tags;
-using TagTool.Serialization;
-using TagTool.Bitmaps;
-using TagTool.Tags.Resources;
-using TagTool.Bitmaps.Utils;
-using TagTool.Bitmaps.DDS;
-using TagTool.Geometry;
-using TagTool.BlamFile;
+using TagTool.Cache;
 using TagTool.Cache.HaloOnline;
-using TagTool.Havok;
-using System.Linq;
-using System.IO.Compression;
-using TagTool.Tools.Geometry;
-using TagTool.Shaders;
-using TagTool.Shaders.ShaderGenerator;
-using TagTool.Commands.Shaders;
-using System.Diagnostics;
-using HaloShaderGenerator.Shader;
-using HaloShaderGenerator.Globals;
+using TagTool.Common;
+using TagTool.Geometry;
+using TagTool.IO;
+using TagTool.Serialization;
+using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands
 {
@@ -83,75 +69,45 @@ namespace TagTool.Commands
             }
         }
 
-        public void RenameMS30Shaders()
+        public byte[] GetCacheRawData(uint resourceAddress, int size)
         {
-            using (var stream = Cache.OpenCacheReadWrite())
+            var cacheFileType = (resourceAddress & 0xC0000000) >> 30;
+            int fileOffset = (int)(resourceAddress & 0x3FFFFFFF);
+
+            GameCacheGen2 sourceCache;
+
+            if (cacheFileType != 0)
             {
-                int newNameCount = 0;
-                foreach (var tag in Cache.TagCache.NonNull())
+                string filename = "";
+                switch (cacheFileType)
                 {
-                    var tagGroups = new Tag[] { "rm  ", new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-                    if (tag.IsInGroup(tagGroups))
-                    {
-                        CachedTagHaloOnline hoTag = tag as CachedTagHaloOnline;
-                        foreach (var dep in hoTag.Dependencies)
-                        {
-                            var depName = Cache.TagCache.GetTag(dep).Name;
-                            if (depName.Contains("ms30"))
-                            {
-                                if (!tag.Name.StartsWith("ms30"))
-                                {
-                                    Console.WriteLine(tag.Name);
-                                    tag.Name = "ms30\\" + tag.Name;
-                                    newNameCount += 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    case 1:
+                        filename = Path.Combine(Cache.Directory.FullName, "mainmenu.map");
+                        break;
+                    case 2:
+                        filename = Path.Combine(Cache.Directory.FullName, "shared.map");
+                        break;
+                    case 3:
+                        filename = Path.Combine(Cache.Directory.FullName, "single_player_shared.map");
+                        break;
+
                 }
-
-                Console.WriteLine($"Added ms30 prefix to {newNameCount} tags.");
-                var hoCache = Cache as GameCacheHaloOnline;
-                hoCache.SaveTagNames();
-
-                /*
-                foreach (var file in Cache.Directory.GetFiles("*.map"))
-                {
-                    using (var mapFileStream = file.Open(FileMode.Open, FileAccess.ReadWrite))
-                    {
-                        var reader = new EndianReader(mapFileStream);
-                        var writer = new EndianWriter(mapFileStream);
-
-                        var mapFile = new MapFile();
-                        mapFile.Read(reader);
-
-                        if (mapFile.MapFileBlf.MapVariant == null)
-                            continue;
-
-                        var tagNamesChunk = mapFile.MapFileBlf.MapVariantTagNames;
-                        var palette = mapFile.MapFileBlf.MapVariant.MapVariant.Palette;
-                        for (int i = 0; i < palette.Length; i++)
-                        {
-                            if (palette[i].TagIndex == -1)
-                                continue;
-
-                            var name = tagNamesChunk.Names[i].Name;
-                            string newName = $"ms30\\{name}";
-                            if (Cache.TagCache.TryGetTag(newName, out CachedTag tag))
-                            {
-                                tagNamesChunk.Names[i].Name = newName;
-                                Console.WriteLine($"Prefixed '{tag}'");
-                            }
-                        }
-
-                        mapFileStream.Position = 0;
-                        mapFile.Write(writer);
-                    }
-                }
-                */
-
+                // TODO: make this a function call with a stored reference to caches in the base cache or something better than this
+                sourceCache = (GameCacheGen2)GameCache.Open(new FileInfo(filename));
             }
+            else
+                sourceCache = (GameCacheGen2)Cache;
+
+            var stream = sourceCache.OpenCacheRead();
+
+            var reader = new EndianReader(stream, Cache.Endianness);
+
+            reader.SeekTo(fileOffset);
+            var data = reader.ReadBytes(size);
+
+            reader.Close();
+
+            return data;
         }
 
         public override object Execute(List<string> args)
@@ -159,7 +115,8 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            var size = TagStructure.GetStructureSize(typeof(TagTool.Tags.Definitions.Gen2.RenderModel), CacheVersion.Halo2Xbox);
+            var HOCache = GameCache.Open(new FileInfo("D:\\halo online test\\maps\\tags.dat"));
+
 
             using (var stream = Cache.OpenCacheRead())
             {
@@ -167,8 +124,25 @@ namespace TagTool.Commands
                 {
                     if (tag.IsInGroup("mode"))
                     {
-                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.Gen2.RenderModel>(stream, tag);
+                        var modeTag = Cache.Deserialize<RenderModel>(stream, tag);
+
                         Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
+
+                        var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(modeTag.Geometry.Resource);
+
+                        if (resource == null)
+                            continue;
+
+                        var converter = new RenderGeometryConverter(HOCache, Cache);
+                        try
+                        {
+                            var newResource = converter.Convert(modeTag.Geometry, resource);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine($"Failed to convert geometry for {tag.Name}, {e.Message}");
+                        }
+
                     }
                 }
             }

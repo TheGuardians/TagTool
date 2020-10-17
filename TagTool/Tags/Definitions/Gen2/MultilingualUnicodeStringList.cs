@@ -2,20 +2,21 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "multilingual_unicode_string_list", Tag = "unic", Size = 0x44)]
+    [TagStructure(Name = "multilingual_unicode_string_list", Tag = "unic", Size = 0x34)]
     public class MultilingualUnicodeStringList : TagStructure
     {
-        public List<MultilingualUnicodeStringReference> StringReferences;
+        public List<MultilingualUnicodeStringReferenceBlock> StringReferences;
         public byte[] StringDataUtf8;
-        [TagField(Flags = Padding, Length = 36)]
-        public byte[] Padding1;
+        [TagField(Length = 0x24, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         
         [TagStructure(Size = 0x28)]
-        public class MultilingualUnicodeStringReference : TagStructure
+        public class MultilingualUnicodeStringReferenceBlock : TagStructure
         {
             public StringId StringId;
             public int EnglishOffset;

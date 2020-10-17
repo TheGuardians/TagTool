@@ -2,26 +2,31 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "ai_mission_dialogue", Tag = "mdlg", Size = 0xC)]
+    [TagStructure(Name = "ai_mission_dialogue", Tag = "mdlg", Size = 0x8)]
     public class AiMissionDialogue : TagStructure
     {
-        public List<MissionDialogueLine> Lines;
+        public List<MissionDialogueLinesBlock> Lines;
         
-        [TagStructure(Size = 0x14)]
-        public class MissionDialogueLine : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class MissionDialogueLinesBlock : TagStructure
         {
             public StringId Name;
-            public List<MissionDialogueVariant> Variants;
+            public List<MissionDialogueVariantsBlock> Variants;
             public StringId DefaultSoundEffect;
             
-            [TagStructure(Size = 0x18)]
-            public class MissionDialogueVariant : TagStructure
+            [TagStructure(Size = 0x10)]
+            public class MissionDialogueVariantsBlock : TagStructure
             {
-                public StringId VariantDesignation; // 3-letter designation for the character^
+                /// <summary>
+                /// 3-letter designation for the character^
+                /// </summary>
+                public StringId VariantDesignation;
+                [TagField(ValidTags = new [] { "snd!" })]
                 public CachedTag Sound;
                 public StringId SoundEffect;
             }

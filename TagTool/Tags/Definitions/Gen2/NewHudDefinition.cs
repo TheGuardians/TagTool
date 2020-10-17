@@ -2,51 +2,52 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "new_hud_definition", Tag = "nhdt", Size = 0x3C)]
+    [TagStructure(Name = "new_hud_definition", Tag = "nhdt", Size = 0x28)]
     public class NewHudDefinition : TagStructure
     {
+        [TagField(ValidTags = new [] { "nhdt" })]
         public CachedTag DoNotUse;
-        public List<HudBitmapWidgetDefinition> BitmapWidgets;
-        public List<HudTextWidgetDefinition> TextWidgets;
-        public NewHudDashlightData DashlightData;
-        public List<HudScreenEffectWidgetDefinition> ScreenEffectWidgets;
+        public List<HudBitmapWidgets> BitmapWidgets;
+        public List<HudTextWidgets> TextWidgets;
+        public NewHudDashlightDataStructBlock DashlightData;
+        public List<HudScreenEffectWidgets> ScreenEffectWidgets;
         
-        [TagStructure(Size = 0x78)]
-        public class HudBitmapWidgetDefinition : TagStructure
+        [TagStructure(Size = 0x64)]
+        public class HudBitmapWidgets : TagStructure
         {
             public StringId Name;
-            public HudWidgetInputsDefinition Unknown1;
-            public HudWidgetStateDefinition Unknown2;
+            public HudWidgetInputsStructBlock Unknown;
+            public HudWidgetStateDefinitionStructBlock Unknown1;
             public AnchorValue Anchor;
             public FlagsValue Flags;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag Bitmap;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag Shader;
             public sbyte FullscreenSequenceIndex;
             public sbyte HalfscreenSequenceIndex;
             public sbyte QuarterscreenSequenceIndex;
-            [TagField(Flags = Padding, Length = 1)]
-            public byte[] Padding1;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public Point2d FullscreenOffset;
             public Point2d HalfscreenOffset;
             public Point2d QuarterscreenOffset;
             public RealPoint2d FullscreenRegistrationPoint;
             public RealPoint2d HalfscreenRegistrationPoint;
             public RealPoint2d QuarterscreenRegistrationPoint;
-            public List<HudWidgetEffectDefinition> Effect;
+            public List<HudWidgetEffectBlock> Effect;
             public SpecialHudTypeValue SpecialHudType;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [TagStructure(Size = 0x4)]
-            public class HudWidgetInputsDefinition : TagStructure
+            public class HudWidgetInputsStructBlock : TagStructure
             {
-                /// <summary>
-                /// widget inputs
-                /// </summary>
                 public Input1Value Input1;
                 public Input2Value Input2;
                 public Input3Value Input3;
@@ -58,6 +59,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -66,10 +71,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -79,6 +80,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -86,22 +102,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -112,29 +113,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input2Value : sbyte
@@ -143,6 +144,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -151,10 +156,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -164,6 +165,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -171,22 +187,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -197,29 +198,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input3Value : sbyte
@@ -228,6 +229,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -236,10 +241,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -249,6 +250,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -256,22 +272,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -282,29 +283,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input4Value : sbyte
@@ -313,6 +314,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -321,10 +326,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -334,6 +335,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -341,22 +357,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -367,44 +368,42 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
             }
             
             [TagStructure(Size = 0x14)]
-            public class HudWidgetStateDefinition : TagStructure
+            public class HudWidgetStateDefinitionStructBlock : TagStructure
             {
                 /// <summary>
-                /// widget state
-                /// </summary>
-                /// <remarks>
                 /// this section is split up into YES and NO flags.
                 /// a widget will draw if any of it's YES flags are true,
-                /// but it will NOT draw if any of it's NO flags are true.
+                /// but it will NOT
+                /// draw if any of it's NO flags are true.
                 /// 
-                /// </remarks>
+                /// </summary>
                 public YUnitFlagsValue YUnitFlags;
                 public YExtraFlagsValue YExtraFlags;
                 public YWeaponFlagsValue YWeaponFlags;
@@ -416,8 +415,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 public sbyte AgeCutoff;
                 public sbyte ClipCutoff;
                 public sbyte TotalCutoff;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding1;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum YUnitFlagsValue : ushort
@@ -564,32 +563,20 @@ namespace TagTool.Tags.Definitions.Gen2
                 ScopeStretch = 1 << 4
             }
             
-            [TagStructure(Size = 0x7C)]
-            public class HudWidgetEffectDefinition : TagStructure
+            [TagStructure(Size = 0x68)]
+            public class HudWidgetEffectBlock : TagStructure
             {
                 /// <summary>
-                /// WIDGET EFFECTS
-                /// </summary>
-                /// <remarks>
                 /// allow the scaling, rotation, and offsetting of widgets
-                /// </remarks>
+                /// </summary>
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                /// <summary>
-                /// horizontal and vertical scale
-                /// </summary>
-                public HudWidgetEffectFunction YourMom;
-                public HudWidgetEffectFunction YourMom1;
-                /// <summary>
-                /// theta
-                /// </summary>
-                public HudWidgetEffectFunction YourMom2;
-                /// <summary>
-                /// horizontal and vertical offset
-                /// </summary>
-                public HudWidgetEffectFunction YourMom3;
-                public HudWidgetEffectFunction YourMom4;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public HudWidgetEffectFunctionStructBlock YourMom;
+                public HudWidgetEffectFunctionStructBlock1 YourMom1;
+                public HudWidgetEffectFunctionStructBlock2 YourMom2;
+                public HudWidgetEffectFunctionStructBlock3 YourMom3;
+                public HudWidgetEffectFunctionStructBlock4 YourMom4;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -599,18 +586,138 @@ namespace TagTool.Tags.Definitions.Gen2
                     ApplyOffset = 1 << 2
                 }
                 
-                [TagStructure(Size = 0x18)]
-                public class HudWidgetEffectFunction : TagStructure
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock : TagStructure
                 {
                     public StringId InputName;
                     public StringId RangeName;
                     public float TimePeriodInSeconds;
-                    public FunctionDefinition Function;
+                    public ScalarFunctionStructBlock Function;
                     
-                    [TagStructure(Size = 0xC)]
-                    public class FunctionDefinition : TagStructure
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
                     {
-                        public FunctionDefinition Function;
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock1 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock2 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock3 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock4 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
                     }
                 }
             }
@@ -628,50 +735,47 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x60)]
-        public class HudTextWidgetDefinition : TagStructure
+        [TagStructure(Size = 0x54)]
+        public class HudTextWidgets : TagStructure
         {
             public StringId Name;
-            public HudWidgetInputsDefinition Unknown1;
-            public HudWidgetStateDefinition Unknown2;
+            public HudWidgetInputsStructBlock Unknown;
+            public HudWidgetStateDefinitionStructBlock Unknown1;
             public AnchorValue Anchor;
             /// <summary>
-            /// FLAGS
-            /// </summary>
-            /// <remarks>
             /// string is a number: treats the inputted string id as a function name, not a string name
             /// 
-            /// force 2-digit number: when used in combination with above, forces output to be a 2-digit numberwith leading zeros if necessary
+            /// force 2-digit number: when used
+            /// in combination with above, forces output to be a 2-digit numberwith leading zeros if necessary
             /// 
-            /// force 3-digit number: same as above, but with 3 digits instead of 2
+            /// force 3-digit number:
+            /// same as above, but with 3 digits instead of 2
             /// 
             /// 
-            /// </remarks>
+            /// </summary>
             public FlagsValue Flags;
+            [TagField(ValidTags = new [] { "shad" })]
             public CachedTag Shader;
             public StringId String;
             public JustificationValue Justification;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public FullscreenFontIndexValue FullscreenFontIndex;
             public HalfscreenFontIndexValue HalfscreenFontIndex;
             public QuarterscreenFontIndexValue QuarterscreenFontIndex;
-            [TagField(Flags = Padding, Length = 1)]
-            public byte[] Padding2;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             public float FullscreenScale;
             public float HalfscreenScale;
             public float QuarterscreenScale;
             public Point2d FullscreenOffset;
             public Point2d HalfscreenOffset;
             public Point2d QuarterscreenOffset;
-            public List<HudWidgetEffectDefinition> Effect;
+            public List<HudWidgetEffectBlock> Effect;
             
             [TagStructure(Size = 0x4)]
-            public class HudWidgetInputsDefinition : TagStructure
+            public class HudWidgetInputsStructBlock : TagStructure
             {
-                /// <summary>
-                /// widget inputs
-                /// </summary>
                 public Input1Value Input1;
                 public Input2Value Input2;
                 public Input3Value Input3;
@@ -683,6 +787,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -691,10 +799,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -704,6 +808,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -711,22 +830,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -737,29 +841,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input2Value : sbyte
@@ -768,6 +872,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -776,10 +884,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -789,6 +893,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -796,22 +915,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -822,29 +926,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input3Value : sbyte
@@ -853,6 +957,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -861,10 +969,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -874,6 +978,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -881,22 +1000,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -907,29 +1011,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input4Value : sbyte
@@ -938,6 +1042,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -946,10 +1054,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -959,6 +1063,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -966,22 +1085,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -992,44 +1096,42 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
             }
             
             [TagStructure(Size = 0x14)]
-            public class HudWidgetStateDefinition : TagStructure
+            public class HudWidgetStateDefinitionStructBlock : TagStructure
             {
                 /// <summary>
-                /// widget state
-                /// </summary>
-                /// <remarks>
                 /// this section is split up into YES and NO flags.
                 /// a widget will draw if any of it's YES flags are true,
-                /// but it will NOT draw if any of it's NO flags are true.
+                /// but it will NOT
+                /// draw if any of it's NO flags are true.
                 /// 
-                /// </remarks>
+                /// </summary>
                 public YUnitFlagsValue YUnitFlags;
                 public YExtraFlagsValue YExtraFlags;
                 public YWeaponFlagsValue YWeaponFlags;
@@ -1041,8 +1143,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 public sbyte AgeCutoff;
                 public sbyte ClipCutoff;
                 public sbyte TotalCutoff;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding1;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum YUnitFlagsValue : ushort
@@ -1213,32 +1315,20 @@ namespace TagTool.Tags.Definitions.Gen2
                 NumberFont
             }
             
-            [TagStructure(Size = 0x7C)]
-            public class HudWidgetEffectDefinition : TagStructure
+            [TagStructure(Size = 0x68)]
+            public class HudWidgetEffectBlock : TagStructure
             {
                 /// <summary>
-                /// WIDGET EFFECTS
-                /// </summary>
-                /// <remarks>
                 /// allow the scaling, rotation, and offsetting of widgets
-                /// </remarks>
+                /// </summary>
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                /// <summary>
-                /// horizontal and vertical scale
-                /// </summary>
-                public HudWidgetEffectFunction YourMom;
-                public HudWidgetEffectFunction YourMom1;
-                /// <summary>
-                /// theta
-                /// </summary>
-                public HudWidgetEffectFunction YourMom2;
-                /// <summary>
-                /// horizontal and vertical offset
-                /// </summary>
-                public HudWidgetEffectFunction YourMom3;
-                public HudWidgetEffectFunction YourMom4;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public HudWidgetEffectFunctionStructBlock YourMom;
+                public HudWidgetEffectFunctionStructBlock1 YourMom1;
+                public HudWidgetEffectFunctionStructBlock2 YourMom2;
+                public HudWidgetEffectFunctionStructBlock3 YourMom3;
+                public HudWidgetEffectFunctionStructBlock4 YourMom4;
                 
                 [Flags]
                 public enum FlagsValue : ushort
@@ -1248,63 +1338,188 @@ namespace TagTool.Tags.Definitions.Gen2
                     ApplyOffset = 1 << 2
                 }
                 
-                [TagStructure(Size = 0x18)]
-                public class HudWidgetEffectFunction : TagStructure
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock : TagStructure
                 {
                     public StringId InputName;
                     public StringId RangeName;
                     public float TimePeriodInSeconds;
-                    public FunctionDefinition Function;
+                    public ScalarFunctionStructBlock Function;
                     
-                    [TagStructure(Size = 0xC)]
-                    public class FunctionDefinition : TagStructure
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
                     {
-                        public FunctionDefinition Function;
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock1 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock2 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock3 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x14)]
+                public class HudWidgetEffectFunctionStructBlock4 : TagStructure
+                {
+                    public StringId InputName;
+                    public StringId RangeName;
+                    public float TimePeriodInSeconds;
+                    public ScalarFunctionStructBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class ScalarFunctionStructBlock : TagStructure
+                    {
+                        public MappingFunctionBlock Function;
+                        
+                        [TagStructure(Size = 0x8)]
+                        public class MappingFunctionBlock : TagStructure
+                        {
+                            public List<ByteBlock> Data;
+                            
+                            [TagStructure(Size = 0x1)]
+                            public class ByteBlock : TagStructure
+                            {
+                                public sbyte Value;
+                            }
+                        }
                     }
                 }
             }
         }
         
         [TagStructure(Size = 0x8)]
-        public class NewHudDashlightData : TagStructure
+        public class NewHudDashlightDataStructBlock : TagStructure
         {
             /// <summary>
-            /// dashlight data
-            /// </summary>
-            /// <remarks>
             /// only relevant to new hud tags for weapons
-            /// </remarks>
-            public short LowClipCutoff; // the cutoff for showing the reload dashlight
-            public short LowAmmoCutoff; // the cutoff for showing the low ammo dashlight
-            public float AgeCutoff; // the age cutoff for showing the low battery dashlight
+            /// </summary>
+            /// <summary>
+            /// the cutoff for showing the reload dashlight
+            /// </summary>
+            public short LowClipCutoff;
+            /// <summary>
+            /// the cutoff for showing the low ammo dashlight
+            /// </summary>
+            public short LowAmmoCutoff;
+            /// <summary>
+            /// the age cutoff for showing the low battery dashlight
+            /// </summary>
+            public float AgeCutoff;
         }
         
-        [TagStructure(Size = 0x70)]
-        public class HudScreenEffectWidgetDefinition : TagStructure
+        [TagStructure(Size = 0x50)]
+        public class HudScreenEffectWidgets : TagStructure
         {
             public StringId Name;
-            public HudWidgetInputsDefinition Unknown1;
-            public HudWidgetStateDefinition Unknown2;
+            public HudWidgetInputsStructBlock Unknown;
+            public HudWidgetStateDefinitionStructBlock Unknown1;
             public AnchorValue Anchor;
             public FlagsValue Flags;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag Bitmap;
+            [TagField(ValidTags = new [] { "egor" })]
             public CachedTag FullscreenScreenEffect;
             public ScreenEffectBonusStructBlock Waa;
             public sbyte FullscreenSequenceIndex;
             public sbyte HalfscreenSequenceIndex;
             public sbyte QuarterscreenSequenceIndex;
-            [TagField(Flags = Padding, Length = 1)]
-            public byte[] Padding1;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public Point2d FullscreenOffset;
             public Point2d HalfscreenOffset;
             public Point2d QuarterscreenOffset;
             
             [TagStructure(Size = 0x4)]
-            public class HudWidgetInputsDefinition : TagStructure
+            public class HudWidgetInputsStructBlock : TagStructure
             {
-                /// <summary>
-                /// widget inputs
-                /// </summary>
                 public Input1Value Input1;
                 public Input2Value Input2;
                 public Input3Value Input3;
@@ -1316,6 +1531,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -1324,10 +1543,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -1337,6 +1552,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -1344,22 +1574,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -1370,29 +1585,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input2Value : sbyte
@@ -1401,6 +1616,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -1409,10 +1628,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -1422,6 +1637,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -1429,22 +1659,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -1455,29 +1670,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input3Value : sbyte
@@ -1486,6 +1701,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -1494,10 +1713,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -1507,6 +1722,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -1514,22 +1744,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -1540,29 +1755,29 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
                 
                 public enum Input4Value : sbyte
@@ -1571,6 +1786,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     BasicOne,
                     BasicTime,
                     BasicGlobalHudFade,
+                    Unknown,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
                     Unknown4,
                     Unknown5,
                     Unknown6,
@@ -1579,10 +1798,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown9,
                     Unknown10,
                     Unknown11,
-                    Unknown12,
-                    Unknown13,
-                    Unknown14,
-                    Unknown15,
                     UnitShield,
                     UnitBody,
                     UnitAutoaimed,
@@ -1592,6 +1807,21 @@ namespace TagTool.Tags.Definitions.Gen2
                     UnitTimeOnDplShld,
                     UnitZoomFraction,
                     UnitCamoValue,
+                    Unknown12,
+                    Unknown13,
+                    Unknown14,
+                    Unknown15,
+                    Unknown16,
+                    Unknown17,
+                    Unknown18,
+                    ParentShield,
+                    ParentBody,
+                    Unknown19,
+                    Unknown20,
+                    Unknown21,
+                    Unknown22,
+                    Unknown23,
+                    Unknown24,
                     Unknown25,
                     Unknown26,
                     Unknown27,
@@ -1599,22 +1829,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Unknown29,
                     Unknown30,
                     Unknown31,
-                    ParentShield,
-                    ParentBody,
-                    Unknown34,
-                    Unknown35,
-                    Unknown36,
-                    Unknown37,
-                    Unknown38,
-                    Unknown39,
-                    Unknown40,
-                    Unknown41,
-                    Unknown42,
-                    Unknown43,
-                    Unknown44,
-                    Unknown45,
-                    Unknown46,
-                    Unknown47,
+                    Unknown32,
                     WeaponClipAmmo,
                     WeaponHeat,
                     WeaponBattery,
@@ -1625,44 +1840,42 @@ namespace TagTool.Tags.Definitions.Gen2
                     WeaponTimeOnOverheat,
                     WeaponBatteryFraction,
                     WeaponLockingFraction,
-                    Unknown58,
-                    Unknown59,
-                    Unknown60,
-                    Unknown61,
-                    Unknown62,
-                    Unknown63,
-                    Unknown64,
+                    Unknown33,
+                    Unknown34,
+                    Unknown35,
+                    Unknown36,
+                    Unknown37,
+                    Unknown38,
+                    Unknown39,
                     UserScoreFraction,
                     OtherUserScoreFraction,
                     UserWinning,
                     BombArmingAmount,
-                    Unknown69,
-                    Unknown70,
-                    Unknown71,
-                    Unknown72,
-                    Unknown73,
-                    Unknown74,
-                    Unknown75,
-                    Unknown76,
-                    Unknown77,
-                    Unknown78,
-                    Unknown79,
-                    Unknown80
+                    Unknown40,
+                    Unknown41,
+                    Unknown42,
+                    Unknown43,
+                    Unknown44,
+                    Unknown45,
+                    Unknown46,
+                    Unknown47,
+                    Unknown48,
+                    Unknown49,
+                    Unknown50,
+                    Unknown51
                 }
             }
             
             [TagStructure(Size = 0x14)]
-            public class HudWidgetStateDefinition : TagStructure
+            public class HudWidgetStateDefinitionStructBlock : TagStructure
             {
                 /// <summary>
-                /// widget state
-                /// </summary>
-                /// <remarks>
                 /// this section is split up into YES and NO flags.
                 /// a widget will draw if any of it's YES flags are true,
-                /// but it will NOT draw if any of it's NO flags are true.
+                /// but it will NOT
+                /// draw if any of it's NO flags are true.
                 /// 
-                /// </remarks>
+                /// </summary>
                 public YUnitFlagsValue YUnitFlags;
                 public YExtraFlagsValue YExtraFlags;
                 public YWeaponFlagsValue YWeaponFlags;
@@ -1674,8 +1887,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 public sbyte AgeCutoff;
                 public sbyte ClipCutoff;
                 public sbyte TotalCutoff;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding1;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum YUnitFlagsValue : ushort
@@ -1818,10 +2031,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 Unused = 1 << 0
             }
             
-            [TagStructure(Size = 0x20)]
+            [TagStructure(Size = 0x10)]
             public class ScreenEffectBonusStructBlock : TagStructure
             {
+                [TagField(ValidTags = new [] { "egor" })]
                 public CachedTag HalfscreenScreenEffect;
+                [TagField(ValidTags = new [] { "egor" })]
                 public CachedTag QuarterscreenScreenEffect;
             }
         }

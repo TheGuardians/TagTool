@@ -2,21 +2,23 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "text_value_pair_definition", Tag = "sily", Size = 0x30)]
+    [TagStructure(Name = "text_value_pair_definition", Tag = "sily", Size = 0x24)]
     public class TextValuePairDefinition : TagStructure
     {
         public ParameterValue Parameter;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding1;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag StringList;
         public StringId TitleText;
         public StringId HeaderText;
         public StringId DescriptionText;
-        public List<TextValuePairReferenceNew> TextValuePairs;
+        public List<TextValuePairReferenceBlock> TextValuePairs;
         
         public enum ParameterValue : int
         {
@@ -135,7 +137,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0xC)]
-        public class TextValuePairReferenceNew : TagStructure
+        public class TextValuePairReferenceBlock : TagStructure
         {
             public FlagsValue Flags;
             public int Value;

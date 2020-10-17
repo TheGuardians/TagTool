@@ -2,33 +2,30 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "style", Tag = "styl", Size = 0x64)]
+    [TagStructure(Name = "style", Tag = "styl", Size = 0x5C)]
     public class Style : TagStructure
     {
         [TagField(Length = 32)]
         public string Name;
         /// <summary>
-        /// Combat status decay options
+        /// Controls how combat status is allowed to be automatically reduced in the absence of combat stimuli. 'Latch at X' means
+        /// that once the level of x is attained (and/or surpassed) the combat status never falls below it
         /// </summary>
-        /// <remarks>
-        /// Controls how combat status is allowed to be automatically reduced in the absence of combat stimuli. 'Latch at X' means that once the level of x is attained (and/or surpassed) the combat status never falls below it
-        /// </remarks>
         public CombatStatusDecayOptionsValue CombatStatusDecayOptions;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         /// <summary>
-        /// Atittude
+        /// Indicates general stance for style. This matches the property blocks in the character definition (e.g. defense
+        /// properties)
         /// </summary>
-        /// <remarks>
-        /// Indicates general stance for style. This matches the property blocks in the character definition (e.g. defense properties)
-        /// </remarks>
         public AttitudeValue Attitude;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding2;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public EngageAttitudeValue EngageAttitude;
         public EvasionAttitudeValue EvasionAttitude;
         public CoverAttitudeValue CoverAttitude;
@@ -40,22 +37,19 @@ namespace TagTool.Tags.Definitions.Gen2
         public IdleAttitudeValue IdleAttitude;
         public WeaponAttitudeValue WeaponAttitude;
         public SwarmAttitudeValue SwarmAttitude;
-        [TagField(Flags = Padding, Length = 1)]
-        public byte[] Padding3;
+        [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
         /// <summary>
-        /// Style Behavior Control
-        /// </summary>
-        /// <remarks>
         /// Check the appropriate box to turn on/off the given behavior
-        /// </remarks>
+        /// </summary>
         public StyleControlValue StyleControl;
         public Behaviors1Value Behaviors1;
         public Behaviors2Value Behaviors2;
         public Behaviors3Value Behaviors3;
         public Behaviors4Value Behaviors4;
         public Behaviors5Value Behaviors5;
-        public List<SpecialMovementDefinition> SpecialMovement;
-        public List<StyleBehaviorName> BehaviorList;
+        public List<SpecialMovementBlock> SpecialMovement;
+        public List<BehaviorNamesBlock> BehaviorList;
         
         public enum CombatStatusDecayOptionsValue : short
         {
@@ -182,7 +176,7 @@ namespace TagTool.Tags.Definitions.Gen2
             CoverFriend = 1 << 11,
             BlindPanic = 1 << 12,
             Engage = 1 << 13,
-            Engage0 = 1 << 14,
+            Engage1 = 1 << 14,
             Fight = 1 << 15,
             MeleeCharge = 1 << 16,
             MeleeLeapingCharge = 1 << 17,
@@ -207,7 +201,7 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             LeapOnCover = 1 << 0,
             Search = 1 << 1,
-            Search0 = 1 << 2,
+            Search1 = 1 << 2,
             Uncover = 1 << 3,
             Investigate = 1 << 4,
             PursuitSync = 1 << 5,
@@ -248,7 +242,7 @@ namespace TagTool.Tags.Definitions.Gen2
             SurpriseRetreat = 1 << 3,
             OverheatedWeaponRetreat = 1 << 4,
             Ambush = 1 << 5,
-            Ambush0 = 1 << 6,
+            Ambush1 = 1 << 6,
             CoordinatedAmbush = 1 << 7,
             ProximityAmbush = 1 << 8,
             VulnerableEnemyAmbush = 1 << 9,
@@ -281,7 +275,7 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             VehicleEngageWanderImpulse = 1 << 0,
             Postcombat = 1 << 1,
-            Postcombat0 = 1 << 2,
+            Postcombat1 = 1 << 2,
             PostPostcombat = 1 << 3,
             CheckFriend = 1 << 4,
             ShootCorpse = 1 << 5,
@@ -289,7 +283,7 @@ namespace TagTool.Tags.Definitions.Gen2
             Alert = 1 << 7,
             Alert1 = 1 << 8,
             Idle = 1 << 9,
-            Idle2 = 1 << 10,
+            Idle1 = 1 << 10,
             WanderBehavior = 1 << 11,
             FlightWander = 1 << 12,
             Patrol = 1 << 13,
@@ -319,39 +313,39 @@ namespace TagTool.Tags.Definitions.Gen2
             Stunned = 1 << 0,
             CureIsolation = 1 << 1,
             DeployTurret = 1 << 2,
-            Bit3 = 1 << 3,
-            Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
-            Bit12 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15,
-            Bit16 = 1 << 16,
-            Bit17 = 1 << 17,
-            Bit18 = 1 << 18,
-            Bit19 = 1 << 19,
-            Bit20 = 1 << 20,
-            Bit21 = 1 << 21,
-            Bit22 = 1 << 22,
-            Bit23 = 1 << 23,
-            Bit24 = 1 << 24,
-            Bit25 = 1 << 25,
-            Bit26 = 1 << 26,
-            Bit27 = 1 << 27,
-            Bit28 = 1 << 28,
-            Bit29 = 1 << 29,
-            Bit30 = 1 << 30,
-            Bit31 = 1u << 31
+            Unknown = 1 << 3,
+            Unknown1 = 1 << 4,
+            Unknown2 = 1 << 5,
+            Unknown3 = 1 << 6,
+            Unknown4 = 1 << 7,
+            Unknown5 = 1 << 8,
+            Unknown6 = 1 << 9,
+            Unknown7 = 1 << 10,
+            Unknown8 = 1 << 11,
+            Unknown9 = 1 << 12,
+            Unknown10 = 1 << 13,
+            Unknown11 = 1 << 14,
+            Unknown12 = 1 << 15,
+            Unknown13 = 1 << 16,
+            Unknown14 = 1 << 17,
+            Unknown15 = 1 << 18,
+            Unknown16 = 1 << 19,
+            Unknown17 = 1 << 20,
+            Unknown18 = 1 << 21,
+            Unknown19 = 1 << 22,
+            Unknown20 = 1 << 23,
+            Unknown21 = 1 << 24,
+            Unknown22 = 1 << 25,
+            Unknown23 = 1 << 26,
+            Unknown24 = 1 << 27,
+            Unknown25 = 1 << 28,
+            Unknown26 = 1 << 29,
+            Unknown27 = 1 << 30,
+            Unknown28 = 1u << 31
         }
         
         [TagStructure(Size = 0x4)]
-        public class SpecialMovementDefinition : TagStructure
+        public class SpecialMovementBlock : TagStructure
         {
             public SpecialMovement1Value SpecialMovement1;
             
@@ -369,7 +363,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x20)]
-        public class StyleBehaviorName : TagStructure
+        public class BehaviorNamesBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string BehaviorName;

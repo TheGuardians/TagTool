@@ -14,7 +14,7 @@ namespace TagTool.BlamFile
     /// <summary>
     /// Generates a map variant blf given a scenario and metadata
     /// </summary>
-    class MapVariantGenerator
+    public class MapVariantGenerator
     {
         // TODO: add a definition cache
 
@@ -25,6 +25,12 @@ namespace TagTool.BlamFile
         private ForgeGlobalsDefinition _forgeGlobals;
         private HashSet<CachedTag> _forgePalette;
         public Dictionary<GameObjectTypeHalo3ODST, ObjectTypeDefinition> ObjectTypes;
+        public uint ObjectTypeMask =
+            (1 << (int)GameObjectTypeHalo3ODST.Vehicle) |
+            (1 << (int)GameObjectTypeHalo3ODST.Weapon) |
+            (1 << (int)GameObjectTypeHalo3ODST.Equipment) |
+            (1 << (int)GameObjectTypeHalo3ODST.Scenery) |
+            (1 << (int)GameObjectTypeHalo3ODST.Crate);
 
         public Blf Generate(Stream cacheStream, GameCache cache, Scenario scenario, ContentItemMetadata metadata)
         {
@@ -36,11 +42,26 @@ namespace TagTool.BlamFile
             _forgePalette = new HashSet<CachedTag>(_forgeGlobals.Palette.Select(x => x.Object));
 
             ObjectTypes = new Dictionary<GameObjectTypeHalo3ODST, ObjectTypeDefinition>();
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Biped, new ObjectTypeDefinition(_scenario.Bipeds, _scenario.BipedPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Vehicle, new ObjectTypeDefinition(_scenario.Vehicles, _scenario.VehiclePalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Weapon, new ObjectTypeDefinition(_scenario.Weapons, _scenario.WeaponPalette));
-            ObjectTypes.Add(GameObjectTypeHalo3ODST.Equipment, new ObjectTypeDefinition(_scenario.Equipment, _scenario.EquipmentPalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Equipment, new ObjectTypeDefinition(_scenario.Equipment, _scenario.Equipment));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.AlternateRealityDevice, new ObjectTypeDefinition(_scenario.AlternateRealityDevices, _scenario.AlternateRealityDevices));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Terminal, new ObjectTypeDefinition(_scenario.Terminals, _scenario.TerminalPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Scenery, new ObjectTypeDefinition(_scenario.Scenery, _scenario.SceneryPalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Machine, new ObjectTypeDefinition(_scenario.Machines, _scenario.MachinePalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Control, new ObjectTypeDefinition(_scenario.Controls, _scenario.ControlPalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.SoundScenery, new ObjectTypeDefinition(_scenario.SoundScenery, _scenario.SoundSceneryPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Crate, new ObjectTypeDefinition(_scenario.Crates, _scenario.CratePalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Creature, new ObjectTypeDefinition(_scenario.Creatures, _scenario.CreaturePalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Giant, new ObjectTypeDefinition(_scenario.Giants, _scenario.GiantPalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.EffectScenery, new ObjectTypeDefinition(_scenario.EffectScenery, _scenario.EffectSceneryPalette));
+
+            for(var i = GameObjectTypeHalo3ODST.Biped; i <= GameObjectTypeHalo3ODST.EffectScenery; i++)
+            {
+                if (((ObjectTypeMask >> (int)i) & 1) == 0)
+                    ObjectTypes.Remove(i);
+            }
 
             return GenerateBlf(metadata, GenerateMapVariant(metadata));
         }
@@ -314,7 +335,7 @@ namespace TagTool.BlamFile
                 properties.SpawnTime = (byte)scrnMultiplayerProperties.SpawnTime;
 
             properties.TeamAffiliation = (MapVariantGameTeam)scrnMultiplayerProperties.Team;
-            properties.Shape = new MultiplayerObjectBoundaryShape();
+
             if (scrnMultiplayerProperties.Shape > MultiplayerObjectProperties.ShapeValue.None)
             {
                 properties.Shape.Type = (MultiplayerObjectShapeType)scrnMultiplayerProperties.Shape;

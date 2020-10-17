@@ -2,52 +2,58 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "sky", Tag = "sky ", Size = 0xDC)]
+    [TagStructure(Name = "sky", Tag = "sky ", Size = 0xAC)]
     public class Sky : TagStructure
     {
+        [TagField(ValidTags = new [] { "mode" })]
         public CachedTag RenderModel;
+        [TagField(ValidTags = new [] { "jmad" })]
         public CachedTag AnimationGraph;
         public FlagsValue Flags;
-        public float RenderModelScale; // Multiplier by which to scale the model's geometry up or down (0 defaults to standard, 0.03).
-        public float MovementScale; // How much the sky moves to remain centered on the player (0 defaults to 1.0, which means no parallax).
-        public List<SkyCubemap> CubeMap;
         /// <summary>
-        /// AMBIENT LIGHT
+        /// Multiplier by which to scale the model's geometry up or down (0 defaults to standard, 0.03).
         /// </summary>
-        public RealRgbColor IndoorAmbientColor; // Indoor ambient light color.
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding1;
-        public RealRgbColor OutdoorAmbientColor; // Indoor ambient light color.
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding2;
+        public float RenderModelScale;
         /// <summary>
-        /// FOG
+        /// How much the sky moves to remain centered on the player (0 defaults to 1.0, which means no parallax).
+        /// </summary>
+        public float MovementScale;
+        public List<SkyCubemapBlock> CubeMap;
+        /// <summary>
+        /// Indoor ambient light color.
+        /// </summary>
+        public RealRgbColor IndoorAmbientColor;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        /// <summary>
+        /// Indoor ambient light color.
+        /// </summary>
+        public RealRgbColor OutdoorAmbientColor;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        /// <summary>
+        /// How far fog spreads into adjacent clusters.
         /// </summary>
         public float FogSpreadDistance; // world units
-        public List<SkyAtmosphericFog> AtmosphericFog;
-        public List<SkyAtmosphericFog> SecondaryFog;
+        public List<SkyAtmosphericFogBlock> AtmosphericFog;
+        public List<SkyAtmosphericFogBlock1> SecondaryFog;
         public List<SkyFogBlock> SkyFog;
-        public List<SkyPatchyFog> PatchyFog;
-        /// <summary>
-        /// BLOOM OVERRIDE
-        /// </summary>
+        public List<SkyPatchyFogBlock> PatchyFog;
         public float Amount; // [0,1]
         public float Threshold; // [0,1]
         public float Brightness; // [0,1]
         public float GammaPower;
-        public List<SkyLight> Lights;
-        /// <summary>
-        /// ROTATION
-        /// </summary>
+        public List<SkyLightBlock> Lights;
         public Angle GlobalSkyRotation;
-        public List<SkyShaderFunction> ShaderFunctions;
-        public List<SkyAnimation> Animations;
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Padding3;
+        public List<SkyShaderFunctionBlock> ShaderFunctions;
+        public List<SkyAnimationBlock> Animations;
+        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
         public RealRgbColor ClearColor;
         
         [Flags]
@@ -61,19 +67,50 @@ namespace TagTool.Tags.Definitions.Gen2
             UseClearColor = 1 << 5
         }
         
-        [TagStructure(Size = 0x14)]
-        public class SkyCubemap : TagStructure
+        [TagStructure(Size = 0xC)]
+        public class SkyCubemapBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag CubeMapReference;
-            public float PowerScale; // 0 Defaults to 1.
+            /// <summary>
+            /// 0 Defaults to 1.
+            /// </summary>
+            public float PowerScale;
         }
         
         [TagStructure(Size = 0x18)]
-        public class SkyAtmosphericFog : TagStructure
+        public class SkyAtmosphericFogBlock : TagStructure
         {
             public RealRgbColor Color;
+            /// <summary>
+            /// Fog density is clamped to this value.
+            /// </summary>
             public float MaximumDensity; // [0,1]
+            /// <summary>
+            /// Before this distance there is no fog.
+            /// </summary>
             public float StartDistance; // world units
+            /// <summary>
+            /// Fog becomes opaque (maximum density) at this distance from the viewer.
+            /// </summary>
+            public float OpaqueDistance; // world units
+        }
+        
+        [TagStructure(Size = 0x18)]
+        public class SkyAtmosphericFogBlock1 : TagStructure
+        {
+            public RealRgbColor Color;
+            /// <summary>
+            /// Fog density is clamped to this value.
+            /// </summary>
+            public float MaximumDensity; // [0,1]
+            /// <summary>
+            /// Before this distance there is no fog.
+            /// </summary>
+            public float StartDistance; // world units
+            /// <summary>
+            /// Fog becomes opaque (maximum density) at this distance from the viewer.
+            /// </summary>
             public float OpaqueDistance; // world units
         }
         
@@ -81,42 +118,75 @@ namespace TagTool.Tags.Definitions.Gen2
         public class SkyFogBlock : TagStructure
         {
             public RealRgbColor Color;
+            /// <summary>
+            /// Fog density is clamped to this value.
+            /// </summary>
             public float Density; // [0,1]
         }
         
-        [TagStructure(Size = 0x58)]
-        public class SkyPatchyFog : TagStructure
+        [TagStructure(Size = 0x50)]
+        public class SkyPatchyFogBlock : TagStructure
         {
             public RealRgbColor Color;
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Padding1;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public Bounds<float> Density; // [0,1]
             public Bounds<float> Distance; // world units
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding2;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(ValidTags = new [] { "fpch" })]
             public CachedTag PatchyFog;
         }
         
-        [TagStructure(Size = 0x48)]
-        public class SkyLight : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class SkyLightBlock : TagStructure
         {
             public RealVector3d DirectionVector;
             public RealEulerAngles2d Direction;
+            [TagField(ValidTags = new [] { "lens" })]
             public CachedTag LensFlare;
-            public List<SkyLightFog> Fog;
-            public List<SkyLightFog> FogOpposite;
-            public List<SkyRadiosityLight> Radiosity;
+            public List<SkyLightFogBlock> Fog;
+            public List<SkyLightFogBlock1> FogOpposite;
+            public List<SkyRadiosityLightBlock> Radiosity;
             
             [TagStructure(Size = 0x2C)]
-            public class SkyLightFog : TagStructure
+            public class SkyLightFogBlock : TagStructure
             {
                 public RealRgbColor Color;
-                public float MaximumDensity; // [0,1]
-                public float StartDistance; // world units
-                public float OpaqueDistance; // world units
                 /// <summary>
-                /// FOG INFLUENCES
+                /// Fog density is clamped to this value.
                 /// </summary>
+                public float MaximumDensity; // [0,1]
+                /// <summary>
+                /// Before this distance there is no fog.
+                /// </summary>
+                public float StartDistance; // world units
+                /// <summary>
+                /// Fog becomes opaque (maximum density) at this distance from the viewer.
+                /// </summary>
+                public float OpaqueDistance; // world units
+                public Bounds<Angle> Cone; // degrees
+                public float AtmosphericFogInfluence; // [0,1]
+                public float SecondaryFogInfluence; // [0,1]
+                public float SkyFogInfluence; // [0,1]
+            }
+            
+            [TagStructure(Size = 0x2C)]
+            public class SkyLightFogBlock1 : TagStructure
+            {
+                public RealRgbColor Color;
+                /// <summary>
+                /// Fog density is clamped to this value.
+                /// </summary>
+                public float MaximumDensity; // [0,1]
+                /// <summary>
+                /// Before this distance there is no fog.
+                /// </summary>
+                public float StartDistance; // world units
+                /// <summary>
+                /// Fog becomes opaque (maximum density) at this distance from the viewer.
+                /// </summary>
+                public float OpaqueDistance; // world units
                 public Bounds<Angle> Cone; // degrees
                 public float AtmosphericFogInfluence; // [0,1]
                 public float SecondaryFogInfluence; // [0,1]
@@ -124,14 +194,26 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x28)]
-            public class SkyRadiosityLight : TagStructure
+            public class SkyRadiosityLightBlock : TagStructure
             {
                 public FlagsValue Flags;
-                public RealRgbColor Color; // Light color.
+                /// <summary>
+                /// Light color.
+                /// </summary>
+                public RealRgbColor Color;
+                /// <summary>
+                /// Light power from 0 to infinity.
+                /// </summary>
                 public float Power; // [0,+inf]
+                /// <summary>
+                /// Length of the ray for shadow testing.
+                /// </summary>
                 public float TestDistance; // world units
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding1;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                /// <summary>
+                /// Angular diameter of the light source in the sky.
+                /// </summary>
                 public Angle Diameter; // degrees
                 
                 [Flags]
@@ -146,23 +228,29 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x24)]
-        public class SkyShaderFunction : TagStructure
+        public class SkyShaderFunctionBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            /// <summary>
+            /// Global function that controls this shader value.
+            /// </summary>
             [TagField(Length = 32)]
-            public string GlobalFunctionName; // Global function that controls this shader value.
+            public string GlobalFunctionName;
         }
         
         [TagStructure(Size = 0x24)]
-        public class SkyAnimation : TagStructure
+        public class SkyAnimationBlock : TagStructure
         {
-            public short AnimationIndex; // Index of the animation in the animation graph.
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            /// <summary>
+            /// Index of the animation in the animation graph.
+            /// </summary>
+            public short AnimationIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float Period; // sec
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding2;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
         }
     }
 }

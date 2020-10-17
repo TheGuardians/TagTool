@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
@@ -28,7 +29,13 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             FitToAdpcmBlocksize = 1 << 0,
             SplitLongSoundIntoPermutations = 1 << 1,
+            /// <summary>
+            /// always play as 3d sound, even in first person
+            /// </summary>
             AlwaysSpatialize = 1 << 2,
+            /// <summary>
+            /// disable occlusion/obstruction for this sound
+            /// </summary>
             NeverObstruct = 1 << 3,
             InternalDonTTouch = 1 << 4,
             UseHugeSoundTransmission = 1 << 5,
@@ -43,7 +50,7 @@ namespace TagTool.Tags.Definitions.Gen2
             ProjectileImpact,
             ProjectileDetonation,
             ProjectileFlyby,
-            Unknown3,
+            Unknown,
             WeaponFire,
             WeaponReady,
             WeaponReload,
@@ -55,36 +62,36 @@ namespace TagTool.Tags.Definitions.Gen2
             WeaponAnimation,
             ObjectImpacts,
             ParticleImpacts,
-            Unknown15,
-            Unknown16,
-            Unknown17,
+            Unknown1,
+            Unknown2,
+            Unknown3,
             UnitFootsteps,
             UnitDialog,
             UnitAnimation,
-            Unknown21,
+            Unknown4,
             VehicleCollision,
             VehicleEngine,
             VehicleAnimation,
-            Unknown25,
+            Unknown5,
             DeviceDoor,
-            Unknown27,
+            Unknown6,
             DeviceMachinery,
             DeviceStationary,
-            Unknown30,
-            Unknown31,
+            Unknown7,
+            Unknown8,
             Music,
             AmbientNature,
             AmbientMachinery,
-            Unknown35,
+            Unknown9,
             HugeAss,
             ObjectLooping,
             CinematicMusic,
-            Unknown39,
-            Unknown40,
-            Unknown41,
-            Unknown42,
-            Unknown43,
-            Unknown44,
+            Unknown10,
+            Unknown11,
+            Unknown12,
+            Unknown13,
+            Unknown14,
+            Unknown15,
             CortanaMission,
             CortanaCinematic,
             MissionDialog,

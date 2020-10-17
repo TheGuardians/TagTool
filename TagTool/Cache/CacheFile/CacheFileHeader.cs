@@ -27,7 +27,7 @@ namespace TagTool.Cache
         public uint MemoryBufferOffset;
         public int MemoryBufferSize;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
         public int MemoryBufferCapacity;
 
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
@@ -42,7 +42,7 @@ namespace TagTool.Cache
         [TagField(Length = 32, MaxVersion = CacheVersion.HaloPC)]
         public string NameOld;
 
-        [TagField(Length = 256, MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(Length = 256, MinVersion = CacheVersion.Halo2Beta)]
         public string SourceFile;
 
         [TagField(Length = 32)]
@@ -57,51 +57,51 @@ namespace TagTool.Cache
         [TagField(MaxVersion = CacheVersion.HaloPC, Length = 0x794)]
         public byte[] Padding;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
         public uint CacheResourceCRC;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public bool Unknown2;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public bool TrackedBuild;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public bool Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public byte Unknown4;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int Unknown5;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int Unknown6;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int Unknown7;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int Unknown8;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int Unknown9;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
         public int StringIDsBufferAlignedOffset;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int StringIDsCount;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int StringIDsBufferSize;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public uint StringIDsIndicesOffset;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public uint StringIDsBufferOffset;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int ExternalDependencies;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public ulong Timestamp;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public ulong MainMenuTimestamp;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public ulong SharedTimestamp;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public ulong CampaignTimestamp;
         [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
         public ulong MultiplayerTimestamp;
@@ -119,25 +119,25 @@ namespace TagTool.Cache
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public int Unknown3LowDateTime;
 
-        [TagField(Length = 0x20, MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(Length = 0x20, MinVersion = CacheVersion.Halo2Beta)]
         public string Name;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int Unknown13;
 
-        [TagField(Length = 256, MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(Length = 256, MinVersion = CacheVersion.Halo2Beta)]
         public string ScenarioPath;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int MinorVersion;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int TagNamesCount;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public uint TagNamesBufferOffset;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public int TagNamesBufferSize;
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public uint TagNameIndicesOffset;
 
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
@@ -155,13 +155,13 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
         public uint FastLoadGeometryBlockSize = 0;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta)]
         public uint Checksum;
 
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
         public uint MoppCodesChecksum;
 
-        [TagField(Length = 1320, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Xbox)]
+        [TagField(Length = 1320, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Xbox)]
         public byte[] UnknownsH2X = new byte[1320];
 
         [TagField(Length = 1284, MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]

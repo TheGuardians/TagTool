@@ -2,62 +2,93 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "scenario_cluster_data_resource", Tag = "clu*", Size = 0x3C)]
+    [TagStructure(Name = "scenario_cluster_data_resource", Tag = "clu*", Size = 0x28)]
     public class ScenarioClusterDataResource : TagStructure
     {
-        public List<ScenarioClusterData> ClusterData;
-        public List<StructureBackgroundSoundPaletteEntry> BackgroundSoundPalette;
-        public List<StructureSoundEnvironmentPaletteEntry> SoundEnvironmentPalette;
-        public List<StructureWeatherPaletteEntry> WeatherPalette;
-        public List<ScenarioAtmosphericFogPaletteEntry> AtmosphericFogPalette;
+        public List<ScenarioClusterDataBlock> ClusterData;
+        public List<StructureBspBackgroundSoundPaletteBlock> BackgroundSoundPalette;
+        public List<StructureBspSoundEnvironmentPaletteBlock> SoundEnvironmentPalette;
+        public List<StructureBspWeatherPaletteBlock> WeatherPalette;
+        public List<ScenarioAtmosphericFogPalette> AtmosphericFogPalette;
         
-        [TagStructure(Size = 0x50)]
-        public class ScenarioClusterData : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class ScenarioClusterDataBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "sbsp" })]
             public CachedTag Bsp;
-            public List<ScenarioClusterProperty> BackgroundSounds;
-            public List<ScenarioClusterProperty> SoundEnvironments;
+            public List<ScenarioClusterBackgroundSoundsBlock> BackgroundSounds;
+            public List<ScenarioClusterSoundEnvironmentsBlock> SoundEnvironments;
             public int BspChecksum;
-            public List<RealPoint3d> ClusterCentroids;
-            public List<ScenarioClusterProperty> WeatherProperties;
-            public List<ScenarioClusterProperty> AtmosphericFogProperties;
+            public List<ScenarioClusterPointsBlock> ClusterCentroids;
+            public List<ScenarioClusterWeatherPropertiesBlock> WeatherProperties;
+            public List<ScenarioClusterAtmosphericFogPropertiesBlock> AtmosphericFogProperties;
             
             [TagStructure(Size = 0x4)]
-            public class ScenarioClusterProperty : TagStructure
+            public class ScenarioClusterBackgroundSoundsBlock : TagStructure
             {
                 public short Type;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+            }
+            
+            [TagStructure(Size = 0x4)]
+            public class ScenarioClusterSoundEnvironmentsBlock : TagStructure
+            {
+                public short Type;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
             
             [TagStructure(Size = 0xC)]
-            public class RealPoint3d : TagStructure
+            public class ScenarioClusterPointsBlock : TagStructure
             {
                 public RealPoint3d Centroid;
             }
+            
+            [TagStructure(Size = 0x4)]
+            public class ScenarioClusterWeatherPropertiesBlock : TagStructure
+            {
+                public short Type;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+            }
+            
+            [TagStructure(Size = 0x4)]
+            public class ScenarioClusterAtmosphericFogPropertiesBlock : TagStructure
+            {
+                public short Type;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+            }
         }
         
-        [TagStructure(Size = 0x74)]
-        public class StructureBackgroundSoundPaletteEntry : TagStructure
+        [TagStructure(Size = 0x64)]
+        public class StructureBspBackgroundSoundPaletteBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            [TagField(ValidTags = new [] { "lsnd" })]
             public CachedTag BackgroundSound;
-            public CachedTag InsideClusterSound; // Play only when player is inside cluster.
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding1;
+            /// <summary>
+            /// Play only when player is inside cluster.
+            /// </summary>
+            [TagField(ValidTags = new [] { "lsnd" })]
+            public CachedTag InsideClusterSound;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float CutoffDistance;
             public ScaleFlagsValue ScaleFlags;
             public float InteriorScale;
             public float PortalScale;
             public float ExteriorScale;
             public float InterpolationSpeed; // 1/sec
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding2;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [Flags]
             public enum ScaleFlagsValue : uint
@@ -69,113 +100,123 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x50)]
-        public class StructureSoundEnvironmentPaletteEntry : TagStructure
+        [TagStructure(Size = 0x48)]
+        public class StructureBspSoundEnvironmentPaletteBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            [TagField(ValidTags = new [] { "snde" })]
             public CachedTag SoundEnvironment;
             public float CutoffDistance;
             public float InterpolationSpeed; // 1/sec
-            [TagField(Flags = Padding, Length = 24)]
-            public byte[] Padding1;
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
-        [TagStructure(Size = 0x98)]
-        public class StructureWeatherPaletteEntry : TagStructure
+        [TagStructure(Size = 0x88)]
+        public class StructureBspWeatherPaletteBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            [TagField(ValidTags = new [] { "weat" })]
             public CachedTag WeatherSystem;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding3;
+            [TagField(ValidTags = new [] { "wind" })]
             public CachedTag Wind;
             public RealVector3d WindDirection;
             public float WindMagnitude;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding4;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             [TagField(Length = 32)]
             public string WindScaleFunction;
         }
         
-        [TagStructure(Size = 0x100)]
-        public class ScenarioAtmosphericFogPaletteEntry : TagStructure
+        [TagStructure(Size = 0xF4)]
+        public class ScenarioAtmosphericFogPalette : TagStructure
         {
             public StringId Name;
-            /// <summary>
-            /// ATMOSPHERIC FOG
-            /// </summary>
             public RealRgbColor Color;
+            /// <summary>
+            /// How far fog spreads into adjacent clusters: 0 defaults to 1.
+            /// </summary>
             public float SpreadDistance; // World Units
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            /// <summary>
+            /// Fog density clamps to this value.
+            /// </summary>
             public float MaximumDensity; // [0,1]
+            /// <summary>
+            /// Before this distance, there is no fog.
+            /// </summary>
             public float StartDistance; // World Units
+            /// <summary>
+            /// Fog becomes opaque (maximum density) at this distance from viewer.
+            /// </summary>
             public float OpaqueDistance; // World Units
-            /// <summary>
-            /// SECONDARY FOG
-            /// </summary>
             public RealRgbColor Color1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
-            public float MaximumDensity2; // [0,1]
-            public float StartDistance3; // World Units
-            public float OpaqueDistance4; // World Units
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding3;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             /// <summary>
-            /// PLANAR FOG OVERRIDE
+            /// Fog density clamps to this value.
             /// </summary>
-            /// <remarks>
+            public float MaximumDensity1; // [0,1]
+            /// <summary>
+            /// Before this distance, there is no fog.
+            /// </summary>
+            public float StartDistance1; // World Units
+            /// <summary>
+            /// Fog becomes opaque (maximum density) at this distance from viewer.
+            /// </summary>
+            public float OpaqueDistance1; // World Units
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+            /// <summary>
             /// Planar fog, if present, is interpolated toward these values.
-            /// </remarks>
+            /// </summary>
             public RealRgbColor PlanarColor;
             public float PlanarMaxDensity; // [0,1]
             public float PlanarOverrideAmount; // [0,1]
-            public float PlanarMinDistanceBias; // World Units
-            [TagField(Flags = Padding, Length = 44)]
-            public byte[] Padding4;
             /// <summary>
-            /// PATCHY FOG
+            /// Don't ask.
             /// </summary>
+            public float PlanarMinDistanceBias; // World Units
+            [TagField(Length = 0x2C, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             public RealRgbColor PatchyColor;
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Padding5;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
             public Bounds<float> PatchyDensity; // [0,1]
             public Bounds<float> PatchyDistance; // World Units
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding6;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
+            [TagField(ValidTags = new [] { "fpch" })]
             public CachedTag PatchyFog;
-            public List<ScenarioAtmosphericFogMixer> Mixers;
-            /// <summary>
-            /// BLOOM OVERRIDE
-            /// </summary>
+            public List<ScenarioAtmosphericFogMixerBlock> Mixers;
             public float Amount; // [0,1]
             public float Threshold; // [0,1]
             public float Brightness; // [0,1]
             public float GammaPower;
-            /// <summary>
-            /// CAMERA IMMERSION OVERRIDE
-            /// </summary>
             public CameraImmersionFlagsValue CameraImmersionFlags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding7;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding6;
             
             [TagStructure(Size = 0x10)]
-            public class ScenarioAtmosphericFogMixer : TagStructure
+            public class ScenarioAtmosphericFogMixerBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public StringId AtmosphericFogSource; // From Scenario Atmospheric Fog Palette
                 public StringId Interpolator; // From Scenario Interpolators
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2)]
+                public byte[] Unknown;
+                [TagField(Length = 0x2)]
                 public byte[] Unknown1;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Unknown2;
             }
             
             [Flags]

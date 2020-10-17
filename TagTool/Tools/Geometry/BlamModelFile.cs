@@ -409,6 +409,10 @@ namespace TagTool.Tools.Geometry
             {
                 var vertexStream = VertexStreamFactory.Create(version, vertexDataStream);
 
+                VertexStreamReach reachVertexStream = null;
+                if (version >= CacheVersion.HaloReach)
+                    reachVertexStream = (VertexStreamReach)vertexStream;
+
                 for (int j = 0; j < vertexCount; j++)
                 {
                     var vertex = new BMFVertex();
@@ -450,6 +454,42 @@ namespace TagTool.Tools.Geometry
                                 vertex.Weights[i] = new BMFVertexWeight { NodeIndex = skinned.BlendIndices[i], Weight = skinned.BlendWeights[i] };
                             }
                             break;
+                       
+                        case VertexBufferFormat.RigidCompressed:
+                            var compressedRigid = reachVertexStream.ReadReachRigidVertex();
+
+                            vertex.Position = vertexCompressor.DecompressPosition(compressedRigid.Position).IJK;
+                            texcoordTemp = vertexCompressor.DecompressUv(compressedRigid.Texcoord);
+                            vertex.Texcoord = new RealVector3d(texcoordTemp.I, texcoordTemp.J, 0.0f);
+                            vertex.Normal = compressedRigid.Normal;
+                            vertex.Tangent = compressedRigid.Tangent.IJK;
+                            vertex.Binormal = compressedRigid.Binormal;
+
+                            vertex.Weights[0] = new BMFVertexWeight { NodeIndex = rigidNodeIndex, Weight = 1.0f };
+
+                            for (int i = 1; i < 4; i++)
+                            {
+                                vertex.Weights[i] = new BMFVertexWeight();
+                            }
+
+                            break;
+
+                        case VertexBufferFormat.SkinnedCompressed:
+                            var compressedSkinned = reachVertexStream.ReadReachSkinnedVertex();
+
+                            vertex.Position = vertexCompressor.DecompressPosition(compressedSkinned.Position).IJK;
+                            texcoordTemp = vertexCompressor.DecompressUv(compressedSkinned.Texcoord);
+                            vertex.Texcoord = new RealVector3d(texcoordTemp.I, texcoordTemp.J, 0.0f);
+                            vertex.Normal = compressedSkinned.Normal;
+                            vertex.Tangent = compressedSkinned.Tangent.IJK;
+                            vertex.Binormal = compressedSkinned.Binormal;
+
+                            for (int i = 0; i < 4; i++)
+                            {
+                                vertex.Weights[i] = new BMFVertexWeight { NodeIndex = compressedSkinned.BlendIndices[i], Weight = compressedSkinned.BlendWeights[i] };
+                            }
+                            break;
+
                         default:
                             throw new InvalidOperationException("Unsupported vertex buffer type: " + vertexBuffer.Format);
                     }
@@ -606,7 +646,7 @@ namespace TagTool.Tools.Geometry
         [TagField(Length = Constants.StringLength, ForceNullTerminated = true)]
         public string Name;
 
-        public Mesh.Part.PartTypeNew DrawType = Mesh.Part.PartTypeNew.OpaqueShadowCasting;
+        public Part.PartTypeNew DrawType = Part.PartTypeNew.OpaqueShadowCasting;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
         public byte[] Padding;

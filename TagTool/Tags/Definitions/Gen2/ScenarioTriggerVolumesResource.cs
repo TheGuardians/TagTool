@@ -2,43 +2,43 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "scenario_trigger_volumes_resource", Tag = "trg*", Size = 0x18)]
+    [TagStructure(Name = "scenario_trigger_volumes_resource", Tag = "trg*", Size = 0x10)]
     public class ScenarioTriggerVolumesResource : TagStructure
     {
-        public List<ScenarioTriggerVolume> KillTriggerVolumes;
-        public List<ScenarioObjectName> ObjectNames;
+        public List<ScenarioTriggerVolumeBlock> KillTriggerVolumes;
+        public List<ScenarioObjectNamesBlock> ObjectNames;
         
         [TagStructure(Size = 0x44)]
-        public class ScenarioTriggerVolume : TagStructure
+        public class ScenarioTriggerVolumeBlock : TagStructure
         {
             public StringId Name;
             public short ObjectName;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public StringId NodeName;
-            public float Unknown3;
             [TagField(Length = 6)]
-            public float EmptyString;
+            public float[] Unknown1;
             public RealPoint3d Position;
             public RealPoint3d Extents;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short KillTriggerVolume;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
         }
         
         [TagStructure(Size = 0x24)]
-        public class ScenarioObjectName : TagStructure
+        public class ScenarioObjectNamesBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            public short Unknown;
             public short Unknown1;
-            public short Unknown2;
         }
     }
 }

@@ -2,35 +2,33 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x28C)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x1C4)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
     {
-        [TagField(Flags = Padding, Length = 2)]
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding1;
-        [TagField(Flags = Padding, Length = 2)]
+        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
         public byte[] Padding2;
-        [TagField(Flags = Padding, Length = 16)]
+        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
         public byte[] Padding3;
-        [TagField(Flags = Padding, Length = 8)]
+        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
         public byte[] Padding4;
-        [TagField(Flags = Padding, Length = 8)]
+        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
         public byte[] Padding5;
-        [TagField(Flags = Padding, Length = 16)]
+        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
         public byte[] Padding6;
-        [TagField(Flags = Padding, Length = 8)]
+        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
         public byte[] Padding7;
-        [TagField(Flags = Padding, Length = 8)]
-        public byte[] Padding8;
         /// <summary>
-        /// UI Rendering Globals
-        /// </summary>
-        /// <remarks>
         /// miscellaneous rendering globals, more below...
-        /// </remarks>
+        /// </summary>
         public float OverlayedScreenAlphaMod;
         public short IncTextUpdatePeriod; // milliseconds
         public short IncTextBlockCharacter; // ASCII code
@@ -40,186 +38,140 @@ namespace TagTool.Tags.Definitions.Gen2
         public float ProjectionPlaneDistance; // distance at which objects are rendered when z=0 (normal size)
         public float FarClipPlaneDistance; // objects farther than this are not drawn
         /// <summary>
-        /// Overlayed UI Color
-        /// </summary>
-        /// <remarks>
         /// This is the color of the overlayed ui effect; the alpha component is the maximum opacity
-        /// </remarks>
+        /// </summary>
         public RealArgbColor OverlayedInterfaceColor;
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Padding9;
+        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding8;
         /// <summary>
-        /// Displayed Errors
-        /// </summary>
-        /// <remarks>
         /// For each error condition displayed in the UI, set the title and description string ids here
-        /// </remarks>
-        public List<UiErrorCategory> Errors;
-        /// <summary>
-        /// Cursor Sound
         /// </summary>
-        /// <remarks>
+        public List<UiErrorCategoryBlock> Errors;
+        /// <summary>
         /// This is the sound that plays as you tab through items
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag;
         /// <summary>
-        /// Selection Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when an item is selected
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag1;
         /// <summary>
-        /// Error Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays to alert the user that something went wrong
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag2;
         /// <summary>
-        /// Advancing Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when advancing to a new screen
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag3;
         /// <summary>
-        /// Retreating Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when retreating to a previous screen
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag4;
         /// <summary>
-        /// Initial Login Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when advancing past the initial login screen
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag5;
         /// <summary>
-        /// VKBD Cursor Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when cursoring in the vkeyboard
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag6;
         /// <summary>
-        /// VKBD Character Insertion Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when selecting buttons in the vkeyboard
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag7;
         /// <summary>
-        /// Online Notification Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when you receive an online notification
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag8;
         /// <summary>
-        /// Tabbed View Pane Tabbing Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays when tabbing thru views in a tabbed view pane (eg, online menu)
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag9;
         /// <summary>
-        /// Pregame Countdown Timer Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays as the countdown timer progresses
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "snd!" })]
         public CachedTag SoundTag10;
-        public CachedTag Unknown1;
+        [TagField(ValidTags = new [] { "snd!" })]
+        public CachedTag Unknown;
         /// <summary>
-        /// Matchmaking Advance Sound
-        /// </summary>
-        /// <remarks>
         /// This is the sound that plays as matchmaking enters the final stage
-        /// </remarks>
-        public CachedTag SoundTag11;
-        public CachedTag Unknown2;
-        public CachedTag Unknown3;
-        public CachedTag Unknown4;
-        /// <summary>
-        /// Global Bitmaps
         /// </summary>
-        /// <remarks>
+        [TagField(ValidTags = new [] { "snd!" })]
+        public CachedTag SoundTag11;
+        [TagField(ValidTags = new [] { "snd!" })]
+        public CachedTag Unknown1;
+        [TagField(ValidTags = new [] { "snd!" })]
+        public CachedTag Unknown2;
+        [TagField(ValidTags = new [] { "snd!" })]
+        public CachedTag Unknown3;
+        /// <summary>
         /// Sprite sequences for global ui bitmaps, as follows:
         /// 1) vkeyboard cursor
         /// 
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag GlobalBitmapsTag;
         /// <summary>
-        /// Global Text Strings
-        /// </summary>
-        /// <remarks>
         /// Global UI Text goes here
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag UnicodeStringListTag;
         /// <summary>
-        /// Screen Animations
-        /// </summary>
-        /// <remarks>
         /// Animations used by screen definitions for transitions and ambient animating
-        /// </remarks>
-        public List<AnimationReference> ScreenAnimations;
-        /// <summary>
-        /// Polygonal Shape Groups
         /// </summary>
-        /// <remarks>
+        public List<AnimationReferenceBlock> ScreenAnimations;
+        /// <summary>
         /// Define the various groups of shape-objects for use on any ui screens here
-        /// </remarks>
-        public List<ShapeGroupReference> ShapeGroups;
-        /// <summary>
-        /// Persistant Background Animations
         /// </summary>
-        /// <remarks>
+        public List<ShapeGroupReferenceBlock> ShapeGroups;
+        /// <summary>
         /// These are the animations used by elements that live in the persistant background
-        /// </remarks>
-        public List<PersistantAnimationReference> Animations;
-        /// <summary>
-        /// List Skins
         /// </summary>
-        /// <remarks>
+        public List<PersistentBackgroundAnimationBlock> Animations;
+        /// <summary>
         /// These define the visual appearances (skins) available for UI lists
-        /// They are expected to be entered in the following order:
+        /// They are expected to be entered in the following
+        /// order:
         /// 0) default
         /// 1) squad lobby player list
         /// 2) settings list
         /// 3) playlist entry list
         /// 4) variants list
-        /// 5) game browser list
+        /// 5) game browser
+        /// list
         /// 6) online player menu
         /// 7) game setup menu
         /// 8) playlist contents display
         /// 9) profile picker
         /// 10) mp map list
-        /// 11) main menu
+        /// 11) main
+        /// menu
         /// 
-        /// </remarks>
-        public List<UserInterfaceListSkinReference> ListItemSkins;
-        /// <summary>
-        /// Additional UI Strings
         /// </summary>
-        /// <remarks>
+        public List<ListSkinReferenceBlock> ListItemSkins;
+        /// <summary>
         /// These are for specific purposes as noted
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag ButtonKeyTypeStrings;
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag GameTypeStrings;
-        public CachedTag Unknown5;
+        public CachedTag Unknown4;
+        public List<SkillToRankMappingBlock> SkillMappings;
         /// <summary>
-        /// Skill to rank mapping table
-        /// </summary>
-        public List<SkillToRankMapping> SkillMappings;
-        /// <summary>
-        /// WINDOW PARAMETERS
-        /// </summary>
-        /// <remarks>
         /// Various settings for different sized UI windows
-        /// </remarks>
+        /// </summary>
         public FullScreenHeaderTextFontValue FullScreenHeaderTextFont;
         public LargeDialogHeaderTextFontValue LargeDialogHeaderTextFont;
         public HalfDialogHeaderTextFontValue HalfDialogHeaderTextFont;
@@ -234,28 +186,27 @@ namespace TagTool.Tags.Definitions.Gen2
         public Rectangle2d QtrDialogHeaderTextBounds;
         public Rectangle2d QtrDialogButtonKeyTextBounds;
         /// <summary>
-        /// Main menu music
-        /// </summary>
-        /// <remarks>
         /// Looping sound that plays while the main menu is active
-        /// </remarks>
+        /// </summary>
+        [TagField(ValidTags = new [] { "lsnd" })]
         public CachedTag MainMenuMusic;
         public int MusicFadeTime; // milliseconds
         
-        [TagStructure(Size = 0x34)]
-        public class UiErrorCategory : TagStructure
+        [TagStructure(Size = 0x28)]
+        public class UiErrorCategoryBlock : TagStructure
         {
             public StringId CategoryName;
             public FlagsValue Flags;
             public DefaultButtonValue DefaultButton;
-            [TagField(Flags = Padding, Length = 1)]
-            public byte[] Padding1;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(ValidTags = new [] { "unic" })]
             public CachedTag StringTag;
             public StringId DefaultTitle;
             public StringId DefaultMessage;
             public StringId DefaultOk;
             public StringId DefaultCancel;
-            public List<UiError> ErrorBlock;
+            public List<UiErrorBlock> ErrorBlock;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -271,13 +222,13 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x18)]
-            public class UiError : TagStructure
+            public class UiErrorBlock : TagStructure
             {
                 public ErrorValue Error;
                 public FlagsValue Flags;
                 public DefaultButtonValue DefaultButton;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding1;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public StringId Title;
                 public StringId Message;
                 public StringId Ok;
@@ -556,37 +507,28 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x38)]
-        public class AnimationReference : TagStructure
+        [TagStructure(Size = 0x2C)]
+        public class AnimationReferenceBlock : TagStructure
         {
             public FlagsValue Flags;
             /// <summary>
-            /// Primary Intro Transition
-            /// </summary>
-            /// <remarks>
             /// Defines the primary intro transitional animation
-            /// </remarks>
+            /// </summary>
             public int AnimationPeriod; // milliseconds
-            public List<AnimationKeyframeReference> Keyframes;
+            public List<ScreenAnimationKeyframeReferenceBlock> Keyframes;
             /// <summary>
-            /// Primary Outro Transition
-            /// </summary>
-            /// <remarks>
             /// Defines the primary outro transitional animation
-            /// </remarks>
-            public int AnimationPeriod1; // milliseconds
-            public List<AnimationKeyframeReference> Keyframes2;
-            /// <summary>
-            /// Ambient Animation
             /// </summary>
-            /// <remarks>
+            public int AnimationPeriod1; // milliseconds
+            public List<ScreenAnimationKeyframeReferenceBlock1> Keyframes1;
+            /// <summary>
             /// Defines the ambient animation
-            /// </remarks>
-            public int AnimationPeriod3; // milliseconds
+            /// </summary>
+            public int AnimationPeriod2; // milliseconds
             public AmbientAnimationLoopingStyleValue AmbientAnimationLoopingStyle;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public List<AnimationKeyframeReference> Keyframes4;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<ScreenAnimationKeyframeReferenceBlock2> Keyframes2;
             
             [Flags]
             public enum FlagsValue : uint
@@ -595,10 +537,19 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x14)]
-            public class AnimationKeyframeReference : TagStructure
+            public class ScreenAnimationKeyframeReferenceBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public float Alpha;
+                public RealPoint3d Position;
+            }
+            
+            [TagStructure(Size = 0x14)]
+            public class ScreenAnimationKeyframeReferenceBlock1 : TagStructure
+            {
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float Alpha;
                 public RealPoint3d Position;
             }
@@ -610,44 +561,44 @@ namespace TagTool.Tags.Definitions.Gen2
                 Loop,
                 DonTLoop
             }
+            
+            [TagStructure(Size = 0x14)]
+            public class ScreenAnimationKeyframeReferenceBlock2 : TagStructure
+            {
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public float Alpha;
+                public RealPoint3d Position;
+            }
         }
         
-        [TagStructure(Size = 0x24)]
-        public class ShapeGroupReference : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class ShapeGroupReferenceBlock : TagStructure
         {
             /// <summary>
-            /// Unused Debug Geometry Shapes
-            /// </summary>
-            /// <remarks>
             /// This is the old way
-            /// </remarks>
-            public List<ShapeBlockReference> Shapes;
-            /// <summary>
-            /// Model-Light Groups
             /// </summary>
-            /// <remarks>
+            public List<ShapeBlockReferenceBlock> Shapes;
+            /// <summary>
             /// Specify commonly used model/light groups here
-            /// </remarks>
-            public List<UiModelSceneReference> ModelSceneBlocks;
-            /// <summary>
-            /// Bitmaps
             /// </summary>
-            /// <remarks>
+            public List<UiModelSceneReferenceBlock> ModelSceneBlocks;
+            /// <summary>
             /// Specify more flavor bitmaps here
-            /// </remarks>
-            public List<BitmapBlockReference> BitmapBlocks;
+            /// </summary>
+            public List<BitmapBlockReferenceBlock> BitmapBlocks;
             
-            [TagStructure(Size = 0x34)]
-            public class ShapeBlockReference : TagStructure
+            [TagStructure(Size = 0x30)]
+            public class ShapeBlockReferenceBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
                 public RealArgbColor Color;
-                public List<PointBlockReference> Points;
+                public List<PointBlockReferenceBlock> Points;
                 public short RenderDepthBias;
-                [TagField(Flags = Padding, Length = 14)]
-                public byte[] Padding1;
+                [TagField(Length = 0xE, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 
                 [Flags]
                 public enum FlagsValue : uint
@@ -725,33 +676,32 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x4)]
-                public class PointBlockReference : TagStructure
+                public class PointBlockReferenceBlock : TagStructure
                 {
                     public Point2d Coordinates;
                 }
             }
             
-            [TagStructure(Size = 0x54)]
-            public class UiModelSceneReference : TagStructure
+            [TagStructure(Size = 0x4C)]
+            public class UiModelSceneReferenceBlock : TagStructure
             {
                 /// <summary>
-                /// NOTE on coordinate systems
-                /// </summary>
-                /// <remarks>
                 /// Halo y-axis=ui z-axis, and Halo z-axis=ui y-axis.
-                /// As a convention, let's always place objects in the ui scenario such that
+                /// As a convention, let's always place objects in the ui scenario such
+                /// that
                 /// they are facing in the '-y' direction, and the camera such that is is
-                /// facing the '+y' direction. This way the ui animation for models (which
+                /// facing the '+y' direction. This way the ui
+                /// animation for models (which
                 /// gets applied to the camera) will always be consisitent.
-                /// </remarks>
+                /// </summary>
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
                 public short IntroAnimationDelayMilliseconds;
                 public short RenderDepthBias;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
-                public List<UiObjectReference> Objects;
-                public List<UiLightReference> Lights;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<UiObjectReferenceBlock> Objects;
+                public List<UiLightReferenceBlock> Lights;
                 public RealVector3d AnimationScaleFactor;
                 public RealPoint3d CameraPosition;
                 public float FovDegress;
@@ -836,22 +786,22 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class UiObjectReference : TagStructure
+                public class UiObjectReferenceBlock : TagStructure
                 {
                     [TagField(Length = 32)]
                     public string Name;
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class UiLightReference : TagStructure
+                public class UiLightReferenceBlock : TagStructure
                 {
                     [TagField(Length = 32)]
                     public string Name;
                 }
             }
             
-            [TagStructure(Size = 0x40)]
-            public class BitmapBlockReference : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class BitmapBlockReferenceBlock : TagStructure
             {
                 public FlagsValue Flags;
                 public AnimationIndexValue AnimationIndex;
@@ -861,10 +811,11 @@ namespace TagTool.Tags.Definitions.Gen2
                 public Point2d TopLeft;
                 public float HorizTextureWrapsSecond;
                 public float VertTextureWrapsSecond;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag BitmapTag;
                 public short RenderDepthBias;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float SpriteAnimationSpeedFps;
                 public Point2d ProgressBottomLeft;
                 public StringId StringIdentifier;
@@ -956,16 +907,16 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x14)]
-        public class PersistantAnimationReference : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class PersistentBackgroundAnimationBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public int AnimationPeriod; // milliseconds
-            public List<AnimationKeyframeReference> InterpolatedKeyframes;
+            public List<BackgroundAnimationKeyframeReferenceBlock> InterpolatedKeyframes;
             
             [TagStructure(Size = 0x14)]
-            public class AnimationKeyframeReference : TagStructure
+            public class BackgroundAnimationKeyframeReferenceBlock : TagStructure
             {
                 public int StartTransitionIndex;
                 public float Alpha;
@@ -973,14 +924,15 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x10)]
-        public class UserInterfaceListSkinReference : TagStructure
+        [TagStructure(Size = 0x8)]
+        public class ListSkinReferenceBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "skin" })]
             public CachedTag ListItemSkins;
         }
         
         [TagStructure(Size = 0x4)]
-        public class SkillToRankMapping : TagStructure
+        public class SkillToRankMappingBlock : TagStructure
         {
             public Bounds<short> SkillBounds;
         }

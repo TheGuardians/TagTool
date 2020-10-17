@@ -227,7 +227,7 @@ namespace TagTool.Geometry
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="part">The mesh part to read.</param>
         /// <returns>The index buffer converted into a triangle list.</returns>
-        private static ushort[] ReadIndices(MeshReader reader, Mesh.Part part)
+        private static ushort[] ReadIndices(MeshReader reader, Part part)
         {
             // Use index buffer 0
             var indexBuffer = reader.IndexBuffers[0];

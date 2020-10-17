@@ -8,8 +8,10 @@ namespace TagTool.Ai
         public CharacterMetagameFlags Flags;
         public CharacterMetagameUnit Unit;
         public CharacterMetagameClassification Classification;
-        public sbyte Unknown;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+        public byte[] pad0 = new byte[1];
         public short Points;
-        public short Unknown2;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        public byte[] pad1 = new byte[2];
     }
 }

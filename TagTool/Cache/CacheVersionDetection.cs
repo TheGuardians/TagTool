@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TagTool.Tags;
 
 namespace TagTool.Cache
@@ -13,15 +14,15 @@ namespace TagTool.Cache
         /// <returns>The engine version if the timestamp matched directly, otherwise <see cref="CacheVersion.Unknown"/>.</returns>
         public static CacheVersion DetectFromTimestamp(long timestamp, out CacheVersion closestGuess)
         {
-            var index = Array.BinarySearch(VersionTimestamps, timestamp);
-            if (index >= 0)
+            if (HaloOnlineTimestampMapping.ContainsKey(timestamp))
             {
-                // Version matches a timestamp directly
-                closestGuess = (CacheVersion)index;
+                closestGuess = HaloOnlineTimestampMapping[timestamp];
                 return closestGuess;
             }
 
+            // (INACCURATE)
             // Match the closest timestamp
+            var index = Array.BinarySearch(VersionTimestamps, timestamp);
             index = Math.Max(0, Math.Min(~index - 1, VersionTimestamps.Length - 1));
             closestGuess = (CacheVersion)index;
             return CacheVersion.Unknown;
@@ -56,6 +57,8 @@ namespace TagTool.Cache
                     return CacheVersion.HaloPC;
                 case "01.00.00.0609":
                     return CacheVersion.HaloCustomEdition;
+                case "02.06.28.07902":
+                    return CacheVersion.Halo2Beta;
                 case "02.09.27.09809":
                     return CacheVersion.Halo2Xbox;
                 case "11081.07.04.30.0934.main":
@@ -127,6 +130,8 @@ namespace TagTool.Cache
                     return "01.00.00.0564";
                 case CacheVersion.HaloCustomEdition:
                     return "01.00.00.0609";
+                case CacheVersion.Halo2Beta:
+                    return "02.06.28.07902";
                 case CacheVersion.Halo2Xbox:
                     return "02.09.27.09809";
                 case CacheVersion.Halo2Vista:
@@ -197,6 +202,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloXbox:
                 case CacheVersion.HaloPC:
                 case CacheVersion.HaloCustomEdition:
+                case CacheVersion.Halo2Beta:
 				case CacheVersion.Halo2Xbox:
 				case CacheVersion.Halo2Vista:
 				case CacheVersion.HaloOnline106708:
@@ -310,6 +316,7 @@ namespace TagTool.Cache
             {
                 case CacheVersion.HaloXbox:
                 case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Beta:
                     return platform.HasFlag(CachePlatform.Xbox);
 
                 case CacheVersion.Halo3Beta:
@@ -366,6 +373,7 @@ namespace TagTool.Cache
 
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Beta:
                     return CacheGeneration.Second;
 
                 case CacheVersion.Halo3Beta:
@@ -399,6 +407,29 @@ namespace TagTool.Cache
                     return CacheGeneration.Unknown;
             }
         }
+
+        /// <summary>
+        /// tags.dat timestamps for each halo online game version.
+        /// Timestamps in here map directly to a <see cref="CacheVersion"/> value.
+        /// </summary>
+        private static readonly Dictionary<long, CacheVersion> HaloOnlineTimestampMapping = new Dictionary<long, CacheVersion>
+        {
+            [130713360239499012] = CacheVersion.HaloOnline106708,
+            [130772932862346058] = CacheVersion.HaloOnline235640,
+            [130785901486445524] = CacheVersion.HaloOnline301003,
+            [130800445160458507] = CacheVersion.HaloOnline327043,
+            [130814318396118255] = CacheVersion.HaloOnline372731,
+            [130829123589114103] = CacheVersion.HaloOnline416097,
+            [130834294034159845] = CacheVersion.HaloOnline430475,
+            [130844512316254660] = CacheVersion.HaloOnline454665,
+            [130851642645809862] = CacheVersion.HaloOnline449175,
+            [130858473716879375] = CacheVersion.HaloOnline498295,
+            [130868891945946004] = CacheVersion.HaloOnline530605,
+            [130869644198634503] = CacheVersion.HaloOnline532911,
+            [130879952719550501] = CacheVersion.HaloOnline554482,
+            [130881889330693956] = CacheVersion.HaloOnline571627,
+            [130930071628935939] = CacheVersion.HaloOnline700123
+        };
 
         /// <summary>
         /// tags.dat timestamps for each game version.
@@ -443,6 +474,7 @@ namespace TagTool.Cache
         HaloXbox,
         HaloPC,
         HaloCustomEdition,
+        Halo2Beta,
         Halo2Xbox,
         Halo2Vista,
         Halo3Beta,

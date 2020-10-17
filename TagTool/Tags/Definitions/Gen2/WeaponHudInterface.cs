@@ -2,71 +2,71 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "weapon_hud_interface", Tag = "wphi", Size = 0x17C)]
+    [TagStructure(Name = "weapon_hud_interface", Tag = "wphi", Size = 0x158)]
     public class WeaponHudInterface : TagStructure
     {
+        [TagField(ValidTags = new [] { "wphi" })]
         public CachedTag ChildHud;
-        /// <summary>
-        /// Flash cutoffs
-        /// </summary>
         public FlagsValue Flags;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public short InventoryAmmoCutoff;
         public short LoadedAmmoCutoff;
         public short HeatCutoff;
         public short AgeCutoff;
-        [TagField(Flags = Padding, Length = 32)]
-        public byte[] Padding2;
-        /// <summary>
-        /// Weapon hud screen alignment
-        /// </summary>
+        [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public AnchorValue Anchor;
-        [TagField(Flags = Padding, Length = 2)]
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+        [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
         public byte[] Padding3;
-        [TagField(Flags = Padding, Length = 32)]
-        public byte[] Padding4;
-        public List<WeaponHudStaticElement> StaticElements;
-        public List<WeaponHudMeterElement> MeterElements;
-        public List<WeaponHudNumberElement> NumberElements;
+        public List<WeaponHudStaticBlock> StaticElements;
+        public List<WeaponHudMeterBlock> MeterElements;
+        public List<WeaponHudNumberBlock> NumberElements;
         /// <summary>
-        /// Crosshairs
-        /// </summary>
-        /// <remarks>
         /// Crosshairs always go in the center of the screen.
         /// Crosshairs can be attached to one of four different states:
         /// 
-        /// * Aim: Default crosshair. Frame 0 is the default state, frame 1 is the auto-aim state (frame rate ignored)
-        /// * Zoom: Zoom overlay. Each zoom level has a corresponding frame (frame rate ignored)
-        /// * Charge: Charging overlay. If you wish to display an animation for charging, put it here.
+        /// * Aim:
+        /// Default crosshair. Frame 0 is the default state, frame 1 is the auto-aim state (frame rate ignored)
+        /// * Zoom: Zoom overlay.
+        /// Each zoom level has a corresponding frame (frame rate ignored)
+        /// * Charge: Charging overlay. If you wish to display an
+        /// animation for charging, put it here.
         /// * Flash: Similar to charging, but for low ammo/batter/heat states
-        /// * Reload/Overheat: Similar to charging, but for reloading/overheating
+        /// * Reload/Overheat:
+        /// Similar to charging, but for reloading/overheating
         /// 
-        /// </remarks>
-        public List<WeaponHudCrosshairsElement> Crosshairs;
-        public List<WeaponHudOverlaysElement> OverlayElements;
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Padding5;
-        public List<GNullBlock> Unknown1;
-        public List<HudScreenEffectDefinition> ScreenEffect;
-        [TagField(Flags = Padding, Length = 132)]
-        public byte[] Padding6;
-        /// <summary>
-        /// Messaging information
         /// </summary>
-        public short SequenceIndex; // sequence index into the global hud icon bitmap
-        public short WidthOffset; // extra spacing beyond bitmap width for text alignment
+        public List<WeaponHudCrosshairBlock> Crosshairs;
+        public List<WeaponHudOverlaysBlock> OverlayElements;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding4;
+        public List<GNullBlock> Unknown;
+        public List<GlobalHudScreenEffectDefinition> ScreenEffect;
+        [TagField(Length = 0x84, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding5;
+        /// <summary>
+        /// sequence index into the global hud icon bitmap
+        /// </summary>
+        public short SequenceIndex;
+        /// <summary>
+        /// extra spacing beyond bitmap width for text alignment
+        /// </summary>
+        public short WidthOffset;
         public Point2d OffsetFromReferenceCorner;
         public ArgbColor OverrideIconColor;
         public sbyte FrameRate030;
-        public FlagsValue Flags1;
+        public FlagsValue1 Flags1;
         public short TextIndex;
-        [TagField(Flags = Padding, Length = 48)]
-        public byte[] Padding7;
+        [TagField(Length = 0x30, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding6;
         
         [Flags]
         public enum FlagsValue : ushort
@@ -84,44 +84,51 @@ namespace TagTool.Tags.Definitions.Gen2
             Crosshair
         }
         
-        [TagStructure(Size = 0xB4)]
-        public class WeaponHudStaticElement : TagStructure
+        [TagStructure(Size = 0xA8)]
+        public class WeaponHudStaticBlock : TagStructure
         {
             public StateAttachedToValue StateAttachedTo;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public CanUseOnMapTypeValue CanUseOnMapType;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding3;
             public Point2d AnchorOffset;
             public float WidthScale;
             public float HeightScale;
             public ScalingFlagsValue ScalingFlags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
             public byte[] Padding4;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding5;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag InterfaceBitmap;
             public ArgbColor DefaultColor;
             public ArgbColor FlashingColor;
             public float FlashPeriod;
-            public float FlashDelay; // time between flashes
+            /// <summary>
+            /// time between flashes
+            /// </summary>
+            public float FlashDelay;
             public short NumberOfFlashes;
             public FlashFlagsValue FlashFlags;
-            public float FlashLength; // time of each flash
+            /// <summary>
+            /// time of each flash
+            /// </summary>
+            public float FlashLength;
             public ArgbColor DisabledColor;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding6;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
             public short SequenceIndex;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding6;
+            public List<GlobalHudMultitextureOverlayDefinition> MultitexOverlay;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding7;
-            public List<MultitextureOverlayHudElementDefinition> MultitexOverlay;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
             public byte[] Padding8;
-            [TagField(Flags = Padding, Length = 40)]
-            public byte[] Padding9;
             
             public enum StateAttachedToValue : short
             {
@@ -155,75 +162,64 @@ namespace TagTool.Tags.Definitions.Gen2
                 ReverseDefaultFlashingColors = 1 << 0
             }
             
-            [TagStructure(Size = 0x1E0)]
-            public class MultitextureOverlayHudElementDefinition : TagStructure
+            [TagStructure(Size = 0x1C4)]
+            public class GlobalHudMultitextureOverlayDefinition : TagStructure
             {
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short Type;
                 public FramebufferBlendFuncValue FramebufferBlendFunc;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 32)]
-                public byte[] Padding3;
                 /// <summary>
-                /// anchors
-                /// </summary>
-                /// <remarks>
                 /// where you want the origin of the texture.
                 /// *"texture" uses the texture coordinates supplied
-                /// *"screen" uses the origin of the screen as the origin of the texture
-                /// </remarks>
+                /// *"screen" uses the origin of
+                /// the screen as the origin of the texture
+                /// </summary>
                 public PrimaryAnchorValue PrimaryAnchor;
                 public SecondaryAnchorValue SecondaryAnchor;
                 public TertiaryAnchorValue TertiaryAnchor;
                 /// <summary>
-                /// blending function
-                /// </summary>
-                /// <remarks>
                 /// how to blend the textures together
-                /// </remarks>
+                /// </summary>
                 public _0To1BlendFuncValue _0To1BlendFunc;
                 public _1To2BlendFuncValue _1To2BlendFunc;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding4;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding3;
                 /// <summary>
-                /// map scales
-                /// </summary>
-                /// <remarks>
                 /// how much to scale the textures
-                /// </remarks>
+                /// </summary>
                 public RealPoint2d PrimaryScale;
                 public RealPoint2d SecondaryScale;
                 public RealPoint2d TertiaryScale;
                 /// <summary>
-                /// map offsets
-                /// </summary>
-                /// <remarks>
                 /// how much to offset the origin of the texture
-                /// </remarks>
+                /// </summary>
                 public RealPoint2d PrimaryOffset;
                 public RealPoint2d SecondaryOffset;
                 public RealPoint2d TertiaryOffset;
                 /// <summary>
-                /// map
-                /// </summary>
-                /// <remarks>
                 /// which maps to use
-                /// </remarks>
+                /// </summary>
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag Primary;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag Secondary;
+                [TagField(ValidTags = new [] { "bitm" })]
                 public CachedTag Tertiary;
                 public PrimaryWrapModeValue PrimaryWrapMode;
                 public SecondaryWrapModeValue SecondaryWrapMode;
                 public TertiaryWrapModeValue TertiaryWrapMode;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding4;
+                [TagField(Length = 0xB8, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding5;
-                [TagField(Flags = Padding, Length = 184)]
+                public List<GlobalHudMultitextureOverlayEffectorDefinition> Effectors;
+                [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding6;
-                public List<MultitextureOverlayHudElementEffectorDefinition> Effectors;
-                [TagField(Flags = Padding, Length = 128)]
-                public byte[] Padding7;
                 
                 public enum FramebufferBlendFuncValue : short
                 {
@@ -295,55 +291,46 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0xDC)]
-                public class MultitextureOverlayHudElementEffectorDefinition : TagStructure
+                public class GlobalHudMultitextureOverlayEffectorDefinition : TagStructure
                 {
-                    [TagField(Flags = Padding, Length = 64)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     /// <summary>
-                    /// source/destination
-                    /// </summary>
-                    /// <remarks>
                     /// These describe the relationship that causes the effect.
-                    /// * destination type is the type of variable you want to be effected
+                    /// * destination type is the type of variable you want to be
+                    /// effected
                     /// * destination tells which texture map (or geometry offset) to apply it to
-                    /// * source says which value to look at when computing the effect
-                    /// </remarks>
+                    /// * source says which value to look at
+                    /// when computing the effect
+                    /// </summary>
                     public DestinationTypeValue DestinationType;
                     public DestinationValue Destination;
                     public SourceValue Source;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding2;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding1;
                     /// <summary>
-                    /// in/out bounds
+                    /// When the source is at the lower inbound, the destination ends up the lower outbound and vice-versa applies for the upper
+                    /// values.
                     /// </summary>
-                    /// <remarks>
-                    /// When the source is at the lower inbound, the destination ends up the lower outbound and vice-versa applies for the upper values.
-                    /// </remarks>
                     public Bounds<float> InBounds; // source units
                     public Bounds<float> OutBounds; // pixels
-                    [TagField(Flags = Padding, Length = 64)]
-                    public byte[] Padding3;
+                    [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding2;
                     /// <summary>
-                    /// tint color bounds
-                    /// </summary>
-                    /// <remarks>
                     /// If destination is tint, these values are used instead of the out bounds.
-                    /// </remarks>
+                    /// </summary>
                     public RealRgbColor TintColorLowerBound;
                     public RealRgbColor TintColorUpperBound;
                     /// <summary>
-                    /// periodic functions
-                    /// </summary>
-                    /// <remarks>
                     /// If you use a periodic function as the source, this lets you tweak it.
-                    /// </remarks>
+                    /// </summary>
                     public PeriodicFunctionValue PeriodicFunction;
-                    [TagField(Flags = Padding, Length = 2)]
-                    public byte[] Padding4;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding3;
                     public float FunctionPeriod; // seconds
                     public float FunctionPhase; // seconds
-                    [TagField(Flags = Padding, Length = 32)]
-                    public byte[] Padding5;
+                    [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding4;
                     
                     public enum DestinationTypeValue : short
                     {
@@ -392,25 +379,26 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0xB4)]
-        public class WeaponHudMeterElement : TagStructure
+        [TagStructure(Size = 0xA8)]
+        public class WeaponHudMeterBlock : TagStructure
         {
             public StateAttachedToValue StateAttachedTo;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public CanUseOnMapTypeValue CanUseOnMapType;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding3;
             public Point2d AnchorOffset;
             public float WidthScale;
             public float HeightScale;
             public ScalingFlagsValue ScalingFlags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
             public byte[] Padding4;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding5;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag MeterBitmap;
             public ArgbColor ColorAtMeterMinimum;
             public ArgbColor ColorAtMeterMaximum;
@@ -421,15 +409,18 @@ namespace TagTool.Tags.Definitions.Gen2
             public short SequenceIndex;
             public sbyte AlphaMultiplier;
             public sbyte AlphaBias;
-            public short ValueScale; // used for non-integral values, i.e. health and shields
+            /// <summary>
+            /// used for non-integral values, i.e. health and shields
+            /// </summary>
+            public short ValueScale;
             public float Opacity;
             public float Translucency;
             public ArgbColor DisabledColor;
-            public List<GNullBlock> Unknown1;
-            [TagField(Flags = Padding, Length = 4)]
+            public List<GNullBlock> Unknown;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
+            [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
             public byte[] Padding6;
-            [TagField(Flags = Padding, Length = 40)]
-            public byte[] Padding7;
             
             public enum StateAttachedToValue : short
             {
@@ -474,46 +465,52 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0xA0)]
-        public class WeaponHudNumberElement : TagStructure
+        public class WeaponHudNumberBlock : TagStructure
         {
             public StateAttachedToValue StateAttachedTo;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public CanUseOnMapTypeValue CanUseOnMapType;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding3;
             public Point2d AnchorOffset;
             public float WidthScale;
             public float HeightScale;
             public ScalingFlagsValue ScalingFlags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
             public byte[] Padding4;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Padding5;
             public ArgbColor DefaultColor;
             public ArgbColor FlashingColor;
             public float FlashPeriod;
-            public float FlashDelay; // time between flashes
+            /// <summary>
+            /// time between flashes
+            /// </summary>
+            public float FlashDelay;
             public short NumberOfFlashes;
             public FlashFlagsValue FlashFlags;
-            public float FlashLength; // time of each flash
+            /// <summary>
+            /// time of each flash
+            /// </summary>
+            public float FlashLength;
             public ArgbColor DisabledColor;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding6;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
             public sbyte MaximumNumberOfDigits;
             public FlagsValue Flags;
             public sbyte NumberOfFractionalDigits;
-            [TagField(Flags = Padding, Length = 1)]
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding6;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
             public byte[] Padding7;
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Padding8;
             public WeaponSpecificFlagsValue WeaponSpecificFlags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding8;
+            [TagField(Length = 0x24, Flags = TagFieldFlags.Padding)]
             public byte[] Padding9;
-            [TagField(Flags = Padding, Length = 36)]
-            public byte[] Padding10;
             
             public enum StateAttachedToValue : short
             {
@@ -562,21 +559,22 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x68)]
-        public class WeaponHudCrosshairsElement : TagStructure
+        [TagStructure(Size = 0x5C)]
+        public class WeaponHudCrosshairBlock : TagStructure
         {
             public CrosshairTypeValue CrosshairType;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public CanUseOnMapTypeValue CanUseOnMapType;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding3;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag CrosshairBitmap;
-            public List<WeaponHudCrosshairItem> CrosshairOverlays;
-            [TagField(Flags = Padding, Length = 40)]
-            public byte[] Padding4;
+            public List<WeaponHudCrosshairItemBlock> CrosshairOverlays;
+            [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             
             public enum CrosshairTypeValue : short
             {
@@ -609,31 +607,37 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x6C)]
-            public class WeaponHudCrosshairItem : TagStructure
+            public class WeaponHudCrosshairItemBlock : TagStructure
             {
                 public Point2d AnchorOffset;
                 public float WidthScale;
                 public float HeightScale;
                 public ScalingFlagsValue ScalingFlags;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 20)]
-                public byte[] Padding2;
                 public ArgbColor DefaultColor;
                 public ArgbColor FlashingColor;
                 public float FlashPeriod;
-                public float FlashDelay; // time between flashes
+                /// <summary>
+                /// time between flashes
+                /// </summary>
+                public float FlashDelay;
                 public short NumberOfFlashes;
                 public FlashFlagsValue FlashFlags;
-                public float FlashLength; // time of each flash
+                /// <summary>
+                /// time of each flash
+                /// </summary>
+                public float FlashLength;
                 public ArgbColor DisabledColor;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding3;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
                 public short FrameRate;
                 public short SequenceIndex;
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 32)]
-                public byte[] Padding4;
+                [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding3;
                 
                 [Flags]
                 public enum ScalingFlagsValue : ushort
@@ -662,21 +666,22 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x68)]
-        public class WeaponHudOverlaysElement : TagStructure
+        [TagStructure(Size = 0x5C)]
+        public class WeaponHudOverlaysBlock : TagStructure
         {
             public StateAttachedToValue StateAttachedTo;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public CanUseOnMapTypeValue CanUseOnMapType;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding3;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag OverlayBitmap;
-            public List<WeaponHudOverlayItem> Overlays;
-            [TagField(Flags = Padding, Length = 40)]
-            public byte[] Padding4;
+            public List<WeaponHudOverlayBlock> Overlays;
+            [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             
             public enum StateAttachedToValue : short
             {
@@ -698,36 +703,42 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x88)]
-            public class WeaponHudOverlayItem : TagStructure
+            public class WeaponHudOverlayBlock : TagStructure
             {
                 public Point2d AnchorOffset;
                 public float WidthScale;
                 public float HeightScale;
                 public ScalingFlagsValue ScalingFlags;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Flags = Padding, Length = 20)]
-                public byte[] Padding2;
                 public ArgbColor DefaultColor;
                 public ArgbColor FlashingColor;
                 public float FlashPeriod;
-                public float FlashDelay; // time between flashes
+                /// <summary>
+                /// time between flashes
+                /// </summary>
+                public float FlashDelay;
                 public short NumberOfFlashes;
                 public FlashFlagsValue FlashFlags;
-                public float FlashLength; // time of each flash
+                /// <summary>
+                /// time of each flash
+                /// </summary>
+                public float FlashLength;
                 public ArgbColor DisabledColor;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding3;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
                 public short FrameRate;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding4;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding3;
                 public short SequenceIndex;
                 public TypeValue Type;
                 public FlagsValue Flags;
-                [TagField(Flags = Padding, Length = 16)]
+                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding4;
+                [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding5;
-                [TagField(Flags = Padding, Length = 40)]
-                public byte[] Padding6;
                 
                 [Flags]
                 public enum ScalingFlagsValue : ushort
@@ -765,56 +776,51 @@ namespace TagTool.Tags.Definitions.Gen2
         {
         }
         
-        [TagStructure(Size = 0x160)]
-        public class HudScreenEffectDefinition : TagStructure
+        [TagStructure(Size = 0x140)]
+        public class GlobalHudScreenEffectDefinition : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             /// <summary>
-            /// Mask
-            /// </summary>
-            /// <remarks>
             /// Mask bitmap overlay. Use either a 2D bitmap or an interface bitmap.
-            /// </remarks>
+            /// </summary>
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 16)]
-            public byte[] Padding3;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag MaskFullscreen;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag MaskSplitscreen;
-            [TagField(Flags = Padding, Length = 8)]
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
             public byte[] Padding4;
-            [TagField(Flags = Padding, Length = 20)]
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
             public byte[] Padding5;
-            [TagField(Flags = Padding, Length = 24)]
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
             public byte[] Padding6;
-            [TagField(Flags = Padding, Length = 8)]
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
             public byte[] Padding7;
-            [TagField(Flags = Padding, Length = 24)]
+            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
             public byte[] Padding8;
-            [TagField(Flags = Padding, Length = 20)]
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
             public byte[] Padding9;
-            [TagField(Flags = Padding, Length = 24)]
-            public byte[] Padding10;
-            /// <summary>
-            /// Screen effect (fullscreen)
-            /// </summary>
             public ScreenEffectFlagsValue ScreenEffectFlags;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding11;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding10;
+            [TagField(ValidTags = new [] { "egor" })]
             public CachedTag ScreenEffect;
-            [TagField(Flags = Padding, Length = 32)]
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding11;
+            public ScreenEffectFlagsValue1 ScreenEffectFlags1;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
             public byte[] Padding12;
-            /// <summary>
-            /// Screen effect (splitscreen)
-            /// </summary>
-            public ScreenEffectFlagsValue ScreenEffectFlags1;
-            [TagField(Flags = Padding, Length = 32)]
+            [TagField(ValidTags = new [] { "egor" })]
+            public CachedTag ScreenEffect1;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
             public byte[] Padding13;
-            public CachedTag ScreenEffect2;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding14;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -830,6 +836,20 @@ namespace TagTool.Tags.Definitions.Gen2
             {
                 OnlyWhenZoomed = 1 << 0
             }
+            
+            [Flags]
+            public enum ScreenEffectFlagsValue1 : uint
+            {
+                OnlyWhenZoomed = 1 << 0
+            }
+        }
+        
+        [Flags]
+        public enum FlagsValue1 : byte
+        {
+            UseTextFromStringListInstead = 1 << 0,
+            OverrideDefaultColor = 1 << 1,
+            WidthOffsetIsAbsoluteIconWidth = 1 << 2
         }
     }
 }

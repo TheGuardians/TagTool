@@ -2,27 +2,25 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "chocolate_mountain", Tag = "gldf", Size = 0xC)]
+    [TagStructure(Name = "chocolate_mountain", Tag = "gldf", Size = 0x8)]
     public class ChocolateMountain : TagStructure
     {
         public List<LightingVariablesBlock> LightingVariables;
         
-        [TagStructure(Size = 0xA0)]
+        [TagStructure(Size = 0x90)]
         public class LightingVariablesBlock : TagStructure
         {
             public ObjectAffectedValue ObjectAffected;
-            /// <summary>
-            /// Global lightmap sample
-            /// </summary>
             public float LightmapBrightnessOffset;
-            public PrimaryLightStruct PrimaryLight;
-            public SecondaryLightStruct SecondaryLight;
-            public AmbientLightStruct AmbientLight;
-            public LightmapShadowsStruct LightmapShadows;
+            public PrimaryLightStructBlock PrimaryLight;
+            public SecondaryLightStructBlock SecondaryLight;
+            public AmbientLightStructBlock AmbientLight;
+            public LightmapShadowsStructBlock LightmapShadows;
             
             [Flags]
             public enum ObjectAffectedValue : uint
@@ -43,115 +41,102 @@ namespace TagTool.Tags.Definitions.Gen2
                 Creature = 1 << 13
             }
             
-            [TagStructure(Size = 0x28)]
-            public class PrimaryLightStruct : TagStructure
+            [TagStructure(Size = 0x24)]
+            public class PrimaryLightStructBlock : TagStructure
             {
-                /// <summary>
-                /// Primary light
-                /// </summary>
                 public RealRgbColor MinLightmapColor;
                 public RealRgbColor MaxLightmapColor;
-                public float ExclusionAngleFromUp; // degrees from up the direct light cannot be
                 /// <summary>
-                /// Primary light function
+                /// degrees from up the direct light cannot be
                 /// </summary>
-                /// <remarks>
+                public float ExclusionAngleFromUp;
+                /// <summary>
                 /// input: accuracy, output: primary light scale
-                /// </remarks>
-                public FunctionDefinition Function;
+                /// </summary>
+                public MappingFunctionBlock Function;
                 
-                [TagStructure(Size = 0xC)]
-                public class FunctionDefinition : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
                 {
-                    public List<Byte> Data;
+                    public List<ByteBlock> Data;
                     
                     [TagStructure(Size = 0x1)]
-                    public class Byte : TagStructure
+                    public class ByteBlock : TagStructure
                     {
                         public sbyte Value;
                     }
                 }
             }
             
-            [TagStructure(Size = 0x40)]
-            public class SecondaryLightStruct : TagStructure
+            [TagStructure(Size = 0x3C)]
+            public class SecondaryLightStructBlock : TagStructure
             {
-                /// <summary>
-                /// Secondary light
-                /// </summary>
                 public RealRgbColor MinLightmapColor;
                 public RealRgbColor MaxLightmapColor;
                 public RealRgbColor MinDiffuseSample;
                 public RealRgbColor MaxDiffuseSample;
-                public float ZAxisRotation; // degrees
                 /// <summary>
-                /// Secondary light function
+                /// degrees
                 /// </summary>
-                /// <remarks>
+                public float ZAxisRotation;
+                /// <summary>
                 /// input: accuracy, output: secondary light scale
-                /// </remarks>
-                public FunctionDefinition Function;
+                /// </summary>
+                public MappingFunctionBlock Function;
                 
-                [TagStructure(Size = 0xC)]
-                public class FunctionDefinition : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
                 {
-                    public List<Byte> Data;
+                    public List<ByteBlock> Data;
                     
                     [TagStructure(Size = 0x1)]
-                    public class Byte : TagStructure
+                    public class ByteBlock : TagStructure
                     {
                         public sbyte Value;
                     }
                 }
             }
             
-            [TagStructure(Size = 0x24)]
-            public class AmbientLightStruct : TagStructure
+            [TagStructure(Size = 0x20)]
+            public class AmbientLightStructBlock : TagStructure
             {
-                /// <summary>
-                /// Ambient light
-                /// </summary>
                 public RealRgbColor MinLightmapSample;
                 public RealRgbColor MaxLightmapSample;
                 /// <summary>
-                /// Ambient light function
+                /// Ambient light scale. (left side min brightness, right side max brightness). Before this scale it determines a global
+                /// ambient scale, which added to either light will total ~1.0 scale. Then this scale modifies that.
                 /// </summary>
-                /// <remarks>
-                /// Ambient light scale. (left side min brightness, right side max brightness). Before this scale it determines a global ambient scale, which added to either light will total ~1.0 scale. Then this scale modifies that.
-                /// </remarks>
-                public FunctionDefinition Function;
+                public MappingFunctionBlock Function;
                 
-                [TagStructure(Size = 0xC)]
-                public class FunctionDefinition : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
                 {
-                    public List<Byte> Data;
+                    public List<ByteBlock> Data;
                     
                     [TagStructure(Size = 0x1)]
-                    public class Byte : TagStructure
+                    public class ByteBlock : TagStructure
                     {
                         public sbyte Value;
                     }
                 }
             }
             
-            [TagStructure(Size = 0xC)]
-            public class LightmapShadowsStruct : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class LightmapShadowsStructBlock : TagStructure
             {
                 /// <summary>
-                /// Lightmap shadows
+                /// Shadows generated by the lightmaps get direction from lightmap primary incoming light direction and darken based on how
+                /// accurate that light is fed into the function below
                 /// </summary>
-                /// <remarks>
-                /// Shadows generated by the lightmaps get direction from lightmap primary incoming light direction and darken based on how accurate that light is fed into the function below
-                /// </remarks>
-                public FunctionDefinition Function1;
+                public MappingFunctionBlock Function1;
                 
-                [TagStructure(Size = 0xC)]
-                public class FunctionDefinition : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
                 {
-                    public List<Byte> Data;
+                    public List<ByteBlock> Data;
                     
                     [TagStructure(Size = 0x1)]
-                    public class Byte : TagStructure
+                    public class ByteBlock : TagStructure
                     {
                         public sbyte Value;
                     }

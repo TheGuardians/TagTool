@@ -2,55 +2,53 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "decorators", Tag = "DECP", Size = 0x40)]
+    [TagStructure(Name = "decorators", Tag = "DECP", Size = 0x30)]
     public class Decorators : TagStructure
     {
         public RealPoint3d GridOrigin;
         public int CellCountPerDimension;
-        public List<DecoratorCacheBlock> CacheBlocks;
-        public List<DecoratorGroup> Groups;
-        public List<DecoratorCellCollection> Cells;
-        public List<DecoratorProjectedDecal> Decals;
+        public List<DecoratorCacheBlockBlock> CacheBlocks;
+        public List<DecoratorGroupBlock> Groups;
+        public List<DecoratorCellCollectionBlock> Cells;
+        public List<DecoratorProjectedDecalBlock> Decals;
         
-        [TagStructure(Size = 0x3C)]
-        public class DecoratorCacheBlock : TagStructure
+        [TagStructure(Size = 0x34)]
+        public class DecoratorCacheBlockBlock : TagStructure
         {
-            public GeometryBlockInfoStruct GeometryBlockInfo;
-            public List<DecoratorCacheBlockData> CacheBlockData;
-            [TagField(Flags = Padding, Length = 4)]
+            public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+            public List<DecoratorCacheBlockDataBlock> CacheBlockData;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
             
-            [TagStructure(Size = 0x28)]
-            public class GeometryBlockInfoStruct : TagStructure
+            [TagStructure(Size = 0x24)]
+            public class GlobalGeometryBlockInfoStructBlock : TagStructure
             {
-                /// <summary>
-                /// BLOCK INFO
-                /// </summary>
                 public int BlockOffset;
                 public int BlockSize;
                 public int SectionDataSize;
                 public int ResourceDataSize;
-                public List<GeometryBlockResource> Resources;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding1;
+                public List<GlobalGeometryBlockResourceBlock> Resources;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short OwnerTagSectionOffset;
-                [TagField(Flags = Padding, Length = 2)]
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Padding3;
                 
                 [TagStructure(Size = 0x10)]
-                public class GeometryBlockResource : TagStructure
+                public class GlobalGeometryBlockResourceBlock : TagStructure
                 {
                     public TypeValue Type;
-                    [TagField(Flags = Padding, Length = 3)]
-                    public byte[] Padding1;
+                    [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
                     public short PrimaryLocator;
                     public short SecondaryLocator;
                     public int ResourceDataSize;
@@ -65,23 +63,23 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
             
-            [TagStructure(Size = 0x9C)]
-            public class DecoratorCacheBlockData : TagStructure
+            [TagStructure(Size = 0x88)]
+            public class DecoratorCacheBlockDataBlock : TagStructure
             {
-                public List<DecoratorPlacement> Placements;
-                public List<RasterizerVertexDecoratorDecal> DecalVertices;
-                public List<Word> DecalIndices;
+                public List<DecoratorPlacementBlock> Placements;
+                public List<DecalVerticesBlock> DecalVertices;
+                public List<IndicesBlock> DecalIndices;
                 public VertexBuffer DecalVertexBuffer;
-                [TagField(Flags = Padding, Length = 16)]
-                public byte[] Padding1;
-                public List<RasterizerVertexDecoratorSprite> SpriteVertices;
-                public List<Word> SpriteIndices;
+                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public List<SpriteVerticesBlock> SpriteVertices;
+                public List<IndicesBlock1> SpriteIndices;
                 public VertexBuffer SpriteVertexBuffer;
-                [TagField(Flags = Padding, Length = 16)]
-                public byte[] Padding2;
+                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 [TagStructure(Size = 0x18)]
-                public class DecoratorPlacement : TagStructure
+                public class DecoratorPlacementBlock : TagStructure
                 {
                     public int InternalData1;
                     public int CompressedPosition;
@@ -92,7 +90,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x20)]
-                public class RasterizerVertexDecoratorDecal : TagStructure
+                public class DecalVerticesBlock : TagStructure
                 {
                     public RealPoint3d Position;
                     public RealPoint2d Texcoord0;
@@ -101,13 +99,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x2)]
-                public class Word : TagStructure
+                public class IndicesBlock : TagStructure
                 {
                     public short Index;
                 }
                 
                 [TagStructure(Size = 0x30)]
-                public class RasterizerVertexDecoratorSprite : TagStructure
+                public class SpriteVerticesBlock : TagStructure
                 {
                     public RealPoint3d Position;
                     public RealVector3d Offset;
@@ -115,11 +113,17 @@ namespace TagTool.Tags.Definitions.Gen2
                     public RealPoint2d Texcoord;
                     public ArgbColor Color;
                 }
+                
+                [TagStructure(Size = 0x2)]
+                public class IndicesBlock1 : TagStructure
+                {
+                    public short Index;
+                }
             }
         }
         
         [TagStructure(Size = 0x18)]
-        public class DecoratorGroup : TagStructure
+        public class DecoratorGroupBlock : TagStructure
         {
             public sbyte DecoratorSet;
             public DecoratorTypeValue DecoratorType;
@@ -147,18 +151,17 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x18)]
-        public class DecoratorCellCollection : TagStructure
+        public class DecoratorCellCollectionBlock : TagStructure
         {
-            public short ChildIndex;
             [TagField(Length = 8)]
-            public short ChildIndices;
+            public short[] ChildIndex;
             public short CacheBlockIndex;
             public short GroupCount;
             public int GroupStartIndex;
         }
         
         [TagStructure(Size = 0x40)]
-        public class DecoratorProjectedDecal : TagStructure
+        public class DecoratorProjectedDecalBlock : TagStructure
         {
             public sbyte DecoratorSet;
             public sbyte DecoratorClass;

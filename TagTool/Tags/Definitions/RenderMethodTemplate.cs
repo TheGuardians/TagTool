@@ -12,7 +12,14 @@ namespace TagTool.Tags.Definitions
 	{
         public CachedTag VertexShader;
         public CachedTag PixelShader;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline235640)]
         public EntryPointBitMask ValidEntryPoints;
+        [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline700123)]
+        public EntryPointBitMaskMs30 ValidEntryPointsHO;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public EntryPointBitMaskReach ValidEntryPointsReach;
+
         public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables by usage
         public List<ParameterTable> ParameterTables; // Ranges of Parameters
         public List<ParameterMapping> Parameters; 

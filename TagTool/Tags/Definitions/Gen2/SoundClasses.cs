@@ -2,41 +2,60 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0xC)]
+    [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0x8)]
     public class SoundClasses : TagStructure
     {
-        public List<SoundClassDefinition> Classes;
+        public List<SoundClassBlock> Classes;
         
         [TagStructure(Size = 0x5C)]
-        public class SoundClassDefinition : TagStructure
+        public class SoundClassBlock : TagStructure
         {
-            public short MaxSoundsPerTag116; // maximum number of sounds playing per individual sound tag
-            public short MaxSoundsPerObject116; // maximum number of sounds of this type playing on an object
+            /// <summary>
+            /// maximum number of sounds playing per individual sound tag
+            /// </summary>
+            public short MaxSoundsPerTag116;
+            /// <summary>
+            /// maximum number of sounds of this type playing on an object
+            /// </summary>
+            public short MaxSoundsPerObject116;
+            /// <summary>
+            /// replaces other instances after this many milliseconds
+            /// </summary>
             public int PreemptionTime; // ms
             public InternalFlagsValue InternalFlags;
             public FlagsValue Flags;
             public short Priority;
             public CacheMissModeValue CacheMissMode;
+            /// <summary>
+            /// how much reverb applies to this sound class
+            /// </summary>
             public float ReverbGain; // dB
             public float OverrideSpeakerGain; // dB
             public Bounds<float> DistanceBounds;
             public Bounds<float> GainBounds; // dB
             public float CutsceneDucking; // dB
             public float CutsceneDuckingFadeInTime; // seconds
+            /// <summary>
+            /// how long this lasts after the cutscene ends
+            /// </summary>
             public float CutsceneDuckingSustainTime; // seconds
             public float CutsceneDuckingFadeOutTime; // seconds
             public float ScriptedDialogDucking; // dB
             public float ScriptedDialogDuckingFadeInTime; // seconds
+            /// <summary>
+            /// how long this lasts after the scripted dialog ends
+            /// </summary>
             public float ScriptedDialogDuckingSustainTime; // seconds
             public float ScriptedDialogDuckingFadeOutTime; // seconds
             public float DopplerFactor;
             public StereoPlaybackTypeValue StereoPlaybackType;
-            [TagField(Flags = Padding, Length = 3)]
-            public byte[] Padding1;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float TransmissionMultiplier;
             public float ObstructionMaxBend;
             public float OcclusionMaxBend;

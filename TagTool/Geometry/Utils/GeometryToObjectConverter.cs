@@ -485,8 +485,6 @@ namespace TagTool.Geometry.Utils
             renderModel.Regions.Add(new RenderModel.Region()
             {
                 Name = DestCache.StringTable.GetStringId("default"),
-                NodeMapOffset = 0,
-                NodeMapSize = 1,
                 Permutations = new List<RenderModel.Region.Permutation>()
                     {
                        new RenderModel.Region.Permutation()
@@ -504,8 +502,6 @@ namespace TagTool.Geometry.Utils
                 Translation = new RealPoint3d(0, 0, 0),
                 Scale = 1.0f
             });
-
-            renderModel.Compression = renderModel.Geometry.Compression;
 
             //copy over materials block, and reindex mesh part materials
 

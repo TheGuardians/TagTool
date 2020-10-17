@@ -2,54 +2,58 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x18C)]
+    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x110)]
     public class PhysicsModel : TagStructure
     {
         public FlagsValue Flags;
         public float Mass;
-        public float LowFreqDeactivationScale; // 0 is default (1). LESS than 1 deactivates less aggressively. GREATER than 1 is more agressive.
-        public float HighFreqDeactivationScale; // 0 is default (1). LESS than 1 deactivates less aggressively. GREATER than 1 is more agressive.
-        [TagField(Flags = Padding, Length = 24)]
-        public byte[] Padding1;
-        public List<PhysicsModelPhantomType> PhantomTypes;
-        public List<PhysicsModelNodeConstraintEdge> NodeEdges;
-        public List<PhysicsModelRigidBody> RigidBodies;
-        public List<PhysicsModelMaterial> Materials;
-        public List<PhysicsModelSphere> Spheres;
-        public List<PhysicsModelMultiSphere> MultiSpheres;
-        public List<PhysicsModelPill> Pills;
-        public List<PhysicsModelBox> Boxes;
-        public List<PhysicsModelTriangle> Triangles;
-        public List<PhysicsModelPolyhedron> Polyhedra;
         /// <summary>
-        /// ALL THESE WORLDS ARE YOURS, EXCEPT EUROPA...
+        /// 0 is default (1). LESS than 1 deactivates less aggressively. GREATER than 1 is more agressive.
         /// </summary>
-        /// <remarks>
+        public float LowFreqDeactivationScale;
+        /// <summary>
+        /// 0 is default (1). LESS than 1 deactivates less aggressively. GREATER than 1 is more agressive.
+        /// </summary>
+        public float HighFreqDeactivationScale;
+        [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public List<PhantomTypesBlock> PhantomTypes;
+        public List<PhysicsModelNodeConstraintEdgeBlock> NodeEdges;
+        public List<RigidBodiesBlock> RigidBodies;
+        public List<MaterialsBlock> Materials;
+        public List<SpheresBlock> Spheres;
+        public List<MultiSpheresBlock> MultiSpheres;
+        public List<PillsBlock> Pills;
+        public List<BoxesBlock> Boxes;
+        public List<TrianglesBlock> Triangles;
+        public List<PolyhedraBlock> Polyhedra;
+        /// <summary>
         /// Attempt no landings there.  And you can't edit anything below this point, so why even look at it?
-        /// </remarks>
+        /// </summary>
         public List<PolyhedronFourVectorsBlock> PolyhedronFourVectors;
-        public List<Hkvector4> PolyhedronPlaneEquations;
-        public List<PhysicsModelMassDistribution> MassDistributions;
-        public List<PhysicsModelList> Lists;
+        public List<PolyhedronPlaneEquationsBlock> PolyhedronPlaneEquations;
+        public List<MassDistributionsBlock> MassDistributions;
+        public List<ListsBlock> Lists;
         public List<ListShapesBlock> ListShapes;
-        public List<PhysicsModelMopp> Mopps;
+        public List<MoppsBlock> Mopps;
         public byte[] MoppCodes;
-        public List<PhysicsModelHingeConstraint> HingeConstraints;
-        public List<PhysicsModelRagdollConstraint> RagdollConstraints;
-        public List<PhysicsModelRegion> Regions;
-        public List<PhysicsModelNode> Nodes;
-        public List<TagImportInfo> ImportInfo;
-        public List<ErrorReportCategory> Errors;
-        public List<PhysicsModelPointToPathCurve> PointToPathCurves;
-        public List<PhysicsModelLimitedHingeConstraint> LimitedHingeConstraints;
-        public List<PhysicsModelBallAndSocketConstraint> BallAndSocketConstraints;
-        public List<PhysicsModelStiffSpringConstraint> StiffSpringConstraints;
-        public List<PhysicsModelPrismaticConstraint> PrismaticConstraints;
-        public List<PhysicsModelPhantom> Phantoms;
+        public List<HingeConstraintsBlock> HingeConstraints;
+        public List<RagdollConstraintsBlock> RagdollConstraints;
+        public List<RegionsBlock> Regions;
+        public List<NodesBlock> Nodes;
+        public List<GlobalTagImportInfoBlock> ImportInfo;
+        public List<GlobalErrorReportCategoriesBlock> Errors;
+        public List<PointToPathCurveBlock> PointToPathCurves;
+        public List<LimitedHingeConstraintsBlock> LimitedHingeConstraints;
+        public List<BallAndSocketConstraintsBlock> BallAndSocketConstraints;
+        public List<StiffSpringConstraintsBlock> StiffSpringConstraints;
+        public List<PrismaticConstraintsBlock> PrismaticConstraints;
+        public List<PhantomsBlock> Phantoms;
         
         [Flags]
         public enum FlagsValue : uint
@@ -58,49 +62,59 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x68)]
-        public class PhysicsModelPhantomType : TagStructure
+        public class PhantomTypesBlock : TagStructure
         {
             public FlagsValue Flags;
             public MinimumSizeValue MinimumSize;
             public MaximumSizeValue MaximumSize;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public StringId MarkerName; // you don't need this if you're just generating effects.  If empty it defaults to the up of the object
-            public StringId AlignmentMarkerName; // you don't need this if you're just generating effects.  If empty it defaults to "marker name"
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             /// <summary>
-            /// Linear Motion
+            /// you don't need this if you're just generating effects.  If empty it defaults to the up of the object
             /// </summary>
-            /// <remarks>
+            public StringId MarkerName;
+            /// <summary>
+            /// you don't need this if you're just generating effects.  If empty it defaults to "marker name"
+            /// </summary>
+            public StringId AlignmentMarkerName;
+            /// <summary>
             /// 0 - means do nothing
             /// CENTER: motion towards marker position 
-            /// AXIS: motion towards marker axis, such that object is on the axis
+            /// AXIS: motion towards marker axis, such that object is on the
+            /// axis
             /// DIRECTION: motion along marker direction
-            /// </remarks>
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding2;
-            public float HookesLawE; // 0 if you don't want this to behave like spring.  1 is a good starting point if you do.
-            public float LinearDeadRadius; // radius from linear motion origin in which acceleration is dead.
+            /// </summary>
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            /// <summary>
+            /// 0 if you don't want this to behave like spring.  1 is a good starting point if you do.
+            /// </summary>
+            public float HookesLawE;
+            /// <summary>
+            /// radius from linear motion origin in which acceleration is dead.
+            /// </summary>
+            public float LinearDeadRadius;
             public float CenterAcc;
             public float CenterMaxVel;
             public float AxisAcc;
             public float AxisMaxVel;
             public float DirectionAcc;
             public float DirectionMaxVel;
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding3;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             /// <summary>
-            /// Angular Motion
-            /// </summary>
-            /// <remarks>
             /// 0 - means do nothing
             /// ALIGNMENT: algin objects in the phantom with the marker
             /// SPIN: spin the object about the marker axis
-            /// </remarks>
-            public float AlignmentHookesLawE; // 0 if you don't want this to behave like spring.  1 is a good starting point if you do.
+            /// </summary>
+            /// <summary>
+            /// 0 if you don't want this to behave like spring.  1 is a good starting point if you do.
+            /// </summary>
+            public float AlignmentHookesLawE;
             public float AlignmentAcc;
             public float AlignmentMaxVel;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding4;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             
             [Flags]
             public enum FlagsValue : uint
@@ -123,12 +137,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 IgnoresSoundScenery = 1 << 15,
                 IgnoresCrates = 1 << 16,
                 IgnoresCreatures = 1 << 17,
-                Bit18 = 1 << 18,
-                Bit19 = 1 << 19,
-                Bit20 = 1 << 20,
-                Bit21 = 1 << 21,
-                Bit22 = 1 << 22,
-                Bit23 = 1 << 23,
+                Unknown = 1 << 18,
+                Unknown1 = 1 << 19,
+                Unknown2 = 1 << 20,
+                Unknown3 = 1 << 21,
+                Unknown4 = 1 << 22,
+                Unknown5 = 1 << 23,
                 LocalizesPhysics = 1 << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
@@ -158,24 +172,35 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x1C)]
-        public class PhysicsModelNodeConstraintEdge : TagStructure
+        [TagStructure(Size = 0x18)]
+        public class PhysicsModelNodeConstraintEdgeBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short NodeA;
             public short NodeB;
-            public List<PhysicsModelNodeConstraintEdgeConstraint> Constraints;
-            public StringId NodeAMaterial; // if you don't fill this out we will pluck the material from the first primitive, of the first rigid body attached to node a
-            public StringId NodeBMaterial; // if you don't fill this out we will pluck the material from the first primitive, of the first rigid body attached to node b, if node b is none we use whatever material a has
+            public List<PhysicsModelConstraintEdgeConstraintBlock> Constraints;
+            /// <summary>
+            /// if you don't fill this out we will pluck the material from the first primitive, of the first rigid body attached to node
+            /// a
+            /// </summary>
+            public StringId NodeAMaterial;
+            /// <summary>
+            /// if you don't fill this out we will pluck the material from the first primitive, of the first rigid body attached to node
+            /// b, if node b is none we use whatever material a has
+            /// </summary>
+            public StringId NodeBMaterial;
             
             [TagStructure(Size = 0xC)]
-            public class PhysicsModelNodeConstraintEdgeConstraint : TagStructure
+            public class PhysicsModelConstraintEdgeConstraintBlock : TagStructure
             {
                 public TypeValue Type;
                 public short Index;
                 public FlagsValue Flags;
-                public float Friction; // 0 is the default (takes what it was set in max) anything else overrides that value
+                /// <summary>
+                /// 0 is the default (takes what it was set in max) anything else overrides that value
+                /// </summary>
+                public float Friction;
                 
                 public enum TypeValue : short
                 {
@@ -190,57 +215,89 @@ namespace TagTool.Tags.Definitions.Gen2
                 [Flags]
                 public enum FlagsValue : uint
                 {
+                    /// <summary>
+                    /// this constraint makes the edge rigid until it is loosened by damage
+                    /// </summary>
                     IsRigid = 1 << 0,
+                    /// <summary>
+                    /// this constraint will not generate impact effects
+                    /// </summary>
                     DisableEffects = 1 << 1
                 }
             }
         }
         
         [TagStructure(Size = 0x90)]
-        public class PhysicsModelRigidBody : TagStructure
+        public class RigidBodiesBlock : TagStructure
         {
             public short Node;
             public short Region;
             public short Permutattion;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public RealPoint3d BoudingSphereOffset;
             public float BoundingSphereRadius;
             public FlagsValue Flags;
             public MotionTypeValue MotionType;
             public short NoPhantomPowerAlt;
             public SizeValue Size;
-            public float InertiaTensorScale; // 0.0 defaults to 1.0
-            public float LinearDamping; // this goes from 0-10 (10 is really, really high)
-            public float AngularDamping; // this goes from 0-10 (10 is really, really high)
+            /// <summary>
+            /// 0.0 defaults to 1.0
+            /// </summary>
+            public float InertiaTensorScale;
+            /// <summary>
+            /// this goes from 0-10 (10 is really, really high)
+            /// </summary>
+            public float LinearDamping;
+            /// <summary>
+            /// this goes from 0-10 (10 is really, really high)
+            /// </summary>
+            public float AngularDamping;
             public RealVector3d CenterOffMassOffset;
             public ShapeTypeValue ShapeType;
             public short Shape;
             public float Mass; // kg*
             public RealVector3d CenterOfMass;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown;
             public RealVector3d IntertiaTensorX;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public RealVector3d IntertiaTensorY;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public RealVector3d IntertiaTensorZ;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
-            public float BoundingSpherePad; // the bounding sphere for this rigid body will be outset by this much
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Padding2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
+            /// <summary>
+            /// the bounding sphere for this rigid body will be outset by this much
+            /// </summary>
+            public float BoundingSpherePad;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             
             [Flags]
             public enum FlagsValue : ushort
             {
                 NoCollisionsWSelf = 1 << 0,
                 OnlyCollideWEnv = 1 << 1,
+                /// <summary>
+                /// this rigid body will not generate impact effects unless it hits another dynamic rigid body that does
+                /// </summary>
                 DisableEffects = 1 << 2,
+                /// <summary>
+                /// set this flag if this rigid bodies won't touch the environment, this allows us to open up some
+                /// optimizations
+                /// </summary>
                 DoesNotInteractWEnvironment = 1 << 3,
+                /// <summary>
+                /// if you have either of the early mover flags set in the object definitoin this body will be choosen as
+                /// the one to make every thing local to, otherwise I pick :-)
+                /// </summary>
                 BestEarlyMoverBody = 1 << 4,
+                /// <summary>
+                /// don't check this flag without talking to eamon
+                /// </summary>
                 HasNoPhantomPowerVersion = 1 << 5
             }
             
@@ -287,7 +344,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0xC)]
-        public class PhysicsModelMaterial : TagStructure
+        public class MaterialsBlock : TagStructure
         {
             public StringId Name;
             public StringId GlobalMaterialName;
@@ -302,7 +359,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x80)]
-        public class PhysicsModelSphere : TagStructure
+        public class SpheresBlock : TagStructure
         {
             public StringId Name;
             public short Material;
@@ -312,36 +369,36 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short Phantom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public float Radius;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
             public short Size1;
-            public short Count2;
-            [TagField(Flags = Padding, Length = 4)]
+            public short Count1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
             public byte[] Unknown5;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown6;
             public RealVector3d RotationI;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown7;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown6;
             public RealVector3d RotationJ;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown8;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown7;
             public RealVector3d RotationK;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown9;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown8;
             public RealVector3d Translation;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown10;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown9;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -351,7 +408,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0xB0)]
-        public class PhysicsModelMultiSphere : TagStructure
+        public class MultiSpheresBlock : TagStructure
         {
             public StringId Name;
             public short Material;
@@ -361,21 +418,18 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short Phantom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public int NumSpheres;
-            public RealVector3d Sphere;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
             [TagField(Length = 8)]
-            public FourVectorsStorageDatum[] FourVectorsStorage;
+            public Unknown3Datum[] Unknown3;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -383,17 +437,17 @@ namespace TagTool.Tags.Definitions.Gen2
                 Unused = 1 << 0
             }
             
-            [TagStructure()]
-            public class FourVectorsStorageDatum : TagStructure
+            [TagStructure(Size = 0x10)]
+            public class Unknown3Datum : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown1;
                 public RealVector3d Sphere;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown3;
             }
         }
         
         [TagStructure(Size = 0x50)]
-        public class PhysicsModelPill : TagStructure
+        public class PillsBlock : TagStructure
         {
             public StringId Name;
             public short Material;
@@ -403,22 +457,22 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short Phantom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public float Radius;
             public RealVector3d Bottom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
             public RealVector3d Top;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown5;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown4;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -428,7 +482,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x90)]
-        public class PhysicsModelBox : TagStructure
+        public class BoxesBlock : TagStructure
         {
             public StringId Name;
             public short Material;
@@ -438,39 +492,39 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short Phantom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public float Radius;
             public RealVector3d HalfExtents;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
             public byte[] Unknown4;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown5;
             public short Size1;
-            public short Count2;
-            [TagField(Flags = Padding, Length = 4)]
+            public short Count1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown5;
+            [TagField(Length = 0x4)]
             public byte[] Unknown6;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown7;
             public RealVector3d RotationI;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown8;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown7;
             public RealVector3d RotationJ;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown9;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown8;
             public RealVector3d RotationK;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown10;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown9;
             public RealVector3d Translation;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown11;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown10;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -480,7 +534,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x60)]
-        public class PhysicsModelTriangle : TagStructure
+        public class TrianglesBlock : TagStructure
         {
             public StringId Name;
             public short Material;
@@ -490,25 +544,25 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short Phantom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public float Radius;
             public RealVector3d PointA;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
             public RealVector3d PointB;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown5;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown4;
             public RealVector3d PointC;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown6;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown5;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -518,7 +572,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x100)]
-        public class PhysicsModelPolyhedron : TagStructure
+        public class PolyhedraBlock : TagStructure
         {
             public StringId Name;
             public short Material;
@@ -528,44 +582,35 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x2)]
+            public byte[] Unknown;
             public short Phantom;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public float Radius;
             public RealVector3d AabbHalfExtents;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
             public RealVector3d AabbCenter;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x4)]
+            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
             public byte[] Unknown5;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown6;
             public int FourVectorsSize;
             public int FourVectorsCapacity;
             public int NumVertices;
-            public RealVector3d FourVectorsX;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown7;
-            public RealVector3d FourVectorsY;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown8;
-            public RealVector3d FourVectorsZ;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown9;
             [TagField(Length = 3)]
-            public FourVectorsStorageDatum[] FourVectorsStorage;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown11;
+            public Unknown6Datum[] Unknown62;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown6;
             public int PlaneEquationsSize;
             public int PlaneEquationsCapacity;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown12;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown7;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -573,18 +618,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 Unused = 1 << 0
             }
             
-            [TagStructure()]
-            public class FourVectorsStorageDatum : TagStructure
+            [TagStructure(Size = 0x30)]
+            public class Unknown6Datum : TagStructure
             {
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown1;
-                public RealVector3d FourVectorsZ;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown2;
-                public RealVector3d FourVectorsY;
-                [TagField(Flags = Padding, Length = 4)]
-                public byte[] Unknown3;
                 public RealVector3d FourVectorsX;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown6;
+                public RealVector3d FourVectorsY;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown61;
+                public RealVector3d FourVectorsZ;
+                [TagField(Length = 0x4)]
+                public byte[] Unknown62;
             }
         }
         
@@ -592,58 +637,55 @@ namespace TagTool.Tags.Definitions.Gen2
         public class PolyhedronFourVectorsBlock : TagStructure
         {
             public RealVector3d FourVectorsX;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown;
             public RealVector3d FourVectorsY;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public RealVector3d FourVectorsZ;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
         }
         
         [TagStructure(Size = 0x10)]
-        public class Hkvector4 : TagStructure
+        public class PolyhedronPlaneEquationsBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 16)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x10)]
+            public byte[] Unknown;
         }
         
         [TagStructure(Size = 0x40)]
-        public class PhysicsModelMassDistribution : TagStructure
+        public class MassDistributionsBlock : TagStructure
         {
             public RealVector3d CenterOfMass;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown;
             public RealVector3d InertiaTensorI;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
             public RealVector3d InertiaTensorJ;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public RealVector3d InertiaTensorK;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
         }
         
         [TagStructure(Size = 0x38)]
-        public class PhysicsModelList : TagStructure
+        public class ListsBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
             public byte[] Unknown2;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
             public int ChildShapesSize;
             public int ChildShapesCapacity;
-            public ShapeTypeValue ShapeType;
-            public short Shape;
-            public int CollisionFilter;
             [TagField(Length = 4)]
-            public ChildShapesStorageDatum[] ChildShapesStorage;
+            public CollisionFilterDatum[] CollisionFilter;
             
             public enum ShapeTypeValue : short
             {
@@ -665,32 +707,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 Mopp
             }
             
-            [TagStructure()]
-            public class ChildShapesStorageDatum : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class CollisionFilterDatum : TagStructure
             {
-                public int CollisionFilter;
-                public short Shape;
                 public ShapeTypeValue ShapeType;
-                
-                public enum ShapeTypeValue : short
-                {
-                    Sphere,
-                    Pill,
-                    Box,
-                    Triangle,
-                    Polyhedron,
-                    MultiSphere,
-                    Unused0,
-                    Unused1,
-                    Unused2,
-                    Unused3,
-                    Unused4,
-                    Unused5,
-                    Unused6,
-                    Unused7,
-                    List,
-                    Mopp
-                }
+                public short Shape;
+                public int CollisionFilter;
             }
         }
         
@@ -723,29 +745,29 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x14)]
-        public class PhysicsModelMopp : TagStructure
+        public class MoppsBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public short List;
             public int CodeOffset;
         }
         
         [TagStructure(Size = 0x78)]
-        public class PhysicsModelHingeConstraint : TagStructure
+        public class HingeConstraintsBlock : TagStructure
         {
-            public PhysicsModelConstraintBodies ConstraintBodies;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public ConstraintBodiesStructBlock ConstraintBodies;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             
             [TagStructure(Size = 0x74)]
-            public class PhysicsModelConstraintBodies : TagStructure
+            public class ConstraintBodiesStructBlock : TagStructure
             {
                 public StringId Name;
                 public short NodeA;
@@ -761,17 +783,17 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealVector3d BUp;
                 public RealPoint3d BPosition;
                 public short EdgeIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x94)]
-        public class PhysicsModelRagdollConstraint : TagStructure
+        public class RagdollConstraintsBlock : TagStructure
         {
-            public PhysicsModelConstraintBodies ConstraintBodies;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public ConstraintBodiesStructBlock ConstraintBodies;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float MinTwist;
             public float MaxTwist;
             public float MinCone;
@@ -781,7 +803,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float MaxFricitonTorque;
             
             [TagStructure(Size = 0x74)]
-            public class PhysicsModelConstraintBodies : TagStructure
+            public class ConstraintBodiesStructBlock : TagStructure
             {
                 public StringId Name;
                 public short NodeA;
@@ -797,25 +819,25 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealVector3d BUp;
                 public RealPoint3d BPosition;
                 public short EdgeIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
-        [TagStructure(Size = 0x10)]
-        public class PhysicsModelRegion : TagStructure
+        [TagStructure(Size = 0xC)]
+        public class RegionsBlock : TagStructure
         {
             public StringId Name;
-            public List<PhysicsModelPermutation> Permutations;
+            public List<PermutationsBlock> Permutations;
             
-            [TagStructure(Size = 0x10)]
-            public class PhysicsModelPermutation : TagStructure
+            [TagStructure(Size = 0xC)]
+            public class PermutationsBlock : TagStructure
             {
                 public StringId Name;
-                public List<RigidBodiesBlock> RigidBodies;
+                public List<RigidBodyIndicesBlock> RigidBodies;
                 
                 [TagStructure(Size = 0x2)]
-                public class RigidBodiesBlock : TagStructure
+                public class RigidBodyIndicesBlock : TagStructure
                 {
                     public short RigidBody;
                 }
@@ -823,7 +845,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0xC)]
-        public class PhysicsModelNode : TagStructure
+        public class NodesBlock : TagStructure
         {
             public StringId Name;
             public FlagsValue Flags;
@@ -838,8 +860,8 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x254)]
-        public class TagImportInfo : TagStructure
+        [TagStructure(Size = 0x250)]
+        public class GlobalTagImportInfoBlock : TagStructure
         {
             public int Build;
             [TagField(Length = 256)]
@@ -848,49 +870,49 @@ namespace TagTool.Tags.Definitions.Gen2
             public string ImportDate;
             [TagField(Length = 32)]
             public string Culprit;
-            [TagField(Flags = Padding, Length = 96)]
-            public byte[] Padding1;
+            [TagField(Length = 0x60, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             [TagField(Length = 32)]
             public string ImportTime;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public List<TagImportFileBlock> Files;
+            [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            public List<TagImportFile> Files;
-            [TagField(Flags = Padding, Length = 128)]
-            public byte[] Padding3;
             
-            [TagStructure(Size = 0x21C)]
-            public class TagImportFile : TagStructure
+            [TagStructure(Size = 0x210)]
+            public class TagImportFileBlock : TagStructure
             {
                 [TagField(Length = 256)]
                 public string Path;
                 [TagField(Length = 32)]
                 public string ModificationDate;
-                [TagField(Flags = Padding, Length = 8)]
-                public byte[] Unknown1;
-                [TagField(Flags = Padding, Length = 88)]
-                public byte[] Padding1;
+                [TagField(Length = 0x8)]
+                public byte[] Unknown;
+                [TagField(Length = 0x58, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public int Checksum; // crc32
                 public int Size; // bytes
                 public byte[] ZippedData;
-                [TagField(Flags = Padding, Length = 128)]
-                public byte[] Padding2;
+                [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
             }
         }
         
-        [TagStructure(Size = 0x2A8)]
-        public class ErrorReportCategory : TagStructure
+        [TagStructure(Size = 0x2A4)]
+        public class GlobalErrorReportCategoriesBlock : TagStructure
         {
             [TagField(Length = 256)]
             public string Name;
             public ReportTypeValue ReportType;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Length = 0x194, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 404)]
-            public byte[] Padding3;
-            public List<ErrorReport> Reports;
+            public List<ErrorReportsBlock> Reports;
             
             public enum ReportTypeValue : short
             {
@@ -910,8 +932,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 ReportKeyIsValid = 1 << 4
             }
             
-            [TagStructure(Size = 0x284)]
-            public class ErrorReport : TagStructure
+            [TagStructure(Size = 0x260)]
+            public class ErrorReportsBlock : TagStructure
             {
                 public TypeValue Type;
                 public FlagsValue Flags;
@@ -919,22 +941,22 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagField(Length = 32)]
                 public string SourceFilename;
                 public int SourceLineNumber;
-                public List<ErrorReportVertex> Vertices;
-                public List<ErrorReportVector> Vectors;
-                public List<ErrorReportLine> Lines;
-                public List<ErrorReportTriangle> Triangles;
-                public List<ErrorReportQuad> Quads;
-                public List<ErrorReportComment> Comments;
-                [TagField(Flags = Padding, Length = 380)]
-                public byte[] Padding1;
+                public List<ErrorReportVerticesBlock> Vertices;
+                public List<ErrorReportVectorsBlock> Vectors;
+                public List<ErrorReportLinesBlock> Lines;
+                public List<ErrorReportTrianglesBlock> Triangles;
+                public List<ErrorReportQuadsBlock> Quads;
+                public List<ErrorReportCommentsBlock> Comments;
+                [TagField(Length = 0x17C, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public int ReportKey;
                 public int NodeIndex;
                 public Bounds<float> BoundsX;
                 public Bounds<float> BoundsY;
                 public Bounds<float> BoundsZ;
                 public RealArgbColor Color;
-                [TagField(Flags = Padding, Length = 84)]
-                public byte[] Padding2;
+                [TagField(Length = 0x54, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 
                 public enum TypeValue : short
                 {
@@ -955,106 +977,91 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x34)]
-                public class ErrorReportVertex : TagStructure
+                public class ErrorReportVerticesBlock : TagStructure
                 {
                     public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     public RealArgbColor Color;
                     public float ScreenSize;
                 }
                 
                 [TagStructure(Size = 0x40)]
-                public class ErrorReportVector : TagStructure
+                public class ErrorReportVectorsBlock : TagStructure
                 {
                     public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     public RealArgbColor Color;
                     public RealVector3d Normal;
                     public float ScreenLength;
                 }
                 
-                [TagStructure(Size = 0x50)]
-                public class ErrorReportLine : TagStructure
+                [TagStructure(Size = 0x3C)]
+                public class ErrorReportLinesBlock : TagStructure
                 {
-                    public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     [TagField(Length = 2)]
-                    public RealPoint3d Points;
+                    public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
                 
-                [TagStructure(Size = 0x70)]
-                public class ErrorReportTriangle : TagStructure
+                [TagStructure(Size = 0x48)]
+                public class ErrorReportTrianglesBlock : TagStructure
                 {
-                    public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     [TagField(Length = 3)]
-                    public RealPoint3d Points;
+                    public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
                 
-                [TagStructure(Size = 0x90)]
-                public class ErrorReportQuad : TagStructure
+                [TagStructure(Size = 0x54)]
+                public class ErrorReportQuadsBlock : TagStructure
                 {
-                    public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     [TagField(Length = 4)]
-                    public RealPoint3d Points;
+                    public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
                 
-                [TagStructure(Size = 0x44)]
-                public class ErrorReportComment : TagStructure
+                [TagStructure(Size = 0x38)]
+                public class ErrorReportCommentsBlock : TagStructure
                 {
                     public byte[] Text;
                     public RealPoint3d Position;
-                    public sbyte NodeIndex;
                     [TagField(Length = 4)]
-                    public sbyte NodeIndices;
-                    public float NodeWeight;
+                    public sbyte[] NodeIndex;
                     [TagField(Length = 4)]
-                    public float NodeWeights;
+                    public float[] NodeWeight;
                     public RealArgbColor Color;
                 }
             }
         }
         
-        [TagStructure(Size = 0x14)]
-        public class PhysicsModelPointToPathCurve : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class PointToPathCurveBlock : TagStructure
         {
             public StringId Name;
             public short NodeIndex;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
-            public List<PhysicsModelPointToPathCurvePoint> Points;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<PointToPathCurvePointBlock> Points;
             
             [TagStructure(Size = 0x10)]
-            public class PhysicsModelPointToPathCurvePoint : TagStructure
+            public class PointToPathCurvePointBlock : TagStructure
             {
                 public RealPoint3d Position;
                 public float TValue;
@@ -1062,17 +1069,17 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x84)]
-        public class PhysicsModelLimitedHingeConstraint : TagStructure
+        public class LimitedHingeConstraintsBlock : TagStructure
         {
-            public PhysicsModelConstraintBodies ConstraintBodies;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public ConstraintBodiesStructBlock ConstraintBodies;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float LimitFriction;
             public float LimitMinAngle;
             public float LimitMaxAngle;
             
             [TagStructure(Size = 0x74)]
-            public class PhysicsModelConstraintBodies : TagStructure
+            public class ConstraintBodiesStructBlock : TagStructure
             {
                 public StringId Name;
                 public short NodeA;
@@ -1088,20 +1095,20 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealVector3d BUp;
                 public RealPoint3d BPosition;
                 public short EdgeIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x78)]
-        public class PhysicsModelBallAndSocketConstraint : TagStructure
+        public class BallAndSocketConstraintsBlock : TagStructure
         {
-            public PhysicsModelConstraintBodies ConstraintBodies;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public ConstraintBodiesStructBlock ConstraintBodies;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             
             [TagStructure(Size = 0x74)]
-            public class PhysicsModelConstraintBodies : TagStructure
+            public class ConstraintBodiesStructBlock : TagStructure
             {
                 public StringId Name;
                 public short NodeA;
@@ -1117,21 +1124,21 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealVector3d BUp;
                 public RealPoint3d BPosition;
                 public short EdgeIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x7C)]
-        public class PhysicsModelStiffSpringConstraint : TagStructure
+        public class StiffSpringConstraintsBlock : TagStructure
         {
-            public PhysicsModelConstraintBodies ConstraintBodies;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public ConstraintBodiesStructBlock ConstraintBodies;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float SpringLength;
             
             [TagStructure(Size = 0x74)]
-            public class PhysicsModelConstraintBodies : TagStructure
+            public class ConstraintBodiesStructBlock : TagStructure
             {
                 public StringId Name;
                 public short NodeA;
@@ -1147,23 +1154,23 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealVector3d BUp;
                 public RealPoint3d BPosition;
                 public short EdgeIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x84)]
-        public class PhysicsModelPrismaticConstraint : TagStructure
+        public class PrismaticConstraintsBlock : TagStructure
         {
-            public PhysicsModelConstraintBodies ConstraintBodies;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            public ConstraintBodiesStructBlock ConstraintBodies;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public float MinLimit;
             public float MaxLimit;
             public float MaxFrictionForce;
             
             [TagStructure(Size = 0x74)]
-            public class PhysicsModelConstraintBodies : TagStructure
+            public class ConstraintBodiesStructBlock : TagStructure
             {
                 public StringId Name;
                 public short NodeA;
@@ -1179,30 +1186,30 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealVector3d BUp;
                 public RealPoint3d BPosition;
                 public short EdgeIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding1;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
         
         [TagStructure(Size = 0x20)]
-        public class PhysicsModelPhantom : TagStructure
+        public class PhantomsBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown;
             public short Size;
             public short Count;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown2;
-            [TagField(Flags = Padding, Length = 4)]
+            [TagField(Length = 0x4)]
+            public byte[] Unknown1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown3;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown2;
             public short Size1;
-            public short Count2;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unknown4;
+            public short Count1;
+            [TagField(Length = 0x4)]
+            public byte[] Unknown3;
         }
     }
 }

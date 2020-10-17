@@ -2,27 +2,25 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "liquid", Tag = "tdtl", Size = 0x74)]
+    [TagStructure(Name = "liquid", Tag = "tdtl", Size = 0x70)]
     public class Liquid : TagStructure
     {
-        /// <summary>
-        /// LIQUID
-        /// </summary>
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Padding1;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
         public TypeValue Type;
         public StringId AttachmentMarkerName;
-        [TagField(Flags = Padding, Length = 56)]
-        public byte[] Padding2;
+        [TagField(Length = 0x38, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public float FalloffDistanceFromCamera; // world units
         public float CutoffDistanceFromCamera; // world units
-        [TagField(Flags = Padding, Length = 32)]
-        public byte[] Padding3;
-        public List<LiquidArc> Arcs;
+        [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+        public List<LiquidArcBlock> Arcs;
         
         public enum TypeValue : short
         {
@@ -31,65 +29,56 @@ namespace TagTool.Tags.Definitions.Gen2
             ProjectileFromWeapon
         }
         
-        [TagStructure(Size = 0x114)]
-        public class LiquidArc : TagStructure
+        [TagStructure(Size = 0xEC)]
+        public class LiquidArcBlock : TagStructure
         {
             /// <summary>
-            /// LIQUID ARC
+            /// Note that if the type is not STANDARD, then the 'collide_with_stuff' and material effects will not have any effect. In
+            /// addition, the 'natural_length' will not have an effect except as a means to compute the collision fraction.
             /// </summary>
-            /// <remarks>
-            /// Note that if the type is not STANDARD, then the 'collide_with_stuff' and material effects will not have any effect. In addition, the 'natural_length' will not have an effect except as a means to compute the collision fraction.
-            /// </remarks>
             public FlagsValue Flags;
             public SpriteCountValue SpriteCount;
             public float NaturalLength; // world units
             public short Instances;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding1;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public Angle InstanceSpreadAngle; // degrees
             public float InstanceRotationPeriod; // seconds
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding2;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            [TagField(ValidTags = new [] { "foot" })]
             public CachedTag MaterialEffects;
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag Bitmap;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding3;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             /// <summary>
-            /// HORIZONTAL RANGE
-            /// </summary>
-            /// <remarks>
             /// In world units, how far the noise extends horizontally. By default the horizontal range is along the world XY plane.
-            /// </remarks>
-            public FunctionDefinition HorizontalRange;
-            /// <summary>
-            /// VERTICAL RANGE
             /// </summary>
-            /// <remarks>
+            public ScalarFunctionStructBlock HorizontalRange;
+            /// <summary>
             /// In world units, how far the noise extends vertically. By default the vertical range is along the world Z axis (up).
-            /// </remarks>
-            public FunctionDefinition VerticalRange;
+            /// </summary>
+            public ScalarFunctionStructBlock1 VerticalRange;
             public float VerticalNegativeScale; // [0,1]
             /// <summary>
-            /// ROUGHNESS
+            /// Roughness controls how the different 'octaves' of noise get scaled. Usually it is in the range [0,1] but it can be
+            /// slightly higher or lower and still make sense (zero is actually a pretty decent value). The mathematical equation used is
+            /// 2^(-k*(1-r)) where 'k' is the octave index starting at 0 and 'r' is the roughness value.
             /// </summary>
-            /// <remarks>
-            /// Roughness controls how the different 'octaves' of noise get scaled. Usually it is in the range [0,1] but it can be slightly higher or lower and still make sense (zero is actually a pretty decent value). The mathematical equation used is 2^(-k*(1-r)) where 'k' is the octave index starting at 0 and 'r' is the roughness value.
-            /// </remarks>
-            public FunctionDefinition Roughness;
-            [TagField(Flags = Padding, Length = 64)]
-            public byte[] Padding4;
+            public ScalarFunctionStructBlock2 Roughness;
+            [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             /// <summary>
-            /// NOISE FREQUENCIES
-            /// </summary>
-            /// <remarks>
             /// 4 sprites is 3 octaves
             /// 8 sprites is 4 octaves
             /// 16 sprites is 5 octaves
             /// 32 sprites is 6 octaves
             /// 64 sprites is 7 octaves
-            /// 128 sprites is 8 octaves
+            /// 128
+            /// sprites is 8 octaves
             /// 256 sprites is 9 octaves, etc.
-            /// </remarks>
+            /// </summary>
             public float Octave1Frequency; // cycles/second
             public float Octave2Frequency; // cycles/second
             public float Octave3Frequency; // cycles/second
@@ -99,26 +88,21 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Octave7Frequency; // cycles/second
             public float Octave8Frequency; // cycles/second
             public float Octave9Frequency; // cycles/second
-            [TagField(Flags = Padding, Length = 28)]
-            public byte[] Padding5;
+            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
             public OctaveFlagsValue OctaveFlags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding6;
-            public List<LiquidCore> Cores;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
+            public List<LiquidCoreBlock> Cores;
             /// <summary>
-            /// RANGE-COLLISION SCALE
+            /// Scales range (amplitude) by collision fraction. The input to the function will be 1 if there is no collision, and 0 if
+            /// the collision occurs at the origin.
             /// </summary>
-            /// <remarks>
-            /// Scales range (amplitude) by collision fraction. The input to the function will be 1 if there is no collision, and 0 if the collision occurs at the origin.
-            /// </remarks>
-            public FunctionDefinition RangeScale;
+            public ScalarFunctionStructBlock3 RangeScale;
             /// <summary>
-            /// BRIGHTNESS-COLLISION SCALE
-            /// </summary>
-            /// <remarks>
             /// Scales brightness by collision fraction.
-            /// </remarks>
-            public FunctionDefinition BrightnessScale;
+            /// </summary>
+            public ScalarFunctionStructBlock4 BrightnessScale;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -140,10 +124,58 @@ namespace TagTool.Tags.Definitions.Gen2
                 _256Sprites
             }
             
-            [TagStructure(Size = 0xC)]
-            public class FunctionDefinition : TagStructure
+            [TagStructure(Size = 0x8)]
+            public class ScalarFunctionStructBlock : TagStructure
             {
-                public FunctionDefinition Function;
+                public MappingFunctionBlock Function;
+                
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
+                {
+                    public List<ByteBlock> Data;
+                    
+                    [TagStructure(Size = 0x1)]
+                    public class ByteBlock : TagStructure
+                    {
+                        public sbyte Value;
+                    }
+                }
+            }
+            
+            [TagStructure(Size = 0x8)]
+            public class ScalarFunctionStructBlock1 : TagStructure
+            {
+                public MappingFunctionBlock Function;
+                
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
+                {
+                    public List<ByteBlock> Data;
+                    
+                    [TagStructure(Size = 0x1)]
+                    public class ByteBlock : TagStructure
+                    {
+                        public sbyte Value;
+                    }
+                }
+            }
+            
+            [TagStructure(Size = 0x8)]
+            public class ScalarFunctionStructBlock2 : TagStructure
+            {
+                public MappingFunctionBlock Function;
+                
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
+                {
+                    public List<ByteBlock> Data;
+                    
+                    [TagStructure(Size = 0x1)]
+                    public class ByteBlock : TagStructure
+                    {
+                        public sbyte Value;
+                    }
+                }
             }
             
             [Flags]
@@ -160,51 +192,156 @@ namespace TagTool.Tags.Definitions.Gen2
                 Octave9 = 1 << 8
             }
             
-            [TagStructure(Size = 0x4C)]
-            public class LiquidCore : TagStructure
+            [TagStructure(Size = 0x38)]
+            public class LiquidCoreBlock : TagStructure
             {
-                [TagField(Flags = Padding, Length = 12)]
-                public byte[] Padding1;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short BitmapIndex;
-                [TagField(Flags = Padding, Length = 2)]
-                public byte[] Padding2;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 /// <summary>
-                /// THICKNESS
-                /// </summary>
-                /// <remarks>
                 /// In world units.
-                /// </remarks>
-                public FunctionDefinition Thickness;
-                /// <summary>
-                /// COLOR
                 /// </summary>
-                public FunctionDefinition Color;
+                public ScalarFunctionStructBlock Thickness;
+                public ColorFunctionStructBlock Color;
                 /// <summary>
-                /// BRIGHTNESS/TIME
-                /// </summary>
-                /// <remarks>
                 /// Periodic function based on time.
-                /// </remarks>
-                public FunctionDefinition BrightnessTime;
-                /// <summary>
-                /// BRIGHTNESS/FACING
                 /// </summary>
-                /// <remarks>
+                public ScalarFunctionStructBlock1 BrightnessTime;
+                /// <summary>
                 /// Brightness when facing perpendicular versus parallel.
-                /// </remarks>
-                public FunctionDefinition BrightnessFacing;
-                /// <summary>
-                /// ALONG-AXIS SCALE
                 /// </summary>
-                /// <remarks>
+                public ScalarFunctionStructBlock2 BrightnessFacing;
+                /// <summary>
                 /// Scale along-axis. Default should be 1.
-                /// </remarks>
-                public FunctionDefinition AlongAxisScale;
+                /// </summary>
+                public ScalarFunctionStructBlock3 AlongAxisScale;
                 
-                [TagStructure(Size = 0xC)]
-                public class FunctionDefinition : TagStructure
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock : TagStructure
                 {
-                    public FunctionDefinition Function;
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ColorFunctionStructBlock : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock1 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock2 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+                
+                [TagStructure(Size = 0x8)]
+                public class ScalarFunctionStructBlock3 : TagStructure
+                {
+                    public MappingFunctionBlock Function;
+                    
+                    [TagStructure(Size = 0x8)]
+                    public class MappingFunctionBlock : TagStructure
+                    {
+                        public List<ByteBlock> Data;
+                        
+                        [TagStructure(Size = 0x1)]
+                        public class ByteBlock : TagStructure
+                        {
+                            public sbyte Value;
+                        }
+                    }
+                }
+            }
+            
+            [TagStructure(Size = 0x8)]
+            public class ScalarFunctionStructBlock3 : TagStructure
+            {
+                public MappingFunctionBlock Function;
+                
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
+                {
+                    public List<ByteBlock> Data;
+                    
+                    [TagStructure(Size = 0x1)]
+                    public class ByteBlock : TagStructure
+                    {
+                        public sbyte Value;
+                    }
+                }
+            }
+            
+            [TagStructure(Size = 0x8)]
+            public class ScalarFunctionStructBlock4 : TagStructure
+            {
+                public MappingFunctionBlock Function;
+                
+                [TagStructure(Size = 0x8)]
+                public class MappingFunctionBlock : TagStructure
+                {
+                    public List<ByteBlock> Data;
+                    
+                    [TagStructure(Size = 0x1)]
+                    public class ByteBlock : TagStructure
+                    {
+                        public sbyte Value;
+                    }
                 }
             }
         }

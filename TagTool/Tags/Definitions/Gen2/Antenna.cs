@@ -2,42 +2,69 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0xB4)]
+    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0xA0)]
     public class Antenna : TagStructure
     {
-        public StringId AttachmentMarkerName; // the marker name where the antenna should be attached
+        /// <summary>
+        /// the marker name where the antenna should be attached
+        /// </summary>
+        public StringId AttachmentMarkerName;
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag Bitmaps;
+        [TagField(ValidTags = new [] { "pphy" })]
         public CachedTag Physics;
-        [TagField(Flags = Padding, Length = 80)]
-        public byte[] Padding1;
-        public float SpringStrengthCoefficient; // strength of the spring (larger values make the spring stronger)
+        [TagField(Length = 0x50, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        /// <summary>
+        /// strength of the spring (larger values make the spring stronger)
+        /// </summary>
+        public float SpringStrengthCoefficient;
         public float FalloffPixels;
         public float CutoffPixels;
-        [TagField(Flags = Padding, Length = 40)]
-        public byte[] Padding2;
-        public List<AntennaVertex> Vertices;
+        [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        public List<AntennaVertexBlock> Vertices;
         
         [TagStructure(Size = 0x80)]
-        public class AntennaVertex : TagStructure
+        public class AntennaVertexBlock : TagStructure
         {
-            public float SpringStrengthCoefficient; // strength of the spring (larger values make the spring stronger)
-            [TagField(Flags = Padding, Length = 24)]
-            public byte[] Padding1;
-            public RealEulerAngles2d Angles; // direction toward next vertex
+            /// <summary>
+            /// strength of the spring (larger values make the spring stronger)
+            /// </summary>
+            public float SpringStrengthCoefficient;
+            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            /// <summary>
+            /// direction toward next vertex
+            /// </summary>
+            public RealEulerAngles2d Angles;
+            /// <summary>
+            /// distance between this vertex and the next
+            /// </summary>
             public float Length; // world units
-            public short SequenceIndex; // bitmap group sequence index for this vertex's texture
-            [TagField(Flags = Padding, Length = 2)]
+            /// <summary>
+            /// bitmap group sequence index for this vertex's texture
+            /// </summary>
+            public short SequenceIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            /// <summary>
+            /// color at this vertex
+            /// </summary>
+            public RealArgbColor Color;
+            /// <summary>
+            /// color at this vertex for the low-LOD line primitives
+            /// </summary>
+            public RealArgbColor LodColor;
+            [TagField(Length = 0x28, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            public RealArgbColor Color; // color at this vertex
-            public RealArgbColor LodColor; // color at this vertex for the low-LOD line primitives
-            [TagField(Flags = Padding, Length = 40)]
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
             public byte[] Padding3;
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Padding4;
         }
     }
 }

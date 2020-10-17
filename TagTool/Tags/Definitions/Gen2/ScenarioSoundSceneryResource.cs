@@ -2,66 +2,69 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "scenario_sound_scenery_resource", Tag = "*sce", Size = 0x4C)]
+    [TagStructure(Name = "scenario_sound_scenery_resource", Tag = "*sce", Size = 0x34)]
     public class ScenarioSoundSceneryResource : TagStructure
     {
-        public List<ScenarioObjectName> Names;
-        public List<ScenarioEnvironmentObject> Unknown1;
-        public List<ScenarioStructureBspReference> StructureReferences;
-        public List<ScenarioObjectPaletteEntry> Palette;
-        public List<ScenarioSoundScenery> Objects;
+        public List<ScenarioObjectNamesBlock> Names;
+        public List<DontUseMeScenarioEnvironmentObjectBlock> Unknown;
+        public List<ScenarioStructureBspReferenceBlock> StructureReferences;
+        public List<ScenarioSoundSceneryPaletteBlock> Palette;
+        public List<ScenarioSoundSceneryBlock> Objects;
         public int NextObjectIdSalt;
-        public List<ScenarioEditorFolder> EditorFolders;
+        public List<GScenarioEditorFolderBlock> EditorFolders;
         
         [TagStructure(Size = 0x24)]
-        public class ScenarioObjectName : TagStructure
+        public class ScenarioObjectNamesBlock : TagStructure
         {
             [TagField(Length = 32)]
             public string Name;
+            public short Unknown;
             public short Unknown1;
-            public short Unknown2;
         }
         
         [TagStructure(Size = 0x40)]
-        public class ScenarioEnvironmentObject : TagStructure
+        public class DontUseMeScenarioEnvironmentObjectBlock : TagStructure
         {
             public short Bsp;
-            public short Unknown2;
+            public short Unknown;
             public int UniqueId;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding1;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             public Tag ObjectDefinitionTag;
             public int Object;
-            [TagField(Flags = Padding, Length = 44)]
-            public byte[] Padding2;
+            [TagField(Length = 0x2C, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
         }
         
-        [TagStructure(Size = 0x54)]
-        public class ScenarioStructureBspReference : TagStructure
+        [TagStructure(Size = 0x44)]
+        public class ScenarioStructureBspReferenceBlock : TagStructure
         {
-            [TagField(Flags = Padding, Length = 16)]
-            public byte[] Padding1;
+            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(ValidTags = new [] { "sbsp" })]
             public CachedTag StructureBsp;
+            [TagField(ValidTags = new [] { "ltmp" })]
             public CachedTag StructureLightmap;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding2;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
             public float UnusedRadianceEstSearchDistance;
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Padding3;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
             public float UnusedLuminelsPerWorldUnit;
             public float UnusedOutputWhiteReference;
-            [TagField(Flags = Padding, Length = 8)]
-            public byte[] Padding4;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
             public FlagsValue Flags;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding5;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
             public short DefaultSky;
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Padding6;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
             
             [Flags]
             public enum FlagsValue : ushort
@@ -70,35 +73,36 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
         
-        [TagStructure(Size = 0x30)]
-        public class ScenarioObjectPaletteEntry : TagStructure
+        [TagStructure(Size = 0x28)]
+        public class ScenarioSoundSceneryPaletteBlock : TagStructure
         {
+            [TagField(ValidTags = new [] { "ssce" })]
             public CachedTag Name;
-            [TagField(Flags = Padding, Length = 32)]
-            public byte[] Padding1;
+            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x50)]
-        public class ScenarioSoundScenery : TagStructure
+        public class ScenarioSoundSceneryBlock : TagStructure
         {
             public short Type;
             public short Name;
-            public ScenarioObjectDatum ObjectData;
-            public ScenarioSoundSceneryDatum SoundScenery;
+            public ScenarioObjectDatumStructBlock ObjectData;
+            public SoundSceneryDatumStructBlock SoundScenery;
             
             [TagStructure(Size = 0x30)]
-            public class ScenarioObjectDatum : TagStructure
+            public class ScenarioObjectDatumStructBlock : TagStructure
             {
                 public PlacementFlagsValue PlacementFlags;
                 public RealPoint3d Position;
                 public RealEulerAngles3d Rotation;
                 public float Scale;
                 public TransformFlagsValue TransformFlags;
-                public ushort[] ManualBspFlags;
-                public ObjectIdentifier ObjectId;
+                public ushort ManualBspFlags;
+                public ScenarioObjectIdStructBlock ObjectId;
                 public BspPolicyValue BspPolicy;
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Padding1;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public short EditorFolder;
                 
                 [Flags]
@@ -106,8 +110,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 {
                     NotAutomatically = 1 << 0,
                     Unused = 1 << 1,
-                    Unused0 = 1 << 2,
-                    Unused1 = 1 << 3,
+                    Unused1 = 1 << 2,
+                    Unused2 = 1 << 3,
                     LockTypeToEnvObject = 1 << 4,
                     LockTransformToEnvObject = 1 << 5,
                     NeverPlaced = 1 << 6,
@@ -122,7 +126,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x8)]
-                public class ObjectIdentifier : TagStructure
+                public class ScenarioObjectIdStructBlock : TagStructure
                 {
                     public int UniqueId;
                     public short OriginBspIndex;
@@ -164,7 +168,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0x1C)]
-            public class ScenarioSoundSceneryDatum : TagStructure
+            public class SoundSceneryDatumStructBlock : TagStructure
             {
                 public VolumeTypeValue VolumeType;
                 public float Height;
@@ -181,7 +185,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x104)]
-        public class ScenarioEditorFolder : TagStructure
+        public class GScenarioEditorFolderBlock : TagStructure
         {
             public int ParentFolder;
             [TagField(Length = 256)]

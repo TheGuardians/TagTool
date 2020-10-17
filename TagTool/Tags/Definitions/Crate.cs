@@ -8,7 +8,8 @@ namespace TagTool.Tags.Definitions
     public class Crate : GameObject
     {
         public CrateFlagsValue Flags2;
-        public short Unknown6;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        public byte[] Pad = new byte[2];
         public List<CharacterMetagameProperties> MetagameProperties;
         public sbyte Unknown7;
         public sbyte Unknown8;

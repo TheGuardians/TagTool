@@ -6,10 +6,15 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194)]
+    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x1F0, MinVersion = CacheVersion.HaloReach)]
     public class Particle : TagStructure
 	{
-        public int Flags;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+        public FlagsValueH3 FlagsH3;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public FlagsValue Flags;
+
         public List<Attachment> Attachments;
         public AppearanceFlagsValue AppearanceFlags;
         public ParticleBillboardStyleValue ParticleBillboardStyle;
@@ -17,7 +22,12 @@ namespace TagTool.Tags.Definitions
         public short FirstSequenceIndex;
         public short SequenceCount;
         public float LowResolutionSwitchDistance;
-        public float CenterOffsetX; //???
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public float CenterOffsetX;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealPoint2d CenterOffset;
+
         public float Curvature;
         public float EdgeRange;
         public float EdgeCutoff;
@@ -25,6 +35,28 @@ namespace TagTool.Tags.Definitions
         public float MotionBlurRotationScale;
         public float MotionBlurAspectScale;
         public RenderMethod RenderMethod;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown1;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown2;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown3;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown4;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown5;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown6;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown7;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown8;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int Unknown9;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Unknown10;
+
         public TagMapping AspectRatio;
         public TagMapping Color;
         public TagMapping Intensity;
@@ -49,7 +81,22 @@ namespace TagTool.Tags.Definitions
             DiesInWater = 1 << 2,
             DiesInAir = 1 << 3,
             HasSweetener = 1 << 4,
-            UsesCheapShader = 1 << 5
+            UsesCheapShader = 1 << 5,
+            Bit6 = 1 << 6,
+            HasAttachment = 1 << 7
+        }
+
+        [Flags]
+        public enum FlagsValueH3 : int
+        {
+            None = 0,
+            DiesAtRest = 1 << 0,
+            DiesOnStructureCollision = 1 << 1,
+            DiesInAir = 1 << 2,
+            HasSweetener = 1 << 3,
+            UsesCheapShader = 1 << 4,
+            Bit6 = 1 << 5,
+            HasAttachment = 1 << 6
         }
 
         [TagStructure(Size = 0x14)]
