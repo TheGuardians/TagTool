@@ -302,6 +302,8 @@ namespace TagTool.Commands.Porting
                     return null;// CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
 				case "rmct":
                     return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
+				case "rmgl":
+					return CacheContext.TagCache.GetTag<Shader>(@"levels\dlc\sidewinder\shaders\side_hall_glass03");
 				case "rmt2":
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);

@@ -56,7 +56,7 @@ namespace TagTool.Commands.Common
             // Try to execute it
             if (!ExecuteCommand(ContextStack.Context, commandArgs))
             {
-                Console.WriteLine("Unrecognized command: {0}", commandArgs[0]);
+                Console.WriteLine("ERROR: Unrecognized command \"{0}\"", commandArgs[0]);
                 Console.WriteLine("Use \"help\" to list available commands.");
             }
 
