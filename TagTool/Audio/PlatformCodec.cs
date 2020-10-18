@@ -4,20 +4,21 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x3, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x3, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x3, MaxVersion = CacheVersion.HaloReach)]
     public class PlatformCodec : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public byte Unknown1;
 
         /// <summary>
         /// Should be 0 in most cases. Seems to be used to determine streaming or loading.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public byte LoadMode;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public SampleRate SampleRate;
 
         public EncodingValue Encoding;

@@ -3,23 +3,16 @@ using TagTool.Cache;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Beta)]
     public class PermutationChunk : TagStructure
 	{
         
         public int Offset;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public short Flags;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public short Size;
 
         /// <summary>
         /// Encoded size, to get the real size apply a mask of 0x3FFFFF. It should always have the bit 0x400000 activated.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int EncodedSize;
 
         /// <summary>
@@ -27,13 +20,8 @@ namespace TagTool.Audio
         /// </summary>
         public int RuntimeIndex;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int UnknownSize;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short SoundDialogInfoIndex;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short Unknown;
 
 
