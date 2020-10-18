@@ -164,7 +164,12 @@ namespace TagTool.Commands.RenderModels
 											//bone.Name = bone.Name.Replace("2", "_tip");
 											//else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
 											//bone.Name = bone.Name.Replace("1", "_low");
-											blendIndicesList.Add((byte)nodes[bone.Name]);
+											var bonefix = bone.Name;
+											if (bone.Name.Contains("Armature_"))
+												bonefix = bonefix.Substring(9);
+												
+
+											blendIndicesList.Add((byte)nodes[bonefix]);
 											blendWeightsList.Add(vertexInfo.Weight);
 										}
 									}
