@@ -852,6 +852,7 @@
     <Compile Include="Tags\Definitions\GlobalCacheFilePixelShaders.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
+    <Compile Include="Tags\Definitions\ShaderGlass.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInteropResource.cs" />
