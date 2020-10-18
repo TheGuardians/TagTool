@@ -7,8 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound", Tag = "snd!", Size = 0x14, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
 	[TagStructure(Name = "sound", Tag = "snd!", Size = 0xD4, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
 	[TagStructure(Name = "sound", Tag = "snd!", Size = 0xD8, MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0xD4, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -17,49 +16,49 @@ namespace TagTool.Tags.Definitions
 	{
         public FlagsValue Flags;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public short Unknown1;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown3;
         
         public SoundClass SoundClass;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public SampleRate SampleRate;
 
         [TagField(Gen = CacheGeneration.Third)]
         public SoundCacheFileGestaltReference SoundReference;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public byte Unknown6;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public ImportType ImportType;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public PlaybackParameter PlaybackParameters;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public Scale Scale;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public PlatformCodec PlatformCodec;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public Promotion Promotion;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<PitchRange> PitchRanges;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<CustomPlayback> CustomPlayBacks;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<ExtraInfo> ExtraInfo;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<LanguageBlock> Languages;
 
         public TagResourceReference Resource;
@@ -86,7 +85,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x9, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x15, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x15, MinVersion = CacheVersion.Halo3Beta)]
         public class SoundCacheFileGestaltReference : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -97,25 +96,25 @@ namespace TagTool.Tags.Definitions
             public EncodingH2 Encoding;
 
             // Halo 3 Section
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public sbyte PitchRangeCount;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short PlatformCodecIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short PitchRangeIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short LanguageIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short Unknown4;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short PlaybackParameterIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short ScaleIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public sbyte PromotionIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public sbyte CustomPlaybackIndex;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short ExtraInfoIndex;
 
             //Halo 2 Section
