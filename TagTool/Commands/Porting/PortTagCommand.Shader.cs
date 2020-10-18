@@ -64,6 +64,7 @@ namespace TagTool.Commands.Porting
                 case Shader rmsh:
                 case ShaderWater rmw:
                 case ShaderBlack rmbk:
+                case ShaderGlass rmgl:
                     return ConvertShaderInternal(cacheStream, blamCacheStream, (RenderMethod)definition, blamTag, (RenderMethod)blamDefinition);
 
                 case ContrailSystem cntl:
@@ -164,7 +165,8 @@ namespace TagTool.Commands.Porting
 
                 case "rmbk" when CacheContext.TagCache.TryGetTag(@"levels\dlc\bunkerworld\shaders\z_black.rmsh", out shaderTag):
                     return shaderTag;
-
+                case "rmgl" when CacheContext.TagCache.TryGetTag(@"levels\dlc\sidewinder\shaders\side_hall_glass03", out shaderTag):
+                    return shaderTag;
                 case "rmrd":
                 case "rmsh":
                 case "rmss":
