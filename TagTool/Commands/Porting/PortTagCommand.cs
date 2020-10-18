@@ -31,7 +31,7 @@ namespace TagTool.Commands.Porting
         private Dictionary<int, CachedTag> PortedTags = new Dictionary<int, CachedTag>();
         private Dictionary<uint, StringId> PortedStringIds = new Dictionary<uint, StringId>();
 
-		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
+		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct"), new Tag("rmgl") };
 		private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
         private readonly List<Tag> ResourceTagGroups = new List<Tag> { new Tag("snd!"), new Tag("bitm"), new Tag("Lbsp") }; // for null tag detection
 
@@ -302,6 +302,8 @@ namespace TagTool.Commands.Porting
                     return null;// CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
 				case "rmct":
                     return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
+				case "rmgl":
+					return CacheContext.TagCache.GetTag<Shader>(@"levels\dlc\sidewinder\shaders\side_hall_glass03");
 				case "rmt2":
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
