@@ -9,7 +9,7 @@ using static TagTool.Tags.Definitions.RenderMethodTemplate;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x54, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x64, MinVersion = CacheVersion.HaloReach)]
     public class RenderMethod : TagStructure
     {
         public CachedTag BaseRenderMethod;
