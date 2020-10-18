@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions
 	[TagStructure(Name = "sound", Tag = "snd!", Size = 0xD4, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
 	[TagStructure(Name = "sound", Tag = "snd!", Size = 0xD8, MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0xD4, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "sound", Tag = "snd!", Size = 0x24, MinVersion = CacheVersion.HaloReach)]
     public class Sound : TagStructure
 	{
         public FlagsValue Flags;
@@ -85,7 +85,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x9, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x15, MinVersion = CacheVersion.Halo3Beta)]
+        [TagStructure(Size = 0x15, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x19, MinVersion = CacheVersion.HaloReach)]
         public class SoundCacheFileGestaltReference : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -116,6 +117,12 @@ namespace TagTool.Tags.Definitions
             public sbyte CustomPlaybackIndex;
             [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short ExtraInfoIndex;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short UnknownIndexReach1;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short UnknownIndexReach2;
 
             //Halo 2 Section
 
