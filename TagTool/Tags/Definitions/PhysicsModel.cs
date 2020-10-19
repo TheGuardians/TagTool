@@ -291,12 +291,13 @@ namespace TagTool.Tags.Definitions
             ExtraHuge
         }
 
-        [TagStructure(Size = 0x68)]
+        [TagStructure(Size = 0x68, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x6C, MinVersion = CacheVersion.HaloReach)]
         public class PhantomType : TagStructure
 		{
             public PhantomTypeFlags Flags;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int Unknown;
+            public float BrittleTimer;
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
@@ -435,46 +436,49 @@ namespace TagTool.Tags.Definitions
             ExtraHuge
         }
 
-        [TagStructure(Size = 0xB0, Align = 0x10)]
+        [TagStructure(Size = 0xB0, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
         public class RigidBody : TagStructure
 		{
             public short Node;
             public short Region;
             public short Permutations;
-            public short Unknown;
+            public short SerializedShapes;
             public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
             public RigidBodyFlags Flags;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public MotionTypeValue MotionType;
             public short NoPhantomPowerAltRigidBody;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public MotionTypeValue MotionType_Reach;
+            public MotionTypeValueByte MotionType_Reach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte ProxyCollisionGroup;
             public RigidBodySize Size;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown1;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown2;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown3;
             public float InertiaTensorScale;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float InertialTensorScaleX;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float InertialTensorScaleY;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float InertialTensorScaleZ;
             public float LinearDampening;
             public float AngularDampening;
             public RealPoint3d CenterOfMassOffset;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            public float WaterPhysicsX0;
+            public float WaterPhysicsX1;
+            public float WaterPhysicsY0;
+            public float WaterPhysicsY1;
+            public float WaterPhysicsZ0;
+            public float WaterPhysicsZ1;
+            public uint RuntimeShapePointer;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown9;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public BlamShapeType ShapeType;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public short ShapeIndex;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Mass;
             public RealVector3d CenterOfMass;
             public float CenterOfMassRadius;
@@ -484,24 +488,24 @@ namespace TagTool.Tags.Definitions
             public float InertiaTensorYRadius;
             public RealVector3d InertiaTensorZ;
             public float InertiaTensorZRadius;
-            public float BoundingSpherePad;
+            public uint RuntimeHavokGroupMask;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public BlamShapeType ShapeType_Reach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short ShapeIndex_Reach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Mass_Reach;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown10;
-            public uint Unknown11;
-            public short Unknown12;
-            public short Unknown13;
+            public float BoundingSpherePad;
+            public byte CollisionQualityOverrideType;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+            public byte[] Pad3 = new byte[1];
+            public short RuntimeFlags;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown4;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown5;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown6;
+            public float MassBodyOverride;
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 8)]
+            public byte[] Pad4 = new byte[8];
 
             [Flags]
             public enum RigidBodyFlags : short
@@ -524,6 +528,16 @@ namespace TagTool.Tags.Definitions
                 Keyframed,
                 Fixed,
             }
+
+            public enum MotionTypeValueByte : byte
+            {
+                Sphere,
+                StabilizedSphere,
+                Box,
+                StabilizedBox,
+                Keyframed,
+                Fixed,
+            }
         }
 
         [Flags]
@@ -534,33 +548,40 @@ namespace TagTool.Tags.Definitions
             ForceEnableCollisionWithPlayer = 1 << 1
         }
 
-        [TagStructure(Size = 0xC)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class Material : TagStructure
 		{
             public StringId Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown;
+            public byte Flags;
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 3)]
+            public byte[] Pad4 = new byte[3];
             public StringId MaterialName;
             public short PhantomType;
-            public MaterialFlags Flags;
-            public byte Unknown;
+            public byte ProxyCollisionGroup;
+            public byte RuntimeCollisionGroup;
         }
-
         
         [TagStructure(Size = 0x40)]
         public class Shape : TagStructure
 		{
             public StringId Name;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public short MaterialIndex;
-            public short GlobalMaterialIndex;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte MaterialIndexReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MaterialFlags MaterialFlags;
+            public short RuntimeMaterialType;
             public float RelativeMassScale;
             public float Friction;
             public float Restitution;
             public float Volume;
             public float Mass;
-            public short Index;
+            public short MassDistributionIndex;
             public sbyte PhantomIndex;
-            public sbyte InteractionUnknown;
+            public sbyte ProxyCollisionGroup;
             public int Unknown2;
             public short Size;
             public short Count;
@@ -575,15 +596,18 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30, Align = 0x10)]
         public class Sphere : Shape
         {
-            public int Unknown7;
+            public int FieldPointerSkip;
             public short Size2;
             public short Count2;
             public int Offset2;
-            public int Unknown8;
+            public int UserDataPointer;
             public float Radius2;
             public uint Unknown9;
             public uint Unknown10;
-            public uint Unknown11;
+            //Havok Shape Reference Struct
+            public BlamShapeType Shapetype;
+            public short ShapeIndex;
+            public uint ChildShapeSize;
             public RealVector3d Translation;
             public float TranslationRadius;
         }
@@ -645,9 +669,19 @@ namespace TagTool.Tags.Definitions
             public uint Unknown20;
             public uint Unknown21;
             public uint Unknown22;
+
+            //public RealVector3d PointA;
+            //public float HavokwPointA;
+            //public RealVector3d PointB;
+            //public float HavokwPointB;
+            //public RealVector3d PointC;
+            //public float HavokwPointC;
+            //public RealVector3d Extrusion;
+            //public float HavokwExtrusion;
         }
 
-        [TagStructure(Size = 0x40, Align = 0x10)]
+        [TagStructure(Size = 0x40, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x50, Align = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class Polyhedron : Shape
         {
             public RealVector3d AabbHalfExtents;
@@ -656,22 +690,18 @@ namespace TagTool.Tags.Definitions
             public RealVector3d AabbCenter;
             public float AabbCenterRadius;
 
-            public uint Unknown7;
+            public uint FieldPointerSkip;
             public int FourVectorsSize;
             public uint FourVectorsCapacity;
-            public int Unknown8;
-            public uint Unknown9;
+            public int NumVertices;
+            public uint m_useSpuBuffer;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown1;
+            public int AnotherFieldPointerSkip;
             public int PlaneEquationsSize;
             public uint PlaneEquationsCapacity;
-            public uint Unknown10;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown2;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown3;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown4;
+            public uint Connectivity;
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+            public byte[] Pad = new byte[0xC];
         }
 
         [TagStructure(Size = 0x30, Align = 0x10)]
@@ -690,13 +720,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, Align = 0x10)]
         public class PolyhedronPlaneEquation : TagStructure
 		{
-            public float Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
+            public RealPlane3d PlaneEquation;
         }
 
-        [TagStructure(Size = 0x50, Align = 0x10)]
+        [TagStructure(Size = 0x50, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x70, Align = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class List : TagStructure
 		{
             public int Unknown;
@@ -709,33 +737,31 @@ namespace TagTool.Tags.Definitions
             public uint Unknown5;
             public int ChildShapesSize;
             public uint ChildShapesCapacity;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0xC)]
+            public byte[] nail_in_dick = new byte[0xC];
+
+            public RealVector3d AabbHalfExtents;
+            public float AabbHalfExtentsRadius;
+            public RealVector3d AabbCenter;
+            public float AabbCenterRadius;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown1;
+            public int EnabledChildren0;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown2;
+            public int EnabledChildren1;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown3;
+            public int EnabledChildren2;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown4;
+            public int EnabledChildren3;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown5;
+            public int EnabledChildren4;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown6;
+            public int EnabledChildren5;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown7;
+            public int EnabledChildren6;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ReachUnknown8;
+            public int EnabledChildren7;
         }
 
         [TagStructure(Size = 0x10)]
@@ -743,9 +769,9 @@ namespace TagTool.Tags.Definitions
 		{
             public BlamShapeType ShapeType;
             public short ShapeIndex;
-            public uint Unknown;
-            public uint Unknown2;
-            public int Unknown3;
+            public uint CollisionFilter;
+            public uint ShapeSize;
+            public uint NumChildShapes;
         }
 
         [TagStructure(Size = 0x78, Align = 0x10)]
