@@ -651,6 +651,17 @@ namespace TagTool.Commands.CollisionModels
                 //if this edge spans the plane, then create a new dividing edge
                 if(edge_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
                 {
+                    if (Bsp.Vertices.Count >= ushort.MaxValue)
+                    {
+                        Console.WriteLine("###ERROR: Vertex count overflow (>65535 vertices) during bsp generation!");
+                        return false;
+                    }
+                    if (Bsp.Edges.Count >= ushort.MaxValue - 1)
+                    {
+                        Console.WriteLine("###ERROR: Edge count overflow (>65535 edges) during bsp generation!");
+                        return false;
+                    }
+
                     //allocate new edges and vertex
                     Bsp.Vertices.Add(new Vertex());
                     int new_vertex_index_A = Bsp.Vertices.Count - 1;
@@ -945,6 +956,13 @@ namespace TagTool.Commands.CollisionModels
 
                         case Plane_Relationship.BothSidesofPlane: //surface is both in front of and behind plane
                             split_plane_count++;
+
+                            if (Bsp.Surfaces.Count >= ushort.MaxValue - 1)
+                            {
+                                Console.WriteLine("###ERROR: Surface count overflow (>65535 surfaces) during bsp generation!");
+                                return false;
+                            }
+
                             Bsp.Surfaces.Add(new Surface());
                             Bsp.Surfaces.Add(new Surface());
                             int new_surface_A_index = Bsp.Surfaces.Count - 2;

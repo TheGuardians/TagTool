@@ -274,7 +274,11 @@ namespace TagTool.Commands.CollisionModels
                 if (newvertex.Point == testvertex.Point)
                     return i;
             }
-                            
+            if(Bsp.Vertices.Count >= ushort.MaxValue)
+            {
+                Console.WriteLine("###ERROR: Can only support up to 65535 unique vertices!");
+                return -1;
+            }
             Bsp.Vertices.Add(newvertex);
             return Bsp.Vertices.Count - 1;
         }
@@ -283,6 +287,11 @@ namespace TagTool.Commands.CollisionModels
         {
             foreach(triangle newtriangle in Triangles)
             {
+                if (Bsp.Surfaces.Count >= ushort.MaxValue)
+                {
+                    Console.WriteLine("###ERROR: Can only support up to 65535 unique surfaces!");
+                    return false;
+                }
                 Bsp.Surfaces.Add(new Surface());
                 int surface_index = Bsp.Surfaces.Count - 1;
                 Bsp.Surfaces[surface_index].Plane = ushort.MaxValue;
@@ -290,6 +299,9 @@ namespace TagTool.Commands.CollisionModels
                 int point0 = add_vertex(Vertices[newtriangle.a]);
                 int point1 = add_vertex(Vertices[newtriangle.b]);
                 int point2 = add_vertex(Vertices[newtriangle.c]);
+
+                if (point0 == -1 || point1 == -1 || point2 == -1)
+                    return false;
 
                 int edge_index0 = collision_geometry_add_edge(point0, point1, surface_index);
                 int edge_index1 = collision_geometry_add_edge(point1, point2, surface_index);
@@ -370,6 +382,12 @@ namespace TagTool.Commands.CollisionModels
                     Console.WriteLine($"###ERROR: Edge Index {edge_index} is degenerate!!");
                     return -1;
                 }
+            }
+
+            if (Bsp.Edges.Count >= ushort.MaxValue)
+            {
+                Console.WriteLine("###ERROR: Can only support up to 65535 unique edges!");
+                return -1;
             }
 
             Bsp.Edges.Add(new Edge
