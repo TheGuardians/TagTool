@@ -75,13 +75,7 @@ namespace TagTool.Commands.RenderModels
 			foreach (var oldNode in Definition.Nodes)
 			{
 				var name = Cache.StringTable.GetString(oldNode.Name);
-
-                if (!nodes.ContainsKey(name))
-                {
-                    Console.WriteLine($"###ERROR: New model does not contain node '{name}'!");
-                    return false;
-                }
-				nodes[name] = builder.AddNode(oldNode);
+				nodes.Add(name,builder.AddNode(oldNode));
 			}
 
 			foreach (var region in Definition.Regions)
@@ -230,11 +224,14 @@ namespace TagTool.Commands.RenderModels
 
 						if (materialIndices.ContainsKey(meshMaterial.Name))
 							materialIndex = materialIndices[meshMaterial.Name];
-						else
-							materialIndex = materialIndices[meshMaterial.Name] = builder.AddMaterial(new RenderMaterial
-							{
-								RenderMethod = defaultShaderTag,
-							});
+                        else
+                        {
+                            materialIndices.Add(meshMaterial.Name, builder.AddMaterial(new RenderMaterial
+                            {
+                                RenderMethod = defaultShaderTag,
+                            }));
+                            materialIndex = materialIndices[meshMaterial.Name];
+                        }
 
 						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
 						builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
