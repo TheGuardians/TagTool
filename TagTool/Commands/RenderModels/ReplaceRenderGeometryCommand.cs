@@ -166,7 +166,12 @@ namespace TagTool.Commands.RenderModels
 											var bonefix = bone.Name;
 											if (bone.Name.Contains("Armature_"))
 												bonefix = bonefix.Substring(9);
-												
+
+                                            if (!nodes.ContainsKey(bonefix))
+                                            {
+                                                Console.WriteLine($"###ERROR: There is no node {bonefix} to match bone {bone.Name}");
+                                                return false;
+                                            }
 
 											blendIndicesList.Add((byte)nodes[bonefix]);
 											blendWeightsList.Add(vertexInfo.Weight);
