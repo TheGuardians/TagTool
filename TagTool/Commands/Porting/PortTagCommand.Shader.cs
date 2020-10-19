@@ -346,6 +346,11 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].BooleanConstants = newShaderProperty.BooleanConstants;
             finalRm.ShaderProperties[0].AlphaBlendMode = newShaderProperty.AlphaBlendMode;
             finalRm.ShaderProperties[0].BlendFlags = newShaderProperty.BlendFlags;
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
+            }
 
             // fixup runtime queryable properties
             if (BlamCache.Version < CacheVersion.HaloReach)
@@ -383,18 +388,14 @@ namespace TagTool.Commands.Porting
 
             finalRm.BaseRenderMethod = rmdfInstance;
 
-            // TODO
-            if (BlamCache.Version >= CacheVersion.HaloReach)
-            {
-                finalRm.ShaderProperties[0].EntryPoints.Clear();
-                finalRm.ShaderProperties[0].ParameterTables.Clear();
-                finalRm.ShaderProperties[0].Parameters.Clear();
-                finalRm.ShaderProperties[0].Functions.Clear();
-            }
-
             // fixup rm animations
             if (finalRm.ShaderProperties[0].Functions.Count > 0)
-                RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
+            {
+                if (BlamCache.Version >= CacheVersion.HaloReach) // Reach doesnt always store register info :(
+                    RebuildRenderMethodAnimationsFromRmt2(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance);
+                else
+                    RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
+            }
 
             // build new rm option indices
             finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(edRmt2Descriptor);
@@ -639,6 +640,8 @@ namespace TagTool.Commands.Porting
             // Build parameters
             //
 
+            // TODO: fix this code with new knowledge of ms30 entry points
+
             // collect new entry point indices (saber crap)
             List<int> newEntryPoints = new List<int>();
             switch (rmdfTag.Name)
@@ -758,30 +761,221 @@ namespace TagTool.Commands.Porting
             }
         }
 
+        /// <summary>
+        /// Not as thorough as RebuildRenderMethodAnimations(), however should work for most templated Halo Reach shaders.
+        /// </summary>
+        private void RebuildRenderMethodAnimationsFromRmt2(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, CachedTag rmdfTag)
+        {
+            Dictionary<EntryPointReach, List<RegisterID>> externalSamplers = new Dictionary<EntryPointReach, List<RegisterID>>();
+            Dictionary<EntryPointReach, List<RegisterID>> externalPixelConstants = new Dictionary<EntryPointReach, List<RegisterID>>();
+            Dictionary<EntryPointReach, List<RegisterID>> externalVertexConstants = new Dictionary<EntryPointReach, List<RegisterID>>();
+
+            // FORMAT: "name\\function" eg. "diffuse_coefficient\\0" "base_map\\1"
+            List<string> AnimatedTextureParameters = new List<string>();
+            List<string> AnimatedPixelParameters = new List<string>();
+            List<string> AnimatedVertexParameters = new List<string>();
+
+            // Collect used registers in the RenderMethod
+            for (int i = 0; i < finalRm.ShaderProperties[0].EntryPoints.Count; i++)
+            {
+                if ((((int)bmRmt2.ValidEntryPointsReach >> i) & 1) == 0)
+                    continue;
+
+                var entryPointBlock = finalRm.ShaderProperties[0].EntryPoints[i];
+                EntryPointReach entryPoint = (EntryPointReach)i;
+
+                externalSamplers[entryPoint] = new List<RegisterID>();
+                externalPixelConstants[entryPoint] = new List<RegisterID>();
+                externalVertexConstants[entryPoint] = new List<RegisterID>();
+
+                for (int j = entryPointBlock.Offset; j < (entryPointBlock.Offset + entryPointBlock.Count); j++)
+                {
+                    var parameterTable = finalRm.ShaderProperties[0].ParameterTables[j];
+
+                    // sampler
+                    for (int k = parameterTable.Texture.Offset; k < (parameterTable.Texture.Offset + parameterTable.Texture.Count); k++)
+                    {
+                        var parameter = finalRm.ShaderProperties[0].Parameters[k];
+                        RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Sampler, parameter.FunctionIndex, parameter.SourceIndex);
+                        if (!externalSamplers[entryPoint].Contains(registerId))
+                        {
+                            externalSamplers[entryPoint].Add(registerId);
+
+                            string animatedParameter = $"{BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[parameter.SourceIndex].Name)}\\{parameter.FunctionIndex}";
+
+                            if (!AnimatedTextureParameters.Contains(animatedParameter))
+                                AnimatedTextureParameters.Add(animatedParameter);
+                        }
+                    }
+
+                    // pixel
+                    for (int k = parameterTable.RealPixel.Offset; k < (parameterTable.RealPixel.Offset + parameterTable.RealPixel.Count); k++)
+                    {
+                        var parameter = finalRm.ShaderProperties[0].Parameters[k];
+                        RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
+                        if (!externalPixelConstants[entryPoint].Contains(registerId))
+                        {
+                            externalPixelConstants[entryPoint].Add(registerId);
+
+                            string animatedParameter = $"{BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[parameter.SourceIndex].Name)}\\{parameter.FunctionIndex}";
+
+                            if (!AnimatedPixelParameters.Contains(animatedParameter))
+                                AnimatedPixelParameters.Add(animatedParameter);
+                        }
+                    }
+
+                    // vertex
+                    for (int k = parameterTable.RealVertex.Offset; k < (parameterTable.RealVertex.Offset + parameterTable.RealVertex.Count); k++)
+                    {
+                        var parameter = finalRm.ShaderProperties[0].Parameters[k];
+                        RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
+                        if (!externalVertexConstants[entryPoint].Contains(registerId))
+                        {
+                            externalVertexConstants[entryPoint].Add(registerId);
+
+                            string animatedParameter = $"{BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[parameter.SourceIndex].Name)}\\{parameter.FunctionIndex}";
+
+                            if (!AnimatedVertexParameters.Contains(animatedParameter))
+                                AnimatedVertexParameters.Add(animatedParameter);
+                        }
+                    }
+                }
+            }
+
+            // Now (hopefully) all animated parameters are collected, we can rebuild them as MS23 always stores register info
+
+            // store source indices for base cache in dictionary for fast lookup
+            Dictionary<string, byte> TextureConstantMapping = new Dictionary<string, byte>();
+            Dictionary<string, byte> RealConstantMapping = new Dictionary<string, byte>();
+            for (byte i = 0; i < edRmt2.TextureParameterNames.Count; i++)
+                TextureConstantMapping.Add(CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name), i);
+            for (byte i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                RealConstantMapping.Add(CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name), i);
+
+            var pixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
+            var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfTag);
+            var glvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, rmdf.GlobalVertexShader);
+
+            finalRm.ShaderProperties[0].EntryPoints.Clear();
+            finalRm.ShaderProperties[0].ParameterTables.Clear();
+            finalRm.ShaderProperties[0].Parameters.Clear();
+
+            finalRm.ShaderProperties[0].EntryPoints.AddRange(Enumerable.Repeat(new RenderMethodTemplate.PackedInteger_10_6(), edRmt2.EntryPoints.Count));
+
+            foreach (EntryPoint entryPoint in Enum.GetValues(typeof(EntryPoint)))
+            {
+                //EntryPointReach entryPointReach;
+                if ((((int)edRmt2.ValidEntryPoints >> (int)entryPoint) & 1) == 0/* || !Enum.TryParse(entryPoint.ToString(), out entryPointReach)*/)
+                    continue;
+
+                var table = new ParameterTable();
+
+                int entryIndex = (int)entryPoint;
+                int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
+                int shaderCount = pixl.EntryPointShaders[entryIndex].Count;
+                int vertexShaderIndex = glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[entryIndex].ShaderIndex;
+                if (shaderCount <= 0 || shaderIndex >= pixl.Shaders.Count || vertexShaderIndex <= 0)
+                    continue;
+
+                // texture
+                table.Texture.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                foreach (var textureParameter in AnimatedTextureParameters)
+                {
+                    string[] parts = textureParameter.Split('\\');
+
+                    foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                    {
+                        if (pcParameter.RegisterType == ShaderParameter.RType.Sampler && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
+                        {
+                            var parameterBlock = new ParameterMapping
+                            {
+                                RegisterIndex = (short)pcParameter.RegisterIndex,
+                                SourceIndex = TextureConstantMapping[parts[0]],
+                                FunctionIndex = byte.Parse(parts[1])
+                            };
+
+                            finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                            break;
+                        }
+                    }
+                }
+                table.Texture.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.Texture.Offset);
+
+                // real pixel
+                table.RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                foreach (var pixelParameter in AnimatedPixelParameters)
+                {
+                    string[] parts = pixelParameter.Split('\\');
+
+                    string registerName = parts[0];
+                    if (AnimatedTextureParameters.Contains(parts[0]))
+                        registerName += "_xform"; // fixup
+
+                    foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                    {
+                        if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == registerName)
+                        {
+                            var parameterBlock = new ParameterMapping
+                            {
+                                RegisterIndex = (short)pcParameter.RegisterIndex,
+                                SourceIndex = RealConstantMapping[parts[0]],
+                                FunctionIndex = byte.Parse(parts[1])
+                            };
+
+                            finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                            break;
+                        }
+                    }
+                }
+                table.RealPixel.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealPixel.Offset);
+
+                // real vertex
+                table.RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                foreach (var vertexParameter in AnimatedVertexParameters)
+                {
+                    string[] parts = vertexParameter.Split('\\');
+
+                    foreach (var pcParameter in glvs.Shaders[vertexShaderIndex].PCParameters)
+                    {
+                        if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
+                        {
+                            var parameterBlock = new ParameterMapping
+                            {
+                                RegisterIndex = (short)pcParameter.RegisterIndex,
+                                SourceIndex = RealConstantMapping[parts[0]],
+                                FunctionIndex = byte.Parse(parts[1])
+                            };
+
+                            finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                            break;
+                        }
+                    }
+                }
+                table.RealVertex.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealVertex.Offset);
+
+                // TODO: support building parameter table for each shader in entry point. this should be ok for now though
+                finalRm.ShaderProperties[0].EntryPoints[entryIndex].Offset = (ushort)finalRm.ShaderProperties[0].ParameterTables.Count;
+                finalRm.ShaderProperties[0].EntryPoints[entryIndex].Count = 1;
+                finalRm.ShaderProperties[0].ParameterTables.Add(table);
+            }
+        }
+
         private TextureConstant GetDefaultTextureConstant(string parameter, ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, Dictionary<StringId, CachedTag> optionBitmaps)
         {
             TextureConstant textureConstant = new TextureConstant { XFormArgumentIndex = -1 };
 
-            if (rmt2Descriptor.Type == "particle") // not sure what this is but all prt3 have it
-                textureConstant.SamplerFlags = 17;
-
-            // hardcoded because the default bitmaps for these parameters produces bad results
-            switch (parameter)
+            if (rmt2Descriptor.Type == "particle")
             {
-                case "alpha_test_map": // the default bitmap for this puts a transparent "ALPHA" all over the shader
-                    if (rmt2Descriptor.IsMs30)
-                        textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");
-                    else
-                        textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"shaders\default_bitmaps\bitmaps\default_detail.bitm");
-                    return textureConstant;
+                textureConstant.SamplerAddressMode = new TextureConstant.PackedSamplerAddressMode
+                {
+                    AddressU = TextureConstant.SamplerAddressModeEnum.Clamp,
+                    AddressV = TextureConstant.SamplerAddressModeEnum.Clamp
+                };
             }
 
             // get default bitmap from dictionary
             if (!optionBitmaps.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out textureConstant.Bitmap) || textureConstant.Bitmap == null)
             {
-                // fallback
-                //Console.WriteLine($"WARNING: Sampler parameter \"{parameter}\" has no default bitmap");
-
                 // null bitmap causes bad rendering, use default_detail in these cases
                 if (rmt2Descriptor.IsMs30)
                     textureConstant.Bitmap = CacheContext.TagCache.GetTag(@"ms30\shaders\default_bitmaps\bitmaps\default_detail.bitm");

@@ -244,9 +244,7 @@ namespace TagTool.Shaders.ShaderMatching
                 return null;
 
             // rebuild source rmt2 tagname using updated indices
-            string srcRmt2Tagname = $"shaders\\{sourceRmt2Desc.Type}_templates\\";
-            foreach (var option in sourceRmt2Desc.Options)
-                srcRmt2Tagname += $"_{option.ToString()}";
+            string srcRmt2Tagname = $"shaders\\{sourceRmt2Desc.Type}_templates\\_{string.Join("_", sourceRmt2Desc.Options)}";
 
             // find closest rmt2
 

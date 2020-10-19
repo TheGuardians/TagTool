@@ -75,13 +75,14 @@ namespace TagTool.Tags.Definitions
 
             public RenderMethodOption.OptionBlock.OptionDataType Type;
             public CachedTag Bitmap;
-            public uint Unknown2;
-            public int Unknown3;
-            public short Unknown4;
-            public short Unknown5;
-            public short Unknown6;
-            public short Unknown7;
-            public short Unknown8;
+            public float DefaultRealValue;
+            public int DefaultIntBoolValue;
+            public short SamplerFlags;
+            public short SamplerFilterMode;
+            public short DefaultAddressMode;
+            public short AddressU;
+            public short AddressV;
+            // one of these is extern_mode
             public short Unknown9;
             public uint Unknown10;
             public List<ShaderFunction> Functions;
@@ -142,11 +143,89 @@ namespace TagTool.Tags.Definitions
                 [TagField(Flags = Label)]
                 public CachedTag Bitmap;
                 public short BitmapIndex;
-                public sbyte SamplerFlags;
-                public sbyte SamplerFilterMode;
+                public PackedSamplerAddressMode SamplerAddressMode;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public SamplerFilterMode FilterMode;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public PackedSamplerFilterMode FilterModeReach;
                 public sbyte ExternMode;
                 public sbyte XFormArgumentIndex;
                 public PackedInteger_10_6 Functions = new PackedInteger_10_6(); // Range of Functions
+
+                public enum SamplerFilterMode : byte
+                {
+                    Trilinear,
+                    Point,
+                    Bilinear,
+                    unused_00,
+                    Anisotropic_2x,
+                    unused_01,
+                    Anisotropic_4x,
+                    LightprobeTextureArray,
+                    TextureArrayQuadlinear,
+                    TextureArrayQuadanisotropic_2x
+                }
+
+                [TagStructure(Size = 0x1)]
+                public class PackedSamplerFilterMode : TagStructure
+                {
+                    public SamplerFilterMode FilterMode { get => GetFilterMode(); set => SetFilterMode(value); }
+                    public byte Anisotropy { get => GetAnisotropy(); set => SetAnisotropy(value); }
+
+                    private SamplerFilterMode GetFilterMode() => (SamplerFilterMode)(FilterValue & 0xF);
+                    private byte GetAnisotropy() => (byte)(FilterValue >> 4);
+                    private void SetFilterMode(SamplerFilterMode u)
+                    {
+                        if ((byte)u > 0xFu) throw new System.Exception("Out of range");
+                        var b = ((byte)GetAnisotropy() & 0xF) << 4;
+                        FilterValue = (byte)((byte)u | b);
+                    }
+                    private void SetAnisotropy(byte v)
+                    {
+                        if ((byte)v > 0xFu) throw new System.Exception("Out of range");
+                        var a = (byte)GetFilterMode();
+                        var b = ((byte)v & 0xF) << 4;
+                        FilterValue = (byte)(a | b);
+                    }
+
+                    public byte FilterValue;
+                }
+
+                public enum SamplerAddressModeEnum : byte
+                {
+                    Wrap,
+                    Clamp,
+                    Mirror,
+                    BlackBorder,
+                    MirrorOnce,
+                    MirrorOnceBorder
+                }
+
+                [TagStructure(Size = 0x1)]
+                public class PackedSamplerAddressMode : TagStructure
+                {
+                    public SamplerAddressModeEnum AddressU { get => GetU(); set => SetU(value); }
+                    public SamplerAddressModeEnum AddressV { get => GetV(); set => SetV(value); }
+
+                    private SamplerAddressModeEnum GetU() => (SamplerAddressModeEnum)(SamplerAddressUV & 0xF);
+                    private SamplerAddressModeEnum GetV() => (SamplerAddressModeEnum)(SamplerAddressUV >> 4);
+                    private void SetU(SamplerAddressModeEnum u)
+                    {
+                        if ((byte)u > 0xFu) throw new System.Exception("Out of range");
+                        var a = (byte)u;
+                        var b = ((byte)GetV() & 0xF) << 4;
+                        SamplerAddressUV = (byte)(a | b);
+                    }
+                    private void SetV(SamplerAddressModeEnum v)
+                    {
+                        if ((byte)v > 0xFu) throw new System.Exception("Out of range");
+                        var a = (byte)GetU();
+                        var b = ((byte)v & 0xF) << 4;
+                        SamplerAddressUV = (byte)(a | b);
+                    }
+
+                    public byte SamplerAddressUV;
+                }
             }
 
             [TagStructure(Size = 0x10)]
