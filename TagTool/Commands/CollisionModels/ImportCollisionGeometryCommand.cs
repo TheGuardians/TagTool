@@ -215,9 +215,9 @@ namespace TagTool.Commands.CollisionModels
             for (int i = 0; i < Indices.Length; i += 3)
             {
                 //the normals in Halo seem to be the opposite by convention when compared to other editing software
-                triangle newtriangle = new triangle{ a = Indices[i + 1], b = Indices[i], c = Indices[i + 2] };
-                Vector3D point0 = Vertices[Indices[i + 1]];
-                Vector3D point1 = Vertices[Indices[i]];
+                triangle newtriangle = new triangle{ a = Indices[i], b = Indices[i + 1], c = Indices[i + 2] };
+                Vector3D point0 = Vertices[Indices[i]];
+                Vector3D point1 = Vertices[Indices[i + 1]];
                 Vector3D point2 = Vertices[Indices[i + 2]];
                 float xdiff_1_0 = point1.X - point0.X;
                 float ydiff_1_0 = point1.Y - point0.Y;
@@ -267,7 +267,7 @@ namespace TagTool.Commands.CollisionModels
         {
             //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
             //we also need to scale everything down by 1/100 to account for editing software conventions
-            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = -vertex.Z * 0.01f, Z = vertex.Y * 0.01f }, FirstEdge = ushort.MaxValue };
+            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = vertex.Y * 0.01f, Z = vertex.Z * 0.01f }, FirstEdge = ushort.MaxValue };
             for(int i = 0; i < Bsp.Vertices.Count; i++)
             {
                 Vertex testvertex = Bsp.Vertices[i];
@@ -797,7 +797,7 @@ namespace TagTool.Commands.CollisionModels
             }
             if (pointlist.Count < 3 || !plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
             {
-                Console.WriteLine("###ERROR: Surface invalid for plane generation!");
+                Console.WriteLine("###ERROR: Surface is too small or has less than 3 points!");
                 return false;
             }
             else
