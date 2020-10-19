@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Commands.Porting
 {
@@ -537,6 +538,14 @@ namespace TagTool.Commands.Porting
                             if (BlamCache.Version == CacheVersion.Halo3ODST)
                                 frame.FOV *= 0.65535f; // fov change in ODST affected cisc too it seems
                         }
+                    }
+                    break;
+
+                case CollisionModel coll:
+                    if (BlamCache.Version == CacheVersion.HaloReach)
+                    {
+                        GenerateCollisionBSPCommand bspgeneration = new GenerateCollisionBSPCommand(ref coll);
+                        bspgeneration.Execute(new List<string>());
                     }
                     break;
 

@@ -46,7 +46,8 @@ namespace TagTool.Commands.CollisionModels
                             return false;
                     }
                 }
-            }        
+            }
+            Console.WriteLine($"###Collision bsp built successfully!");
             return true;
         }
 
@@ -68,6 +69,7 @@ namespace TagTool.Commands.CollisionModels
 
             //populate surface_addendums list for usage later on
             original_surface_count = Bsp.Surfaces.Count;
+            surface_addendums = new List<int>();
             for(int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
             {
                 surface_addendums.Add(surface_index);
@@ -86,7 +88,7 @@ namespace TagTool.Commands.CollisionModels
             int bsp3dnode_index = -1;
             if (build_bsp_tree_main(surface_array, ref bsp3dnode_index))
             {
-                Console.WriteLine($"###Collision bsp R{region_index}P{permutation_index}B{bsp_index} built successfully!");
+                //Console.WriteLine($"###Collision bsp R{region_index}P{permutation_index}B{bsp_index} built successfully!");
                 Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = Bsp;
             }
             else
@@ -422,7 +424,7 @@ namespace TagTool.Commands.CollisionModels
                 if(surface_index < 0 && (short)Bsp.Surfaces[absolute_surface_index].Plane == plane_index)
                 {
                     plane_matched_surface_array.surface_array.Add(absolute_surface_index);
-                    //reset plane matching surfaces in the primary array to an unused state
+                    //reset plane matching surfaces in the primary array to an unflagged state
                     surface_array.surface_array[surface_array_index] = absolute_surface_index;
                 }
             }

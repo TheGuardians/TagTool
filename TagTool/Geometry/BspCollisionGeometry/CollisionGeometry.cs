@@ -7,8 +7,8 @@ using TagTool.Havok;
 
 namespace TagTool.Geometry.BspCollisionGeometry
 {
-    [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x60, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x6C, MinVersion = CacheVersion.HaloReach)]
     public class CollisionGeometry : TagStructure
 	{
         public TagBlock<Bsp3dNode> Bsp3dNodes;
@@ -179,7 +179,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short MaterialIndex;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public short Unknown;
+        public short BreakableSurfaceSet;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public byte BreakableSurfaceIndex_H2;
