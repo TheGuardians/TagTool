@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.RenderModels
 {
@@ -164,8 +165,15 @@ namespace TagTool.Commands.RenderModels
 											//else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
 											//bone.Name = bone.Name.Replace("1", "_low");
 											var bonefix = bone.Name;
-											if (bone.Name.Contains("Armature_"))
-												bonefix = bonefix.Substring(9);
+
+                                            if(Regex.IsMatch(bone.Name, @"Armature_\d\d\d_.*"))
+                                            {
+                                                bonefix = Regex.Match(bone.Name, @"Armature_\d\d\d_(.*)").Value;
+                                            }
+                                            else if (Regex.IsMatch(bone.Name, @"Armature_.*"))
+                                            {
+                                                bonefix = Regex.Match(bone.Name, @"Armature_(.*)").Value;
+                                            }
 
                                             if (!nodes.ContainsKey(bonefix))
                                             {
