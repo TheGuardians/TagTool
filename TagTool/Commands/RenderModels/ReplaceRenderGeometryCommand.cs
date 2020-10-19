@@ -76,6 +76,11 @@ namespace TagTool.Commands.RenderModels
 			{
 				var name = Cache.StringTable.GetString(oldNode.Name);
 
+                if (!nodes.ContainsKey(name))
+                {
+                    Console.WriteLine($"###ERROR: New model does not contain node '{name}'!");
+                    return false;
+                }
 				nodes[name] = builder.AddNode(oldNode);
 			}
 
