@@ -168,11 +168,11 @@ namespace TagTool.Commands.RenderModels
 
                                             if(Regex.IsMatch(bone.Name, @"Armature_\d\d\d_.*"))
                                             {
-                                                bonefix = Regex.Match(bone.Name, @"Armature_\d\d\d_(.*)").Value;
+                                                bonefix = Regex.Match(bone.Name, @"Armature_\d\d\d_(.*)").Groups[1].Value;
                                             }
                                             else if (Regex.IsMatch(bone.Name, @"Armature_.*"))
                                             {
-                                                bonefix = Regex.Match(bone.Name, @"Armature_(.*)").Value;
+                                                bonefix = Regex.Match(bone.Name, @"Armature_(.*)").Groups[1].Value;
                                             }
 
                                             if (!nodes.ContainsKey(bonefix))
