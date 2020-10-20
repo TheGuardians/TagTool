@@ -860,7 +860,8 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].ParameterTables.Clear();
             finalRm.ShaderProperties[0].Parameters.Clear();
 
-            finalRm.ShaderProperties[0].EntryPoints.AddRange(Enumerable.Repeat(new RenderMethodTemplate.PackedInteger_10_6(), edRmt2.EntryPoints.Count));
+            while (finalRm.ShaderProperties[0].EntryPoints.Count < edRmt2.EntryPoints.Count)
+                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.PackedInteger_10_6());
 
             foreach (EntryPoint entryPoint in Enum.GetValues(typeof(EntryPoint)))
             {
@@ -878,84 +879,106 @@ namespace TagTool.Commands.Porting
                     continue;
 
                 // texture
-                table.Texture.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
-                foreach (var textureParameter in AnimatedTextureParameters)
+                if (AnimatedTextureParameters.Count > 0)
                 {
-                    string[] parts = textureParameter.Split('\\');
-
-                    foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                    table.Texture.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                    foreach (var textureParameter in AnimatedTextureParameters)
                     {
-                        if (pcParameter.RegisterType == ShaderParameter.RType.Sampler && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
-                        {
-                            var parameterBlock = new ParameterMapping
-                            {
-                                RegisterIndex = (short)pcParameter.RegisterIndex,
-                                SourceIndex = TextureConstantMapping[parts[0]],
-                                FunctionIndex = byte.Parse(parts[1])
-                            };
+                        string[] parts = textureParameter.Split('\\');
 
-                            finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
-                            break;
+                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                        {
+                            if (pcParameter.RegisterType == ShaderParameter.RType.Sampler && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
+                            {
+                                var parameterBlock = new ParameterMapping
+                                {
+                                    RegisterIndex = (short)pcParameter.RegisterIndex,
+                                    SourceIndex = TextureConstantMapping[parts[0]],
+                                    FunctionIndex = byte.Parse(parts[1])
+                                };
+
+                                finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                                break;
+                            }
                         }
                     }
+                    if (table.Texture.Offset == finalRm.ShaderProperties[0].Parameters.Count)
+                        table.Texture.Integer = 0;
+                    else
+                        table.Texture.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.Texture.Offset);
                 }
-                table.Texture.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.Texture.Offset);
 
                 // real pixel
-                table.RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
-                foreach (var pixelParameter in AnimatedPixelParameters)
+                if (AnimatedPixelParameters.Count > 0)
                 {
-                    string[] parts = pixelParameter.Split('\\');
-
-                    string registerName = parts[0];
-                    if (AnimatedTextureParameters.Contains(parts[0]))
-                        registerName += "_xform"; // fixup
-
-                    foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                    table.RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                    foreach (var pixelParameter in AnimatedPixelParameters)
                     {
-                        if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == registerName)
-                        {
-                            var parameterBlock = new ParameterMapping
-                            {
-                                RegisterIndex = (short)pcParameter.RegisterIndex,
-                                SourceIndex = RealConstantMapping[parts[0]],
-                                FunctionIndex = byte.Parse(parts[1])
-                            };
+                        string[] parts = pixelParameter.Split('\\');
 
-                            finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
-                            break;
+                        string registerName = parts[0];
+                        if (TextureConstantMapping.Keys.Contains(parts[0]))
+                            registerName += "_xform"; // fixup
+
+                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                        {
+                            if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == registerName)
+                            {
+                                var parameterBlock = new ParameterMapping
+                                {
+                                    RegisterIndex = (short)pcParameter.RegisterIndex,
+                                    SourceIndex = RealConstantMapping[parts[0]],
+                                    FunctionIndex = byte.Parse(parts[1])
+                                };
+
+                                finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                                break;
+                            }
                         }
                     }
+                    if (table.RealPixel.Offset == finalRm.ShaderProperties[0].Parameters.Count)
+                        table.RealPixel.Integer = 0;
+                    else
+                        table.RealPixel.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealPixel.Offset);
                 }
-                table.RealPixel.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealPixel.Offset);
 
                 // real vertex
-                table.RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
-                foreach (var vertexParameter in AnimatedVertexParameters)
+                if (AnimatedVertexParameters.Count > 0)
                 {
-                    string[] parts = vertexParameter.Split('\\');
-
-                    foreach (var pcParameter in glvs.Shaders[vertexShaderIndex].PCParameters)
+                    table.RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                    foreach (var vertexParameter in AnimatedVertexParameters)
                     {
-                        if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
-                        {
-                            var parameterBlock = new ParameterMapping
-                            {
-                                RegisterIndex = (short)pcParameter.RegisterIndex,
-                                SourceIndex = RealConstantMapping[parts[0]],
-                                FunctionIndex = byte.Parse(parts[1])
-                            };
+                        string[] parts = vertexParameter.Split('\\');
 
-                            finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
-                            break;
+                        foreach (var pcParameter in glvs.Shaders[vertexShaderIndex].PCParameters)
+                        {
+                            if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
+                            {
+                                var parameterBlock = new ParameterMapping
+                                {
+                                    RegisterIndex = (short)pcParameter.RegisterIndex,
+                                    SourceIndex = RealConstantMapping[parts[0]],
+                                    FunctionIndex = byte.Parse(parts[1])
+                                };
+
+                                finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                                break;
+                            }
                         }
                     }
+                    if (table.RealVertex.Offset == finalRm.ShaderProperties[0].Parameters.Count)
+                        table.RealVertex.Integer = 0;
+                    else
+                        table.RealVertex.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealVertex.Offset);
                 }
-                table.RealVertex.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealVertex.Offset);
 
                 // TODO: support building parameter table for each shader in entry point. this should be ok for now though
-                finalRm.ShaderProperties[0].EntryPoints[entryIndex].Offset = (ushort)finalRm.ShaderProperties[0].ParameterTables.Count;
-                finalRm.ShaderProperties[0].EntryPoints[entryIndex].Count = 1;
+                if (AnimatedVertexParameters.Count > 0 || AnimatedPixelParameters.Count > 0 || AnimatedTextureParameters.Count > 0)
+                {
+                    finalRm.ShaderProperties[0].EntryPoints[entryIndex].Offset = (ushort)finalRm.ShaderProperties[0].ParameterTables.Count;
+                    finalRm.ShaderProperties[0].EntryPoints[entryIndex].Count = 1;
+                }
+
                 finalRm.ShaderProperties[0].ParameterTables.Add(table);
             }
         }
