@@ -42,12 +42,11 @@ namespace TagTool.Commands.CollisionModels
                 {
                     for(int bsp_index = 0; bsp_index < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bsp_index++)
                     {
-                        if (!generate_bsp(region_index, permutation_index, bsp_index))
-                            return false;
+                        generate_bsp(region_index, permutation_index, bsp_index);
                     }
                 }
             }
-            Console.WriteLine($"###Collision bsp built successfully!");
+            Console.WriteLine($"###Collision bsp build complete!");
             return true;
         }
 
@@ -79,8 +78,8 @@ namespace TagTool.Commands.CollisionModels
             surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
             for (int i = 0; i < Bsp.Surfaces.Count; i++)
             {
-                if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Climbable) || Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Breakable))
-                    surface_array.surface_array.Add(i);
+                if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.TwoSided))
+                    surface_array.surface_array.Add((int)(i & 0x7FFFFFFF));
                 else
                     surface_array.surface_array.Add((int)(i | 0x80000000));
             }
@@ -357,7 +356,8 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Console.WriteLine("###ERROR couldn't build surface lists.");
+                        if(debug)
+                            Console.WriteLine("###ERROR couldn't build surface lists.");
                         return false;
                     }
 
@@ -533,7 +533,38 @@ namespace TagTool.Commands.CollisionModels
                 return bsp2dnode_index;
             }
             Console.WriteLine("###ERROR couldn't build bsp because of overlapping surfaces.");
+            if (debug)
+            {
+                foreach (int surface_index in plane_matched_surface_array.surface_array)
+                {
+                    int abs_surface_index = surface_index & 0x7FFFFFFF;
+                    surface_print_vertices(abs_surface_index);
+                }
+            }         
             return bsp2dnode_index;
+        }
+
+        void surface_print_vertices(int surface_index)
+        {
+            Surface surface_block = Bsp.Surfaces[surface_index];
+            int first_Edge_index = surface_block.FirstEdge;
+            int current_edge_index = surface_block.FirstEdge;
+            Console.WriteLine($"Surface {surface_index}");
+            do
+            {
+                Edge edge_block = Bsp.Edges[current_edge_index];
+                if (edge_block.RightSurface == surface_index)
+                {
+                    current_edge_index = edge_block.ReverseEdge;
+                    Console.WriteLine($"{Bsp.Vertices[edge_block.EndVertex].Point}");
+                }
+                else
+                {
+                    current_edge_index = edge_block.ForwardEdge;
+                    Console.WriteLine($"{Bsp.Vertices[edge_block.StartVertex].Point}");
+                }
+            }
+            while (current_edge_index != first_Edge_index);
         }
 
         public bool build_leaves(ref surface_array_definition surface_array, ref int leaf_index)
