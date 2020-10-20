@@ -37,6 +37,10 @@ namespace TagTool.Commands.Shaders
 
             using (var stream = Cache.OpenCacheRead())
             {
+                GlobalCacheFilePixelShaders gpix = null;
+                if (Cache.Version == CacheVersion.HaloReach)
+                    gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));
+
                 List<string> shaderTypes = new List<string>();
 
                 foreach (var tag in Cache.TagCache.NonNull())
@@ -96,7 +100,7 @@ namespace TagTool.Commands.Shaders
                                         string entryName = entry.ToString().ToLower() + ".pixel_shader";
                                         string pixelShaderFilename = Path.Combine(tagName, entryName);
 
-                                        DisassembleShader(pixl, entryShader, pixelShaderFilename, Cache);
+                                        DisassembleShader(pixl, entryShader, pixelShaderFilename, Cache, pixl.Shaders[entryShader].GlobalCachePixelShaderIndex != -1 ? gpix : null);
                                     }
                                 }
                             }
@@ -167,14 +171,14 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        private string DisassembleShader(object definition, int shaderIndex, string filename, GameCache cache)
+        private string DisassembleShader(object definition, int shaderIndex, string filename, GameCache cache, GlobalCacheFilePixelShaders gpix = null)
         {
             //version the directory
             string path = $"{cache.Version.ToString()}\\{filename}";
 
             if (cache.GetType() == typeof(GameCacheGen3))
             {
-                return DisassembleGen3Shader(definition, shaderIndex, path);
+                return DisassembleGen3Shader(definition, shaderIndex, path, gpix);
             }
             else if (Cache.GetType() == typeof(GameCacheHaloOnline))
             {
@@ -183,8 +187,7 @@ namespace TagTool.Commands.Shaders
             return null;
         }
 
-
-        private string DisassembleGen3Shader(object definition, int shaderIndex, string filename)
+        private string DisassembleGen3Shader(object definition, int shaderIndex, string filename, GlobalCacheFilePixelShaders gpix)
         {
             var file = UseXSDCommand.XSDFileInfo;
             if (file == null)
@@ -211,8 +214,10 @@ namespace TagTool.Commands.Shaders
                     if (definition.GetType() == typeof(PixelShader))
                     {
                         var _definition = definition as PixelShader;
-                        if (shaderIndex < _definition.Shaders.Count)
+                        if (gpix == null && shaderIndex < _definition.Shaders.Count)
                             shaderBlock = _definition.Shaders[shaderIndex];
+                        else if (gpix != null)
+                            shaderBlock = gpix.Shaders[_definition.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
                         else
                             return null;
                     }

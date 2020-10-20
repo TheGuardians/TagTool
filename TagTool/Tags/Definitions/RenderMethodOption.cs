@@ -12,10 +12,13 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class OptionBlock : TagStructure
         {
             public StringId Name;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint Unknown;
             public OptionDataType Type;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -30,7 +33,7 @@ namespace TagTool.Tags.Definitions
             public short Flags;
             public DefaultFilterModeValue DefaultFilterMode;
             public DefaultAddressModeValue DefaultAddressMode;
-            public short AnisotropyAmount; // might just be padding in h3\odst\ho, anisotropy appears to come from the filter mode
+            public short AnisotropyAmount;
 
             public ArgbColor DefaultColor;
             public float DefaultBitmapScale;
@@ -47,6 +50,10 @@ namespace TagTool.Tags.Definitions
             public uint Unknown17;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public uint Unknown18;
+            [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+            public uint Unknown19;
+            [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+            public uint Unknown20;
 
             public enum OptionDataType : uint
             {
