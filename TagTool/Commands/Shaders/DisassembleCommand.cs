@@ -280,7 +280,7 @@ namespace TagTool.Commands.Shaders
         private void GenerateGen3ShaderHeader(int shaderIndex, StreamWriter writer, GlobalCacheFilePixelShaders gpix)
         {
             List<ShaderParameter> parameters = null;
-            List<RealQuaternion> constants = null;
+            List<RealQuaternion> constants = new List<RealQuaternion>();
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {
@@ -309,7 +309,8 @@ namespace TagTool.Commands.Shaders
                         shader_block = gpix.Shaders[_definition.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
                 }
 
-                constants = GetShaderConstants(shader_block.XboxShaderReference.ConstantData);
+                if (shader_block.XboxShaderReference != null)
+                    constants = GetShaderConstants(shader_block.XboxShaderReference.ConstantData);
                 parameters = shader_block.XboxParameters;
             }
 
@@ -334,7 +335,8 @@ namespace TagTool.Commands.Shaders
                         return;
                 }
 
-                constants = GetShaderConstants(shaderBlock.XboxShaderReference.ConstantData);
+                if (shaderBlock.XboxShaderReference != null)
+                    constants = GetShaderConstants(shaderBlock.XboxShaderReference.ConstantData);
                 parameters = shaderBlock.XboxParameters;
             }
 
@@ -434,7 +436,7 @@ namespace TagTool.Commands.Shaders
             {
                 for (var i = 0; i < constantData.Length / 16; i++)
                 {
-                    constants.Add(reader.ReadRealQuaternion());
+                    constants.Add(new RealQuaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
                 }
                 constants.Reverse(); //they are stored in reverse order
             }
