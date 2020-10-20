@@ -567,9 +567,6 @@ namespace TagTool.Shaders.ShaderMatching
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
                         switch ($"{methodName}\\{optionName}")
                         {
-                            case @"albedo\palettized_2d_plasma":
-                                optionName = "palettized_plasma";
-                                break;
                             case @"lighting\per_pixel_smooth":
                             case @"lighting\smoke_lighting":
                                 optionName = "per_pixel_ravi_order_3";
@@ -580,6 +577,12 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"depth_fade\low_res":
                             case @"depth_fade\palette_shift":
                                 optionName = "on";
+                                break;
+                            case @"self_illumination\palettized_depth_fade":
+                                optionName = "palettized_plasma";
+                                break;
+                            case @"albedo\patchy_emblem":
+                                optionName = "emblem_change_color";
                                 break;
                         }
 

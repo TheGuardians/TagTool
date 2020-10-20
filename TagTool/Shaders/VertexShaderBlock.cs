@@ -28,6 +28,6 @@ namespace TagTool.Shaders
         [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
         public int GlobalCachePixelShaderIndex; // pixl only
 
-        public PixelShaderReference XboxShaderReference;
+        public VertexShaderReference XboxShaderReference;
     }
 }

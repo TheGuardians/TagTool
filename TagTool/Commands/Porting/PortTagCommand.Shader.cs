@@ -391,7 +391,7 @@ namespace TagTool.Commands.Porting
             // fixup rm animations
             if (finalRm.ShaderProperties[0].Functions.Count > 0)
             {
-                if (BlamCache.Version >= CacheVersion.HaloReach) // Reach doesnt always store register info :(
+                if (BlamCache.Version >= CacheVersion.HaloReach && !EffectRenderMethodTypes.Contains(blamRmt2Descriptor.Type)) // Reach doesnt always store register info :(
                     RebuildRenderMethodAnimationsFromRmt2(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance);
                 else
                     RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
