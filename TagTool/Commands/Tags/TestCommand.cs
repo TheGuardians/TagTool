@@ -126,6 +126,11 @@ namespace TagTool.Commands
                     if (tag.IsInGroup("snd!"))
                     {
                         var soundTag = Cache.Deserialize<Sound>(stream, tag);
+
+                        if (soundTag.SoundReference.UnknownIndexReach2 != 0)
+                            Console.WriteLine($"{soundTag.SoundReference.UnknownIndexReach2} {tag.Name}" );
+
+
                     }
                 }
             }

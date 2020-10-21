@@ -27,7 +27,7 @@ namespace TagTool.Audio
         public uint Unknown4;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public TagResourceReference ExtraInfoSoundResource;
+        public TagResourceReference FacialAnimationResource;
 
 
         [TagStructure(Size = 0xC)]

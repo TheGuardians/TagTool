@@ -418,6 +418,7 @@ namespace TagTool.Audio
             switch (from)
             {
                 case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Beta:
                     value = Halo3Retail.ToString();
                     break;
 

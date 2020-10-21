@@ -107,6 +107,8 @@ namespace TagTool.Tags.Definitions
             public short LanguageIndex;
             [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short Unknown4;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short UnknownIndexReach1;
             [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short PlaybackParameterIndex;
             [TagField(MinVersion = CacheVersion.Halo3Beta)]
@@ -117,10 +119,6 @@ namespace TagTool.Tags.Definitions
             public sbyte CustomPlaybackIndex;
             [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public short ExtraInfoIndex;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short UnknownIndexReach1;
-
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short UnknownIndexReach2;
 

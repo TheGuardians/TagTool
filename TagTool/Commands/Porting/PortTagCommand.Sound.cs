@@ -46,7 +46,7 @@ namespace TagTool.Commands.Porting
             var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
             var loop = sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound);
 
-            sound.PlaybackParameters = playbackParameters;
+            sound.PlaybackParameters = playbackParameters.DeepClone();
             sound.Scale = scale;
             sound.PlatformCodec = platformCodec.DeepClone();
             sound.Promotion = promotion;
@@ -63,6 +63,34 @@ namespace TagTool.Commands.Porting
                 sound.ImportType = ImportType.MultiLayer;
 
             sound.PlatformCodec.LoadMode = 0;
+
+            if(BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                // Fix playback parameters for reach
+
+                sound.PlaybackParameters.MaximumBendPerSecond = sound.PlaybackParameters.MaximumBendPerSecondReach;
+                sound.PlaybackParameters.SkipFraction = sound.PlaybackParameters.SkipFractionReach;
+
+                sound.PlaybackParameters.DistanceB = sound.PlaybackParameters.DistanceC;
+                sound.PlaybackParameters.DistanceC = sound.PlaybackParameters.DistanceE;
+                sound.PlaybackParameters.DistanceD = sound.PlaybackParameters.DistanceG;
+
+                sound.PlaybackParameters.FieldDisableFlags = 0;
+
+                if (sound.PlaybackParameters.DistanceA == 0)
+                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceA;
+
+                if (sound.PlaybackParameters.DistanceB == 0)
+                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceB;
+
+                if (sound.PlaybackParameters.DistanceC == 0)
+                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceC;
+
+                if (sound.PlaybackParameters.DistanceD == 0)
+                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceD;
+
+                sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.Bit4;
+            }
 
             //
             // Process all the pitch ranges
@@ -173,7 +201,7 @@ namespace TagTool.Commands.Porting
                     var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
                     permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
-                    permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
+                    permutation.SkipFraction = new Bounds<float>(0.0f, permutation.EncodedSkipFraction / 32767.0f);
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
@@ -306,44 +334,51 @@ namespace TagTool.Commands.Porting
 
             if (sound.SoundReference.LanguageIndex != -1)
             {
-                sound.Languages = new List<LanguageBlock>();
-
-                foreach (var language in BlamSoundGestalt.Languages)
+                if(BlamCache.Version < CacheVersion.HaloReach)
                 {
-                    sound.Languages.Add(new LanguageBlock
+                    sound.Languages = new List<LanguageBlock>();
+
+                    foreach (var language in BlamSoundGestalt.Languages)
                     {
-                        Language = language.Language,
-                        PermutationDurations = new List<LanguageBlock.PermutationDurationBlock>(),
-                        PitchRangeDurations = new List<LanguageBlock.PitchRangeDurationBlock>(),
-                    });
-
-                    //Add all the  Pitch Range Duration block (pitch range count dependent)
-
-                    var curLanguage = sound.Languages.Last();
-
-                    for (int i = 0; i < sound.SoundReference.PitchRangeCount; i++)
-                    {
-                        curLanguage.PitchRangeDurations.Add(language.PitchRangeDurations[sound.SoundReference.LanguageIndex + i]);
-                    }
-
-                    //Add all the Permutation Duration Block and adjust offsets
-
-                    for (int i = 0; i < curLanguage.PitchRangeDurations.Count; i++)
-                    {
-                        var curPRD = curLanguage.PitchRangeDurations[i];
-
-                        //Get current block count for new index
-                        short newPermutationIndex = (short)curLanguage.PermutationDurations.Count();
-
-                        for (int j = curPRD.PermutationStartIndex; j < curPRD.PermutationStartIndex + curPRD.PermutationCount; j++)
+                        sound.Languages.Add(new LanguageBlock
                         {
-                            curLanguage.PermutationDurations.Add(language.PermutationDurations[j]);
+                            Language = language.Language,
+                            PermutationDurations = new List<LanguageBlock.PermutationDurationBlock>(),
+                            PitchRangeDurations = new List<LanguageBlock.PitchRangeDurationBlock>(),
+                        });
+
+                        //Add all the  Pitch Range Duration block (pitch range count dependent)
+
+                        var curLanguage = sound.Languages.Last();
+
+                        for (int i = 0; i < sound.SoundReference.PitchRangeCount; i++)
+                        {
+                            curLanguage.PitchRangeDurations.Add(language.PitchRangeDurations[sound.SoundReference.LanguageIndex + i]);
                         }
 
-                        //apply new index
-                        curPRD.PermutationStartIndex = newPermutationIndex;
-                    }
+                        //Add all the Permutation Duration Block and adjust offsets
 
+                        for (int i = 0; i < curLanguage.PitchRangeDurations.Count; i++)
+                        {
+                            var curPRD = curLanguage.PitchRangeDurations[i];
+
+                            //Get current block count for new index
+                            short newPermutationIndex = (short)curLanguage.PermutationDurations.Count();
+
+                            for (int j = curPRD.PermutationStartIndex; j < curPRD.PermutationStartIndex + curPRD.PermutationCount; j++)
+                            {
+                                curLanguage.PermutationDurations.Add(language.PermutationDurations[j]);
+                            }
+
+                            //apply new index
+                            curPRD.PermutationStartIndex = newPermutationIndex;
+                        }
+
+                    }
+                }
+                else
+                {
+                    // TODO: reverse reach's facial animation resource
                 }
             }
 
