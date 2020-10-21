@@ -372,14 +372,18 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Console.WriteLine($"###ERROR: Edge Index {edge_index} is degenerate!!");
+                        Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
+                        Console.WriteLine($"{Bsp.Vertices[point0_index].Point * 100.0f}");
+                        Console.WriteLine($"{Bsp.Vertices[point1_index].Point * 100.0f}");
                         return -1;
                     }
                 }
                 if (Bsp.Edges[edge_index].StartVertex == point0_index &&
                     Bsp.Edges[edge_index].EndVertex == point1_index)
                 {
-                    Console.WriteLine($"###ERROR: Edge Index {edge_index} is degenerate!!");
+                    Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
+                    Console.WriteLine($"{Bsp.Vertices[point0_index].Point * 100.0f}");
+                    Console.WriteLine($"{Bsp.Vertices[point1_index].Point * 100.0f}");
                     return -1;
                 }
             }
@@ -413,8 +417,8 @@ namespace TagTool.Commands.CollisionModels
                 if(edge.RightSurface == ushort.MaxValue)
                 {
                     Console.WriteLine($"###ERROR: Edge with below vertices is open!");
-                    Console.WriteLine($"{Bsp.Vertices[edge.StartVertex].Point}");
-                    Console.WriteLine($"{Bsp.Vertices[edge.EndVertex].Point}");
+                    Console.WriteLine($"{Bsp.Vertices[edge.StartVertex].Point * 100.0f}");
+                    Console.WriteLine($"{Bsp.Vertices[edge.EndVertex].Point * 100.0f}");
                     result = false;
                 }
             }
