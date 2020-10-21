@@ -21,6 +21,7 @@ namespace TagTool.Commands.CollisionModels
         private int[] Indices { get; set; }
         private List<triangle> Triangles { get; set; }
         private bool debug = false;
+        private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
 
@@ -30,9 +31,10 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry [mopp] <filepath> <tagname>",
+                  "ImportCollisionGeometry [mopp] [force] <filepath> <tagname>",
                   
-                  "Import an obj file as a collision model tag")
+                  "Import an obj file as a collision model tag. Use the mopp argument for mopp generation" +
+                  ", and use the force argument to force import the collision geometry even if it has open edges")
         {
             Cache = cache;
         }
@@ -46,7 +48,7 @@ namespace TagTool.Commands.CollisionModels
             string filepath;
             string tagName;
 
-            if(args.Count == 3 && args[0] == "mopp")
+            if(args.Contains("mopp"))
             {
                 buildmopp = true;
                 //mopp generation can only accept triangles
@@ -60,6 +62,11 @@ namespace TagTool.Commands.CollisionModels
                 max_surface_edges = 8;
                 filepath = args[0];
                 tagName = args[1];
+            }
+
+            if (args.Contains("force"))
+            {
+                forceimport = true;
             }
 
             CachedTag tag;
@@ -432,19 +439,28 @@ namespace TagTool.Commands.CollisionModels
                 Edge edge = Bsp.Edges[edge_index];
                 if(edge.RightSurface == ushort.MaxValue)
                 {
-                    Console.WriteLine($"###ERROR: Edge with below vertices is open!");
+                    if (!forceimport)
+                    {
+                        Console.WriteLine($"###ERROR: Edge with below vertices is open!");
 
-                    RealPoint3d point0 = Bsp.Vertices[edge.StartVertex].Point * 100.0f;
-                    RealPoint3d point0_fix = new RealPoint3d {X = point0.X, Y = -point0.Z, Z = point0.Y };
-                    RealPoint3d point1 = Bsp.Vertices[edge.EndVertex].Point * 100.0f;
-                    RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
+                        RealPoint3d point0 = Bsp.Vertices[edge.StartVertex].Point * 100.0f;
+                        RealPoint3d point0_fix = new RealPoint3d { X = point0.X, Y = -point0.Z, Z = point0.Y };
+                        RealPoint3d point1 = Bsp.Vertices[edge.EndVertex].Point * 100.0f;
+                        RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
 
-                    Console.WriteLine($"{point0}");
-                    Console.WriteLine($"{point1}");
-                    Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
-                    Console.WriteLine($"{point0_fix}");
-                    Console.WriteLine($"{point1_fix}");
-                    result = false;
+                        Console.WriteLine($"{point0}");
+                        Console.WriteLine($"{point1}");
+                        Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
+                        Console.WriteLine($"{point0_fix}");
+                        Console.WriteLine($"{point1_fix}");
+                        result = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"###WARNING: This mesh contains open edges which may lead to collision errors!" +
+                            $"You have enabled the 'force' argument so import will proceed regardless!");
+                        return true;
+                    }
                 }
             }
             return result;
