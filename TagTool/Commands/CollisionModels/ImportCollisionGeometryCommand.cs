@@ -373,8 +373,16 @@ namespace TagTool.Commands.CollisionModels
                     else
                     {
                         Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
-                        Console.WriteLine($"{Bsp.Vertices[point0_index].Point * 100.0f}");
-                        Console.WriteLine($"{Bsp.Vertices[point1_index].Point * 100.0f}");
+                        RealPoint3d point0 = Bsp.Vertices[point0_index].Point * 100.0f;
+                        RealPoint3d point0_fix = new RealPoint3d { X = point0.X, Y = -point0.Z, Z = point0.Y };
+                        RealPoint3d point1 = Bsp.Vertices[point1_index].Point * 100.0f;
+                        RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
+
+                        Console.WriteLine($"{point0}");
+                        Console.WriteLine($"{point1}");
+                        Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
+                        Console.WriteLine($"{point0_fix}");
+                        Console.WriteLine($"{point1_fix}");
                         return -1;
                     }
                 }
@@ -382,8 +390,16 @@ namespace TagTool.Commands.CollisionModels
                     Bsp.Edges[edge_index].EndVertex == point1_index)
                 {
                     Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
-                    Console.WriteLine($"{Bsp.Vertices[point0_index].Point * 100.0f}");
-                    Console.WriteLine($"{Bsp.Vertices[point1_index].Point * 100.0f}");
+                    RealPoint3d point0 = Bsp.Vertices[point0_index].Point * 100.0f;
+                    RealPoint3d point0_fix = new RealPoint3d { X = point0.X, Y = -point0.Z, Z = point0.Y };
+                    RealPoint3d point1 = Bsp.Vertices[point1_index].Point * 100.0f;
+                    RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
+
+                    Console.WriteLine($"{point0}");
+                    Console.WriteLine($"{point1}");
+                    Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
+                    Console.WriteLine($"{point0_fix}");
+                    Console.WriteLine($"{point1_fix}");
                     return -1;
                 }
             }
@@ -417,8 +433,17 @@ namespace TagTool.Commands.CollisionModels
                 if(edge.RightSurface == ushort.MaxValue)
                 {
                     Console.WriteLine($"###ERROR: Edge with below vertices is open!");
-                    Console.WriteLine($"{Bsp.Vertices[edge.StartVertex].Point * 100.0f}");
-                    Console.WriteLine($"{Bsp.Vertices[edge.EndVertex].Point * 100.0f}");
+
+                    RealPoint3d point0 = Bsp.Vertices[edge.StartVertex].Point * 100.0f;
+                    RealPoint3d point0_fix = new RealPoint3d {X = point0.X, Y = -point0.Z, Z = point0.Y };
+                    RealPoint3d point1 = Bsp.Vertices[edge.EndVertex].Point * 100.0f;
+                    RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
+
+                    Console.WriteLine($"{point0}");
+                    Console.WriteLine($"{point1}");
+                    Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
+                    Console.WriteLine($"{point0_fix}");
+                    Console.WriteLine($"{point1_fix}");
                     result = false;
                 }
             }
