@@ -41,27 +41,38 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
-            //Arguments needed: <filepath> <tagname>
-            if (args.Count < 2)
-                return new TagToolError(CommandError.ArgCount);
-
             string filepath;
             string tagName;
 
-            if(args.Contains("mopp"))
+            //Arguments needed: <filepath> <tagname>
+            switch (args.Count)
+            {
+                case 2:
+                    filepath = args[0];
+                    tagName = args[1];
+                    break;
+                case 3:
+                    filepath = args[1];
+                    tagName = args[2];
+                    break;
+                case 4:
+                    filepath = args[2];
+                    tagName = args[3];
+                    break;
+                default:
+                    return new TagToolError(CommandError.ArgCount);
+            }
+
+            if (args.Contains("mopp"))
             {
                 buildmopp = true;
                 //mopp generation can only accept triangles
                 max_surface_edges = 3;
-                filepath = args[1];
-                tagName = args[2];
             }
             else
             {
                 buildmopp = false;
                 max_surface_edges = 8;
-                filepath = args[0];
-                tagName = args[1];
             }
 
             if (args.Contains("force"))
