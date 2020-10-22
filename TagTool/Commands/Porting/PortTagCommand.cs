@@ -1483,6 +1483,10 @@ namespace TagTool.Commands.Porting
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
+            if (BlamCache.Version == CacheVersion.HaloReach)
+                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
+
             // todo: properly convert type
             if (BlamCache.Endianness != CacheContext.Endianness && BlamCache.Endianness == EndianFormat.BigEndian)
                 objectType.Unknown2 = objectType.Unknown1;
