@@ -20,7 +20,7 @@ namespace TagTool.Commands.CollisionModels
         private List<Assimp.Vector3D> Vertices { get; set; }
         private int[] Indices { get; set; }
         private List<triangle> Triangles { get; set; }
-        private bool debug = false;
+        private bool debug = true;
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
@@ -89,11 +89,10 @@ namespace TagTool.Commands.CollisionModels
             //    return new TagToolError(CommandError.FileNotFound);
 
             //import the mesh and get the vertices and indices
+            Scene model;
             using (var importer = new AssimpContext())
             {
-                Scene model;
-
-                using (var logStream = new LogStream((msg, userData) => Console.WriteLine(msg)))
+                using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
                 {
                     logStream.Attach();
                     model = importer.ImportFile(filepath,
@@ -104,12 +103,6 @@ namespace TagTool.Commands.CollisionModels
                         PostProcessSteps.Triangulate);
                     logStream.Detach();
                 }
-
-                if (model.Meshes.Count > 1)
-                    Console.WriteLine("###WARNING: More than one mesh found, only the first mesh will be used.");
-
-                Indices = model.Meshes[0].GetIndices();
-                Vertices = model.Meshes[0].Vertices;
             }
 
             //set up collision model tag
@@ -142,6 +135,16 @@ namespace TagTool.Commands.CollisionModels
                 }
             };
 
+            collisionModel.Materials = new List<CollisionModel.Material>();
+            foreach(Assimp.Material material in model.Materials)
+            {
+                //note: if the material name string does not reflect a stringid currently in the cache, it'll be set to a null stringid
+                collisionModel.Materials.Add(new CollisionModel.Material
+                {
+                    Name = Cache.StringTable.GetStringId(material.Name)
+                });
+            }
+
             //begin building the collision geometry
             collisionModel.Regions[0].Permutations[0].Bsps.Add(new CollisionModel.Region.Permutation.Bsp());
             collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = new CollisionGeometry
@@ -157,8 +160,30 @@ namespace TagTool.Commands.CollisionModels
             };
             Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
 
-            //sort triangles before adding them
-            Triangles = sort_triangles();
+            //loop through each mesh and add the triangles to the global list
+            Triangles = new List<triangle>();
+            foreach (Assimp.Mesh currentmesh in model.Meshes)
+            {
+                Indices = currentmesh.GetIndices();
+                Vertices = currentmesh.Vertices;
+
+                if(debug)
+                    Console.WriteLine($"Mesh {currentmesh.Name} has {Vertices.Count} Vertices!");
+
+                if (Indices.Length % 3 != 0)
+                {
+                    Console.WriteLine("###ERROR: The input model has stray vertices (number of vertex indices not divisible by 3!)");
+                    return false;
+                }
+
+                add_triangles(currentmesh.MaterialIndex);
+            }
+
+            //this code calculates the ?perimeter of each triangle, and sorts them. 
+            //This will effect the efficiency of bsp generation later --
+            //as it is better to use smaller surface planes to split larger surfaces rather than vice versa
+            triangle_list_qsort_compar sorter = new triangle_list_qsort_compar();
+            Triangles.Sort(sorter);
 
             if (!collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() || !reduce_collision_geometry())
             {
@@ -208,6 +233,7 @@ namespace TagTool.Commands.CollisionModels
             public int a;
             public int b;
             public int c;
+            public int material_index;
             public float sorting_parameter;
         }
 
@@ -225,15 +251,11 @@ namespace TagTool.Commands.CollisionModels
             }
         }
 
-        public List<triangle> sort_triangles()
+        public bool add_triangles(int materialindex)
         {
-            //this code calculates the ?perimeter of each triangle, and sorts them. 
-            //This will effect the efficiency of bsp generation later as it is better to use smaller surface planes to split larger surfaces
-            List<triangle> Trianglelist = new List<triangle>();
             for (int i = 0; i < Indices.Length; i += 3)
             {
-                //the normals in Halo seem to be the opposite by convention when compared to other editing software
-                triangle newtriangle = new triangle{ a = Indices[i], b = Indices[i + 1], c = Indices[i + 2] };
+                triangle newtriangle = new triangle{ a = Indices[i], b = Indices[i + 1], c = Indices[i + 2], material_index = materialindex};
                 Vector3D point0 = Vertices[Indices[i]];
                 Vector3D point1 = Vertices[Indices[i + 1]];
                 Vector3D point2 = Vertices[Indices[i + 2]];
@@ -250,11 +272,10 @@ namespace TagTool.Commands.CollisionModels
                 float v14 = zdiff_1_0 * xdiff_2_0 - zdiff_2_0 * xdiff_1_0;
 
                 newtriangle.sorting_parameter = (float)Math.Sqrt((v11 * v12 + v14 * v14 + v13 * v13) * 0.5);
-                Trianglelist.Add(newtriangle);
+                Triangles.Add(newtriangle);
             }
-            triangle_list_qsort_compar sorter = new triangle_list_qsort_compar();
-            Trianglelist.Sort(sorter);
-            return Trianglelist;
+
+            return true;
         }
 
         public bool join_identical_vertices()
@@ -313,6 +334,7 @@ namespace TagTool.Commands.CollisionModels
                 Bsp.Surfaces.Add(new Surface());
                 int surface_index = Bsp.Surfaces.Count - 1;
                 Bsp.Surfaces[surface_index].Plane = ushort.MaxValue;
+                Bsp.Surfaces[surface_index].MaterialIndex = (short)newtriangle.material_index;
 
                 int point0 = add_vertex(Vertices[newtriangle.a]);
                 int point1 = add_vertex(Vertices[newtriangle.b]);
