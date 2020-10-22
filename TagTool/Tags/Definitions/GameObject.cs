@@ -65,10 +65,8 @@ namespace TagTool.Tags.Definitions
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
 
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
-        public byte[] RuntimeInterpolatorFunctionsBlock = new byte[0xC];
-
         public short HudTextMessageIndex;
+
         public short SecondaryFlags;
 
         public List<Attachment> Attachments;
@@ -547,7 +545,7 @@ namespace TagTool.Tags.Definitions
         }
     }
 
-    public enum GameObjectTypeHalo2 : short
+    public enum GameObjectTypeHalo2 : sbyte
     {
         Biped,
 		Vehicle,
@@ -564,7 +562,7 @@ namespace TagTool.Tags.Definitions
 		Creature
     }
 
-    public enum GameObjectTypeHalo3Retail : short
+    public enum GameObjectTypeHalo3Retail : sbyte
     {
         None = -1,
         Biped,
@@ -583,7 +581,7 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
-    public enum GameObjectTypeHalo3ODST : short
+    public enum GameObjectTypeHalo3ODST : sbyte
     {
         None = -1,
         Biped,
@@ -603,7 +601,7 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
-    public enum GameObjectTypeHaloOnline : short
+    public enum GameObjectTypeHaloOnline : sbyte
     {
         None = -1,
         Biped,
@@ -631,17 +629,20 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public GameObjectTypeHalo2 Halo2;
 
+        [TagField(Platform = CachePlatform.Xbox360)]
+        public sbyte Unknown1;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public GameObjectTypeHalo3Retail Halo3Retail;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
         public GameObjectTypeHalo3ODST Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public GameObjectTypeHaloOnline HaloOnline;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public GameObjectTypeHalo3Retail HaloReach;
+        [TagField(Platform = CachePlatform.OnlyPC | CachePlatform.Xbox)]
+        public sbyte Unknown2;
     }
 
     [Flags]
