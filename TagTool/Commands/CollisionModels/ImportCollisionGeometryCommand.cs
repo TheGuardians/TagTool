@@ -20,7 +20,7 @@ namespace TagTool.Commands.CollisionModels
         private List<Assimp.Vector3D> Vertices { get; set; }
         private int[] Indices { get; set; }
         private List<triangle> Triangles { get; set; }
-        private bool debug = true;
+        private bool debug = false;
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
@@ -230,9 +230,9 @@ namespace TagTool.Commands.CollisionModels
 
         public struct triangle
         {
-            public int a;
-            public int b;
-            public int c;
+            public Vector3D a;
+            public Vector3D b;
+            public Vector3D c;
             public int material_index;
             public float sorting_parameter;
         }
@@ -255,7 +255,7 @@ namespace TagTool.Commands.CollisionModels
         {
             for (int i = 0; i < Indices.Length; i += 3)
             {
-                triangle newtriangle = new triangle{ a = Indices[i], b = Indices[i + 1], c = Indices[i + 2], material_index = materialindex};
+                triangle newtriangle = new triangle{ a = Vertices[Indices[i]], b = Vertices[Indices[i + 1]], c = Vertices[Indices[i + 2]], material_index = materialindex};
                 Vector3D point0 = Vertices[Indices[i]];
                 Vector3D point1 = Vertices[Indices[i + 1]];
                 Vector3D point2 = Vertices[Indices[i + 2]];
@@ -336,9 +336,9 @@ namespace TagTool.Commands.CollisionModels
                 Bsp.Surfaces[surface_index].Plane = ushort.MaxValue;
                 Bsp.Surfaces[surface_index].MaterialIndex = (short)newtriangle.material_index;
 
-                int point0 = add_vertex(Vertices[newtriangle.a]);
-                int point1 = add_vertex(Vertices[newtriangle.b]);
-                int point2 = add_vertex(Vertices[newtriangle.c]);
+                int point0 = add_vertex(newtriangle.a);
+                int point1 = add_vertex(newtriangle.b);
+                int point2 = add_vertex(newtriangle.c);
 
                 if (point0 == -1 || point1 == -1 || point2 == -1)
                     return false;
@@ -413,16 +413,8 @@ namespace TagTool.Commands.CollisionModels
                     else
                     {
                         Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
-                        RealPoint3d point0 = Bsp.Vertices[point0_index].Point * 100.0f;
-                        RealPoint3d point0_fix = new RealPoint3d { X = point0.X, Y = -point0.Z, Z = point0.Y };
-                        RealPoint3d point1 = Bsp.Vertices[point1_index].Point * 100.0f;
-                        RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
-
-                        Console.WriteLine($"{point0}");
-                        Console.WriteLine($"{point1}");
-                        Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
-                        Console.WriteLine($"{point0_fix}");
-                        Console.WriteLine($"{point1_fix}");
+                        List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[point0_index].Point, Bsp.Vertices[point1_index].Point };
+                        debug_print_vertices(debugvertices);
                         return -1;
                     }
                 }
@@ -430,16 +422,8 @@ namespace TagTool.Commands.CollisionModels
                     Bsp.Edges[edge_index].EndVertex == point1_index)
                 {
                     Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
-                    RealPoint3d point0 = Bsp.Vertices[point0_index].Point * 100.0f;
-                    RealPoint3d point0_fix = new RealPoint3d { X = point0.X, Y = -point0.Z, Z = point0.Y };
-                    RealPoint3d point1 = Bsp.Vertices[point1_index].Point * 100.0f;
-                    RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
-
-                    Console.WriteLine($"{point0}");
-                    Console.WriteLine($"{point1}");
-                    Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
-                    Console.WriteLine($"{point0_fix}");
-                    Console.WriteLine($"{point1_fix}");
+                    List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[point0_index].Point, Bsp.Vertices[point1_index].Point };
+                    debug_print_vertices(debugvertices);
                     return -1;
                 }
             }
@@ -475,17 +459,8 @@ namespace TagTool.Commands.CollisionModels
                     if (!forceimport)
                     {
                         Console.WriteLine($"###ERROR: Edge with below vertices is open!");
-
-                        RealPoint3d point0 = Bsp.Vertices[edge.StartVertex].Point * 100.0f;
-                        RealPoint3d point0_fix = new RealPoint3d { X = point0.X, Y = -point0.Z, Z = point0.Y };
-                        RealPoint3d point1 = Bsp.Vertices[edge.EndVertex].Point * 100.0f;
-                        RealPoint3d point1_fix = new RealPoint3d { X = point1.X, Y = -point1.Z, Z = point1.Y };
-
-                        Console.WriteLine($"{point0}");
-                        Console.WriteLine($"{point1}");
-                        Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
-                        Console.WriteLine($"{point0_fix}");
-                        Console.WriteLine($"{point1_fix}");
+                        List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[edge.StartVertex].Point, Bsp.Vertices[edge.EndVertex].Point };
+                        debug_print_vertices(debugvertices);
                         result = false;
                     }
                     else
@@ -891,9 +866,15 @@ namespace TagTool.Commands.CollisionModels
                 if (surface_edge_index == surface_block.FirstEdge)
                     break;
             }
-            if (pointlist.Count < 3 || !plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
+            if (pointlist.Count < 3)
             {
-                Console.WriteLine("###ERROR: Surface is too small or has less than 3 points!");
+                Console.WriteLine("###ERROR: Surface has less than 3 points!");
+                return false;
+            }
+            if (!plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
+            {
+                Console.WriteLine("###ERROR: Surface has overlapping vertices!");
+                debug_print_vertices(pointlist);
                 return false;
             }
             else
@@ -929,6 +910,20 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
             return true;
+        }
+
+        public void debug_print_vertices(List<RealPoint3d> vertexlist)
+        {
+            foreach(RealPoint3d vertex in vertexlist)
+            {
+                Console.WriteLine($"{vertex * 100.0f}");
+            }
+            Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
+            foreach (RealPoint3d vertex in vertexlist)
+            {
+                RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
+                Console.WriteLine($"{vertex_fix * 100.0f}");
+            }
         }
 
         public bool generate_surface_planes()
