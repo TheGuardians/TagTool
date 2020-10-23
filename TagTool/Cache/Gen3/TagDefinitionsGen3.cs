@@ -112,6 +112,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("rmd ", "rm  ", "shader_decal"), typeof(ShaderDecal) },
             { new TagGroupGen3("rmdf", "render_method_definition"), typeof(RenderMethodDefinition) },
             { new TagGroupGen3("rmfl", "rm  ", "shader_foliage"), typeof(ShaderFoliage) },
+            { new TagGroupGen3("rmgl", "rm  ", "shader_glass"), typeof(ShaderGlass) },
             { new TagGroupGen3("rmhg", "rm  ", "shader_halogram"), typeof(ShaderHalogram) },
             { new TagGroupGen3("rmop", "render_method_option"), typeof(RenderMethodOption) },
             { new TagGroupGen3("rmsh", "rm  ", "shader"), typeof(Shader) },

@@ -115,33 +115,21 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-            var HOCache = GameCache.Open(new FileInfo("D:\\halo online test\\maps\\tags.dat"));
-
 
             using (var stream = Cache.OpenCacheRead())
             {
+                var ugh = Cache.Deserialize<SoundCacheFileGestalt>(stream, Cache.TagCache.GetTag("i've got a lovely bunch of coconuts.ugh!"));
+
+
                 foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    if (tag.IsInGroup("mode"))
+                    if (tag.IsInGroup("snd!"))
                     {
-                        var modeTag = Cache.Deserialize<RenderModel>(stream, tag);
+                        var soundTag = Cache.Deserialize<Sound>(stream, tag);
 
-                        Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
+                        if (soundTag.SoundReference.UnknownIndexReach2 != 0)
+                            Console.WriteLine($"{soundTag.SoundReference.UnknownIndexReach2} {tag.Name}" );
 
-                        var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(modeTag.Geometry.Resource);
-
-                        if (resource == null)
-                            continue;
-
-                        var converter = new RenderGeometryConverter(HOCache, Cache);
-                        try
-                        {
-                            var newResource = converter.Convert(modeTag.Geometry, resource);
-                        }
-                        catch(Exception e)
-                        {
-                            Console.WriteLine($"Failed to convert geometry for {tag.Name}, {e.Message}");
-                        }
 
                     }
                 }

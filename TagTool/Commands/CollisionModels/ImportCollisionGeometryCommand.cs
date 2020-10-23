@@ -21,6 +21,7 @@ namespace TagTool.Commands.CollisionModels
         private int[] Indices { get; set; }
         private List<triangle> Triangles { get; set; }
         private bool debug = false;
+        private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
 
@@ -30,36 +31,44 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry [mopp] <filepath> <tagname>",
+                  "ImportCollisionGeometry [mopp] [force] [debug] <filepath> <tagname>",
                   
-                  "Import an obj file as a collision model tag")
+                  "Import an obj file as a collision model tag. Use the mopp argument for mopp generation" +
+                  ", and use the force argument to force import the collision geometry even if it has open edges")
         {
             Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            //Arguments needed: <filepath> <tagname>
-            if (args.Count < 2)
-                return new TagToolError(CommandError.ArgCount);
-
             string filepath;
             string tagName;
 
-            if(args.Count == 3 && args[0] == "mopp")
+            //Arguments needed: <filepath> <tagname>
+            if(args.Count < 2)
+                return new TagToolError(CommandError.ArgCount);
+            filepath = args[args.Count - 2];
+            tagName = args[args.Count - 1];            
+
+            if (args.Contains("mopp"))
             {
                 buildmopp = true;
                 //mopp generation can only accept triangles
                 max_surface_edges = 3;
-                filepath = args[1];
-                tagName = args[2];
             }
             else
             {
                 buildmopp = false;
                 max_surface_edges = 8;
-                filepath = args[0];
-                tagName = args[1];
+            }
+
+            if (args.Contains("force"))
+            {
+                forceimport = true;
+            }
+            if (args.Contains("debug"))
+            {
+                debug = true;
             }
 
             CachedTag tag;
@@ -71,11 +80,10 @@ namespace TagTool.Commands.CollisionModels
             //    return new TagToolError(CommandError.FileNotFound);
 
             //import the mesh and get the vertices and indices
+            Scene model;
             using (var importer = new AssimpContext())
             {
-                Scene model;
-
-                using (var logStream = new LogStream((msg, userData) => Console.WriteLine(msg)))
+                using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
                 {
                     logStream.Attach();
                     model = importer.ImportFile(filepath,
@@ -86,12 +94,6 @@ namespace TagTool.Commands.CollisionModels
                         PostProcessSteps.Triangulate);
                     logStream.Detach();
                 }
-
-                if (model.Meshes.Count > 1)
-                    Console.WriteLine("###WARNING: More than one mesh found, only the first mesh will be used.");
-
-                Indices = model.Meshes[0].GetIndices();
-                Vertices = model.Meshes[0].Vertices;
             }
 
             //set up collision model tag
@@ -124,6 +126,16 @@ namespace TagTool.Commands.CollisionModels
                 }
             };
 
+            collisionModel.Materials = new List<CollisionModel.Material>();
+            foreach(Assimp.Material material in model.Materials)
+            {
+                //note: if the material name string does not reflect a stringid currently in the cache, it'll be set to a null stringid
+                collisionModel.Materials.Add(new CollisionModel.Material
+                {
+                    Name = Cache.StringTable.GetStringId(material.Name)
+                });
+            }
+
             //begin building the collision geometry
             collisionModel.Regions[0].Permutations[0].Bsps.Add(new CollisionModel.Region.Permutation.Bsp());
             collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = new CollisionGeometry
@@ -139,13 +151,44 @@ namespace TagTool.Commands.CollisionModels
             };
             Bsp = collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry;
 
-            //sort triangles before adding them
-            Triangles = sort_triangles();
+            //loop through each mesh and add the triangles to the global list
+            Triangles = new List<triangle>();
+            foreach (Assimp.Mesh currentmesh in model.Meshes)
+            {
+                Indices = currentmesh.GetIndices();
+                Vertices = currentmesh.Vertices;
+
+                if(debug)
+                    Console.WriteLine($"Mesh {currentmesh.Name} has {Vertices.Count} Vertices!");
+
+                if (Indices.Length % 3 != 0)
+                {
+                    Console.WriteLine("###ERROR: The input model has stray vertices (number of vertex indices not divisible by 3!)");
+                    return false;
+                }
+
+                add_triangles(currentmesh.MaterialIndex);
+            }
+
+            //this code calculates the ?perimeter of each triangle, and sorts them. 
+            //This will effect the efficiency of bsp generation later --
+            //as it is better to use smaller surface planes to split larger surfaces rather than vice versa
+            triangle_list_qsort_compar sorter = new triangle_list_qsort_compar();
+            Triangles.Sort(sorter);
 
             if (!collision_geometry_add_surfaces() || !collision_geometry_check_for_open_edges() || !reduce_collision_geometry())
             {
                 Console.WriteLine("### Failed to import collision geometry!");
                 return false;
+            }
+
+            if (!forceimport || debug)
+            {
+                if (!verify_collision_geometry())
+                {
+                    Console.WriteLine($"###Failed to verify collision geometry!");
+                    return false;
+                }
             }
 
             //build the collision bsp
@@ -187,9 +230,10 @@ namespace TagTool.Commands.CollisionModels
 
         public struct triangle
         {
-            public int a;
-            public int b;
-            public int c;
+            public Vector3D a;
+            public Vector3D b;
+            public Vector3D c;
+            public int material_index;
             public float sorting_parameter;
         }
 
@@ -207,17 +251,13 @@ namespace TagTool.Commands.CollisionModels
             }
         }
 
-        public List<triangle> sort_triangles()
+        public bool add_triangles(int materialindex)
         {
-            //this code calculates the ?perimeter of each triangle, and sorts them. 
-            //This will effect the efficiency of bsp generation later as it is better to use smaller surface planes to split larger surfaces
-            List<triangle> Trianglelist = new List<triangle>();
             for (int i = 0; i < Indices.Length; i += 3)
             {
-                //the normals in Halo seem to be the opposite by convention when compared to other editing software
-                triangle newtriangle = new triangle{ a = Indices[i + 1], b = Indices[i], c = Indices[i + 2] };
-                Vector3D point0 = Vertices[Indices[i + 1]];
-                Vector3D point1 = Vertices[Indices[i]];
+                triangle newtriangle = new triangle{ a = Vertices[Indices[i]], b = Vertices[Indices[i + 1]], c = Vertices[Indices[i + 2]], material_index = materialindex};
+                Vector3D point0 = Vertices[Indices[i]];
+                Vector3D point1 = Vertices[Indices[i + 1]];
                 Vector3D point2 = Vertices[Indices[i + 2]];
                 float xdiff_1_0 = point1.X - point0.X;
                 float ydiff_1_0 = point1.Y - point0.Y;
@@ -232,11 +272,10 @@ namespace TagTool.Commands.CollisionModels
                 float v14 = zdiff_1_0 * xdiff_2_0 - zdiff_2_0 * xdiff_1_0;
 
                 newtriangle.sorting_parameter = (float)Math.Sqrt((v11 * v12 + v14 * v14 + v13 * v13) * 0.5);
-                Trianglelist.Add(newtriangle);
+                Triangles.Add(newtriangle);
             }
-            triangle_list_qsort_compar sorter = new triangle_list_qsort_compar();
-            Trianglelist.Sort(sorter);
-            return Trianglelist;
+
+            return true;
         }
 
         public bool join_identical_vertices()
@@ -267,14 +306,18 @@ namespace TagTool.Commands.CollisionModels
         {
             //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
             //we also need to scale everything down by 1/100 to account for editing software conventions
-            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = -vertex.Z * 0.01f, Z = vertex.Y * 0.01f }, FirstEdge = ushort.MaxValue };
+            Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = vertex.Y * 0.01f, Z = vertex.Z * 0.01f }, FirstEdge = ushort.MaxValue };
             for(int i = 0; i < Bsp.Vertices.Count; i++)
             {
                 Vertex testvertex = Bsp.Vertices[i];
                 if (newvertex.Point == testvertex.Point)
                     return i;
             }
-                            
+            if(Bsp.Vertices.Count >= ushort.MaxValue)
+            {
+                Console.WriteLine("###ERROR: Can only support up to 65535 unique vertices!");
+                return -1;
+            }
             Bsp.Vertices.Add(newvertex);
             return Bsp.Vertices.Count - 1;
         }
@@ -283,13 +326,22 @@ namespace TagTool.Commands.CollisionModels
         {
             foreach(triangle newtriangle in Triangles)
             {
+                if (Bsp.Surfaces.Count >= ushort.MaxValue)
+                {
+                    Console.WriteLine("###ERROR: Can only support up to 65535 unique surfaces!");
+                    return false;
+                }
                 Bsp.Surfaces.Add(new Surface());
                 int surface_index = Bsp.Surfaces.Count - 1;
                 Bsp.Surfaces[surface_index].Plane = ushort.MaxValue;
+                Bsp.Surfaces[surface_index].MaterialIndex = (short)newtriangle.material_index;
 
-                int point0 = add_vertex(Vertices[newtriangle.a]);
-                int point1 = add_vertex(Vertices[newtriangle.b]);
-                int point2 = add_vertex(Vertices[newtriangle.c]);
+                int point0 = add_vertex(newtriangle.a);
+                int point1 = add_vertex(newtriangle.b);
+                int point2 = add_vertex(newtriangle.c);
+
+                if (point0 == -1 || point1 == -1 || point2 == -1)
+                    return false;
 
                 int edge_index0 = collision_geometry_add_edge(point0, point1, surface_index);
                 int edge_index1 = collision_geometry_add_edge(point1, point2, surface_index);
@@ -360,16 +412,26 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Console.WriteLine($"###ERROR: Edge Index {edge_index} is degenerate!!");
+                        Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
+                        List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[point0_index].Point, Bsp.Vertices[point1_index].Point };
+                        debug_print_vertices(debugvertices);
                         return -1;
                     }
                 }
                 if (Bsp.Edges[edge_index].StartVertex == point0_index &&
                     Bsp.Edges[edge_index].EndVertex == point1_index)
                 {
-                    Console.WriteLine($"###ERROR: Edge Index {edge_index} is degenerate!!");
+                    Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
+                    List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[point0_index].Point, Bsp.Vertices[point1_index].Point };
+                    debug_print_vertices(debugvertices);
                     return -1;
                 }
+            }
+
+            if (Bsp.Edges.Count >= ushort.MaxValue)
+            {
+                Console.WriteLine("###ERROR: Can only support up to 65535 unique edges!");
+                return -1;
             }
 
             Bsp.Edges.Add(new Edge
@@ -394,10 +456,19 @@ namespace TagTool.Commands.CollisionModels
                 Edge edge = Bsp.Edges[edge_index];
                 if(edge.RightSurface == ushort.MaxValue)
                 {
-                    Console.WriteLine($"###ERROR: Edge with below vertices is open!");
-                    Console.WriteLine($"{Bsp.Vertices[edge.StartVertex].Point}");
-                    Console.WriteLine($"{Bsp.Vertices[edge.EndVertex].Point}");
-                    result = false;
+                    if (!forceimport)
+                    {
+                        Console.WriteLine($"###ERROR: Edge with below vertices is open!");
+                        List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[edge.StartVertex].Point, Bsp.Vertices[edge.EndVertex].Point };
+                        debug_print_vertices(debugvertices);
+                        result = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"###WARNING: This mesh contains open edges which may lead to collision errors!" +
+                            $" You have enabled the 'force' argument so import will proceed regardless!");
+                        return true;
+                    }
                 }
             }
             return result;
@@ -795,9 +866,15 @@ namespace TagTool.Commands.CollisionModels
                 if (surface_edge_index == surface_block.FirstEdge)
                     break;
             }
-            if (pointlist.Count < 3 || !plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
+            if (pointlist.Count < 3)
             {
-                Console.WriteLine("###ERROR: Surface invalid for plane generation!");
+                Console.WriteLine("###ERROR: Surface has less than 3 points!");
+                return false;
+            }
+            if (!plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
+            {
+                Console.WriteLine("###ERROR: Surface has overlapping vertices!");
+                debug_print_vertices(pointlist);
                 return false;
             }
             else
@@ -833,6 +910,20 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
             return true;
+        }
+
+        public void debug_print_vertices(List<RealPoint3d> vertexlist)
+        {
+            foreach(RealPoint3d vertex in vertexlist)
+            {
+                Console.WriteLine($"{vertex * 100.0f}");
+            }
+            Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
+            foreach (RealPoint3d vertex in vertexlist)
+            {
+                RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
+                Console.WriteLine($"{vertex_fix * 100.0f}");
+            }
         }
 
         public bool generate_surface_planes()
@@ -999,6 +1090,108 @@ namespace TagTool.Commands.CollisionModels
             plane.D = (float)v18;
 
             return plane;
+        }
+
+        //////////////////////////
+        //VERIFICATION CHECKS
+        ///////////////////////////
+        public bool verify_collision_geometry()
+        {
+            if (Bsp.Edges.Count > 0 && Bsp.Surfaces.Count > 0)
+            {
+                for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
+                {
+                    Edge edge_block = Bsp.Edges[edge_index];
+                    if (edge_block.StartVertex < 0 || edge_block.StartVertex >= Bsp.Vertices.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad start vertex index.");
+                        return false;
+                    }
+                    if (edge_block.EndVertex < 0 || edge_block.EndVertex >= Bsp.Vertices.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad end vertex index.");
+                        return false;
+                    }
+                    if (edge_block.StartVertex == edge_block.EndVertex)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one vertex.");
+                        return false;
+                    }
+                    if (edge_get_length(edge_index) < 0.001)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} is too short.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge < 0 || edge_block.ForwardEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad forward edge index.");
+                        return false;
+                    }
+                    if (edge_block.ReverseEdge < 0 || edge_block.ReverseEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad reverse edge index.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge == edge_index || edge_block.ReverseEdge == edge_index)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references itself.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge == edge_block.ReverseEdge)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one edge.");
+                        return false;
+                    }
+                    for (int direction = 0; direction < 2; direction++)
+                    {
+                        int next_edge_index = direction == 0 ? edge_block.ForwardEdge : edge_block.ReverseEdge;
+                        Edge next_edge_block = Bsp.Edges[next_edge_index];
+                        int test_vertex = direction == 0 ? edge_block.EndVertex : edge_block.StartVertex;
+                        int test_surface = direction == 0 ? edge_block.LeftSurface : edge_block.RightSurface;
+                        if ((next_edge_block.StartVertex != test_vertex || next_edge_block.LeftSurface != test_surface)
+                         && (next_edge_block.EndVertex != test_vertex || next_edge_block.RightSurface != test_surface))
+                        {
+                            string directionstring = direction == 0 ? "forward" : "reverse";
+                            Console.WriteLine($"###ERROR edge {edge_index} doesn't share a vertex or surface with its {directionstring} edge.");
+                            return false;
+                        }
+                    }
+                    if (edge_block.LeftSurface < 0 || edge_block.LeftSurface >= Bsp.Surfaces.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad left surface index.");
+                        return false;
+                    }
+                    if (edge_block.RightSurface < 0 || edge_block.RightSurface >= Bsp.Surfaces.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad right surface index.");
+                        return false;
+                    }
+                    if (edge_block.LeftSurface == edge_block.RightSurface)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one surface.");
+                        return false;
+                    }
+                }
+                for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+                {
+                    Surface surface_block = Bsp.Surfaces[surface_index];
+                    if (surface_block.FirstEdge < 0 || surface_block.FirstEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"###ERROR surface {surface_index} has a bad first edge index");
+                        return false;
+                    }
+                    if (surface_count_edges(surface_index) > 8)
+                    {
+                        Console.WriteLine($"###ERROR surface {surface_index} has too many edges");
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

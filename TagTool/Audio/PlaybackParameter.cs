@@ -5,23 +5,44 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x44,  MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x44,  MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
     public class PlaybackParameter : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public FieldDisableFlagsValue FieldDisableFlags;
 
+
+        // TODO: reverse code to figure out if that's actually true
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float SkipFractionReach;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float MaximumBendPerSecondReach;
+
+
         public float DistanceA;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float DistanceB;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float DistanceC;
-
         public float DistanceD;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DistanceE;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DistanceF;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DistanceG;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DistanceH;
+
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float SkipFraction;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float MaximumBendPerSecond;
+
+
+
         public float GainBase;
         public float GainVariance;
         public Bounds<short> RandomPitchBounds;

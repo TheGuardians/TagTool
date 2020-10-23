@@ -7,12 +7,13 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0xC, MaxVersion = CacheVersion.HaloReach)]
     public class LightVolumeSystem : TagStructure
 	{
         public List<LightVolumeSystemBlock> LightVolume;
 
-        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused1;
 
         [Flags]
@@ -36,7 +37,8 @@ namespace TagTool.Tags.Definitions
             Bit15 = 1 << 15
         }
 
-        [TagStructure(Size = 0x17C)]
+        [TagStructure(Size = 0x17C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x1B4, MinVersion = CacheVersion.HaloReach)]
         public class LightVolumeSystemBlock : TagStructure
 		{
             public StringId LightVolumeName;
@@ -51,6 +53,21 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public float BrightnessRatio;
 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int Unknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown3;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown4;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown5;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown6;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown7;
+
             public TagMapping Length;
             public TagMapping Offset;
             public TagMapping ProfileDensity;
@@ -64,9 +81,27 @@ namespace TagTool.Tags.Definitions
             public uint RuntimeMUsedStates;
             public uint RuntimeMMaxProfileCount;
 
+            //[TagField(MinVersion = CacheVersion.HaloReach)]
+            //public int Unknown8;
+            //[TagField(MinVersion = CacheVersion.HaloReach)]
+            //public int Unknown9;
+            //[TagField(MinVersion = CacheVersion.HaloReach)]
+            //public int Unknown10;
+            //[TagField(MinVersion = CacheVersion.HaloReach)]
+            //public int Unknown11;
+            //[TagField(MinVersion = CacheVersion.HaloReach)]
+            //public List<UnknownBlock> Unknown12;
+
             public List<RuntimeGpuProperty> RuntimeGpuProperties;
             public List<RuntimeGpuFunction> RuntimeGpuFunctions;
             public List<RuntimeGpuColor> RuntimeGpuColors;
+
+            [TagStructure(Size = 0x8)]
+            public class UnknownBlock : TagStructure
+            {
+                public int Unknown1;
+                public int Unknown2;
+            }
 
             [TagStructure(Size = 0x10)]
             public class RuntimeGpuProperty : TagStructure

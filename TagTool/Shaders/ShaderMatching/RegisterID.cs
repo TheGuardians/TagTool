@@ -6,11 +6,15 @@ namespace TagTool.Shaders.ShaderMatching
     {
         public int RegisterIndex;
         public ShaderParameter.RType Type;
+        public int FunctionIndex;
+        public int SourceIndex;
 
-        public RegisterID(int registerIndex, ShaderParameter.RType type)
+        public RegisterID(int registerIndex, ShaderParameter.RType type, int functionIndex = -1, int sourceIndex = -1)
         {
             RegisterIndex = registerIndex;
             Type = type;
+            FunctionIndex = functionIndex;
+            SourceIndex = sourceIndex;
         }
 
         public override bool Equals(object obj)

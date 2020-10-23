@@ -6,24 +6,24 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0x1)]
     public class SoundClass : TagStructure
-	{
+    {
         [TagField(MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.HaloCustomEdition)]
         public SoundClassHalo Halo;
 
-        [TagField(Version = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+        public SoundClassHalo2 Halo2;
+
+        [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
         public SoundClassHalo3Retail Halo3Retail;
 
         [TagField(Version = CacheVersion.Halo3ODST)]
         public SoundClassHalo3ODST Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public SoundClassHaloOnline HaloOnline;
 
-        [TagField(Version = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public SoundClassHaloReach HaloReach;
-
-        [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-        public SoundClassHalo2 Halo2;
 
         public enum SoundClassHalo2 : sbyte
         {
@@ -418,6 +418,7 @@ namespace TagTool.Audio
             switch (from)
             {
                 case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Beta:
                     value = Halo3Retail.ToString();
                     break;
 

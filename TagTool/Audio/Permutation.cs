@@ -6,51 +6,49 @@ using TagTool.Tags;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
     public class Permutation : TagStructure
-	{
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+    {
+        [TagField(Gen = CacheGeneration.Third)]
         public short ImportNameIndex;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public StringId ImportName;
 
         //Convert
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public short EncodedSkipFraction;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public Bounds<float> SkipFraction;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public sbyte GainH2;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public sbyte PermutationInfoIndex;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public short LanguageNeutralTime;
 
         public uint SampleSize;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int FirstPermutationChunkIndex;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public short PermutationChunkCount;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public sbyte Gain;
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public sbyte OverallPermutationIndex;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int UnknownReach3;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint PermutationNumber;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint IsNotFirstPermutation;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<PermutationChunk> PermutationChunks;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown1;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown2;
     }
 }

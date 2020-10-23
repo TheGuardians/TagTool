@@ -65,6 +65,9 @@ namespace TagTool.Tags.Definitions
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
 
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        public byte[] RuntimeInterpolatorFunctionsBlock = new byte[0xC];
+
         public short HudTextMessageIndex;
 
         public short SecondaryFlags;
@@ -638,8 +641,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
         public GameObjectTypeHalo3ODST Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public GameObjectTypeHaloOnline HaloOnline;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public GameObjectTypeHalo3Retail HaloReach;
 
         [TagField(Platform = CachePlatform.OnlyPC | CachePlatform.Xbox)]
         public sbyte Unknown2;

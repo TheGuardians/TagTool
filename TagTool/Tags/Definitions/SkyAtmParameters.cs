@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
             public float Brightness;
             public float FogGradientThreshold;
             public float LightIntensity;
-            public float SkyInvisiblilityThroughFog;
+            public float SkyInvisibilityThroughFog;
             public float Unknown3;
             public float Unknown4;
             public float LightSourceSpread;

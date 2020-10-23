@@ -26,7 +26,8 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var rigidbody in phmo.RigidBodies)
                 {
-                    rigidbody.MotionType = rigidbody.MotionType_Reach;
+                    string ReachValue = rigidbody.MotionType_Reach.ToString();
+                    rigidbody.MotionType = (PhysicsModel.RigidBody.MotionTypeValue)Enum.Parse(typeof(PhysicsModel.RigidBody.MotionTypeValue), ReachValue);
                     rigidbody.ShapeType = rigidbody.ShapeType_Reach;
                     rigidbody.ShapeIndex = rigidbody.ShapeIndex_Reach;
                     rigidbody.Mass = rigidbody.Mass_Reach;

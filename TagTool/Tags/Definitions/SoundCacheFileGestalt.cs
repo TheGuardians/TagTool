@@ -4,13 +4,11 @@ using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0x58, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xB8, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC4, MinVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xDC, MinVersion = CacheVersion.HaloReach)]
     public class SoundCacheFileGestalt : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<PlatformCodec> PlatformCodecs;
 
         public List<PlaybackParameter> PlaybackParameters;
@@ -24,31 +22,44 @@ namespace TagTool.Tags.Definitions
         public List<PitchRange> PitchRanges;
         public List<Permutation> Permutations;
 
-        [TagField(Version = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<LanguagePermutation> LanguagePermutations;
 
-        // Unknown9 block Reach
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Unknown6C> UnknownReach1;
 
-        // not in Reach
-
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CustomPlayback> CustomPlaybacks;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<LanguageBlock> Languages;
 
         public List<RuntimePermutationFlag> RuntimePermutationFlags;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+
         public TagFunction Unknown2 = new TagFunction { Data = new byte[0] };
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown4;
 
         public List<PermutationChunk> PermutationChunks;
         public List<Promotion> Promotions;
-        public List<ExtraInfo> ExtraInfo; 
+        public List<ExtraInfo> ExtraInfo;
 
-        //Unknown15 Reach
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<int> UnknownReach2;
+
+
+        [TagStructure(MinVersion = CacheVersion.HaloReach, Size = 0x2C)]
+        public class Unknown6C : TagStructure
+        {
+            public int Unknown1;
+            public CachedTag Unknown2;
+            public int Unknown3;
+            public int Unknown4;
+            public int Unknown5;
+            public int Unknown6;
+            public int Unknown7;
+            public int Unknown8;
+        }
+
 
         //
         // Functions for sound conversion 

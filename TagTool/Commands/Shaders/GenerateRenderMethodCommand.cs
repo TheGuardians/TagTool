@@ -135,6 +135,12 @@ namespace TagTool.Commands.Shaders
                         if (Cache.StringTable.GetString(option.Name) == name && option.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
                         {
                             textureConstant.Bitmap = option.DefaultSamplerBitmap;
+                            textureConstant.SamplerAddressMode = new RenderMethod.ShaderProperty.TextureConstant.PackedSamplerAddressMode
+                            {
+                                AddressU = (RenderMethod.ShaderProperty.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode,
+                                AddressV = (RenderMethod.ShaderProperty.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode
+                            };
+                            textureConstant.FilterMode = (RenderMethod.ShaderProperty.TextureConstant.SamplerFilterMode)option.DefaultFilterMode;
                             textureConstant.ExternMode = (sbyte)option.RenderMethodExtern;
 
                             found = true;

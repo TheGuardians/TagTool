@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.RenderModels
 {
@@ -75,8 +76,7 @@ namespace TagTool.Commands.RenderModels
 			foreach (var oldNode in Definition.Nodes)
 			{
 				var name = Cache.StringTable.GetString(oldNode.Name);
-
-				nodes[name] = builder.AddNode(oldNode);
+				nodes.Add(name,builder.AddNode(oldNode));
 			}
 
 			foreach (var region in Definition.Regions)
@@ -165,9 +165,21 @@ namespace TagTool.Commands.RenderModels
 											//else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
 											//bone.Name = bone.Name.Replace("1", "_low");
 											var bonefix = bone.Name;
-											if (bone.Name.Contains("Armature_"))
-												bonefix = bonefix.Substring(9);
-												
+
+                                            if(Regex.IsMatch(bone.Name, @"Armature_\d\d\d_.*"))
+                                            {
+                                                bonefix = Regex.Match(bone.Name, @"Armature_\d\d\d_(.*)").Groups[1].Value;
+                                            }
+                                            else if (Regex.IsMatch(bone.Name, @"Armature_.*"))
+                                            {
+                                                bonefix = Regex.Match(bone.Name, @"Armature_(.*)").Groups[1].Value;
+                                            }
+
+                                            if (!nodes.ContainsKey(bonefix))
+                                            {
+                                                Console.WriteLine($"###ERROR: There is no node {bonefix} to match bone {bone.Name}");
+                                                return false;
+                                            }
 
 											blendIndicesList.Add((byte)nodes[bonefix]);
 											blendWeightsList.Add(vertexInfo.Weight);
@@ -225,11 +237,14 @@ namespace TagTool.Commands.RenderModels
 
 						if (materialIndices.ContainsKey(meshMaterial.Name))
 							materialIndex = materialIndices[meshMaterial.Name];
-						else
-							materialIndex = materialIndices[meshMaterial.Name] = builder.AddMaterial(new RenderMaterial
-							{
-								RenderMethod = defaultShaderTag,
-							});
+                        else
+                        {
+                            materialIndices.Add(meshMaterial.Name, builder.AddMaterial(new RenderMaterial
+                            {
+                                RenderMethod = defaultShaderTag,
+                            }));
+                            materialIndex = materialIndices[meshMaterial.Name];
+                        }
 
 						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
 						builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);

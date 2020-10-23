@@ -278,13 +278,13 @@ namespace TagTool.Geometry
             poly.RelativeMassScale = 1.0f;
             poly.PhantomIndex = 0;
             poly.PhantomIndex--;
-            poly.InteractionUnknown = 0;
-            poly.InteractionUnknown--;
+            poly.ProxyCollisionGroup = 0;
+            poly.ProxyCollisionGroup--;
             poly.FourVectorsSize = nFVS;
             poly.FourVectorsCapacity = (uint)(0x80000000 + nFVS); //
             poly.PlaneEquationsSize = nPlanes;
             poly.PlaneEquationsCapacity = (uint)(0x80000000 + nPlanes); //
-            poly.GlobalMaterialIndex = 0;
+            poly.RuntimeMaterialType = 0;
             //A possible improvement could be to calculate this
             poly.Volume = 0.1f;
 
@@ -315,10 +315,13 @@ namespace TagTool.Geometry
                 var p_vals = p.AsArray;
                 var plane = new PhysicsModel.PolyhedronPlaneEquation
                 {
-                    Unknown = p_vals[0].AsFloat,
-                    Unknown2 = p_vals[1].AsFloat,
-                    Unknown3 = p_vals[2].AsFloat,
-                    Unknown4 = p_vals[3].AsFloat
+                    PlaneEquation = new RealPlane3d
+                    {
+                        I = p_vals[0].AsFloat,
+                        J = p_vals[1].AsFloat,
+                        K = p_vals[2].AsFloat,
+                        D = p_vals[3].AsFloat
+                    }
                 };
 
                 phmo.PolyhedronPlaneEquations.Add(plane);

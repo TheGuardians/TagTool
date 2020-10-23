@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Commands.Porting
 {
@@ -31,7 +32,7 @@ namespace TagTool.Commands.Porting
         private Dictionary<int, CachedTag> PortedTags = new Dictionary<int, CachedTag>();
         private Dictionary<uint, StringId> PortedStringIds = new Dictionary<uint, StringId>();
 
-		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
+		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct"), new Tag("rmgl") };
 		private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
         private readonly List<Tag> ResourceTagGroups = new List<Tag> { new Tag("snd!"), new Tag("bitm"), new Tag("Lbsp") }; // for null tag detection
 
@@ -537,6 +538,14 @@ namespace TagTool.Commands.Porting
                             if (BlamCache.Version == CacheVersion.Halo3ODST)
                                 frame.FOV *= 0.65535f; // fov change in ODST affected cisc too it seems
                         }
+                    }
+                    break;
+
+                case CollisionModel coll:
+                    if (BlamCache.Version == CacheVersion.HaloReach)
+                    {
+                        GenerateCollisionBSPCommand bspgeneration = new GenerateCollisionBSPCommand(ref coll);
+                        bspgeneration.Execute(new List<string>());
                     }
                     break;
 
@@ -1473,6 +1482,10 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version == CacheVersion.Halo3Retail)
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
+
+            if (BlamCache.Version == CacheVersion.HaloReach)
+                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
 
             // todo: properly convert type
             if (BlamCache.Endianness != CacheContext.Endianness && BlamCache.Endianness == EndianFormat.BigEndian)

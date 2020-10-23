@@ -60,7 +60,7 @@ namespace TagTool.Commands.Sounds
             var resourceReference = Definition.Resource;
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(resourceReference);
             
-            if (resourceDefinition.Data == null)
+            if (resourceDefinition == null || resourceDefinition.Data == null)
             {
                 Console.WriteLine("The sound resource contains no data");
                 return true;

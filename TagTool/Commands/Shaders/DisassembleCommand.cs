@@ -23,11 +23,11 @@ namespace TagTool.Commands.Shaders
             base(true,
 
                 "Disassemble",
-                "Disassembles a VertexShader at the specified index.",
+                "Disassembles the shader at the specified index.",
 
                 "Disassemble <index> [file]",
 
-                "<index> - index into the VertexShaders tagblock.")
+                "<index> - index into the Shaders tagblock.")
         {
             Cache = cache;
             Tag = tag;
@@ -42,14 +42,22 @@ namespace TagTool.Commands.Shaders
             var disassemblies = new List<string> { };
             var indices = new List<int>();
 
+            GlobalCacheFilePixelShaders gpix = null;
+
             if (args[0] == "*")
             {
                 for (var i = 0; ; i++)
                 {
                     string disassembly = null;
-                    if(Cache.GetType() == typeof(GameCacheGen3))
+                    if (Cache.GetType() == typeof(GameCacheGen3))
                     {
-                        disassembly = DisassembleGen3Shader(i);
+                        if (Cache.Version == CacheVersion.HaloReach)
+                        {
+                            using (var stream = Cache.OpenCacheRead())
+                                gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));
+                        }
+
+                        disassembly = DisassembleGen3Shader(i, gpix);
                     }
                     else if (Cache.GetType() == typeof(GameCacheHaloOnline))
                     {
@@ -71,7 +79,13 @@ namespace TagTool.Commands.Shaders
                 {
                     if (Cache.GetType() == typeof(GameCacheGen3))
                     {
-                        disassemblies.Add(DisassembleGen3Shader(shaderIndex));
+                        if (Cache.Version == CacheVersion.HaloReach)
+                        {
+                            using (var stream = Cache.OpenCacheRead())
+                                gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));
+                        }
+
+                        disassemblies.Add(DisassembleGen3Shader(shaderIndex, gpix));
                     }
                     else if (Cache.GetType() == typeof(GameCacheHaloOnline))
                     {
@@ -88,7 +102,7 @@ namespace TagTool.Commands.Shaders
                 using (var writer = File.CreateText(Path.Combine(filename, $"{Tag.Name.Split('\\').Last()}_{indices[i]}.{Tag.Group}.txt")))
                 {
                     if (Cache.GetType() == typeof(GameCacheGen3))
-                        GenerateGen3ShaderHeader(indices[i], writer);
+                        GenerateGen3ShaderHeader(indices[i], writer, gpix);
                     writer.WriteLine(disassemblies[i]);
                 }
                     
@@ -96,7 +110,7 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        private string DisassembleGen3Shader(int shaderIndex)
+        private string DisassembleGen3Shader(int shaderIndex, GlobalCacheFilePixelShaders gpix)
         {
             var file = UseXSDCommand.XSDFileInfo;
             if(file == null)
@@ -123,8 +137,10 @@ namespace TagTool.Commands.Shaders
                     if (typeof(T) == typeof(PixelShader))
                     {
                         var _definition = Definition as PixelShader;
-                        if (shaderIndex < _definition.Shaders.Count)
+                        if (gpix == null && shaderIndex < _definition.Shaders.Count)
                             shaderBlock = _definition.Shaders[shaderIndex];
+                        else if (gpix != null)
+                            shaderBlock = gpix.Shaders[_definition.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
                         else
                             return null;
                     }
@@ -261,10 +277,10 @@ namespace TagTool.Commands.Shaders
             return disassembly;
         }
 
-        private void GenerateGen3ShaderHeader(int shaderIndex, StreamWriter writer)
+        private void GenerateGen3ShaderHeader(int shaderIndex, StreamWriter writer, GlobalCacheFilePixelShaders gpix)
         {
             List<ShaderParameter> parameters = null;
-            List<RealQuaternion> constants = null;
+            List<RealQuaternion> constants = new List<RealQuaternion>();
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {
@@ -276,6 +292,9 @@ namespace TagTool.Commands.Shaders
                         shader_block = _definition.Shaders[shaderIndex];
                     else
                         return;
+
+                    if (shader_block.XboxShaderReference == null && gpix != null)
+                        shader_block = gpix.Shaders[_definition.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
                 }
 
                 if (typeof(T) == typeof(GlobalPixelShader))
@@ -285,9 +304,13 @@ namespace TagTool.Commands.Shaders
                         shader_block = _definition.Shaders[shaderIndex];
                     else
                         return;
+
+                    if (shader_block.XboxShaderReference == null && gpix != null)
+                        shader_block = gpix.Shaders[_definition.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
                 }
 
-                constants = GetShaderConstants(shader_block.XboxShaderReference.ConstantData);
+                if (shader_block.XboxShaderReference != null)
+                    constants = GetShaderConstants(shader_block.XboxShaderReference.ConstantData);
                 parameters = shader_block.XboxParameters;
             }
 
@@ -312,7 +335,8 @@ namespace TagTool.Commands.Shaders
                         return;
                 }
 
-                constants = GetShaderConstants(shaderBlock.XboxShaderReference.ConstantData);
+                if (shaderBlock.XboxShaderReference != null)
+                    constants = GetShaderConstants(shaderBlock.XboxShaderReference.ConstantData);
                 parameters = shaderBlock.XboxParameters;
             }
 
@@ -412,7 +436,7 @@ namespace TagTool.Commands.Shaders
             {
                 for (var i = 0; i < constantData.Length / 16; i++)
                 {
-                    constants.Add(reader.ReadRealQuaternion());
+                    constants.Add(new RealQuaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
                 }
                 constants.Reverse(); //they are stored in reverse order
             }

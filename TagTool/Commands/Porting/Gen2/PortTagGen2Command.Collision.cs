@@ -111,7 +111,7 @@ namespace TagTool.Commands.Porting.Gen2
 				surface.MaterialIndex = surface.MaterialIndex_H2;
 				surface.BreakableSurfaceIndex = surface.BreakableSurfaceIndex_H2;
 				surface.Flags = surface.Flags_H2;
-				surface.Unknown = -1;
+				surface.BreakableSurfaceSet = -1;
 			}
 
 			return collisionGeometry;
