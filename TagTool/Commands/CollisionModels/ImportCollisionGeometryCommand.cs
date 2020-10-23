@@ -31,7 +31,7 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry [mopp] [force] <filepath> <tagname>",
+                  "ImportCollisionGeometry [mopp] [force] [debug] <filepath> <tagname>",
                   
                   "Import an obj file as a collision model tag. Use the mopp argument for mopp generation" +
                   ", and use the force argument to force import the collision geometry even if it has open edges")
@@ -45,23 +45,10 @@ namespace TagTool.Commands.CollisionModels
             string tagName;
 
             //Arguments needed: <filepath> <tagname>
-            switch (args.Count)
-            {
-                case 2:
-                    filepath = args[0];
-                    tagName = args[1];
-                    break;
-                case 3:
-                    filepath = args[1];
-                    tagName = args[2];
-                    break;
-                case 4:
-                    filepath = args[2];
-                    tagName = args[3];
-                    break;
-                default:
-                    return new TagToolError(CommandError.ArgCount);
-            }
+            if(args.Count < 2)
+                return new TagToolError(CommandError.ArgCount);
+            filepath = args[args.Count - 2];
+            tagName = args[args.Count - 1];            
 
             if (args.Contains("mopp"))
             {
@@ -78,6 +65,10 @@ namespace TagTool.Commands.CollisionModels
             if (args.Contains("force"))
             {
                 forceimport = true;
+            }
+            if (args.Contains("debug"))
+            {
+                debug = true;
             }
 
             CachedTag tag;
@@ -189,6 +180,15 @@ namespace TagTool.Commands.CollisionModels
             {
                 Console.WriteLine("### Failed to import collision geometry!");
                 return false;
+            }
+
+            if (!forceimport || debug)
+            {
+                if (!verify_collision_geometry())
+                {
+                    Console.WriteLine($"###Failed to verify collision geometry!");
+                    return false;
+                }
             }
 
             //build the collision bsp
@@ -466,7 +466,7 @@ namespace TagTool.Commands.CollisionModels
                     else
                     {
                         Console.WriteLine($"###WARNING: This mesh contains open edges which may lead to collision errors!" +
-                            $"You have enabled the 'force' argument so import will proceed regardless!");
+                            $" You have enabled the 'force' argument so import will proceed regardless!");
                         return true;
                     }
                 }
@@ -1090,6 +1090,108 @@ namespace TagTool.Commands.CollisionModels
             plane.D = (float)v18;
 
             return plane;
+        }
+
+        //////////////////////////
+        //VERIFICATION CHECKS
+        ///////////////////////////
+        public bool verify_collision_geometry()
+        {
+            if (Bsp.Edges.Count > 0 && Bsp.Surfaces.Count > 0)
+            {
+                for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
+                {
+                    Edge edge_block = Bsp.Edges[edge_index];
+                    if (edge_block.StartVertex < 0 || edge_block.StartVertex >= Bsp.Vertices.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad start vertex index.");
+                        return false;
+                    }
+                    if (edge_block.EndVertex < 0 || edge_block.EndVertex >= Bsp.Vertices.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad end vertex index.");
+                        return false;
+                    }
+                    if (edge_block.StartVertex == edge_block.EndVertex)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one vertex.");
+                        return false;
+                    }
+                    if (edge_get_length(edge_index) < 0.001)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} is too short.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge < 0 || edge_block.ForwardEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad forward edge index.");
+                        return false;
+                    }
+                    if (edge_block.ReverseEdge < 0 || edge_block.ReverseEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad reverse edge index.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge == edge_index || edge_block.ReverseEdge == edge_index)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references itself.");
+                        return false;
+                    }
+                    if (edge_block.ForwardEdge == edge_block.ReverseEdge)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one edge.");
+                        return false;
+                    }
+                    for (int direction = 0; direction < 2; direction++)
+                    {
+                        int next_edge_index = direction == 0 ? edge_block.ForwardEdge : edge_block.ReverseEdge;
+                        Edge next_edge_block = Bsp.Edges[next_edge_index];
+                        int test_vertex = direction == 0 ? edge_block.EndVertex : edge_block.StartVertex;
+                        int test_surface = direction == 0 ? edge_block.LeftSurface : edge_block.RightSurface;
+                        if ((next_edge_block.StartVertex != test_vertex || next_edge_block.LeftSurface != test_surface)
+                         && (next_edge_block.EndVertex != test_vertex || next_edge_block.RightSurface != test_surface))
+                        {
+                            string directionstring = direction == 0 ? "forward" : "reverse";
+                            Console.WriteLine($"###ERROR edge {edge_index} doesn't share a vertex or surface with its {directionstring} edge.");
+                            return false;
+                        }
+                    }
+                    if (edge_block.LeftSurface < 0 || edge_block.LeftSurface >= Bsp.Surfaces.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad left surface index.");
+                        return false;
+                    }
+                    if (edge_block.RightSurface < 0 || edge_block.RightSurface >= Bsp.Surfaces.Count)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} has a bad right surface index.");
+                        return false;
+                    }
+                    if (edge_block.LeftSurface == edge_block.RightSurface)
+                    {
+                        Console.WriteLine($"###ERROR edge {edge_index} references only one surface.");
+                        return false;
+                    }
+                }
+                for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
+                {
+                    Surface surface_block = Bsp.Surfaces[surface_index];
+                    if (surface_block.FirstEdge < 0 || surface_block.FirstEdge >= Bsp.Edges.Count)
+                    {
+                        Console.WriteLine($"###ERROR surface {surface_index} has a bad first edge index");
+                        return false;
+                    }
+                    if (surface_count_edges(surface_index) > 8)
+                    {
+                        Console.WriteLine($"###ERROR surface {surface_index} has too many edges");
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
