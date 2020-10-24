@@ -182,7 +182,7 @@ namespace TagTool.Commands.CollisionModels
                 return false;
             }
 
-            if (!forceimport || debug)
+            if (!forceimport)
             {
                 if (!verify_collision_geometry())
                 {
