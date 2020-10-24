@@ -704,7 +704,7 @@ namespace TagTool.Tags.Definitions
             MeleeOnly = 1 << 24,
             CannotFireIfParentDead = 1 << 25,
             WeaponAgesWithEachKill = 1 << 26,
-            PrimaryTriggerMeleeAttacks = 1 << 27,
+            AllowsUnaimedLunge = 1 << 27,
             CannotBeUsedByPlayer = 1 << 28,
         }
     }
