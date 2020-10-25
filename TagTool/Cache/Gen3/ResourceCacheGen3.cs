@@ -110,12 +110,38 @@ namespace TagTool.Cache.Gen3
             if (secondaryResourceData == null)
                 secondaryResourceData = new byte[0];
 
+
+            //
+            // Reorganize primary and secondary resources into a single contiguous data[]
+            //
+
             byte[] data = new byte[primaryResourceData.Length + secondaryResourceData.Length];
-            Array.Copy(primaryResourceData, 0, data, 0, primaryResourceData.Length);
-            Array.Copy(secondaryResourceData, 0, data, primaryResourceData.Length, secondaryResourceData.Length);
 
             if (data.Length == 0)
                 return null;
+
+            var primarySubPageTable = GetPrimarySubpageTable(resourceReference.Gen3ResourceID);
+            var secondarySubPageTable = GetSecondarySubpageTable(resourceReference.Gen3ResourceID);
+
+            if (primarySubPageTable == null)
+                return null;
+
+            var primaryRunningOffset = 0;
+            foreach(var subPage in primarySubPageTable.Subpages)
+            {
+                Array.Copy(primaryResourceData, primaryRunningOffset, data, subPage.Offset, subPage.Size);
+                primaryRunningOffset += subPage.Size;
+            }
+
+            if(secondarySubPageTable != null && secondaryResourceData.Length > 0)
+            {
+                var secondaryRunningOffset = 0;
+                foreach (var subPage in secondarySubPageTable.Subpages)
+                {
+                    Array.Copy(secondaryResourceData, secondaryRunningOffset, data, subPage.Offset, subPage.Size);
+                    secondaryRunningOffset += subPage.Size;
+                }
+            }
 
             // does not exist in gen3, create one.
             var resourceDef = new SoundResourceDefinition
@@ -263,6 +289,36 @@ namespace TagTool.Cache.Gen3
             var data = new byte[length];
             Array.Copy(decompressed, offset, data, 0, length);
             return data;
+        }
+
+        private ResourceSubpageTable GetPrimarySubpageTable(DatumHandle ID)
+        {
+            var resource = ResourceGestalt.TagResources[ID.Index];
+
+            if (resource.SegmentIndex == -1)
+                return null;
+
+            var segment = ResourceLayoutTable.Sections[resource.SegmentIndex];
+
+            if (segment.RequiredSizeIndex == -1)
+                return null;
+            else
+                return ResourceLayoutTable.SubpageTables[segment.RequiredSizeIndex];
+        }
+
+        private ResourceSubpageTable GetSecondarySubpageTable(DatumHandle ID)
+        {
+            var resource = ResourceGestalt.TagResources[ID.Index];
+
+            if (resource.SegmentIndex == -1)
+                return null;
+
+            var segment = ResourceLayoutTable.Sections[resource.SegmentIndex];
+
+            if (segment.OptionalSizeIndex == -1)
+                return null;
+            else
+                return ResourceLayoutTable.SubpageTables[segment.OptionalSizeIndex];
         }
 
         private byte[] GetPrimaryResource(DatumHandle ID)
