@@ -205,7 +205,7 @@ namespace TagTool.Commands.CollisionModels
 
             //build the collision bsp
             GenerateCollisionBSPCommand bsp_builder = new GenerateCollisionBSPCommand(ref collisionModel);
-            if (!bsp_builder.generate_bsp(0, 0, 0))
+            if (!bsp_builder.generate_bsp(0, 0, 0, debug))
                 return false;
 
             if (buildmopp)

@@ -50,8 +50,11 @@ namespace TagTool.Commands.CollisionModels
             return true;
         }
 
-        public bool generate_bsp(int region_index, int permutation_index, int bsp_index)
+        public bool generate_bsp(int region_index, int permutation_index, int bsp_index, bool debug_arg = false)
         {
+            if (debug_arg == true)
+                debug = true;
+
             Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry.DeepClone();
 
             //make sure there is nothing in the bsp blocks before starting
@@ -89,6 +92,11 @@ namespace TagTool.Commands.CollisionModels
                 Console.WriteLine($"###Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
+            if (debug && !verify_collision_bsp())
+            {
+                Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
+                return false;
+            }               
             return true;
         }
 
@@ -307,11 +315,29 @@ namespace TagTool.Commands.CollisionModels
                     //this function is recursive, and continues branching until no more 3d nodes can be made
                     if(build_bsp_tree_main(back_surface_array,ref back_child_node_index) && build_bsp_tree_main(front_surface_array, ref front_child_node_index))
                     {
-                        UInt64 bsp3dnode_value = 0;
-                        coll_bsp3dnode node = new coll_bsp3dnode { FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF };
+                        //UInt64 bsp3dnode_value = 0;
+                        //coll_bsp3dnode node = new coll_bsp3dnode { FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF };
+                        Bsp3dNode node = new Bsp3dNode { BackChild = -1, FrontChild = -1 };
 
-                        node.Plane = splitting_parameters.plane_index < 0 ? (short)(splitting_parameters.plane_index | 0x8000) : (short)splitting_parameters.plane_index;
+                        node.Plane = splitting_parameters.plane_index < 0 ? (int)(splitting_parameters.plane_index | 0x8000) : splitting_parameters.plane_index;
 
+                        if(front_child_node_index != -1)
+                        {
+                            if (front_child_node_index < 0)
+                                front_child_node_index = (front_child_node_index & 0x7FFFFFFF) | 0x800000;
+                            node.FrontChild = front_child_node_index;
+                        }
+                        if (back_child_node_index != -1)
+                        {
+                            if (back_child_node_index < 0)
+                                back_child_node_index = (back_child_node_index & 0x7FFFFFFF) | 0x800000;
+                            node.BackChild = back_child_node_index;
+                        }
+
+                        Bsp.Bsp3dNodes[current_bsp3dnode_index] = node;
+                        bsp3dnode_index = current_bsp3dnode_index;
+
+                        /*
                         if (front_child_node_index != -1)
                         {
                             byte[] frontchildbytes = BitConverter.GetBytes(front_child_node_index);
@@ -345,8 +371,7 @@ namespace TagTool.Commands.CollisionModels
                         }
 
                         Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode{ Value = bsp3dnode_value };
-
-                        bsp3dnode_index = current_bsp3dnode_index;
+                        */
                     }
                     else
                     {
@@ -1870,6 +1895,61 @@ namespace TagTool.Commands.CollisionModels
             }
             while (current_edge_index != first_Edge_index);
             return edge_count;
+        }
+
+        public bool verify_collision_bsp()
+        {
+            for(var i = 0; i < Bsp.Bsp3dNodes.Count; i++)
+            {
+                Bsp3dNode node = Bsp.Bsp3dNodes[i];
+                if((short)node.Plane < 0 || (short)node.Plane > Bsp.Planes.Count)
+                {
+                    Console.WriteLine($"###ERROR: Bsp3dnode {i} has a bad plane index!");
+                    return false;
+                }
+                if(node.BackChild != 0x00FFFFFF)
+                {
+                    bool back_child_is_leaf = (node.BackChild & 0x800000) > 0;
+                    int backmaxcount = back_child_is_leaf ? Bsp.Leaves.Count : Bsp.Bsp3dNodes.Count;
+                    int backchildindex = node.BackChild & 0x7FFFFF;
+                    if (backchildindex < 0 || backchildindex > backmaxcount)
+                    {
+                        Console.WriteLine($"###ERROR: Bsp3dnode {i} has a bad back child index!");
+                        return false;
+                    }
+                }
+                if (node.FrontChild != 0x00FFFFFF)
+                {
+                    bool front_child_is_leaf = (node.FrontChild & 0x800000) > 0;
+                    int frontmaxcount = front_child_is_leaf ? Bsp.Leaves.Count : Bsp.Bsp3dNodes.Count;
+                    int frontchildindex = node.FrontChild & 0x7FFFFF;
+                    if (frontchildindex < 0 || frontchildindex > frontmaxcount)
+                    {
+                        Console.WriteLine($"###ERROR: Bsp3dnode {i} has a bad front child index!");
+                        return false;
+                    }
+                }
+            }
+            //check depth of bsp3dtree
+            int back_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[0].BackChild);
+            int front_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[0].FrontChild);
+            if (front_count > back_count)
+                back_count = front_count;
+            if(debug)
+                Console.WriteLine($"Depth of Bsp3dTree is {back_count} (max 128 ideally)");
+
+            return true;
+        }
+
+        public int count_bsp3d_nodes(int node_index)
+        {
+            if((node_index & 0x800000) > 0)
+                return 0;
+            int front_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[node_index].FrontChild);
+            int back_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[node_index].BackChild);
+            if (front_count > back_count)
+                back_count = front_count;
+            return back_count + 1;
         }
     }
 }
