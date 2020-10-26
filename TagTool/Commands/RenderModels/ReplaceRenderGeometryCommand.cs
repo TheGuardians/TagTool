@@ -96,7 +96,8 @@ namespace TagTool.Commands.RenderModels
 						continue;
 
 					var permName = Cache.StringTable.GetString(permutation.Name);
-					var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
+
+                    var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
 					foreach (string entry in altconventions)
 					{
 					    var tempMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
@@ -104,7 +105,19 @@ namespace TagTool.Commands.RenderModels
 					}
 					
 					if (permMeshes.Count == 0)
-						return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+                    {
+                        //quick fix to allow simple import of single mesh objects
+                        if (scene.Meshes.Count == 1 && Definition.Regions.Count == 1 && Definition.Regions[0].Permutations.Count == 1)
+                        {
+                            Console.WriteLine($"###WARNING: No mesh(es) found for region '{regionName}' permutation '{permName}'");
+                            Console.WriteLine($"###Only one mesh/region/permutation is present, so importing anyways!");
+                            permMeshes.Add(scene.Meshes[0]);
+                        }
+                        else
+                        {
+                            return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+                        }
+                    }
 
 					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
 
