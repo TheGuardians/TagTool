@@ -296,9 +296,6 @@ namespace TagTool.Commands.CollisionModels
         public int add_vertex(Vector3D vertex)
         {
             Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = vertex.Y * 0.01f, Z = vertex.Z * 0.01f }, FirstEdge = ushort.MaxValue };
-            //obj export seems to switch Y and Z axes and invert Y axis
-            if (isobj)
-                newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = -vertex.Z * 0.01f, Z = vertex.Y * 0.01f }, FirstEdge = ushort.MaxValue };
             for (int i = 0; i < Bsp.Vertices.Count; i++)
             {
                 Vertex testvertex = Bsp.Vertices[i];
@@ -908,20 +905,22 @@ namespace TagTool.Commands.CollisionModels
 
         public void debug_print_vertices(List<RealPoint3d> vertexlist)
         {
-
-            foreach (RealPoint3d vertex in vertexlist)
+            if (!isobj)
             {
-                Console.WriteLine($"{vertex * 100.0f}");
+                foreach (RealPoint3d vertex in vertexlist)
+                {
+                    Console.WriteLine($"{vertex * 100.0f}");
+                }
             }
-
-            /*
-            Console.WriteLine($"#NOTE: The below coordinates are fixed for OBJ convention!");
-            foreach (RealPoint3d vertex in vertexlist)
+            else
             {
-                RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
-                Console.WriteLine($"{vertex_fix * 100.0f}");
-            }
-            */
+                Console.WriteLine($"#NOTE: The below coordinates are fixed for OBJ convention!");
+                foreach (RealPoint3d vertex in vertexlist)
+                {
+                    RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
+                    Console.WriteLine($"{vertex_fix * 100.0f}");
+                }
+            }          
         }
 
         public bool generate_surface_planes()
