@@ -43,7 +43,7 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
-            string filepath = "";
+            FileInfo filepath = new FileInfo("");
             int maxindex = Cache.TagCacheGenHO.Tags.Count;
             string tagName = $"newcoll{maxindex}";
 
@@ -78,7 +78,7 @@ namespace TagTool.Commands.CollisionModels
                             return new TagToolError(CommandError.ArgCount, "filepath and tagname arguments are required!");
                         else
                         {
-                            filepath = argStack.Pop();
+                            filepath = new FileInfo(argStack.Pop());
                             tagName = argStack.Pop();
                         }
                         break;
@@ -88,7 +88,7 @@ namespace TagTool.Commands.CollisionModels
             CachedTag tag;
 
             //the obj format seems to use different axes by default, adjust debug printouts 
-            if (filepath.ToLower().EndsWith(".obj"))
+            if (filepath.Extension.ToLower() == ".obj")
                 isobj = true;
 
             //check inputs
@@ -104,7 +104,7 @@ namespace TagTool.Commands.CollisionModels
                 using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
                 {
                     logStream.Attach();
-                    model = importer.ImportFile(filepath,
+                    model = importer.ImportFile(filepath.FullName,
                         PostProcessSteps.OptimizeMeshes |
                         PostProcessSteps.RemoveComponent |
                         PostProcessSteps.Debone |
@@ -906,22 +906,20 @@ namespace TagTool.Commands.CollisionModels
 
         public void debug_print_vertices(List<RealPoint3d> vertexlist)
         {
-            if (!isobj)
+
+            foreach (RealPoint3d vertex in vertexlist)
             {
-                foreach (RealPoint3d vertex in vertexlist)
-                {
-                    Console.WriteLine($"{vertex * 100.0f}");
-                }
+                Console.WriteLine($"{vertex * 100.0f}");
             }
-            else
+
+            /*
+            Console.WriteLine($"#NOTE: The below coordinates are fixed for OBJ convention!");
+            foreach (RealPoint3d vertex in vertexlist)
             {
-                Console.WriteLine($"#NOTE: The below coordinates are fixed for OBJ convention!");
-                foreach (RealPoint3d vertex in vertexlist)
-                {
-                    RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
-                    Console.WriteLine($"{vertex_fix * 100.0f}");
-                }
+                RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
+                Console.WriteLine($"{vertex_fix * 100.0f}");
             }
+            */
         }
 
         public bool generate_surface_planes()
