@@ -149,10 +149,13 @@ namespace TagTool.Commands.CollisionModels
             collisionModel.Materials = new List<CollisionModel.Material>();
             foreach(Assimp.Material material in model.Materials)
             {
+                StringId materialID = Cache.StringTable.GetStringId(material.Name);
+                if (materialID == StringId.Invalid)
+                    materialID = Cache.StringTable.GetStringId("default");
                 //note: if the material name string does not reflect a stringid currently in the cache, it'll be set to a null stringid
                 collisionModel.Materials.Add(new CollisionModel.Material
                 {
-                    Name = Cache.StringTable.GetStringId(material.Name)
+                    Name = materialID
                 });
             }
 
