@@ -146,6 +146,7 @@ namespace TagTool.Commands.CollisionModels
                 }
             };
 
+            /*
             collisionModel.Materials = new List<CollisionModel.Material>();
             foreach(Assimp.Material material in model.Materials)
             {
@@ -158,6 +159,7 @@ namespace TagTool.Commands.CollisionModels
                     Name = materialID
                 });
             }
+            */
 
             //begin building the collision geometry
             collisionModel.Regions[0].Permutations[0].Bsps.Add(new CollisionModel.Region.Permutation.Bsp());
@@ -184,7 +186,7 @@ namespace TagTool.Commands.CollisionModels
                 if(debug)
                     Console.WriteLine($"Mesh {currentmesh.Name} has {Faces.Count} Faces!");
 
-                add_triangles(currentmesh.MaterialIndex);
+                add_triangles(0);
             }
 
             //this code calculates the ?perimeter of each triangle, and sorts them. 
@@ -273,6 +275,12 @@ namespace TagTool.Commands.CollisionModels
             for (int i = 0; i < Faces.Count; i++)
             {
                 List<int> indices = Faces[i].Indices;
+                if(indices.Count != 3)
+                {
+                    Console.WriteLine($"###ERROR: Face {i} did not have exactly 3 vertices!");
+                    return false;
+                }
+
                 triangle newtriangle = new triangle{ a = Vertices[indices[0]], b = Vertices[indices[1]], c = Vertices[indices[2]], material_index = materialindex};
                 Vector3D point0 = Vertices[indices[0]];
                 Vector3D point1 = Vertices[indices[1]];

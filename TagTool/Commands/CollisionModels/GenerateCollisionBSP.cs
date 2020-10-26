@@ -36,6 +36,9 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
+            if (args.Count == 1)
+                if (args[0] == "debug")
+                    debug = true;
             for (int region_index = 0; region_index < Definition.Regions.Count; region_index++)
             {
                 for(int permutation_index = 0; permutation_index < Definition.Regions[region_index].Permutations.Count; permutation_index++)
@@ -56,6 +59,7 @@ namespace TagTool.Commands.CollisionModels
                 debug = true;
 
             Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry.DeepClone();
+            CollisionGeometry Bsp_copy = Bsp.DeepClone();
 
             //make sure there is nothing in the bsp blocks before starting
             Bsp.Leaves.Clear();
@@ -92,10 +96,13 @@ namespace TagTool.Commands.CollisionModels
                 Console.WriteLine($"###Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
-            if (debug && !verify_collision_bsp())
-            {
-                Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
-                return false;
+            if (debug)
+            {                
+                if (!verify_collision_bsp(Bsp_copy))
+                {
+                    Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
+                    return false;
+                }            
             }               
             return true;
         }
@@ -1897,7 +1904,7 @@ namespace TagTool.Commands.CollisionModels
             return edge_count;
         }
 
-        public bool verify_collision_bsp()
+        public bool verify_collision_bsp(CollisionGeometry Bsp_copy)
         {
             for(var i = 0; i < Bsp.Bsp3dNodes.Count; i++)
             {
@@ -1929,14 +1936,24 @@ namespace TagTool.Commands.CollisionModels
                         return false;
                     }
                 }
+
+                /*
+                if (Bsp.Bsp3dNodes[i].Value != Bsp_copy.Bsp3dNodes[i].Value)
+                {
+                    Console.WriteLine($"###ERROR: Bsp3dnode {i} does not match!");
+                    Console.WriteLine($"{Bsp.Bsp3dNodes[i].Plane},{Bsp.Bsp3dNodes[i].BackChild},{Bsp.Bsp3dNodes[i].FrontChild}");
+                    Console.WriteLine($"{Bsp_copy.Bsp3dNodes[i].Plane},{Bsp_copy.Bsp3dNodes[i].BackChild},{Bsp_copy.Bsp3dNodes[i].FrontChild}");
+                    return false;
+                }
+                */
             }
             //check depth of bsp3dtree
             int back_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[0].BackChild);
             int front_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[0].FrontChild);
             if (front_count > back_count)
                 back_count = front_count;
-            if(debug)
-                Console.WriteLine($"Depth of Bsp3dTree is {back_count} (max 128 ideally)");
+            if(debug && back_count > 128)
+                Console.WriteLine($"###WARNING:Depth of Bsp3dTree is {back_count} (max 128 ideally)");
 
             return true;
         }
