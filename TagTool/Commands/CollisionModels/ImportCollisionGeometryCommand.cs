@@ -293,10 +293,11 @@ namespace TagTool.Commands.CollisionModels
 
         public int add_vertex(Vector3D vertex)
         {
-            //the Y and Z axes are swapped in Halo, and the Y axis is also flipped, don't ask me why
-            //we also need to scale everything down by 1/100 to account for editing software conventions
             Vertex newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = vertex.Y * 0.01f, Z = vertex.Z * 0.01f }, FirstEdge = ushort.MaxValue };
-            for(int i = 0; i < Bsp.Vertices.Count; i++)
+            //obj export seems to switch Y and Z axes and invert Y axis
+            if (isobj)
+                newvertex = new Vertex { Point = new TagTool.Common.RealPoint3d { X = vertex.X * 0.01f, Y = -vertex.Z * 0.01f, Z = vertex.Y * 0.01f }, FirstEdge = ushort.MaxValue };
+            for (int i = 0; i < Bsp.Vertices.Count; i++)
             {
                 Vertex testvertex = Bsp.Vertices[i];
                 if (newvertex.Point == testvertex.Point)
