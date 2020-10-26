@@ -1238,7 +1238,7 @@ namespace TagTool.Commands.CollisionModels
             Plane_Relationship surface_plane_relationship = 0;
             Surface surface_block = Bsp.Surfaces[surface_index];
             List<RealPoint2d> pointlist = new List<RealPoint2d>();
-            List<float> inputlist = new List<float>();
+            List<double> inputlist = new List<double>();
 
             int surface_edge_index = surface_block.FirstEdge;
             while (true)
@@ -1253,14 +1253,14 @@ namespace TagTool.Commands.CollisionModels
                 RealPoint2d relevant_coords = vertex_get_projection_relevant_coords(edge_vertex, plane_projection_axis, plane_mirror_check);
                 pointlist.Add(relevant_coords);
 
-                float plane_equation_vertex_input = bsp2dnodeblock.Plane.I * relevant_coords.X + bsp2dnodeblock.Plane.J * relevant_coords.Y - bsp2dnodeblock.Plane.D;
+                double plane_equation_vertex_input = bsp2dnodeblock.Plane.I * relevant_coords.X + bsp2dnodeblock.Plane.J * relevant_coords.Y - bsp2dnodeblock.Plane.D;
                 inputlist.Add(plane_equation_vertex_input);
 
-                if (plane_equation_vertex_input < -0.00012207031)
+                if (plane_equation_vertex_input < -0.00009999999747378752)
                 {
                     surface_plane_relationship |= Plane_Relationship.BackofPlane;
                 }
-                if (plane_equation_vertex_input > 0.00012207031)
+                if (plane_equation_vertex_input > 0.00009999999747378752)
                 {
                     surface_plane_relationship |= Plane_Relationship.FrontofPlane;
                 }
