@@ -19,12 +19,13 @@ namespace TagTool.Commands.CollisionModels
         private GameCacheHaloOnlineBase Cache { get; }
         private CollisionGeometry Bsp { get; set; }
         private List<Assimp.Vector3D> Vertices { get; set; }
-        private int[] Indices { get; set; }
+        private List<Face> Faces { get; set; }
         private List<triangle> Triangles { get; set; }
         private bool debug = false;
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
+        private bool isobj = false;
 
         public ImportCollisionGeometryCommand(GameCacheHaloOnlineBase cache)
             : base(false,
@@ -85,6 +86,10 @@ namespace TagTool.Commands.CollisionModels
             }
 
             CachedTag tag;
+
+            //the obj format seems to use different axes by default, adjust debug printouts 
+            if (filepath.ToLower().EndsWith(".obj"))
+                isobj = true;
 
             //check inputs
             if(Cache.TagCache.TryGetTag(tagName + ".coll", out tag))
@@ -168,17 +173,11 @@ namespace TagTool.Commands.CollisionModels
             Triangles = new List<triangle>();
             foreach (Assimp.Mesh currentmesh in model.Meshes)
             {
-                Indices = currentmesh.GetIndices();
                 Vertices = currentmesh.Vertices;
+                Faces = currentmesh.Faces;
 
                 if(debug)
-                    Console.WriteLine($"Mesh {currentmesh.Name} has {Vertices.Count} Vertices!");
-
-                if (Indices.Length % 3 != 0)
-                {
-                    Console.WriteLine("###ERROR: The input model has stray vertices (number of vertex indices not divisible by 3!)");
-                    return false;
-                }
+                    Console.WriteLine($"Mesh {currentmesh.Name} has {Faces.Count} Faces!");
 
                 add_triangles(currentmesh.MaterialIndex);
             }
@@ -266,12 +265,13 @@ namespace TagTool.Commands.CollisionModels
 
         public bool add_triangles(int materialindex)
         {
-            for (int i = 0; i < Indices.Length; i += 3)
+            for (int i = 0; i < Faces.Count; i++)
             {
-                triangle newtriangle = new triangle{ a = Vertices[Indices[i]], b = Vertices[Indices[i + 1]], c = Vertices[Indices[i + 2]], material_index = materialindex};
-                Vector3D point0 = Vertices[Indices[i]];
-                Vector3D point1 = Vertices[Indices[i + 1]];
-                Vector3D point2 = Vertices[Indices[i + 2]];
+                List<int> indices = Faces[i].Indices;
+                triangle newtriangle = new triangle{ a = Vertices[indices[0]], b = Vertices[indices[1]], c = Vertices[indices[2]], material_index = materialindex};
+                Vector3D point0 = Vertices[indices[0]];
+                Vector3D point1 = Vertices[indices[1]];
+                Vector3D point2 = Vertices[indices[2]];
                 float xdiff_1_0 = point1.X - point0.X;
                 float ydiff_1_0 = point1.Y - point0.Y;
                 float zdiff_1_0 = point1.Z - point0.Z;
@@ -289,30 +289,6 @@ namespace TagTool.Commands.CollisionModels
             }
 
             return true;
-        }
-
-        public bool join_identical_vertices()
-        {
-           List<Assimp.Vector3D> newVertices = new List<Vector3D>();
-           int[] newIndices = new int[Indices.Length];
-           int index_buffer_index = 0;
-           while (index_buffer_index < Indices.Length)
-           {
-                if (!newVertices.Contains(Vertices[Indices[index_buffer_index]]))
-                {
-                    newVertices.Add(Vertices[Indices[index_buffer_index]]);
-                    newIndices[index_buffer_index] = newVertices.Count - 1;
-                }
-                else
-                {
-                    newIndices[index_buffer_index] = newVertices.IndexOf(Vertices[Indices[index_buffer_index]]);
-                }
-                index_buffer_index++;
-           }
-           Console.WriteLine($"Merged {Vertices.Count - newVertices.Count} vertices");
-           Vertices = newVertices.DeepClone();
-           Indices = newIndices.DeepClone();
-           return true;
         }
 
         public int add_vertex(Vector3D vertex)
@@ -886,7 +862,9 @@ namespace TagTool.Commands.CollisionModels
             }
             if (!plane_generation_points_valid(pointlist[0], pointlist[1], pointlist[2]))
             {
-                Console.WriteLine("###ERROR: Surface has overlapping vertices!");
+                Console.WriteLine("###ERROR: Surface has overlapping vertices! (distance < 0.0001)");
+                Console.WriteLine("#Make sure that your model is scaled properly and not too detailed!");
+                Console.WriteLine("#If your model is scaled properly, try merging vertices by distance");
                 debug_print_vertices(pointlist);
                 return false;
             }
@@ -927,15 +905,21 @@ namespace TagTool.Commands.CollisionModels
 
         public void debug_print_vertices(List<RealPoint3d> vertexlist)
         {
-            foreach(RealPoint3d vertex in vertexlist)
+            if (!isobj)
             {
-                Console.WriteLine($"{vertex * 100.0f}");
+                foreach (RealPoint3d vertex in vertexlist)
+                {
+                    Console.WriteLine($"{vertex * 100.0f}");
+                }
             }
-            Console.WriteLine($"#NOTE: The below coordinates are fixed for Blender convention!");
-            foreach (RealPoint3d vertex in vertexlist)
+            else
             {
-                RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
-                Console.WriteLine($"{vertex_fix * 100.0f}");
+                Console.WriteLine($"#NOTE: The below coordinates are fixed for OBJ convention!");
+                foreach (RealPoint3d vertex in vertexlist)
+                {
+                    RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
+                    Console.WriteLine($"{vertex_fix * 100.0f}");
+                }
             }
         }
 
