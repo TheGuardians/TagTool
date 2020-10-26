@@ -43,9 +43,9 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
-            FileInfo filepath = new FileInfo("");
             int maxindex = Cache.TagCacheGenHO.Tags.Count;
             string tagName = $"newcoll{maxindex}";
+            string fileName = "";
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
@@ -78,7 +78,7 @@ namespace TagTool.Commands.CollisionModels
                             return new TagToolError(CommandError.ArgCount, "filepath and tagname arguments are required!");
                         else
                         {
-                            filepath = new FileInfo(argStack.Pop());
+                            fileName = argStack.Pop();
                             tagName = argStack.Pop();
                         }
                         break;
@@ -87,6 +87,8 @@ namespace TagTool.Commands.CollisionModels
 
             CachedTag tag;
 
+
+            FileInfo filepath = new FileInfo(fileName);
             //the obj format seems to use different axes by default, adjust debug printouts 
             if (filepath.Extension.ToLower() == ".obj")
                 isobj = true;
