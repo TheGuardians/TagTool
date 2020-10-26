@@ -203,7 +203,12 @@ namespace TagTool.Commands.CollisionModels
             double surface_plane_fit = 0;
             Surface surface_block = Bsp.Surfaces[surface_index];
             Edge first_edge_block = Bsp.Edges[surface_block.FirstEdge];
-            RealPlane3d plane_parameters = plane_get_equation_parameters(surface_block.Plane);
+
+            int plane_index = (short)surface_block.Plane;
+            if (surface_block.Flags.HasFlag(SurfaceFlags.PlaneNegated))
+                plane_index |= 0x8000;
+
+            RealPlane3d plane_parameters = plane_get_equation_parameters(plane_index);
 
             RealPoint3d first_edge_vertex;
             if (first_edge_block.RightSurface == surface_index)
@@ -447,7 +452,11 @@ namespace TagTool.Commands.CollisionModels
             {
                 int surface_index = surface_array.surface_array[surface_array_index];
                 int absolute_surface_index = surface_index & 0x7FFFFFFF;
-                if(surface_index < 0 && (short)Bsp.Surfaces[absolute_surface_index].Plane == plane_index)
+
+                int test_plane = (short)Bsp.Surfaces[absolute_surface_index].Plane;
+                if (Bsp.Surfaces[absolute_surface_index].Flags.HasFlag(SurfaceFlags.PlaneNegated))
+                    test_plane |= 0x8000;
+                if (surface_index < 0 && test_plane == plane_index)
                 {
                     plane_matched_surface_array.surface_array.Add(absolute_surface_index);
                     //reset plane matching surfaces in the primary array to an unflagged state
@@ -617,6 +626,8 @@ namespace TagTool.Commands.CollisionModels
                 if(surface_index < 0)
                 {
                     int plane_index = (short)surface_block.Plane;
+                    if (surface_block.Flags.HasFlag(SurfaceFlags.PlaneNegated))
+                        plane_index |= 0x8000;
                     surface_array_definition plane_matched_surface_array = collect_plane_matching_surfaces(ref surface_array, plane_index);
                     if(plane_matched_surface_array.surface_array.Count > 0)
                     {
@@ -625,7 +636,7 @@ namespace TagTool.Commands.CollisionModels
                         Plane plane_block = Bsp.Planes[plane_index & 0x7FFF];
                         int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
                         bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
-                        Bsp.Bsp2dReferences[bsp2drefindex].PlaneIndex = plane_index < 0 ? (short)(plane_index | 0x8000) : (short)plane_index;
+                        Bsp.Bsp2dReferences[bsp2drefindex].PlaneIndex = (short)plane_index;
                         Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = -1;
 
                         //update leaf block parameters given new bsp2dreference
@@ -1299,7 +1310,7 @@ namespace TagTool.Commands.CollisionModels
             Surface surface_block = Bsp.Surfaces[surface_index];
 
             //check if surface is on the plane
-            if ((surface_block.Plane & 0x7FFF) == plane_index)
+            if (((short)surface_block.Plane & 0x7FFF) == plane_index)
                 return Plane_Relationship.OnPlane;
 
             //if plane block is empty, use the plane index to get one instead
@@ -1413,7 +1424,7 @@ namespace TagTool.Commands.CollisionModels
                             Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
                             if (surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
                             {
-                                if((surface_block.Plane & 0x8000) > 0)
+                                if((surface_block.Plane & 0x8000) > 0 || surface_block.Flags.HasFlag(SurfaceFlags.PlaneNegated))
                                 {
                                     splitting_Parameters.BackSurfaceUsedCount++;
                                     if (++current_surface_array_index >= surface_array.free_count + surface_array.used_count)
@@ -1547,7 +1558,7 @@ namespace TagTool.Commands.CollisionModels
             //loop through free surfaces to see how effectively their associated planes split the remaining surfaces. Find the one that most effectively splits the remaining surfaces.
             for (int i = 0; i < surface_array.free_count; i++)
             {
-                int current_plane_index = (int)(Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFF);
+                int current_plane_index = ((short)Bsp.Surfaces[(surface_array.surface_array[i] & 0x7FFFFFFF)].Plane & 0x7FFF);
                 plane_splitting_parameters current_plane_splitting_parameters = determine_plane_splitting_effectiveness(surface_array, current_plane_index, new RealPlane3d());
                 if(current_plane_splitting_parameters.plane_splitting_effectiveness < lowest_plane_splitting_parameters.plane_splitting_effectiveness)
                 {
