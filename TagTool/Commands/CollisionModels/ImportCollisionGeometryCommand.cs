@@ -5,6 +5,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Geometry;
+using System.Linq;
 using TagTool.Tags;
 using TagTool.Geometry.BspCollisionGeometry;
 using Assimp;
@@ -41,34 +42,46 @@ namespace TagTool.Commands.CollisionModels
 
         public override object Execute(List<string> args)
         {
-            string filepath;
-            string tagName;
+            string filepath = "";
+            int maxindex = Cache.TagCacheGenHO.Tags.Count;
+            string tagName = $"newcoll{maxindex}";
+
+            var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
             //Arguments needed: <filepath> <tagname>
-            if(args.Count < 2)
+            if (args.Count < 2 || args.Count > 5)
                 return new TagToolError(CommandError.ArgCount);
-            filepath = args[args.Count - 2];
-            tagName = args[args.Count - 1];            
 
-            if (args.Contains("mopp"))
+            while(argStack.Count > 0)
             {
-                buildmopp = true;
-                //mopp generation can only accept triangles
-                max_surface_edges = 3;
-            }
-            else
-            {
-                buildmopp = false;
-                max_surface_edges = 8;
-            }
-
-            if (args.Contains("force"))
-            {
-                forceimport = true;
-            }
-            if (args.Contains("debug"))
-            {
-                debug = true;
+                var arg = argStack.Peek();
+                switch (arg.ToLower())
+                {
+                    case "mopp":
+                        buildmopp = true;
+                        max_surface_edges = 3;
+                        argStack.Pop();
+                        break;
+                    case "force":
+                        forceimport = true;
+                        argStack.Pop();
+                        break;
+                    case "debug":
+                        debug = true;
+                        argStack.Pop();
+                        break;
+                    default:
+                        if(argStack.Count > 2)
+                            return new TagToolError(CommandError.ArgInvalid);
+                        else if (argStack.Count < 2)
+                            return new TagToolError(CommandError.ArgCount, "filepath and tagname arguments are required!");
+                        else
+                        {
+                            filepath = argStack.Pop();
+                            tagName = argStack.Pop();
+                        }
+                        break;
+                }
             }
 
             CachedTag tag;
