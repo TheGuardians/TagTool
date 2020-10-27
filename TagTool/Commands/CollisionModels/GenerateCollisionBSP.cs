@@ -327,33 +327,15 @@ namespace TagTool.Commands.CollisionModels
                     //this function is recursive, and continues branching until no more 3d nodes can be made
                     if(build_bsp_tree_main(back_surface_array,ref back_child_node_index) && build_bsp_tree_main(front_surface_array, ref front_child_node_index))
                     {
-                        //UInt64 bsp3dnode_value = 0;
-                        //coll_bsp3dnode node = new coll_bsp3dnode { FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF };
-                        Bsp3dNode node = new Bsp3dNode { BackChild = -1, FrontChild = -1 };
+                        UInt64 bsp3dnode_value = 0;
+                        coll_bsp3dnode node = new coll_bsp3dnode { FrontChildLower = (byte)0xFF, FrontChildMid = (byte)0xFF, FrontChildUpper = (byte)0xFF, BackChildLower = (byte)0xFF, BackChildMid = (byte)0xFF, BackChildUpper = (byte)0xFF };
 
-                        node.Plane = splitting_parameters.plane_index < 0 ? (int)(splitting_parameters.plane_index | 0x8000) : splitting_parameters.plane_index;
+                        node.Plane = splitting_parameters.plane_index < 0 ? (short)(splitting_parameters.plane_index | 0x8000) : (short)splitting_parameters.plane_index;
 
-                        if(front_child_node_index != -1)
-                        {
-                            if (front_child_node_index < 0)
-                                front_child_node_index = (front_child_node_index & 0x7FFFFFFF) | 0x800000;
-                            node.FrontChild = front_child_node_index;
-                        }
-                        if (back_child_node_index != -1)
-                        {
-                            if (back_child_node_index < 0)
-                                back_child_node_index = (back_child_node_index & 0x7FFFFFFF) | 0x800000;
-                            node.BackChild = back_child_node_index;
-                        }
-
-                        Bsp.Bsp3dNodes[current_bsp3dnode_index] = node;
-                        bsp3dnode_index = current_bsp3dnode_index;
-
-                        /*
                         if (front_child_node_index != -1)
                         {
                             byte[] frontchildbytes = BitConverter.GetBytes(front_child_node_index);
-                            node.FrontChildUpper = frontchildbytes[3];
+                            node.FrontChildUpper = (frontchildbytes[3] & 0x80) > 0 ? (byte)(frontchildbytes[2] | 0x80) : frontchildbytes[2];
                             node.FrontChildMid = frontchildbytes[1];
                             node.FrontChildLower = frontchildbytes[0];
                         }
@@ -361,11 +343,11 @@ namespace TagTool.Commands.CollisionModels
                         if (back_child_node_index != -1)
                         {
                             byte[] backchildbytes = BitConverter.GetBytes(back_child_node_index);
-                            node.BackChildUpper = backchildbytes[3];
+                            node.BackChildUpper = (backchildbytes[3] & 0x80) > 0 ? (byte)(backchildbytes[2] | 0x80) : backchildbytes[2];
                             node.BackChildMid = backchildbytes[1];
                             node.BackChildLower = backchildbytes[0];
                         }
-                       
+
                         //data storage format is funky with two 3-byte "ints". This is a homebrewed method to handle it.
                         using (MemoryStream stream = new MemoryStream())
                         {
@@ -382,8 +364,9 @@ namespace TagTool.Commands.CollisionModels
                             bsp3dnode_value = reader.ReadUInt64();
                         }
 
-                        Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode{ Value = bsp3dnode_value };
-                        */
+                        Bsp.Bsp3dNodes[current_bsp3dnode_index] = new Bsp3dNode { Value = bsp3dnode_value };
+
+                        bsp3dnode_index = current_bsp3dnode_index;                                           
                     }
                     else
                     {
