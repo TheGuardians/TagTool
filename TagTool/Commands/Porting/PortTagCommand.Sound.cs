@@ -465,21 +465,45 @@ namespace TagTool.Commands.Porting
 
             //Match the tags with the proper stringId
 
-            for (int i = 0; i < 304; i++)
+            if(BlamCache.Version < CacheVersion.HaloReach)
             {
-                var vocalization = newVocalization[i];
-                for (int j = 0; j < dialogue.Vocalizations.Count; j++)
+                for (int i = 0; i < 304; i++)
                 {
-                    var vocalizationH3 = dialogue.Vocalizations[j];
-                    if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationH3.Name)))
+                    var vocalization = newVocalization[i];
+                    for (int j = 0; j < dialogue.Vocalizations.Count; j++)
                     {
-                        vocalization.Flags = vocalizationH3.Flags;
-                        vocalization.Unknown = vocalizationH3.Unknown;
-                        vocalization.Sound = vocalizationH3.Sound;
-                        break;
+                        var vocalizationH3 = dialogue.Vocalizations[j];
+                        if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationH3.Name)))
+                        {
+                            vocalization.Flags = vocalizationH3.Flags;
+                            vocalization.Unknown = vocalizationH3.Unknown;
+                            vocalization.Sound = vocalizationH3.Sound;
+                            break;
+                        }
                     }
                 }
             }
+            else
+            {
+                for (int i = 0; i < 304; i++)
+                {
+                    var vocalization = newVocalization[i];
+                    for (int j = 0; j < dialogue.Vocalizations.Count; j++)
+                    {
+                        var vocalizationReach = dialogue.Vocalizations[j];
+                        if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationReach.Name)))
+                        {
+                            // we use index 0 because other indices are for different situation like stealth. 
+                            if(vocalizationReach.ReachSounds.Count > 0)
+                                vocalization.Sound = vocalizationReach.ReachSounds[0].Sound;
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            
 
             dialogue.Vocalizations = newVocalization;
 

@@ -493,6 +493,43 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
+            if (rmt2Desc.Type == "custom")
+            {
+                string tagName = $"shaders\\custom_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+                // needs unapply rotation for misc3 + parallax
+                bool miscUnsupported = rmt2Desc.Options[9] == 3 && rmt2Desc.Options[8] != 0;
+
+                if (!miscUnsupported)
+                {
+                    var generator = new HaloShaderGenerator.Custom.CustomGenerator((HaloShaderGenerator.Custom.Albedo)rmt2Desc.Options[0], (HaloShaderGenerator.Custom.Bump_Mapping)rmt2Desc.Options[1], (HaloShaderGenerator.Custom.Alpha_Test)rmt2Desc.Options[2], (HaloShaderGenerator.Custom.Specular_Mask)rmt2Desc.Options[3], (HaloShaderGenerator.Custom.Material_Model)rmt2Desc.Options[4], (HaloShaderGenerator.Custom.Environment_Mapping)rmt2Desc.Options[5], (HaloShaderGenerator.Custom.Self_Illumination)rmt2Desc.Options[6], (HaloShaderGenerator.Custom.Blend_Mode)rmt2Desc.Options[7], (HaloShaderGenerator.Custom.Parallax)rmt2Desc.Options[8], (HaloShaderGenerator.Custom.Misc)rmt2Desc.Options[9]);
+
+                    GlobalPixelShader glps;
+                    GlobalVertexShader glvs;
+                    RenderMethodDefinition rmdf;
+                    CachedTag rmdfTag;
+                    BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag);
+                    //if (!BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag))
+                    //{
+                    //    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, "custom", out glps, out glvs);
+                    //    rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\custom.rmdf");
+                    //    BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                    //}
+                    //else
+                    //{
+                        rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
+                        glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                        glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+                    //}
+
+                    var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+
+                    generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+
+                    BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                    return true;
+                }
+            }
 
             return false;
         }
