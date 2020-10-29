@@ -36,29 +36,14 @@ namespace TagTool.Commands.RenderMethods
                 using (var cacheStream = Cache.OpenCacheRead())
                     template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                for (var i = 0; i < template.RealParameterNames.Count; i++)
-                {
-                    Console.WriteLine("");
+				Console.WriteLine("");
 
+				for (var i = 0; i < template.RealParameterNames.Count; i++)
+                {
                     var argumentName = Cache.StringTable.GetString(template.RealParameterNames[i].Name);
                     var argumentValue = new RealQuaternion(property.RealConstants[i].Values);
 
-                    Console.WriteLine(string.Format("{0}:", argumentName));
-
-                    if (argumentName.EndsWith("_map"))
-                    {
-                        Console.WriteLine(string.Format("\tX Scale: {0}", argumentValue.I));
-                        Console.WriteLine(string.Format("\tY Scale: {0}", argumentValue.J));
-                        Console.WriteLine(string.Format("\tX Offset: {0}", argumentValue.K));
-                        Console.WriteLine(string.Format("\tY Offset: {0}", argumentValue.W));
-                    }
-                    else
-                    {
-                        Console.WriteLine(string.Format("\tX: {0}", argumentValue.I));
-                        Console.WriteLine(string.Format("\tY: {0}", argumentValue.J));
-                        Console.WriteLine(string.Format("\tZ: {0}", argumentValue.K));
-                        Console.WriteLine(string.Format("\tW: {0}", argumentValue.W));
-                    }
+                    Console.WriteLine(string.Format("{0} {1} {2} {3} {4}", argumentName, argumentValue.I, argumentValue.J, argumentValue.K, argumentValue.W));
                 }
             }
 
