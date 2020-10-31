@@ -491,7 +491,7 @@ namespace TagTool.Commands.Porting
             var blf = new TagTool.BlamFile.Blf(CacheVersion.HaloOnline106708);
 
             MapFile map = new MapFile();
-            var header = new CacheFileHeader();
+            var header = new CacheFileHeaderGenHaloOnline();
 
             var scnr = cache.Deserialize<Scenario>(cacheStream, scenarioTag);
 
@@ -516,7 +516,7 @@ namespace TagTool.Commands.Porting
                     header.CacheType = CacheFileType.Multiplayer;
                     break;
             }
-            header.SharedType = CacheFileSharedType.None;
+            header.SharedCacheType = CacheFileSharedType.None;
 
             header.MapId = scnr.MapId;
             header.ScenarioTagIndex = scenarioTag.Index;
@@ -562,7 +562,7 @@ namespace TagTool.Commands.Porting
                 map.Write(writer);
 
                 var modPackCache = cache as GameCacheModPackage;
-                modPackCache.AddMapFile(mapStream, map.Header.MapId);
+                modPackCache.AddMapFile(mapStream, header.MapId);
             }
             else
             {

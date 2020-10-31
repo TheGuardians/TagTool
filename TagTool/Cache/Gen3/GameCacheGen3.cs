@@ -40,15 +40,20 @@ namespace TagTool.Cache
 
         public uint TagAddressToOffset(uint address)
         {
+            var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
+
+            if (Version == CacheVersion.Halo3Beta)
+                return address - (headerGen3.VirtualBaseAddress32 - headerGen3.GetTagMemoryHeader().MemoryBufferOffset);
+
             var baseAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                BaseMapFile.Header.VirtualBaseAddress64 :
-                (ulong)BaseMapFile.Header.VirtualBaseAddress32;
+                headerGen3.VirtualBaseAddress64 :
+                (ulong)headerGen3.VirtualBaseAddress32;
 
             var unpackedAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
                 (((ulong)address << 2) + 0x50000000) :
                 (ulong)address;
 
-            return (uint)(unpackedAddress - (baseAddress - (ulong)BaseMapFile.Header.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
+            return (uint)(unpackedAddress - (baseAddress - (ulong)headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
         }
 
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
@@ -61,9 +66,10 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = BaseMapFile.EndianFormat;
-            var interop = mapFile.Header.SectionTable;
 
-            DisplayName = mapFile.Header.Name + ".map";
+            var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
+
+            DisplayName = mapFile.Header.GetName() + ".map";
 
             Directory = file.Directory;
 
@@ -76,7 +82,7 @@ namespace TagTool.Cache
 
                 if(TagCacheGen3.Instances.Count > 0)
                 {
-                    if (BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
+                    if (Version == CacheVersion.Halo3Beta || headerGen3.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
                         LocaleTables = new List<LocaleTable>();
                     else
                     {
@@ -151,7 +157,7 @@ namespace TagTool.Cache
 
         public void ResizeSection(CacheFileSectionType type, int requestedAdditionalSpace)
         {
-            var sectionTable = BaseMapFile.Header.SectionTable;
+            var sectionTable = ((CacheFileHeaderGen3)BaseMapFile.Header).SectionTable;
             var section = sectionTable.Sections[(int)type];
 
             var sectionFileOffset = sectionTable.GetSectionOffset(type);

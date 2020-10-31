@@ -102,13 +102,13 @@ namespace TagTool.Commands.Modding
 
                     MapFile map = new MapFile();
                     map.Read(reader);
-
-                    var modIndex = map.Header.ScenarioTagIndex;
+                    var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                    var modIndex = header.ScenarioTagIndex;
                     TagMapping.TryGetValue(modIndex, out int newScnrIndex);
-                    map.Header.ScenarioTagIndex = newScnrIndex;
+                    header.ScenarioTagIndex = newScnrIndex;
 
                     var modPackCache = BaseCache as GameCacheModPackage;
-                    modPackCache.AddMapFile(mapFile, map.Header.MapId);
+                    modPackCache.AddMapFile(mapFile, header.MapId);
                 }
                 else
                 {
@@ -116,11 +116,11 @@ namespace TagTool.Commands.Modding
                     {
                         MapFile map = new MapFile();
                         map.Read(reader);
-
-                        var modIndex = map.Header.ScenarioTagIndex;
+                        var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                        var modIndex = header.ScenarioTagIndex;
                         TagMapping.TryGetValue(modIndex, out int newScnrIndex);
-                        map.Header.ScenarioTagIndex = newScnrIndex;
-                        var mapName = map.Header.Name;
+                        header.ScenarioTagIndex = newScnrIndex;
+                        var mapName = header.Name;
 
                         var mapPath = $"{BaseCache.Directory.FullName}\\{mapName}.map";
                         var file = new FileInfo(mapPath);

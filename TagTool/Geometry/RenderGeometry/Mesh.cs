@@ -152,10 +152,10 @@ namespace TagTool.Geometry
         public List<Part> Parts;
         public List<SubPart> SubParts;
 
-        [TagField(Length = 8, MinVersion = Halo3Retail)]
+        [TagField(Length = 8, MinVersion = Halo3Beta)]
         public short[] VertexBufferIndices;
 
-        [TagField(Length = 2, MinVersion = Halo3Retail)]
+        [TagField(Length = 2, MinVersion = Halo3Beta)]
         public short[] IndexBufferIndices;
 
         /// <summary>
@@ -170,38 +170,38 @@ namespace TagTool.Geometry
         [TagField(Flags = Runtime)]
         public IndexBufferDefinition[] ResourceIndexBuffers;
 
-        [TagField(MinVersion = Halo3Retail, MaxVersion = HaloOnline700123)]
+        [TagField(MinVersion = Halo3Beta, MaxVersion = HaloOnline700123)]
         public MeshFlags Flags;
         [TagField(MinVersion = HaloReach)]
         public short FlagsReach;
 
-        [TagField(MinVersion = Halo3Retail, Format = nameof(Flags))]
+        [TagField(MinVersion = Halo3Beta, Format = nameof(Flags))]
         public sbyte RigidNodeIndex;
 
-        [TagField(MinVersion = Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
         public VertexType Type;
 
         [TagField(MinVersion = HaloReach)]
         public VertexTypeReach ReachType;
 
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public PrtSHType PrtType;
 
         [TagField(MinVersion = HaloReach)]
         public byte LightingPolicy;
 
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public PrimitiveType IndexBufferType;
 
-        [TagField(Flags = Padding, Length = 3, MinVersion = Halo3Retail, MaxVersion = HaloOnline700123)]
+        [TagField(Flags = Padding, Length = 3, MinVersion = Halo3Beta, MaxVersion = HaloOnline700123)]
         public byte[] Unused3;
         [TagField(Flags = Padding, Length = 1, MinVersion = HaloReach)]
         public byte[] Unused4;
 
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public List<InstancedGeometryBlock> InstancedGeometry;
 
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public List<WaterBlock> Water;
 
         [TagField(MinVersion = HaloReach)]
@@ -251,7 +251,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The transparent sorting index of the mesh part.
         /// </summary>
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public short TransparentSortingIndex;
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The type of the mesh part.
         /// </summary>
-        [TagField(MinVersion = Halo3Retail, Downgrade = nameof(TypeOld))]
+        [TagField(MinVersion = Halo3Beta, Downgrade = nameof(TypeOld))]
         public PartTypeNew TypeNew;
 
         [TagField(MinVersion = HaloReach)]
@@ -303,7 +303,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The flags of the mesh part.
         /// </summary>
-        [TagField(MinVersion = Halo3Retail, Downgrade = nameof(FlagsOld))]
+        [TagField(MinVersion = Halo3Beta, Downgrade = nameof(FlagsOld))]
         public PartFlagsNew FlagsNew;
 
         [TagField(MaxVersion = Halo2Vista)]
@@ -315,7 +315,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The number of vertices that the mesh part uses.
         /// </summary>
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public ushort VertexCount;
 
         [TagField(Flags = Padding, Length = 2, MinVersion = HaloReach)]
@@ -416,7 +416,7 @@ namespace TagTool.Geometry
         /// Note that this actually seems to be unused. The value is pulled from
         /// the vertex buffer definition instead.
         /// </remarks>
-        [TagField(MinVersion = Halo3Retail)]
+        [TagField(MinVersion = Halo3Beta)]
         public ushort VertexCount;
     }
 

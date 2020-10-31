@@ -27,7 +27,7 @@ namespace TagTool.Cache.Gen3
                     localesKey = "BungieHaloReach!";
                     break;
             }
-            var sectionTable = baseMapFile.Header.SectionTable;
+            var sectionTable = ((CacheFileHeaderGen3)baseMapFile.Header).SectionTable;
 
             if (sectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
                 return new List<LocaleTable>();

@@ -46,10 +46,13 @@ namespace TagTool.BlamFile
             EndianFormat = DetectEndianFormat(reader);
             MapVersion = GetMapFileVersion(reader);
             Version = DetectCacheVersion(reader);
-            var deserializer = new TagDeserializer(Version);
-            reader.SeekTo(0);
-            var dataContext = new DataSerializationContext(reader);
-            Header = (CacheFileHeader)deserializer.Deserialize(dataContext, typeof(CacheFileHeader));
+
+            Header = CacheFileHeader.Read(Version, reader);
+
+            if (!Header.IsValid())
+            {
+                Console.WriteLine("Warning: invalid map file header or footer detected. Verify definition");
+            }
 
             // temporary code until map file format cleanup
             if (MapVersion == CacheFileVersion.HaloOnline)
@@ -153,50 +156,55 @@ namespace TagTool.BlamFile
 
         public static MapFile GenerateMapFile(CacheVersion version, Scenario scnr, CachedTag scenarioTag, Blf mapInfo = null)
         {
-            MapFile map = new MapFile();
-            var header = new CacheFileHeader();
-
-
-            map.Version = version;
-            map.EndianFormat = EndianFormat.LittleEndian;
-            map.MapVersion = CacheFileVersion.HaloOnline;
-
-            header.HeaderSignature = new Tag("head");
-            header.FooterSignature = new Tag("foot");
-            header.FileVersion = map.MapVersion;
-            header.Build = CacheVersionDetection.GetBuildName(version);
-
-            switch (scnr.MapType)
+            if(version == CacheVersion.HaloOnline106708)
             {
-                case ScenarioMapType.MainMenu:
-                    header.CacheType = CacheFileType.MainMenu;
-                    break;
-                case ScenarioMapType.SinglePlayer:
-                    header.CacheType = CacheFileType.Campaign;
-                    break;
-                case ScenarioMapType.Multiplayer:
-                    header.CacheType = CacheFileType.Multiplayer;
-                    break;
-            }
-            header.SharedType = CacheFileSharedType.None;
+                MapFile map = new MapFile();
+                var header = new CacheFileHeaderGenHaloOnline();
 
-            header.MapId = scnr.MapId;
-            header.ScenarioTagIndex = scenarioTag.Index;
-            header.Name = scenarioTag.Name.Split('\\').Last();
-            header.ScenarioPath = scenarioTag.Name;
 
-            map.Header = header;
+                map.Version = version;
+                map.EndianFormat = EndianFormat.LittleEndian;
+                map.MapVersion = CacheFileVersion.HaloOnline;
 
-            header.FileLength = 0x3390;
+                header.HeaderSignature = new Tag("head");
+                header.FooterSignature = new Tag("foot");
+                header.FileVersion = map.MapVersion;
+                header.Build = CacheVersionDetection.GetBuildName(version);
 
-            if (mapInfo != null)
-            {
-                if (mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.StartOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.EndOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
+                switch (scnr.MapType)
                 {
-                    map.MapFileBlf = mapInfo;
+                    case ScenarioMapType.MainMenu:
+                        header.CacheType = CacheFileType.MainMenu;
+                        break;
+                    case ScenarioMapType.SinglePlayer:
+                        header.CacheType = CacheFileType.Campaign;
+                        break;
+                    case ScenarioMapType.Multiplayer:
+                        header.CacheType = CacheFileType.Multiplayer;
+                        break;
                 }
+                header.SharedCacheType = CacheFileSharedType.None;
+
+                header.MapId = scnr.MapId;
+                header.ScenarioTagIndex = scenarioTag.Index;
+                header.Name = scenarioTag.Name.Split('\\').Last();
+                header.ScenarioPath = scenarioTag.Name;
+
+                map.Header = header;
+
+                header.FileLength = 0x3390;
+
+                if (mapInfo != null)
+                {
+                    if (mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.StartOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.EndOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
+                    {
+                        map.MapFileBlf = mapInfo;
+                    }
+                }
+                return map;
             }
-            return map;
+
+            return null;
         }
     }
 }

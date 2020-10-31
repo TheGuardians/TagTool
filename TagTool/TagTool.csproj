@@ -255,6 +255,11 @@
     <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="BlamFile\MapVariantGenerator.cs" />
     <Compile Include="Cache\CachedTag.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeaderGenHaloOnline.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeaderGen3.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeaderGen2.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeaderGen1.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="Cache\CacheFile\CacheFileVersion.cs" />
     <Compile Include="Cache\Codecs\CodecDefinition.cs" />
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
@@ -268,6 +273,7 @@
     <Compile Include="Cache\Gen2\StringTableGen2.cs" />
     <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
     <Compile Include="Cache\Gen2\TagCacheGen2.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHalo3Beta.cs" />
     <Compile Include="Cache\Gen3\TagGroupGen3.cs" />
     <Compile Include="Cache\Interops\InteropDefinition.cs" />
     <Compile Include="Cache\Resources\CharacterUsage.cs" />
@@ -462,7 +468,6 @@
     <Compile Include="Cache\GameCache.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnlineBase.cs" />
     <Compile Include="BlamFile\MapFile.cs" />
-    <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="BlamFile\MapVariant.cs" />
     <Compile Include="Cache\ModPackages\ModPackage.cs" />
     <Compile Include="Cache\ModPackages\ModPackageHeader.cs" />
