@@ -57,7 +57,7 @@ namespace TagTool.BlamFile
             // temporary code until map file format cleanup
             if (MapVersion == CacheFileVersion.HaloOnline)
             {
-                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(CacheFileHeader), Version).TotalSize;
+                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(Header.GetType(), Version).TotalSize;
 
                 // Seek to the blf
                 reader.SeekTo(mapFileHeaderSize);
