@@ -29,9 +29,9 @@ namespace TagTool.Commands.Porting
             if (BlamSoundGestalt == null)
                 BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
 
-            if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\towav.exe"))
+            if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\towav.exe") || !File.Exists(@"Tools\xmadec.exe"))
             {
-                Console.WriteLine("Failed to locate sound conversion tools, please install ffmpeg and towav in the Tools folder");
+                Console.WriteLine("Failed to locate sound conversion tools, please install ffmpeg, towav and xmadec in the Tools folder");
                 return null;
             }
 
@@ -154,7 +154,26 @@ namespace TagTool.Commands.Porting
                 // Set compression format
                 //
 
-                sound.PlatformCodec.Compression = Compression.MP3;
+                var targetFormat = Compression.OGG;
+
+                string extension;
+                switch (targetFormat)
+                {
+                    case Compression.MP3:
+                        extension = "mp3";
+                        break;
+                    case Compression.PCM:
+                        extension = "wav";
+                        break;
+                    case Compression.OGG:
+                        extension = "ogg";
+                        break;
+                    default:
+                        extension = "mp3";
+                        break;
+                }
+
+                sound.PlatformCodec.Compression = targetFormat;
 
                 //
                 // Convert Blam permutations to ElDorado format
@@ -207,7 +226,7 @@ namespace TagTool.Commands.Porting
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
 
                     string permutationName = $"{basePermutationCacheName}_{relativePitchRangeIndex}_{i}";
-                    string extension = "mp3";
+                    
                     var cacheFileName = $"{permutationName}.{extension}";
 
                     if (useCache) { 
@@ -227,7 +246,7 @@ namespace TagTool.Commands.Porting
 
                     if (!exists || !useCache)
                     {
-                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData);
+                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData, targetFormat);
                         permutationData = blamSound.Data;
                         if (useCache)
                         {

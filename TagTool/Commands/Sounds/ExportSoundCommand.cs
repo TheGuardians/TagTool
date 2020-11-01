@@ -125,7 +125,26 @@ namespace TagTool.Commands.Sounds
                     using(var stream = Cache.OpenCacheRead())
                         BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
                 }
-                    
+
+                var targetFormat = Compression.PCM;
+
+                string extension;
+                switch (targetFormat)
+                {
+                    case Compression.MP3:
+                        extension = "mp3";
+                        break;
+                    case Compression.PCM:
+                        extension = "wav";
+                        break;
+                    case Compression.OGG:
+                        extension = "ogg";
+                        break;
+                    default:
+                        extension = "mp3";
+                        break;
+                }
+
 
                 for (int pitchRangeIndex = Definition.SoundReference.PitchRangeIndex; pitchRangeIndex < Definition.SoundReference.PitchRangeIndex + Definition.SoundReference.PitchRangeCount; pitchRangeIndex++)
                 {
@@ -134,9 +153,9 @@ namespace TagTool.Commands.Sounds
 
                     for (int i = 0; i < permutationCount; i++)
                     {
-                        string permutationName = $"{Tag.Name.Replace('\\', '_')}_{relativePitchRangeIndex}_{i}.mp3";
+                        string permutationName = $"{Tag.Name.Replace('\\', '_')}_{relativePitchRangeIndex}_{i}.{extension}";
                         var outPath = Path.Combine(outDirectory, permutationName);
-                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData);
+                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData, targetFormat);
                         using (EndianWriter output = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
                         {
                             output.WriteBlock(blamSound.Data);
