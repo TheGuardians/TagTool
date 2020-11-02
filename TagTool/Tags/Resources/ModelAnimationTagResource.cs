@@ -13,18 +13,17 @@ namespace TagTool.Tags.Resources
         public class GroupMember : TagStructure
         {
             public StringId Name;
-            public uint Checksum;
+            public int Checksum;
             public short FrameCount;
             public byte NodeCount;
             public GroupMemberMovementDataType MovementDataType; // sbyte
-            public GroupMemberHeaderType BaseHeader; // sbyte; 0x0 means no base header
-            public GroupMemberHeaderType OverlayHeader; // sbyte; 0x0 means no overlay header (there's always one)
-            public short Unknown1; // value/offset if MovementDataType.dx_dy or dx_dy_dyaw
-            public short Unknown2;
-            public short OverlayOffset; // with member offset as origin
-            public short Unknown3; // always 0x0
-            public short Unknown4; // always 0x0
-            public uint FlagsOffset; // with OverlayOffset as origin , not member offset
+            public GroupMemberHeaderType CompressedData; // sbyte; 0x0 means no base header
+            public GroupMemberHeaderType UncompressedData; // sbyte; 0x0 means no overlay header (there's always one)
+            public short DefaultData; // value/offset if MovementDataType.dx_dy or dx_dy_dyaw
+            public short PillOffsetData;
+            public short MovementData; // with member offset as origin
+            public int AnimatedNodeFlags; // always 0x0
+            public int StaticNodeFlags; // with OverlayOffset as origin , not member offset
 
             [TagField(Align = 0x10)]
             public TagData AnimationData; // this will point to an Animation object

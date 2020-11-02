@@ -58,7 +58,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                         if (name.EndsWith(":put_away"))
                         {
-                            animation.LoopFrameIndexNew = (short)(animation.FrameCount - 1);
+                            animation.LoopFrameIndex = (short)(animation.FrameCount - 1);
                             putAwayIndex = i;
                         }
                         else if (name.EndsWith(":ready"))

@@ -162,12 +162,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 public CurrentCompressionValue CurrentCompression;
                 public float Weight;
                 public short LoopFrameIndex;
-                public short Unknown;
-                public short Unknown1;
+                public short PreviousVariantSibling;
+                public short NextVariantSibling;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                public byte[] Unknown2;
-                public PackedDataSizesStructBlock Unknown3;
+                public byte[] AnimationData;
+                public PackedDataSizesStructBlock DataSizes;
                 public List<AnimationFrameEventBlock> FrameEventsAbcdcc;
                 public List<AnimationSoundEventBlock> SoundEventsAbcdcc;
                 public List<AnimationEffectEventBlock> EffectEventsAbcdcc;
@@ -244,13 +244,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagStructure(Size = 0x10)]
                 public class PackedDataSizesStructBlock : TagStructure
                 {
-                    public sbyte Unknown;
-                    public sbyte Unknown1;
-                    public short Unknown2;
-                    public short Unknown3;
-                    public short Unknown4;
-                    public int Unknown5;
-                    public int Unknown6;
+                    public sbyte CompressedData;
+                    public sbyte UncompressedData;
+                    public short DefaultData;
+                    public short PillOffsetData;
+                    public short MovementData;
+                    public int AnimatedNodeFlags;
+                    public int StaticNodeFlags;
                 }
                 
                 [TagStructure(Size = 0x4)]

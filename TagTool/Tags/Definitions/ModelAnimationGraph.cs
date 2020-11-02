@@ -7,21 +7,37 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0xBC, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x104, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x104, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+    //NOTE: Reach Animation Tag Definition is incomplete!
+    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x1B8, MinVersion = CacheVersion.HaloReach)]
     public class ModelAnimationGraph : TagStructure
 	{
         public CachedTag ParentAnimationGraph;
         public AnimationInheritanceFlags InheritanceFlags;
         public AnimationPrivateFlags PrivateFlags;
         public short AnimationCodecPack;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short ForceCompressionSetting;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short MiscGraphFlags;
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        public byte[] NodeUsageBlock = new byte[0xC];
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        public byte[] NodeMasksBlock = new byte[0xC];
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        public byte[] FunctionsBlock = new byte[0xC];
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        public byte[] ModelAnimationVariantsBlock = new byte[0xC];
+
         public List<SkeletonNode> SkeletonNodes;
         public List<AnimationTagReference> SoundReferences;
         public List<AnimationTagReference> EffectReferences;
-        public List<BlendScreen> BlendScreens;
+        public List<BlendScreen> BlendScreens;       
+        public List<FootMarkersBlock> FootMarkers;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<Leg> Legs;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag FrameEvents;
 
         public List<Animation> Animations;
         public List<Mode> Modes;
@@ -39,14 +55,7 @@ namespace TagTool.Tags.Definitions
         public byte[] LastImportResults;
 
         public List<AdditionalNodeDataBlock> AdditionalNodeData;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<CacheBlock> CacheBlocks;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<CacheUnknown> CacheUnknowns;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        
         public List<ResourceGroup> ResourceGroups;
 
         [Flags]
@@ -70,7 +79,8 @@ namespace TagTool.Tags.Definitions
             ReadyForUse = 1 << 6
         }
 
-        [TagStructure(Size = 0x20)]
+        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
         public class SkeletonNode : TagStructure
 		{
             [TagField(Flags = TagFieldFlags.Label)]
@@ -80,9 +90,20 @@ namespace TagTool.Tags.Definitions
             public short ParentNodeIndex;
             public SkeletonModelFlags ModelFlags;
             public SkeletonNodeJointFlags NodeJointFlags;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte AdditionalFlags;
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 3)]
+            public byte[] Pad = new byte[3];
+
             public RealVector3d BaseVector;
             public float VectorRange;
             public float ZPosition;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint FrameID1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint FrameID2;
 
             [Flags]
             public enum SkeletonModelFlags : byte
@@ -128,13 +149,12 @@ namespace TagTool.Tags.Definitions
             Bit15 = 1 << 15
         }
 
-        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
         public class AnimationTagReference : TagStructure
 		{
             public CachedTag Reference;
             public AnimationTagReferenceFlags Flags;
-            public short Unknown;
+            public short InternalFlags;
         }
 
         [TagStructure(Size = 0x1C)]
@@ -153,14 +173,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class Leg : TagStructure
+        public class FootMarkersBlock : TagStructure
 		{
             public StringId FootMarker;
             public Bounds<float> FootBounds;
             public StringId AnkleMarker;
             public Bounds<float> AnkleBounds;
             public AnchorsValue Anchors;
-            public short Unknown;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Pad = new byte[2];
 
             public enum AnchorsValue : short
             {
@@ -176,168 +197,94 @@ namespace TagTool.Tags.Definitions
             Replacement
         }
         
-        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.HaloReach)]
         public class Animation : TagStructure
 		{
             [TagField(Flags = TagFieldFlags.Label)]
-            public StringId Name;
+            public StringId Name;           
+            public float Weight;            
+            public short LoopFrameIndex;            
+            public PlaybackFlagsValue PlaybackFlags;
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int NodeListChecksumOld;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float OverrideBlendInTime;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float OverrideBlendOutTime;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short ParentAnimation;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short NextAnimation;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short ProductionFlags;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short Composite;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public CachedTag GraphReference;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short SharedAnimationIndex;
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Pad = new byte[2];
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public float WeightNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int ProductionChecksumOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short LoopFrameIndexNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int ImportChecksum;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public PlaybackFlagsValue PlaybackFlagsNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public FrameType TypeOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public sbyte BlendScreenNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public AnimationMovementDataType FrameInfoTypeOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public CompressionValue DesiredCompressionNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public sbyte BlendScreenOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public CompressionValue CurrentCompressionNew;
-            
-            public sbyte NodeCount;
-            
-            public short FrameCount;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public FrameType TypeNew;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public AnimationMovementDataType FrameInfoTypeNew;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public ProductionFlagsNewValue ProductionFlagsNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public InternalFlagsOldValue InternalFlagsOld;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public ProductionFlagsOldValue ProductionFlagsOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public InternalFlagsNewValue InternalFlagsNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public PlaybackFlagsValue PlaybackFlagsOld;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CompressionValue DesiredCompressionOld;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CompressionValue CurrentCompressionOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public int NodeListChecksumNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public float WeightOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public int ProductionChecksumNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
-            public int ParentGraphIndex;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
-            public int ParentGraphBlockIndex;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
-            public int ParentGraphBlockOffset;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
-            public short ParentGraphStartingPoint;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short LoopFrameIndexOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short Unknown;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short PreviousVariantSiblingOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short Unknown2;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short NextVariantSiblingOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short PreviousVariantSiblingNew;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short NextVariantSiblingNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public byte[] AnimationData;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short ResourceGroupIndex;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public sbyte BlendScreenNew;            
+            public CompressionValue DesiredCompressionNew;            
+            public CompressionValue CurrentCompressionNew;            
+            public sbyte NodeCount;            
+            public short FrameCount;         
+            public FrameType TypeNew;            
+            public AnimationMovementDataType FrameInfoTypeNew;            
+            public ProductionFlagsNewValue ProductionFlagsNew;            
+            public InternalFlagsNewValue InternalFlagsNew;           
+            public int NodeListChecksumNew;           
+            public int ProductionChecksumNew;            
+            public short Unknown;            
+            public short Unknown2;            
+            public short PreviousVariantSiblingNew;            
+            public short NextVariantSiblingNew;            
+            public short ResourceGroupIndex;            
             public short ResourceGroupMemberIndex;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public sbyte StaticNodeFlags;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public sbyte AnimatedNodeFlags;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short MovementData;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short PillOffsetData;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short DefaultData;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int UncompressedData;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int CompressedData;
 
             public List<FrameEvent> FrameEvents;
             public List<SoundEvent> SoundEvents;
             public List<EffectEvent> EffectEvents;
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public List<DialogueEvent> DialogueEvents;
 
             public List<ObjectSpaceParentNode> ObjectSpaceParentNodes;
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public List<LegAnchoringBlock> LegAnchoring;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public float Unknown13;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public float Unknown14;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public float Unknown15;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public float Unknown16;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public List<FootTrackingBlock> FootTracking;
+           
+            public float Unknown13;           
+            public float Unknown14;            
+            public float Unknown15;            
+            public float Unknown16;            
             public float Unknown17;
+
+            [TagStructure(Size = 0xD4, MinVersion = CacheVersion.HaloReach)]
+            public class SharedAnimationData : TagStructure
+            {
+                public byte NodeCount;
+                public byte Unknown;
+                public short FrameCount;
+                
+                public FrameType AnimationType;
+                public AnimationMovementDataType FrameInfoType;
+                public AnimationMovementDataType DesiredFrameInfoType;
+                public CompressionValue DesiredCompression;
+                public CompressionValue CurrentCompression;
+                public short InternalFlags;
+
+                public ProductionFlagsNewValue ProductionFlagsNew;
+                public InternalFlagsNewValue InternalFlagsNew;
+                public int NodeListChecksumNew;
+                public int ProductionChecksumNew;
+                public short Unknown1;
+                public short Unknown2;
+                public short PreviousVariantSiblingNew;
+                public short NextVariantSiblingNew;
+                public short ResourceGroupIndex;
+                public short ResourceGroupMemberIndex;
+            }
 
             [Flags]
             public enum InternalFlagsOldValue : byte
@@ -460,17 +407,17 @@ namespace TagTool.Tags.Definitions
                 public StringId MarkerName;
             }
 
-            [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST)]
             public class EffectEvent : TagStructure
 			{
                 public short Effect;
                 public short Frame;
-                [TagField(MinVersion = CacheVersion.Halo2Vista)]
                 public StringId MarkerName;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown;
+                public byte DamageEffectReportingType;
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = TagFieldFlags.Padding, Length = 3)]
+                public byte[] Pad = new byte[3];
             }
 
             public enum DialogueEventType : short
@@ -523,27 +470,25 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class LegAnchoringBlock : TagStructure
+            public class FootTrackingBlock : TagStructure
 			{
-                public short LegIndex;
-                public short Unknown;
-                public List<UnknownBlock> Unknown2;
+                public short Foot;
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                public byte[] Pad = new byte[2];
+                public List<FootLockCycleBlock> FootLockCycles;
 
                 [TagStructure(Size = 0x14)]
-                public class UnknownBlock : TagStructure
+                public class FootLockCycleBlock : TagStructure
 				{
-                    public short Frame1a;
-                    public short Frame2a;
-                    public short Frame1b;
-                    public short Frame2b;
-                    public uint Unknown;
-                    public uint Unknown2;
-                    public uint Unknown3;
+                    public short StartedLocking;
+                    public short Locked;
+                    public short StartedUnlocking;
+                    public short Unlocked;
+                    public RealPoint3d LockPoint;
                 }
             }
         }
 
-        [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
         public class Mode : TagStructure
 		{
@@ -551,15 +496,8 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public List<WeaponClassBlock> WeaponClass;
             public List<ModeIkBlock> ModeIk;
+            public List<FootTrackingDefaultsBlock> FootDefaults;
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public uint Unknown;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public uint Unknown2;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public uint Unknown3;
-
-            [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
             public class WeaponClassBlock : TagStructure
@@ -568,7 +506,6 @@ namespace TagTool.Tags.Definitions
                 public StringId Label;
 
                 public List<WeaponTypeBlock> WeaponType;
-
                 public List<ModeIkBlock> WeaponIk;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -585,12 +522,6 @@ namespace TagTool.Tags.Definitions
                     public List<DeathAndDamageBlock> DeathAndDamage;
                     public List<Transition> Transitions;
 
-                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-                    public List<PrecacheListBlock> HighPrecache;
-
-                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-                    public List<PrecacheListBlock> LowPrecache;
-
                     [TagStructure(Size = 0x8)]
                     public class Entry : TagStructure
 					{
@@ -600,7 +531,6 @@ namespace TagTool.Tags.Definitions
                         public short Animation;
                     }
 
-                    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
                     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
                     public class DeathAndDamageBlock : TagStructure
 					{
@@ -609,7 +539,6 @@ namespace TagTool.Tags.Definitions
 
                         public List<Direction> Directions;
 
-                        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
                         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
                         public class Direction : TagStructure
 						{
@@ -624,7 +553,6 @@ namespace TagTool.Tags.Definitions
                         }
                     }
 
-                    [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
                     [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
                     public class Transition : TagStructure
 					{
@@ -729,6 +657,13 @@ namespace TagTool.Tags.Definitions
                 public StringId Marker;
                 public StringId AttachToMarker;
             }
+
+            [TagStructure(Size = 0x4)]
+            public class FootTrackingDefaultsBlock : TagStructure
+            {
+                public short Foot;
+                public short DefaultState;
+            }
         }
 
         [TagStructure(Size = 0x28)]
@@ -779,7 +714,6 @@ namespace TagTool.Tags.Definitions
             TightenNodes = 1 << 0
         }
 
-        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3Retail)]
         public class Inheritance : TagStructure
 		{
@@ -820,32 +754,6 @@ namespace TagTool.Tags.Definitions
             public float DefaultScale;
             public RealPoint3d MinimumBounds;
             public RealPoint3d MaximumBounds;
-        }
-
-        [TagStructure(Size = 0x14)]
-        public class CacheBlock : TagStructure
-		{
-            [TagField(Flags = Short)]
-            public CachedTag Owner;
-
-            public int BlockSize;
-            public int BlockOffset;
-
-            public short Unknown1;
-            public byte Unknown2;
-            public byte Unknown3;
-            public int Unknown4;
-        }
-
-        [TagStructure(Size = 0x18)]
-        public class CacheUnknown : TagStructure
-		{
-            public int Unknown1;
-            public int Unknown2;
-            public int Unknown3;
-            public int Unknown4;
-            public int Unknown5;
-            public int Unknown6;
         }
 
         [TagStructure(Size = 0xC)]
