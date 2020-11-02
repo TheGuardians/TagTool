@@ -16,8 +16,6 @@ namespace TagTool.Commands.Porting
     {
         public List<ModelAnimationGraph.ResourceGroup> ConvertModelAnimationGraphResourceGroups(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.ResourceGroup> resourceGroups)
         {
-            var resourceDefinitions = new List<ModelAnimationTagResource>();
-
             foreach (var group in resourceGroups)
             {
                 var resourceDefinition = BlamCache.ResourceCache.GetModelAnimationTagResource(group.ResourceReference);

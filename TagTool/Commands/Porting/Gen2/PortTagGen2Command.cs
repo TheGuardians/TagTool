@@ -5,8 +5,11 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags;
+using TagTool.Commands.Porting;
 using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
+using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -24,6 +27,9 @@ namespace TagTool.Commands.Porting.Gen2
         public override object Execute(List<string> args)
         {
             var resourceStreams = new Dictionary<ResourceLocation, Stream>();
+
+            if (args.Count < 1)
+                return new TagToolError(CommandError.ArgCount);
 
             try
             {
@@ -69,6 +75,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case CollisionModelGen2 collisionModel:
                     definition = ConvertCollisionModel(tag, collisionModel);
                     break;
+                case ModelAnimationGraphGen2 modelAnimationGraph:
+                    definition = ConvertModelAnimationGraph(tag, modelAnimationGraph);
+                    break;
             }
 
             if (definition != null)
@@ -91,7 +100,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case string _:  // no conversion necessary
                     return data;
                 case CachedTag tag:
-                    return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
+                    return null;
+                    //FOR NOW, RETURN NULL INSTEAD OF PORTING DEPS, AS TAG SUPPORT IS LIMITED
+                    //return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
                 case Array _:
                 case IList _: // All arrays and List<T> implement IList, so we should just use that
                     data = ConvertCollection(cacheStream, gen2CacheStream, resourceStreams, data as IList, definition, blamTagName);

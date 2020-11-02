@@ -347,6 +347,7 @@
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\DoNotReplaceGroupsCommand.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Animations.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
