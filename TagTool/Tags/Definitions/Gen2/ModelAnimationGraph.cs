@@ -587,11 +587,11 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             public List<InheritedAnimationBlock> InheritenceListBbaaaa;
             public List<WeaponClassLookupBlock> WeaponListBbaaaa;
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
-            
+            [TagField(Length = 8)]
+            public uint[] LeftArmNodes;
+            [TagField(Length = 8)]
+            public uint[] RightArmNodes;
+
             [TagStructure(Size = 0x20)]
             public class InheritedAnimationBlock : TagStructure
             {

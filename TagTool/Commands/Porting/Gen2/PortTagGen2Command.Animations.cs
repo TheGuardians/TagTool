@@ -30,6 +30,8 @@ namespace TagTool.Commands.Porting.Gen2
                 ObjectOverlays = new List<ModelAnimationGraph.ObjectOverlay>(),
                 InheritanceList = new List<ModelAnimationGraph.Inheritance>(),
                 WeaponList = new List<ModelAnimationGraph.WeaponListBlock>(),
+                LeftArmNodes = gen2Animation.RunTimeData.LeftArmNodes,
+                RightArmNodes = gen2Animation.RunTimeData.RightArmNodes,
                 AdditionalNodeData = new List<ModelAnimationGraph.AdditionalNodeDataBlock>(),
                 ResourceGroups = new List<ModelAnimationGraph.ResourceGroup>()
             };
