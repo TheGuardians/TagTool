@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 GroupMembers = new TagBlock<ModelAnimationTagResource.GroupMember>()
             };
-            animationTagResource.GroupMembers.AddressType = CacheAddressType.Data;
+            animationTagResource.GroupMembers.AddressType = CacheAddressType.Definition;
 
             //convert Animations
             foreach (var gen2anim in gen2Animation.Resources.AnimationsAbcdcc)
