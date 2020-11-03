@@ -508,19 +508,19 @@ namespace TagTool.Shaders.ShaderMatching
                     GlobalVertexShader glvs;
                     RenderMethodDefinition rmdf;
                     CachedTag rmdfTag;
-                    BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag);
-                    //if (!BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag))
-                    //{
-                    //    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, "custom", out glps, out glvs);
-                    //    rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\custom.rmdf");
-                    //    BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
-                    //}
-                    //else
-                    //{
+                    if (!BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag))
+                    {
+                        rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, "custom", out glps, out glvs);
+                        rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\custom");
+                        BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                        (BaseCache as GameCacheHaloOnlineBase).SaveTagNames();
+                    }
+                    else
+                    {
                         rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
                         glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
                         glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
-                    //}
+                    }
 
                     var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
 

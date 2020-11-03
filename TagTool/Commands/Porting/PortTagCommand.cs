@@ -146,7 +146,7 @@ namespace TagTool.Commands.Porting
             if (ResourceTagGroups.Contains(blamTag.Group.Tag))
             {
                 // there is only a few cases here -- if geometry\animation references a null resource its tag is still valid
-
+                
                 if (blamTag.Group.Tag == "snd!")
                 {
                     Sound sound = BlamCache.Deserialize<Sound>(blamCacheStream, blamTag);
@@ -202,7 +202,7 @@ namespace TagTool.Commands.Porting
                 TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor);
 
                 foreach (var tag in CacheContext.TagCacheGenHO.TagTable)
-                    if (tag != null && tag.Group.Tag == "rmt2" && (tag.Name.Contains(rmt2Descriptor.Type) || (rmt2Descriptor.Type == "black" && FlagIsSet(PortingFlags.GenerateShaders))))
+                    if (tag != null && tag.Group.Tag == "rmt2" && (tag.Name.Contains(rmt2Descriptor.Type) || FlagIsSet(PortingFlags.GenerateShaders)))
                     {
                         if ((FlagIsSet(PortingFlags.Ms30) && tag.Name.StartsWith("ms30\\")) || (!FlagIsSet(PortingFlags.Ms30) && !tag.Name.StartsWith("ms30\\")))
                             return true;
@@ -217,7 +217,7 @@ namespace TagTool.Commands.Porting
                 resultTag = GetDefaultShader(blamTag.Group.Tag, resultTag);
                 return false;
             }
-            else if (blamTag.Group.Tag == "glvs" || blamTag.Group.Tag == "glps")
+            else if (blamTag.Group.Tag == "glvs" || blamTag.Group.Tag == "glps" || blamTag.Group.Tag == "rmdf")
                 return false; // these tags will be generated in the template generation code
 
             return true;
@@ -297,6 +297,8 @@ namespace TagTool.Commands.Porting
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
 
+                case "rmdf":
+                    return null;
 				case "glvs":
                     return null;//CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
