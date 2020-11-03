@@ -36,6 +36,9 @@ namespace TagTool.Commands.Porting.Gen2
                 ResourceGroups = new List<ModelAnimationGraph.ResourceGroup>()
             };
 
+            //set this flag, it seems to be usually checked and is not present in H2
+            Animation.PrivateFlags |= ModelAnimationGraph.AnimationPrivateFlags.ReadyForUse;
+
             //convert skeleton nodes
             foreach (var gen2Node in gen2Animation.Resources.SkeletonNodesAbcdcc)
                 Animation.SkeletonNodes.Add(new ModelAnimationGraph.SkeletonNode()
@@ -133,7 +136,9 @@ namespace TagTool.Commands.Porting.Gen2
                     ResourceGroupMemberIndex = (short)Animation.Animations.Count,
 
                     FrameEvents = Frames,
-                    ObjectSpaceParentNodes = Spacenodes
+                    ObjectSpaceParentNodes = Spacenodes,
+                    //I don't know what this is or what it does, but it seems to be usually 1.0
+                    Unknown13 = 1.0f
                 });
 
                 //add animation data to new animation tag resource
