@@ -115,30 +115,33 @@ namespace TagTool.Commands.Porting.Gen2
                     Weight = gen2anim.Weight,
                     LoopFrameIndex = gen2anim.LoopFrameIndex,
                     PlaybackFlags = (ModelAnimationGraph.Animation.PlaybackFlagsValue)gen2anim.PlaybackFlags,
-                    BlendScreenNew = gen2anim.BlendScreen,
-                    DesiredCompressionNew = (ModelAnimationGraph.Animation.CompressionValue)gen2anim.DesiredCompression,
-                    CurrentCompressionNew = (ModelAnimationGraph.Animation.CompressionValue)gen2anim.CurrentCompression,
-                    NodeCount = gen2anim.NodeCount,
-                    FrameCount = gen2anim.FrameCount,
-                    TypeNew = (ModelAnimationGraph.FrameType)gen2anim.Type,
-                    FrameInfoTypeNew = (Animations.AnimationMovementDataType)gen2anim.FrameInfoType,
-                    ProductionFlagsNew = (ModelAnimationGraph.Animation.ProductionFlagsNewValue)gen2anim.ProductionFlags,
-                    InternalFlagsNew = (ModelAnimationGraph.Animation.InternalFlagsNewValue)gen2anim.InternalFlags,
-                    NodeListChecksumNew = gen2anim.NodeListChecksum,
-                    ProductionChecksumNew = gen2anim.ProductionChecksum,
-                    Unknown = 5, //not sure what these do, setting default values
-                    Unknown2 = 6,
-                    PreviousVariantSiblingNew = gen2anim.PreviousVariantSibling,
-                    NextVariantSiblingNew = gen2anim.NextVariantSibling,
+                    AnimationData = new ModelAnimationGraph.Animation.SharedAnimationData()
+                    {
+                        BlendScreen = gen2anim.BlendScreen,
+                        DesiredCompression = (ModelAnimationGraph.Animation.CompressionValue)gen2anim.DesiredCompression,
+                        CurrentCompression = (ModelAnimationGraph.Animation.CompressionValue)gen2anim.CurrentCompression,
+                        NodeCount = gen2anim.NodeCount,
+                        FrameCount = gen2anim.FrameCount,
+                        AnimationType = (ModelAnimationGraph.FrameType)gen2anim.Type,
+                        FrameInfoType = (Animations.AnimationMovementDataType)gen2anim.FrameInfoType,
+                        ProductionFlags = (ModelAnimationGraph.Animation.ProductionFlagsValue)gen2anim.ProductionFlags,
+                        InternalFlags = (ModelAnimationGraph.Animation.InternalFlagsValue)gen2anim.InternalFlags,
+                        NodeListChecksum = gen2anim.NodeListChecksum,
+                        ProductionChecksum = gen2anim.ProductionChecksum,
+                        Unknown2 = 5, //not sure what these do, setting default values
+                        Unknown3 = 6,
+                        PreviousVariantSibling= gen2anim.PreviousVariantSibling,
+                        NextVariantSibling = gen2anim.NextVariantSibling,
 
-                    //these may need to be adjusted later, hackfix for now
-                    ResourceGroupIndex = 0,
-                    ResourceGroupMemberIndex = (short)Animation.Animations.Count,
+                        //these may need to be adjusted later, hackfix for now
+                        ResourceGroupIndex = 0,
+                        ResourceGroupMemberIndex = (short)Animation.Animations.Count,
 
-                    FrameEvents = Frames,
-                    ObjectSpaceParentNodes = Spacenodes,
-                    //I don't know what this is or what it does, but it seems to be usually 1.0
-                    Unknown13 = 1.0f
+                        FrameEvents = Frames,
+                        ObjectSpaceParentNodes = Spacenodes,
+                        //I don't know what this is or what it does, but it seems to be usually 1.0
+                        Heading = new RealVector3d(1.0f, 0.0f, 0.0f) { }
+                    }
                 });
 
                 //add animation data to new animation tag resource
@@ -192,11 +195,15 @@ namespace TagTool.Commands.Porting.Gen2
                         var newWeaponType = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock()
                         {
                             Label = gen2wt.Label,
-                            Actions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
-                            Overlays = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
-                            DeathAndDamage = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock>(),
-                            Transitions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Transition>()
+                            Set = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.AnimationSet()
+                            {
+                                Actions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
+                                Overlays = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
+                                DeathAndDamage = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock>(),
+                                Transitions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Transition>()
+                            }
                         };
+
                         //weapon type actions
                         foreach (var gen2action in gen2wt.ActionsAabbcc)
                         {
@@ -206,7 +213,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 GraphIndex = gen2action.Animation.GraphIndex,
                                 Animation = gen2action.Animation.Animation
                             };
-                            newWeaponType.Actions.Add(newAction);
+                            newWeaponType.Set.Actions.Add(newAction);
                         }
                         //weapon type overlays
                         foreach (var gen2overlay in gen2wt.OverlaysAabbcc)
@@ -217,7 +224,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 GraphIndex = gen2overlay.Animation.GraphIndex,
                                 Animation = gen2overlay.Animation.Animation
                             };
-                            newWeaponType.Overlays.Add(newOverlay);
+                            newWeaponType.Set.Overlays.Add(newOverlay);
                         }
                         //weapon type deathanddamage
                         foreach (var gen2death in gen2wt.DeathAndDamageAabbcc)
@@ -246,7 +253,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 }
                                 newDeath.Directions.Add(newDirection);
                             }
-                            newWeaponType.DeathAndDamage.Add(newDeath);
+                            newWeaponType.Set.DeathAndDamage.Add(newDeath);
                         }
                         //weapon type transitions
                         foreach (var gen2transition in gen2wt.TransitionsAabbcc)
@@ -275,7 +282,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 };
                                 newTransition.Destinations.Add(newDestination);
                             }
-                            newWeaponType.Transitions.Add(newTransition);
+                            newWeaponType.Set.Transitions.Add(newTransition);
                         }
                         newWeaponClass.WeaponType.Add(newWeaponType);
                     }

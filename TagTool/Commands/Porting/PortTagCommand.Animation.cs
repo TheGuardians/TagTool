@@ -328,6 +328,10 @@ namespace TagTool.Commands.Porting
 
                         // set new data
                         member.AnimationData.Data = destStream.ToArray();
+
+                        var datagrab = member.AnimationData.Data;
+                        Console.Write(BitConverter.ToString(datagrab).Replace("-", string.Empty));
+                        var test = member.AnimationData.Data.DeepClone();
                     }
                 }
 
@@ -340,6 +344,41 @@ namespace TagTool.Commands.Porting
         public ModelAnimationGraph ConvertModelAnimationGraph(Stream cacheStream, Stream blamCacheStream,  Dictionary<ResourceLocation, Stream> resourceStreams, ModelAnimationGraph definition)
         {
             definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, blamCacheStream, resourceStreams, definition.ResourceGroups);
+
+            if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                //convert animations
+                foreach (var animation in definition.Animations)
+                {
+                    if (animation.AnimationDataBlock.Count > 1)
+                        Console.WriteLine("###WARNING: Reach animation has >1 animation data block, whereas HO only supports 1");
+                    animation.AnimationData = animation.AnimationDataBlock[0];
+
+                    animation.AnimationData.PreviousVariantSibling = animation.PreviousVariantSiblingReach;
+                    animation.AnimationData.NextVariantSibling = animation.NextVariantSiblingReach;
+                    animation.AnimationData.DesiredCompression = animation.AnimationData.DesiredCompressionReach;
+                    animation.AnimationData.CurrentCompression = animation.AnimationData.CurrentCompressionReach;
+                    animation.AnimationData.ProductionFlags = animation.ProductionFlagsReach;
+                    animation.AnimationData.Heading = animation.AnimationData.HeadingReach;
+                    animation.AnimationData.HeadingAngle = animation.AnimationData.HeadingAngleReach;
+
+                }
+
+                //convert weapon types
+                foreach (var mode in definition.Modes)
+                {
+                    foreach (var weaponClass in mode.WeaponClass)
+                    {
+                        foreach (var weaponType in weaponClass.WeaponType)
+                        {
+                            if (weaponType.AnimationSetsReach.Count > 1)
+                                Console.WriteLine("###WARNING: Reach animation has >1 weapon type sets block, whereas HO only supports 1");
+                            weaponType.Set = weaponType.AnimationSetsReach[0];
+                        }
+                    }
+                }
+            }
+
             var resolver = CacheContext.StringTable.Resolver;
             definition.Modes = definition.Modes.OrderBy(a => resolver.GetSet(a.Name)).ThenBy(a => resolver.GetIndex(a.Name)).ToList();
 
@@ -353,12 +392,12 @@ namespace TagTool.Commands.Porting
 
                     foreach (var weaponType in weaponClass.WeaponType)
                     {
-                        weaponType.Actions = weaponType.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                        weaponType.Overlays = weaponType.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                        weaponType.DeathAndDamage = weaponType.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                        weaponType.Transitions = weaponType.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+                        weaponType.Set.Actions = weaponType.Set.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Overlays = weaponType.Set.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.DeathAndDamage = weaponType.Set.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Transitions = weaponType.Set.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
 
-                        foreach (var transition in weaponType.Transitions)
+                        foreach (var transition in weaponType.Set.Transitions)
                             transition.Destinations = transition.Destinations.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
                     }
                 }

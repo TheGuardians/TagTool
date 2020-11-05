@@ -49,7 +49,7 @@ namespace TagTool.Animations
                     };
 
                     animation.TicksPerSecond = 30;
-                    animation.DurationInTicks = tagAnimation.FrameCount;
+                    animation.DurationInTicks = tagAnimation.AnimationData.FrameCount;
 
                     //
                     // Convert tag animation into assimp animation. A channel affects only a single node (bone)
@@ -57,7 +57,7 @@ namespace TagTool.Animations
 
                     //Animation data should go here
 
-                    for(int j = 0; j< tagAnimation.NodeCount; j++)
+                    for(int j = 0; j< tagAnimation.AnimationData.NodeCount; j++)
                     {
                         NodeAnimationChannel channel = new NodeAnimationChannel();
                         channel.NodeName = Nodes[j].Name;
