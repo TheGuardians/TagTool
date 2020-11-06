@@ -1,6 +1,7 @@
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Tags.Resources
 {
@@ -9,7 +10,8 @@ namespace TagTool.Tags.Resources
     {
         public TagBlock<GroupMember> GroupMembers;
 
-        [TagStructure(Size = 0x30)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
         public class GroupMember : TagStructure
         {
             public StringId Name;
@@ -25,6 +27,9 @@ namespace TagTool.Tags.Resources
             public int AnimatedNodeFlags; // always 0x0
             public int StaticNodeFlags; // with OverlayOffset as origin , not member offset
 
+            [TagField(MinVersion = CacheVersion.HaloReach, Length = 13)]
+            public int[] ReachUnknown;
+
             [TagField(Align = 0x10)]
             public TagData AnimationData; // this will point to an Animation object
 
@@ -33,22 +38,20 @@ namespace TagTool.Tags.Resources
             {
                 public AnimationCompressionFormats AnimationCodec; // base/overlay
                 public byte RotationNodeCount; // number of nodes with rotation frames (XYZW short per frame)
-                public byte PositionNodeCount; // number of nodes with position frames (XYZ float per frame)
+                public byte TranslationNodeCount; // number of nodes with position frames (XYZ float per frame)
                 public byte ScaleNodeCount; // number of nodes with position frames (X float per frame); something that affects node render draw distance or lightning
-                public float Unknown0;       //very likely a float
-                public float PlaybackRate = 1.0f;
+                public float ErrorValue;
+                public float CompressionRate = 1.0f;
             }
 
             [TagStructure(Size = 0x14)]
             public class Format1 : TagStructure // used by Format3
             {
-                public uint DataStart;
-                public uint ScaleFramesOffset;
-                public uint RotationFramesSize;
-                public uint PositionFramesSize;
-                public uint ScaleFramesSize;
-
-                // public uint RotationFramesOffset; // hidden, always 0x20
+                public uint TranslationDataOffset;
+                public uint ScaleDataOffset;
+                public uint RotatedNodeBlockSize;
+                public uint TranslatedNodeBlockSize;
+                public uint ScaledNodeBlockSize;
             }
 
             [TagStructure(Size = 0x14)]
@@ -257,7 +260,7 @@ namespace TagTool.Tags.Resources
             Type2_Unused, // _uncompressed_animated_data_codec
             Type3,        // _8byte_quantized_rotation_only_codec
             Type4,        // byte_keyframe_lightly_quantized
-            Type5, // word_keyframe_lightly_quantized
+            Type5,        // word_keyframe_lightly_quantized
             Type6,        // reverse_byte_keyframe_lightly_quantized
             Type7,        // reverse_word_keyframe_lightly_quantized
             Type8         // _blend_screen_codec

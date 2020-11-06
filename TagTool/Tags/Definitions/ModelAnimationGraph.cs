@@ -65,6 +65,10 @@ namespace TagTool.Tags.Definitions
         public List<VehicleSuspensionBlock> VehicleSuspension;
         public List<ObjectOverlay> ObjectOverlays;
         public List<Inheritance> InheritanceList;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Inheritance> NewInheritanceList;
+
         public List<WeaponListBlock> WeaponList;
 
         [TagField(Length = 8)]
