@@ -19,19 +19,41 @@ namespace TagTool.Tags.Resources
             public short FrameCount;
             public byte NodeCount;
             public GroupMemberMovementDataType MovementDataType; // sbyte
-            public GroupMemberHeaderType CompressedData; // sbyte; 0x0 means no base header
-            public GroupMemberHeaderType UncompressedData; // sbyte; 0x0 means no overlay header (there's always one)
-            public short DefaultData; // value/offset if MovementDataType.dx_dy or dx_dy_dyaw
-            public short PillOffsetData;
-            public short MovementData; // with member offset as origin
-            public int AnimatedNodeFlags; // always 0x0
-            public int StaticNodeFlags; // with OverlayOffset as origin , not member offset
 
-            [TagField(MinVersion = CacheVersion.HaloReach, Length = 13)]
-            public int[] ReachUnknown;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public PackedDataSizesStructBlock PackedDataSizes;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public PackedDataSizesStructReach PackedDataSizesReach;
 
             [TagField(Align = 0x10)]
             public TagData AnimationData; // this will point to an Animation object
+
+            [TagStructure(Size = 0x44)]
+            public class PackedDataSizesStructReach : TagStructure
+            {
+                public int StaticDataSize;
+                public int CompressedDataSize;
+                public int StaticNodeFlags;
+                public int AnimatedNodeFlags;
+                public int MovementData;
+
+                //These fields are only present in reach, and seem to be the sizes for some additional animation data.
+                //The animation data uses the same codec layout as regular animation data, and is tacked on to the AnimationData after the nodeflags
+                [TagField(Length = 12)]
+                public int[] UnknownDataSizesReach;               
+            }
+
+            [TagStructure(Size = 0x10)]
+            public class PackedDataSizesStructBlock : TagStructure
+            {
+                public byte StaticNodeFlags; // sbyte; 0x0 means no base header
+                public byte AnimatedNodeFlags; // sbyte; 0x0 means no overlay header (there's always one)
+                public short MovementData; // value/offset if MovementDataType.dx_dy or dx_dy_dyaw
+                public short PillOffsetData;
+                public short StaticDataSize; // with member offset as origin
+                public int UncompressedDataSize; // always 0x0
+                public int CompressedDataSize; // with OverlayOffset as origin , not member offset
+            }
 
             [TagStructure(Size = 0xC)]
             public class Codec : TagStructure
@@ -263,7 +285,8 @@ namespace TagTool.Tags.Resources
             Type5,        // word_keyframe_lightly_quantized
             Type6,        // reverse_byte_keyframe_lightly_quantized
             Type7,        // reverse_word_keyframe_lightly_quantized
-            Type8         // _blend_screen_codec
+            Type8,        // _blend_screen_codec
+            Type9         // curve codec
         }
 
         [Flags]

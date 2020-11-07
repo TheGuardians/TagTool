@@ -244,13 +244,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagStructure(Size = 0x10)]
                 public class PackedDataSizesStructBlock : TagStructure
                 {
-                    public sbyte CompressedData;
-                    public sbyte UncompressedData;
-                    public short DefaultData;
-                    public short PillOffsetData;
+                    public byte StaticNodeFlags;
+                    public byte AnimatedNodeFlags;
                     public short MovementData;
-                    public int AnimatedNodeFlags;
-                    public int StaticNodeFlags;
+                    public short PillOffsetData;
+                    public short StaticDataSize;
+                    public int UncompressedDataSize;
+                    public int CompressedDataSize;
                 }
                 
                 [TagStructure(Size = 0x4)]

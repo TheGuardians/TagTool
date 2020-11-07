@@ -152,13 +152,16 @@ namespace TagTool.Commands.Porting.Gen2
                     FrameCount = gen2anim.FrameCount,
                     NodeCount = (byte)gen2anim.NodeCount,
                     MovementDataType = (ModelAnimationTagResource.GroupMemberMovementDataType)gen2anim.Type,
-                    CompressedData = (ModelAnimationTagResource.GroupMemberHeaderType)gen2anim.DataSizes.CompressedData,
-                    UncompressedData = (ModelAnimationTagResource.GroupMemberHeaderType)gen2anim.DataSizes.UncompressedData,
-                    DefaultData = gen2anim.DataSizes.DefaultData,
-                    PillOffsetData = gen2anim.DataSizes.PillOffsetData,
-                    MovementData = gen2anim.DataSizes.MovementData,
-                    AnimatedNodeFlags = gen2anim.DataSizes.AnimatedNodeFlags,
-                    StaticNodeFlags = gen2anim.DataSizes.StaticNodeFlags,
+                    PackedDataSizes = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructBlock
+                    {
+                        CompressedDataSize = gen2anim.DataSizes.CompressedDataSize,
+                        UncompressedDataSize = gen2anim.DataSizes.UncompressedDataSize,
+                        StaticDataSize = gen2anim.DataSizes.StaticDataSize,
+                        PillOffsetData = gen2anim.DataSizes.PillOffsetData,
+                        MovementData = gen2anim.DataSizes.MovementData,
+                        AnimatedNodeFlags = gen2anim.DataSizes.AnimatedNodeFlags,
+                        StaticNodeFlags = gen2anim.DataSizes.StaticNodeFlags,
+                    },
                     AnimationData = new TagData {Data = gen2anim.AnimationData, AddressType = CacheAddressType.Data }
                 });
             }
