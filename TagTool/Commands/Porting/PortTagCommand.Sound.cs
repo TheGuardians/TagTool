@@ -220,7 +220,7 @@ namespace TagTool.Commands.Porting
                     var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
                     permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
-                    permutation.SkipFraction = new Bounds<float>(0.0f, permutation.EncodedSkipFraction / 32767.0f);
+                    permutation.SkipFraction = permutation.EncodedSkipFraction / 32767.0f;
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
@@ -309,13 +309,13 @@ namespace TagTool.Commands.Porting
                                         Unknown1 = permutationChunk.Unknown,
                                         Unknown2 = permutationChunk.UnknownSize,
                                         Unknown3 = 0,
-                                        Unknown4 = permutation.SampleSize,
+                                        Unknown4 = permutation.SampleCount,
                                         Unknown5 = 0,
                                         Unknown6 = permutationChunk.EncodedSize & 0xFFFF
                                     }
                                 },
                                 Compression = 8,
-                                ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
+                                ResourceSampleSize = pitchRange.Permutations[i].SampleCount,
                                 ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset,
                                 SampleCount = (uint)pitchRange.Permutations[i].PermutationChunks[0].EncodedSize & 0x3FFFFFF,
                                 //SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),

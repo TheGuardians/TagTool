@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
@@ -19,10 +20,11 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.Third)]
         public short EncodedSkipFraction;
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public Bounds<float> SkipFraction;
+        public float SkipFraction;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public uint Unknown3;
 
-
-        public uint SampleSize;
+        public uint SampleCount;
 
         [TagField(Gen = CacheGeneration.Third)]
         public int FirstPermutationChunkIndex;
@@ -46,9 +48,21 @@ namespace TagTool.Audio
         public List<PermutationChunk> PermutationChunks;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown1;
+        public PermutationFlagsHaloOnline PermutationFlagsHO;
+
+        [TagField(Gen = CacheGeneration.HaloOnline, Flags = TagFieldFlags.Padding, Length = 2)]
+        public byte[] Padding;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown2;
+        public uint FirstSample;
+
+        [Flags]
+        public enum PermutationFlagsHaloOnline : short
+        {
+            /// <summary>
+            /// Wait for the currently playing permutation to finish
+            /// </summary>
+            SequencedBit = (1 << 0)
+        }
     }
 }

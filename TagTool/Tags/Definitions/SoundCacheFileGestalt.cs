@@ -160,7 +160,7 @@ namespace TagTool.Tags.Definitions
         /// <returns></returns>
         public uint GetPermutationSamples(int permutationIndex)
         {
-            return Permutations[permutationIndex].SampleSize;
+            return Permutations[permutationIndex].SampleCount;
         }
 
         /// <summary>

@@ -37,7 +37,7 @@ namespace TagTool.Audio
             var permutation = soundGestalt.Permutations[permutationGestaltIndex];
             Encoding = platformCodec.Encoding;
             SampleRate = platformCodec.SampleRate;
-            SampleCount = permutation.SampleSize;
+            SampleCount = permutation.SampleCount;
             RealPermutationIndex = permutation.OverallPermutationIndex;
             UpdateFormat(platformCodec.Compression, data);
         }
