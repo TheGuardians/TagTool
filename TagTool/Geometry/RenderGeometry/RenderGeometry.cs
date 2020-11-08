@@ -82,7 +82,11 @@ namespace TagTool.Geometry
             public byte UnknownByte1;
             public byte UnknownByte2;
             public short Unknown2;
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public byte[] Unknown3;
+            // having an actual byte[] here crashes, not sure what it should be.
+            [TagField(MaxVersion = CacheVersion.Halo3Beta, Length = 0x14)]
+            public byte[] UnknownBeta;
         }
 
         [TagStructure(Size = 0x20)]

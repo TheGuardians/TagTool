@@ -493,7 +493,7 @@ namespace TagTool.Shaders.ShaderMatching
                 BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                 return true;
             }
-            if (rmt2Desc.Type == "custom")
+            else if (rmt2Desc.Type == "custom")
             {
                 string tagName = $"shaders\\custom_templates\\_{string.Join("_", rmt2Desc.Options)}";
 
@@ -508,19 +508,19 @@ namespace TagTool.Shaders.ShaderMatching
                     GlobalVertexShader glvs;
                     RenderMethodDefinition rmdf;
                     CachedTag rmdfTag;
-                    BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag);
-                    //if (!BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag))
-                    //{
-                    //    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, "custom", out glps, out glvs);
-                    //    rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\custom.rmdf");
-                    //    BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
-                    //}
-                    //else
-                    //{
+                    if (!BaseCache.TagCache.TryGetTag("shaders\\custom.rmdf", out rmdfTag))
+                    {
+                        rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, "custom", out glps, out glvs);
+                        rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>("shaders\\custom");
+                        BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                        (BaseCache as GameCacheHaloOnlineBase).SaveTagNames();
+                    }
+                    else
+                    {
                         rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
                         glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
                         glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
-                    //}
+                    }
 
                     var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
 
@@ -529,6 +529,38 @@ namespace TagTool.Shaders.ShaderMatching
                     BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
                     return true;
                 }
+            }
+            else if (rmt2Desc.Type == "screen")
+            {
+                string tagName = $"shaders\\{rmt2Desc.Type}_templates\\_{string.Join("_", rmt2Desc.Options)}";
+
+
+                var generator = new HaloShaderGenerator.Screen.ScreenGenerator((HaloShaderGenerator.Screen.Warp)rmt2Desc.Options[0], (HaloShaderGenerator.Screen.Base)rmt2Desc.Options[1], (HaloShaderGenerator.Screen.Overlay_A)rmt2Desc.Options[2], (HaloShaderGenerator.Screen.Overlay_B)rmt2Desc.Options[3], (HaloShaderGenerator.Screen.Blend_Mode)rmt2Desc.Options[4]);
+            
+                GlobalPixelShader glps;
+                GlobalVertexShader glvs;
+                RenderMethodDefinition rmdf;
+                CachedTag rmdfTag;
+                if (!BaseCache.TagCache.TryGetTag($"shaders\\{rmt2Desc.Type}.rmdf", out rmdfTag))
+                {
+                    rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, rmt2Desc.Type, out glps, out glvs);
+                    rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
+                    BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                    (BaseCache as GameCacheHaloOnlineBase).SaveTagNames();
+                }
+                else
+                {
+                    rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
+                    glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
+                    glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
+                }
+            
+                var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+            
+                generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+            
+                BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+                return true;
             }
 
             return false;

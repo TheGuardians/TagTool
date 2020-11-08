@@ -211,6 +211,13 @@ namespace TagTool.Commands.Porting
 
             RenderMethod originalRm = finalRm;
 
+            // convert filter mode
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
+            }
+
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = blamRmt2;
             var bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, bmRmt2Instance);
@@ -346,11 +353,6 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].BooleanConstants = newShaderProperty.BooleanConstants;
             finalRm.ShaderProperties[0].AlphaBlendMode = newShaderProperty.AlphaBlendMode;
             finalRm.ShaderProperties[0].BlendFlags = newShaderProperty.BlendFlags;
-            if (BlamCache.Version >= CacheVersion.HaloReach)
-            {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
-            }
 
             // fixup runtime queryable properties
             if (BlamCache.Version < CacheVersion.HaloReach)

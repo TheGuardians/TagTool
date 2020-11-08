@@ -70,7 +70,7 @@ namespace TagTool.Commands.Forge
 
         private void MaximizeMapForgeBudget(MapFile mapFile)
         {
-            var scenarioTag = Cache.TagCache.GetTag<Scenario>(mapFile.Header.ScenarioPath);
+            var scenarioTag = Cache.TagCache.GetTag<Scenario>(mapFile.Header.GetScenarioPath());
 
             Console.WriteLine($"Maximizing budget for scenario '{scenarioTag.Name}'...");
 
@@ -92,7 +92,7 @@ namespace TagTool.Commands.Forge
                     CampaignDifficulty = -1,
                     CampaignInsertionPoint = 0,
                     IsSurvival = false,
-                    MapChecksum = BlamCrc32.CrcChecksum(mapFile.Header.RSASignature)
+                    MapChecksum = BlamCrc32.CrcChecksum(((CacheFileHeaderGenHaloOnline)mapFile.Header).RSASignature)
                 };
 
                 var generator = new MapVariantGenerator();

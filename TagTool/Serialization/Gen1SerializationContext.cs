@@ -28,7 +28,7 @@ namespace TagTool.Serialization
             if (Tag.AddressToOffsetOverride != null)
                 return Tag.AddressToOffsetOverride(currentOffset, address);
 
-            return (uint)(address - GameCache.TagCacheGen1.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            return (uint)(address - GameCache.TagCacheGen1.BaseTagAddress + GameCache.BaseMapFile.Header.GetTagTableHeaderOffset());
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)

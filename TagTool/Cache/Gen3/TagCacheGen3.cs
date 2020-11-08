@@ -118,6 +118,10 @@ namespace TagTool.Cache.Gen3
             Instances = new List<CachedTagGen3>();
             GlobalInstances = new Dictionary<Tag, CachedTagGen3>();
 
+            var gen3Header = (CacheFileHeaderGen3)baseMapFile.Header;
+            var tagNamesHeader = gen3Header.GetTagNameHeader();
+            var tagMemoryHeader = gen3Header.GetTagMemoryHeader();
+
             switch (Version)
             {
                 case CacheVersion.Halo3Beta:
@@ -130,20 +134,38 @@ namespace TagTool.Cache.Gen3
                     break;
             }
 
-            var sectionTable = baseMapFile.Header.SectionTable;
-            var sectionOffset = sectionTable.GetSectionOffset(CacheFileSectionType.TagSection);
+            uint sectionOffset;
 
-            // means no tags
-            if (sectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
-                return;
+            uint tagNamesOffsetsTableOffset;
+            uint tagNamesBufferOffset;
+            ulong addressMask;
 
-            var addressMask = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                (baseMapFile.Header.VirtualBaseAddress64 - (ulong)sectionOffset) :
-                (ulong)(baseMapFile.Header.VirtualBaseAddress32 - sectionOffset);
+            if (Version > CacheVersion.Halo3Beta)
+            {
+                var sectionTable = gen3Header.SectionTable;
+                sectionOffset = sectionTable.GetSectionOffset(CacheFileSectionType.TagSection);
+
+                // means no tags
+                if (sectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
+                    return;
+
+                tagNamesOffsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, tagNamesHeader.TagNameIndicesOffset);
+                tagNamesBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, tagNamesHeader.TagNamesBufferOffset);
+
+                addressMask = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                (gen3Header.VirtualBaseAddress64 - (ulong)sectionOffset) :
+                (ulong)(gen3Header.VirtualBaseAddress32 - sectionOffset);
+            }
+            else
+            {
+                tagNamesOffsetsTableOffset = tagNamesHeader.TagNameIndicesOffset;
+                tagNamesBufferOffset = tagNamesHeader.TagNamesBufferOffset;
+                addressMask = gen3Header.VirtualBaseAddress32 - tagMemoryHeader.MemoryBufferOffset;
+            }
 
             var tagTableHeaderOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                (baseMapFile.Header.TagsHeaderAddress64 - addressMask) :
-                ((ulong)baseMapFile.Header.TagsHeaderAddress32 - addressMask);
+                (gen3Header.TagTableHeaderOffset64 - addressMask) :
+                ((ulong)gen3Header.TagTableHeaderOffset32 - addressMask);
 
             reader.SeekTo((long)tagTableHeaderOffset);
 
@@ -164,9 +186,6 @@ namespace TagTool.Cache.Gen3
                 Header.GlobalIndicesAddress64 - addressMask :
                 (ulong)Header.GlobalIndicesAddress32 - addressMask;
 
-            var tagNamesOffsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.TagNameIndicesOffset);
-            var tagNamesBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.TagNamesBufferOffset);
-            
             #region Read Tag Groups
 
             reader.SeekTo((long)tagGroupsOffset);
@@ -198,7 +217,7 @@ namespace TagTool.Cache.Gen3
                 uint ID = (uint)((reader.ReadInt16() << 16) | i);
 
                 var offset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                    (uint)((ulong)baseMapFile.Header.SectionTable.SectionAddressToOffsets[2] + (ulong)baseMapFile.Header.SectionTable.Sections[2].Offset + (((ulong)reader.ReadUInt32() * 4) - (baseMapFile.Header.VirtualBaseAddress64 - 0x50000000))) :
+                    (uint)((ulong)gen3Header.SectionTable.SectionAddressToOffsets[2] + (ulong)gen3Header.SectionTable.Sections[2].Offset + (((ulong)reader.ReadUInt32() * 4) - (gen3Header.VirtualBaseAddress64 - 0x50000000))) :
                     (uint)(reader.ReadUInt32() - addressMask);
 
                 CachedTagGen3 tag = new CachedTagGen3(groupIndex, ID, offset, i, tagGroup);
@@ -223,8 +242,8 @@ namespace TagTool.Cache.Gen3
             reader.SeekTo(tagNamesBufferOffset);
 
             using (var newReader = (TagsKey == "" || TagsKey == null) ?
-                new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.TagNamesBufferSize)), EndianFormat.BigEndian) :
-                new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.TagNamesBufferSize, TagsKey), EndianFormat.BigEndian))
+                new EndianReader(new MemoryStream(reader.ReadBytes(tagNamesHeader.TagNamesBufferSize)), EndianFormat.BigEndian) :
+                new EndianReader(reader.DecryptAesSegment(tagNamesHeader.TagNamesBufferSize, TagsKey), EndianFormat.BigEndian))
             {
                 for (int i = 0; i < stringOffsets.Length; i++)
                 {

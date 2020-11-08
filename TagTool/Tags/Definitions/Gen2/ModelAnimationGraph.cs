@@ -162,12 +162,12 @@ namespace TagTool.Tags.Definitions.Gen2
                 public CurrentCompressionValue CurrentCompression;
                 public float Weight;
                 public short LoopFrameIndex;
-                public short Unknown;
-                public short Unknown1;
+                public short PreviousVariantSibling;
+                public short NextVariantSibling;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                public byte[] Unknown2;
-                public PackedDataSizesStructBlock Unknown3;
+                public byte[] AnimationData;
+                public PackedDataSizesStructBlock DataSizes;
                 public List<AnimationFrameEventBlock> FrameEventsAbcdcc;
                 public List<AnimationSoundEventBlock> SoundEventsAbcdcc;
                 public List<AnimationEffectEventBlock> EffectEventsAbcdcc;
@@ -244,13 +244,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagStructure(Size = 0x10)]
                 public class PackedDataSizesStructBlock : TagStructure
                 {
-                    public sbyte Unknown;
-                    public sbyte Unknown1;
-                    public short Unknown2;
-                    public short Unknown3;
-                    public short Unknown4;
-                    public int Unknown5;
-                    public int Unknown6;
+                    public byte StaticNodeFlags;
+                    public byte AnimatedNodeFlags;
+                    public short MovementData;
+                    public short PillOffsetData;
+                    public short StaticDataSize;
+                    public int UncompressedDataSize;
+                    public int CompressedDataSize;
                 }
                 
                 [TagStructure(Size = 0x4)]
@@ -587,11 +587,11 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             public List<InheritedAnimationBlock> InheritenceListBbaaaa;
             public List<WeaponClassLookupBlock> WeaponListBbaaaa;
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
-            
+            [TagField(Length = 8)]
+            public uint[] LeftArmNodes;
+            [TagField(Length = 8)]
+            public uint[] RightArmNodes;
+
             [TagStructure(Size = 0x20)]
             public class InheritedAnimationBlock : TagStructure
             {

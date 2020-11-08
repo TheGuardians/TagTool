@@ -435,9 +435,10 @@ namespace TagTool.Tags.Definitions
             public DamageReportingType CollisionDamageReportingType;
 
             public DamageReportingType ResponseDamageReportingType;
-        
-            [TagField(Flags = Padding, Length = 22)]
-            public byte[] Unused5 = new byte[22];
+
+            public short Unused2;
+            [TagField(Flags = Padding, Length = 20)]
+            public byte[] Unused5 = new byte[20];
 
             public float MaxVitality;
             public float MinStunDamage;

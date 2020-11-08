@@ -27,7 +27,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
 
         public override object Execute(List<string> args)
         {
@@ -97,6 +97,7 @@ namespace TagTool.Commands.Shaders
                     case "black":           GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
                     case "halogram":        GenerateHalogram(stream, options, rmt2TagName, rmdf); break;
                     case "custom":          GenerateCustom(stream, options, rmt2TagName, rmdf); break;
+                    case "screen":          GenerateScreen(stream, options, rmt2TagName, rmdf); break;
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
@@ -307,6 +308,29 @@ namespace TagTool.Commands.Shaders
             HaloShaderGenerator.Custom.Misc misc = (HaloShaderGenerator.Custom.Misc)options[9];
 
             var generator = new HaloShaderGenerator.Custom.CustomGenerator(albedo, bumpMapping, alphaTest, specularMask, materialModel, environmentMapping, selfIllumination, blendMode, parallax, misc);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateScreen(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.Screen.Warp warp = (HaloShaderGenerator.Screen.Warp)options[0];
+            HaloShaderGenerator.Screen.Base _base = (HaloShaderGenerator.Screen.Base)options[1];
+            HaloShaderGenerator.Screen.Overlay_A overlay_a = (HaloShaderGenerator.Screen.Overlay_A)options[2];
+            HaloShaderGenerator.Screen.Overlay_B overlay_b = (HaloShaderGenerator.Screen.Overlay_B)options[3];
+            HaloShaderGenerator.Screen.Blend_Mode blend_mode = (HaloShaderGenerator.Screen.Blend_Mode)options[4];
+
+            var generator = new HaloShaderGenerator.Screen.ScreenGenerator(warp, _base, overlay_a, overlay_b, blend_mode);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);

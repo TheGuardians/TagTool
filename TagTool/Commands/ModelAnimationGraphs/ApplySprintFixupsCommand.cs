@@ -58,7 +58,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                         if (name.EndsWith(":put_away"))
                         {
-                            animation.LoopFrameIndexNew = (short)(animation.FrameCount - 1);
+                            animation.LoopFrameIndex = (short)(animation.AnimationData.FrameCount - 1);
                             putAwayIndex = i;
                         }
                         else if (name.EndsWith(":ready"))
@@ -78,7 +78,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                 var sprintLoopAirborneFound = false;
                                 var sprintExitFound = false;
 
-                                foreach (var action in weaponType.Actions)
+                                foreach (var action in weaponType.Set.Actions)
                                 {
                                     var label = Cache.StringTable.GetString(action.Label);
 
@@ -107,7 +107,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                 }
 
                                 if (!sprintEnterFound)
-                                    weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+                                    weaponType.Set.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
                                         Label = Cache.StringTable.GetStringId("sprint_enter"),
                                         GraphIndex = -1,
@@ -115,7 +115,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                     });
 
                                 if (!sprintLoopFound)
-                                    weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+                                    weaponType.Set.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
                                         Label = Cache.StringTable.GetStringId("sprint_loop"),
                                         GraphIndex = -1,
@@ -123,7 +123,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                     });
 
                                 if (!sprintLoopAirborneFound)
-                                    weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+                                    weaponType.Set.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
                                         Label = Cache.StringTable.GetStringId("sprint_loop_airborne"),
                                         GraphIndex = -1,
@@ -131,7 +131,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                                     });
 
                                 if (!sprintExitFound)
-                                    weaponType.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+                                    weaponType.Set.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
                                     {
                                         Label = Cache.StringTable.GetStringId("sprint_exit"),
                                         GraphIndex = -1,

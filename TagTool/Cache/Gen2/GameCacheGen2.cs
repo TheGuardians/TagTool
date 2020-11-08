@@ -38,10 +38,10 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = BaseMapFile.EndianFormat;
-            DisplayName = mapFile.Header.Name + ".map";
+            DisplayName = mapFile.Header.GetName() + ".map";
             Directory = file.Directory;
 
-            switch (BaseMapFile.Header.CacheType)
+            switch (BaseMapFile.Header.GetCacheType())
             {
                 case CacheFileType.Campaign:
                     SharedCacheType = CacheFileType.SharedCampaign;
@@ -79,7 +79,7 @@ namespace TagTool.Cache
 
             VistaSharedTagCacheFile = new FileInfo(Path.Combine(Directory.FullName, VistaSharedTagCacheName));
 
-            if (!File.Exists(VistaSharedTagCacheFile.Name))
+            if (!File.Exists(VistaSharedTagCacheFile.FullName))
             {
                 Console.WriteLine($"Warning, shared map file required to load tags not found: {VistaSharedTagCacheName}");
                 return false;
@@ -91,7 +91,7 @@ namespace TagTool.Cache
 
         private void LoadSharedResourceCaches()
         {
-            var thisName = BaseMapFile.Header.Name + ".map";
+            var thisName = BaseMapFile.Header.GetName() + ".map";
 
             if (thisName == "shared.map" || thisName == "single_player_shared.map")
                 return;

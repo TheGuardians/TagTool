@@ -91,7 +91,9 @@ namespace TagTool.Commands.Files
                         using (var stream = fileInfo.Open(FileMode.Open, FileAccess.Read))
                         using (var reader = new EndianReader(stream))
                             map.Read(reader);
-                        map.Header.ScenarioTagIndex = scenario.Index;
+
+                        var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                        header.ScenarioTagIndex = scenario.Index;
 
                         if (mapInfo != null)
                             if (forceUpdate || map.MapFileBlf == null)
@@ -177,7 +179,8 @@ namespace TagTool.Commands.Files
                     map.Write(writer);
 
                     var modPackCache = Cache as GameCacheModPackage;
-                    modPackCache.AddMapFile(mapStream, map.Header.MapId);
+                    var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                    modPackCache.AddMapFile(mapStream, header.MapId);
 
                     if (mapInfo != null)
                         Console.WriteLine($"Scenario tag index for {name}: 0x{scenario.Index:X4} (using map info)");

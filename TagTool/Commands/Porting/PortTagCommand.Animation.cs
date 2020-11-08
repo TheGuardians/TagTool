@@ -16,8 +16,6 @@ namespace TagTool.Commands.Porting
     {
         public List<ModelAnimationGraph.ResourceGroup> ConvertModelAnimationGraphResourceGroups(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.ResourceGroup> resourceGroups)
         {
-            var resourceDefinitions = new List<ModelAnimationTagResource>();
-
             foreach (var group in resourceGroups)
             {
                 var resourceDefinition = BlamCache.ResourceCache.GetModelAnimationTagResource(group.ResourceReference);
@@ -33,22 +31,56 @@ namespace TagTool.Commands.Porting
                     var member = resourceDefinition.GroupMembers[memberIndex];
                     var animationData = member.AnimationData.Data;
 
-                    using(var sourceStream = new MemoryStream(animationData))
-                    using(var sourceReader = new EndianReader(sourceStream, CacheVersionDetection.IsLittleEndian(BlamCache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
-                    using(var destStream = new MemoryStream())
-                    using(var destWriter = new EndianWriter(destStream, CacheVersionDetection.IsLittleEndian(CacheContext.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+                    //load the data sizes for verification of the ported data
+                    int MovementDataSize = 0;
+                    int StaticNodeFlagsSize = 0;
+                    int AnimatedNodeFlagsSize = 0;
+                    int CompressedDataSize = 0;
+                    int StaticDataSize = 0;
+                    int ExtraData = 0;
+                    if(BlamCache.Version == CacheVersion.HaloReach)
+                    {
+                        MovementDataSize = member.PackedDataSizesReach.MovementData;
+                        StaticNodeFlagsSize = member.PackedDataSizesReach.StaticNodeFlags;
+                        AnimatedNodeFlagsSize = member.PackedDataSizesReach.AnimatedNodeFlags;
+                        CompressedDataSize = member.PackedDataSizesReach.CompressedDataSize;
+                        StaticDataSize = member.PackedDataSizesReach.StaticDataSize;
+                        for (var j = 0; j < member.PackedDataSizesReach.UnknownDataSizesReach.Length; j++)
+                            ExtraData += member.PackedDataSizesReach.UnknownDataSizesReach[j];
+                        //copy values to pre-Reach data sizes block
+                        member.PackedDataSizes = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructBlock
+                        {
+                            MovementData = (short)member.PackedDataSizesReach.MovementData,
+                            StaticNodeFlags = (byte)member.PackedDataSizesReach.StaticNodeFlags,
+                            AnimatedNodeFlags = (byte)member.PackedDataSizesReach.AnimatedNodeFlags,
+                            CompressedDataSize = member.PackedDataSizesReach.CompressedDataSize,
+                            StaticDataSize = (short)member.PackedDataSizesReach.StaticDataSize
+                        };
+                    }
+                    else
+                    {
+                        MovementDataSize = member.PackedDataSizes.MovementData;
+                        StaticNodeFlagsSize = member.PackedDataSizes.StaticNodeFlags;
+                        AnimatedNodeFlagsSize = member.PackedDataSizes.AnimatedNodeFlags;
+                        CompressedDataSize = member.PackedDataSizes.CompressedDataSize;
+                        StaticDataSize = member.PackedDataSizes.StaticDataSize;
+                    }
+
+                    using (var sourceStream = new MemoryStream(animationData))
+                    using (var sourceReader = new EndianReader(sourceStream, CacheVersionDetection.IsLittleEndian(BlamCache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+                    using (var destStream = new MemoryStream())
+                    using (var destWriter = new EndianWriter(destStream, CacheVersionDetection.IsLittleEndian(CacheContext.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
                     {
                         var dataContext = new DataSerializationContext(sourceReader, destWriter);
 
                         ModelAnimationTagResource.GroupMember.Codec codec;
                         ModelAnimationTagResource.GroupMember.FrameInfo frameInfo;
 
-                        if (member.BaseHeader != ModelAnimationTagResource.GroupMemberHeaderType.Overlay)
+                        codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
+                        CacheContext.Serializer.Serialize(dataContext, codec);
+
+                        if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type1)
                         {
-                            codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
-
-                            CacheContext.Serializer.Serialize(dataContext, codec);
-
                             var Format1 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format1>(dataContext);
 
                             CacheContext.Serializer.Serialize(dataContext, Format1);
@@ -56,43 +88,47 @@ namespace TagTool.Commands.Porting
                             for (int i = 0; i < codec.RotationNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                            sourceStream.Position = Format1.DataStart;
+                            sourceStream.Position = Format1.TranslationDataOffset;
                             destStream.Position = sourceStream.Position;
-                            for (int i = 0; i < codec.PositionNodeCount; i++)
+                            for (int i = 0; i < codec.TranslationNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                            sourceStream.Position = Format1.ScaleFramesOffset;
+                            sourceStream.Position = Format1.ScaleDataOffset;
                             destStream.Position = sourceStream.Position;
                             for (int i = 0; i < codec.ScaleNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+
+                            if (sourceStream.Position != StaticDataSize)
+                                Console.WriteLine("###ERROR: Static Data Size did not match data sizes struct!");
+
+                            //read next codec header
+                            codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
+                            CacheContext.Serializer.Serialize(dataContext, codec);
                         }
-
-                        // If the overlay header is alone, member.OverlayOffset = 0
-                        sourceStream.Position = member.OverlayOffset;
-                        destStream.Position = member.OverlayOffset;
-
-                        codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
-                        CacheContext.Serializer.Serialize(dataContext, codec);
 
                         // deserialize second header. or as first header if the type1/format1 header isn't used.
                         switch (codec.AnimationCodec)
                         {
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type3: // should merge with type1
                                 var header = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format1>(dataContext);
-
                                 CacheContext.Serializer.Serialize(dataContext, header);
+
+                                //perform fixups on offsets for our use
+                                var RotationDataOffset = sourceStream.Position.DeepClone();
+                                var TranslationDataOffset = RotationDataOffset + header.RotatedNodeBlockSize * codec.RotationNodeCount;
+                                var ScaleDataOffset = TranslationDataOffset + header.TranslatedNodeBlockSize * codec.TranslationNodeCount;
 
                                 for (int nodeIndex = 0; nodeIndex < codec.RotationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + header.DataStart;
+                                sourceStream.Position = TranslationDataOffset;
                                 destStream.Position = sourceStream.Position;
-                                for (int nodeIndex = 0; nodeIndex < codec.PositionNodeCount; nodeIndex++)
+                                for (int nodeIndex = 0; nodeIndex < codec.TranslationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + header.ScaleFramesOffset;
+                                sourceStream.Position = ScaleDataOffset;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
@@ -106,7 +142,6 @@ namespace TagTool.Commands.Porting
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type6:
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type7:
                                 var overlay = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Overlay>(dataContext);
-
                                 CacheContext.Serializer.Serialize(dataContext, overlay);
 
                                 #region Description
@@ -141,7 +176,7 @@ namespace TagTool.Commands.Porting
                                     RotationFrameCount.Add(keyframes);
                                 }
 
-                                for (int i = 0; i < codec.PositionNodeCount; i++)
+                                for (int i = 0; i < codec.TranslationNodeCount; i++)
                                 {
                                     frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfo>(dataContext);
 
@@ -163,7 +198,7 @@ namespace TagTool.Commands.Porting
                                     ScaleFrameCount.Add(keyframes);
                                 }
 
-                                sourceStream.Position = member.OverlayOffset + overlay.RotationKeyframesOffset;
+                                sourceStream.Position = overlay.RotationKeyframesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -176,7 +211,7 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + overlay.PositionKeyframesOffset;
+                                sourceStream.Position = overlay.PositionKeyframesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -189,7 +224,7 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + overlay.ScaleKeyframesOffset;
+                                sourceStream.Position = overlay.ScaleKeyframesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -202,19 +237,19 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + overlay.RotationFramesOffset;
+                                sourceStream.Position = overlay.RotationFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + overlay.PositionFramesOffset;
+                                sourceStream.Position = overlay.PositionFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + overlay.ScaleFramesOffset;
+                                sourceStream.Position = overlay.ScaleFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -224,20 +259,19 @@ namespace TagTool.Commands.Porting
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type8:
                                 // Type 8 is basically a type 3 but with rotation frames using 4 floats, or a realQuaternion
                                 var Format8 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format8>(dataContext);
-
                                 CacheContext.Serializer.Serialize(dataContext, Format8);
 
                                 for (int nodeIndex = 0; nodeIndex < codec.RotationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrameFloat>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + Format8.PositionFramesOffset;
+                                sourceStream.Position = Format8.PositionFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
-                                for (int nodeIndex = 0; nodeIndex < codec.PositionNodeCount; nodeIndex++)
+                                for (int nodeIndex = 0; nodeIndex < codec.TranslationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                sourceStream.Position = member.OverlayOffset + Format8.ScaleFramesOffset;
+                                sourceStream.Position = Format8.ScaleFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
@@ -251,8 +285,13 @@ namespace TagTool.Commands.Porting
                                 member.AnimationData.Data = sourceStream.ToArray();
                                 continue;
                             default:
-                                throw new DataMisalignedException();
+                                Console.WriteLine("###ERROR: Animation codec not supported!");
+                                return null;
+
                         }
+
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize)
+                            Console.WriteLine("###ERROR: Compressed Data Size did not match data sizes struct!");
 
                         #region How Footer/Flags works
                         // Better description by DemonicSandwich from http://remnantmods.com/forums/viewtopic.php?f=13&t=1574 : Node List Block: (matches my previous observations)
@@ -275,61 +314,58 @@ namespace TagTool.Commands.Porting
                         // If the animated nodes count is over 32, then a new flags set is added.
                         // 1 set per header is added, such as 32 nodes = 1 set, 64 = 2 sets, 96 = 3 sets etc , 128-256 maybe max
 
-                        sourceStream.Position = member.OverlayOffset + member.FlagsOffset;
-                        destStream.Position = sourceStream.Position;
+                        //int NodeFlagsSize = (int)Math.Ceiling((double)member.NodeCount / 32.0) * 32 / 8 * 3;
 
-                        var footerSizeBase = (byte)member.BaseHeader / 4;
-                        for (int flagsCount = 0; flagsCount < footerSizeBase; flagsCount++)
-                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                        if(StaticNodeFlagsSize > 0)
+                        {
+                            //var footerSizeBase = (byte)NodeFlagsSize / 4;
+                            for (int flagsCount = 0; flagsCount < StaticNodeFlagsSize; flagsCount+=4)
+                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                        }
 
-                        var footerSizeOverlay = (byte)member.OverlayHeader / 4;
-                        for (int flagsCount = 0; flagsCount < footerSizeOverlay; flagsCount++)
-                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize)
+                            Console.WriteLine("###ERROR: Static Node Flags Size did not match data sizes struct!");
+
+                        if (AnimatedNodeFlagsSize > 0)
+                        {
+                            //var footerSizeBase = (byte)NodeFlagsSize / 4;
+                            for (int flagsCount = 0; flagsCount < AnimatedNodeFlagsSize; flagsCount+=4)
+                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                        }
+
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize)
+                            Console.WriteLine("###ERROR: Animated Node Flags Size did not match data sizes struct!");
+
                         #endregion
 
                         switch (member.MovementDataType)
                         {
                             case ModelAnimationTagResource.GroupMemberMovementDataType.None:
-                                if (member.Unknown1 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDyaw>(dataContext));
-                                if (member.Unknown2 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 break;
 
                             case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
-                                if (member.Unknown1 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
+                                for (int i = 0; i < member.FrameCount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDy>(dataContext));
-                                if (member.Unknown2 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 break;
 
                             case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
-                                if (member.Unknown1 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
-                                if (member.Unknown2 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
+                                for (int i = 0; i < member.FrameCount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 break;
 
                             case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
-                                if (member.Unknown1 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
-                                if (member.Unknown2 > 0)
-                                    for (int i = 0; i < member.FrameCount; i++)
+                                for (int i = 0; i < member.FrameCount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
                                 break;
                             default:
                                 break;
                         }
 
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize)
+                            Console.WriteLine("###ERROR: Movement Data Size did not match data sizes struct!");
+
                         // set new data
-                        member.AnimationData.Data = destStream.ToArray();
+                        member.AnimationData.Data = destStream.ToArray();                        
                     }
                 }
 
@@ -342,6 +378,41 @@ namespace TagTool.Commands.Porting
         public ModelAnimationGraph ConvertModelAnimationGraph(Stream cacheStream, Stream blamCacheStream,  Dictionary<ResourceLocation, Stream> resourceStreams, ModelAnimationGraph definition)
         {
             definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, blamCacheStream, resourceStreams, definition.ResourceGroups);
+            
+            if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                //convert animations
+                foreach (var animation in definition.Animations)
+                {
+                    if (animation.AnimationDataBlock.Count > 1)
+                        Console.WriteLine("###WARNING: Reach animation has >1 animation data block, whereas HO only supports 1");
+                    animation.AnimationData = animation.AnimationDataBlock[0];
+
+                    animation.AnimationData.PreviousVariantSibling = animation.PreviousVariantSiblingReach;
+                    animation.AnimationData.NextVariantSibling = animation.NextVariantSiblingReach;
+                    animation.AnimationData.DesiredCompression = animation.AnimationData.DesiredCompressionReach;
+                    animation.AnimationData.CurrentCompression = animation.AnimationData.CurrentCompressionReach;
+                    animation.AnimationData.ProductionFlags = animation.ProductionFlagsReach;
+                    animation.AnimationData.Heading = animation.AnimationData.HeadingReach;
+                    animation.AnimationData.HeadingAngle = animation.AnimationData.HeadingAngleReach;
+
+                }
+
+                //convert weapon types
+                foreach (var mode in definition.Modes)
+                {
+                    foreach (var weaponClass in mode.WeaponClass)
+                    {
+                        foreach (var weaponType in weaponClass.WeaponType)
+                        {
+                            if (weaponType.AnimationSetsReach.Count > 1)
+                                Console.WriteLine("###WARNING: Reach animation has >1 weapon type sets block, whereas HO only supports 1");
+                            weaponType.Set = weaponType.AnimationSetsReach[0];
+                        }
+                    }
+                }
+            }
+
             var resolver = CacheContext.StringTable.Resolver;
             definition.Modes = definition.Modes.OrderBy(a => resolver.GetSet(a.Name)).ThenBy(a => resolver.GetIndex(a.Name)).ToList();
 
@@ -355,12 +426,12 @@ namespace TagTool.Commands.Porting
 
                     foreach (var weaponType in weaponClass.WeaponType)
                     {
-                        weaponType.Actions = weaponType.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                        weaponType.Overlays = weaponType.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                        weaponType.DeathAndDamage = weaponType.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                        weaponType.Transitions = weaponType.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+                        weaponType.Set.Actions = weaponType.Set.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Overlays = weaponType.Set.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.DeathAndDamage = weaponType.Set.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Transitions = weaponType.Set.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
 
-                        foreach (var transition in weaponType.Transitions)
+                        foreach (var transition in weaponType.Set.Transitions)
                             transition.Destinations = transition.Destinations.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
                     }
                 }

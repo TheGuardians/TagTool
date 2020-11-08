@@ -656,7 +656,7 @@ namespace TagTool.Cache
                 MapFile mapFile = new MapFile();
                 mapReader.BaseStream.Position = 0;
                 mapFile.Read(mapReader);
-                MapIds.Add(mapFile.Header.MapId);
+                MapIds.Add(((CacheFileHeaderGenHaloOnline)mapFile.Header).MapId);
             }
         }
 
@@ -741,7 +741,7 @@ namespace TagTool.Cache
                 MapFile map = new MapFile();
                 map.Read(reader);
 
-                var type = map.Header.CacheType;
+                var type = ((CacheFileHeaderGenHaloOnline)map.Header).CacheType;
 
                 if (type == CacheFileType.Campaign)
                     Header.MapFlags |= MapFlags.CampaignMaps;

@@ -38,9 +38,9 @@ namespace TagTool.Serialization
                 return Tag.AddressToOffsetOverride(currentOffset, address);
 
             if(GameCache.Version == CacheVersion.Halo2Vista)
-                return GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
+                return (uint)GameCache.BaseMapFile.Header.GetTagTableHeaderOffset() + (address - GameCache.TagCacheGen2.VirtualAddress);
             else
-                return GameCache.BaseMapFile.Header.MemoryBufferOffset + GameCache.BaseMapFile.Header.TagsHeaderAddress32 + (address - GameCache.TagCacheGen2.VirtualAddress);
+                return GameCache.BaseMapFile.Header.GetTagMemoryHeader().MemoryBufferOffset + (uint)GameCache.BaseMapFile.Header.GetTagTableHeaderOffset() + (address - GameCache.TagCacheGen2.VirtualAddress);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)

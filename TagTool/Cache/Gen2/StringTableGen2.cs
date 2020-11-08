@@ -20,18 +20,20 @@ namespace TagTool.Cache.Gen2
             // Read offsets
             //
 
-            reader.SeekTo(baseMapFile.Header.StringIDsIndicesOffset);
+            var stringIDHeader = baseMapFile.Header.GetStringIDHeader();
 
-            int[] stringOffset = new int[baseMapFile.Header.StringIDsCount];
-            for (var i = 0; i < baseMapFile.Header.StringIDsCount; i++)
+            reader.SeekTo(stringIDHeader.IndicesOffset);
+
+            int[] stringOffset = new int[stringIDHeader.Count];
+            for (var i = 0; i < stringIDHeader.Count; i++)
             {
                 stringOffset[i] = reader.ReadInt32();
                 Add("");
             }
 
-            reader.SeekTo(baseMapFile.Header.StringIDsBufferOffset);
+            reader.SeekTo(stringIDHeader.BufferOffset);
 
-            EndianReader newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.StringIDsBufferSize)), reader.Format);
+            EndianReader newReader = new EndianReader(new MemoryStream(reader.ReadBytes(stringIDHeader.BufferSize)), reader.Format);
 
             //
             // Read strings

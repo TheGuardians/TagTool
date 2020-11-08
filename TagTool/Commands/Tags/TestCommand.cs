@@ -10,6 +10,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Gen1;
 
 namespace TagTool.Commands
 {
@@ -118,19 +119,24 @@ namespace TagTool.Commands
 
             using (var stream = Cache.OpenCacheRead())
             {
-                var ugh = Cache.Deserialize<SoundCacheFileGestalt>(stream, Cache.TagCache.GetTag("i've got a lovely bunch of coconuts.ugh!"));
+                //var ugh = Cache.Deserialize<SoundCacheFileGestalt>(stream, Cache.TagCache.GetTag("i've got a lovely bunch of coconuts.ugh!"));
 
 
                 foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    if (tag.IsInGroup("snd!"))
+                    if (tag.IsInGroup("mode"))
                     {
-                        var soundTag = Cache.Deserialize<Sound>(stream, tag);
+                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.RenderModel>(stream, tag);
+                        Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
 
-                        if (soundTag.SoundReference.UnknownIndexReach2 != 0)
-                            Console.WriteLine($"{soundTag.SoundReference.UnknownIndexReach2} {tag.Name}" );
+                        var resource = modeTag.Geometry.Resource;
 
+                        var renderGeo = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(resource);
 
+                        if(renderGeo != null)
+                        {
+                            Console.WriteLine("Got geo");
+                        }
                     }
                 }
             }

@@ -75,10 +75,10 @@ namespace TagTool.Cache.Gen2
         {
             Version = mapFile.Version;
             TagDefinitions = new TagDefinitionsGen2();
-            IsShared = mapFile.Header.CacheType == CacheFileType.Shared || 
-                        mapFile.Header.CacheType == CacheFileType.SharedCampaign;
+            IsShared = mapFile.Header.GetCacheType() == CacheFileType.Shared || 
+                        mapFile.Header.GetCacheType() == CacheFileType.SharedCampaign;
 
-            var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
+            var tagDataSectionOffset = (uint)mapFile.Header.GetTagTableHeaderOffset();
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
@@ -146,12 +146,14 @@ namespace TagTool.Cache.Gen2
 
             if(Version > CacheVersion.Halo2Beta)
             {
-                reader.SeekTo(mapFile.Header.TagNameIndicesOffset);
+                var tagNamesHeader = mapFile.Header.GetTagNameHeader();
+
+                reader.SeekTo(tagNamesHeader.TagNameIndicesOffset);
                 var tagNamesOffset = new int[Header.TagCount];
                 for (int i = 0; i < Header.TagCount; i++)
                     tagNamesOffset[i] = reader.ReadInt32();
 
-                reader.SeekTo(mapFile.Header.TagNamesBufferOffset);
+                reader.SeekTo(tagNamesHeader.TagNamesBufferOffset);
 
                 for (int i = 0; i < tagNamesOffset.Length; i++)
                 {
@@ -161,7 +163,7 @@ namespace TagTool.Cache.Gen2
                     if (tagNamesOffset[i] == -1)
                         continue;
 
-                    reader.SeekTo(tagNamesOffset[i] + mapFile.Header.TagNamesBufferOffset);
+                    reader.SeekTo(tagNamesOffset[i] + tagNamesHeader.TagNamesBufferOffset);
 
                     Tags[i].Name = reader.ReadNullTerminatedString();
                 }
@@ -187,7 +189,7 @@ namespace TagTool.Cache.Gen2
             if (Version <= CacheVersion.Halo2Xbox)
                 VirtualAddress = Tags[0].Offset;
             else if (Version == CacheVersion.Halo2Vista)
-                VirtualAddress = mapFile.Header.VirtualAddress;
+                VirtualAddress = mapFile.Header.GetTagMemoryHeader().VirtualAddress;
 
         }
 
@@ -195,7 +197,7 @@ namespace TagTool.Cache.Gen2
         {
             var scnrTag = (CachedTagGen2)GetTag(Header.ScenarioID);
 
-            uint magic = mapFile.Header.TagsHeaderAddress32 + mapFile.Header.MemoryBufferOffset - VirtualAddress;
+            uint magic = (uint)mapFile.Header.GetTagTableHeaderOffset() + mapFile.Header.GetTagMemoryHeader().MemoryBufferOffset - VirtualAddress;
 
             // seek to the sbsp reference block
             reader.BaseStream.Position = scnrTag.Offset + magic + 0x210;

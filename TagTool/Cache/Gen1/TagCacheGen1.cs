@@ -34,6 +34,22 @@ namespace TagTool.Cache.Gen1
         public Tag Tags;
     }
 
+    [TagStructure(Size = 0x20)]
+    public class TagTableEntryGen1 : TagStructure
+    {
+        public Tag Tag;
+        public Tag ParentTag;
+        public Tag GrandParentTag;
+
+        public uint ID;
+        public uint TagNameAddress;
+
+        public uint Address;
+
+        public uint Unknown1;
+        public uint Unknown2;
+    }
+
     public class TagCacheGen1 : TagCache
     {
         public TagCacheGen1Header Header;
@@ -43,7 +59,7 @@ namespace TagTool.Cache.Gen1
         public TagCacheGen1(EndianReader reader, MapFile mapFile)
         {
             TagDefinitions = new TagDefinitionsGen1();
-            var tagDataSectionOffset = mapFile.Header.TagsHeaderAddress32;
+            var tagDataSectionOffset = (uint)mapFile.Header.GetTagTableHeaderOffset();
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
@@ -55,33 +71,27 @@ namespace TagTool.Cache.Gen1
             else
                 BaseTagAddress = 0x40440000;
 
-            //
-            // Read all tags offsets are all broken, need some proper look
-            //
-
             reader.SeekTo(Header.CachedTagArrayAddress - BaseTagAddress + tagDataSectionOffset);
 
             for (int i = 0; i < Header.TagCount; i++)
             {
-                var group = new TagGroupGen1(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
+                var entry = deserializer.Deserialize<TagTableEntryGen1>(dataContext);
+
+                var group = new TagGroupGen1(entry.Tag, entry.ParentTag, entry.GrandParentTag);
 
                 if (!TagDefinitions.TagDefinitionExists(group))
                     Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
 
-                var tagID = reader.ReadUInt32();
-                var tagPathNameAddress = reader.ReadUInt32();
                 var currentPos = reader.Position;
                 string name = "";
-                if (tagPathNameAddress != 0)
+                if (entry.TagNameAddress != 0)
                 {
-                    reader.SeekTo(tagPathNameAddress - BaseTagAddress + tagDataSectionOffset);
+                    reader.SeekTo(entry.TagNameAddress - BaseTagAddress + tagDataSectionOffset);
                     name = reader.ReadNullTerminatedString();
                     reader.SeekTo(currentPos);
                 }
-                var tagDataAddress = reader.ReadUInt32();
-                var weird2 = reader.ReadUInt32();
-                var unused = reader.ReadUInt32();
-                Tags.Add(new CachedTagGen1((int)(tagID & 0xFFFF), tagID, group, tagDataAddress, name));
+
+                Tags.Add(new CachedTagGen1((int)(entry.ID & 0xFFFF), entry.ID, group, entry.Address, name));
             }
 
             FixupStructureBsps(reader, mapFile);
@@ -126,7 +136,7 @@ namespace TagTool.Cache.Gen1
 
         private void FixupStructureBsps(EndianReader reader, MapFile mapFile)
         {
-            uint AddressToOffset(uint address) => (address - BaseTagAddress) + mapFile.Header.TagsHeaderAddress32;
+            uint AddressToOffset(uint address) => (address - BaseTagAddress) + (uint)mapFile.Header.GetTagTableHeaderOffset();
 
             var scnrTag = (CachedTagGen1)GetTag(Header.ScenarioTagID);
 
