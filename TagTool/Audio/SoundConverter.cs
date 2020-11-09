@@ -313,14 +313,44 @@ namespace TagTool.Audio
             return result;
         }
 
+        private static long FindRiffChunk(Stream stream, string id, out long chunkSize)
+        {
+            chunkSize = 0;
+
+            long offset = -1;
+            byte[] header = new byte[8];
+
+            do
+            {
+                if (stream.Read(header, 0, header.Length) != header.Length)
+                    break;
+
+                string currentChunkId = System.Text.Encoding.ASCII.GetString(header, 0, 4);
+                uint currentChunkSize = BitConverter.ToUInt32(header, 4);
+
+                if (currentChunkId == id)
+                {
+                    chunkSize = currentChunkSize;
+                    offset = stream.Position;
+                }
+
+                stream.Position += currentChunkId == "RIFF" ? 4 : currentChunkSize;
+            } 
+            while (offset < 0);
+
+            return offset;
+        }
+
         private static byte[] PrepareWAVForFMOD(string name)
         {
-            var headerSize = 0x2E;
-            var wavFileData = File.ReadAllBytes(name);
-            var copyLength = wavFileData.Length - headerSize;
-            byte[] result = new byte[wavFileData.Length - headerSize + 0x20];
-            Array.Copy(wavFileData, headerSize, result, 0x10, copyLength);
-            return result;
+            using (var stream = File.OpenRead(name))
+            {
+                long dataOffset = FindRiffChunk(stream, "data", out long dataSize);
+                byte[] result = new byte[dataSize + 0x20];
+                stream.Position = dataOffset;
+                stream.Read(result, 0x10, (int)dataSize);
+                return result;
+            }
         }
 
         private static byte[] LoadWAVData(string name, int length, bool matchLength=true)
