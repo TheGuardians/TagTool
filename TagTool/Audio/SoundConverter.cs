@@ -66,7 +66,7 @@ namespace TagTool.Audio
                     blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
                     WriteWAVFile(blamSound);
                     ConvertToMP3(WAVFile);
-                    blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
+                    LoadMP3Data(blamSound);
                 }
             }
             else if(targetFormat == Compression.PCM)
@@ -203,10 +203,53 @@ namespace TagTool.Audio
         private static void LoadMP3Data(BlamSound blamSound)
         {
             byte[] data = File.ReadAllBytes(MP3File);
-            var dataLength = data.Length - 0x51;
-            byte[] result = new byte[dataLength];
+            var firstFrameOffset = 0;
+
+            using (var reader = new EndianReader(new MemoryStream(data)))
+            {
+                var tagHeader = reader.ReadBytes(10);
+                var id = System.Text.Encoding.ASCII.GetString(tagHeader, 0, 3);
+                if (id == "ID3")
+                {
+                    byte majorVersion = tagHeader[3];
+                    byte flags = tagHeader[5];
+                    var footerPresent = ((flags >> 4) & 1) != 0;
+                    int tagSize = (tagHeader[6] << 21) | (tagHeader[7] << 14) | (tagHeader[8] << 7) | (tagHeader[9]);
+
+                    reader.BaseStream.Position += tagSize;
+                    if (footerPresent)
+                        reader.BaseStream.Position += 10;
+                }
+
+                firstFrameOffset = (int)reader.Position;
+
+                var frameHeader = reader.ReadBytes(4);
+                var mpegVersion = (frameHeader[1] >> 3) & 1;
+                var channelMode = (frameHeader[3] >> 6) & 3; // stero, joint stero, dual channel, mono
+
+                int lameOffset;
+                if (mpegVersion == 1)
+                    lameOffset = channelMode == 3 ? 17 : 32;
+                else
+                    lameOffset = channelMode == 3 ? 9 : 17;
+
+                reader.BaseStream.Position += lameOffset;
+                var lameTag = reader.ReadString(4);
+                if (lameTag == "Info" || lameTag == "Xing")
+                {
+                    reader.BaseStream.Position += 0x89;
+                    var encoderDelayBits = reader.ReadBytes(3);
+                    var delay = (encoderDelayBits[0] << 4) | (encoderDelayBits[1] >> 4);
+                    var pad = ((encoderDelayBits[1] << 8) | encoderDelayBits[2]) & 0xfff;
+
+                    blamSound.FirstSample = (uint)delay;
+                }
+            }
+
             // remove ID3 header from mp3 file
-            Array.Copy(data, 0x51, result, 0, dataLength);
+            var result = new byte[data.Length - firstFrameOffset];
+            Array.Copy(data, firstFrameOffset, result, 0, result.Length);
+            
             blamSound.UpdateFormat(Compression.MP3, result);
         }
 

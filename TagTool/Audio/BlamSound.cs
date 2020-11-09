@@ -14,6 +14,7 @@ namespace TagTool.Audio
         public EncodingValue Encoding;
         public Compression Compression;
         public uint SampleCount;
+        public uint FirstSample;
         public int RealPermutationIndex;
         public byte[] Data;
 

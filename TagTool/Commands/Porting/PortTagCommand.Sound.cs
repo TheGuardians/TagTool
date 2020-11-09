@@ -257,7 +257,10 @@ namespace TagTool.Commands.Porting
                             }
                         }
                         permutation.SampleCount = blamSound.SampleCount;
-                        permutation.FirstSample = 0;
+                        permutation.FirstSample = blamSound.FirstSample;
+                        // temporary hack
+                        if (permutation.FirstSample > 0)
+                            permutation.PermutationFlagsHO |= Permutation.PermutationFlagsHaloOnline.SequencedBit;
                     }
                     else
                     {
