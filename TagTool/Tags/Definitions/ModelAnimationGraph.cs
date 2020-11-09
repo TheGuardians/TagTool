@@ -584,7 +584,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
                     public class AnimationSet : TagStructure
                     {
-                        [TagField(MinVersion = CacheVersion.HaloReach)]
+                        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Label)]
                         public StringId Label;
                         [TagField(MinVersion = CacheVersion.HaloReach)]
                         public short OverlayGroup;

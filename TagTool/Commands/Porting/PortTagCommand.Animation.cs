@@ -408,38 +408,52 @@ namespace TagTool.Commands.Porting
                             if (weaponType.AnimationSetsReach.Count > 1)
                                 Console.WriteLine("###WARNING: Reach animation has >1 weapon type sets block, whereas HO only supports 1");
                             weaponType.Set = weaponType.AnimationSetsReach[0];
-                        }
-                    }
-                }
-            }
-
-            if(BlamCache.Version < CacheVersion.HaloReach)
-            {
-                var resolver = CacheContext.StringTable.Resolver;
-                definition.Modes = definition.Modes.OrderBy(a => resolver.GetSet(a.Name)).ThenBy(a => resolver.GetIndex(a.Name)).ToList();
-
-                foreach (var mode in definition.Modes)
-                {
-                    mode.WeaponClass = mode.WeaponClass.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-
-                    foreach (var weaponClass in mode.WeaponClass)
-                    {
-                        weaponClass.WeaponType = weaponClass.WeaponType.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-
-                        foreach (var weaponType in weaponClass.WeaponType)
-                        {
-                            weaponType.Set.Actions = weaponType.Set.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                            weaponType.Set.Overlays = weaponType.Set.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                            weaponType.Set.DeathAndDamage = weaponType.Set.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
-                            weaponType.Set.Transitions = weaponType.Set.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
-
+                            //manually convert stringids from copied reach data
+                            foreach(var action in weaponType.Set.Actions)
+                                action.Label = ConvertStringId(action.Label);
+                            foreach (var overlay in weaponType.Set.Overlays)
+                                overlay.Label = ConvertStringId(overlay.Label);
+                            foreach (var death in weaponType.Set.DeathAndDamage)
+                                death.Label = ConvertStringId(death.Label);
                             foreach (var transition in weaponType.Set.Transitions)
-                                transition.Destinations = transition.Destinations.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+                            {
+                                transition.StateName = ConvertStringId(transition.StateName);
+                                foreach(var destination in transition.Destinations)
+                                {
+                                    destination.ModeName = ConvertStringId(destination.ModeName);
+                                    destination.StateName = ConvertStringId(destination.StateName);
+                                }
+                            }
+                                
                         }
                     }
                 }
             }
-            
+
+            var resolver = CacheContext.StringTable.Resolver;
+            definition.Modes = definition.Modes.OrderBy(a => resolver.GetSet(a.Name)).ThenBy(a => resolver.GetIndex(a.Name)).ToList();
+
+            foreach (var mode in definition.Modes)
+            {
+                mode.WeaponClass = mode.WeaponClass.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+
+                foreach (var weaponClass in mode.WeaponClass)
+                {
+                    weaponClass.WeaponType = weaponClass.WeaponType.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+
+                    foreach (var weaponType in weaponClass.WeaponType)
+                    {
+                        weaponType.Set.Actions = weaponType.Set.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Overlays = weaponType.Set.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.DeathAndDamage = weaponType.Set.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Transitions = weaponType.Set.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+
+                        foreach (var transition in weaponType.Set.Transitions)
+                            transition.Destinations = transition.Destinations.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+                    }
+                }
+            }
+
             return definition;
         }
 
