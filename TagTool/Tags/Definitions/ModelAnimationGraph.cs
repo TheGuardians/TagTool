@@ -243,7 +243,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ProductionFlagsValue ProductionFlagsReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short Composite;
+            public sbyte BlendScreenReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte ReachUnknown;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag GraphReference;
             [TagField(MinVersion = CacheVersion.HaloReach)]
