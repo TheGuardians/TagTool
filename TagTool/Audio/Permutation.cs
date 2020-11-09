@@ -22,7 +22,7 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public float SkipFraction;
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown3;
+        public float GainHO;
 
         public uint SampleCount;
 

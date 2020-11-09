@@ -65,7 +65,7 @@ namespace TagTool.Audio
                     ConvertToWAV(XMAFile, true);
                     blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
                     WriteWAVFile(blamSound);
-                    ConvertWAVToMP3Looping(WAVFile, highQuality);
+                    ConvertToMP3(WAVFile);
                     blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
                 }
             }

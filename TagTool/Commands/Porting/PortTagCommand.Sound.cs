@@ -154,7 +154,7 @@ namespace TagTool.Commands.Porting
                 // Set compression format
                 //
 
-                var targetFormat = Compression.OGG;
+                var targetFormat = Compression.MP3;
 
                 string extension;
                 switch (targetFormat)
@@ -221,6 +221,7 @@ namespace TagTool.Commands.Porting
 
                     permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
                     permutation.SkipFraction = permutation.EncodedSkipFraction / 32767.0f;
+                    permutation.GainHO = (float)permutation.Gain;
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
