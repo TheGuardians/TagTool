@@ -31,6 +31,16 @@ namespace TagTool.Audio
             }
         }
 
+        public BlamSound(SampleRate sampleRate, EncodingValue encoding, Compression compression, uint sampleCount, byte[] data, int bitsPerSample)
+        {
+            SampleRate = sampleRate;
+            Encoding = encoding;
+            Compression = compression;
+            SampleCount = sampleCount;
+            Data = data;
+            RealPermutationIndex = 0;
+        }
+
         private void InitGen3Sound(Sound sound, SoundCacheFileGestalt soundGestalt, int permutationGestaltIndex, byte[] data)
         {
             var platformCodec = soundGestalt.PlatformCodecs[sound.SoundReference.PlatformCodecIndex];
@@ -46,6 +56,43 @@ namespace TagTool.Audio
         {
             Compression = compression;
             Data = data;
+
+            if(compression == Compression.PCM)
+            {
+                int channelCount;
+
+                switch (Encoding)
+                {
+                    case EncodingValue.Mono:
+                        channelCount = 1;
+                        break;
+                    case EncodingValue.Stereo:
+                        channelCount = 2;
+                        break;
+                    case EncodingValue.Surround:
+                        channelCount = 4;
+                        break;
+                    case EncodingValue._51Surround:
+                        channelCount = 6;
+                        break;
+                    default:
+                        channelCount = 2;
+                        break;
+                }
+                var dataLength = data.Length;
+
+
+                uint newSampleCount = (uint)(((dataLength * 8) / 16) / channelCount);
+
+                if(newSampleCount != SampleCount)
+                {
+                    Console.WriteLine($"BlamSound had {SampleCount} samples but new PCM sound has {newSampleCount} samples");
+                }
+
+                SampleCount = newSampleCount;
+
+            }
+
         }
     }
 }

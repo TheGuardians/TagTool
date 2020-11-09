@@ -256,10 +256,13 @@ namespace TagTool.Commands.Porting
                                 output.WriteBlock(blamSound.Data);
                             }
                         }
+                        permutation.SampleCount = blamSound.SampleCount;
+                        permutation.FirstSample = 0;
                     }
                     else
                     {
                         permutationData = File.ReadAllBytes(cacheFileName);
+                        // TODO: store WAV instead of mp3, read sample count
                     }
 
                     // fixup dialog indices, might need more work
