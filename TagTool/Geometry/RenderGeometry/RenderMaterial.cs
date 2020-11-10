@@ -30,9 +30,22 @@ namespace TagTool.Geometry
         [TagField(MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Skin> Skins;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Property> Properties;
 
         public int Unknown;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown0;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown1;
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 4)]
+        public byte[] ReachUnknown2 = new byte[4];
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown3;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ReachUnknown4;
+
         public sbyte BreakableSurfaceIndex;
         public sbyte Unknown2;
         public sbyte Unknown3;
