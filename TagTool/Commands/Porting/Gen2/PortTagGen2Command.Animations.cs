@@ -4,6 +4,7 @@ using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System.IO;
+using System.Linq;
 using TagTool.Tags.Resources;
 using TagTool.Cache.HaloOnline;
 using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
@@ -54,9 +55,23 @@ namespace TagTool.Commands.Porting.Gen2
                     ZPosition = gen2Node.ZPos
                 });
 
-            ///////////////////////
-            /////TODO: Convert sound and effect references
-            ///////////////////////
+            //convert sound references
+            foreach(var gen2snd in gen2Animation.Resources.SoundReferencesAbcdcc)
+            {
+                Animation.SoundReferences.Add(new ModelAnimationGraph.AnimationTagReference
+                {
+                    Flags = (ModelAnimationGraph.AnimationTagReferenceFlags)gen2snd.Flags
+                });
+            }
+
+            //convert effect references
+            foreach (var gen2effe in gen2Animation.Resources.EffectReferencesAbcdcc)
+            {
+                Animation.EffectReferences.Add(new ModelAnimationGraph.AnimationTagReference
+                {
+                    Flags = (ModelAnimationGraph.AnimationTagReferenceFlags)gen2effe.Flags
+                });
+            }
 
             //convert BlendScreens
             foreach (var gen2blend in gen2Animation.Resources.BlendScreensAbcdcc)
@@ -83,9 +98,26 @@ namespace TagTool.Commands.Porting.Gen2
             //convert Animations
             foreach (var gen2anim in gen2Animation.Resources.AnimationsAbcdcc)
             {
-                ////////
-                //TODO: handle sound/effect/dialogue events
-                ////////
+                var Sounds = new List<ModelAnimationGraph.Animation.SoundEvent>();
+                foreach(var gen2snd in gen2anim.SoundEventsAbcdcc)
+                {
+                    Sounds.Add(new ModelAnimationGraph.Animation.SoundEvent()
+                    {
+                        Sound = gen2snd.Sound,
+                        Frame = gen2snd.Frame,
+                        MarkerName = gen2snd.MarkerName
+                    });
+                }
+
+                var Effects = new List<ModelAnimationGraph.Animation.EffectEvent>();
+                foreach (var gen2effe in gen2anim.EffectEventsAbcdcc)
+                {
+                    Effects.Add(new ModelAnimationGraph.Animation.EffectEvent()
+                    {
+                        Effect = gen2effe.Effect,
+                        Frame = gen2effe.Frame
+                    });
+                }
 
                 var Frames = new List<ModelAnimationGraph.Animation.FrameEvent>();
                 foreach (var gen2frame in gen2anim.FrameEventsAbcdcc)
@@ -139,6 +171,8 @@ namespace TagTool.Commands.Porting.Gen2
 
                         FrameEvents = Frames,
                         ObjectSpaceParentNodes = Spacenodes,
+                        EffectEvents = Effects,
+                        SoundEvents = Sounds,
                         //I don't know what this is or what it does, but it seems to be usually 1.0
                         Heading = new RealVector3d(1.0f, 0.0f, 0.0f) { }
                     }
@@ -400,6 +434,31 @@ namespace TagTool.Commands.Porting.Gen2
                     MinimumBounds = gen2adnode.MinBounds,
                     MaximumBounds = gen2adnode.MaxBounds
                 });
+            }
+
+            //Sort nodes by stringid order
+            var resolver = Cache.StringTable.Resolver;
+            Animation.Modes = Animation.Modes.OrderBy(a => resolver.GetSet(a.Name)).ThenBy(a => resolver.GetIndex(a.Name)).ToList();
+
+            foreach (var mode in Animation.Modes)
+            {
+                mode.WeaponClass = mode.WeaponClass.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+
+                foreach (var weaponClass in mode.WeaponClass)
+                {
+                    weaponClass.WeaponType = weaponClass.WeaponType.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+
+                    foreach (var weaponType in weaponClass.WeaponType)
+                    {
+                        weaponType.Set.Actions = weaponType.Set.Actions.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Overlays = weaponType.Set.Overlays.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.DeathAndDamage = weaponType.Set.DeathAndDamage.OrderBy(a => resolver.GetSet(a.Label)).ThenBy(a => resolver.GetIndex(a.Label)).ToList();
+                        weaponType.Set.Transitions = weaponType.Set.Transitions.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+
+                        foreach (var transition in weaponType.Set.Transitions)
+                            transition.Destinations = transition.Destinations.OrderBy(a => resolver.GetSet(a.FullName)).ThenBy(a => resolver.GetIndex(a.FullName)).ToList();
+                    }
+                }
             }
 
             return Animation;
