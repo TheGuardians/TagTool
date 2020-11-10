@@ -84,12 +84,6 @@ namespace TagTool.Audio
 
 
                 uint newSampleCount = (uint)(((dataLength * 8) / 16) / channelCount);
-
-                if(newSampleCount != SampleCount)
-                {
-                    Console.WriteLine($"BlamSound had {SampleCount} samples but new PCM sound has {newSampleCount} samples");
-                }
-
                 SampleCount = newSampleCount;
 
             }

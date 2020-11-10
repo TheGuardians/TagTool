@@ -165,9 +165,6 @@ namespace TagTool.Commands.Porting
                     case Compression.PCM:
                         extension = "wav";
                         break;
-                    case Compression.OGG:
-                        extension = "ogg";
-                        break;
                     default:
                         extension = "mp3";
                         break;
@@ -434,27 +431,15 @@ namespace TagTool.Commands.Porting
             if (soundLooping.SoundClass == SoundLooping.SoundClassValue.FirstPersonOutside)
                 soundLooping.SoundClass = SoundLooping.SoundClassValue.OutsideSurroundTail;
 
-
-            //
-            // Fixes for looping sound (temporary and hacky)
-            //
-
-            if (soundLooping.SoundClass == SoundLooping.SoundClassValue.VehicleEngine ||
-                soundLooping.SoundClass == SoundLooping.SoundClassValue.VehicleEngineLod ||
-                soundLooping.SoundClass == SoundLooping.SoundClassValue.Music)
-            {
-                soundLooping.Unknown4 = 1;
-            }
-
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
                 foreach (var track in soundLooping.Tracks)
                 {
-                    // FadeMode was added in ODST, H3 uses Linear for in sounds, and Power for out sounds
-                    track.FadeInMode = SoundLooping.Track.SoundFadeMode.Linear;
-                    track.FadeOutMode = SoundLooping.Track.SoundFadeMode.Power;
-                    track.AlternateCrossfadeMode = SoundLooping.Track.SoundFadeMode.Linear;
-                    track.AlternateFadeOutMode = SoundLooping.Track.SoundFadeMode.Power;
+                    // FadeMode was added in ODST, H3 uses InversePower for in sounds, and Power for out sounds
+                    track.FadeInMode = SoundLooping.Track.SoundFadeMode.None;
+                    track.FadeOutMode = SoundLooping.Track.SoundFadeMode.None;
+                    track.AlternateCrossfadeMode = SoundLooping.Track.SoundFadeMode.None;
+                    track.AlternateFadeOutMode = SoundLooping.Track.SoundFadeMode.None;
                 }
             }
 

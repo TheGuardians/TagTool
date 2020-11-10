@@ -11,6 +11,8 @@ using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Definitions.Gen1;
+using TagTool.Audio.Converter;
+using TagTool.Audio;
 
 namespace TagTool.Commands
 {
@@ -116,7 +118,6 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
-
             using (var stream = Cache.OpenCacheRead())
             {
                 //var ugh = Cache.Deserialize<SoundCacheFileGestalt>(stream, Cache.TagCache.GetTag("i've got a lovely bunch of coconuts.ugh!"));
@@ -124,19 +125,30 @@ namespace TagTool.Commands
 
                 foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    if (tag.IsInGroup("mode"))
+                    if (tag.IsInGroup("snd!"))
                     {
-                        var modeTag = Cache.Deserialize<TagTool.Tags.Definitions.RenderModel>(stream, tag);
-                        Console.WriteLine(Cache.StringTable.GetString(modeTag.Name));
+                        var soundTag = Cache.Deserialize<TagTool.Tags.Definitions.Sound>(stream, tag);
 
-                        var resource = modeTag.Geometry.Resource;
-
-                        var renderGeo = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(resource);
-
-                        if(renderGeo != null)
+                        if (soundTag.PlatformCodec.Compression == Compression.FSB4)
                         {
-                            Console.WriteLine("Got geo");
+                            Console.WriteLine($"{tag.Name}");
                         }
+
+                        /*
+                        foreach (var pitchRange in soundTag.PitchRanges)
+                        {
+                            foreach(var permutation in pitchRange.Permutations)
+                            {
+                                if(permutation.FirstSample != 0)
+                                {
+                                    Console.WriteLine($"{tag.Name} first sample index: {permutation.FirstSample} format: {soundTag.PlatformCodec.Compression}");
+                                    break;
+                                }
+                                
+                            }
+                        }*/
+
+
                     }
                 }
             }

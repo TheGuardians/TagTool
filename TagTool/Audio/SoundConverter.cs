@@ -30,59 +30,36 @@ namespace TagTool.Audio
             ClearFiles();
             BlamSound blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
 
-            var loop = sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound);
             var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
             var sampleRate = blamSound.SampleRate.GetSampleRateHz();
 
             WriteXMAFile(blamSound);
 
-            bool highQuality = sound.SoundClass.HaloOnline == SoundClass.SoundClassHaloOnline.Music || sound.SoundClass.HaloOnline == SoundClass.SoundClassHaloOnline.CinematicMusic;
-
             if(targetFormat == Compression.MP3)
             {
                 if (channelCount > 2)
                 {
-                    // channelCount is 4 or 6, ignore looping
+                    // channelCount is 4 or 6
                     ConvertToWAV(XMAFile, false);
                     byte[] originalWAVdata = File.ReadAllBytes(WAVFile);
                     byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x4E);
                     blamSound.UpdateFormat(Compression.PCM, truncatedWAVdata);
-                    WriteWAVFile(blamSound);
-                    ConvertToMP3(WAVFile);
-                    LoadMP3Data(blamSound);
-                }
-                else if (!loop)
-                {
-                    // not looping stereo or mono
-                    ConvertToWAV(XMAFile, true);
-                    blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
-                    WriteWAVFile(blamSound);
-                    ConvertToMP3(WAVFile);
-                    LoadMP3Data(blamSound);
                 }
                 else
                 {
                     ConvertToWAV(XMAFile, true);
                     blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
-                    WriteWAVFile(blamSound);
-                    ConvertToMP3(WAVFile);
-                    LoadMP3Data(blamSound);
                 }
+                WriteWAVFile(blamSound);
+                ConvertToMP3(WAVFile);
+                blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
             }
             else if(targetFormat == Compression.PCM)
             {
                 ConvertToWAV(XMAFile, channelCount > 2 ? false: true);
                 blamSound.UpdateFormat(Compression.PCM, PrepareWAVForFMOD(WAVFile));
             }
-            else if(targetFormat == Compression.OGG)
-            {
-                ConvertToWAV(XMAFile, channelCount > 2 ? false : true);
-                ConvertWAVToOGG(WAVFile);
-                blamSound.UpdateFormat(Compression.OGG, File.ReadAllBytes(OGGFile));
-            }
 
-
-            
             ClearFiles();
             return blamSound;
         }
@@ -167,135 +144,6 @@ namespace TagTool.Audio
             ffmpeg.WaitForExit();
         }
 
-        private static bool LoadANdMergeWAV(BlamSound blamSound)
-        {
-            uint length = (uint)(2 * blamSound.SampleCount * Encoding.GetChannelCount(blamSound.Encoding));
-
-            byte[] WAVFLR = null;
-            //byte[] WAVRLR = null;
-            //byte[] WAVCCL = null;
-            switch (Encoding.GetChannelCount(blamSound.Encoding))
-            {
-                case 1:
-                case 2:
-                    byte[] data = LoadWAVData(WAVFile, (int)length, false);
-                    blamSound.UpdateFormat(Compression.PCM, data);
-                    uint newSampleCount = (uint)(data.Length / (Encoding.GetChannelCount(blamSound.Encoding) * 2));
-                    blamSound.SampleCount = newSampleCount;
-                    break;
-                case 4:
-                    WAVFLR = LoadWAVData(WAV1FlUnk, (int)length / 2);
-                    //WAVRLR = LoadWAVData(WAV2BlUnk, (int)length / 2);
-                    blamSound.UpdateFormat(Compression.PCM, WAVFLR); //MergeChannels(length, WAVFLR, WAVRLR)
-                    blamSound.Encoding = EncodingValue.Stereo;
-                    break;
-                case 6:
-                    WAVFLR = LoadWAVData(WAV1FlUnk, (int)length / 3);
-                    //WAVCCL = LoadWAVData(WAV2CUnk, (int)length / 3);
-                    //WAVRLR = LoadWAVData(WAV3BlUnk, (int)length / 3);
-                    blamSound.UpdateFormat(Compression.PCM, WAVFLR); //MergeChannels(length, WAVFLR, WAVCCL, WAVRLR)
-                    blamSound.Encoding = EncodingValue.Stereo;
-                    break;
-            }
-            return true;
-        }
-        
-        private static void LoadMP3Data(BlamSound blamSound)
-        {
-            byte[] data = File.ReadAllBytes(MP3File);
-            var firstFrameOffset = 0;
-
-            using (var reader = new EndianReader(new MemoryStream(data)))
-            {
-                var tagHeader = reader.ReadBytes(10);
-                var id = System.Text.Encoding.ASCII.GetString(tagHeader, 0, 3);
-                if (id == "ID3")
-                {
-                    byte majorVersion = tagHeader[3];
-                    byte flags = tagHeader[5];
-                    var footerPresent = ((flags >> 4) & 1) != 0;
-                    int tagSize = (tagHeader[6] << 21) | (tagHeader[7] << 14) | (tagHeader[8] << 7) | (tagHeader[9]);
-
-                    reader.BaseStream.Position += tagSize;
-                    if (footerPresent)
-                        reader.BaseStream.Position += 10;
-                }
-
-                firstFrameOffset = (int)reader.Position;
-
-                var frameHeader = reader.ReadBytes(4);
-                var mpegVersion = (frameHeader[1] >> 3) & 1;
-                var channelMode = (frameHeader[3] >> 6) & 3; // stero, joint stero, dual channel, mono
-
-                int lameOffset;
-                if (mpegVersion == 1)
-                    lameOffset = channelMode == 3 ? 17 : 32;
-                else
-                    lameOffset = channelMode == 3 ? 9 : 17;
-
-                reader.BaseStream.Position += lameOffset;
-                var lameTag = reader.ReadString(4);
-                if (lameTag == "Info" || lameTag == "Xing")
-                {
-                    reader.BaseStream.Position += 0x89;
-                    var encoderDelayBits = reader.ReadBytes(3);
-                    var delay = (encoderDelayBits[0] << 4) | (encoderDelayBits[1] >> 4);
-                    var pad = ((encoderDelayBits[1] << 8) | encoderDelayBits[2]) & 0xfff;
-
-                    blamSound.FirstSample = (uint)delay;
-                }
-            }
-
-            // remove ID3 header from mp3 file
-            var result = new byte[data.Length - firstFrameOffset];
-            Array.Copy(data, firstFrameOffset, result, 0, result.Length);
-            
-            blamSound.UpdateFormat(Compression.MP3, result);
-        }
-
-        private static void ConvertWAVToMP3Looping(string WAVFileName, bool highQuality)
-        {
-            string suffix = "";
-            if (highQuality)
-            {
-                suffix = " -q:a 0 ";
-            }
-            // Assumes that wavFileName and mp3FileName have the same name but different extensions.
-            ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
-            {
-                Arguments = WAVFileName + suffix,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false,
-                RedirectStandardInput = false
-            };
-            Process mp3loop = Process.Start(info);
-            mp3loop.WaitForExit();
-        }
-
-        private static void ConvertWAVToOGG(string WAVFileName)
-        {
-            ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
-            {
-                Arguments = "-i " + WAVFileName + " -q:a 7 -c:a libvorbis " + OGGFile,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false,
-                RedirectStandardInput = false
-            };
-            Process ffmpeg = Process.Start(info);
-            ffmpeg.WaitForExit();
-        }
-
-        private static void CreateFSB4(BlamSound blamSound)
-        {
-            blamSound.UpdateFormat(Compression.FSB4, null);
-        }
-
         private static void WriteXMAFile(BlamSound blamSound)
         {
             using (EndianWriter output = new EndianWriter(new FileStream(XMAFile, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
@@ -311,15 +159,6 @@ namespace TagTool.Audio
             {
                 WAVFile WAVfile = new WAVFile(blamSound);
                 WAVfile.Write(output);
-            }
-        }
-
-        private static void WriteFSBFile(BlamSound blamSound)
-        {
-            using (EndianWriter output = new EndianWriter(new FileStream(FSBFile, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-            {
-                FSB4File FSB4File = new FSB4File(blamSound);
-                FSB4File.Write(output);
             }
         }
 
@@ -419,45 +258,5 @@ namespace TagTool.Audio
             return result;
         }
 
-        private static byte[] MergeChannels(uint length, byte[] front, byte[] rear)
-        {
-            byte[] result = new byte[length];
-            // 2 bytes per channel, 4 channels. front first, rear second.
-            for(int i = 0; i < length; i += 8)
-            {
-                result[i + 0] = front[i / 2 + 0];
-                result[i + 1] = front[i / 2 + 1];
-                result[i + 2] = front[i / 2 + 2];
-                result[i + 3] = front[i / 2 + 3];
-                result[i + 4] = rear[i / 2 + 0];
-                result[i + 5] = rear[i / 2 + 1];
-                result[i + 6] = rear[i / 2 + 2];
-                result[i + 7] = rear[i / 2 + 3];
-            }
-            return result;
-        }
-
-        private static byte[] MergeChannels(uint length, byte[] front, byte[] center, byte[] rear)
-        {
-            byte[] result = new byte[length];
-            // 2 bytes per channel, 6 channels. front first, center second, rear third.
-            for (int i = 0; i < length; i += 12)
-            {
-                result[i + 0] = front[i / 3 + 0];
-                result[i + 1] = front[i / 3 + 1];
-                result[i + 2] = front[i / 3 + 2];
-                result[i + 3] = front[i / 3 + 3];
-                result[i + 4] = center[i / 3 + 0];
-                result[i + 5] = center[i / 3 + 1];
-                result[i + 6] = center[i / 3 + 2];
-                result[i + 7] = center[i / 3 + 3];
-                result[i + 8] = rear[i / 3 + 0];
-                result[i + 9] = rear[i / 3 + 1];
-                result[i + 10] = rear[i / 3 + 2];
-                result[i + 11] = rear[i / 3 + 3];
-
-            }
-            return result;
-        }
     }
 }

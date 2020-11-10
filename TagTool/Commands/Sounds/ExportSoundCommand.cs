@@ -137,9 +137,6 @@ namespace TagTool.Commands.Sounds
                     case Compression.PCM:
                         extension = "wav";
                         break;
-                    case Compression.OGG:
-                        extension = "ogg";
-                        break;
                     default:
                         extension = "mp3";
                         break;
@@ -156,6 +153,7 @@ namespace TagTool.Commands.Sounds
                         string permutationName = $"{Tag.Name.Replace('\\', '_')}_{relativePitchRangeIndex}_{i}.{extension}";
                         var outPath = Path.Combine(outDirectory, permutationName);
                         BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData, targetFormat);
+                        Console.WriteLine($"pitch range {pitchRangeIndex}, permutation {i} sample count: {blamSound.SampleCount}");
                         using (EndianWriter output = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
                         {
                             output.WriteBlock(blamSound.Data);
