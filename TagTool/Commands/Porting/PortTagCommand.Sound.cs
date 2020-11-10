@@ -244,7 +244,7 @@ namespace TagTool.Commands.Porting
 
                     if (!exists || !useCache)
                     {
-                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData, targetFormat);
+                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData, targetFormat, true);
                         permutationData = blamSound.Data;
                         if (useCache)
                         {

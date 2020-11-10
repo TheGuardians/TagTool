@@ -25,7 +25,7 @@ namespace TagTool.Audio
         private static readonly string WAV2CUnk = BaseFileName + " 2 C Unk.wav";
         private static readonly string WAV3BlUnk = BaseFileName + " 3 Bl Unk.wav";
 
-        public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat)
+        public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool porting)
         {
             ClearFiles();
             BlamSound blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
@@ -57,7 +57,11 @@ namespace TagTool.Audio
             else if(targetFormat == Compression.PCM)
             {
                 ConvertToWAV(XMAFile, channelCount > 2 ? false: true);
-                blamSound.UpdateFormat(Compression.PCM, PrepareWAVForFMOD(WAVFile));
+                blamSound.UpdateFormat(Compression.PCM, porting ? PrepareWAVForFMOD(WAVFile) : File.ReadAllBytes(WAVFile));
+            }
+            else if(targetFormat == Compression.XMA)
+            {
+                blamSound.UpdateFormat(Compression.XMA, File.ReadAllBytes(XMAFile));
             }
 
             ClearFiles();

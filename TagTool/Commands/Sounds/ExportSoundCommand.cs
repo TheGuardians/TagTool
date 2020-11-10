@@ -24,7 +24,7 @@ namespace TagTool.Commands.Sounds
                 "ExportSound",
                 "Export snd! data to a file",
                 
-                "ExportSound <Path>",
+                "ExportSound [format] <Path>",
                 "")
         {
             Cache = cache;
@@ -35,6 +35,16 @@ namespace TagTool.Commands.Sounds
         public override object Execute(List<string> args)
         {
             string outDirectory = "";
+
+            Compression? targetFormat = null;
+            if (args.Count > 0)
+            {
+                if (Enum.TryParse(args[0], true, out Compression format))
+                {
+                    targetFormat = format;
+                    args.RemoveAt(0);
+                } 
+            }
 
             if (args.Count == 1)
                 outDirectory = args[0];
@@ -68,102 +78,117 @@ namespace TagTool.Commands.Sounds
 
             var dataReference = resourceDefinition.Data;
             byte[] soundData = dataReference.Data;
-            
-            if (Cache is GameCacheHaloOnlineBase)
-            {
-                for (int i = 0; i < Definition.PitchRanges.Count; i++)
-                {
-                    var pitchRange = Definition.PitchRanges[i];
-                    for (int j = 0; j < pitchRange.Permutations.Count; j++)
-                    {
-                        var permutation = pitchRange.Permutations[j];
-                        var filename = Tag.Index.ToString("X8") + "_" + i.ToString() + "_" + j.ToString();
 
-                        byte[] permutationData = new byte[permutation.PermutationChunks[0].EncodedSize & 0x3FFFFFF];
-                        Array.Copy(soundData, permutation.PermutationChunks[0].Offset, permutationData, 0, permutationData.Length);
+            switch (Cache)
+            {
+                case GameCacheHaloOnlineBase _:
+                    ExportHaloOnlineSound(outDirectory, soundData, targetFormat);
+                    break;
+                case GameCacheGen3 _:
+                    ExportGen3Sound(outDirectory, soundData, targetFormat);
+                    break;
+                default:
+                    throw new NotSupportedException("Cache not supported");
+            }
+           
+            Console.WriteLine("Done!");
+            return true;
+        }
+
+        private void ExportGen3Sound(string outDirectory, byte[] soundData, Compression? targetFormat)
+        {
+            if (BlamSoundGestalt == null)
+            {
+                using (var stream = Cache.OpenCacheRead())
+                    BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
+            }
+
+            for (int pitchRangeIndex = Definition.SoundReference.PitchRangeIndex; pitchRangeIndex < Definition.SoundReference.PitchRangeIndex + Definition.SoundReference.PitchRangeCount; pitchRangeIndex++)
+            {
+                var relativePitchRangeIndex = pitchRangeIndex - Definition.SoundReference.PitchRangeIndex;
+                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
+
+                if(targetFormat == null)
+                    targetFormat = BlamSoundGestalt.PlatformCodecs[Definition.SoundReference.PlatformCodecIndex].Compression;
+
+                for (int i = 0; i < permutationCount; i++)
+                {
+                    var filename = GetExportFileName(targetFormat.Value, relativePitchRangeIndex, i);
+                    var outPath = Path.Combine(outDirectory, filename);
+                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData, targetFormat.Value, false);
+                    Console.WriteLine($"{filename}: pitch range {pitchRangeIndex}, permutation {i} sample count: {blamSound.SampleCount}");
+                    using (EndianWriter output = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+                    {
+                        output.WriteBlock(blamSound.Data);
+                    }
+                }
+            }
+        }
+
+        private void ExportHaloOnlineSound(string outDirectory, byte[] soundData, Compression? targetFormat)
+        {
+            if (targetFormat != null)
+                throw new NotSupportedException("Converting formats from halo online cache not supported");
+
+            targetFormat = Definition.PlatformCodec.Compression;
+
+            for (int i = 0; i < Definition.PitchRanges.Count; i++)
+            {
+                var pitchRange = Definition.PitchRanges[i];
+                for (int j = 0; j < pitchRange.Permutations.Count; j++)
+                {
+                    var permutation = pitchRange.Permutations[j];
+
+                    byte[] permutationData = new byte[permutation.PermutationChunks[0].EncodedSize & 0x3FFFFFF];
+                    Array.Copy(soundData, permutation.PermutationChunks[0].Offset, permutationData, 0, permutationData.Length);
+
+                    var filename = GetExportFileName(targetFormat.Value, i, j);
+                    var outPath = Path.Combine(outDirectory, filename);
+
+                    using (EndianWriter writer = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+                    {
+                        var channelCount = Encoding.GetChannelCount(Definition.PlatformCodec.Encoding);
+                        var sampleRate = Definition.SampleRate.GetSampleRateHz();
 
                         switch (Definition.PlatformCodec.Compression)
                         {
                             case Compression.PCM:
-                                filename += ".wav";
+                                WAVFile WAVfile = new WAVFile(permutationData, channelCount, sampleRate);
+                                WAVfile.Write(writer);
                                 break;
                             case Compression.MP3:
-                                filename += ".mp3";
-                                break;
                             case Compression.FSB4:
-                                filename += ".fsb";
+                                writer.Write(permutationData);
                                 break;
                         }
-
-                        var outPath = Path.Combine(outDirectory, filename);
-
-                        using (EndianWriter writer = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                        {
-                            var channelCount = Encoding.GetChannelCount(Definition.PlatformCodec.Encoding);
-                            var sampleRate = Definition.SampleRate.GetSampleRateHz();
-
-                            switch (Definition.PlatformCodec.Compression)
-                            {
-                                case Compression.PCM:
-                                    WAVFile WAVfile = new WAVFile(permutationData, channelCount, sampleRate);
-                                    WAVfile.Write(writer);
-                                    break;
-                                case Compression.MP3:
-                                case Compression.FSB4:
-                                    writer.Write(permutationData);
-                                    break;
-                            }
-                        }
                     }
+
+                    Console.WriteLine($"{filename}: pitch range {i}, permutation {j} sample count: {permutation.SampleCount}");
                 }
             }
+        }
 
-            else if (Cache.GetType() == typeof(GameCacheGen3))
+        private string GetExportFileName(Compression targetFormat, int pitchRangeIndex, int permutationIndex)
+        {
+            string extension = GetFormtFileExtension(targetFormat);
+            return $"{Tag.ToString().Replace('\\', '_')}_{pitchRangeIndex}_{permutationIndex}.{extension}";
+        }
+
+        private string GetFormtFileExtension(Compression format)
+        {
+            switch (format)
             {
-                if (BlamSoundGestalt == null)
-                {
-                    using(var stream = Cache.OpenCacheRead())
-                        BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
-                }
-
-                var targetFormat = Compression.PCM;
-
-                string extension;
-                switch (targetFormat)
-                {
-                    case Compression.MP3:
-                        extension = "mp3";
-                        break;
-                    case Compression.PCM:
-                        extension = "wav";
-                        break;
-                    default:
-                        extension = "mp3";
-                        break;
-                }
-
-
-                for (int pitchRangeIndex = Definition.SoundReference.PitchRangeIndex; pitchRangeIndex < Definition.SoundReference.PitchRangeIndex + Definition.SoundReference.PitchRangeCount; pitchRangeIndex++)
-                {
-                    var relativePitchRangeIndex = pitchRangeIndex - Definition.SoundReference.PitchRangeIndex;
-                    var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
-
-                    for (int i = 0; i < permutationCount; i++)
-                    {
-                        string permutationName = $"{Tag.Name.Replace('\\', '_')}_{relativePitchRangeIndex}_{i}.{extension}";
-                        var outPath = Path.Combine(outDirectory, permutationName);
-                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData, targetFormat);
-                        Console.WriteLine($"pitch range {pitchRangeIndex}, permutation {i} sample count: {blamSound.SampleCount}");
-                        using (EndianWriter output = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                        {
-                            output.WriteBlock(blamSound.Data);
-                        }
-                    }
-                }
+                case Compression.XMA:
+                    return "xma";
+                case Compression.PCM:
+                    return "wav";
+                case Compression.MP3:
+                    return "mp3";
+                case Compression.FSB4:
+                    return "fsb";
+                default:
+                    throw new NotSupportedException();
             }
-            
-            Console.WriteLine("Done!");
-            return true;
         }
     }
 }
