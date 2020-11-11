@@ -448,13 +448,12 @@ namespace TagTool.Commands.Porting
                 MaxSoundsPerObject = 1,
                 PreemptionTime = 100,
 
-                InternalFlags = (SoundClasses.Class.InternalFlagBits.ClassIsValid | SoundClasses.Class.InternalFlagBits.Bit4 | 
+                InternalFlags = (SoundClasses.Class.InternalFlagBits.ClassIsValid | SoundClasses.Class.InternalFlagBits.Bit4 |
                  SoundClasses.Class.InternalFlagBits.Bit5 | SoundClasses.Class.InternalFlagBits.Bit6 |
                  SoundClasses.Class.InternalFlagBits.Bit8 | SoundClasses.Class.InternalFlagBits.Bit9),
 
                 Priority = 5,
-                DistanceBoundsMin = 8.0f,
-                DistanceBoundsMax = 120.0f,
+                DistanceBounds = new Bounds<float>(8, 120),
                 TransmissionMultiplier = 1.0f
             };
 
@@ -464,6 +463,9 @@ namespace TagTool.Commands.Porting
 
             if (version <= CacheVersion.Halo3Retail)
             {
+                foreach (var c in sncl.Classes)
+                    c.CacheMissModeODST = (SoundClasses.Class.CacheMissModeODSTValue)c.CacheMissMode;
+
                 // add classes missing from H3
                 for (int i = sncl.Classes.Count; i < 65; i++)
                     sncl.Classes.Add(sClass);
