@@ -20,10 +20,10 @@ namespace TagTool.Commands.Sounds
 
         public ExportSoundCommand(GameCache cache, CachedTag tag, Sound definition) :
             base(true,
-                
+
                 "ExportSound",
                 "Export snd! data to a file",
-                
+
                 "ExportSound [format] <Path>",
                 "")
         {
@@ -43,7 +43,7 @@ namespace TagTool.Commands.Sounds
                 {
                     targetFormat = format;
                     args.RemoveAt(0);
-                } 
+                }
             }
 
             if (args.Count == 1)
@@ -69,7 +69,7 @@ namespace TagTool.Commands.Sounds
 
             var resourceReference = Definition.Resource;
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(resourceReference);
-            
+
             if (resourceDefinition == null || resourceDefinition.Data == null)
             {
                 Console.WriteLine("The sound resource contains no data");
@@ -90,7 +90,7 @@ namespace TagTool.Commands.Sounds
                 default:
                     throw new NotSupportedException("Cache not supported");
             }
-           
+
             Console.WriteLine("Done!");
             return true;
         }
@@ -108,14 +108,14 @@ namespace TagTool.Commands.Sounds
                 var relativePitchRangeIndex = pitchRangeIndex - Definition.SoundReference.PitchRangeIndex;
                 var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
 
-                if(targetFormat == null)
+                if (targetFormat == null)
                     targetFormat = BlamSoundGestalt.PlatformCodecs[Definition.SoundReference.PlatformCodecIndex].Compression;
 
                 for (int i = 0; i < permutationCount; i++)
                 {
                     var filename = GetExportFileName(targetFormat.Value, relativePitchRangeIndex, i);
                     var outPath = Path.Combine(outDirectory, filename);
-                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData, targetFormat.Value, false);
+                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, BlamSoundGestalt, Definition, relativePitchRangeIndex, i, soundData, targetFormat.Value, false, "", Tag.Name);
                     Console.WriteLine($"{filename}: pitch range {pitchRangeIndex}, permutation {i} sample count: {blamSound.SampleCount}");
                     using (EndianWriter output = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
                     {

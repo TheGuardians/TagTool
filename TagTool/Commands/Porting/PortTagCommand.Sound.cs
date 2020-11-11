@@ -17,13 +17,6 @@ namespace TagTool.Commands.Porting
     {
         private SoundCacheFileGestalt BlamSoundGestalt { get; set; } = null;
 
-        static string GetTagFileFriendlyName(string tagname)
-        {
-            var pieces = tagname.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries);
-            var filename = string.Join("_", pieces);
-            return filename;
-        }
-
         private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
         {
             if (BlamSoundGestalt == null)
@@ -44,7 +37,6 @@ namespace TagTool.Commands.Porting
             var scale = BlamSoundGestalt.Scales[sound.SoundReference.ScaleIndex];
             var promotion = sound.SoundReference.PromotionIndex != -1 ? BlamSoundGestalt.Promotions[sound.SoundReference.PromotionIndex] : new Promotion();
             var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
-            var loop = sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound);
 
             sound.PlaybackParameters = playbackParameters.DeepClone();
             sound.Scale = scale;
@@ -145,31 +137,10 @@ namespace TagTool.Commands.Porting
                 sound.PitchRanges[newPitchRangeIndex].Permutations = new List<Permutation>();
 
                 //
-                // Determine the audio channel count
-                //
-
-                var channelCount = Encoding.GetChannelCount(sound.PlatformCodec.Encoding);
-
-                //
                 // Set compression format
                 //
 
                 var targetFormat = Compression.MP3;
-
-                string extension;
-                switch (targetFormat)
-                {
-                    case Compression.MP3:
-                        extension = "mp3";
-                        break;
-                    case Compression.PCM:
-                        extension = "wav";
-                        break;
-                    default:
-                        extension = "mp3";
-                        break;
-                }
-
                 sound.PlatformCodec.Compression = targetFormat;
 
                 //
@@ -177,32 +148,8 @@ namespace TagTool.Commands.Porting
                 //
 
                 var useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
-                var basePermutationCacheName = Path.Combine(TempDirectory.FullName + GetTagFileFriendlyName(blamTag_Name)); //temp File path
-                var originalFilePath = "";
+                var soundCachePath = useCache ? Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName : "";
 
-
-                if (useCache)
-                {
-                    originalFilePath = Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, GetTagFileFriendlyName(blamTag_Name)); //old structure file path
-
-                    var split = blamTag_Name.Split('\\');
-                    var endName = split[split.Length - 1]; //get the last portion of the tag name
-                    var newPath = Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName;
-
-                    for (int i = 0; i < split.Length - 1; i++)
-                    {
-
-                        var folder = split[i];
-
-                        var dir = Path.Combine(newPath, folder); //combine the new path with the current folder
-                        if (!Directory.Exists(dir))// check if that specific folder exists and if not create it
-                            Directory.CreateDirectory(dir);
-
-                        newPath = Path.Combine(newPath, folder); // update the new path varible with the current folder
-                    }
-
-                    basePermutationCacheName = Path.Combine(newPath, endName); //combine the last portion of the tag name with the new path
-                }
 
                 var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
                 var permutationOrder = BlamSoundGestalt.GetPermutationOrder(pitchRangeIndex);
@@ -211,8 +158,6 @@ namespace TagTool.Commands.Porting
                 for (int i = 0; i < permutationCount; i++)
                 {
                     var permutationIndex = pitchRange.FirstPermutationIndex + i;
-                    var permutationSize = BlamSoundGestalt.GetPermutationSize(permutationIndex);
-                    var permutationOffset = BlamSoundGestalt.GetPermutationOffset(permutationIndex);
 
                     var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
@@ -223,47 +168,11 @@ namespace TagTool.Commands.Porting
                     permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
 
-                    string permutationName = $"{basePermutationCacheName}_{relativePitchRangeIndex}_{i}";
-                    
-                    var cacheFileName = $"{permutationName}.{extension}";
+                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData, targetFormat, useCache, soundCachePath, blamTag_Name);
 
-                    if (useCache) { 
-                        string oldPermutationName = $"{originalFilePath}_{relativePitchRangeIndex}_{i}";
-                        var oldCacheFileName = $"{oldPermutationName}.{extension}";
-
-                        if (File.Exists(oldCacheFileName)) //check if sound exists in the old format and rename it to use the new folder structure
-                        {
-                            Console.WriteLine("Sound exists in original format: " + oldCacheFileName + " Renaming...");
-                            File.Move(oldCacheFileName, cacheFileName);
-                        }
-                    }
-
-                    bool exists = File.Exists(cacheFileName);
-
-                    byte[] permutationData = null;
-
-                    if (!exists || !useCache)
-                    {
-                        BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData, targetFormat, true);
-                        permutationData = blamSound.Data;
-                        if (useCache)
-                        {
-                            using (EndianWriter output = new EndianWriter(new FileStream(cacheFileName, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                            {
-                                output.WriteBlock(blamSound.Data);
-                            }
-                        }
-                        permutation.SampleCount = blamSound.SampleCount;
-                        permutation.FirstSample = blamSound.FirstSample;
-                        // temporary hack
-                        if (permutation.FirstSample > 0)
-                            permutation.PermutationFlagsHO |= Permutation.PermutationFlagsHaloOnline.SequencedBit;
-                    }
-                    else
-                    {
-                        permutationData = File.ReadAllBytes(cacheFileName);
-                        // TODO: store WAV instead of mp3, read sample count
-                    }
+                    byte[] permutationData = blamSound.Data;
+                    permutation.SampleCount = blamSound.SampleCount;
+                    permutation.FirstSample = blamSound.FirstSample;
 
                     // fixup dialog indices, might need more work
                     var firstPermutationChunk = BlamSoundGestalt.GetFirstPermutationChunk(permutationIndex);
@@ -450,7 +359,7 @@ namespace TagTool.Commands.Porting
         {
 
             CachedTag edAdlg = null;
-            AiDialogueGlobals adlg = null;
+            AiDialogueGlobals adlg; ;
             foreach (var tag in CacheContext.TagCache.FindAllInGroup("adlg"))
             {
                 edAdlg = tag;

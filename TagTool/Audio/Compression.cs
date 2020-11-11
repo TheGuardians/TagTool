@@ -14,5 +14,7 @@
         MP3 = 0x8,              //MP3
         FSB4 = 0x9,             //FMOD System Bank Type 4
         OGG = 0x20,             // OGG container, Vorbis encoding
+
+        Tagtool_WAV = -1,              // TagTool value for returning unchanged wav file
     }
 }
