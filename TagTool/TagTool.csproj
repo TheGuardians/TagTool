@@ -235,6 +235,7 @@
     <Compile Include="Animations\AnimatedCodecHeader.cs" />
     <Compile Include="Animations\AnimationCodec.cs" />
     <Compile Include="Animations\AnimationCodecHeader.cs" />
+    <Compile Include="Animations\AnimationImporter.cs" />
     <Compile Include="Animations\Codecs\UncompressedStaticCodec.cs" />
     <Compile Include="Animations\StaticCodecHeader.cs" />
     <Compile Include="Animations\AnimationCodecType.cs" />

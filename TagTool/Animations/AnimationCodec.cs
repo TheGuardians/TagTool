@@ -13,7 +13,7 @@ namespace TagTool.Animations
         public virtual byte[] ReadKeyframes(EndianReader reader) => null;
 
         public abstract IEnumerable<RealQuaternion> ReadRotations(EndianReader reader, int count);
-        public abstract IEnumerable<RealPoint3d> RealTranslations(EndianReader reader, int count);
-        public abstract IEnumerable<float> RealScales(EndianReader reader, int count);
+        public abstract IEnumerable<RealPoint3d> ReadTranslations(EndianReader reader, int count);
+        public abstract IEnumerable<float> ReadScales(EndianReader reader, int count);
     }
 }

@@ -16,7 +16,7 @@ namespace TagTool.Animations.Codecs
                     (float)reader.ReadInt16() / short.MaxValue);
         }
 
-        public override IEnumerable<RealPoint3d> RealTranslations(EndianReader reader, int count)
+        public override IEnumerable<RealPoint3d> ReadTranslations(EndianReader reader, int count)
         {
             for (var i = 0; i < count; i++)
                 yield return new RealPoint3d(
@@ -25,7 +25,7 @@ namespace TagTool.Animations.Codecs
                     reader.ReadSingle());
         }
 
-        public override IEnumerable<float> RealScales(EndianReader reader, int count)
+        public override IEnumerable<float> ReadScales(EndianReader reader, int count)
         {
             for (var i = 0; i < count; i++)
                 yield return reader.ReadSingle();

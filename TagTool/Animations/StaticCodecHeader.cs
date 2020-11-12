@@ -4,7 +4,7 @@
 namespace TagTool.Animations
 {
     [TagStructure(Size = 0x14)]
-    public class StaticCodecHeader : AnimationCodecHeader
+    public class StaticCodecHeader : TagStructure
     {
         public int TranslationDataOffset;
         public int ScaleDataOffset;
