@@ -217,6 +217,16 @@ namespace TagTool.Commands.Porting
                 foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
                     textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
             }
+            else if (BlamCache.Version == CacheVersion.Halo3ODST)
+            {
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModeODST.FilterMode;
+            }
+            else if (BlamCache.Version <= CacheVersion.Halo3Retail)
+            {
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModeH3;
+            }
 
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = blamRmt2;

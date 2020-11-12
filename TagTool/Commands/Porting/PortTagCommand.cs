@@ -742,6 +742,18 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertRasterizerGlobals(rasg);
 					break;
 
+                case RenderMethodOption rmop when BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach:
+                    foreach (var block in rmop.Options)
+                    {
+                        if (BlamCache.Version == CacheVersion.Halo3ODST && block.RenderMethodExtern >= RenderMethodExtern.emblem_player_shoulder_texture)
+                            block.RenderMethodExtern = (RenderMethodExtern)((int)block.RenderMethodExtern + 2);
+                        if (BlamCache.Version >= CacheVersion.HaloReach)
+                        {
+                            // TODO
+                        }
+                    }
+                    break;
+
                 case RenderModel mode:
                     if (BlamCache.Version < CacheVersion.Halo3Retail)
                         blamDefinition = ConvertGen2RenderModel(edTag, mode, resourceStreams);
