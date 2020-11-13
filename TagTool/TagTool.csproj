@@ -345,6 +345,7 @@
     <Compile Include="Commands\Modding\CreateModPackageCommand.cs" />
     <Compile Include="Commands\Modding\ExtractFontsCommand.cs" />
     <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\AddAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\DoNotReplaceGroupsCommand.cs" />

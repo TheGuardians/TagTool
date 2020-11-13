@@ -48,11 +48,11 @@ namespace TagTool.Animations
                 //set parent nodes
                 for (int i = 0; i < nodecount; i++)
                 {
-                    if (AnimationNodes[i].FirstChildNode != -1)
+                    if (AnimationNodes[i].FirstChildNode != -1 && AnimationNodes[AnimationNodes[i].FirstChildNode].ParentNode == -1)
                     {
                         AnimationNodes[AnimationNodes[i].FirstChildNode].ParentNode = (short)i;
                     }
-                    if (AnimationNodes[i].NextSiblingNode != -1 && AnimationNodes[i].ParentNode != -1)
+                    if (AnimationNodes[i].NextSiblingNode != -1 && AnimationNodes[i].ParentNode != -1 && AnimationNodes[AnimationNodes[i].NextSiblingNode].ParentNode == -1)
                     {
                         AnimationNodes[AnimationNodes[i].NextSiblingNode].ParentNode = (short)AnimationNodes[i].ParentNode;
                     }
@@ -62,8 +62,8 @@ namespace TagTool.Animations
                 {
                     for (int node_index = 0; node_index < nodecount; node_index++)
                     {
-                        var rotation = textReader.ReadLine().Split(' ');
-                        var translation = textReader.ReadLine().Split(' ');
+                        var translation = textReader.ReadLine().Split('\t');
+                        var rotation = textReader.ReadLine().Split('\t');
                         var scale = textReader.ReadLine();
                         AnimationNodes[node_index].Frames.Add(new AnimationFrame
                         {
@@ -75,15 +75,26 @@ namespace TagTool.Animations
                         if(AnimationNodes[node_index].Frames.Count > 1)
                         {
                             var currentnode = AnimationNodes[node_index];
-                            if (currentnode.Frames[frame_index].Rotation != currentnode.Frames[frame_index - 1].Rotation)
+                            if (currentnode.Frames[frame_index].Rotation != currentnode.Frames[frame_index - 1].Rotation &&
+                                !currentnode.isRotated)
+                            {
                                 currentnode.isRotated = true;
                                 rotatedNodeCount++;
-                            if (currentnode.Frames[frame_index].Translation != currentnode.Frames[frame_index - 1].Translation)
+                            }
+
+                            if (currentnode.Frames[frame_index].Translation != currentnode.Frames[frame_index - 1].Translation &&
+                                !currentnode.isTranslated)
+                            {
                                 currentnode.isTranslated = true;
                                 translatedNodeCount++;
-                            if (currentnode.Frames[frame_index].Scale != currentnode.Frames[frame_index - 1].Scale)
+                            }
+
+                            if (currentnode.Frames[frame_index].Scale != currentnode.Frames[frame_index - 1].Scale &&
+                                !currentnode.isScaled)
+                            {
                                 currentnode.isScaled = true;
                                 scaledNodeCount++;
+                            }
                         }
                     }
                 }
@@ -97,7 +108,8 @@ namespace TagTool.Animations
                 Checksum = nodeChecksum,
                 MovementDataType = ModelAnimationTagResource.GroupMemberMovementDataType.None,
                 FrameCount = (short)frameCount,
-                NodeCount = (byte)AnimationNodes.Count
+                NodeCount = (byte)AnimationNodes.Count,
+                PackedDataSizes = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructBlock()
             };
 
             using (MemoryStream stream = new MemoryStream())
@@ -110,7 +122,8 @@ namespace TagTool.Animations
                     Type = AnimationCodecType._8ByteQuantizedRotationOnly,
                     RotationCount = (sbyte)rotatedNodeCount,
                     TranslationCount = (sbyte)translatedNodeCount,
-                    ScaleCount = (sbyte)scaledNodeCount
+                    ScaleCount = (sbyte)scaledNodeCount,
+                    PlaybackRate = 1.0f
                 };
                 CacheContext.Serializer.Serialize(dataContext, codecheader);
 
@@ -152,8 +165,8 @@ namespace TagTool.Animations
 
                 List<int> AnimationFlags = BuildFlags();
                 groupmember.PackedDataSizes.AnimatedNodeFlags = (byte)(0x4 * AnimationFlags.Count);
-                foreach(var flagset in AnimationFlags)
-                    CacheContext.Serializer.Serialize(dataContext, flagset);
+                foreach (var flagset in AnimationFlags)
+                    dataContext.Writer.Write(flagset);
 
                 groupmember.AnimationData = new TagData(stream.ToArray());
             }
@@ -205,7 +218,7 @@ namespace TagTool.Animations
                 {
                     if (AnimationNodes[node_index].isTranslated)
                     {
-                        var translation = new RealPoint3d
+                        var translation = new TranslationFrameFloat
                         {
                             X = AnimationNodes[node_index].Frames[frame_index].Translation.X,
                             Y = AnimationNodes[node_index].Frames[frame_index].Translation.Y,
@@ -247,13 +260,21 @@ namespace TagTool.Animations
             return Flags;
         }
 
+        [TagStructure(Size = 0xC)]
+        public class TranslationFrameFloat : TagStructure
+        {
+            public float X;
+            public float Y;
+            public float Z;
+        }
+
         public class AnimationNode
         {
             public string Name;
             public short ParentNode;
             public short FirstChildNode;
             public short NextSiblingNode;
-            public List<AnimationFrame> Frames;
+            public List<AnimationFrame> Frames = new List<AnimationFrame>();
             public bool isTranslated;
             public bool isRotated;
             public bool isScaled;
