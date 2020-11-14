@@ -24,38 +24,50 @@ namespace TagTool.Animations
 
         public void Import(string fileName)
         {
-            using (TextReader textReader = (TextReader)File.OpenText(fileName))
+            using (FileStream textStream = (FileStream)File.OpenRead(fileName))
             {
-                textReader.ReadLine(); //version
+                StreamReader textReader = new StreamReader(textStream);
+                int Version = 0;
+
+                //this garbage is because some H2V JMA exporters use UCS-2 LE text encoding, which crashes the streamreader
+                try
+                {
+                    Version = int.Parse(textReader.ReadLine());
+                }
+                catch
+                {
+                    textStream.Position = 0;
+                    textReader = new StreamReader(textStream, Encoding.Unicode, true);
+                    Version = int.Parse(textReader.ReadLine()); //version
+                }
+
+                if (Version >= 16394)
+                    textReader.ReadLine(); //version part 2
                 frameCount = int.Parse(textReader.ReadLine());
                 textReader.ReadLine(); //framerate
-                textReader.ReadLine();
+                textReader.ReadLine(); //actor count
                 textReader.ReadLine(); //actor name
                 int nodecount = int.Parse(textReader.ReadLine());
-                nodeChecksum = int.Parse(textReader.ReadLine());
+                if (Version < 16394)
+                    nodeChecksum = int.Parse(textReader.ReadLine());
                 AnimationNodes = new List<AnimationNode>();
                 for (int i = 0; i < nodecount; i++)
                 {
-                    AnimationNodes.Add(new AnimationNode
+                    var newnode = new AnimationNode();
+                    newnode.Name = textReader.ReadLine();
+                    if (Version == 16392 || Version == 16393)
                     {
-                        Name = textReader.ReadLine(),
-                        FirstChildNode = short.Parse(textReader.ReadLine()),
-                        NextSiblingNode = short.Parse(textReader.ReadLine()),
-                        ParentNode = -1
-                    });
-                }
-
-                //set parent nodes
-                for (int i = 0; i < nodecount; i++)
-                {
-                    if (AnimationNodes[i].FirstChildNode != -1 && AnimationNodes[AnimationNodes[i].FirstChildNode].ParentNode == -1)
-                    {
-                        AnimationNodes[AnimationNodes[i].FirstChildNode].ParentNode = (short)i;
+                        newnode.FirstChildNode = short.Parse(textReader.ReadLine());
+                        newnode.NextSiblingNode = short.Parse(textReader.ReadLine());
+                        newnode.ParentNode = -1;
                     }
-                    if (AnimationNodes[i].NextSiblingNode != -1 && AnimationNodes[i].ParentNode != -1 && AnimationNodes[AnimationNodes[i].NextSiblingNode].ParentNode == -1)
+                    else if (Version >= 16394)
                     {
-                        AnimationNodes[AnimationNodes[i].NextSiblingNode].ParentNode = (short)AnimationNodes[i].ParentNode;
+                        newnode.ParentNode = short.Parse(textReader.ReadLine());
+                        newnode.FirstChildNode = -1;
+                        newnode.NextSiblingNode = -1;
                     }
+                    AnimationNodes.Add(newnode);
                 }
 
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
@@ -72,7 +84,7 @@ namespace TagTool.Animations
                             Scale = float.Parse(scale)
                         });
                         //check to see if node frame is different from last one, to see if node is used
-                        if(AnimationNodes[node_index].Frames.Count > 1)
+                        if (AnimationNodes[node_index].Frames.Count > 1)
                         {
                             var currentnode = AnimationNodes[node_index];
                             if (currentnode.Frames[frame_index].Rotation != currentnode.Frames[frame_index - 1].Rotation &&
@@ -183,7 +195,7 @@ namespace TagTool.Animations
                     if (AnimationNodes[node_index].isScaled)
                     {
                         var scale = AnimationNodes[node_index].Frames[frame_index].Scale;
-                        CacheContext.Serializer.Serialize(dataContext, scale);
+                        dataContext.Writer.Write(scale);
                     }
                 }
             }
