@@ -125,7 +125,7 @@ namespace TagTool.Animations
             };
 
             using (MemoryStream stream = new MemoryStream())
-            using(EndianWriter writer = new EndianWriter(stream))
+            using(EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
             {
                 var dataContext = new DataSerializationContext(writer);
 
@@ -211,10 +211,10 @@ namespace TagTool.Animations
                     {
                         var rotation = new ModelAnimationTagResource.GroupMember.RotationFrame
                         {
-                            X = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.I * short.MaxValue),
-                            Y = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.J * short.MaxValue),
-                            Z = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.K * short.MaxValue),
-                            W = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.W * short.MaxValue)
+                            X = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.I * short.MaxValue)),
+                            Y = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.J * short.MaxValue)),
+                            Z = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.K * short.MaxValue)),
+                            W = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.W * short.MaxValue))
                         };
                         CacheContext.Serializer.Serialize(dataContext, rotation);
                     }
@@ -261,13 +261,11 @@ namespace TagTool.Animations
                     scaleflags[flagset] |= 1 << (nodeindex - (flagset * 32));
             }
 
+            //all rotation flags are first serialized, then all translation flags etc
             List<int> Flags = new List<int>();
-            for (int flagset = 0; flagset < flagcount; flagset++)
-            {
-                Flags.Add(rotationflags[flagset]);
-                Flags.Add(translationflags[flagset]);
-                Flags.Add(scaleflags[flagset]);
-            }
+            Flags.AddRange(rotationflags);
+            Flags.AddRange(translationflags);
+            Flags.AddRange(scaleflags);
             
             return Flags;
         }
