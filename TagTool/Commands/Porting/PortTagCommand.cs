@@ -562,18 +562,10 @@ namespace TagTool.Commands.Porting
                                 {
                                     //fix inverted vignette
                                     float temp = framesblock.Dynamicvalue1; 
-                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2;
-                                    framesblock.Dynamicvalue2 = temp;
+                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2 * 1.5f;
+                                    framesblock.Dynamicvalue2 = temp * 1.5f;
                                 }
                             }
-                        }
-                    }
-                    foreach (var postprocessblock in crte.PostProcessing)
-                    {
-                        foreach (var hueblock in postprocessblock.Hue)
-                        {
-                            //make red tentacles greenish brown
-                            hueblock.Basevalue1 = 55.0f;
                         }
                     }
                     break;
