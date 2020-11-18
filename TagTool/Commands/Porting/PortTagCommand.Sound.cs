@@ -120,16 +120,11 @@ namespace TagTool.Commands.Porting
                 var pitchRange = BlamSoundGestalt.PitchRanges[pitchRangeIndex];
                 pitchRange.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name);
                 pitchRange.PitchRangeParameters = BlamSoundGestalt.PitchRangeParameters[pitchRange.PitchRangeParametersIndex];
-                pitchRange.Unknown1 = 0;
-                pitchRange.Unknown2 = 0;
-                pitchRange.Unknown3 = 0;
-                pitchRange.Unknown4 = 0;
-                pitchRange.Unknown5 = -1;
-                pitchRange.Unknown6 = -1;
+                pitchRange.RuntimePermutationFlags = -1;
                 //I suspect this unknown7 to be a flag to tell if there is a Unknownblock in extrainfo. (See a sound in udlg for example)
-                pitchRange.Unknown7 = 0;
+                pitchRange.RuntimeDiscardedPermutationIndex = -1;
                 pitchRange.PermutationCount = (byte)BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
-                pitchRange.Unknown8 = -1;
+                pitchRange.RuntimeLastPermutationIndex = -1;
 
                 // Add pitch range to ED sound
                 sound.PitchRanges.Add(pitchRange);
@@ -176,7 +171,7 @@ namespace TagTool.Commands.Porting
 
                     // fixup dialog indices, might need more work
                     var firstPermutationChunk = BlamSoundGestalt.GetFirstPermutationChunk(permutationIndex);
-                    var newChunk = new PermutationChunk(currentSoundDataOffset, permutationData.Length, firstPermutationChunk.SoundDialogInfoIndex, firstPermutationChunk.Unknown, firstPermutationChunk.UnknownSize);
+                    var newChunk = new PermutationChunk(currentSoundDataOffset, permutationData.Length, firstPermutationChunk.LastSample, firstPermutationChunk.FirstSample);
                     permutation.PermutationChunks.Add(newChunk);
                     currentSoundDataOffset += permutationData.Length;
                     pitchRange.Permutations.Add(permutation);
@@ -214,17 +209,16 @@ namespace TagTool.Commands.Porting
                             new ExtraInfo.LanguagePermutation.RawInfoBlock
                             {
                                 SkipFractionName = StringId.Invalid,
-                                UnknownList = new List<ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown>
+                                SeekTable = new List<ExtraInfo.LanguagePermutation.RawInfoBlock.SeekTableBlock>
                                 {
-                                    new ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown
+                                    new ExtraInfo.LanguagePermutation.RawInfoBlock.SeekTableBlock
                                     {
-                                        SoundDialogInfoSize = permutationChunk.SoundDialogInfoIndex,
-                                        Unknown1 = permutationChunk.Unknown,
-                                        Unknown2 = permutationChunk.UnknownSize,
-                                        Unknown3 = 0,
-                                        Unknown4 = permutation.SampleCount,
-                                        Unknown5 = 0,
-                                        Unknown6 = permutationChunk.EncodedSize & 0xFFFF
+                                        BlockRelativeSampleEnd = permutationChunk.LastSample,
+                                        BlockRelativeSampleStart = permutationChunk.FirstSample,
+                                        StartingSampleIndex = 0,
+                                        EndingSampleIndex = permutation.SampleCount,
+                                        StartingOffset = 0,
+                                        EndingOffset = (uint)permutationChunk.EncodedSize & 0xFFFF
                                     }
                                 },
                                 Compression = 8,

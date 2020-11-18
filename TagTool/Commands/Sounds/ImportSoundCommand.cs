@@ -102,14 +102,13 @@ namespace TagTool.Commands.Sounds
                 var pitchRange = new PitchRange
                 {
                     ImportName = new StringId(5221),   //|default|
-                    Unknown5 = -1,
-                    Unknown6 = -1,
-                    Unknown7 = -1,
-                    Unknown8 = -1,
+                    RuntimePermutationFlags = -1,
+                    RuntimeDiscardedPermutationIndex = -1,
+                    RuntimeLastPermutationIndex = -1,
                     PermutationCount = (short)permutationCount,
                     PitchRangeParameters = new PitchRangeParameter()
                 };
-                pitchRange.PitchRangeParameters.UnknownBounds = new Bounds<short>(-32768, 32767);
+                pitchRange.PitchRangeParameters.PlaybackBendBounds = new Bounds<short>(-32768, 32767);
 
                 pitchRange.Permutations = new List<Permutation>();
 
