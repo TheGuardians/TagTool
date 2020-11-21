@@ -81,7 +81,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //create new importer class and import the source file
             var importer = new AnimationImporter();
-            importer.Import(filepath.FullName);
+            importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)Cache);
+
+            //the overlay animation type has a base frame and offset nodes which need to be reset on import
+            //if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
+            //    importer.RemoveOverlayBase();
 
             //build a new resource 
             ModelAnimationTagResource newResource = new ModelAnimationTagResource
