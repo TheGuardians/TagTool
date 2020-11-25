@@ -416,9 +416,9 @@ namespace TagTool.Animations
 
         public void WriteScaleFrameData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext)
         {
-            for (int frame_index = 0; frame_index < frameCount; frame_index++)
+            for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
-                for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
+                for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     if (AnimationNodes[node_index].hasAnimatedScale)
                     {
@@ -430,10 +430,10 @@ namespace TagTool.Animations
         }
 
         public void WriteRotationFrameData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext)
-        {
-            for (int frame_index = 0; frame_index < frameCount; frame_index++)
+        {      
+            for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
-                for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
+                for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     if (AnimationNodes[node_index].hasAnimatedRotation)
                     {
@@ -447,14 +447,14 @@ namespace TagTool.Animations
                         CacheContext.Serializer.Serialize(dataContext, rotation);
                     }
                 }
-            }
+            }            
         }
 
         public void WriteTranslationFrameData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext)
         {
-            for (int frame_index = 0; frame_index < frameCount; frame_index++)
+            for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
-                for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
+                for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     if (AnimationNodes[node_index].hasAnimatedTranslation)
                     {
