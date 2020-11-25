@@ -83,9 +83,14 @@ namespace TagTool.Animations
                         var translation = textReader.ReadLine().Split('\t');
                         var rotation = textReader.ReadLine().Split('\t');
                         var scale = textReader.ReadLine();
+
+                        //Conjugate the quaternion during import, this is what tool.exe does
+                        var newRotation = new Quaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3]));
+                        newRotation = Quaternion.Conjugate(newRotation);
+
                         AnimationNodes[node_index].Frames.Add(new AnimationFrame
                         {
-                            Rotation = new RealQuaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3])),
+                            Rotation = new RealQuaternion(newRotation.X, newRotation.Y, newRotation.Z, newRotation.W),
                             Translation = new RealPoint3d((float)double.Parse(translation[0]) * 0.01f, (float)double.Parse(translation[1]) * 0.01f, (float)double.Parse(translation[2]) * 0.01f),
                             Scale = (float)double.Parse(scale)
                         });
@@ -93,7 +98,7 @@ namespace TagTool.Animations
                         if (AnimationNodes[node_index].Frames.Count > 1)
                         {
                             var currentnode = AnimationNodes[node_index];
-
+                            
                             if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedRotation)
                             {
                                 currentnode.hasAnimatedRotation = true;
@@ -287,10 +292,10 @@ namespace TagTool.Animations
                 {
                     var rotation = new ModelAnimationTagResource.GroupMember.RotationFrame
                     {
-                        X = (short)(Math.Round(currentnode.Frames[0].Rotation.I * short.MaxValue)),
-                        Y = (short)(Math.Round(currentnode.Frames[0].Rotation.J * short.MaxValue)),
-                        Z = (short)(Math.Round(currentnode.Frames[0].Rotation.K * short.MaxValue)),
-                        W = (short)(Math.Round(currentnode.Frames[0].Rotation.W * short.MaxValue))
+                        X = (short)(currentnode.Frames[0].Rotation.I * short.MaxValue),
+                        Y = (short)(currentnode.Frames[0].Rotation.J * short.MaxValue),
+                        Z = (short)(currentnode.Frames[0].Rotation.K * short.MaxValue),
+                        W = (short)(currentnode.Frames[0].Rotation.W * short.MaxValue)
                     };
                     CacheContext.Serializer.Serialize(dataContext, rotation);
                 }
@@ -434,10 +439,10 @@ namespace TagTool.Animations
                     {
                         var rotation = new ModelAnimationTagResource.GroupMember.RotationFrame
                         {
-                            X = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.I * short.MaxValue)),
-                            Y = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.J * short.MaxValue)),
-                            Z = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.K * short.MaxValue)),
-                            W = (short)(Math.Round(AnimationNodes[node_index].Frames[frame_index].Rotation.W * short.MaxValue))
+                            X = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.I * short.MaxValue),
+                            Y = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.J * short.MaxValue),
+                            Z = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.K * short.MaxValue),
+                            W = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.W * short.MaxValue)
                         };
                         CacheContext.Serializer.Serialize(dataContext, rotation);
                     }
