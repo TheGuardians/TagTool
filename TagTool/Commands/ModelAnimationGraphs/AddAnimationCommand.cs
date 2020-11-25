@@ -50,7 +50,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             List<string> ModelList = new List<string>();
             Console.WriteLine("------------------------------------------------------------------");
-            Console.WriteLine("Enter the tagname of each model tag that this animation uses");
+            Console.WriteLine("Enter the tagname of each render model tag that this animation uses");
             Console.WriteLine("Enter a blank line to finish.");
             Console.WriteLine("------------------------------------------------------------------");
             for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
