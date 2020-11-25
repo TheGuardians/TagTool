@@ -85,17 +85,14 @@ namespace TagTool.Animations
                         var scale = textReader.ReadLine();
                         AnimationNodes[node_index].Frames.Add(new AnimationFrame
                         {
-                            Rotation = new RealQuaternion(float.Parse(rotation[0]), float.Parse(rotation[1]), float.Parse(rotation[2]), float.Parse(rotation[3])),
+                            Rotation = new RealQuaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3])),
                             Translation = new RealPoint3d((float)double.Parse(translation[0]) * 0.01f, (float)double.Parse(translation[1]) * 0.01f, (float)double.Parse(translation[2]) * 0.01f),
-                            Scale = float.Parse(scale)
+                            Scale = (float)double.Parse(scale)
                         });
                         //check to see if node frame is different from last one, to see if node is used
                         if (AnimationNodes[node_index].Frames.Count > 1)
                         {
                             var currentnode = AnimationNodes[node_index];
-
-                            if (Math.Abs(currentnode.Frames[frame_index].Translation.X) > 10 || Math.Abs(currentnode.Frames[frame_index].Translation.Y) > 10 || Math.Abs(currentnode.Frames[frame_index].Translation.Z) > 10)
-                                Console.WriteLine("###ERROR: Code has shit the bed!");
 
                             if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedRotation)
                             {
