@@ -48,6 +48,18 @@ namespace TagTool.Commands.ModelAnimationGraphs
             if (!File.Exists(filepath.FullName))
                 return new TagToolError(CommandError.FileNotFound);
 
+            List<string> ModelList = new List<string>();
+            Console.WriteLine("------------------------------------------------------------------");
+            Console.WriteLine("Enter the tagname of each model tag that this animation uses");
+            Console.WriteLine("Enter a blank line to finish.");
+            Console.WriteLine("------------------------------------------------------------------");
+            for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
+            {
+                //remove any tag type info from tagname
+                line = line.Split('.')[0];
+                ModelList.Add(line);
+            }
+
             string file_extension = filepath.Extension;
 
             switch (file_extension.ToUpper())
@@ -81,7 +93,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //create new importer class and import the source file
             var importer = new AnimationImporter();
-            importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)Cache);
+            importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)Cache, ModelList);
 
             //the overlay animation type has a base frame and offset nodes which need to be reset on import
             //if (AnimationType == ModelAnimationGraph.FrameType.Overlay)

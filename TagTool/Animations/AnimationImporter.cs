@@ -23,9 +23,12 @@ namespace TagTool.Animations
         public int rotatedNodeCount;
         public int translatedNodeCount;
         public int scaledNodeCount;
+        public int staticRotatedNodeCount;
+        public int staticTranslatedNodeCount;
+        public int staticScaledNodeCount;
         public bool buildstaticdata = false;
 
-        public void Import(string fileName, GameCacheHaloOnlineBase CacheContext)
+        public void Import(string fileName, GameCacheHaloOnlineBase CacheContext, List<string> ModelList)
         {
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
             {
@@ -90,27 +93,58 @@ namespace TagTool.Animations
                         if (AnimationNodes[node_index].Frames.Count > 1)
                         {
                             var currentnode = AnimationNodes[node_index];
-                            if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) &&
-                                currentnode.hasStaticRotation)
+                            if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedRotation)
                             {
+                                currentnode.hasAnimatedRotation = true;
                                 currentnode.hasStaticRotation = false;
                                 rotatedNodeCount++;
                             }
-
-                            if (!CompareTranslations(currentnode.Frames[frame_index], currentnode.Frames[0]) &&
-                                currentnode.hasStaticTranslation)
+                            if (!CompareTranslations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedTranslation)
                             {
+                                currentnode.hasAnimatedTranslation = true;
                                 currentnode.hasStaticTranslation = false;
                                 translatedNodeCount++;
                             }
-
-                            if (currentnode.Frames[frame_index].Scale != 1.0f &&
-                                currentnode.hasStaticScale)
+                            if (Math.Abs(currentnode.Frames[frame_index].Scale - currentnode.Frames[0].Scale) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
                             {
+                                currentnode.hasAnimatedScale = true;
                                 currentnode.hasStaticScale = false;
                                 scaledNodeCount++;
                             }
+
                         }
+                    }
+                }
+
+                //Get node default positions from mode tag
+                SetDefaultNodePositions(CacheContext, ModelList);
+
+                //setup static nodes
+                for (int node_index = 0; node_index < nodecount; node_index++)
+                {
+                    var currentnode = AnimationNodes[node_index];
+
+                    var DefaultPositionFrame = new AnimationFrame
+                    {
+                        Rotation = currentnode.DefaultRotation,
+                        Translation = currentnode.DefaultTranslation,
+                        Scale = currentnode.DefaultScale
+                    };
+
+                    if (!CompareRotations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedRotation)
+                    {
+                        currentnode.hasStaticRotation = true;
+                        staticRotatedNodeCount++;
+                    }
+                    if (!CompareTranslations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedTranslation)
+                    {
+                        currentnode.hasStaticTranslation = true;
+                        staticTranslatedNodeCount++;
+                    }
+                    if (Math.Abs(currentnode.Frames[0].Scale - 1.0d) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
+                    {
+                        currentnode.hasStaticScale = true;
+                        staticScaledNodeCount++;
                     }
                 }
             }
@@ -118,19 +152,19 @@ namespace TagTool.Animations
 
         public bool CompareTranslations(AnimationFrame Frame1, AnimationFrame Frame2)
         {
-            if(Math.Abs(Frame2.Translation.X - Frame1.Translation.X) > 0.0001 || 
-               Math.Abs(Frame2.Translation.Y - Frame1.Translation.Y) > 0.0001 ||
-               Math.Abs(Frame2.Translation.Z - Frame1.Translation.Z) > 0.0001)
+            if(Math.Abs(Frame2.Translation.X - Frame1.Translation.X) >= 0.00009999999747378752 || 
+               Math.Abs(Frame2.Translation.Y - Frame1.Translation.Y) >= 0.00009999999747378752 ||
+               Math.Abs(Frame2.Translation.Z - Frame1.Translation.Z) >= 0.00009999999747378752)
                 return false;
             return true;
         }
 
         public bool CompareRotations(AnimationFrame Frame1, AnimationFrame Frame2)
         {
-            if (Math.Abs(Frame2.Rotation.I - Frame1.Rotation.I) > 0.0001 ||
-                Math.Abs(Frame2.Rotation.J - Frame1.Rotation.J) > 0.0001 ||
-                Math.Abs(Frame2.Rotation.K - Frame1.Rotation.K) > 0.0001 ||
-                Math.Abs(Frame2.Rotation.W - Frame1.Rotation.W) > 0.0001)
+            if (Math.Abs(Frame2.Rotation.I - Frame1.Rotation.I) >= 0.00009999999747378752 ||
+                Math.Abs(Frame2.Rotation.J - Frame1.Rotation.J) >= 0.00009999999747378752 ||
+                Math.Abs(Frame2.Rotation.K - Frame1.Rotation.K) >= 0.00009999999747378752 ||
+                Math.Abs(Frame2.Rotation.W - Frame1.Rotation.W) >= 0.00009999999747378752)
                 return false;
             return true;
         }
@@ -233,10 +267,10 @@ namespace TagTool.Animations
             var staticcodecheader = new AnimationCodecHeader
             {
                 Type = AnimationCodecType.UncompressedStatic,
-                RotationCount = (sbyte)(AnimationNodes.Count - rotatedNodeCount),
-                TranslationCount = (sbyte)(AnimationNodes.Count - translatedNodeCount),
-                ScaleCount = (sbyte)(AnimationNodes.Count - scaledNodeCount),
-                PlaybackRate = 1.0f
+                RotationCount = (sbyte)(staticRotatedNodeCount),
+                TranslationCount = (sbyte)(staticTranslatedNodeCount),
+                ScaleCount = (sbyte)(staticScaledNodeCount),
+                PlaybackRate = 0.0f //this is 0 for static data
             };
             CacheContext.Serializer.Serialize(dataContext, staticcodecheader);
 
@@ -380,7 +414,7 @@ namespace TagTool.Animations
             {
                 for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
                 {
-                    if (!AnimationNodes[node_index].hasStaticScale)
+                    if (AnimationNodes[node_index].hasAnimatedScale)
                     {
                         var scale = AnimationNodes[node_index].Frames[frame_index].Scale;
                         dataContext.Writer.Write(scale);
@@ -395,7 +429,7 @@ namespace TagTool.Animations
             {
                 for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
                 {
-                    if (!AnimationNodes[node_index].hasStaticRotation)
+                    if (AnimationNodes[node_index].hasAnimatedRotation)
                     {
                         var rotation = new ModelAnimationTagResource.GroupMember.RotationFrame
                         {
@@ -416,7 +450,7 @@ namespace TagTool.Animations
             {
                 for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
                 {
-                    if (!AnimationNodes[node_index].hasStaticTranslation)
+                    if (AnimationNodes[node_index].hasAnimatedTranslation)
                     {
                         var translation = new TranslationFrameFloat
                         {
@@ -441,21 +475,56 @@ namespace TagTool.Animations
             for (int nodeindex = 0; nodeindex < AnimationNodes.Count; nodeindex++)
             {
                 int flagset = (int)Math.Floor(nodeindex / 32.0f);
-                if ((isStaticFlags && AnimationNodes[nodeindex].hasStaticTranslation) || (!isStaticFlags && !AnimationNodes[nodeindex].hasStaticTranslation))
+                if ((isStaticFlags && AnimationNodes[nodeindex].hasStaticRotation) || (!isStaticFlags && AnimationNodes[nodeindex].hasAnimatedRotation))
                     rotationflags[flagset] |= 1 << (nodeindex - (flagset * 32));
-                if ((isStaticFlags && AnimationNodes[nodeindex].hasStaticRotation) || (!isStaticFlags && !AnimationNodes[nodeindex].hasStaticRotation))
+                if ((isStaticFlags && AnimationNodes[nodeindex].hasStaticTranslation) || (!isStaticFlags && AnimationNodes[nodeindex].hasAnimatedTranslation))
                     translationflags[flagset] |= 1 << (nodeindex - (flagset * 32));
-                if ((isStaticFlags && AnimationNodes[nodeindex].hasStaticScale) || (!isStaticFlags && !AnimationNodes[nodeindex].hasStaticScale))
+                if ((isStaticFlags && AnimationNodes[nodeindex].hasStaticScale) || (!isStaticFlags && AnimationNodes[nodeindex].hasAnimatedScale))
                     scaleflags[flagset] |= 1 << (nodeindex - (flagset * 32));
             }
 
             //all translation flags are first serialized, then all rotation flags etc
             List<int> Flags = new List<int>();
-            Flags.AddRange(translationflags);
             Flags.AddRange(rotationflags);
+            Flags.AddRange(translationflags);
             Flags.AddRange(scaleflags);
             
             return Flags;
+        }
+
+        public void SetDefaultNodePositions(GameCacheHaloOnlineBase CacheContext, List<string> ModelList)
+        {
+            //string tagname = @"objects\characters\masterchief\fp\fp";
+            
+            using (var CacheStream = CacheContext.OpenCacheReadWrite())
+            {
+                for(var node_index = 0; node_index < AnimationNodes.Count; node_index++)
+                {
+                    var matching_index = -1;
+                    foreach (var tagname in ModelList)
+                    {
+                        var mode_tag_ref = CacheContext.TagCacheGenHO.GetTag<RenderModel>(tagname);
+                        var mode_tag = CacheContext.Deserialize<RenderModel>(CacheStream, mode_tag_ref);
+                        var mode_nodes = mode_tag.Nodes;
+                    
+                        for (var mode_node_index = 0; mode_node_index < mode_nodes.Count; mode_node_index++)
+                        {
+                            if (CacheContext.StringTable.GetString(mode_nodes[mode_node_index].Name) == AnimationNodes[node_index].Name)
+                            {
+                                matching_index = mode_node_index;
+                                AnimationNodes[node_index].DefaultRotation = mode_nodes[mode_node_index].DefaultRotation;
+                                AnimationNodes[node_index].DefaultTranslation = mode_nodes[mode_node_index].DefaultTranslation;
+                                AnimationNodes[node_index].DefaultScale = mode_nodes[mode_node_index].DefaultScale;
+                                break;
+                            }
+                        }
+                        if (matching_index != -1)
+                            break;
+                    }
+                    if (matching_index == -1)
+                        Console.WriteLine($"###WARNING: Unable to find matching model node for node {AnimationNodes[node_index].Name}");
+                }
+            }
         }
 
         [TagStructure(Size = 0xC)]
@@ -472,17 +541,24 @@ namespace TagTool.Animations
             public short ParentNode;
             public short FirstChildNode;
             public short NextSiblingNode;
-            public bool hasStaticTranslation = true;
-            public bool hasStaticRotation = true;
-            public bool hasStaticScale = true;
+            public bool hasStaticTranslation;
+            public bool hasStaticRotation;
+            public bool hasStaticScale;
+            public bool hasAnimatedTranslation;
+            public bool hasAnimatedRotation;
+            public bool hasAnimatedScale;
+            public bool defaultDataSet;
+            public RealQuaternion DefaultRotation;
+            public RealPoint3d DefaultTranslation;
+            public float DefaultScale;
             public List<AnimationFrame> Frames = new List<AnimationFrame>();
         }
 
         public class AnimationFrame
         {
-            public RealQuaternion Rotation;
-            public RealPoint3d Translation;
-            public float Scale;
+            public RealQuaternion Rotation = new RealQuaternion(0,0,0,1);
+            public RealPoint3d Translation = new RealPoint3d(0,0,0);
+            public float Scale = 1.0f;
         }
     }
 }
