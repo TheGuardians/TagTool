@@ -237,8 +237,8 @@ namespace TagTool.Animations
                 stream.Position = staticcodecheaderoffset;
                 var staticcodecsizes = new StaticCodecHeader
                 {
-                    TranslationDataOffset = (int)translationdataoffset,
-                    ScaleDataOffset = (int)scaledataoffset,
+                    TranslationDataOffset = (int)translationdataoffset - (int)datastartoffset,
+                    ScaleDataOffset = (int)scaledataoffset - (int)datastartoffset,
                     RotationFrameSize = 0x8 * frameCount, //four shorts times number of frames in animation
                     TranslationFrameSize = 0xC * frameCount, //three floats times number of frames in animation
                     ScaleFrameSize = 0x4 * frameCount //one float times number of frames in animation
@@ -553,7 +553,6 @@ namespace TagTool.Animations
             public bool hasAnimatedTranslation;
             public bool hasAnimatedRotation;
             public bool hasAnimatedScale;
-            public bool defaultDataSet;
             public RealQuaternion DefaultRotation;
             public RealPoint3d DefaultTranslation;
             public float DefaultScale;
