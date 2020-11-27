@@ -39,9 +39,9 @@ namespace TagTool.Commands.Tags
                 return true;
             }
 
-            tag.Name = args[1];
+            tag.Name = args[1].Split('.')[0];
 
-            Console.WriteLine($"[Index: 0x{tag.Index:X4}] {args[1]}.{tag.Group}");
+            Console.WriteLine($"[Index: 0x{tag.Index:X4}] {args[1].Split('.')[0]}.{tag.Group}");
 
             return true;
         }

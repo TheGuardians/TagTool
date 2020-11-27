@@ -235,6 +235,7 @@
     <Compile Include="Animations\AnimatedCodecHeader.cs" />
     <Compile Include="Animations\AnimationCodec.cs" />
     <Compile Include="Animations\AnimationCodecHeader.cs" />
+    <Compile Include="Animations\AnimationImporter.cs" />
     <Compile Include="Animations\Codecs\UncompressedStaticCodec.cs" />
     <Compile Include="Animations\StaticCodecHeader.cs" />
     <Compile Include="Animations\AnimationCodecType.cs" />
@@ -344,6 +345,7 @@
     <Compile Include="Commands\Modding\CreateModPackageCommand.cs" />
     <Compile Include="Commands\Modding\ExtractFontsCommand.cs" />
     <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\AddAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Porting\DoNotReplaceGroupsCommand.cs" />

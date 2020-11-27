@@ -395,6 +395,11 @@ namespace TagTool.Commands.Porting
                     animation.AnimationData.ProductionFlags = animation.ProductionFlagsReach;
                     animation.AnimationData.Heading = animation.AnimationData.HeadingReach;
                     animation.AnimationData.HeadingAngle = animation.AnimationData.HeadingAngleReach;
+                    animation.AnimationData.BlendScreen = animation.BlendScreenReach;
+                    foreach (var soundevent in animation.AnimationData.SoundEvents)
+                        soundevent.MarkerName = ConvertStringId(soundevent.MarkerName);
+                    foreach (var effectevent in animation.AnimationData.EffectEvents)
+                        effectevent.MarkerName = ConvertStringId(effectevent.MarkerName);
 
                 }
 
@@ -408,6 +413,23 @@ namespace TagTool.Commands.Porting
                             if (weaponType.AnimationSetsReach.Count > 1)
                                 Console.WriteLine("###WARNING: Reach animation has >1 weapon type sets block, whereas HO only supports 1");
                             weaponType.Set = weaponType.AnimationSetsReach[0];
+                            //manually convert stringids from copied reach data
+                            foreach(var action in weaponType.Set.Actions)
+                                action.Label = ConvertStringId(action.Label);
+                            foreach (var overlay in weaponType.Set.Overlays)
+                                overlay.Label = ConvertStringId(overlay.Label);
+                            foreach (var death in weaponType.Set.DeathAndDamage)
+                                death.Label = ConvertStringId(death.Label);
+                            foreach (var transition in weaponType.Set.Transitions)
+                            {
+                                transition.StateName = ConvertStringId(transition.StateName);
+                                foreach(var destination in transition.Destinations)
+                                {
+                                    destination.ModeName = ConvertStringId(destination.ModeName);
+                                    destination.StateName = ConvertStringId(destination.StateName);
+                                }
+                            }
+                                
                         }
                     }
                 }

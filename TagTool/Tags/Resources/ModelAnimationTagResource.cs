@@ -62,8 +62,8 @@ namespace TagTool.Tags.Resources
                 public byte RotationNodeCount; // number of nodes with rotation frames (XYZW short per frame)
                 public byte TranslationNodeCount; // number of nodes with position frames (XYZ float per frame)
                 public byte ScaleNodeCount; // number of nodes with position frames (X float per frame); something that affects node render draw distance or lightning
-                public float ErrorValue;
-                public float CompressionRate = 1.0f;
+                public float ErrorPercentage;
+                public float PlaybackRate = 1.0f;
             }
 
             [TagStructure(Size = 0x14)]

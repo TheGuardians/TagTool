@@ -217,6 +217,16 @@ namespace TagTool.Commands.Porting
                 foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
                     textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
             }
+            else if (BlamCache.Version == CacheVersion.Halo3ODST)
+            {
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModeODST.FilterMode;
+            }
+            else if (BlamCache.Version <= CacheVersion.Halo3Retail)
+            {
+                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModeH3;
+            }
 
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = blamRmt2;
@@ -245,6 +255,13 @@ namespace TagTool.Commands.Porting
             // create ed rmt2 descriptor
             ShaderMatcherNew.Rmt2Descriptor.TryParse(edRmt2Instance.Name, out ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor);
 
+            // get relevant rmdf
+            CachedTag rmdfInstance = Matcher.FindRmdf(edRmt2Instance);
+            if (rmdfInstance == null) // shader matching will fail without an rmdf -- throw an exception
+                throw new Exception($"Unable to find valid \"{edRmt2Descriptor.Type}\" rmdf for rmt2");
+
+            finalRm.BaseRenderMethod = rmdfInstance;
+
             // black has no options, skip conversion
             if (edRmt2Descriptor.Type == "black")
                 return finalRm;
@@ -260,10 +277,6 @@ namespace TagTool.Commands.Porting
             foreach (var a in edRmt2.BooleanParameterNames)
                 edBoolConstants.Add(CacheContext.StringTable.GetString(a.Name));
 
-            // get relevant rmdf
-            CachedTag rmdfInstance = Matcher.FindRmdf(edRmt2Instance);
-            if (rmdfInstance == null) // shader matching will fail without an rmdf -- throw an exception
-                throw new Exception($"Unable to find valid \"{edRmt2Descriptor.Type}\" rmdf for rmt2");
             RenderMethodDefinition renderMethodDefinition = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfInstance);
 
             // dictionaries for fast lookup
@@ -387,8 +400,6 @@ namespace TagTool.Commands.Porting
                 if (tex.XFormArgumentIndex != -1)
                     tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
             }
-
-            finalRm.BaseRenderMethod = rmdfInstance;
 
             // fixup rm animations
             if (finalRm.ShaderProperties[0].Functions.Count > 0)

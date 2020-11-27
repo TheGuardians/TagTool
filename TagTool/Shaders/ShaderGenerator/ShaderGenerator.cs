@@ -620,16 +620,6 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             List<RenderMethodDefinition.Method> result = new List<RenderMethodDefinition.Method>();
 
-            if (shaderType == "black")
-            {
-                var nameStringid = cache.StringTable.GetStringId("blackness(no_options)");
-                if (nameStringid == StringId.Invalid)
-                    nameStringid = cache.StringTable.AddString("blackness(no_options)");
-
-                result.Add(new RenderMethodDefinition.Method { Type = nameStringid, VertexShaderMethodMacroName = StringId.Invalid, PixelShaderMethodMacroName = StringId.Invalid });
-                return result;
-            }
-
             Array enumValues = generator.GetMethodNames();
 
             if (enumValues == null || generator == null)
@@ -637,7 +627,8 @@ namespace TagTool.Shaders.ShaderGenerator
 
             foreach (var method in enumValues)
             {
-                string methodName = method.ToString().ToLower();
+                // fixup names that can't be put into enums
+                string methodName = FixupMethodOptionName(method.ToString().ToLower());
 
                 var nameStringid = cache.StringTable.GetStringId(methodName);
                 if (nameStringid == StringId.Invalid)
@@ -650,12 +641,15 @@ namespace TagTool.Shaders.ShaderGenerator
 
                 for (int i = 0; i < generator.GetMethodOptionCount((int)method); i++)
                 {
+                    if (shaderType == "black")
+                        break;
+
                     var optionBlock = new RenderMethodDefinition.Method.ShaderOption();
 
                     var parameters = generator.GetParametersInOption(methodName, i, out string rmopName, out string optionName);
 
                     // fixup names that can't be put into enums
-                    optionName = FixupOptionName(optionName.ToLower());
+                    optionName = FixupMethodOptionName(optionName.ToLower());
 
                     optionBlock.Type = cache.StringTable.GetStringId(optionName);
                     if (optionBlock.Type == StringId.Invalid)
@@ -726,9 +720,9 @@ namespace TagTool.Shaders.ShaderGenerator
         }
 
         /// <summary>
-        /// Contains hardcoded fixups for shader options names
+        /// Contains hardcoded fixups for shader method or option names
         /// </summary>
-        private static string FixupOptionName(string input)
+        private static string FixupMethodOptionName(string input)
         {
             switch (input)
             {
@@ -736,6 +730,8 @@ namespace TagTool.Shaders.ShaderGenerator
                     return @"first_person_never_w/rotating_bitmaps";
                 case "_3_channel_self_illum":
                     return "3_channel_self_illum";
+                case "blackness_no_options":
+                    return "blackness(no_options)";
             }
 
             return input;

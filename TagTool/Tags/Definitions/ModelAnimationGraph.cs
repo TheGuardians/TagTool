@@ -243,7 +243,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ProductionFlagsValue ProductionFlagsReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short Composite;
+            public sbyte BlendScreenReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte ReachUnknown;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag GraphReference;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -584,7 +586,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
                     public class AnimationSet : TagStructure
                     {
-                        [TagField(MinVersion = CacheVersion.HaloReach)]
+                        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Label)]
                         public StringId Label;
                         [TagField(MinVersion = CacheVersion.HaloReach)]
                         public short OverlayGroup;

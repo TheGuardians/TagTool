@@ -333,7 +333,8 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public List<Marker> Markers;
 
-            [TagStructure(Size = 0x24)]
+            [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
             public class Marker : TagStructure
 			{
                 public sbyte RegionIndex;
@@ -343,6 +344,8 @@ namespace TagTool.Tags.Definitions
                 public RealPoint3d Translation;
                 public RealQuaternion Rotation;
                 public float Scale;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealPoint3d Direction;
             }
         }
 

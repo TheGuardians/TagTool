@@ -574,12 +574,12 @@ namespace TagTool.Commands.CollisionModels
                 if (edge_block.RightSurface == surface_index)
                 {
                     current_edge_index = edge_block.ReverseEdge;
-                    Console.WriteLine($"{Bsp.Vertices[edge_block.EndVertex].Point}");
+                    Console.WriteLine($"{Bsp.Vertices[edge_block.EndVertex].Point * 100}");
                 }
                 else
                 {
                     current_edge_index = edge_block.ForwardEdge;
-                    Console.WriteLine($"{Bsp.Vertices[edge_block.StartVertex].Point}");
+                    Console.WriteLine($"{Bsp.Vertices[edge_block.StartVertex].Point * 100}");
                 }
             }
             while (current_edge_index != first_Edge_index);

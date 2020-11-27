@@ -562,18 +562,10 @@ namespace TagTool.Commands.Porting
                                 {
                                     //fix inverted vignette
                                     float temp = framesblock.Dynamicvalue1; 
-                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2;
-                                    framesblock.Dynamicvalue2 = temp;
+                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2 * 1.5f;
+                                    framesblock.Dynamicvalue2 = temp * 1.5f;
                                 }
                             }
-                        }
-                    }
-                    foreach (var postprocessblock in crte.PostProcessing)
-                    {
-                        foreach (var hueblock in postprocessblock.Hue)
-                        {
-                            //make red tentacles greenish brown
-                            hueblock.Basevalue1 = 55.0f;
                         }
                     }
                     break;
@@ -741,6 +733,18 @@ namespace TagTool.Commands.Porting
 				case RasterizerGlobals rasg:
 					blamDefinition = ConvertRasterizerGlobals(rasg);
 					break;
+
+                case RenderMethodOption rmop when BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach:
+                    foreach (var block in rmop.Options)
+                    {
+                        if (BlamCache.Version == CacheVersion.Halo3ODST && block.RenderMethodExtern >= RenderMethodExtern.emblem_player_shoulder_texture)
+                            block.RenderMethodExtern = (RenderMethodExtern)((int)block.RenderMethodExtern + 2);
+                        if (BlamCache.Version >= CacheVersion.HaloReach)
+                        {
+                            // TODO
+                        }
+                    }
+                    break;
 
                 case RenderModel mode:
                     if (BlamCache.Version < CacheVersion.Halo3Retail)
