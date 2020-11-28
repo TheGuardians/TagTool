@@ -611,10 +611,6 @@ namespace TagTool.Commands.Porting
                     switch (gameobject)
                     {
                         case Weapon weapon:
-                            //fix weapon firing looping sounds
-                            foreach (var attach in weapon.Attachments)
-                                if (attach.PrimaryScale == CacheContext.StringTable.GetStringId("primary_firing"))
-                                    attach.PrimaryScale = CacheContext.StringTable.GetStringId("primary_rate_of_fire");
                             //fix weapon target tracking
                             if (weapon.Tracking > 0 || weapon.WeaponType == Weapon.WeaponTypeValue.Needler)
                             {

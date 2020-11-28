@@ -20,9 +20,8 @@ namespace TagTool.Audio
         /// </summary>
         public int RuntimeIndex;
 
-        public int UnknownSize;
-        public short SoundDialogInfoIndex;
-        public short Unknown;
+        public uint FirstSample;
+        public uint LastSample;
 
 
         public PermutationChunk()
@@ -30,9 +29,8 @@ namespace TagTool.Audio
             Offset = 0;
             EncodedSize = 0x4000000;
             RuntimeIndex = -1;
-            SoundDialogInfoIndex = 0;
-            Unknown = 0;
-            UnknownSize = 0;
+            LastSample = 0;
+            FirstSample = 0;
         }
 
         public PermutationChunk(int offset, int size)
@@ -40,20 +38,17 @@ namespace TagTool.Audio
             Offset = offset;
             EncodedSize = (0x3FFFFFF & size) + 0x4000000;
             RuntimeIndex = -1;
-            SoundDialogInfoIndex = 0;
-            Unknown = 0;
-            UnknownSize = 0;
+            LastSample = 0;
+            FirstSample = 0;
         }
         
-        public PermutationChunk(int offset, int size, short soundDialogInfoIndex, short unknown, int unknownSize)
+        public PermutationChunk(int offset, int size, uint lastSample, uint firstSample)
         {
             Offset = offset;
             EncodedSize = (0x3FFFFFF & size) + 0x4000000;
             RuntimeIndex = -1;
-            SoundDialogInfoIndex = soundDialogInfoIndex;
-            Unknown = unknown;
-            UnknownSize = unknownSize;
-
+            LastSample = lastSample;
+            FirstSample = firstSample;
         }
     }
 }

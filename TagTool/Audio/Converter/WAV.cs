@@ -5,9 +5,9 @@ namespace TagTool.Audio.Converter
     public class WAVFile : SoundFile
     {
         public int TotalSize;
-        RIFFChunk RIFF;
-        WAVFMTChunk FMT;
-        DataChunk Data;
+        public RIFFChunk RIFF;
+        public WAVFMTChunk FMT;
+        public DataChunk Data;
 
         public WAVFile(byte[] data, int channels, int sampleRate)
         {
@@ -17,6 +17,14 @@ namespace TagTool.Audio.Converter
         public WAVFile(BlamSound blamSound)
         {
             InitWAVFile(blamSound.Data, Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz());
+        }
+
+        public WAVFile(EndianReader reader)
+        {
+            RIFF = new RIFFChunk();
+            FMT = new WAVFMTChunk();
+            Data = new DataChunk();
+            Read(reader);
         }
 
         private void InitWAVFile(byte[] data, int channels, int sampleRate)
@@ -44,7 +52,10 @@ namespace TagTool.Audio.Converter
 
         override public void Read(EndianReader reader)
         {
-            return;
+            RIFF.ReadChunk(reader);
+            FMT.ReadChunk(reader);
+            Data.ReadChunk(reader);
+            TotalSize = RIFF.ChunkSize + FMT.ChunkSize + Data.ChunkSize;
         }
 
 
