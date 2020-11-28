@@ -20,24 +20,26 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public PitchRangeParameter PitchRangeParameters;
 
+        //
+        // Attenuation override
+        //
+
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown1;
+        public Bounds<float> DistanceBounds1;
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown2;
+        public Bounds<float> DistanceBounds2;
+
+        /// <summary>
+        /// keeps track of played permutations
+        /// </summary>
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown3;
-        [TagField(Gen = CacheGeneration.HaloOnline)]
-        public uint Unknown4;
-        [TagField(Gen = CacheGeneration.HaloOnline)]
-        public short Unknown5;
-        [TagField(Gen = CacheGeneration.HaloOnline)]
-        public short Unknown6;
+        public int RuntimePermutationFlags;
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public short PermutationCount;
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public sbyte Unknown7;
+        public sbyte RuntimeDiscardedPermutationIndex;
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        public sbyte Unknown8;
+        public sbyte RuntimeLastPermutationIndex;
 
         [TagField(Gen = CacheGeneration.Third)]
         public short EncodedPermutationDataIndex;

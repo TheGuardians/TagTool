@@ -71,17 +71,47 @@ namespace TagTool.Tags.Definitions
         {
             None = 0,
             LoopingSound = 1 << 0,
-            SplitLongSoundIntoPermutations  = 1 << 1,
-            Bit2 = 1 << 2,
-            UseTagResourceMaybe = 1 << 3,
+            /// <summary>
+            /// always play as 3d sound, even in first person
+            /// </summary>
+            AlwaysSpatialize = 1 << 1,
+            /// <summary>
+            /// disable occlusion/obstruction for this sound
+            /// </summary>
+            NeverObstruct = 1 << 2,
+            FacialAnimationDataStripped = 1 << 3,
             Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
+            /// <summary>
+            /// link count to owner unit
+            /// </summary>
+            LinkToOwner = 1 << 5,
+            /// <summary>
+            /// pitch range is language
+            /// </summary>
+            PitchRangeIsLanguage = 1 << 6,
+            /// <summary>
+            /// don't use sound class speaker flag
+            /// </summary>
+            DontUseSoundClassSpeakerFlag = 1 << 7,
+            /// <summary>
+            /// don't use lipsync data
+            /// </summary>
+            DontUseLipsyncData = 1 << 8,
             Bit9 = 1 << 9,
             Bit10 = 1 << 10,
-            CopyIntoMemoryBeforePlaying = 1 << 11
+            /// <summary>
+            /// instant sound propagation
+            /// </summary>
+            CopyIntoMemoryBeforePlaying = 1 << 11,
+            /// <summary>
+            /// fake spatialization with distance
+            /// </summary>
+            FakeSpatialization,
+            /// <summary>
+            /// sound can't be played
+            /// </summary>
+            Invalid,
+            Bit14 // something to do with impulse sounds
         }
 
         [TagStructure(Size = 0x9, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]

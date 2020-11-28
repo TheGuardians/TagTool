@@ -57,7 +57,7 @@ namespace TagTool.Audio
                 public uint Unknown16;
                 public uint Unknown17;
                 public uint Unknown18;
-                public List<Unknown> UnknownList;
+                public List<SeekTableBlock> SeekTable;
                 public short Compression;
                 public byte Language;
                 public byte Unknown19;
@@ -71,15 +71,14 @@ namespace TagTool.Audio
                 public int Unknown24;
 
                 [TagStructure(Size = 0x18)]
-                public class Unknown : TagStructure
+                public class SeekTableBlock : TagStructure
 				{
-                    public int Unknown2;
-                    public short SoundDialogInfoSize;
-                    public short Unknown1;
-                    public int Unknown3;
-                    public uint Unknown4;
-                    public int Unknown5;
-                    public int Unknown6;
+                    public uint BlockRelativeSampleStart;
+                    public uint BlockRelativeSampleEnd;
+                    public uint StartingSampleIndex;
+                    public uint EndingSampleIndex;
+                    public uint StartingOffset;
+                    public uint EndingOffset;
                 }
             }
         }
