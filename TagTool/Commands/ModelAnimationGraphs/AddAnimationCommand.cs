@@ -95,6 +95,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var importer = new AnimationImporter();
             importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)Cache, ModelList);
 
+            //Check the nodes to verify that this animation can be imported to this jmad
+            if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)Cache))
+                return false;
+
             //the overlay animation type has a base frame and offset nodes which need to be reset on import
             //if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
             //    importer.RemoveOverlayBase();

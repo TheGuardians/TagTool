@@ -285,9 +285,9 @@ namespace TagTool.Commands.Porting
                                 member.AnimationData.Data = sourceStream.ToArray();
                                 continue;
                             default:
-                                Console.WriteLine("###ERROR: Animation codec not supported!");
-                                return null;
-
+                                Console.WriteLine($"###ERROR: Animation codec {codec.AnimationCodec.ToString()} not supported!");
+                                member.AnimationData.Data = null;
+                                continue;
                         }
 
                         if (sourceStream.Position != StaticDataSize + CompressedDataSize)
