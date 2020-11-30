@@ -81,7 +81,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     Console.WriteLine("###WARNING: Movement data not currently supported, animation may not display properly!");
                     break;
                 default:
-                    Console.WriteLine("###ERROR: Filetype not recognized!");
+                    Console.WriteLine($"###ERROR: Filetype {file_extension.ToUpper()} not recognized!");
                     return false;
             }
 
@@ -98,10 +98,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
             //Check the nodes to verify that this animation can be imported to this jmad
             if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)Cache))
                 return false;
-
-            //the overlay animation type has a base frame and offset nodes which need to be reset on import
-            //if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
-            //    importer.RemoveOverlayBase();
 
             //build a new resource 
             ModelAnimationTagResource newResource = new ModelAnimationTagResource

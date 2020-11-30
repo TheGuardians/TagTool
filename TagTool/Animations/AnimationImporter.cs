@@ -474,7 +474,6 @@ namespace TagTool.Animations
         {
             if (ModelList.Count == 0)
             {
-                Console.WriteLine("###WARNING: No render models provided, errors may occur in animation");
                 return;
             }
 
@@ -684,9 +683,9 @@ namespace TagTool.Animations
             public bool hasAnimatedTranslation;
             public bool hasAnimatedRotation;
             public bool hasAnimatedScale;
-            public RealQuaternion DefaultRotation;
-            public RealPoint3d DefaultTranslation;
-            public float DefaultScale;
+            public RealQuaternion DefaultRotation = new RealQuaternion(0, 0, 0, 1);
+            public RealPoint3d DefaultTranslation = new RealPoint3d(0, 0, 0);
+            public float DefaultScale = 1.0f;
             public List<AnimationFrame> Frames = new List<AnimationFrame>();
         }
 
