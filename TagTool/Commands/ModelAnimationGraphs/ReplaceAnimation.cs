@@ -132,14 +132,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 resource.GroupMembers[ResourceGroupMemberIndex] = importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext);
 
                 //write the resource data to a stream and then replace the existing resource in the cache
-                using (MemoryStream stream = new MemoryStream())
-                using (EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+                using (var definitionStream = new MemoryStream())
+                using (var dataStream = new MemoryStream())
+                using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+                using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
                 {
-                    var dataContext = new DataSerializationContext(writer);
-                    CacheContext.Serializer.Serialize(dataContext, resource);
-                    CacheContext.ResourceCaches.ReplaceResource(Animation.ResourceGroups[ResourceGroupIndex].ResourceReference.HaloOnlinePageableResource, stream);
+                    var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
+                    var serializer = new ResourceSerializer(CacheContext.Version);
+                    serializer.Serialize(context, resource);
+                    //reset stream position to beginning so it can be read
+                    dataStream.Position = 0;
+                    CacheContext.ResourceCaches.ReplaceResource(Animation.ResourceGroups[ResourceGroupIndex].ResourceReference.HaloOnlinePageableResource, dataStream);
                 }
-             
+
                 //serialize animation block values
                 Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
             }
