@@ -198,7 +198,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                imported_nodes[3].Name == "base")
             {
                 importer.AnimationNodes.RemoveRange(0, 3);
-                //rotate base frame x by 180 degrees
+                //rotate node 'base' frames x by 180 degrees
                 foreach(var Frame in importer.AnimationNodes[0].Frames)
                 {
                     Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
@@ -215,9 +215,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 Animation.SkeletonNodes[0].ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
                 for (int node_index = 0; node_index < Animation.SkeletonNodes.Count; node_index++)
                 {
-                    Animation.SkeletonNodes[node_index].FirstChildNodeIndex = (short)(Animation.SkeletonNodes[node_index].FirstChildNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].FirstChildNodeIndex - 3);
-                    Animation.SkeletonNodes[node_index].NextSiblingNodeIndex = (short)(Animation.SkeletonNodes[node_index].NextSiblingNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].NextSiblingNodeIndex - 3);
-                    Animation.SkeletonNodes[node_index].ParentNodeIndex = (short)(Animation.SkeletonNodes[node_index].ParentNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].ParentNodeIndex - 3);
+                    if(Animation.SkeletonNodes[node_index].FirstChildNodeIndex != -1)
+                        Animation.SkeletonNodes[node_index].FirstChildNodeIndex = (short)(Animation.SkeletonNodes[node_index].FirstChildNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].FirstChildNodeIndex - 3);
+                    if(Animation.SkeletonNodes[node_index].NextSiblingNodeIndex != -1)
+                        Animation.SkeletonNodes[node_index].NextSiblingNodeIndex = (short)(Animation.SkeletonNodes[node_index].NextSiblingNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].NextSiblingNodeIndex - 3);
+                    if(Animation.SkeletonNodes[node_index].ParentNodeIndex != -1)
+                        Animation.SkeletonNodes[node_index].ParentNodeIndex = (short)(Animation.SkeletonNodes[node_index].ParentNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].ParentNodeIndex - 3);
                 }
             }
         }

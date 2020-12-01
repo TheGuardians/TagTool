@@ -634,22 +634,22 @@ namespace TagTool.Animations
 
             if (AnimationNodes[index].Name != Node)
             {
-                Console.WriteLine($"###ERROR: Node {AnimationNodes[index].Name} has a different name than the jmad ({Node})!");
+                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different name than the jmad ({Node})!");
                 return false;
             }
             if(jmadNodes[index].NextSiblingNodeIndex != AnimationNodes[index].NextSiblingNode)
             {
-                Console.WriteLine($"###ERROR: Node {AnimationNodes[index].Name} has a different next sibling ({newSibling}) than the jmad ({NextSibling})!");
+                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different next sibling ({newSibling}) than the jmad ({NextSibling})!");
                 return false;
             }
             if (jmadNodes[index].FirstChildNodeIndex != AnimationNodes[index].FirstChildNode)
             {
-                Console.WriteLine($"###ERROR: Node {AnimationNodes[index].Name} has a different first child ({newChild}) than the jmad ({FirstChild})!");
+                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different first child ({newChild}) than the jmad ({FirstChild})!");
                 return false;
             }
             if (jmadNodes[index].ParentNodeIndex != AnimationNodes[index].ParentNode)
             {
-                Console.WriteLine($"###ERROR: Node {AnimationNodes[index].Name} has a different parent ({newParent}) than the jmad ({Parent})!");
+                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different parent ({newParent}) than the jmad ({Parent})!");
                 return false;
             }
 
