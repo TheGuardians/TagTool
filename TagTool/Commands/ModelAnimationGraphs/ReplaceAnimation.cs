@@ -24,6 +24,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
+        private bool ReachFixup = false;
 
         public ReplaceAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -31,7 +32,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "ReplaceAnimation",
                   "Replace an animation or animations in a ModelAnimationGraph tag",
 
-                  "ReplaceAnimation <file or folder path>",
+                  "ReplaceAnimation [reachfix] <file or folder path>",
 
                   "Replace an animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
                   "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character\n" +
@@ -45,24 +46,48 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count != 1)
+            if (args.Count < 1 || args.Count > 2)
                 return new TagToolError(CommandError.ArgCount);
+
+            var argStack = new Stack<string>(args.AsEnumerable().Reverse());
+
+            if(argStack.Count == 2)
+            {
+                if (argStack.Pop().ToLower() == "reachfix")
+                    ReachFixup = true;
+                else
+                    return new TagToolError(CommandError.ArgInvalid);
+            }
 
             List<FileInfo> fileList = new List<FileInfo>();
 
-            if (Directory.Exists(args[0]))
+            string directoryarg = argStack.Pop();
+
+            if (Directory.Exists(directoryarg))
             {
-                foreach(var file in Directory.GetFiles(args[0]))
+                foreach(var file in Directory.GetFiles(directoryarg))
                 {
                     fileList.Add(new FileInfo(file));
                 }
             }
-            else if (File.Exists(args[0]))
+            else if (File.Exists(directoryarg))
             {
-                fileList.Add(new FileInfo(args[0]));
+                fileList.Add(new FileInfo(directoryarg));
             }
             else
                 return new TagToolError(CommandError.FileNotFound);
+
+            List<string> ModelList = new List<string>();
+            Console.WriteLine("------------------------------------------------------------------");
+            Console.WriteLine("Enter the tagname of each render model tag that the animation(s) use(s)");
+            Console.WriteLine("Enter a blank line to finish.");
+            Console.WriteLine("------------------------------------------------------------------");
+            for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
+            {
+                //remove any tag type info from tagname
+                line = line.Split('.')[0];
+                ModelList.Add(line);
+            }
 
             Console.WriteLine($"###Replacing {fileList.Count} animation(s)...");
 
@@ -119,7 +144,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
-                importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)CacheContext, new List<string>());
+                importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
+
+                //fixup Reach FP animations
+                if (ReachFixup)
+                    FixupReachFP(importer);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
@@ -158,6 +187,39 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             Console.WriteLine("Animation(s) replaced successfully!");
             return true;
+        }
+
+        public void FixupReachFP(AnimationImporter importer)
+        {
+            var imported_nodes = importer.AnimationNodes;
+            if(imported_nodes[0].Name == "pedestal" &&
+               imported_nodes[1].Name == "aim_pitch" &&
+               imported_nodes[2].Name == "aim_yaw" &&
+               imported_nodes[3].Name == "base")
+            {
+                importer.AnimationNodes.RemoveRange(0, 3);
+                //rotate base frame x by 180 degrees
+                foreach(var Frame in importer.AnimationNodes[0].Frames)
+                {
+                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
+                }
+            }
+
+            var jmad_nodes = Animation.SkeletonNodes;
+            if (CacheContext.StringTable.GetString(jmad_nodes[0].Name) == "pedestal" &&
+                CacheContext.StringTable.GetString(jmad_nodes[1].Name) == "aim_pitch" &&
+                CacheContext.StringTable.GetString(jmad_nodes[2].Name) == "aim_yaw" &&
+                CacheContext.StringTable.GetString(jmad_nodes[3].Name) == "base")
+            {
+                Animation.SkeletonNodes.RemoveRange(0, 3);
+                Animation.SkeletonNodes[0].ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
+                for (int node_index = 0; node_index < Animation.SkeletonNodes.Count; node_index++)
+                {
+                    Animation.SkeletonNodes[node_index].FirstChildNodeIndex = (short)(Animation.SkeletonNodes[node_index].FirstChildNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].FirstChildNodeIndex - 3);
+                    Animation.SkeletonNodes[node_index].NextSiblingNodeIndex = (short)(Animation.SkeletonNodes[node_index].NextSiblingNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].NextSiblingNodeIndex - 3);
+                    Animation.SkeletonNodes[node_index].ParentNodeIndex = (short)(Animation.SkeletonNodes[node_index].ParentNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].ParentNodeIndex - 3);
+                }
+            }
         }
     }
 }

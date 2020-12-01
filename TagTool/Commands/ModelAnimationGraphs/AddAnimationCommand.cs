@@ -17,13 +17,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
 {
     public class AddAnimationCommand : Command
     {
-        private GameCache Cache { get; }
+        private GameCache CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
 
-        public AddAnimationCommand(GameCache cache, ModelAnimationGraph animation, CachedTag jmad)
+        public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
 
                   "AddAnimation",
@@ -33,7 +33,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                   "Add an animation to a ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
         {
-            Cache = cache;
+            CacheContext = cachecontext;
             Animation = animation;
             Jmad = jmad;
         }
@@ -87,16 +87,16 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //get or create stringid for animation block name
             string file_name = Path.GetFileNameWithoutExtension(filepath.FullName).Replace(' ', ':');
-            StringId animation_name = Cache.StringTable.GetStringId(file_name);
+            StringId animation_name = CacheContext.StringTable.GetStringId(file_name);
             if(animation_name == StringId.Invalid)
-                animation_name = Cache.StringTable.AddString(file_name);
+                animation_name = CacheContext.StringTable.AddString(file_name);
 
             //create new importer class and import the source file
             var importer = new AnimationImporter();
-            importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)Cache, ModelList);
+            importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
 
             //Check the nodes to verify that this animation can be imported to this jmad
-            if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)Cache))
+            if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
                 return false;
 
             //build a new resource 
@@ -104,10 +104,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
             {
                 GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
             };
-            newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)Cache));
+            newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
             newResource.GroupMembers.AddressType = CacheAddressType.Definition;
             //serialize the new resource into the cache
-            TagResourceReference resourceref = Cache.ResourceCache.CreateModelAnimationGraphResource(newResource);
+            TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
 
             //add resource reference to the animation tag
             Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
@@ -145,10 +145,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
             Animation.Animations.Add(AnimationBlock);
 
             //save changes to the current tag
-            Cache.SaveStrings();
-            using (Stream cachestream = Cache.OpenCacheReadWrite())
+            CacheContext.SaveStrings();
+            using (Stream cachestream = CacheContext.OpenCacheReadWrite())
             {
-                Cache.Serialize(cachestream, Jmad, Animation);
+                CacheContext.Serialize(cachestream, Jmad, Animation);
             }
 
             Console.WriteLine("Animation added successfully!");

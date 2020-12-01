@@ -28,7 +28,7 @@ namespace TagTool.Animations
         public int staticScaledNodeCount;
         public bool buildstaticdata = false;
 
-        public void Import(string fileName, GameCacheHaloOnlineBase CacheContext, List<string> ModelList)
+        public void Import(string fileName, GameCacheHaloOnlineBase CacheContext, List<string> ModelList, ModelAnimationGraph.FrameType AnimationType)
         {
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
             {
@@ -79,6 +79,7 @@ namespace TagTool.Animations
                 //add first child and next sibling nodes for newer animation formats, or parent nodes for old formats
                 FixupNodeTree(Version);
 
+                //populate node frames values
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     for (int node_index = 0; node_index < nodecount; node_index++)
@@ -96,12 +97,23 @@ namespace TagTool.Animations
                             Rotation = new RealQuaternion(newRotation.X, newRotation.Y, newRotation.Z, newRotation.W),
                             Translation = new RealPoint3d((float)double.Parse(translation[0]) * 0.01f, (float)double.Parse(translation[1]) * 0.01f, (float)double.Parse(translation[2]) * 0.01f),
                             Scale = (float)double.Parse(scale)
-                        });
-                        //check to see if node frame is different from last one, to see if node is used
+                        });                        
+                    }
+                }
+
+                //if the animation is of the overlay type, remove the base frame and subtract it from all other frames
+                if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
+                    RemoveOverlayBase();
+
+                //check to see if each node frame is different from last one, to see if node is used dynamically
+                for (int frame_index = 0; frame_index < frameCount; frame_index++)
+                {
+                    for (int node_index = 0; node_index < nodecount; node_index++)
+                    {
                         if (AnimationNodes[node_index].Frames.Count > 1)
                         {
                             var currentnode = AnimationNodes[node_index];
-                            
+
                             if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedRotation)
                             {
                                 currentnode.hasAnimatedRotation = true;
@@ -120,7 +132,6 @@ namespace TagTool.Animations
                                 currentnode.hasStaticScale = false;
                                 scaledNodeCount++;
                             }
-
                         }
                     }
                 }
@@ -366,22 +377,15 @@ namespace TagTool.Animations
                 //remove basis of overlay to just leave the actual overlay data
                 foreach(var frame in node.Frames)
                 {
-                    if (!node.hasStaticRotation)
-                    {
-                        //using system.numerics.quaternion here because it has a division operator
-                        var temprotation = new Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
-                        var tempbase = new Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
-                        var dividend = temprotation / tempbase;
-                        frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
-                    }
-                    if (!node.hasStaticTranslation)
-                    {
-                        frame.Translation -= BaseFrame.Translation;
-                    }
-                    if (!node.hasStaticScale)
-                    {
-                        frame.Scale -= BaseFrame.Scale;
-                    }
+                    //using system.numerics.quaternion here because it has a division operator
+                    var temprotation = new Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
+                    var tempbase = new Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
+                    var dividend = temprotation / tempbase;
+                    frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
+
+                    frame.Translation -= BaseFrame.Translation;
+
+                    frame.Scale /= BaseFrame.Scale;
                 }
             }
         }
