@@ -726,7 +726,6 @@ namespace TagTool.Commands.Porting
                 Scenario.BspAtlas?.Clear();
                 Scenario.CampaignPlayers?.Clear();
                 //Scenario.SoftCeilings?.Clear();
-                Scenario.PlayerStartingProfile?.Clear();
                 Scenario.PlayerStartingLocations?.Clear();
                 //Scenario.TriggerVolumes?.Clear();
                 Scenario.RecordedAnimations?.Clear();
