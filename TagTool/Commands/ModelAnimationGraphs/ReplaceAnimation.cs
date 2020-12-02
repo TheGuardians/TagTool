@@ -151,8 +151,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     FixupReachFP(importer);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
-                if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
-                    return false;
+                //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
+                //    return false;
 
                 int ResourceGroupIndex = Animation.Animations[matchingindex].AnimationData.ResourceGroupIndex;
                 int ResourceGroupMemberIndex = Animation.Animations[matchingindex].AnimationData.ResourceGroupMemberIndex;
