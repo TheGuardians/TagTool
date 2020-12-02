@@ -381,6 +381,19 @@ namespace TagTool.Commands.Porting
             
             if (BlamCache.Version == CacheVersion.HaloReach)
             {
+                //fix arm node names to match halo 3 convention
+                foreach (var skellynode in definition.SkeletonNodes)
+                {
+                    if (CacheContext.StringTable.GetString(skellynode.Name) == "l_humerus")
+                        skellynode.Name = CacheContext.StringTable.GetStringId("l_upperarm");
+                    else if (CacheContext.StringTable.GetString(skellynode.Name) == "r_humerus")
+                        skellynode.Name = CacheContext.StringTable.GetStringId("r_upperarm");
+                    else if (CacheContext.StringTable.GetString(skellynode.Name) == "l_radius")
+                        skellynode.Name = CacheContext.StringTable.GetStringId("l_forearm");
+                    else if (CacheContext.StringTable.GetString(skellynode.Name) == "r_radius")
+                        skellynode.Name = CacheContext.StringTable.GetStringId("r_forearm");
+                }
+
                 //convert animations
                 foreach (var animation in definition.Animations)
                 {
