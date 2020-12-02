@@ -151,8 +151,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     FixupReachFP(importer);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
-                //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
-                //    return false;
+                if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
+                    return false;
 
                 int ResourceGroupIndex = Animation.Animations[matchingindex].AnimationData.ResourceGroupIndex;
                 int ResourceGroupMemberIndex = Animation.Animations[matchingindex].AnimationData.ResourceGroupMemberIndex;
@@ -202,37 +202,31 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public void FixupReachFP(AnimationImporter importer)
         {
             var imported_nodes = importer.AnimationNodes;
-            if(imported_nodes[0].Name == "pedestal" &&
-               imported_nodes[1].Name == "aim_pitch" &&
-               imported_nodes[2].Name == "aim_yaw" &&
-               imported_nodes[3].Name == "base")
-            {
-                importer.AnimationNodes.RemoveRange(0, 3);
-                //rotate node 'base' frames x by 180 degrees
-                foreach(var Frame in importer.AnimationNodes[0].Frames)
-                {
-                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
-                }
-            }
 
-            var jmad_nodes = Animation.SkeletonNodes;
-            if (CacheContext.StringTable.GetString(jmad_nodes[0].Name) == "pedestal" &&
-                CacheContext.StringTable.GetString(jmad_nodes[1].Name) == "aim_pitch" &&
-                CacheContext.StringTable.GetString(jmad_nodes[2].Name) == "aim_yaw" &&
-                CacheContext.StringTable.GetString(jmad_nodes[3].Name) == "base")
+            var l_humerus = imported_nodes.FindIndex(x => x.Name.Equals("l_humerus"));
+            var r_humerus = imported_nodes.FindIndex(x => x.Name.Equals("l_humerus"));
+            var l_radius = imported_nodes.FindIndex(x => x.Name.Equals("l_radius"));
+            var r_radius = imported_nodes.FindIndex(x => x.Name.Equals("r_radius"));
+            var l_forearm = imported_nodes.FindIndex(x => x.Name.Equals("l_forearm"));
+            var r_forearm = imported_nodes.FindIndex(x => x.Name.Equals("r_forearm"));
+            var l_upperarm = imported_nodes.FindIndex(x => x.Name.Equals("l_upperarm"));
+            var r_upperarm = imported_nodes.FindIndex(x => x.Name.Equals("r_upperarm"));
+
+            if (l_humerus == -1 || r_humerus == -1 || l_radius == -1 || r_radius == -1 ||
+                l_forearm == -1 || r_forearm == -1 || l_upperarm == -1 || r_upperarm == -1)
+                return;
+
+            imported_nodes[l_forearm].hasStaticTranslation = true;
+            imported_nodes[r_forearm].hasStaticTranslation = true;
+            imported_nodes[l_upperarm].hasStaticTranslation = true;
+            imported_nodes[r_upperarm].hasStaticTranslation = true;
+            for (int frame_index = 0; frame_index < importer.frameCount; frame_index++)
             {
-                Animation.SkeletonNodes.RemoveRange(0, 3);
-                Animation.SkeletonNodes[0].ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
-                for (int node_index = 0; node_index < Animation.SkeletonNodes.Count; node_index++)
-                {
-                    if(Animation.SkeletonNodes[node_index].FirstChildNodeIndex != -1)
-                        Animation.SkeletonNodes[node_index].FirstChildNodeIndex = (short)(Animation.SkeletonNodes[node_index].FirstChildNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].FirstChildNodeIndex - 3);
-                    if(Animation.SkeletonNodes[node_index].NextSiblingNodeIndex != -1)
-                        Animation.SkeletonNodes[node_index].NextSiblingNodeIndex = (short)(Animation.SkeletonNodes[node_index].NextSiblingNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].NextSiblingNodeIndex - 3);
-                    if(Animation.SkeletonNodes[node_index].ParentNodeIndex != -1)
-                        Animation.SkeletonNodes[node_index].ParentNodeIndex = (short)(Animation.SkeletonNodes[node_index].ParentNodeIndex < 3 ? 0 : Animation.SkeletonNodes[node_index].ParentNodeIndex - 3);
-                }
-            }
+                imported_nodes[l_forearm].Frames[frame_index].Translation = imported_nodes[l_radius].Frames[frame_index].Translation;
+                imported_nodes[r_forearm].Frames[frame_index].Translation = imported_nodes[r_radius].Frames[frame_index].Translation;
+                imported_nodes[l_upperarm].Frames[frame_index].Translation = imported_nodes[l_humerus].Frames[frame_index].Translation;
+                imported_nodes[r_upperarm].Frames[frame_index].Translation = imported_nodes[r_humerus].Frames[frame_index].Translation;
+            }           
         }
     }
 }
