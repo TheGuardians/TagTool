@@ -166,12 +166,22 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
                 using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
                 {
+                    var pageableResource = Animation.ResourceGroups[ResourceGroupIndex].ResourceReference.HaloOnlinePageableResource;
+
                     var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
                     var serializer = new ResourceSerializer(CacheContext.Version);
                     serializer.Serialize(context, resource);
                     //reset stream position to beginning so it can be read
                     dataStream.Position = 0;
-                    CacheContext.ResourceCaches.ReplaceResource(Animation.ResourceGroups[ResourceGroupIndex].ResourceReference.HaloOnlinePageableResource, dataStream);
+                    CacheContext.ResourceCaches.ReplaceResource(pageableResource, dataStream);
+
+                    var definitionData = definitionStream.ToArray();
+
+                    // add resource definition and fixups
+                    pageableResource.Resource.DefinitionData = definitionData;
+                    pageableResource.Resource.FixupLocations = context.FixupLocations;
+                    pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
+                    pageableResource.Resource.InteropLocations = context.InteropLocations;
                 }
 
                 //serialize animation block values
