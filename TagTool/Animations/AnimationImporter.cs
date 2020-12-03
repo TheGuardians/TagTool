@@ -19,7 +19,7 @@ namespace TagTool.Animations
     {
         public List<AnimationNode> AnimationNodes;
         public int frameCount;
-        public int nodeChecksum;
+        public uint nodeChecksum;
         public int rotatedNodeCount;
         public int translatedNodeCount;
         public int scaledNodeCount;
@@ -48,14 +48,14 @@ namespace TagTool.Animations
                 }
 
                 if (Version >= 16394)
-                    nodeChecksum = int.Parse(textReader.ReadLine()); //version part 2
+                    nodeChecksum = uint.Parse(textReader.ReadLine()); //version part 2
                 frameCount = int.Parse(textReader.ReadLine());
                 textReader.ReadLine(); //framerate
                 textReader.ReadLine(); //actor count
                 textReader.ReadLine(); //actor name
                 int nodecount = int.Parse(textReader.ReadLine());
                 if (Version < 16394)
-                    nodeChecksum = int.Parse(textReader.ReadLine());
+                    nodeChecksum = uint.Parse(textReader.ReadLine());
                 AnimationNodes = new List<AnimationNode>();
                 for (int i = 0; i < nodecount; i++)
                 {
@@ -106,32 +106,23 @@ namespace TagTool.Animations
                     RemoveOverlayBase();
 
                 //check to see if each node frame is different from last one, to see if node is used dynamically
-                for (int frame_index = 0; frame_index < frameCount; frame_index++)
+                for (int node_index = 0; node_index < nodecount; node_index++)
                 {
-                    for (int node_index = 0; node_index < nodecount; node_index++)
+                    for (int frame_index = 0; frame_index < frameCount; frame_index++)
                     {
-                        if (AnimationNodes[node_index].Frames.Count > 1)
-                        {
-                            var currentnode = AnimationNodes[node_index];
+                        var currentnode = AnimationNodes[node_index];
 
-                            if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedRotation)
-                            {
-                                currentnode.hasAnimatedRotation = true;
-                                currentnode.hasStaticRotation = false;
-                                rotatedNodeCount++;
-                            }
-                            if (!CompareTranslations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedTranslation)
-                            {
-                                currentnode.hasAnimatedTranslation = true;
-                                currentnode.hasStaticTranslation = false;
-                                translatedNodeCount++;
-                            }
-                            if (Math.Abs(currentnode.Frames[frame_index].Scale - currentnode.Frames[0].Scale) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
-                            {
-                                currentnode.hasAnimatedScale = true;
-                                currentnode.hasStaticScale = false;
-                                scaledNodeCount++;
-                            }
+                        if (!CompareRotations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedRotation)
+                        {
+                            currentnode.hasAnimatedRotation = true;
+                        }
+                        if (!CompareTranslations(currentnode.Frames[frame_index], currentnode.Frames[0]) && !currentnode.hasAnimatedTranslation)
+                        {
+                            currentnode.hasAnimatedTranslation = true;
+                        }
+                        if (Math.Abs(currentnode.Frames[frame_index].Scale - currentnode.Frames[0].Scale) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
+                        {
+                            currentnode.hasAnimatedScale = true;
                         }
                     }
                 }
@@ -154,17 +145,14 @@ namespace TagTool.Animations
                     if (!CompareRotations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedRotation)
                     {
                         currentnode.hasStaticRotation = true;
-                        staticRotatedNodeCount++;
                     }
                     if (!CompareTranslations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedTranslation)
                     {
                         currentnode.hasStaticTranslation = true;
-                        staticTranslatedNodeCount++;
                     }
-                    if (Math.Abs(currentnode.Frames[0].Scale - 1.0d) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
+                    if (Math.Abs(currentnode.Frames[0].Scale - currentnode.DefaultScale) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
                     {
                         currentnode.hasStaticScale = true;
-                        staticScaledNodeCount++;
                     }
                 }
             }
@@ -193,18 +181,31 @@ namespace TagTool.Animations
         {
             var groupmember = new ModelAnimationTagResource.GroupMember
             {
-                Checksum = nodeChecksum,
+                Checksum = (int)nodeChecksum,
                 MovementDataType = ModelAnimationTagResource.GroupMemberMovementDataType.None,
                 FrameCount = (short)frameCount,
                 NodeCount = (byte)AnimationNodes.Count,
                 PackedDataSizes = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructBlock()
             };
 
-            //check if there is any static data that we need to build
+            //check if there is any static data that we need to build, count nodes of each type
             foreach (var currentnode in AnimationNodes)
             {
                 if (currentnode.hasStaticRotation || currentnode.hasStaticScale || currentnode.hasStaticTranslation)
                     buildstaticdata = true;
+                if (currentnode.hasStaticRotation)
+                    staticRotatedNodeCount++;
+                if (currentnode.hasStaticTranslation)
+                    staticTranslatedNodeCount++;
+                if (currentnode.hasStaticScale)
+                    staticScaledNodeCount++;
+
+                if (currentnode.hasAnimatedRotation)
+                    rotatedNodeCount++;
+                if (currentnode.hasAnimatedTranslation)
+                    translatedNodeCount++;
+                if (currentnode.hasAnimatedScale)
+                    scaledNodeCount++;
             }
 
             using (MemoryStream stream = new MemoryStream())
