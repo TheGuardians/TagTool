@@ -603,8 +603,10 @@ namespace TagTool.Animations
             }
             else
             {
-                if (!CompareSingleNode(jmadNodes, CacheContext, 0))
-                    return false;
+                Console.WriteLine("###ERROR: Node List Checksum mismatch! Check that your animation nodes match the jmad!");
+                return false;
+                //if (!CompareSingleNode(jmadNodes, CacheContext, 0))
+                //    return false;
             }
             return true;
         }

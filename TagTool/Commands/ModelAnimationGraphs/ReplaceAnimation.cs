@@ -201,32 +201,44 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
         public void FixupReachFP(AnimationImporter importer)
         {
+            List<string> BadNodes = new List<string>() { "pedestal", "aim_pitch", "aim_yaw", "l_humerus", "r_humerus", "l_radius", "r_radius", "l_handguard", "r_handguard" };
+
             var imported_nodes = importer.AnimationNodes;
+            var jmad_nodes = Animation.SkeletonNodes;
 
-            var l_humerus = imported_nodes.FindIndex(x => x.Name.Equals("l_humerus"));
-            var r_humerus = imported_nodes.FindIndex(x => x.Name.Equals("l_humerus"));
-            var l_radius = imported_nodes.FindIndex(x => x.Name.Equals("l_radius"));
-            var r_radius = imported_nodes.FindIndex(x => x.Name.Equals("r_radius"));
-            var l_forearm = imported_nodes.FindIndex(x => x.Name.Equals("l_forearm"));
-            var r_forearm = imported_nodes.FindIndex(x => x.Name.Equals("r_forearm"));
-            var l_upperarm = imported_nodes.FindIndex(x => x.Name.Equals("l_upperarm"));
-            var r_upperarm = imported_nodes.FindIndex(x => x.Name.Equals("r_upperarm"));
-
-            if (l_humerus == -1 || r_humerus == -1 || l_radius == -1 || r_radius == -1 ||
-                l_forearm == -1 || r_forearm == -1 || l_upperarm == -1 || r_upperarm == -1)
-                return;
-
-            imported_nodes[l_forearm].hasStaticTranslation = true;
-            imported_nodes[r_forearm].hasStaticTranslation = true;
-            imported_nodes[l_upperarm].hasStaticTranslation = true;
-            imported_nodes[r_upperarm].hasStaticTranslation = true;
-            for (int frame_index = 0; frame_index < importer.frameCount; frame_index++)
+            //prune nodes from currently importing animation file
+            List<AnimationImporter.AnimationNode> importedNodesCopy = imported_nodes.DeepClone();
+            foreach (var node in importedNodesCopy)
             {
-                imported_nodes[l_forearm].Frames[frame_index].Translation = imported_nodes[l_radius].Frames[frame_index].Translation;
-                imported_nodes[r_forearm].Frames[frame_index].Translation = imported_nodes[r_radius].Frames[frame_index].Translation;
-                imported_nodes[l_upperarm].Frames[frame_index].Translation = imported_nodes[l_humerus].Frames[frame_index].Translation;
-                imported_nodes[r_upperarm].Frames[frame_index].Translation = imported_nodes[r_humerus].Frames[frame_index].Translation;
-            }           
+                if (BadNodes.Contains(node.Name))
+                {
+                    imported_nodes.RemoveAt(imported_nodes.FindIndex(x => x.Name.Equals(node.Name)));
+                }
+            }
+
+            //prune nodes from jmad nodes
+            List<ModelAnimationGraph.SkeletonNode> skeletonNodesCopy = jmad_nodes.DeepClone();
+            foreach(var skellynode in skeletonNodesCopy)
+            {
+                string nodename = CacheContext.StringTable.GetString(skellynode.Name);
+                if (BadNodes.Contains(nodename))
+                {
+                    jmad_nodes.RemoveAt(jmad_nodes.FindIndex(x => x.Name.Equals(skellynode.Name)));
+                }
+            }
+            //loop through a second time to fix node tree
+            foreach (var skellynode in jmad_nodes)
+            {
+                if(skellynode.FirstChildNodeIndex != -1)
+                    skellynode.FirstChildNodeIndex = (short)jmad_nodes.FindIndex(x => x.Name.Equals(skeletonNodesCopy[skellynode.FirstChildNodeIndex].Name));
+                if (skellynode.NextSiblingNodeIndex != -1)
+                    skellynode.NextSiblingNodeIndex = (short)jmad_nodes.FindIndex(x => x.Name.Equals(skeletonNodesCopy[skellynode.NextSiblingNodeIndex].Name));
+                if (skellynode.ParentNodeIndex != -1)
+                    skellynode.ParentNodeIndex = (short)jmad_nodes.FindIndex(x => x.Name.Equals(skeletonNodesCopy[skellynode.ParentNodeIndex].Name));
+            }
+
+            //make sure that the first node has the appropriate root flag
+            jmad_nodes[0].ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
         }
     }
 }
