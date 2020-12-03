@@ -239,6 +239,16 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //make sure that the first node has the appropriate root flag
             jmad_nodes[0].ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
+          
+            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
+            if(basenode_index != -1)
+            {
+                //fixup rotated base node
+                foreach (var Frame in imported_nodes[basenode_index].Frames)
+                {
+                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
+                }
+            }
         }
     }
 }
