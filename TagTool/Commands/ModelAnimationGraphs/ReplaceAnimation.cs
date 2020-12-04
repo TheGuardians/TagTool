@@ -240,7 +240,28 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //make sure that the first node has the appropriate root flag
             jmad_nodes[0].ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
-          
+
+            //set left and right arm flags in tag data
+            int flagcount = (int)Math.Ceiling(importer.AnimationNodes.Count / 32.0f);
+            List<int> leftarmflags = new List<int>(new int[flagcount]);
+            List<int> rightarmflags = new List<int>(new int[flagcount]);
+            for (int nodeindex = 0; nodeindex < importer.AnimationNodes.Count; nodeindex++)
+            {
+                int flagset = (int)Math.Floor(nodeindex / 32.0f);
+                if (importer.AnimationNodes[nodeindex].Name.Contains("l_"))
+                    leftarmflags[flagset] |= 1 << (nodeindex - (flagset * 32));
+                if (importer.AnimationNodes[nodeindex].Name.Contains("r_"))
+                    rightarmflags[flagset] |= 1 << (nodeindex - (flagset * 32));
+            }
+            Animation.LeftArmNodes = new uint[8];
+            Animation.RightArmNodes = new uint[8];
+            for (int flagsindex = 0; flagsindex < flagcount; flagsindex++)
+            {
+                Animation.LeftArmNodes[flagsindex] = (uint)leftarmflags[flagsindex];
+                Animation.RightArmNodes[flagsindex] = (uint)rightarmflags[flagsindex];
+            }
+
+            /*
             int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
             if(basenode_index != -1)
             {
@@ -250,6 +271,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
                 }
             }
+            */
         }
     }
 }
