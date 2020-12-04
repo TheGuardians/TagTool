@@ -183,10 +183,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     pageableResource.Resource.FixupLocations = context.FixupLocations;
                     pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
                     pageableResource.Resource.InteropLocations = context.InteropLocations;
+                    Animation.ResourceGroups[ResourceGroupIndex].ResourceReference.HaloOnlinePageableResource = pageableResource;
                 }
 
                 //serialize animation block values
                 Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
+                Animation.Animations[matchingindex].AnimationData.NodeCount = (sbyte)importer.AnimationNodes.Count;
             }
            
             //save changes to the current tag
