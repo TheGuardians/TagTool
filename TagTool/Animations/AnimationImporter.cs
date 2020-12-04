@@ -514,6 +514,7 @@ namespace TagTool.Animations
                         NoMatchList.Add(AnimationNodes[node_index].Name);                
                 }
             }
+            /*
             if(NoMatchList.Count > 0)
             {
                 Console.WriteLine("###WARNING: The following node(s) could not be found in the render models provided!");
@@ -524,6 +525,7 @@ namespace TagTool.Animations
                 }
                 Console.WriteLine();
             }
+            */
 
         }
 

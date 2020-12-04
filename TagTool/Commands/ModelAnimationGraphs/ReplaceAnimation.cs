@@ -79,7 +79,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             List<string> ModelList = new List<string>();
             Console.WriteLine("------------------------------------------------------------------");
-            Console.WriteLine("Enter the tagname of each render model tag that the animation(s) use(s)");
+            Console.WriteLine("Enter the tagname of the primary (actor) render model tag followed by the tagname of the secondary (object) render model tag");
             Console.WriteLine("Enter a blank line to finish.");
             Console.WriteLine("------------------------------------------------------------------");
             for (string line; !String.IsNullOrWhiteSpace(line = Console.ReadLine());)
@@ -150,6 +150,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 if (ReachFixup)
                     FixupReachFP(importer);
 
+                AdjustjmadNodes(importer, ModelList[0], ModelList[1]);
+
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
                 //    return false;
@@ -189,6 +191,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 //serialize animation block values
                 Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
                 Animation.Animations[matchingindex].AnimationData.NodeCount = (sbyte)importer.AnimationNodes.Count;
+
+                Console.WriteLine($"Replaced {file_name} successfully!");
             }
            
             //save changes to the current tag
@@ -198,8 +202,68 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 CacheContext.Serialize(cachestream, Jmad, Animation);
             }
 
-            Console.WriteLine("Animation(s) replaced successfully!");
+            Console.WriteLine("Done!");
             return true;
+        }
+
+        public void AdjustjmadNodes(AnimationImporter importer, string PrimaryModel, string SecondaryModel)
+        {
+            //leave primary model as is for now, just replace secondary model nodes
+            List<ModelAnimationGraph.SkeletonNode> Skelnodescopy = Animation.SkeletonNodes.DeepClone();
+            foreach(var skelnode in Skelnodescopy)
+            {
+                if ((skelnode.ModelFlags &= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel) > 0)
+                    Animation.SkeletonNodes.RemoveAt(Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(skelnode.Name)));
+            }
+
+            using (var CacheStream = CacheContext.OpenCacheReadWrite())
+            {
+                var mode_tag_ref = CacheContext.TagCacheGenHO.GetTag<RenderModel>(SecondaryModel);
+                var mode_tag = CacheContext.Deserialize<RenderModel>(CacheStream, mode_tag_ref);
+                var mode_nodes = mode_tag.Nodes;
+
+                //build set of nodes for secondary model from mode nodes
+                List<ModelAnimationGraph.SkeletonNode> SecondaryNodes = new List<ModelAnimationGraph.SkeletonNode>();
+                foreach(var mode_node in mode_nodes)
+                {
+                    ModelAnimationGraph.SkeletonNode newnode = new ModelAnimationGraph.SkeletonNode
+                    {
+                        Name = mode_node.Name,
+                        NextSiblingNodeIndex = (short)(mode_node.NextSiblingNode == -1 ? -1 : mode_node.NextSiblingNode + Animation.SkeletonNodes.Count),
+                        FirstChildNodeIndex = (short)(mode_node.FirstChildNode == -1 ? -1 : mode_node.FirstChildNode + Animation.SkeletonNodes.Count),
+                        ParentNodeIndex = (short)(mode_node.ParentNode == -1 ? -1 : mode_node.ParentNode + Animation.SkeletonNodes.Count),
+                        ModelFlags = ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel,
+                        ZPosition = mode_node.DefaultTranslation.Z
+                    };
+                    //first node is local root
+                    if (SecondaryNodes.Count == 0)
+                        newnode.ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
+                    SecondaryNodes.Add(newnode);
+                }
+
+                //add secondary model nodes to jmad nodes
+                Animation.SkeletonNodes.AddRange(SecondaryNodes);                
+            }
+
+            //now order imported nodes according to jmad nodes
+            List<AnimationImporter.AnimationNode> newAnimationNodes = new List<AnimationImporter.AnimationNode>();
+            foreach(var skellynode in Animation.SkeletonNodes)
+            {
+                var nodeName = CacheContext.StringTable.GetString(skellynode.Name);
+                int matching_index = importer.AnimationNodes.FindIndex(x => x.Name.Equals(nodeName));
+                if (matching_index == -1)
+                {
+                    Console.WriteLine($"###WARNING: No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
+                    newAnimationNodes.Add(new AnimationImporter.AnimationNode());
+                }
+                else
+                {
+                    newAnimationNodes.Add(importer.AnimationNodes[matching_index]);
+                }
+            }
+
+            //set importer animation nodes to newly sorted list
+            importer.AnimationNodes = newAnimationNodes;
         }
 
         public void FixupReachFP(AnimationImporter importer)
@@ -207,7 +271,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<string> BadNodes = new List<string>() { "pedestal", "aim_pitch", "aim_yaw", "l_humerus", "r_humerus", "l_radius", "r_radius", "l_handguard", "r_handguard" };
 
             var imported_nodes = importer.AnimationNodes;
-            var jmad_nodes = Animation.SkeletonNodes;
+            //var jmad_nodes = Animation.SkeletonNodes;
 
             //prune nodes from currently importing animation file
             List<AnimationImporter.AnimationNode> importedNodesCopy = imported_nodes.DeepClone();
@@ -219,6 +283,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
             }
 
+            /*
             //prune nodes from jmad nodes
             List<ModelAnimationGraph.SkeletonNode> skeletonNodesCopy = jmad_nodes.DeepClone();
             foreach(var skellynode in skeletonNodesCopy)
@@ -262,8 +327,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 Animation.LeftArmNodes[flagsindex] = (uint)leftarmflags[flagsindex];
                 Animation.RightArmNodes[flagsindex] = (uint)rightarmflags[flagsindex];
             }
-
-            /*
+            
             int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
             if(basenode_index != -1)
             {
