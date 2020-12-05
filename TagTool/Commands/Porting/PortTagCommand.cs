@@ -88,53 +88,59 @@ namespace TagTool.Commands.Porting
 
 			var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-			using (var cacheStream = FlagIsSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenCacheReadWrite())
-            using(var blamCacheStream = BlamCache.OpenCacheRead())
-			{
-				if (FlagIsSet(PortingFlags.Memory))
-					using (var cacheFileStream = CacheContext.OpenCacheRead())
-						cacheFileStream.CopyTo(cacheStream);
+            try
+            {
+                using (var cacheStream = FlagIsSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenCacheReadWrite())
+                using (var blamCacheStream = BlamCache.OpenCacheRead())
+                {
+                    if (FlagIsSet(PortingFlags.Memory))
+                        using (var cacheFileStream = CacheContext.OpenCacheRead())
+                            cacheFileStream.CopyTo(cacheStream);
 
-				var oldFlags = Flags;
+                    var oldFlags = Flags;
 
-				foreach (var blamTag in ParseLegacyTag(args.Last()))
-				{
-					ConvertTag(cacheStream, blamCacheStream, resourceStreams, blamTag);
-					Flags = oldFlags;
-				}
+                    foreach (var blamTag in ParseLegacyTag(args.Last()))
+                    {
+                        ConvertTag(cacheStream, blamCacheStream, resourceStreams, blamTag);
+                        Flags = oldFlags;
+                    }
 
-				if (FlagIsSet(PortingFlags.Memory))
-					using (var cacheFileStream = CacheContext.OpenCacheReadWrite())
-					{
-						cacheFileStream.Seek(0, SeekOrigin.Begin);
-						cacheFileStream.SetLength(cacheFileStream.Position);
+                    if (FlagIsSet(PortingFlags.Memory))
+                        using (var cacheFileStream = CacheContext.OpenCacheReadWrite())
+                        {
+                            cacheFileStream.Seek(0, SeekOrigin.Begin);
+                            cacheFileStream.SetLength(cacheFileStream.Position);
 
-						cacheStream.Seek(0, SeekOrigin.Begin);
-						cacheStream.CopyTo(cacheFileStream);
-					}
-			}
+                            cacheStream.Seek(0, SeekOrigin.Begin);
+                            cacheStream.CopyTo(cacheFileStream);
+                        }
+                }
+            }
+            finally
+            {
 
-            if (initialStringIdCount != CacheContext.StringTable.Count)
-                CacheContext.SaveStrings();
+                if (initialStringIdCount != CacheContext.StringTable.Count)
+                    CacheContext.SaveStrings();
 
-			CacheContext.SaveTagNames();
+                CacheContext.SaveTagNames();
 
-			foreach (var entry in resourceStreams)
-			{
-				if (FlagIsSet(PortingFlags.Memory))
-					using (var resourceFileStream = CacheContext.ResourceCaches.OpenCacheReadWrite(entry.Key))
-					{
-						resourceFileStream.Seek(0, SeekOrigin.Begin);
-						resourceFileStream.SetLength(resourceFileStream.Position);
+                foreach (var entry in resourceStreams)
+                {
+                    if (FlagIsSet(PortingFlags.Memory))
+                        using (var resourceFileStream = CacheContext.ResourceCaches.OpenCacheReadWrite(entry.Key))
+                        {
+                            resourceFileStream.Seek(0, SeekOrigin.Begin);
+                            resourceFileStream.SetLength(resourceFileStream.Position);
 
-						entry.Value.Seek(0, SeekOrigin.Begin);
-						entry.Value.CopyTo(resourceFileStream);
-					}
+                            entry.Value.Seek(0, SeekOrigin.Begin);
+                            entry.Value.CopyTo(resourceFileStream);
+                        }
 
-				entry.Value.Close();
-			}
+                    entry.Value.Close();
+                }
 
-            Matcher.DeInit();
+                Matcher.DeInit();
+            }
 
 			return true;
 		}
