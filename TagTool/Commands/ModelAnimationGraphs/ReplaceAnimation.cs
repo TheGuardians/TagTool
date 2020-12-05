@@ -159,10 +159,35 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 int ResourceGroupIndex = Animation.Animations[matchingindex].AnimationData.ResourceGroupIndex;
                 int ResourceGroupMemberIndex = Animation.Animations[matchingindex].AnimationData.ResourceGroupMemberIndex;
 
-                ModelAnimationTagResource resource = CacheContext.ResourceCache.GetModelAnimationTagResource(Animation.ResourceGroups[ResourceGroupIndex].ResourceReference);
-                ModelAnimationTagResource.GroupMember membercopy = resource.GroupMembers[ResourceGroupMemberIndex].DeepClone();
-                resource.GroupMembers[ResourceGroupMemberIndex] = importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext);
+                //ModelAnimationTagResource resource = CacheContext.ResourceCache.GetModelAnimationTagResource(Animation.ResourceGroups[ResourceGroupIndex].ResourceReference);
+                //ModelAnimationTagResource.GroupMember membercopy = resource.GroupMembers[ResourceGroupMemberIndex].DeepClone();
 
+                //build a new resource 
+                ModelAnimationTagResource newResource = new ModelAnimationTagResource
+                {
+                    GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
+                };
+                newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
+                newResource.GroupMembers.AddressType = CacheAddressType.Definition;
+                //serialize the new resource into the cache
+                TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
+
+                //add resource reference to the animation tag
+                Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
+                {
+                    ResourceReference = resourceref,
+                    MemberCount = 1
+                });
+
+                //serialize animation block values
+                Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
+                Animation.Animations[matchingindex].AnimationData.NodeCount = (sbyte)importer.AnimationNodes.Count;
+                Animation.Animations[matchingindex].AnimationData.ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1);
+                Animation.Animations[matchingindex].AnimationData.ResourceGroupMemberIndex = 0;
+
+                Console.WriteLine($"Replaced {file_name} successfully!");
+
+                /*
                 //write the resource data to a stream and then replace the existing resource in the cache
                 using (var definitionStream = new MemoryStream())
                 using (var dataStream = new MemoryStream())
@@ -187,12 +212,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     pageableResource.Resource.InteropLocations = context.InteropLocations;
                     Animation.ResourceGroups[ResourceGroupIndex].ResourceReference.HaloOnlinePageableResource = pageableResource;
                 }
-
-                //serialize animation block values
-                Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
-                Animation.Animations[matchingindex].AnimationData.NodeCount = (sbyte)importer.AnimationNodes.Count;
-
-                Console.WriteLine($"Replaced {file_name} successfully!");
+                */
             }
            
             //save changes to the current tag
@@ -283,6 +303,26 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
             }
 
+            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
+            if (basenode_index != -1)
+            {
+                //fixup rotated base node
+                foreach (var Frame in imported_nodes[basenode_index].Frames)
+                {
+                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
+                }
+            }
+
+            int cc_index = imported_nodes.FindIndex(x => x.Name.Equals("camera_control"));
+            if (cc_index != -1)
+            {
+                //fixup rotated camera_control node
+                foreach (var Frame in imported_nodes[cc_index].Frames)
+                {
+                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
+                }
+            }
+
             /*
             //prune nodes from jmad nodes
             List<ModelAnimationGraph.SkeletonNode> skeletonNodesCopy = jmad_nodes.DeepClone();
@@ -327,16 +367,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 Animation.LeftArmNodes[flagsindex] = (uint)leftarmflags[flagsindex];
                 Animation.RightArmNodes[flagsindex] = (uint)rightarmflags[flagsindex];
             }
-            
-            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
-            if(basenode_index != -1)
-            {
-                //fixup rotated base node
-                foreach (var Frame in imported_nodes[basenode_index].Frames)
-                {
-                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
-                }
-            }
+           
             */
         }
     }
