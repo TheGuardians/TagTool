@@ -43,7 +43,7 @@ namespace TagTool.Commands.RenderMethods
                 {
                     var mapTemplate = template.TextureParameterNames[i];
 
-                    Console.WriteLine($"Bitmap {i} ({Cache.StringTable.GetString(mapTemplate.Name)}): {property.TextureConstants[i].Bitmap.Group.Tag} 0x{property.TextureConstants[i].Bitmap.Index:X4}");
+                    Console.WriteLine($"[{i}] {Cache.StringTable.GetString(mapTemplate.Name)} {property.TextureConstants[i].Bitmap.Name}.bitmap");
                 }
             }
 
