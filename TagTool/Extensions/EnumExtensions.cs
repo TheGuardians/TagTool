@@ -58,5 +58,20 @@ namespace System
         {
             return value.HasFlag(flags);
         }
+
+		public static object ConvertLexical(this Enum value, Type targetType)
+		{
+			var members = value.ToString()
+				.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+				.Where(x => targetType.IsEnumDefined(x))
+				.ToArray();
+
+			return Enum.Parse(targetType, string.Join(", ", members));
+		}
+
+		public static U ConvertLexical<U>(this Enum value) where U : Enum
+		{
+			return (U)ConvertLexical(value, typeof(U));
+		}
 	}
 }
