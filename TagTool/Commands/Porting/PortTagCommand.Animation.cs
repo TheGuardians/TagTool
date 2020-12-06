@@ -403,6 +403,18 @@ namespace TagTool.Commands.Porting
 
                 }
 
+                //sort animations by stringid value, then fix up variant siblings
+                var stringIDresolver = CacheContext.StringTable.Resolver;
+                var animationscopy = definition.Animations.DeepClone();
+                definition.Animations = definition.Animations.OrderBy(a => stringIDresolver.GetSet(a.Name)).ThenBy(a => stringIDresolver.GetIndex(a.Name)).ToList();
+                foreach(var anim in definition.Animations)
+                {
+                    if (anim.AnimationData.NextVariantSibling != -1)
+                        anim.AnimationData.NextVariantSibling = (short)definition.Animations.FindIndex(x => x.Name.Equals(animationscopy[anim.AnimationData.NextVariantSibling].Name));
+                    if (anim.AnimationData.PreviousVariantSibling != -1)
+                        anim.AnimationData.PreviousVariantSibling = (short)definition.Animations.FindIndex(x => x.Name.Equals(animationscopy[anim.AnimationData.PreviousVariantSibling].Name));
+                }
+
                 //convert weapon types
                 foreach (var mode in definition.Modes)
                 {
@@ -415,11 +427,21 @@ namespace TagTool.Commands.Porting
                             weaponType.Set = weaponType.AnimationSetsReach[0];
                             //manually convert stringids from copied reach data
                             foreach(var action in weaponType.Set.Actions)
+                            {
                                 action.Label = ConvertStringId(action.Label);
+                                if (action.Animation != -1)
+                                    action.Animation = (short)definition.Animations.FindIndex(x => x.Name.Equals(animationscopy[action.Animation].Name));
+                            }                               
                             foreach (var overlay in weaponType.Set.Overlays)
+                            {
                                 overlay.Label = ConvertStringId(overlay.Label);
+                                if (overlay.Animation != -1)
+                                    overlay.Animation = (short)definition.Animations.FindIndex(x => x.Name.Equals(animationscopy[overlay.Animation].Name));
+                            }
                             foreach (var death in weaponType.Set.DeathAndDamage)
+                            {
                                 death.Label = ConvertStringId(death.Label);
+                            }
                             foreach (var transition in weaponType.Set.Transitions)
                             {
                                 transition.StateName = ConvertStringId(transition.StateName);
