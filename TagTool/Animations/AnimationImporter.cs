@@ -100,7 +100,6 @@ namespace TagTool.Animations
                         });                        
                     }
                 }
-
             }
         }
 
@@ -599,6 +598,36 @@ namespace TagTool.Animations
             }
 
             return checksum == importedchecksum;
+        }
+
+        //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
+        //nodelistchecksum format seems to have changed in games after Halo 1
+        public uint CalculateNodeListChecksum(int node_index, uint checksum = 0)
+        {
+            AnimationNode node = AnimationNodes[node_index];
+            checksum = ((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
+            checksum += CalculateSingleNodeChecksum(node.Name);
+            checksum = ((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
+
+            int nextnodeindex = node.FirstChildNode;
+            while(nextnodeindex != -1)
+            {
+                checksum = CalculateNodeListChecksum(nextnodeindex, checksum);
+                nextnodeindex = AnimationNodes[nextnodeindex].NextSiblingNode;
+            }
+
+            return checksum = ((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
+        }
+
+        public uint CalculateSingleNodeChecksum(string nodename)
+        {
+            uint checksum = 0;
+            foreach (var chardata in nodename.ToArray())
+            {
+                checksum = (checksum >> 31 | checksum << 1) & 0xFFFFFFFF;
+                checksum += (byte)chardata;
+            }
+            return checksum & 0xFFFFFFFF;
         }
 
         public bool CompareNodes(List<ModelAnimationGraph.SkeletonNode> jmadNodes, GameCacheHaloOnlineBase CacheContext)

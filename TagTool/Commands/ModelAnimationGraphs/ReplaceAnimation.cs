@@ -187,6 +187,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 });
 
                 //serialize animation block values
+                Animation.Animations[matchingindex].AnimationData.NodeListChecksum = (int)(importer.CalculateNodeListChecksum(0));
                 Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
                 Animation.Animations[matchingindex].AnimationData.NodeCount = (sbyte)importer.AnimationNodes.Count;
                 Animation.Animations[matchingindex].AnimationData.ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1);
@@ -279,12 +280,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<AnimationImporter.AnimationNode> newAnimationNodes = new List<AnimationImporter.AnimationNode>();
             foreach (var skellynode in Animation.SkeletonNodes)
             {
-                var nodeName = CacheContext.StringTable.GetString(skellynode.Name);
+                string nodeName = CacheContext.StringTable.GetString(skellynode.Name);
                 int matching_index = importer.AnimationNodes.FindIndex(x => x.Name.Equals(nodeName));
                 if (matching_index == -1)
                 {
                     Console.WriteLine($"###WARNING: No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
-                    newAnimationNodes.Add(new AnimationImporter.AnimationNode());
+                    newAnimationNodes.Add(new AnimationImporter.AnimationNode() {Name = nodeName});
                 }
                 else
                 {
