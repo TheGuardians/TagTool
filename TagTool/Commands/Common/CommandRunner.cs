@@ -26,6 +26,10 @@ namespace TagTool.Commands.Common
                 return;
             }
 
+            //use the # character to void lines in your script, so that they are not executed
+            if (commandLine.StartsWith("#"))
+                return;
+
             if (printInput)
                 Console.WriteLine(commandLine);
 
