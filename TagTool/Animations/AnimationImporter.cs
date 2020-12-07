@@ -77,7 +77,7 @@ namespace TagTool.Animations
                 }
 
                 //add first child and next sibling nodes for newer animation formats, or parent nodes for old formats
-                FixupNodeTree(Version);
+                //FixupNodeTree(Version);
 
                 //populate node frames values
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
@@ -601,7 +601,7 @@ namespace TagTool.Animations
         }
 
         //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
-        //nodelistchecksum format seems to have changed in games after Halo 1
+        //later halo games also use this same format
         public uint CalculateNodeListChecksum(int node_index, uint checksum = 0)
         {
             AnimationNode node = AnimationNodes[node_index];

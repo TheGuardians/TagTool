@@ -285,11 +285,15 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 if (matching_index == -1)
                 {
                     Console.WriteLine($"###WARNING: No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
-                    newAnimationNodes.Add(new AnimationImporter.AnimationNode() {Name = nodeName});
+                    newAnimationNodes.Add(new AnimationImporter.AnimationNode() {Name = nodeName, FirstChildNode = skellynode.FirstChildNodeIndex, NextSiblingNode = skellynode.NextSiblingNodeIndex, ParentNode = skellynode.ParentNodeIndex});
                 }
                 else
                 {
-                    newAnimationNodes.Add(importer.AnimationNodes[matching_index]);
+                    AnimationImporter.AnimationNode matching_node = importer.AnimationNodes[matching_index];
+                    matching_node.FirstChildNode = skellynode.FirstChildNodeIndex;
+                    matching_node.NextSiblingNode = skellynode.NextSiblingNodeIndex;
+                    matching_node.ParentNode = skellynode.ParentNodeIndex;
+                    newAnimationNodes.Add(matching_node);
                 }
             }
 

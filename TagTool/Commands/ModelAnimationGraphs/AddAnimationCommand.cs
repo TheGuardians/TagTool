@@ -94,12 +94,16 @@ namespace TagTool.Commands.ModelAnimationGraphs
             //create new importer class and import the source file
             var importer = new AnimationImporter();
             importer.Import(filepath.FullName);
+
+            //Adjust imported nodes to ensure that they align with the jmad
+            AdjustImportedNodes(importer);
+
             //process node data in advance of serialization
             importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
 
             //Check the nodes to verify that this animation can be imported to this jmad
-            if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
-                return false;
+            //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
+            //    return false;
 
             //build a new resource 
             ModelAnimationTagResource newResource = new ModelAnimationTagResource
@@ -130,7 +134,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     CurrentCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
                     FrameCount = (short)importer.frameCount,
                     NodeCount = (sbyte)importer.AnimationNodes.Count,
-                    NodeListChecksum = (int)importer.nodeChecksum,
+                    NodeListChecksum = (int)(importer.CalculateNodeListChecksum(0)),
                     Unknown2 = 5, //don't know what these do, but set usual values
                     Unknown3 = 6,
                     Heading = new RealVector3d(1,0,0),
@@ -155,6 +159,33 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             Console.WriteLine("Animation added successfully!");
             return true;
+        }
+
+        public void AdjustImportedNodes(AnimationImporter importer)
+        {
+            //now order imported nodes according to jmad nodes
+            List<AnimationImporter.AnimationNode> newAnimationNodes = new List<AnimationImporter.AnimationNode>();
+            foreach (var skellynode in Animation.SkeletonNodes)
+            {
+                string nodeName = CacheContext.StringTable.GetString(skellynode.Name);
+                int matching_index = importer.AnimationNodes.FindIndex(x => x.Name.Equals(nodeName));
+                if (matching_index == -1)
+                {
+                    Console.WriteLine($"###WARNING: No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
+                    newAnimationNodes.Add(new AnimationImporter.AnimationNode() { Name = nodeName, FirstChildNode = skellynode.FirstChildNodeIndex, NextSiblingNode = skellynode.NextSiblingNodeIndex, ParentNode = skellynode.ParentNodeIndex });
+                }
+                else
+                {
+                    AnimationImporter.AnimationNode matching_node = importer.AnimationNodes[matching_index];
+                    matching_node.FirstChildNode = skellynode.FirstChildNodeIndex;
+                    matching_node.NextSiblingNode = skellynode.NextSiblingNodeIndex;
+                    matching_node.ParentNode = skellynode.ParentNodeIndex;
+                    newAnimationNodes.Add(matching_node);
+                }
+            }
+
+            //set importer animation nodes to newly sorted list
+            importer.AnimationNodes = newAnimationNodes;
         }
     }
 }
