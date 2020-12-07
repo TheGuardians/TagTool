@@ -93,7 +93,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //create new importer class and import the source file
             var importer = new AnimationImporter();
-            importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
+            importer.Import(filepath.FullName);
+            //process node data in advance of serialization
+            importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
 
             //Check the nodes to verify that this animation can be imported to this jmad
             if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))

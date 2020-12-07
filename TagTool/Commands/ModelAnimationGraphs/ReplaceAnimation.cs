@@ -89,6 +89,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 ModelList.Add(line);
             }
 
+            //Adjust jmad nodes to match secondary model
+            AdjustjmadNodes(ModelList[0], ModelList[1]);
+
             Console.WriteLine($"###Replacing {fileList.Count} animation(s)...");
 
             foreach(var filepath in fileList)
@@ -144,13 +147,17 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
-                importer.Import(filepath.FullName, (GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
+                importer.Import(filepath.FullName);
 
                 //fixup Reach FP animations
                 if (ReachFixup)
                     FixupReachFP(importer);
 
-                AdjustjmadNodes(importer, ModelList[0], ModelList[1]);
+                //remove excess nodes and reorder to match the tag
+                AdjustImportedNodes(importer);
+
+                //set up node flags for serialization
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
@@ -226,7 +233,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             return true;
         }
 
-        public void AdjustjmadNodes(AnimationImporter importer, string PrimaryModel, string SecondaryModel)
+        public void AdjustjmadNodes(string PrimaryModel, string SecondaryModel)
         {
             //leave primary model as is for now, just replace secondary model nodes
             List<ModelAnimationGraph.SkeletonNode> Skelnodescopy = Animation.SkeletonNodes.DeepClone();
@@ -263,11 +270,14 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //add secondary model nodes to jmad nodes
                 Animation.SkeletonNodes.AddRange(SecondaryNodes);                
-            }
+            }           
+        }
 
+        public void AdjustImportedNodes(AnimationImporter importer)
+        {
             //now order imported nodes according to jmad nodes
             List<AnimationImporter.AnimationNode> newAnimationNodes = new List<AnimationImporter.AnimationNode>();
-            foreach(var skellynode in Animation.SkeletonNodes)
+            foreach (var skellynode in Animation.SkeletonNodes)
             {
                 var nodeName = CacheContext.StringTable.GetString(skellynode.Name);
                 int matching_index = importer.AnimationNodes.FindIndex(x => x.Name.Equals(nodeName));
@@ -288,9 +298,20 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
         public void FixupReachFP(AnimationImporter importer)
         {
-            List<string> BadNodes = new List<string>() { "pedestal", "aim_pitch", "aim_yaw", "l_humerus", "r_humerus", "l_radius", "r_radius", "l_handguard", "r_handguard" };
-
             var imported_nodes = importer.AnimationNodes;
+           
+            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
+            if (basenode_index != -1)
+            {
+                //fixup rotated base node
+                foreach (var Frame in imported_nodes[basenode_index].Frames)
+                {
+                    Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
+                }
+            }
+
+            /*
+            List<string> BadNodes = new List<string>() { "pedestal", "aim_pitch", "aim_yaw", "l_humerus", "r_humerus", "l_radius", "r_radius", "l_handguard", "r_handguard" };           
             //var jmad_nodes = Animation.SkeletonNodes;
 
             //prune nodes from currently importing animation file
@@ -302,26 +323,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     imported_nodes.RemoveAt(imported_nodes.FindIndex(x => x.Name.Equals(node.Name)));
                 }
             }
-
-            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
-            if (basenode_index != -1)
-            {
-                //fixup rotated base node
-                foreach (var Frame in imported_nodes[basenode_index].Frames)
-                {
-                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
-                }
-            }
-
-            int cc_index = imported_nodes.FindIndex(x => x.Name.Equals("camera_control"));
-            if (cc_index != -1)
-            {
-                //fixup rotated camera_control node
-                foreach (var Frame in imported_nodes[cc_index].Frames)
-                {
-                    Frame.Rotation = new RealQuaternion(-Frame.Rotation.I, Frame.Rotation.J, Frame.Rotation.K, Frame.Rotation.W);
-                }
-            }
+            */
 
             /*
             //prune nodes from jmad nodes
