@@ -375,21 +375,24 @@ namespace TagTool.Animations
             frameCount--;
             foreach (var node in AnimationNodes)
             {
-                //copy and then remove unnecessary base frame
-                AnimationFrame BaseFrame = node.Frames[0].DeepClone();
-                node.Frames.RemoveAt(0);
-                //remove basis of overlay to just leave the actual overlay data
-                foreach(var frame in node.Frames)
+                if(node.Frames.Count > 0)
                 {
-                    //using system.numerics.quaternion here because it has a division operator
-                    var temprotation = new Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
-                    var tempbase = new Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
-                    var dividend = temprotation / tempbase;
-                    frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
+                    //copy and then remove unnecessary base frame
+                    AnimationFrame BaseFrame = node.Frames[0].DeepClone();
+                    node.Frames.RemoveAt(0);
+                    //remove basis of overlay to just leave the actual overlay data
+                    foreach (var frame in node.Frames)
+                    {
+                        //using system.numerics.quaternion here because it has a division operator
+                        var temprotation = new Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
+                        var tempbase = new Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
+                        var dividend = temprotation / tempbase;
+                        frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
 
-                    frame.Translation -= BaseFrame.Translation;
+                        frame.Translation -= BaseFrame.Translation;
 
-                    frame.Scale /= BaseFrame.Scale;
+                        frame.Scale /= BaseFrame.Scale;
+                    }
                 }
             }
         }
