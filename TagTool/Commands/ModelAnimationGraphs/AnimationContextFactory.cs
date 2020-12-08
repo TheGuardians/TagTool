@@ -22,7 +22,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             context.AddCommand(new SortModesCommand(cache, animation));
             context.AddCommand(new ApplySprintFixupsCommand(cache));
             context.AddCommand(new AddAnimationCommand(cache, animation, tag));
-            context.AddCommand(new ReplaceAnimationCommand(cache, animation, tag));
+            context.AddCommand(new ReplaceFPAnimationCommand(cache, animation, tag));
         }
     }
 }

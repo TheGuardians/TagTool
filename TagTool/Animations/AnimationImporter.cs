@@ -77,7 +77,7 @@ namespace TagTool.Animations
                 }
 
                 //add first child and next sibling nodes for newer animation formats, or parent nodes for old formats
-                //FixupNodeTree(Version);
+                FixupNodeTree(Version);
 
                 //populate node frames values
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
@@ -530,7 +530,7 @@ namespace TagTool.Animations
             }
             */
 
-        }
+        }       
 
         public void FixupNodeTree(int Version)
         {
@@ -644,7 +644,6 @@ namespace TagTool.Animations
                 //if (!CompareSingleNode(jmadNodes, CacheContext, 0))
                 //    return false;
             }
-            return true;
         }
 
         public bool CompareSingleNode(List<ModelAnimationGraph.SkeletonNode> jmadNodes, GameCacheHaloOnlineBase CacheContext, int index)

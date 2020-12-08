@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {
-    public class ReplaceAnimationCommand : Command
+    public class ReplaceFPAnimationCommand : Command
     {
         private GameCacheHaloOnlineBase CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
@@ -26,15 +26,15 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private CachedTag Jmad { get; set; }
         private bool ReachFixup = false;
 
-        public ReplaceAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
+        public ReplaceFPAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
 
-                  "ReplaceAnimation",
-                  "Replace an animation or animations in a ModelAnimationGraph tag",
+                  "ReplaceFPAnimation",
+                  "Replace a first person animation or animations in a ModelAnimationGraph tag",
 
-                  "ReplaceAnimation [reachfix] <file or folder path>",
+                  "ReplaceFPAnimation [reachfix] <file or folder path>",
 
-                  "Replace an animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
+                  "Replace a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
                   "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character\n" +
                   "Specify a folder to replace multiple animations or a file to replace a single animation")
         {
@@ -236,12 +236,23 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
         public void AdjustjmadNodes(string PrimaryModel, string SecondaryModel)
         {
-            //leave primary model as is for now, just replace secondary model nodes
+            //remove existing secondary model nodes
             List<ModelAnimationGraph.SkeletonNode> Skelnodescopy = Animation.SkeletonNodes.DeepClone();
             foreach(var skelnode in Skelnodescopy)
             {
                 if ((skelnode.ModelFlags &= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel) > 0)
                     Animation.SkeletonNodes.RemoveAt(Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(skelnode.Name)));
+            }
+
+            //repair any node inconsistencies
+            foreach(var node in Animation.SkeletonNodes)
+            {
+                if(node.ParentNodeIndex != -1)
+                    node.ParentNodeIndex = (short)Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(Skelnodescopy[node.ParentNodeIndex].Name));
+                if (node.FirstChildNodeIndex != -1)
+                    node.FirstChildNodeIndex = (short)Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(Skelnodescopy[node.FirstChildNodeIndex].Name));
+                if (node.NextSiblingNodeIndex != -1)
+                    node.NextSiblingNodeIndex = (short)Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(Skelnodescopy[node.NextSiblingNodeIndex].Name));
             }
 
             using (var CacheStream = CacheContext.OpenCacheReadWrite())
@@ -265,12 +276,22 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     };
                     //first node is local root
                     if (SecondaryNodes.Count == 0)
+                    {
                         newnode.ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
+                    }
                     SecondaryNodes.Add(newnode);
                 }
 
                 //add secondary model nodes to jmad nodes
-                Animation.SkeletonNodes.AddRange(SecondaryNodes);                
+                Animation.SkeletonNodes.AddRange(SecondaryNodes);        
+
+                //fixup references to secondary model
+                var right_hand_index = Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(CacheContext.StringTable.GetStringId("r_hand")));
+                var secondary_model_root_index = Animation.SkeletonNodes.FindIndex(x => x.ModelFlags.Equals(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot | ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel));
+                var r_index_low_index = Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(CacheContext.StringTable.GetStringId("r_index_low")));
+                Animation.SkeletonNodes[right_hand_index].FirstChildNodeIndex = (short)secondary_model_root_index;
+                Animation.SkeletonNodes[secondary_model_root_index].ParentNodeIndex = (short)right_hand_index;
+                Animation.SkeletonNodes[secondary_model_root_index].NextSiblingNodeIndex = (short)r_index_low_index;
             }           
         }
 
