@@ -131,6 +131,9 @@ namespace TagTool.Animations
             //check to see if each node frame is different from last one, to see if node is used dynamically
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
+                if (AnimationNodes[node_index].Frames.Count < 1)
+                    continue;
+
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     var currentnode = AnimationNodes[node_index];
@@ -156,6 +159,9 @@ namespace TagTool.Animations
             //setup static nodes
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
+                if (AnimationNodes[node_index].Frames.Count < 1)
+                    continue;
+
                 var currentnode = AnimationNodes[node_index];
 
                 var DefaultPositionFrame = new AnimationFrame
