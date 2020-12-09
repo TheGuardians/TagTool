@@ -63,7 +63,7 @@ namespace TagTool.Commands.RenderMethods
 			else
 			{
 				properties.TextureConstants[parameterIndex].Bitmap = tagInstance;
-				Console.WriteLine(string.Format("{0}: CachedTag = [0x{1}] {2}", args[0], tagInstance.Index.ToString("X4"), tagInstance.Name));
+				Console.WriteLine(string.Format("{0}: CachedTag = [0x{1}] {2}.bitmap", args[0], tagInstance.Index.ToString("X4"), tagInstance.Name));
 			}
 
 			//var argument = properties.TextureConstants[parameterIndex];
