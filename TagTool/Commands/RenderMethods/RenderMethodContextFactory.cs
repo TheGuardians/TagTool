@@ -22,7 +22,8 @@ namespace TagTool.Commands.RenderMethods
             context.AddCommand(new ListArgumentsCommand(cache, tag, renderMethod));
             context.AddCommand(new SetArgumentCommand(cache, tag, renderMethod));
             context.AddCommand(new ListBitmapsCommand(cache, tag, renderMethod));
-            context.AddCommand(new SpecifyBitmapsCommand(cache, tag, renderMethod));
+			context.AddCommand(new SetBitmapCommand(cache, tag, renderMethod));
+			context.AddCommand(new SpecifyBitmapsCommand(cache, tag, renderMethod));
             context.AddCommand(new PopulateParametersCommand(cache, tag, renderMethod));
         }
     }
