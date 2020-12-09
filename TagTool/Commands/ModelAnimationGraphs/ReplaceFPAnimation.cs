@@ -339,9 +339,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
             //fix weapon IK marker
             if(Animation.Modes.Count > 0)
             {
-                if(Animation.Modes[0].ModeIk.Count > 0)
+                if (Animation.Modes[0].WeaponClass.Count > 0)
                 {
-                    Animation.Modes[0].ModeIk[0].AttachToMarker = CacheContext.StringTable.GetStringId("left_hand_spartan_fp");
+                    if(Animation.Modes[0].WeaponClass[0].WeaponIk.Count > 0)
+                    {
+                        Animation.Modes[0].WeaponClass[0].WeaponIk[0].AttachToMarker = CacheContext.StringTable.GetStringId("left_hand_spartan_fp");
+                    }
                 }
             }
 
