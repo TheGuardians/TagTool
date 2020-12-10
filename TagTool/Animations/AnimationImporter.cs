@@ -20,6 +20,7 @@ namespace TagTool.Animations
         public List<AnimationNode> AnimationNodes;
         public int frameCount;
         public uint nodeChecksum;
+        public double framerate;
         public int rotatedNodeCount;
         public int translatedNodeCount;
         public int scaledNodeCount;
@@ -50,7 +51,7 @@ namespace TagTool.Animations
                 if (Version >= 16394)
                     nodeChecksum = uint.Parse(textReader.ReadLine()); //version part 2
                 frameCount = int.Parse(textReader.ReadLine());
-                textReader.ReadLine(); //framerate
+                framerate = double.Parse(textReader.ReadLine()); //framerate
                 textReader.ReadLine(); //actor count
                 textReader.ReadLine(); //actor name
                 int nodecount = int.Parse(textReader.ReadLine());
@@ -234,7 +235,7 @@ namespace TagTool.Animations
                     RotationCount = (sbyte)rotatedNodeCount,
                     TranslationCount = (sbyte)translatedNodeCount,
                     ScaleCount = (sbyte)scaledNodeCount,
-                    PlaybackRate = 1.0f
+                    PlaybackRate = (float)(framerate / 60.0d)
                 };
                 CacheContext.Serializer.Serialize(dataContext, codecheader);
 
@@ -456,6 +457,23 @@ namespace TagTool.Animations
                         CacheContext.Serializer.Serialize(dataContext, translation);
                     }
                 }
+            }
+        }
+
+        public List<AnimationFrame> HandleMovementData(ModelAnimationGraph.FrameType AnimationType, AnimationMovementDataType FrameInfoType)
+        {
+            List<AnimationFrame> MovementData = new List<AnimationFrame>();
+            switch (FrameInfoType)
+            {
+                case AnimationMovementDataType.DxDy:
+                    if(AnimationType != ModelAnimationGraph.FrameType.Base)
+                    {
+                        Console.WriteLine("###ERROR: Only base type animations can have movement data!");
+                        return MovementData;
+                    }
+                    return MovementData;
+                default:
+                    return MovementData;
             }
         }
 
