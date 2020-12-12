@@ -12,6 +12,7 @@ using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System.Numerics;
+using Assimp;
 
 namespace TagTool.Animations
 {
@@ -20,7 +21,7 @@ namespace TagTool.Animations
         public List<AnimationNode> AnimationNodes;
         public int frameCount;
         public uint nodeChecksum;
-        public double framerate;
+        public double framerate = 30;
         public int rotatedNodeCount;
         public int translatedNodeCount;
         public int scaledNodeCount;
@@ -28,6 +29,35 @@ namespace TagTool.Animations
         public int staticTranslatedNodeCount;
         public int staticScaledNodeCount;
         public bool buildstaticdata = false;
+
+        public bool AssimpImport(string fileName)
+        {
+            //import the mesh and get the vertices and indices
+            Scene model;
+            using (var importer = new AssimpContext())
+            {
+                using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
+                {
+                    logStream.Attach();
+                    model = importer.ImportFile(fileName);
+                    logStream.Detach();
+                }
+            }
+
+            if (model.HasAnimations && model.Animations[0].HasNodeAnimations)
+            {
+                foreach(var modelnode in model.Animations[0].NodeAnimationChannels)
+                {
+                    List<AnimationFrame> NodeFrames = new List<AnimationFrame>();
+                }
+            }
+            else
+            {
+                Console.WriteLine("###ERROR: Model has no animations!");
+                return false;
+            }
+            return true;
+        }
 
         public void Import(string fileName)
         {
@@ -90,8 +120,11 @@ namespace TagTool.Animations
                         var scale = textReader.ReadLine();
 
                         //Conjugate the quaternion during import, this is what tool.exe does
-                        var newRotation = new Quaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3]));
-                        newRotation = Quaternion.Conjugate(newRotation);
+                        var newRotation = new System.Numerics.Quaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3]));
+
+                        //rotations are conjugated for early versions of the JMA format
+                        if(Version < 16394)
+                            newRotation = System.Numerics.Quaternion.Conjugate(newRotation);
 
                         AnimationNodes[node_index].Frames.Add(new AnimationFrame
                         {
@@ -391,8 +424,8 @@ namespace TagTool.Animations
                     foreach (var frame in node.Frames)
                     {
                         //using system.numerics.quaternion here because it has a division operator
-                        var temprotation = new Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
-                        var tempbase = new Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
+                        var temprotation = new System.Numerics.Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
+                        var tempbase = new System.Numerics.Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
                         var dividend = temprotation / tempbase;
                         frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
 
@@ -460,9 +493,9 @@ namespace TagTool.Animations
             }
         }
 
-        public List<AnimationFrame> HandleMovementData(ModelAnimationGraph.FrameType AnimationType, AnimationMovementDataType FrameInfoType)
+        public List<RealPoint3d> HandleMovementData(ModelAnimationGraph.FrameType AnimationType, AnimationMovementDataType FrameInfoType)
         {
-            List<AnimationFrame> MovementData = new List<AnimationFrame>();
+            List<RealPoint3d> MovementData = new List<RealPoint3d>();
             switch (FrameInfoType)
             {
                 case AnimationMovementDataType.DxDy:
@@ -470,6 +503,24 @@ namespace TagTool.Animations
                     {
                         Console.WriteLine("###ERROR: Only base type animations can have movement data!");
                         return MovementData;
+                    }
+                    //extract data only from the first (root) node
+                    //data collection starts at the end of the frames, moving backwards to the beginning
+                    for(int frame_index = AnimationNodes[0].Frames.Count - 2; frame_index >= 0; frame_index--)
+                    {
+                        AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index];
+                        AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index + 1];
+                        AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
+
+                        //don't include z axis for basic movement data
+                        RealPoint3d MovementFrame = new RealPoint3d(NextFrame.Translation.X - CurrentFrame.Translation.X,
+                            NextFrame.Translation.Y - CurrentFrame.Translation.Y,0);
+
+                        //set 'nextframe' translation to be equivalent to that of the first frame
+                        AnimationNodes[0].Frames[frame_index + 1].Translation = FirstFrame.Translation;
+
+                        //since we are moving backwards, insert the movementframe at the beginning of the list
+                        MovementData.Insert(0, MovementFrame);
                     }
                     return MovementData;
                 default:
