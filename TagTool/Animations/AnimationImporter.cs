@@ -119,17 +119,18 @@ namespace TagTool.Animations
                         var rotation = textReader.ReadLine().Split('\t');
                         var scale = textReader.ReadLine();
 
-                        //Conjugate the quaternion during import, this is what tool.exe does
-                        var newRotation = new System.Numerics.Quaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3]));
+                        var newRotation = new RealQuaternion((float)double.Parse(rotation[0]), (float)double.Parse(rotation[1]), (float)double.Parse(rotation[2]), (float)double.Parse(rotation[3]));
 
                         //rotations are conjugated for early versions of the JMA format
-                        if(Version < 16394)
-                            newRotation = System.Numerics.Quaternion.Conjugate(newRotation);
+                        if (Version < 16394)
+                            newRotation = new RealQuaternion(newRotation.I, newRotation.J, newRotation.K, -newRotation.W);
+                        //normalize the quaternion
+                        newRotation.Normalize();
 
                         AnimationNodes[node_index].Frames.Add(new AnimationFrame
                         {
-                            Rotation = new RealQuaternion(newRotation.X, newRotation.Y, newRotation.Z, newRotation.W),
-                            Translation = new RealPoint3d((float)double.Parse(translation[0]) * 0.01f, (float)double.Parse(translation[1]) * 0.01f, (float)double.Parse(translation[2]) * 0.01f),
+                            Rotation = newRotation,
+                            Translation = new RealPoint3d((float)(double.Parse(translation[0]) * 0.009999999776482582d), (float)(double.Parse(translation[1]) * 0.009999999776482582d), (float)(double.Parse(translation[2]) * 0.009999999776482582d)),
                             Scale = (float)double.Parse(scale)
                         });                        
                     }
