@@ -9,13 +9,11 @@ namespace TagTool.Tags.Definitions
     public class SoundLooping : TagStructure
 	{
         public SoundLoopingFlags Flags;
-        public float MartySMusicTime;
-        public float Unknown1;
-        public float Unknown2;
-        public float Unknown3;
+        public Bounds<float> MartySMusicTime;
+        public Bounds<float> DistanceBounds;
         public CachedTag Unused;
         public SoundClassValue SoundClass;
-        public short Unknown4;
+        public short LoopTypeHO;
         public List<Track> Tracks;
         public List<DetailSound> DetailSounds;
 

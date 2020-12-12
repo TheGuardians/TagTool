@@ -286,7 +286,7 @@ namespace TagTool.Tags.Resources
             Type6,        // reverse_byte_keyframe_lightly_quantized
             Type7,        // reverse_word_keyframe_lightly_quantized
             Type8,        // _blend_screen_codec
-            Type9         // curve codec
+            Type9         // curve_codec
         }
 
         [Flags]

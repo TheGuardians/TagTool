@@ -18,6 +18,10 @@ namespace TagTool.Commands.CollisionModels
         public CollisionGeometry Bsp { get; set; }
         public CollisionModel Definition { get; set; }
 
+        //Mopp generation DLL sourced from the excellent work of the NifTools team, which can be found here:
+        //github.com/figment/nifmopp
+        //NifTools License included in the Tools folder alongside the dll
+
         [DllImport("kernel32.dll", EntryPoint = "LoadLibrary")]
         static extern int LoadLibrary(
             [MarshalAs(UnmanagedType.LPStr)] string lpLibFileName);

@@ -47,7 +47,7 @@ namespace TagTool.Commands.Porting
             //
             // Tag fixes
             //
-
+            sound.FlagsHO = sound.Flags.ConvertLexical<Sound.FlagsValueHaloOnline>();
             sound.SampleRate = platformCodec.SampleRate;
             sound.ImportType = ImportType.SingleLayer;
             // helps looping sound? there is another value, 10 for Unknown2 but I don't know when to activate it.
