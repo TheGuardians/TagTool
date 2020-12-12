@@ -21,6 +21,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationGraph Animation { get; set; }
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
         private bool isWorldRelative { get; set; }
+        private bool FixAxes = false;
         private CachedTag Jmad { get; set; }
 
         public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
@@ -29,7 +30,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "AddAnimation",
                   "Add an animation to a ModelAnimationGraph tag",
 
-                  "AddAnimation <filepath>",
+                  "AddAnimation [fixaxes] <filepath>",
 
                   "Add an animation to a ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
         {
@@ -41,11 +42,35 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count != 1)
+            if (args.Count < 1 || args.Count > 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            FileInfo filepath = new FileInfo(args[0]);
-            if (!File.Exists(filepath.FullName))
+            var argStack = new Stack<string>(args.AsEnumerable().Reverse());
+
+            if (argStack.Count == 2)
+            {
+                if (argStack.Pop().ToLower() == "fixaxes")
+                    FixAxes = true;
+                else
+                    return new TagToolError(CommandError.ArgInvalid);
+            }
+
+            List<FileInfo> fileList = new List<FileInfo>();
+
+            string directoryarg = argStack.Pop();
+
+            if (Directory.Exists(directoryarg))
+            {
+                foreach (var file in Directory.GetFiles(directoryarg))
+                {
+                    fileList.Add(new FileInfo(file));
+                }
+            }
+            else if (File.Exists(directoryarg))
+            {
+                fileList.Add(new FileInfo(directoryarg));
+            }
+            else
                 return new TagToolError(CommandError.FileNotFound);
 
             List<string> ModelList = new List<string>();
@@ -60,96 +85,112 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 ModelList.Add(line);
             }
 
-            string file_extension = filepath.Extension;
+            Console.WriteLine($"###Replacing {fileList.Count} animation(s)...");
 
-            switch (file_extension.ToUpper())
+            foreach (var filepath in fileList)
             {
-                case ".JMM":
-                    break;
-                case ".JMW":
-                    isWorldRelative = true;
-                    break;
-                case ".JMO":
-                    AnimationType = ModelAnimationGraph.FrameType.Overlay;
-                    break;
-                case ".JMR":
-                    AnimationType = ModelAnimationGraph.FrameType.Replacement;
-                    break;
-                case ".JMA":
-                case ".JMT":
-                case ".JMZ":
-                    Console.WriteLine("###WARNING: Movement data not currently supported, animation may not display properly!");
-                    break;
-                default:
-                    Console.WriteLine($"###ERROR: Filetype {file_extension.ToUpper()} not recognized!");
-                    return false;
-            }
+                string file_extension = filepath.Extension;
 
-            //get or create stringid for animation block name
-            string file_name = Path.GetFileNameWithoutExtension(filepath.FullName).Replace(' ', ':');
-            StringId animation_name = CacheContext.StringTable.GetStringId(file_name);
-            if(animation_name == StringId.Invalid)
-                animation_name = CacheContext.StringTable.AddString(file_name);
-
-            //create new importer class and import the source file
-            var importer = new AnimationImporter();
-            importer.Import(filepath.FullName);
-
-            //Adjust imported nodes to ensure that they align with the jmad
-            AdjustImportedNodes(importer);
-
-            //process node data in advance of serialization
-            importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
-
-            //Check the nodes to verify that this animation can be imported to this jmad
-            //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
-            //    return false;
-
-            //build a new resource 
-            ModelAnimationTagResource newResource = new ModelAnimationTagResource
-            {
-                GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
-            };
-            newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
-            newResource.GroupMembers.AddressType = CacheAddressType.Definition;
-            //serialize the new resource into the cache
-            TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
-
-            //add resource reference to the animation tag
-            Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
-            {
-                ResourceReference = resourceref,
-                MemberCount = 1
-            });
-
-            //serialize animation block values
-            var AnimationBlock = new ModelAnimationGraph.Animation
-            {
-                Name = animation_name,
-                AnimationData = new ModelAnimationGraph.Animation.SharedAnimationData
+                switch (file_extension.ToUpper())
                 {
-                    AnimationType = AnimationType,
-                    BlendScreen = -1,
-                    DesiredCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
-                    CurrentCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
-                    FrameCount = (short)importer.frameCount,
-                    NodeCount = (sbyte)importer.AnimationNodes.Count,
-                    NodeListChecksum = (int)(importer.CalculateNodeListChecksum(0)),
-                    Unknown2 = 5, //don't know what these do, but set usual values
-                    Unknown3 = 6,
-                    Heading = new RealVector3d(1,0,0),
-                    PreviousVariantSibling = -1,
-                    NextVariantSibling = -1,
-                    ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1),
-                    ResourceGroupMemberIndex = 0,
+                    case ".JMM":
+                        break;
+                    case ".JMW":
+                        isWorldRelative = true;
+                        break;
+                    case ".JMO":
+                        AnimationType = ModelAnimationGraph.FrameType.Overlay;
+                        break;
+                    case ".JMR":
+                        AnimationType = ModelAnimationGraph.FrameType.Replacement;
+                        break;
+                    case ".JMA":
+                    case ".JMT":
+                    case ".JMZ":
+                        Console.WriteLine("###WARNING: Movement data not currently supported, animation may not display properly!");
+                        break;
+                    default:
+                        Console.WriteLine($"###ERROR: Filetype {file_extension.ToUpper()} not recognized!");
+                        return false;
                 }
-            };
 
-            if(isWorldRelative)
-                AnimationBlock.AnimationData.InternalFlags |= ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative;
+                //get or create stringid for animation block name
+                string file_name = Path.GetFileNameWithoutExtension(filepath.FullName).Replace(' ', ':');
+                StringId animation_name = CacheContext.StringTable.GetStringId(file_name);
+                if (animation_name == StringId.Invalid)
+                    animation_name = CacheContext.StringTable.AddString(file_name);
 
-            Animation.Animations.Add(AnimationBlock);
+                //create new importer class and import the source file
+                var importer = new AnimationImporter();
+                importer.Import(filepath.FullName);
 
+                //change translation axes optionally to account for blender exports using blender axis convention
+                if (FixAxes)
+                {
+                    foreach(var anode in importer.AnimationNodes)
+                    {
+                        foreach(var dataframe in anode.Frames)
+                        {
+                            dataframe.Translation = new RealPoint3d(dataframe.Translation.X, dataframe.Translation.Z, -dataframe.Translation.Y);
+                        }
+                    }
+                }
+
+                //Adjust imported nodes to ensure that they align with the jmad
+                AdjustImportedNodes(importer);
+
+                //process node data in advance of serialization
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
+
+                //Check the nodes to verify that this animation can be imported to this jmad
+                //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
+                //    return false;
+
+                //build a new resource 
+                ModelAnimationTagResource newResource = new ModelAnimationTagResource
+                {
+                    GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
+                };
+                newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
+                newResource.GroupMembers.AddressType = CacheAddressType.Definition;
+                //serialize the new resource into the cache
+                TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
+
+                //add resource reference to the animation tag
+                Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
+                {
+                    ResourceReference = resourceref,
+                    MemberCount = 1
+                });
+
+                //serialize animation block values
+                var AnimationBlock = new ModelAnimationGraph.Animation
+                {
+                    Name = animation_name,
+                    AnimationData = new ModelAnimationGraph.Animation.SharedAnimationData
+                    {
+                        AnimationType = AnimationType,
+                        BlendScreen = -1,
+                        DesiredCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
+                        CurrentCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
+                        FrameCount = (short)importer.frameCount,
+                        NodeCount = (sbyte)importer.AnimationNodes.Count,
+                        NodeListChecksum = (int)(importer.CalculateNodeListChecksum(0)),
+                        Unknown2 = 5, //don't know what these do, but set usual values
+                        Unknown3 = 6,
+                        Heading = new RealVector3d(1, 0, 0),
+                        PreviousVariantSibling = -1,
+                        NextVariantSibling = -1,
+                        ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1),
+                        ResourceGroupMemberIndex = 0,
+                    }
+                };
+
+                if (isWorldRelative)
+                    AnimationBlock.AnimationData.InternalFlags |= ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative;
+
+                Animation.Animations.Add(AnimationBlock);
+            }
             //save changes to the current tag
             CacheContext.SaveStrings();
             using (Stream cachestream = CacheContext.OpenCacheReadWrite())
@@ -157,7 +198,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 CacheContext.Serialize(cachestream, Jmad, Animation);
             }
 
-            Console.WriteLine("Animation added successfully!");
+            Console.WriteLine("Done!");
             return true;
         }
 
