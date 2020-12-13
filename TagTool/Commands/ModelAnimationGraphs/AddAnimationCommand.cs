@@ -21,7 +21,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationGraph Animation { get; set; }
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
         private bool isWorldRelative { get; set; }
-        private bool FixAxes = false;
         private CachedTag Jmad { get; set; }
 
         public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
@@ -30,7 +29,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "AddAnimation",
                   "Add an animation to a ModelAnimationGraph tag",
 
-                  "AddAnimation [fixaxes] <filepath>",
+                  "AddAnimation <filepath>",
 
                   "Add an animation to a ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
         {
@@ -42,18 +41,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count < 1 || args.Count > 2)
+            if (args.Count != 1)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
-
-            if (argStack.Count == 2)
-            {
-                if (argStack.Pop().ToLower() == "fixaxes")
-                    FixAxes = true;
-                else
-                    return new TagToolError(CommandError.ArgInvalid);
-            }
 
             List<FileInfo> fileList = new List<FileInfo>();
 
@@ -124,18 +115,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 var importer = new AnimationImporter();
                 importer.Import(filepath.FullName);
 
-                //change translation axes optionally to account for blender exports using blender axis convention
-                if (FixAxes)
-                {
-                    foreach(var anode in importer.AnimationNodes)
-                    {
-                        foreach(var dataframe in anode.Frames)
-                        {
-                            dataframe.Translation = new RealPoint3d(dataframe.Translation.X, dataframe.Translation.Z, -dataframe.Translation.Y);
-                        }
-                    }
-                }
-
                 //Adjust imported nodes to ensure that they align with the jmad
                 AdjustImportedNodes(importer);
 
@@ -190,6 +169,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     AnimationBlock.AnimationData.InternalFlags |= ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative;
 
                 Animation.Animations.Add(AnimationBlock);
+                Console.WriteLine($"Added {file_name} successfully!");
             }
             //save changes to the current tag
             CacheContext.SaveStrings();
