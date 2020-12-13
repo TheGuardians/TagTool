@@ -45,8 +45,8 @@ namespace TagTool.BlamFile
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Biped, new ObjectTypeDefinition(_scenario.Bipeds, _scenario.BipedPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Vehicle, new ObjectTypeDefinition(_scenario.Vehicles, _scenario.VehiclePalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Weapon, new ObjectTypeDefinition(_scenario.Weapons, _scenario.WeaponPalette));
-            ObjectTypes.Add(GameObjectTypeHalo3ODST.Equipment, new ObjectTypeDefinition(_scenario.Equipment, _scenario.Equipment));
-            ObjectTypes.Add(GameObjectTypeHalo3ODST.AlternateRealityDevice, new ObjectTypeDefinition(_scenario.AlternateRealityDevices, _scenario.AlternateRealityDevices));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.Equipment, new ObjectTypeDefinition(_scenario.Equipment, _scenario.EquipmentPalette));
+            ObjectTypes.Add(GameObjectTypeHalo3ODST.AlternateRealityDevice, new ObjectTypeDefinition(_scenario.AlternateRealityDevices, _scenario.AlternateRealityDevicePalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Terminal, new ObjectTypeDefinition(_scenario.Terminals, _scenario.TerminalPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Scenery, new ObjectTypeDefinition(_scenario.Scenery, _scenario.SceneryPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Machine, new ObjectTypeDefinition(_scenario.Machines, _scenario.MachinePalette));
@@ -57,7 +57,7 @@ namespace TagTool.BlamFile
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Giant, new ObjectTypeDefinition(_scenario.Giants, _scenario.GiantPalette));
             ObjectTypes.Add(GameObjectTypeHalo3ODST.EffectScenery, new ObjectTypeDefinition(_scenario.EffectScenery, _scenario.EffectSceneryPalette));
 
-            for(var i = GameObjectTypeHalo3ODST.Biped; i <= GameObjectTypeHalo3ODST.EffectScenery; i++)
+            for (var i = GameObjectTypeHalo3ODST.Biped; i <= GameObjectTypeHalo3ODST.EffectScenery; i++)
             {
                 if (((ObjectTypeMask >> (int)i) & 1) == 0)
                     ObjectTypes.Remove(i);
@@ -173,6 +173,9 @@ namespace TagTool.BlamFile
                 for (int i = 0; i < instances.Count; i++)
                 {
                     var instance = instances[i];
+                    if (instance.PaletteIndex < 0 || instance.PaletteIndex >= palette.Count)
+                        continue;
+
                     var paletteEntry = palette[instance.PaletteIndex];
 
                     if (!ObjectIsForgeable(paletteEntry.Object))
@@ -237,7 +240,7 @@ namespace TagTool.BlamFile
             Vectors3dFromEulerAngles(instance.Rotation, out mapvPlacement.Forward, out mapvPlacement.Up);
 
             var multiplayerInstance = instance as IMultiplayerInstance;
-            if (multiplayerInstance.Multiplayer.AttachedNameIndex != -1)
+            if (multiplayerInstance != null && multiplayerInstance.Multiplayer.AttachedNameIndex != -1)
                 AttachToParent(mapvPlacement, paletteEntry.Object, multiplayerInstance.Multiplayer.AttachedNameIndex);
 
             InitMultiplayerProperties(mapvPlacement.Properties, instance, obje);
@@ -301,6 +304,9 @@ namespace TagTool.BlamFile
             //
 
             var multiplayerInstance = instance as IMultiplayerInstance;
+            if (multiplayerInstance == null)
+                return;
+
             var scrnMultiplayerProperties = multiplayerInstance.Multiplayer;
 
 

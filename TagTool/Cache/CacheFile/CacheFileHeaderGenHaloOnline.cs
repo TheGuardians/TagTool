@@ -184,7 +184,7 @@ namespace TagTool.Cache
         public override ulong GetTagTableHeaderOffset() => TagTableHeaderOffset;
         public override string GetName() => Name;
         public override string GetBuild() => Build;
-        public override string GetScenarioPath() => null;
+        public override string GetScenarioPath() => ScenarioPath;
         public override CacheFileType GetCacheType() => CacheType;
         public override CacheFileSharedType GetSharedCacheType() => SharedCacheType;
         public override StringIDHeader GetStringIDHeader() => StringIdsHeader;
