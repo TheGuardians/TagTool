@@ -567,6 +567,7 @@ namespace TagTool.Commands.CollisionModels
             Surface surface_block = Bsp.Surfaces[surface_index];
             int first_Edge_index = surface_block.FirstEdge;
             int current_edge_index = surface_block.FirstEdge;
+            List<RealPoint3d> vertexlist = new List<RealPoint3d>();
             Console.WriteLine($"Surface {surface_index}");
             do
             {
@@ -574,15 +575,26 @@ namespace TagTool.Commands.CollisionModels
                 if (edge_block.RightSurface == surface_index)
                 {
                     current_edge_index = edge_block.ReverseEdge;
-                    Console.WriteLine($"{Bsp.Vertices[edge_block.EndVertex].Point * 100}");
+                    vertexlist.Add(Bsp.Vertices[edge_block.EndVertex].Point);
                 }
                 else
                 {
                     current_edge_index = edge_block.ForwardEdge;
-                    Console.WriteLine($"{Bsp.Vertices[edge_block.StartVertex].Point * 100}");
+                    vertexlist.Add(Bsp.Vertices[edge_block.StartVertex].Point);
                 }
             }
             while (current_edge_index != first_Edge_index);
+            debug_print_vertices(vertexlist);
+        }
+
+        public void debug_print_vertices(List<RealPoint3d> vertexlist)
+        {
+            foreach (RealPoint3d vertex in vertexlist)
+            {
+                RealPoint3d vertex_fix = vertex * 100.0f;
+                Console.WriteLine($"{vertex_fix.X} , {vertex_fix.Y} , {vertex_fix.Z}");
+                Console.WriteLine($"{vertex_fix.X} , {-vertex_fix.Z} , {vertex_fix.Y} (Blender Convention)");
+            }
         }
 
         public bool build_leaves(ref surface_array_definition surface_array, ref int leaf_index)
