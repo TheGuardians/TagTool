@@ -25,7 +25,6 @@ namespace TagTool.Commands.CollisionModels
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
-        private bool isobj = false;
 
         public ImportCollisionGeometryCommand(GameCacheHaloOnlineBase cache)
             : base(false,
@@ -89,9 +88,6 @@ namespace TagTool.Commands.CollisionModels
 
 
             FileInfo filepath = new FileInfo(fileName);
-            //the obj format seems to use different axes by default, adjust debug printouts 
-            if (filepath.Extension.ToLower() == ".obj")
-                isobj = true;
 
             //check inputs
             if(Cache.TagCache.TryGetTag(tagName + ".coll", out tag))
@@ -916,22 +912,12 @@ namespace TagTool.Commands.CollisionModels
 
         public void debug_print_vertices(List<RealPoint3d> vertexlist)
         {
-            if (!isobj)
+            foreach (RealPoint3d vertex in vertexlist)
             {
-                foreach (RealPoint3d vertex in vertexlist)
-                {
-                    Console.WriteLine($"{vertex * 100.0f}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"#NOTE: The below coordinates are fixed for OBJ convention!");
-                foreach (RealPoint3d vertex in vertexlist)
-                {
-                    RealPoint3d vertex_fix = new RealPoint3d { X = vertex.X, Y = -vertex.Z, Z = vertex.Y };
-                    Console.WriteLine($"{vertex_fix * 100.0f}");
-                }
-            }          
+                RealPoint3d vertex_fix = vertex * 100.0f;
+                Console.WriteLine($"{vertex_fix.X} , {vertex_fix.Y} , {vertex_fix.Z}");
+                Console.WriteLine($"{vertex_fix.X} , {-vertex_fix.Z} , {vertex_fix.Y} (Blender Convention)");
+            }      
         }
 
         public bool generate_surface_planes()
