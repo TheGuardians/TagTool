@@ -20,6 +20,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private GameCache CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
+        private ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
 
@@ -64,6 +65,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             else
                 return new TagToolError(CommandError.FileNotFound);
 
+            /*
             List<string> ModelList = new List<string>();
             Console.WriteLine("------------------------------------------------------------------");
             Console.WriteLine("Enter the tagname of each render model tag that this animation uses");
@@ -74,7 +76,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 //remove any tag type info from tagname
                 line = line.Split('.')[0];
                 ModelList.Add(line);
-            }
+            */
 
             Console.WriteLine($"###Replacing {fileList.Count} animation(s)...");
 
@@ -96,9 +98,15 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         AnimationType = ModelAnimationGraph.FrameType.Replacement;
                         break;
                     case ".JMA":
+                        FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy;
+                        break;
                     case ".JMT":
+                        FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw;
+                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
+                        break;
                     case ".JMZ":
-                        Console.WriteLine("###WARNING: Movement data not currently supported, animation may not display properly!");
+                        FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw;
+                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
                         Console.WriteLine($"###ERROR: Filetype {file_extension.ToUpper()} not recognized!");
@@ -119,7 +127,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 AdjustImportedNodes(importer);
 
                 //process node data in advance of serialization
-                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, AnimationType, FrameInfoType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
