@@ -65,7 +65,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
             else
                 return new TagToolError(CommandError.FileNotFound);
 
-            /*
             List<string> ModelList = new List<string>();
             Console.WriteLine("------------------------------------------------------------------");
             Console.WriteLine("Enter the tagname of each render model tag that this animation uses");
@@ -76,7 +75,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 //remove any tag type info from tagname
                 line = line.Split('.')[0];
                 ModelList.Add(line);
-            */
+            }
 
             Console.WriteLine($"###Adding {fileList.Count} animation(s)...");
 
@@ -127,7 +126,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 AdjustImportedNodes(importer);
 
                 //process node data in advance of serialization
-                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, AnimationType, FrameInfoType);
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType, FrameInfoType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))

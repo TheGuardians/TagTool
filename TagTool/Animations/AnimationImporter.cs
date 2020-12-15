@@ -159,10 +159,11 @@ namespace TagTool.Animations
             return true;
         }
 
-        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
+        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, List<string> ModelList, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
         {
             //if the animation is of the overlay type, remove the base frame and subtract it from all other frames
-            SetBaseRemoveOverlay(AnimationType);
+            if(AnimationType == ModelAnimationGraph.FrameType.Overlay)
+                SetBaseRemoveOverlay();
 
             //Extract the movement data from the base node for serialization in its separate block
             MovementDataType = FrameInfoType;
@@ -194,6 +195,9 @@ namespace TagTool.Animations
                     }
                 }
             }
+
+            //Set default node positions for determining static data
+            SetDefaultNodePositions(CacheContext, ModelList);
 
             //setup static nodes
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
@@ -417,7 +421,7 @@ namespace TagTool.Animations
             return (int)dataendoffset;
         }
 
-        public void SetBaseRemoveOverlay(ModelAnimationGraph.FrameType AnimationType)
+        public void SetBaseRemoveOverlay()
         {
             //remove base frame from frame count
             frameCount--;
@@ -427,26 +431,20 @@ namespace TagTool.Animations
                 {
                     //copy and then remove unnecessary base frame
                     AnimationFrame BaseFrame = node.Frames[0].DeepClone();
-                    node.DefaultTranslation = BaseFrame.Translation;
-                    node.DefaultRotation = BaseFrame.Rotation;
-                    node.DefaultScale = BaseFrame.Scale;
                     node.Frames.RemoveAt(0);
 
                     //remove basis of overlay to just leave the actual overlay data
-                    if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
+                    foreach (var frame in node.Frames)
                     {
-                        foreach (var frame in node.Frames)
-                        {
-                            //using system.numerics.quaternion here because it has a division operator
-                            var temprotation = new System.Numerics.Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
-                            var tempbase = new System.Numerics.Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
-                            var dividend = temprotation / tempbase;
-                            frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
+                        //using system.numerics.quaternion here because it has a division operator
+                        var temprotation = new System.Numerics.Quaternion(frame.Rotation.I, frame.Rotation.J, frame.Rotation.K, frame.Rotation.W);
+                        var tempbase = new System.Numerics.Quaternion(BaseFrame.Rotation.I, BaseFrame.Rotation.J, BaseFrame.Rotation.K, BaseFrame.Rotation.W);
+                        var dividend = temprotation / tempbase;
+                        frame.Rotation = new RealQuaternion(dividend.X, dividend.Y, dividend.Z, dividend.W);
 
-                            frame.Translation -= BaseFrame.Translation;
+                        frame.Translation -= BaseFrame.Translation;
 
-                            frame.Scale /= BaseFrame.Scale;
-                        }
+                        frame.Scale /= BaseFrame.Scale;
                     }
                 }
             }
