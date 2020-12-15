@@ -78,7 +78,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 ModelList.Add(line);
             */
 
-            Console.WriteLine($"###Replacing {fileList.Count} animation(s)...");
+            Console.WriteLine($"###Adding {fileList.Count} animation(s)...");
 
             foreach (var filepath in fileList)
             {
