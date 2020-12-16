@@ -21,6 +21,7 @@ namespace TagTool.Animations
         public List<AnimationNode> AnimationNodes;
         public int frameCount;
         public uint nodeChecksum;
+        public int Version = 0;
         public double framerate = 30;
         public int rotatedNodeCount;
         public int translatedNodeCount;
@@ -66,7 +67,6 @@ namespace TagTool.Animations
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
             {
                 StreamReader textReader = new StreamReader(textStream);
-                int Version = 0;
 
                 //this garbage is because some H2V JMA exporters use UCS-2 LE text encoding, which crashes the streamreader
                 try
@@ -469,10 +469,34 @@ namespace TagTool.Animations
         {      
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
+                RealQuaternion previousValue = new RealQuaternion();
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     if (AnimationNodes[node_index].hasAnimatedRotation)
                     {
+                        RealQuaternion currentvalue = AnimationNodes[node_index].Frames[frame_index].Rotation;
+                        if (frame_index > 0 && RealQuaternion.Dot(previousValue, currentvalue) < 0.0)
+                        {
+                            currentvalue = new RealQuaternion(-currentvalue.I, -currentvalue.J, -currentvalue.K, -currentvalue.W);
+                        }
+                        previousValue = currentvalue.DeepClone();
+
+                        float[] Values = currentvalue.ToArray();
+                        for(var i = 0; i < Values.Length; i++)
+                        {
+                            if (Values[i] > 1.0f)
+                                Values[i] = 1.0f;
+                            else if (Values[i] < -1.0f)
+                                Values[i] = -1.0f;
+                            short compressedvalue = (short)(Values[i] * short.MaxValue);
+                            if (compressedvalue > 32767)
+                                compressedvalue = 32767;
+                            else if (compressedvalue < -32767)
+                                compressedvalue = -32767;
+                            dataContext.Writer.Write(compressedvalue);
+                        }
+
+                        /*
                         var rotation = new ModelAnimationTagResource.GroupMember.RotationFrame
                         {
                             X = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.I * short.MaxValue),
@@ -481,6 +505,7 @@ namespace TagTool.Animations
                             W = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.W * short.MaxValue)
                         };
                         CacheContext.Serializer.Serialize(dataContext, rotation);
+                        */
                     }
                 }
             }            

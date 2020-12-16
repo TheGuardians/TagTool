@@ -156,6 +156,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 var importer = new AnimationImporter();
                 importer.Import(filepath.FullName);
 
+                if (importer.Version >= 16394)
+                {
+                    string errormessage = "###ERROR: Only Halo:CE animation files are not currently supported because newer versions offer no benefits but add node-space complications. " +
+                        "Please export your animations to Halo:CE format (JMA Version < 16394) and try importing again.";
+                    return new TagToolError(CommandError.OperationFailed, errormessage);
+                }
+
                 //fixup Reach FP animations
                 if (ReachFixup)
                     FixupReachFP(importer);
