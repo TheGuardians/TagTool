@@ -131,18 +131,18 @@ namespace TagTool.Shaders.ShaderGenerator
 
         public static VertexShader GenerateVertexShader(GameCache cache, IShaderGenerator generator)
         {
-            var vtsh = new VertexShader { SupportedVertexTypes = new List<VertexShader.ShaderVertexBlock>(), Shaders = new List<VertexShaderBlock>() };
+            var vtsh = new VertexShader { EntryPoints = new List<VertexShader.VertexShaderEntryPoint>(), Shaders = new List<VertexShaderBlock>() };
 
             foreach(VertexType vertex in Enum.GetValues(typeof(VertexType)))
             {
-                var vertexBlock = new VertexShader.ShaderVertexBlock { EntryPointShaders = new List<ShaderEntryPointBlock>() };
-                vtsh.SupportedVertexTypes.Add(vertexBlock);
+                var vertexBlock = new VertexShader.VertexShaderEntryPoint { SupportedVertexTypes = new List<ShortOffsetCountBlock>() };
+                vtsh.EntryPoints.Add(vertexBlock);
                 if (generator.IsVertexFormatSupported(vertex))
                 {
                     foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
                     {
-                        var entryBlock = new ShaderEntryPointBlock();
-                        vertexBlock.EntryPointShaders.Add(entryBlock);
+                        var entryBlock = new ShortOffsetCountBlock();
+                        vertexBlock.SupportedVertexTypes.Add(entryBlock);
                         if (generator.IsEntryPointSupported(entryPoint) && !generator.IsVertexShaderShared(entryPoint))
                         {
                             entryBlock.Count = 1;
@@ -155,7 +155,7 @@ namespace TagTool.Shaders.ShaderGenerator
             }
 
             if (vtsh.Shaders.Count == 0)
-                vtsh.SupportedVertexTypes = null;
+                vtsh.EntryPoints = null;
 
             return vtsh;
         }
@@ -191,11 +191,11 @@ namespace TagTool.Shaders.ShaderGenerator
 
         public static PixelShader GeneratePixelShader(GameCache cache, IShaderGenerator generator)
         {
-            var pixl = new PixelShader {EntryPointShaders = new List<ShaderEntryPointBlock>(), Shaders = new List<PixelShaderBlock>() };
+            var pixl = new PixelShader {EntryPointShaders = new List<ShortOffsetCountBlock>(), Shaders = new List<PixelShaderBlock>() };
 
             foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
             {
-                var entryBlock = new ShaderEntryPointBlock();
+                var entryBlock = new ShortOffsetCountBlock();
                 pixl.EntryPointShaders.Add(entryBlock);
                 if(generator.IsEntryPointSupported(entryPoint) && !generator.IsPixelShaderShared(entryPoint))
                 {
@@ -476,7 +476,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     if (generator.IsVertexShaderShared(mode))
                         vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[(int)mode].ShaderIndex];
                     else
-                        vertexShader = vtsh.Shaders[vtsh.SupportedVertexTypes[rmdf.Vertices[0].VertexType].EntryPointShaders[(int)mode].Offset];
+                        vertexShader = vtsh.Shaders[vtsh.EntryPoints[rmdf.Vertices[0].VertexType].SupportedVertexTypes[(int)mode].Offset];
 
                     if (generator.IsPixelShaderShared(mode))
                     {

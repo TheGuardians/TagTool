@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
     public class PixelShader : TagStructure
 	{
         public uint Unknown;
-        public List<ShaderEntryPointBlock> EntryPointShaders;
+        public List<ShortOffsetCountBlock> EntryPointShaders;
         public uint Unknown3;
         public List<PixelShaderBlock> Shaders;
     }

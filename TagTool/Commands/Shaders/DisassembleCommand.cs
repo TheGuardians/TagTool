@@ -57,7 +57,7 @@ namespace TagTool.Commands.Shaders
                                 gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));
                         }
 
-                        disassembly = DisassembleGen3Shader(i, gpix);
+                        disassembly = DisassembleGen3Shader(i, gpix, $" \"{i}\"");
                     }
                     else if (Cache.GetType() == typeof(GameCacheHaloOnline))
                     {
@@ -85,7 +85,7 @@ namespace TagTool.Commands.Shaders
                                 gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));
                         }
 
-                        disassemblies.Add(DisassembleGen3Shader(shaderIndex, gpix));
+                        disassemblies.Add(DisassembleGen3Shader(shaderIndex, gpix, $" \"{shaderIndex}\""));
                     }
                     else if (Cache.GetType() == typeof(GameCacheHaloOnline))
                     {
@@ -110,7 +110,7 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        private string DisassembleGen3Shader(int shaderIndex, GlobalCacheFilePixelShaders gpix)
+        private string DisassembleGen3Shader(int shaderIndex, GlobalCacheFilePixelShaders gpix, string shaderInfo = "")
         {
             var file = UseXSDCommand.XSDFileInfo;
             if(file == null)
@@ -206,7 +206,7 @@ namespace TagTool.Commands.Shaders
             }
             catch(Exception e)
             {
-                Console.WriteLine($"Failed to disassemble shader: {e.ToString()}");
+                Console.WriteLine($"Failed to disassemble shader{shaderInfo}: {e.ToString()}");
             }
             finally
             {

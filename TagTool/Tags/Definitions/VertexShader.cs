@@ -8,14 +8,14 @@ namespace TagTool.Tags.Definitions
     public class VertexShader : TagStructure
 	{
         public uint Unknown;
-        public List<ShaderVertexBlock> SupportedVertexTypes;
+        public List<VertexShaderEntryPoint> EntryPoints;
         public uint Unknown3;
         public List<VertexShaderBlock> Shaders;
 
         [TagStructure(Size = 0xC)]
-        public class ShaderVertexBlock : TagStructure
+        public class VertexShaderEntryPoint : TagStructure
 		{
-            public List<ShaderEntryPointBlock> EntryPointShaders;
+            public List<ShortOffsetCountBlock> SupportedVertexTypes;
         }
     }
 }

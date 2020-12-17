@@ -927,7 +927,7 @@
     <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="Shaders\Compiler\D3D\D3DCompiler.cs" />
     <Compile Include="Shaders\Compiler\D3D\Include.cs" />
-    <Compile Include="Shaders\ShaderEntryPointBlock.cs" />
+    <Compile Include="Shaders\ShortOffsetCountBlock.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />
     <Compile Include="Shaders\VertexShaderBlock.cs" />

@@ -169,6 +169,76 @@ namespace TagTool.Commands.Shaders
                         }
                     }
                 }
+
+                CachedTag rasterizerGlobalsTag = Cache.TagCache.FindFirstInGroup("rasg");
+                if (rasterizerGlobalsTag != null)
+                {
+                    var rasterizerGlobals = Cache.Deserialize<RasterizerGlobals>(stream, rasterizerGlobalsTag);
+
+                    for (int i = 0; i < rasterizerGlobals.DefaultShaders.Count; i++)
+                    {
+                        var explicitShader = rasterizerGlobals.DefaultShaders[i];
+
+                        if (explicitShader.PixelShader == null)
+                        {
+                            Console.WriteLine($"Invalid explicit pixel shader {i}");
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(Cache.Version.ToString() + "\\" + explicitShader.PixelShader.Name);
+
+                            var pixl = Cache.Deserialize<PixelShader>(stream, explicitShader.PixelShader);
+                            foreach (var entry in Enum.GetValues(entryPointEnum))
+                            {
+                                int entryIndex = GetEntryPointIndex(entry);
+
+                                if (pixl.EntryPointShaders.Count <= entryIndex)
+                                    break;
+
+                                for (int j = 0; j < pixl.EntryPointShaders[entryIndex].Count; j++)
+                                {
+                                    int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset + j;
+                                    string entryName = shaderIndex + "_" + entry.ToString().ToLower() + ".pixel_shader";
+                                    string pixelShaderFilename = Path.Combine(explicitShader.PixelShader.Name, entryName);
+
+                                    DisassembleShader(pixl, shaderIndex, pixelShaderFilename, Cache, pixl.Shaders[shaderIndex].GlobalCachePixelShaderIndex != -1 ? gpix : null);
+                                }
+                            }
+                        }
+
+                        if (explicitShader.VertexShader == null)
+                        {
+                            Console.WriteLine($"Invalid explicit vertex shader {i}");
+                        }
+                        else
+                        {
+                            var vtsh = Cache.Deserialize<VertexShader>(stream, explicitShader.VertexShader);
+                            foreach (var entry in Enum.GetValues(entryPointEnum))
+                            {
+                                int entryIndex = GetEntryPointIndex(entry);
+
+                                if (vtsh.EntryPoints.Count <= entryIndex)
+                                    break;
+
+                                for (int j = 0; j < vtsh.EntryPoints[entryIndex].SupportedVertexTypes.Count; j++)
+                                {
+                                    for (int k = 0; k < vtsh.EntryPoints[entryIndex].SupportedVertexTypes[j].Count; k++)
+                                    {
+                                        int shaderIndex = vtsh.EntryPoints[entryIndex].SupportedVertexTypes[j].Offset + k;
+
+                                        var dirName = Path.Combine(explicitShader.VertexShader.Name + "\\",  ((VertexType)k).ToString().ToLower() + "\\");
+                                        Directory.CreateDirectory(Cache.Version.ToString() + "\\" + dirName);
+
+                                        string entryName = shaderIndex + "_" + entry.ToString().ToLower() + ".vertex_shader";
+                                        string vertexShaderFilename = Path.Combine(dirName, entryName);
+
+                                        DisassembleShader(vtsh, shaderIndex, vertexShaderFilename, Cache, null);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             return true;
         }
