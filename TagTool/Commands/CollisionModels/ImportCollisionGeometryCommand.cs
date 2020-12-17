@@ -249,7 +249,7 @@ namespace TagTool.Commands.CollisionModels
             public Vector3D b;
             public Vector3D c;
             public int material_index;
-            public float sorting_parameter;
+            public float area;
         }
 
         public class triangle_list_qsort_compar : IComparer<triangle>
@@ -257,9 +257,9 @@ namespace TagTool.Commands.CollisionModels
             public int Compare(triangle element1, triangle element2)
             {
                 int result = 0;
-                float v2 = element2.sorting_parameter;
-                if (element1.sorting_parameter <= v2)
-                    result = v2 > element1.sorting_parameter ? 1 : 0;
+                float v2 = element2.area;
+                if (element1.area <= v2)
+                    result = v2 > element1.area ? 1 : 0;
                 else
                     result = -1;
                 return result;
@@ -293,7 +293,7 @@ namespace TagTool.Commands.CollisionModels
                 float v13 = zdiff_2_0 * ydiff_1_0 - ydiff_2_0 * zdiff_1_0;
                 float v14 = zdiff_1_0 * xdiff_2_0 - zdiff_2_0 * xdiff_1_0;
 
-                newtriangle.sorting_parameter = (float)Math.Sqrt((v11 * v12 + v14 * v14 + v13 * v13) * 0.5);
+                newtriangle.area = (float)Math.Sqrt((v11 * v12 + v14 * v14 + v13 * v13) * 0.5);
                 Triangles.Add(newtriangle);
             }
 
