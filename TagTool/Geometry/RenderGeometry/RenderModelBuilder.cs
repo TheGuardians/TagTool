@@ -342,10 +342,9 @@ namespace TagTool.Geometry
         /// Builds a model tag and resource data.
         /// </summary>
         /// <param name="serializer">The tag serializer to use to serialize the model definition data.</param>
-        /// <param name="resourceDataStream">The stream to write resource data to.</param>
         /// <returns></returns>
         /// <exception cref="System.InvalidOperationException">Cannot build a model if a region is active</exception>
-        public RenderModel Build(TagSerializer serializer, Stream resourceDataStream)
+        public RenderModel Build(TagSerializer serializer)
         {
             if (_currentRegion != null)
                 throw new InvalidOperationException("Cannot build a model if a region is active");
@@ -356,7 +355,7 @@ namespace TagTool.Geometry
 
             CompressVertices();
 
-            BuildResourceData(serializer, resourceDataStream);
+            BuildResourceData(serializer);
 
             return _model;
         }
@@ -431,7 +430,7 @@ namespace TagTool.Geometry
             return result;
         }
 
-        private void BuildResourceData(TagSerializer serializer, Stream resourceDataStream)
+        private void BuildResourceData(TagSerializer serializer)
         {
             var definition = new RenderGeometryApiResourceDefinition
             {
@@ -443,13 +442,13 @@ namespace TagTool.Geometry
             foreach (var mesh in Meshes)
             {
                 // Serialize the mesh's vertex buffer
-                var vertexBufferStart = (int)resourceDataStream.Position;
-                var vertexCount = SerializeVertexBuffer(mesh, resourceDataStream);
-                var vertexBufferEnd = (int)resourceDataStream.Position;
                 var vertexBufferStream = new MemoryStream();
+                var vertexBufferStart = (int)vertexBufferStream.Position;
+                var vertexCount = SerializeVertexBuffer(mesh, vertexBufferStream);
+                StreamUtil.Align(vertexBufferStream, 4);
+                var vertexBufferEnd = (int)vertexBufferStream.Position;
 
-                resourceDataStream.Position = vertexBufferStart;
-                resourceDataStream.CopyTo(vertexBufferStream, vertexBufferEnd - vertexBufferStart);
+                vertexBufferStream.Position = vertexBufferStart;
 
                 // Add a definition for it
                 mesh.Mesh.VertexBufferIndices[0] = (short)definition.VertexBuffers.Count;
@@ -465,14 +464,11 @@ namespace TagTool.Geometry
                 });
 
                 // Serialize the mesh's index buffer
-                var indexBufferStart = vertexBufferEnd;
-                SerializeIndexBuffer(mesh, resourceDataStream);
-                var indexBufferEnd = (int)resourceDataStream.Position;
-
                 var indexBufferStream = new MemoryStream();
-
-                resourceDataStream.Position = indexBufferStart;
-                resourceDataStream.CopyTo(indexBufferStream, indexBufferEnd - indexBufferStart);
+                var indexBufferStart = (int)indexBufferStream.Position;
+                SerializeIndexBuffer(mesh, indexBufferStream);
+                var indexBufferEnd = (int)indexBufferStream.Position;
+                indexBufferStream.Position = indexBufferStart;
 
                 // Add a definition for it
                 mesh.Mesh.IndexBufferIndices[0] = (short)definition.IndexBuffers.Count;
@@ -486,7 +482,6 @@ namespace TagTool.Geometry
                 });
             }
             SerializeDefinitionData(definition);
-            resourceDataStream.Position = 0;
         }
 
         private void SerializeDefinitionData(RenderGeometryApiResourceDefinition definition)

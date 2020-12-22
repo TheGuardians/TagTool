@@ -259,6 +259,15 @@ namespace TagTool.Commands.RenderModels
                             materialIndex = materialIndices[meshMaterial.Name];
                         }
 
+                        if (mesh.VertexCount > ushort.MaxValue)
+                        {
+                            return new TagToolError(CommandError.OperationFailed, "Number of vertices exceeded the limit! (65535)");
+                        }
+                        if (meshIndices.Length > ushort.MaxValue)
+                        {
+                            return new TagToolError(CommandError.OperationFailed, "Number of vertex indices exceeded the limit! (65535)");
+                        }
+
 						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
 						builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
 						builder.EndPart();
@@ -283,24 +292,21 @@ namespace TagTool.Commands.RenderModels
 				builder.EndRegion();
 			}
 
-			using (var resourceStream = new MemoryStream())
-			{
-				Console.Write("Building render_geometry...");
+            Console.Write("Building render_geometry...");
 
-				var newDefinition = builder.Build(Cache.Serializer, resourceStream);
-				Definition.Regions = newDefinition.Regions;
-				Definition.Geometry = newDefinition.Geometry;
-				Definition.Nodes = newDefinition.Nodes;
-				Definition.Materials = newDefinition.Materials;
+            var newDefinition = builder.Build(Cache.Serializer);
+            Definition.Regions = newDefinition.Regions;
+            Definition.Geometry = newDefinition.Geometry;
+            Definition.Nodes = newDefinition.Nodes;
+            Definition.Materials = newDefinition.Materials;
 
-				Console.WriteLine("done.");
-			}
+            Console.WriteLine("done.");
 
-			//
-			// TODO: Build the new render_model and update the original render_model here...
-			//
+            //
+            // TODO: Build the new render_model and update the original render_model here...
+            //
 
-			Console.Write("Writing render_model tag data...");
+            Console.Write("Writing render_model tag data...");
 
 			using (var cacheStream = Cache.OpenCacheReadWrite())
 				Cache.Serialize(cacheStream, Tag, Definition);
