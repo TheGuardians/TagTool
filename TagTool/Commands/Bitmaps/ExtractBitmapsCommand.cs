@@ -19,20 +19,26 @@ namespace TagTool.Commands.Bitmaps
                 "ExtractBitmaps",
                 "Extract all bitmaps to a folder",
                 
-                "ExtractBitmaps <Folder>",
+                "ExtractBitmaps <type> <directory>",
                 
-                "Extract all bitmap tags and any subimages to the given folder.\n" +
-                "If the folder does not exist, it will be created.")
+                "Extract multiple images to the provided directory.\n\n" +
+                "Available types:\n" +
+				"\t all -> Extracts every image in the current cache.")
         {
             Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            var outDir = args[0];
+			string[] types = { "all" };
+
+			if (Array.IndexOf(types, args[0]) == -1)
+				return new TagToolError(CommandError.CustomError, "Invalid extract type specified!");
+
+			var outDir = args[1];
             Directory.CreateDirectory(outDir);
 
             Console.WriteLine("Loading resource caches...");
