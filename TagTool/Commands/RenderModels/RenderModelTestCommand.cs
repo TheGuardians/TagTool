@@ -251,8 +251,7 @@ namespace TagTool.Commands.RenderModels
 
             Console.Write("Building render_geometry...");
 
-            var resourceStream = new MemoryStream();
-            var renderModel = builder.Build(Cache.Serializer, resourceStream);
+            var renderModel = builder.Build(Cache.Serializer);
 
             if (vertexType == "skinned")
             {

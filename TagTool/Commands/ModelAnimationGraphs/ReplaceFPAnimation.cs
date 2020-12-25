@@ -22,6 +22,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private GameCacheHaloOnlineBase CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
+        private ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
         private bool ReachFixup = false;
@@ -114,9 +115,15 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         AnimationType = ModelAnimationGraph.FrameType.Replacement;
                         break;
                     case ".JMA":
+                        FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy;
+                        break;
                     case ".JMT":
+                        FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw;
+                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
+                        break;
                     case ".JMZ":
-                        Console.WriteLine("###WARNING: Movement data not currently supported, animation may not display properly!");
+                        FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw;
+                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
                         Console.WriteLine($"###ERROR: Filetype {file_extension.ToUpper()} not recognized!");
@@ -149,6 +156,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 var importer = new AnimationImporter();
                 importer.Import(filepath.FullName);
 
+                if (importer.Version >= 16394)
+                {
+                    string errormessage = "###ERROR: Only Halo:CE animation files are not currently supported because newer versions offer no benefits but add node-space complications. " +
+                        "Please export your animations to Halo:CE format (JMA Version < 16394) and try importing again.";
+                    return new TagToolError(CommandError.OperationFailed, errormessage);
+                }
+
                 //fixup Reach FP animations
                 if (ReachFixup)
                     FixupReachFP(importer);
@@ -157,7 +171,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 AdjustImportedNodes(importer);
 
                 //set up node flags for serialization
-                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType);
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType, FrameInfoType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))

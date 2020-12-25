@@ -328,7 +328,8 @@ namespace TagTool.Commands.Porting
 
 			if (!CacheContext.TagCache.TagDefinitions.TagDefinitionExists(blamTag.Group))
 			{
-                throw new Exception($"Tag group {blamTag.Group} does not exist in destination cache!");
+                Console.WriteLine($"Tag group {blamTag.Group} does not exist in destination cache! Returning null!");
+                return null;
 			}
 
             var wasReplacing = FlagIsSet(PortingFlags.Replace);

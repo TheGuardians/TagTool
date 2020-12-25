@@ -21,6 +21,7 @@ namespace TagTool.Animations
         public List<AnimationNode> AnimationNodes;
         public int frameCount;
         public uint nodeChecksum;
+        public int Version = 0;
         public double framerate = 30;
         public int rotatedNodeCount;
         public int translatedNodeCount;
@@ -29,6 +30,8 @@ namespace TagTool.Animations
         public int staticTranslatedNodeCount;
         public int staticScaledNodeCount;
         public bool buildstaticdata = false;
+        private List<MovementDataDxDyDzDyaw> MovementData = new List<MovementDataDxDyDzDyaw>();
+        public ModelAnimationTagResource.GroupMemberMovementDataType MovementDataType;
 
         public bool AssimpImport(string fileName)
         {
@@ -64,7 +67,6 @@ namespace TagTool.Animations
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
             {
                 StreamReader textReader = new StreamReader(textStream);
-                int Version = 0;
 
                 //this garbage is because some H2V JMA exporters use UCS-2 LE text encoding, which crashes the streamreader
                 try
@@ -157,11 +159,17 @@ namespace TagTool.Animations
             return true;
         }
 
-        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, List<string> ModelList, ModelAnimationGraph.FrameType AnimationType)
+        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, List<string> ModelList, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
         {
             //if the animation is of the overlay type, remove the base frame and subtract it from all other frames
-            if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
-                RemoveOverlayBase();
+            if(AnimationType == ModelAnimationGraph.FrameType.Overlay)
+                SetBaseRemoveOverlay();
+
+            //Extract the movement data from the base node for serialization in its separate block
+            MovementDataType = FrameInfoType;
+            //only base type animations can have movement data
+            if (AnimationType == ModelAnimationGraph.FrameType.Base)
+                HandleMovementData();
 
             //check to see if each node frame is different from last one, to see if node is used dynamically
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
@@ -188,7 +196,7 @@ namespace TagTool.Animations
                 }
             }
 
-            //Get node default positions from mode tag
+            //Set default node positions for determining static data
             SetDefaultNodePositions(CacheContext, ModelList);
 
             //setup static nodes
@@ -226,7 +234,7 @@ namespace TagTool.Animations
             var groupmember = new ModelAnimationTagResource.GroupMember
             {
                 Checksum = (int)nodeChecksum,
-                MovementDataType = ModelAnimationTagResource.GroupMemberMovementDataType.None,
+                MovementDataType = MovementDataType,
                 FrameCount = (short)frameCount,
                 NodeCount = (byte)AnimationNodes.Count,
                 PackedDataSizes = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructBlock()
@@ -321,6 +329,9 @@ namespace TagTool.Animations
                 foreach (var flagset in AnimationFlags)
                     dataContext.Writer.Write(flagset);
 
+                //serialize movement data at the end of the stream
+                groupmember.PackedDataSizes.MovementData = (short)SerializeMovementData(CacheContext, dataContext, stream);
+
                 groupmember.AnimationData = new TagData(stream.ToArray());
             }
 
@@ -410,7 +421,7 @@ namespace TagTool.Animations
             return (int)dataendoffset;
         }
 
-        public void RemoveOverlayBase()
+        public void SetBaseRemoveOverlay()
         {
             //remove base frame from frame count
             frameCount--;
@@ -421,6 +432,7 @@ namespace TagTool.Animations
                     //copy and then remove unnecessary base frame
                     AnimationFrame BaseFrame = node.Frames[0].DeepClone();
                     node.Frames.RemoveAt(0);
+
                     //remove basis of overlay to just leave the actual overlay data
                     foreach (var frame in node.Frames)
                     {
@@ -457,10 +469,34 @@ namespace TagTool.Animations
         {      
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
+                RealQuaternion previousValue = new RealQuaternion();
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
                     if (AnimationNodes[node_index].hasAnimatedRotation)
                     {
+                        RealQuaternion currentvalue = AnimationNodes[node_index].Frames[frame_index].Rotation;
+                        if (frame_index > 0 && RealQuaternion.Dot(previousValue, currentvalue) < 0.0)
+                        {
+                            currentvalue = new RealQuaternion(-currentvalue.I, -currentvalue.J, -currentvalue.K, -currentvalue.W);
+                        }
+                        previousValue = currentvalue.DeepClone();
+
+                        float[] Values = currentvalue.ToArray();
+                        for(var i = 0; i < Values.Length; i++)
+                        {
+                            if (Values[i] > 1.0f)
+                                Values[i] = 1.0f;
+                            else if (Values[i] < -1.0f)
+                                Values[i] = -1.0f;
+                            short compressedvalue = (short)(Values[i] * short.MaxValue);
+                            if (compressedvalue > 32767)
+                                compressedvalue = 32767;
+                            else if (compressedvalue < -32767)
+                                compressedvalue = -32767;
+                            dataContext.Writer.Write(compressedvalue);
+                        }
+
+                        /*
                         var rotation = new ModelAnimationTagResource.GroupMember.RotationFrame
                         {
                             X = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.I * short.MaxValue),
@@ -469,6 +505,7 @@ namespace TagTool.Animations
                             W = (short)(AnimationNodes[node_index].Frames[frame_index].Rotation.W * short.MaxValue)
                         };
                         CacheContext.Serializer.Serialize(dataContext, rotation);
+                        */
                     }
                 }
             }            
@@ -494,17 +531,14 @@ namespace TagTool.Animations
             }
         }
 
-        public List<RealPoint3d> HandleMovementData(ModelAnimationGraph.FrameType AnimationType, AnimationMovementDataType FrameInfoType)
+        public void HandleMovementData()
         {
-            List<RealPoint3d> MovementData = new List<RealPoint3d>();
-            switch (FrameInfoType)
+            switch (MovementDataType)
             {
-                case AnimationMovementDataType.DxDy:
-                    if(AnimationType != ModelAnimationGraph.FrameType.Base)
-                    {
-                        Console.WriteLine("###ERROR: Only base type animations can have movement data!");
-                        return MovementData;
-                    }
+                //TODO: add better handling for more complex movement data types
+                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
+                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
+                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
                     //extract data only from the first (root) node
                     //data collection starts at the end of the frames, moving backwards to the beginning
                     for(int frame_index = AnimationNodes[0].Frames.Count - 2; frame_index >= 0; frame_index--)
@@ -514,19 +548,67 @@ namespace TagTool.Animations
                         AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
 
                         //don't include z axis for basic movement data
-                        RealPoint3d MovementFrame = new RealPoint3d(NextFrame.Translation.X - CurrentFrame.Translation.X,
-                            NextFrame.Translation.Y - CurrentFrame.Translation.Y,0);
+                        MovementDataDxDyDzDyaw MovementFrame =
+                            new MovementDataDxDyDzDyaw
+                            {
+                                X = NextFrame.Translation.X - CurrentFrame.Translation.X,
+                                Y = NextFrame.Translation.Y - CurrentFrame.Translation.Y
+                            };
 
                         //set 'nextframe' translation to be equivalent to that of the first frame
-                        AnimationNodes[0].Frames[frame_index + 1].Translation = FirstFrame.Translation;
+                        AnimationNodes[0].Frames[frame_index + 1].Translation = AnimationNodes[0].DefaultTranslation;
 
                         //since we are moving backwards, insert the movementframe at the beginning of the list
                         MovementData.Insert(0, MovementFrame);
                     }
-                    return MovementData;
+                    return;
                 default:
-                    return MovementData;
+                    return;
             }
+        }
+
+        public int SerializeMovementData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext, MemoryStream stream)
+        {
+            //record the offset at the beginning of the movementdata
+            var datastartoffset = stream.Position.DeepClone();
+
+            foreach(var movementframe in MovementData)
+            {
+                switch (MovementDataType)
+                {
+                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
+                        dataContext.Writer.Write(movementframe.X);
+                        dataContext.Writer.Write(movementframe.Y);
+                        break;
+                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
+                        dataContext.Writer.Write(movementframe.X);
+                        dataContext.Writer.Write(movementframe.Y);
+                        dataContext.Writer.Write(movementframe.Z);
+                        break;
+                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
+                        dataContext.Writer.Write(movementframe.X);
+                        dataContext.Writer.Write(movementframe.Y);
+                        dataContext.Writer.Write(movementframe.Z);
+                        dataContext.Writer.Write(movementframe.W);
+                        break;
+                }
+            }
+            
+            //calculate size of movement data
+            int size = (int)(stream.Position - datastartoffset);
+
+            //return the stream position to the end of the stream
+            stream.Position = stream.Length;
+
+            return size;
+        }
+
+        private class MovementDataDxDyDzDyaw
+        {
+            public float X;
+            public float Y;
+            public float Z;
+            public float W;
         }
 
         public List<int> BuildFlags(bool isStaticFlags)
@@ -662,23 +744,6 @@ namespace TagTool.Animations
             }
         }
 
-        public bool CompareNodeListChecksums(List<ModelAnimationGraph.SkeletonNode> Nodes, GameCacheHaloOnlineBase CacheContext)
-        {
-            int checksum = 0;
-            foreach (ModelAnimationGraph.SkeletonNode Node in Nodes)
-            {
-                checksum ^= (int)Node.Name.Value;
-            }
-            int importedchecksum = 0;
-            foreach (AnimationNode newNode in AnimationNodes)
-            {
-                int value = (int)CacheContext.StringTable.GetStringId(newNode.Name).Value;
-                importedchecksum ^= value;
-            }
-
-            return checksum == importedchecksum;
-        }
-
         //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
         //later halo games also use this same format
         public uint CalculateNodeListChecksum(int node_index, uint checksum = 0)
@@ -707,22 +772,6 @@ namespace TagTool.Animations
                 checksum += (byte)chardata;
             }
             return checksum & 0xFFFFFFFF;
-        }
-
-        public bool CompareNodes(List<ModelAnimationGraph.SkeletonNode> jmadNodes, GameCacheHaloOnlineBase CacheContext)
-        {
-            if(CompareNodeListChecksums(jmadNodes, CacheContext))
-            {
-                //Console.WriteLine("Node List Checksums Match!");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("###ERROR: Node List Checksum mismatch! Check that your animation nodes match the jmad!");
-                return false;
-                //if (!CompareSingleNode(jmadNodes, CacheContext, 0))
-                //    return false;
-            }
         }
 
         public bool CompareSingleNode(List<ModelAnimationGraph.SkeletonNode> jmadNodes, GameCacheHaloOnlineBase CacheContext, int index)

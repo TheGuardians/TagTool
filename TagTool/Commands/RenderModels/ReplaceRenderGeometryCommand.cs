@@ -62,11 +62,13 @@ namespace TagTool.Commands.RenderModels
 
 			using (var importer = new AssimpContext())
 			{
-				scene = importer.ImportFile(sceneFile.FullName,
+                //importer.SetConfig(new Assimp.Configs.IntegerPropertyConfig("AI_CONFIG_PP_SLM_VERTEX_LIMIT", 65536));
+                scene = importer.ImportFile(sceneFile.FullName,
 					PostProcessSteps.CalculateTangentSpace |
 					PostProcessSteps.GenerateNormals |
 					PostProcessSteps.SortByPrimitiveType |
-					PostProcessSteps.Triangulate);
+					PostProcessSteps.Triangulate |
+                    PostProcessSteps.JoinIdenticalVertices);
 			}
 
 			var builder = new RenderModelBuilder(Cache);
@@ -283,24 +285,45 @@ namespace TagTool.Commands.RenderModels
 				builder.EndRegion();
 			}
 
-			using (var resourceStream = new MemoryStream())
-			{
-				Console.Write("Building render_geometry...");
+            //check vertex and index buffer counts for each mesh to ensure that they fit within the limits for the resource
+            foreach (var mesh in builder.Meshes)
+            {
+                switch (mesh.VertexFormat)
+                {
+                    case VertexBufferFormat.Skinned:
+                        if (mesh.SkinnedVertices.Length > ushort.MaxValue)
+                        {
+                            return new TagToolError(CommandError.OperationFailed, "Number of vertices ({mesh.SkinnedVertices.Length}) exceeded the limit! (65535)");
+                        }
+                        break;
+                    case VertexBufferFormat.Rigid:
+                        if (mesh.RigidVertices.Length > ushort.MaxValue)
+                        {
+                            return new TagToolError(CommandError.OperationFailed, $"Number of vertices ({mesh.RigidVertices.Length}) exceeded the limit! (65535)");
+                        }
+                        break;
+                }
+                if (mesh.Indices.Length > ushort.MaxValue)
+                {
+                    return new TagToolError(CommandError.OperationFailed, $"Number of vertex indices ({mesh.Indices.Length}) exceeded the limit! (65535)");
+                }
+            }
 
-				var newDefinition = builder.Build(Cache.Serializer, resourceStream);
-				Definition.Regions = newDefinition.Regions;
-				Definition.Geometry = newDefinition.Geometry;
-				Definition.Nodes = newDefinition.Nodes;
-				Definition.Materials = newDefinition.Materials;
+            Console.Write("Building render_geometry...");
 
-				Console.WriteLine("done.");
-			}
+            var newDefinition = builder.Build(Cache.Serializer);
+            Definition.Regions = newDefinition.Regions;
+            Definition.Geometry = newDefinition.Geometry;
+            Definition.Nodes = newDefinition.Nodes;
+            Definition.Materials = newDefinition.Materials;
 
-			//
-			// TODO: Build the new render_model and update the original render_model here...
-			//
+            Console.WriteLine("done.");
 
-			Console.Write("Writing render_model tag data...");
+            //
+            // TODO: Build the new render_model and update the original render_model here...
+            //
+
+            Console.Write("Writing render_model tag data...");
 
 			using (var cacheStream = Cache.OpenCacheReadWrite())
 				Cache.Serialize(cacheStream, Tag, Definition);
