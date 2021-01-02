@@ -62,7 +62,7 @@ namespace TagTool.Animations
             return true;
         }
 
-        public void Import(string fileName)
+        public bool Import(string fileName)
         {
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
             {
@@ -83,10 +83,25 @@ namespace TagTool.Animations
                 if (Version >= 16394)
                     nodeChecksum = uint.Parse(textReader.ReadLine()); //version part 2
                 frameCount = int.Parse(textReader.ReadLine());
+                if(frameCount < 1)
+                {
+                    Console.WriteLine("ERROR: Imported Animation doesn't have any frames!");
+                    return false;
+                }
                 framerate = double.Parse(textReader.ReadLine()); //framerate
-                textReader.ReadLine(); //actor count
+                int actorCount = int.Parse(textReader.ReadLine()); //actor count
+                if (actorCount < 1)
+                {
+                    Console.WriteLine("ERROR: Imported Animation doesn't have any actors!");
+                    return false;
+                }
                 textReader.ReadLine(); //actor name
                 int nodecount = int.Parse(textReader.ReadLine());
+                if (nodecount < 1)
+                {
+                    Console.WriteLine("ERROR: Imported Animation doesn't have any nodes!");
+                    return false;
+                }
                 if (Version < 16394)
                     nodeChecksum = uint.Parse(textReader.ReadLine());
                 AnimationNodes = new List<AnimationNode>();
@@ -138,6 +153,7 @@ namespace TagTool.Animations
                     }
                 }
             }
+            return true;
         }
 
         public bool CompareTranslations(AnimationFrame Frame1, AnimationFrame Frame2)

@@ -23,6 +23,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
+        private bool ReachFixup = false;
 
         public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -42,10 +43,18 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count != 1)
+            if (args.Count < 1 || args.Count > 2)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
+
+            if (argStack.Count == 2)
+            {
+                if (argStack.Pop().ToLower() == "reachfix")
+                    ReachFixup = true;
+                else
+                    return new TagToolError(CommandError.ArgInvalid);
+            }
 
             List<FileInfo> fileList = new List<FileInfo>();
 
@@ -120,7 +129,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
-                importer.Import(filepath.FullName);
+                if (!importer.Import(filepath.FullName))
+                    continue;
 
                 if(importer.Version >= 16394)
                 {
@@ -128,6 +138,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         "Please export your animations to Halo:CE format (JMA Version < 16394) and try importing again.";
                     return new TagToolError(CommandError.OperationFailed, errormessage);
                 }
+
+                //fixup Reach FP animations
+                if (ReachFixup)
+                    FixupReachFP(importer);
 
                 //Adjust imported nodes to ensure that they align with the jmad
                 AdjustImportedNodes(importer);
@@ -222,6 +236,33 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             //set importer animation nodes to newly sorted list
             importer.AnimationNodes = newAnimationNodes;
+        }
+
+        public void FixupReachFP(AnimationImporter importer)
+        {
+            var imported_nodes = importer.AnimationNodes;
+
+            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
+            if (basenode_index != -1)
+            {
+                //fixup rotated base node
+                foreach (var Frame in imported_nodes[basenode_index].Frames)
+                {
+                    Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
+                }
+            }
+
+            //fix weapon IK marker
+            if (Animation.Modes.Count > 0)
+            {
+                if (Animation.Modes[0].WeaponClass.Count > 0)
+                {
+                    if (Animation.Modes[0].WeaponClass[0].WeaponIk.Count > 0)
+                    {
+                        Animation.Modes[0].WeaponClass[0].WeaponIk[0].AttachToMarker = CacheContext.StringTable.GetStringId("left_hand_spartan_fp");
+                    }
+                }
+            }
         }
     }
 }
