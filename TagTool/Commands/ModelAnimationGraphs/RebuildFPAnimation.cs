@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {
-    public class ReplaceFPAnimationCommand : Command
+    public class RebuildFPAnimationCommand : Command
     {
         private GameCacheHaloOnlineBase CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
@@ -27,15 +27,15 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private CachedTag Jmad { get; set; }
         private bool ReachFixup = false;
 
-        public ReplaceFPAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
+        public RebuildFPAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
 
-                  "ReplaceFPAnimation",
-                  "Replace a first person animation or animations in a ModelAnimationGraph tag",
+                  "RebuildFPAnimation",
+                  "Rebuild a first person animation or animations in a ModelAnimationGraph tag",
 
-                  "ReplaceFPAnimation [reachfix] <file or folder path>",
+                  "RebuildFPAnimation [reachfix] <file or folder path>",
 
-                  "Replace a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
+                  "Rebuild a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
                   "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character\n" +
                   "Specify a folder to replace multiple animations or a file to replace a single animation")
         {
@@ -154,7 +154,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
-                importer.Import(filepath.FullName);
+                if (!importer.Import(filepath.FullName))
+                    continue;
 
                 if (importer.Version >= 16394)
                 {

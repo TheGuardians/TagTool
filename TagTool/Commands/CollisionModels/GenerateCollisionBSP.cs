@@ -68,7 +68,7 @@ namespace TagTool.Commands.CollisionModels
             Bsp.Bsp3dNodes.Clear();
 
             //allocate surface array before starting the bsp build
-            surface_array_definition surface_array = new surface_array_definition { free_count = Bsp.Surfaces.Count, used_count = 0, surface_array = new List<int>() };
+            surface_array_definition surface_array = new surface_array_definition { free_count = 0, used_count = 0, surface_array = new List<int>() };
             for (int i = 0; i < Bsp.Surfaces.Count; i++)
             {
                 //starting in reach, some surfaces use the plane negated flag instead of negating the plane index
@@ -79,7 +79,12 @@ namespace TagTool.Commands.CollisionModels
                     Bsp.Surfaces[i].Flags &= ~SurfaceFlags.PlaneNegated;
                 }
 
+                //if the surface is invalid (first seen in reach), ignore it 
+                if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.Invalid))
+                    continue;
+
                 surface_array.surface_array.Add((int)(i | 0x80000000));
+                surface_array.free_count++;
             }
 
             //populate surface_addendums list for usage later on
@@ -1362,19 +1367,6 @@ namespace TagTool.Commands.CollisionModels
                     break;
             }
 
-            //check the surface is on at least one side of the plane
-            if (surface_plane_relationship > 0)
-                return surface_plane_relationship;
-
-            if (debug)
-            {
-                Console.WriteLine("###WARNING found possible T-junction.");
-                Console.WriteLine($"Plane:{bsp2dnodeblock.Plane}");
-                foreach(var point in pointlist)
-                    Console.WriteLine($"Vertex:{point}");
-                foreach (var input in inputlist)
-                    Console.WriteLine($"Plane Fit:{input}");
-            }
             return surface_plane_relationship;
         }
 
