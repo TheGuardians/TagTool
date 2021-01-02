@@ -648,7 +648,7 @@ namespace TagTool.Commands.Porting
                                     weapon.TargetTracking[0].TrackingSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
                                     weapon.TargetTracking[0].LockedSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);                                      
                                 }
-                            }                    
+                            }
                             break;
                         /*case Vehicle vehicle:
                             //fix vehicle weapon target tracking
@@ -683,7 +683,23 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serialize(cacheStream, biped.Model, hlmt);
                             }
                             break;
-                        default:
+						case Crate bloc:
+							if (FlagIsSet(PortingFlags.Forgeable) && bloc.MultiplayerObject.Count == 0)
+								bloc.MultiplayerObject.Add(null);
+							break;
+						case Scenery scen:
+							if (FlagIsSet(PortingFlags.Forgeable) && scen.MultiplayerObject.Count == 0)
+								scen.MultiplayerObject.Add(null);
+							break;
+						case DeviceControl ctrl:
+							if (FlagIsSet(PortingFlags.Forgeable) && ctrl.MultiplayerObject.Count == 0)
+								ctrl.MultiplayerObject.Add(null);
+							break;
+						case DeviceMachine mach:
+							if (FlagIsSet(PortingFlags.Forgeable) && mach.MultiplayerObject.Count == 0)
+								mach.MultiplayerObject.Add(null);
+							break;
+						default:
                             break;
                     };                                     
                     break;
