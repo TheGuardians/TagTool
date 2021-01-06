@@ -2,6 +2,18 @@
 
 namespace TagTool.Shaders
 {
+    public class EntryPointHelper
+    {
+        static public uint GetEntryMask(Cache.CacheVersion version, Tags.Definitions.RenderMethodTemplate template)
+        {
+            if (version < Cache.CacheVersion.HaloOnline301003)
+                return (uint)template.ValidEntryPoints;
+            if (version < Cache.CacheVersion.HaloReach)
+                return (uint)template.ValidEntryPointsHO;
+            return (uint)template.ValidEntryPointsReach;
+        }
+    }
+
     public enum EntryPoint : sbyte
     {
         Default,

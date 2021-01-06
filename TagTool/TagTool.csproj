@@ -374,6 +374,8 @@
     <Compile Include="Commands\Porting\PortTagCommand.ShaderGen.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
+    <Compile Include="Commands\RenderMethods\AddFunctionCommand.cs" />
+    <Compile Include="Commands\RenderMethods\ListFunctionsCommand.cs" />
     <Compile Include="Commands\RenderMethods\PopulateParametersCommand.cs" />
     <Compile Include="Commands\RenderMethods\SetBitmapCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractBitmapsCommand.cs" />
@@ -641,6 +643,7 @@
     <Compile Include="Shaders\RenderMethodExtern.cs" />
     <Compile Include="Shaders\EntryPoint.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
+    <Compile Include="Shaders\ShaderFunctions\ShaderFunctionHelper.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderBlackGenerator.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderGenerator.cs" />
     <Compile Include="Shaders\ShaderMatching\ParticleSorter.cs" />
