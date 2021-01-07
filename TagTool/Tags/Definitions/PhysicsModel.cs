@@ -562,6 +562,25 @@ namespace TagTool.Tags.Definitions
             public byte ProxyCollisionGroup;
             public byte RuntimeCollisionGroup;
         }
+
+        [TagStructure(Size = 0x14)]
+        public class HavokShapeBase : TagStructure
+        {
+            public int FieldPointerSkip;
+            public short Size;
+            public short Count;
+            public int Offset;
+            public int UserData;
+            public float Radius;
+        }
+
+        [TagStructure(Size = 0x8)]
+        public class HavokShapeReference : TagStructure
+        {
+            public BlamShapeType Shapetype;
+            public short ShapeIndex;
+            public uint ChildShapeSize;
+        }
         
         [TagStructure(Size = 0x40)]
         public class Shape : TagStructure
@@ -582,32 +601,20 @@ namespace TagTool.Tags.Definitions
             public short MassDistributionIndex;
             public sbyte PhantomIndex;
             public sbyte ProxyCollisionGroup;
-            public int Unknown2;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown3;
-            public float Radius;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
+
+            public HavokShapeBase ShapeBase;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0xC)]
+            public byte[] Pad = new byte[0xC];
         }
 
         [TagStructure(Size = 0x30, Align = 0x10)]
         public class Sphere : Shape
         {
-            public int FieldPointerSkip;
-            public short Size2;
-            public short Count2;
-            public int Offset2;
-            public int UserDataPointer;
-            public float Radius2;
-            public uint Unknown9;
-            public uint Unknown10;
-            //Havok Shape Reference Struct
-            public BlamShapeType Shapetype;
-            public short ShapeIndex;
-            public uint ChildShapeSize;
+            public HavokShapeBase ConvexBase;
+            public uint FieldPointerSkip;
+            public HavokShapeReference ShapeReference;
+
             public RealVector3d Translation;
             public float TranslationRadius;
         }
@@ -627,25 +634,16 @@ namespace TagTool.Tags.Definitions
             public RealVector3d HalfExtents;
             public float HalfExtentsRadius;
 
-            public int Unknown7;
-            public short Size2;
-            public short Count2;
-            public int Offset2;
-            public int Unknown8;
-            public float Radius2;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
+            public HavokShapeBase ConvexBase;
+            public uint FieldPointerSkip;
+            public HavokShapeReference ShapeReference;
 
             public RealVector3d RotationI;
             public float RotationIRadius;
-
             public RealVector3d RotationJ;
             public float RotationJRadius;
-
             public RealVector3d RotationK;
             public float RotationKRadius;
-
             public RealVector3d Translation;
             public float TranslationRadius;
         }
@@ -653,31 +651,14 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x40, Align = 0x10)]
         public class Triangle : Shape
         {
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-            public uint Unknown19;
-            public uint Unknown20;
-            public uint Unknown21;
-            public uint Unknown22;
-
-            //public RealVector3d PointA;
-            //public float HavokwPointA;
-            //public RealVector3d PointB;
-            //public float HavokwPointB;
-            //public RealVector3d PointC;
-            //public float HavokwPointC;
-            //public RealVector3d Extrusion;
-            //public float HavokwExtrusion;
+            public RealVector3d PointA;
+            public float HavokwPointA;
+            public RealVector3d PointB;
+            public float HavokwPointB;
+            public RealVector3d PointC;
+            public float HavokwPointC;
+            public RealVector3d Extrusion;
+            public float HavokwExtrusion;
         }
 
         [TagStructure(Size = 0x40, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -686,7 +667,6 @@ namespace TagTool.Tags.Definitions
         {
             public RealVector3d AabbHalfExtents;
             public float AabbHalfExtentsRadius;
-
             public RealVector3d AabbCenter;
             public float AabbCenterRadius;
 
@@ -709,10 +689,8 @@ namespace TagTool.Tags.Definitions
 		{
             public RealVector3d FourVectorsX;
             public float FourVectorsXRadius;
-
             public RealVector3d FourVectorsY;
             public float FourVectorsYRadius;
-
             public RealVector3d FourVectorsZ;
             public float FourVectorsZRadius;
         }

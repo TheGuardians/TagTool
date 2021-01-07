@@ -249,10 +249,10 @@ namespace TagTool.Geometry
             // mutated at runtime. The AABB center and half-extents
             // are still there however. This field may not be 
             // correctly named however this  number is always used for it.
-            poly.Size = 0;
+            poly.ShapeBase.Size = 0;
 
-            poly.Count = 128; // uncertain as to what this does.
-            poly.Offset = 32 + index * 128;
+            poly.ShapeBase.Count = 128; // uncertain as to what this does.
+            poly.ShapeBase.Offset = 32 + index * 128;
 
             //The axis-aligned fields are used to optimise collisions
             // with other physics objects. If they are set incorrectly,

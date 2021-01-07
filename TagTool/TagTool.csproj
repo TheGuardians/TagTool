@@ -352,6 +352,7 @@
     <Compile Include="Commands\Porting\DoNotReplaceGroupsCommand.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Animations.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Physics.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
