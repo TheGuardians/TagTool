@@ -171,7 +171,7 @@ namespace TagTool.Commands.CollisionModels
                 for(int surface_index_index = 0; surface_index_index < surface_array.used_count; surface_index_index++)
                 {
                     int surface_index = surface_array.surface_array[surface_index_index + surface_array.free_count];
-                    double current_surface_plane_fit = check_surface_plane_fit(surface_index & 0x7FFFFFFF);
+                    double current_surface_plane_fit = surface_calculate_plane_fit(surface_index & 0x7FFFFFFF);
                     new_surface_array.surface_array.Add(surface_index);
                     if (surface_index < 0)
                     {
@@ -207,78 +207,7 @@ namespace TagTool.Commands.CollisionModels
             surface_array = new_surface_array_B.DeepClone();
             return 2;
         }
-
-        public double check_surface_plane_fit(int surface_index)
-        {
-            double surface_plane_fit = 0;
-            Surface surface_block = Bsp.Surfaces[surface_index];
-            Edge first_edge_block = Bsp.Edges[surface_block.FirstEdge];
-
-            int plane_index = (short)surface_block.Plane;
-
-            RealPlane3d plane_parameters = plane_get_equation_parameters(plane_index);
-
-            RealPoint3d first_edge_vertex;
-            if (first_edge_block.RightSurface == surface_index)
-                first_edge_vertex = Bsp.Vertices[first_edge_block.EndVertex].Point;
-            else
-                first_edge_vertex = Bsp.Vertices[first_edge_block.StartVertex].Point;
-
-            Edge edge_block = new Edge();
-            int edge_index = -1;
-            if (first_edge_block.RightSurface == surface_index)
-                edge_index = first_edge_block.ReverseEdge;
-            else
-                edge_index = first_edge_block.ForwardEdge;
-
-            edge_block = Bsp.Edges[edge_index];
-
-            while (true)
-            {
-                int edge_vertex_A_index = -1;
-                int edge_vertex_B_index = -1;
-                if (edge_block.RightSurface == surface_index)
-                {
-                    edge_vertex_A_index = edge_block.EndVertex;
-                    edge_vertex_B_index = edge_block.StartVertex;
-                }
-                else
-                {
-                    edge_vertex_A_index = edge_block.StartVertex;
-                    edge_vertex_B_index = edge_block.EndVertex;
-                }
-
-                RealPoint3d edge_vertex_A = Bsp.Vertices[edge_vertex_A_index].Point;
-                RealPoint3d edge_vertex_B = Bsp.Vertices[edge_vertex_B_index].Point;
-
-                float XDiff1 = edge_vertex_A.X - first_edge_vertex.X;
-                float YDiff1 = edge_vertex_A.Y - first_edge_vertex.Y;
-                float ZDiff1 = edge_vertex_A.Z - first_edge_vertex.Z;
-                float XDiff2 = edge_vertex_B.X - first_edge_vertex.X;
-                float YDiff2 = edge_vertex_B.Y - first_edge_vertex.Y;
-                float ZDiff2 = edge_vertex_B.Z - first_edge_vertex.Z;
-                float v17 = ZDiff2 * YDiff1 - YDiff2 * ZDiff1;
-                float v18 = ZDiff1 * XDiff2 - ZDiff2 * XDiff1;
-                float v19 = XDiff1 * YDiff2 - XDiff2 * YDiff1;
-
-                surface_plane_fit = plane_parameters.I * v17 + plane_parameters.J * v18 + plane_parameters.K * v19 + surface_plane_fit;
-
-                if (edge_block.RightSurface == surface_index)
-                    edge_index = edge_block.ReverseEdge;
-                else
-                    edge_index = edge_block.ForwardEdge;
-                //break the loop if we have finished circulating the surface
-                if (edge_index == surface_block.FirstEdge)
-                    break;
-
-                edge_block = Bsp.Edges[edge_index];
-            }
-            if (surface_plane_fit < 0)
-                return 0;
-
-            return surface_plane_fit;
-        }
-
+        
         public RealPlane3d plane_get_equation_parameters(int plane_index)
         {
             RealPlane3d plane_equation = new RealPlane3d();
@@ -550,6 +479,10 @@ namespace TagTool.Commands.CollisionModels
                         warning_posted = true;
                     }
 
+                    //this addendum to the function is a bit of black magic from H2Tool.exe. 
+                    //If there is no 2d plane that can satisfactorily separate the surfaces, remove the surface from the array that BEST fits the plane
+                    //I figure although this surface will no longer be referenced by index, it will still be selected for collision by default at the leaf level
+                    //This ultimately allows bsp compilation to complete even when there are overlapping surfaces
                     int remove_surface_index = -1;
                     double smallest_plane_fit = double.MaxValue;
                     for(var i = 0; i < plane_matched_surface_array.surface_array.Count; i++)

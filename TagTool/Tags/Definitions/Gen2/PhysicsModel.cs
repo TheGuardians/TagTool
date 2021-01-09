@@ -54,13 +54,13 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<StiffSpringConstraintsBlock> StiffSpringConstraints;
         public List<PrismaticConstraintsBlock> PrismaticConstraints;
         public List<PhantomsBlock> Phantoms;
-        
+
         [Flags]
         public enum FlagsValue : uint
         {
             Unused = 1 << 0
         }
-        
+
         [TagStructure(Size = 0x68)]
         public class PhantomTypesBlock : TagStructure
         {
@@ -115,7 +115,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float AlignmentMaxVel;
             [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
             public byte[] Padding3;
-            
+
             [Flags]
             public enum FlagsValue : uint
             {
@@ -148,7 +148,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 DisableAngularDamping = 1 << 26,
                 IgnoresDeadBipeds = 1 << 27
             }
-            
+
             public enum MinimumSizeValue : sbyte
             {
                 Default,
@@ -159,7 +159,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Huge,
                 ExtraHuge
             }
-            
+
             public enum MaximumSizeValue : sbyte
             {
                 Default,
@@ -171,7 +171,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 ExtraHuge
             }
         }
-        
+
         [TagStructure(Size = 0x18)]
         public class PhysicsModelNodeConstraintEdgeBlock : TagStructure
         {
@@ -190,7 +190,7 @@ namespace TagTool.Tags.Definitions.Gen2
             /// b, if node b is none we use whatever material a has
             /// </summary>
             public StringId NodeBMaterial;
-            
+
             [TagStructure(Size = 0xC)]
             public class PhysicsModelConstraintEdgeConstraintBlock : TagStructure
             {
@@ -201,7 +201,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// 0 is the default (takes what it was set in max) anything else overrides that value
                 /// </summary>
                 public float Friction;
-                
+
                 public enum TypeValue : short
                 {
                     Hinge,
@@ -211,7 +211,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     BallAndSocket,
                     Prismatic
                 }
-                
+
                 [Flags]
                 public enum FlagsValue : uint
                 {
@@ -226,7 +226,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
         }
-        
+
         [TagStructure(Size = 0x90)]
         public class RigidBodiesBlock : TagStructure
         {
@@ -275,7 +275,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float BoundingSpherePad;
             [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
@@ -300,7 +300,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// </summary>
                 HasNoPhantomPowerVersion = 1 << 5
             }
-            
+
             public enum MotionTypeValue : short
             {
                 Sphere,
@@ -310,7 +310,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Keyframed,
                 Fixed
             }
-            
+
             public enum SizeValue : short
             {
                 Default,
@@ -321,7 +321,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Huge,
                 ExtraHuge
             }
-            
+
             public enum ShapeTypeValue : short
             {
                 Sphere,
@@ -342,7 +342,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Mopp
             }
         }
-        
+
         [TagStructure(Size = 0xC)]
         public class MaterialsBlock : TagStructure
         {
@@ -350,14 +350,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public StringId GlobalMaterialName;
             public short PhantomType;
             public FlagsValue Flags;
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 DoesNotCollideWithFixedBodies = 1 << 0
             }
         }
-        
+
         [TagStructure(Size = 0x80)]
         public class SpheresBlock : TagStructure
         {
@@ -372,21 +372,19 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x2)]
             public byte[] Unknown;
             public short Phantom;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+
+            public int FieldPointerSkip;
             public short Size;
             public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
+            public int Offset;
             public float Radius;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
+
+            public int FieldPointerSkip1;
             public short Size1;
             public short Count1;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown4;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown5;
+            public int Offset1;
+            public float Radius1;
+
             public RealVector3d RotationI;
             [TagField(Length = 0x4)]
             public byte[] Unknown6;
@@ -399,14 +397,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public RealVector3d Translation;
             [TagField(Length = 0x4)]
             public byte[] Unknown9;
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 Unused = 1 << 0
             }
         }
-        
+
         [TagStructure(Size = 0xB0)]
         public class MultiSpheresBlock : TagStructure
         {
@@ -430,13 +428,13 @@ namespace TagTool.Tags.Definitions.Gen2
             public int NumSpheres;
             [TagField(Length = 8)]
             public Unknown3Datum[] Unknown3;
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 Unused = 1 << 0
             }
-            
+
             [TagStructure(Size = 0x10)]
             public class Unknown3Datum : TagStructure
             {
@@ -445,7 +443,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Unknown3;
             }
         }
-        
+
         [TagStructure(Size = 0x50)]
         public class PillsBlock : TagStructure
         {
@@ -457,30 +455,27 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Length = 0x2)]
-            public byte[] Unknown;
+            public short MassDistributionIndex;
             public short Phantom;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+
+            public int FieldPointerSkip;
             public short Size;
             public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
+            public int Offset;
             public float Radius;
+
             public RealVector3d Bottom;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
+            public float BottomRadius;
             public RealVector3d Top;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown4;
-            
+            public float TopRadius;
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 Unused = 1 << 0
             }
         }
-        
+
         [TagStructure(Size = 0x90)]
         public class BoxesBlock : TagStructure
         {
@@ -492,47 +487,40 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Restitution;
             public float Volume;
             public float Mass;
-            [TagField(Length = 0x2)]
-            public byte[] Unknown;
+            public short MassDistributionIndex;
             public short Phantom;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+
+            public int FieldPointerSkip;
             public short Size;
             public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
+            public int Offset;
             public float Radius;
+
             public RealVector3d HalfExtents;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown4;
+            public float HalfExtentsRadius;
+
+            public int FieldPointerSkip1;
             public short Size1;
             public short Count1;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown5;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown6;
+            public int Offset1;
+            public float Radius1;
+
             public RealVector3d RotationI;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown7;
+            public float RotationIRadius;
             public RealVector3d RotationJ;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown8;
+            public float RotationJRadius;
             public RealVector3d RotationK;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown9;
+            public float RotationKRadius;
             public RealVector3d Translation;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown10;
-            
+            public float TranslationRadius;
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 Unused = 1 << 0
             }
         }
-        
+
         [TagStructure(Size = 0x60)]
         public class TrianglesBlock : TagStructure
         {
@@ -547,6 +535,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x2)]
             public byte[] Unknown;
             public short Phantom;
+
             [TagField(Length = 0x4)]
             public byte[] Unknown1;
             public short Size;
@@ -554,6 +543,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x4)]
             public byte[] Unknown2;
             public float Radius;
+
             public RealVector3d PointA;
             [TagField(Length = 0x4)]
             public byte[] Unknown3;
@@ -563,14 +553,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public RealVector3d PointC;
             [TagField(Length = 0x4)]
             public byte[] Unknown5;
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 Unused = 1 << 0
             }
         }
-        
+
         [TagStructure(Size = 0x100)]
         public class PolyhedraBlock : TagStructure
         {
@@ -585,6 +575,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x2)]
             public byte[] Unknown;
             public short Phantom;
+
             [TagField(Length = 0x4)]
             public byte[] Unknown1;
             public short Size;
@@ -592,68 +583,45 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x4)]
             public byte[] Unknown2;
             public float Radius;
+
             public RealVector3d AabbHalfExtents;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
+            public float AabbHalfExtentsRadius;
             public RealVector3d AabbCenter;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown4;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown5;
+            public float AabbCenterRadius;
+            public uint FieldPointerSkip;
             public int FourVectorsSize;
             public int FourVectorsCapacity;
             public int NumVertices;
-            [TagField(Length = 3)]
-            public Unknown6Datum[] Unknown62;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown6;
+            public PolyhedronFourVectorsBlock FourVectors;
+            public uint m_useSpuBuffer;
             public int PlaneEquationsSize;
             public int PlaneEquationsCapacity;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown7;
-            
+            public uint Connectivity;
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 Unused = 1 << 0
             }
-            
-            [TagStructure(Size = 0x30)]
-            public class Unknown6Datum : TagStructure
-            {
-                public RealVector3d FourVectorsX;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown6;
-                public RealVector3d FourVectorsY;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown61;
-                public RealVector3d FourVectorsZ;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown62;
-            }
         }
-        
+
         [TagStructure(Size = 0x30)]
         public class PolyhedronFourVectorsBlock : TagStructure
         {
             public RealVector3d FourVectorsX;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown;
+            public float FourVectorsXRadius;
             public RealVector3d FourVectorsY;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+            public float FourVectorsYRadius;
             public RealVector3d FourVectorsZ;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
+            public float FourVectorsZRadius;
         }
-        
+
         [TagStructure(Size = 0x10)]
         public class PolyhedronPlaneEquationsBlock : TagStructure
         {
-            [TagField(Length = 0x10)]
-            public byte[] Unknown;
+            public RealPlane3d PlaneEquation;
         }
-        
+
         [TagStructure(Size = 0x40)]
         public class MassDistributionsBlock : TagStructure
         {
@@ -670,7 +638,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x4)]
             public byte[] Unknown3;
         }
-        
+
         [TagStructure(Size = 0x38)]
         public class ListsBlock : TagStructure
         {
@@ -686,7 +654,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public int ChildShapesCapacity;
             [TagField(Length = 4)]
             public CollisionFilterDatum[] CollisionFilter;
-            
+
             public enum ShapeTypeValue : short
             {
                 Sphere,
@@ -706,7 +674,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 List,
                 Mopp
             }
-            
+
             [TagStructure(Size = 0x8)]
             public class CollisionFilterDatum : TagStructure
             {
@@ -715,14 +683,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 public int CollisionFilter;
             }
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class ListShapesBlock : TagStructure
         {
             public ShapeTypeValue ShapeType;
             public short Shape;
             public int CollisionFilter;
-            
+
             public enum ShapeTypeValue : short
             {
                 Sphere,
@@ -743,7 +711,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Mopp
             }
         }
-        
+
         [TagStructure(Size = 0x14)]
         public class MoppsBlock : TagStructure
         {
@@ -758,14 +726,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public short List;
             public int CodeOffset;
         }
-        
+
         [TagStructure(Size = 0x78)]
         public class HingeConstraintsBlock : TagStructure
         {
             public ConstraintBodiesStructBlock ConstraintBodies;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            
+
             [TagStructure(Size = 0x74)]
             public class ConstraintBodiesStructBlock : TagStructure
             {
@@ -787,7 +755,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding;
             }
         }
-        
+
         [TagStructure(Size = 0x94)]
         public class RagdollConstraintsBlock : TagStructure
         {
@@ -801,7 +769,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float MinPlane;
             public float MaxPlane;
             public float MaxFricitonTorque;
-            
+
             [TagStructure(Size = 0x74)]
             public class ConstraintBodiesStructBlock : TagStructure
             {
@@ -823,19 +791,19 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding;
             }
         }
-        
+
         [TagStructure(Size = 0xC)]
         public class RegionsBlock : TagStructure
         {
             public StringId Name;
             public List<PermutationsBlock> Permutations;
-            
+
             [TagStructure(Size = 0xC)]
             public class PermutationsBlock : TagStructure
             {
                 public StringId Name;
                 public List<RigidBodyIndicesBlock> RigidBodies;
-                
+
                 [TagStructure(Size = 0x2)]
                 public class RigidBodyIndicesBlock : TagStructure
                 {
@@ -843,7 +811,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
         }
-        
+
         [TagStructure(Size = 0xC)]
         public class NodesBlock : TagStructure
         {
@@ -852,14 +820,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public short Parent;
             public short Sibling;
             public short Child;
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
                 DoesNotAnimate = 1 << 0
             }
         }
-        
+
         [TagStructure(Size = 0x250)]
         public class GlobalTagImportInfoBlock : TagStructure
         {
@@ -879,7 +847,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public List<TagImportFileBlock> Files;
             [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            
+
             [TagStructure(Size = 0x210)]
             public class TagImportFileBlock : TagStructure
             {
@@ -898,7 +866,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding1;
             }
         }
-        
+
         [TagStructure(Size = 0x2A4)]
         public class GlobalErrorReportCategoriesBlock : TagStructure
         {
@@ -913,7 +881,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x194, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
             public List<ErrorReportsBlock> Reports;
-            
+
             public enum ReportTypeValue : short
             {
                 Silent,
@@ -921,7 +889,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Warning,
                 Error
             }
-            
+
             [Flags]
             public enum FlagsValue : ushort
             {
@@ -931,7 +899,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 LightmapLight = 1 << 3,
                 ReportKeyIsValid = 1 << 4
             }
-            
+
             [TagStructure(Size = 0x260)]
             public class ErrorReportsBlock : TagStructure
             {
@@ -957,7 +925,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealArgbColor Color;
                 [TagField(Length = 0x54, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                
+
                 public enum TypeValue : short
                 {
                     Silent,
@@ -965,7 +933,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     Warning,
                     Error
                 }
-                
+
                 [Flags]
                 public enum FlagsValue : ushort
                 {
@@ -975,7 +943,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     LightmapLight = 1 << 3,
                     ReportKeyIsValid = 1 << 4
                 }
-                
+
                 [TagStructure(Size = 0x34)]
                 public class ErrorReportVerticesBlock : TagStructure
                 {
@@ -987,7 +955,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public RealArgbColor Color;
                     public float ScreenSize;
                 }
-                
+
                 [TagStructure(Size = 0x40)]
                 public class ErrorReportVectorsBlock : TagStructure
                 {
@@ -1000,7 +968,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public RealVector3d Normal;
                     public float ScreenLength;
                 }
-                
+
                 [TagStructure(Size = 0x3C)]
                 public class ErrorReportLinesBlock : TagStructure
                 {
@@ -1012,7 +980,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
-                
+
                 [TagStructure(Size = 0x48)]
                 public class ErrorReportTrianglesBlock : TagStructure
                 {
@@ -1024,7 +992,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
-                
+
                 [TagStructure(Size = 0x54)]
                 public class ErrorReportQuadsBlock : TagStructure
                 {
@@ -1036,7 +1004,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public RealPoint3d[] Position;
                     public RealArgbColor Color;
                 }
-                
+
                 [TagStructure(Size = 0x38)]
                 public class ErrorReportCommentsBlock : TagStructure
                 {
@@ -1050,7 +1018,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
         }
-        
+
         [TagStructure(Size = 0x10)]
         public class PointToPathCurveBlock : TagStructure
         {
@@ -1059,7 +1027,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
             public List<PointToPathCurvePointBlock> Points;
-            
+
             [TagStructure(Size = 0x10)]
             public class PointToPathCurvePointBlock : TagStructure
             {
@@ -1067,7 +1035,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public float TValue;
             }
         }
-        
+
         [TagStructure(Size = 0x84)]
         public class LimitedHingeConstraintsBlock : TagStructure
         {
@@ -1077,7 +1045,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float LimitFriction;
             public float LimitMinAngle;
             public float LimitMaxAngle;
-            
+
             [TagStructure(Size = 0x74)]
             public class ConstraintBodiesStructBlock : TagStructure
             {
@@ -1099,14 +1067,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding;
             }
         }
-        
+
         [TagStructure(Size = 0x78)]
         public class BallAndSocketConstraintsBlock : TagStructure
         {
             public ConstraintBodiesStructBlock ConstraintBodies;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            
+
             [TagStructure(Size = 0x74)]
             public class ConstraintBodiesStructBlock : TagStructure
             {
@@ -1128,7 +1096,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding;
             }
         }
-        
+
         [TagStructure(Size = 0x7C)]
         public class StiffSpringConstraintsBlock : TagStructure
         {
@@ -1136,7 +1104,7 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
             public float SpringLength;
-            
+
             [TagStructure(Size = 0x74)]
             public class ConstraintBodiesStructBlock : TagStructure
             {
@@ -1158,7 +1126,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding;
             }
         }
-        
+
         [TagStructure(Size = 0x84)]
         public class PrismaticConstraintsBlock : TagStructure
         {
@@ -1168,7 +1136,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float MinLimit;
             public float MaxLimit;
             public float MaxFrictionForce;
-            
+
             [TagStructure(Size = 0x74)]
             public class ConstraintBodiesStructBlock : TagStructure
             {
@@ -1190,7 +1158,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Padding;
             }
         }
-        
+
         [TagStructure(Size = 0x20)]
         public class PhantomsBlock : TagStructure
         {

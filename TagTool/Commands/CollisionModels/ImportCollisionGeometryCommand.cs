@@ -596,9 +596,9 @@ namespace TagTool.Commands.CollisionModels
                     if ((ushort)surface_A != ushort.MaxValue && (ushort)surface_B != ushort.MaxValue)
                     {
                         Surface surface_A_block = Bsp.Surfaces[surface_A];
-                        Surface surface_B_block = Bsp.Surfaces[surface_B];
+                        Surface surface_B_block = Bsp.Surfaces[surface_B];                  
 
-                        if (surface_A_block.Plane == surface_B_block.Plane && surface_A_block.BreakableSurfaceIndex == surface_B_block.BreakableSurfaceIndex)
+                        if (surface_A_block.Plane == surface_B_block.Plane && surface_A_block.MaterialIndex == surface_B_block.MaterialIndex)
                         {
                             //we only want to make surfaces with a maximum of 8 edges, so make sure that merging these two surfaces will result in a surface with no more than 8 edges
                             if (surface_count_edges(surface_A) + surface_count_edges(surface_B) - 2 <= max_surface_edges)
