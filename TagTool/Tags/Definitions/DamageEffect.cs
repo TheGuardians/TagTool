@@ -1,6 +1,9 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -68,6 +71,7 @@ namespace TagTool.Tags.Definitions
         public float OutwardRadius;
         public float OutwardExponent;
 
+        [Flags]
         public enum FlagsValue : uint
         {
             DonTScaleDamageByDistance = 1 << 0,
@@ -78,6 +82,7 @@ namespace TagTool.Tags.Definitions
             AffectsModelTargets = 1 << 2
         }
 
+        [Flags]
         public enum FlagsValue1 : uint
         {
             DoesNotHurtOwner = 1 << 0,
