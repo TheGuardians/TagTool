@@ -683,25 +683,12 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serialize(cacheStream, biped.Model, hlmt);
                             }
                             break;
-                        case Crate bloc:
-                            if (FlagIsSet(PortingFlags.Forgeable) && bloc.MultiplayerObject.Count == 0)
-                                bloc.MultiplayerObject.Add(null);
-                            break;
-                        case Scenery scen:
-                            if (FlagIsSet(PortingFlags.Forgeable) && scen.MultiplayerObject.Count == 0)
-                                scen.MultiplayerObject.Add(null);
-                            break;
-                        case DeviceControl ctrl:
-                            if (FlagIsSet(PortingFlags.Forgeable) && ctrl.MultiplayerObject.Count == 0)
-                                ctrl.MultiplayerObject.Add(null);
-                            break;
-                        case DeviceMachine mach:
-                            if (FlagIsSet(PortingFlags.Forgeable) && mach.MultiplayerObject.Count == 0)
-                                mach.MultiplayerObject.Add(null);
-                            break;
                         default:
                             break;
                     };
+                    if (FlagIsSet(PortingFlags.MPobject) && blamDefinition is GameObject obj && obj.MultiplayerObject.Count == 0)
+                        obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 30 });
+
                     break;
 
 				case Globals matg:

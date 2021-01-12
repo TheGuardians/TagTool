@@ -136,7 +136,7 @@ namespace TagTool.Commands.Porting
 			/// Add a multiplayerobject block for spawnable tag types.
 			/// </summary>
 			[PortingFlagDescription("Add a multiplayerobject block for spawnable tag types.")]
-			Forgeable = 1 << 19,
+			MPobject = 1 << 19,
 
 			// No [PortingFlagDescription] here means we'll flag names as the description.
 			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Print | Merge | GenerateShaders
