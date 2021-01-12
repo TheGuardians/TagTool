@@ -33,12 +33,12 @@ namespace TagTool.Commands.Bitmaps
             if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
-			string[] types = { "all" };
+            string[] types = { "all" };
 
-			if (Array.IndexOf(types, args[0]) == -1)
-				return new TagToolError(CommandError.CustomError, "Invalid extract type specified!");
+            if (Array.IndexOf(types, args[0]) == -1)
+                return new TagToolError(CommandError.CustomError, "Invalid extract type specified!");
 
-			var outDir = args[1];
+            var outDir = args[1];
             Directory.CreateDirectory(outDir);
 
             Console.WriteLine("Loading resource caches...");

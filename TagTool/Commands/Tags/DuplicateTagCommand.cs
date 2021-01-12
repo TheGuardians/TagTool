@@ -29,23 +29,23 @@ namespace TagTool.Commands.Tags
                 return new TagToolError(CommandError.TagInvalid);
 
             var newTag = Cache.TagCache.AllocateTag(originalTag.Group);
-			if (args.Count == 2)
-				newTag = Cache.TagCache.AllocateTag(originalTag.Group, args[1]);
+            if (args.Count == 2)
+                newTag = Cache.TagCache.AllocateTag(originalTag.Group, args[1]);
 
-			using (var stream = Cache.OpenCacheReadWrite())
+            using (var stream = Cache.OpenCacheReadWrite())
             {
                 var originalDefinition = Cache.Deserialize(stream, originalTag);
                 Cache.Serialize(stream, newTag, originalDefinition);
 
-				//Cache.SaveTagNames();
-			}
+                //Cache.SaveTagNames();
+            }
 
-			if (args.Count == 2)
-				Console.WriteLine($"[Index: 0x{newTag.Index:X4}] {args[1]}.{newTag.Group}");
-			else
-				Console.Write($"Tag duplicated to 0x{newTag.Index.ToString("X")}\n");
+            if (args.Count == 2)
+                Console.WriteLine($"[Index: 0x{newTag.Index:X4}] {args[1]}.{newTag.Group}");
+            else
+                Console.Write($"Tag duplicated to 0x{newTag.Index.ToString("X")}\n");
 
-			return true;
+            return true;
         }
     }
 }
