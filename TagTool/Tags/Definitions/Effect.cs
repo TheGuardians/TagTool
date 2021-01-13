@@ -28,12 +28,16 @@ namespace TagTool.Tags.Definitions
         public short LoopStartEvent;
         public EffectPriority Priority;
         public uint Unknown5;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public uint Unknown6;
+
         public List<Location> Locations;
         public List<Event> Events;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<LoopingSounds> LoopingSoundBlock;
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag LoopingSound;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -42,6 +46,7 @@ namespace TagTool.Tags.Definitions
         public sbyte EventIndex;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public short Unknown11;
+
         public float AlwaysPlayDistance;
         public float NeverPlayDistance;
         public float RuntimeLightprobeDeathDelay;
@@ -75,6 +80,7 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId Name;
             public int Unknown;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte Unknown2;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -83,11 +89,13 @@ namespace TagTool.Tags.Definitions
             public sbyte Unknown4;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte Unknown5;
+
             public float SkipFraction;
             public float DelayBoundsMin;
             public float DelayBoundsMax;
             public float DurationBoundsMin;
             public float DurationBoundsMax;
+
             public List<Part> Parts;
             public List<Acceleration> Accelerations;
             public List<ParticleSystem> ParticleSystems;
@@ -104,8 +112,10 @@ namespace TagTool.Tags.Definitions
                 public EffectEventPriority Priority;
                 public EffectEventPartCameraMode CameraMode;
                 public Tag RuntimeBaseGroupTag;
+
                 [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Unused;
+
                 public CachedTag Type;
                 public Bounds<float> VelocityBounds;
                 public RealEulerAngles2d VelocityOrientation;
@@ -163,28 +173,33 @@ namespace TagTool.Tags.Definitions
                 public EffectViolenceMode Disposition;
                 public ParticleCameraMode CameraMode;
                 public short SortBias;
-                [TagField(MinVersion = CacheVersion.HaloReach)]
-                public short Unknownshort;
-                [TagField(MinVersion = CacheVersion.HaloReach)]
-                public short Unknownshort2;
+                [TagField(Flags = Padding, Length = 0x2, MinVersion = CacheVersion.HaloReach)]
+                public byte[] Unused0;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ushort Flags;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public int FlagsReach;
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown18;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown19;
-                public float Unknown6;
+                public float PixelBudget; // ms
                 public float NearRange;
                 public float NearCutoff;
-                public float Unknown9;
-                public uint Unknown10;
-                public float Unknown11;
-                public float AmountSize;
-                public float Unknown12;
+                public float NearFadeOverride;
                 public float LodInDistance;
                 public float LodFeatherInDelta;
+                public float InverseLodFeatherIn;
+                public float LodOutDistance;
+                public float LodFeatherOutDelta;
+                public float InverseLodFeatherOut;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown15;
+
                 public List<Emitter> Emitters;
+
                 public float Unknown16;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
@@ -209,16 +224,11 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public CachedTag BoatHull;
 
-                    public uint Unknown3;
-                    public uint Unknown4;
+                    public float BoundingRadiusEstimate;
+                    public float BoundRadiusOverride;
+                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    public RealPoint3d AxisScale;
                     public RealPoint2d UVScrollRate;
-
-                    [TagField(MinVersion = CacheVersion.HaloReach)]
-                    public uint Unknown7;
-                    [TagField(MinVersion = CacheVersion.HaloReach)]
-                    public uint Unknown8;
-                    [TagField(MinVersion = CacheVersion.HaloReach)]
-                    public uint Unknown9;
 
                     /// <summary>
                     /// XYZ controls that offset the emitter's origin from the original location.

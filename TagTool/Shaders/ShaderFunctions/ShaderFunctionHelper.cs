@@ -152,14 +152,12 @@ namespace TagTool.Shaders.ShaderFunctions
             var properties = renderMethod.ShaderProperties[0];
             uint validEntries = EntryPointHelper.GetEntryMask(cache.Version, template);
 
-            // Start actual function building code
-
             properties.EntryPoints.Clear();
             properties.ParameterTables.Clear();
             properties.Parameters.Clear();
 
             for (int i = 0; i < template.EntryPoints.Count; i++)
-                properties.EntryPoints.Add(new RenderMethodTemplate.PackedInteger_10_6());
+                properties.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
 
             for (int i = 0; i < properties.EntryPoints.Count; i++)
             {

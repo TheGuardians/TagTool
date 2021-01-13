@@ -910,7 +910,10 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public ShaderIndexValue ShaderIndex;
-                public short Unknown;
+                [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
+                public byte[] Padding;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+                public ChudBlendMode BlendModeHO;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public InputValue_HO Input_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -998,6 +1001,23 @@ namespace TagTool.Tags.Definitions
                     DirectionalDamageApply,
                     ReallySimple,
                     Unknown
+                }
+
+                public enum ChudBlendMode : short
+                {
+                    AlphaBlend,
+                    Additive,
+                    Multiply,
+                    Opaque,
+                    DoubleMultiply,
+                    PreMultipliedAlpha,
+                    Maximum,
+                    MultiplyAdd,
+                    AddSrcTimesDstAlpha,
+                    AddSrcTimesSrcAlpha,
+                    InvAlphaBlend,
+                    SeparateAlphaBlend,
+                    SeparateAlphaBlendAdditive
                 }
 
                 public enum InputValue_HO : short

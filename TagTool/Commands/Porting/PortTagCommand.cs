@@ -720,6 +720,11 @@ namespace TagTool.Commands.Porting
                         int flagsH3 = (int)particle.FlagsH3;
                         particle.Flags = (Particle.FlagsValue)((flagsH3 & 0x3) + ((int)(flagsH3 & 0xFFFFFFFC) << 1));
                     }
+                    else if (BlamCache.Version >= CacheVersion.HaloReach) // Shift all flags above 9 by 2
+                    {
+                        int flagsReach = particle.AppearanceFlags;
+                        particle.AppearanceFlags = ((flagsReach & 0xFF) + ((int)(flagsReach & 0xFFFFFC00) >> 2));
+                    }
                     // temp prevent odst prt3 using cheap shader as we dont have the entry point shader
                     if (particle.Flags.HasFlag(Particle.FlagsValue.UsesCheapShader))
                         particle.Flags &= ~Particle.FlagsValue.UsesCheapShader;

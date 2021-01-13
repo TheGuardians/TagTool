@@ -4,54 +4,56 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x188, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x194, MinVersion = CacheVersion.HaloOnline106708)]
     public class VisionMode : TagStructure
     {
         public sbyte Unknown1;
         public sbyte Unknown2;
-        public sbyte Flags;
-        public sbyte Unknown3;
+        public sbyte Unknown3; // unused, always 1
+        public sbyte Unknown4;
 
-        public RenderDataBlock ParentRenderData;
-        public RenderDataBlock ChildRenderData;
-        public RenderDataBlock TheaterRenderData;
+        public PingParametersBlock Ping;
+        public PingParametersBlock VehiclePing;
+        public PingParametersBlock ObserverPing;
+        public CachedTag PingSound;
 
-        public CachedTag AnimationSound;
+        public PingColorBlock WeaponPingColor;
+        public PingColorBlock AllyPingColor;
+        public PingColorBlock EnemyPingColor;
+        public PingColorBlock ObjectivePingColor;
+        public PingColorBlock EnvironmentPingColor;
 
-        public OutlineDataBlock WeaponOutlineData;
-        public OutlineDataBlock AllyOutlineData;
-        public OutlineDataBlock EnemyOutlineData;
-        public OutlineDataBlock ObjectiveOutlineData;
-        public OutlineDataBlock SceneryOutlineData;
+        public CachedTag VisionMask;
+        public CachedTag VisionCameraFx;
 
-        public CachedTag VisionModeMask;
-        public CachedTag VisionModeCameraFx;
-
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
-
+        /// <summary>
+        /// This controls timing and distance of the pulse animation when VISR is active.
+        /// </summary>
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public class RenderDataBlock : TagStructure
+        public class PingParametersBlock : TagStructure
         {
-            public float PrimaryRenderDistance;
+            public float PingDistance;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public float SecondaryRenderDistance;
-            public float AnimationSpeed;
-            public float AnimationTimeModifier;
-            public float Unknown;
-            public float AnimationDelayBySeconds;
+            public float VisionThroughWallsDistance;
+            public float PingInterval; // 30 tick
+            public float PingPulseDuration; // 30 tick
+            public float Unused;
+            public float PingDelaySeconds;
         }
 
+        /// <summary>
+        /// This controls the color and intensity of the pulse animation when VISR is active.
+        /// </summary>
         [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
-        public class OutlineDataBlock : TagStructure
+        public class PingColorBlock : TagStructure
         {
             public TagFunction PrimaryColourFunction;
             public TagFunction SecondaryColourFunction;
-            public float FillIntensity;
-            public float PrimaryColourInfluence;
-            public float SecondaryColourInfluence;
-            public float OutlineIntensity;
+            public float Alpha; // only affects "through walls" in halo online
+            public float PrimaryColorScale;
+            public float SecondaryColourScale;
+            public float OverlappingDimmingFactor; // behaves differently in ODST
         }
     }
 }

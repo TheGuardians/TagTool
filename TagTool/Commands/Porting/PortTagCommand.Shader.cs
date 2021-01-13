@@ -556,7 +556,7 @@ namespace TagTool.Commands.Porting
             return vertexRegisters;
         }
 
-        private bool TableParameterAlreadyExists(RenderMethodTemplate.PackedInteger_10_6 tableInteger, List<ParameterMapping> tableParameters, ParameterMapping parameter)
+        private bool TableParameterAlreadyExists(RenderMethodTemplate.TagBlockIndex tableInteger, List<ParameterMapping> tableParameters, ParameterMapping parameter)
         {
             for (int i = tableInteger.Offset; i < tableInteger.Offset + tableInteger.Count; i++)
                 if (tableParameters[i].RegisterIndex == parameter.RegisterIndex &&
@@ -675,7 +675,7 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].Parameters.Clear();
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count != edRmt2.EntryPoints.Count)
-                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.PackedInteger_10_6());
+                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
             while (finalRm.ShaderProperties[0].ParameterTables.Count != edRmt2.ParameterTables.Count)
                 finalRm.ShaderProperties[0].ParameterTables.Add(new ParameterTable());
 
@@ -874,7 +874,7 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].Parameters.Clear();
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count < edRmt2.EntryPoints.Count)
-                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.PackedInteger_10_6());
+                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
 
             foreach (EntryPoint entryPoint in Enum.GetValues(typeof(EntryPoint)))
             {
