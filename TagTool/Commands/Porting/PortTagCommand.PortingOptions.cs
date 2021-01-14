@@ -132,6 +132,12 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Attempt to generate shaders.")]
 			GenerateShaders = 1 << 18,
 
+			/// <summary>
+			/// Add a multiplayerobject block for spawnable tag types.
+			/// </summary>
+			[PortingFlagDescription("Add a multiplayerobject block for spawnable tag types.")]
+			MPobject = 1 << 19,
+
 			// No [PortingFlagDescription] here means we'll flag names as the description.
 			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Print | Merge | GenerateShaders
 		}

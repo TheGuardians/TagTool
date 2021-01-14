@@ -648,7 +648,7 @@ namespace TagTool.Commands.Porting
                                     weapon.TargetTracking[0].TrackingSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
                                     weapon.TargetTracking[0].LockedSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);                                      
                                 }
-                            }                    
+                            }
                             break;
                         /*case Vehicle vehicle:
                             //fix vehicle weapon target tracking
@@ -685,7 +685,10 @@ namespace TagTool.Commands.Porting
                             break;
                         default:
                             break;
-                    };                                     
+                    };
+                    if (FlagIsSet(PortingFlags.MPobject) && blamDefinition is GameObject obj && obj.MultiplayerObject.Count == 0)
+                        obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 30 });
+
                     break;
 
 				case Globals matg:
