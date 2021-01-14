@@ -28,9 +28,11 @@ namespace TagTool.Commands.Tags
             if (!Cache.TagCache.TryGetCachedTag(args[0], out var originalTag))
                 return new TagToolError(CommandError.TagInvalid);
 
-            var newTag = Cache.TagCache.AllocateTag(originalTag.Group);
+            var name = "";
             if (args.Count == 2)
-                newTag = Cache.TagCache.AllocateTag(originalTag.Group, args[1]);
+                name = args[1];
+
+            var newTag = Cache.TagCache.AllocateTag(originalTag.Group, name);
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
