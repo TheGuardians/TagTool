@@ -656,7 +656,7 @@ namespace TagTool.Shaders.ShaderGenerator
                         optionBlock.Type = cache.StringTable.AddString(optionName);
 
                     optionBlock.Option = null;
-                    if (rmopName != null && !cache.TagCache.TryGetTag<RenderMethodOption>(rmopName, out optionBlock.Option))
+                    if (rmopName != null && rmopName != "" && !cache.TagCache.TryGetTag<RenderMethodOption>(rmopName, out optionBlock.Option))
                     {
                         Console.WriteLine($"Generating rmop \"{rmopName}\"");
 

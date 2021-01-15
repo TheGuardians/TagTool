@@ -19,8 +19,18 @@ namespace TagTool.Commands.Porting
 
             foreach (var reflection in lensFlare.Reflections)
             {
-                reflection.RotationOffset_HO = reflection.RotationOffset_H3;
-                reflection.TintModulationFactor_HO = reflection.TintModulationFactor_H3;
+                if (BlamCache.Version >= CacheVersion.HaloReach)
+                {
+                    reflection.RadiusBounds = reflection.RadiusBoundsReach;
+                    reflection.BrightnessBounds = reflection.BrightnessBoundsReach;
+                    reflection.RotationOffset_HO = reflection.RotationOffset_Reach;
+                    reflection.TintModulationFactor_HO = reflection.TintModulationFactor_Reach;
+                }
+                else
+                {
+                    reflection.RotationOffset_HO = reflection.RotationOffset_H3;
+                    reflection.TintModulationFactor_HO = reflection.TintModulationFactor_H3;
+                }
                 reflection.Unknown2 = 0;
                 reflection.BitmapOverride = null;
 

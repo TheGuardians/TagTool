@@ -20,7 +20,7 @@ namespace TagTool.Tags.Definitions
         //  Halo 3 lens tags always use their first reflection block element.
         //
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public int OcclusionReflectionIndex;
 
         public float OcclusionRadius;
@@ -28,6 +28,9 @@ namespace TagTool.Tags.Definitions
         public UnknownFlagsValue UnknownFlags;
 
         public OcclusionOffsetDirectionValue OcclusionOffsetDirection;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float UnknownReach;
 
         public uint Unknown1;
         public uint Unknown2;
@@ -127,54 +130,58 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach)]
         public class Reflection : TagStructure
 		{
             public FlagsValue Flags;
-
             public short BitmapIndex;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown2;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public CachedTag BitmapOverride;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public float RotationOffset_HO;
 
             public float PositionFlareAxis;
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float RotationOffset_H3;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float RotationOffset_Reach;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<float> OffsetBounds;
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public Bounds<float> RadiusBounds;
-
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public Bounds<float> RadiusBoundsReach;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public Bounds<float> BrightnessBounds;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public Bounds<float> BrightnessBoundsReach;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public TagFunction RadiusCurveFunction = new TagFunction { Data = new byte[0] };
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public TagFunction ScaleCurveXFunction = new TagFunction { Data = new byte[0] };
-
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public TagFunction ScaleCurveYFunction = new TagFunction { Data = new byte[0] };
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public TagFunction BrightnessCurveFunction = new TagFunction { Data = new byte[0] };
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float TintModulationFactor_H3;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float TintModulationFactor_Reach;
 
             public RealRgbColor TintColor;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public float TintModulationFactor_HO;
 
             public float TintPower;
