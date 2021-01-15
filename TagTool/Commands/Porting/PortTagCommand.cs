@@ -722,6 +722,11 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertLensFlare(lens);
 					break;
 
+                case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
+                    ligh.FrustumMinimumViewDistance = ligh.FrustumMinimumViewDistanceReach;
+                    ligh.MaxIntensityRange = ligh.MaxIntensityRangeReach;
+                    break;
+
                 case Model hlmt:
                     foreach (var target in hlmt.Targets)
                     {
