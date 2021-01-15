@@ -480,6 +480,29 @@ namespace TagTool.Commands.Porting
             switch (blamDefinition)
 			{
 				case AreaScreenEffect sefc:
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        sefc.GlobalFlags = sefc.GlobalFlagsReach;
+                        sefc.GlobalHiddenFlags = sefc.GlobalHiddenFlagsReach;
+
+                        foreach (var screenEffect in sefc.ScreenEffects)
+                        {
+                            screenEffect.Flags = screenEffect.FlagsReach;
+                            screenEffect.Delay = screenEffect.DelayReach;
+                            screenEffect.InputVariable = screenEffect.InputVariableReach;
+                            screenEffect.RangeVariable = screenEffect.RangeVariableReach;
+                            screenEffect.ObjectFalloff = screenEffect.ObjectFalloffReach;
+                            screenEffect.Tron = screenEffect.TronReach;
+                            screenEffect.RadialBlur = screenEffect.RadialBlurReach;
+                            screenEffect.RadialBlurDirection = screenEffect.RadialBlurDirectionReach;
+                            screenEffect.HorizontalBlur = screenEffect.HorizontalBlurReach;
+                            screenEffect.VerticalBlur = screenEffect.VerticalBlurReach;
+                            screenEffect.Unknown4 = screenEffect.Unknown4Reach;
+                            screenEffect.HudTransparency = screenEffect.HudTransparencyReach;
+                            screenEffect.FovIn = screenEffect.FovInReach;
+                            screenEffect.FovOut = screenEffect.FovOutReach;
+                        }
+                    }
 					if (BlamCache.Version < CacheVersion.Halo3ODST)
 					{
 						sefc.GlobalHiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
