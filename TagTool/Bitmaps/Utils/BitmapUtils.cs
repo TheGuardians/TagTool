@@ -743,6 +743,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt3aMono:
                 case BitmapFormat.ReachDxt3aMono:
                 case BitmapFormat.ReachDxt5aMono:
+                case BitmapFormat.Y16:
                     return BitmapFormat.Y8;
 
                 case BitmapFormat.A4R4G4B4:
@@ -841,6 +842,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.AY8:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.R5G6B5:
+                case BitmapFormat.Y16:
                 default:
                     blockSize = 1;
                     break;
@@ -896,13 +898,13 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A2R10G10B10:
                 case BitmapFormat.A16B16G16R16:
                 case BitmapFormat.V16U16:
+                case BitmapFormat.Y16:
                     return false;
                 case BitmapFormat.Dxt1:
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Unused1E:
                 case BitmapFormat.Dxt5a:
-                case BitmapFormat.Unused20:
                 case BitmapFormat.Dxn:
                 case BitmapFormat.Ctx1:
                 case BitmapFormat.Dxt3aAlpha:

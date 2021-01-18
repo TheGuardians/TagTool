@@ -383,6 +383,7 @@ namespace TagTool.Bitmaps.Utils
                     GenerateCompressedMipMaps(bitmap);
                     break;
                 case BitmapFormat.A8Y8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.Y8:
                 case BitmapFormat.A8:
                 case BitmapFormat.A8R8G8B8:
@@ -521,6 +522,7 @@ namespace TagTool.Bitmaps.Utils
                     break;
                 case BitmapFormat.Y8:
                 case BitmapFormat.A8:
+                case BitmapFormat.Y16:
                     channelCount = 1;
                     break;
                 case BitmapFormat.A8R8G8B8:

@@ -39,7 +39,7 @@ namespace TagTool.Bitmaps
         V16U16,             // 0x1D, v16u16 signed 16-bit normals
         Unused1E,           // 0x1E compressed 4-bit single channel
         Dxt5a,              // 0x1F compressed interpolated single channel
-        Unused20,           // 0x20 compressed channel mask
+        Y16,                // 0x20 compressed channel mask, Reach: 16 bits monochrome texture
         Dxn,                // 0x21, compressed normals: high quality ('ATI2')
         Ctx1,               // 0x22  compressed normals: high compression
         Dxt3aAlpha,         // 0x23 compressed 4-bit alpha channel
@@ -79,6 +79,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.A4R4G4B4Font:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.Y16:
                     bitsPerPixel = 16;
                     break;
 
@@ -184,6 +185,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Y8:
                 case BitmapFormat.A8:
                 case BitmapFormat.A8Y8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.A16B16G16R16F:
                 case BitmapFormat.A32B32G32R32F:
                 case BitmapFormat.A4R4G4B4:
@@ -238,6 +240,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A1R5G5B5:
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.R5G6B5:
                     compressionFactor = 0.5;
                     break;
@@ -271,6 +274,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Y8:
                 case BitmapFormat.AY8:
                 case BitmapFormat.A8Y8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A4R4G4B4:

@@ -95,6 +95,25 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        private static byte[] DecodeY16(byte[] data, int width, int height)
+        {
+            byte[] buffer = new byte[height * width * 4];
+
+            for (int i = 0; i < (height * width); i++)
+            {
+                // 16 bit color, but stored in 8 bits, precision loss, we can use the most important byte and truncate the rest for now.
+                // ushort color = (ushort)((data[i * 2]) | (data[i * 2 + 1] << 8));
+
+                int index = i * 4;
+                buffer[index] = data[i * 2 + 1];
+                buffer[index + 1] = data[i * 2 + 1];
+                buffer[index + 2] = data[i * 2 + 1];
+                buffer[index + 3] = 0;
+            }
+
+            return buffer;
+        }
+
         private static byte[] EncodeA8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width];
@@ -843,7 +862,64 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
-        // TODO: fix/refactor
+
+        private static byte[] DecodeDxt3A1111(byte[] data, int width, int height)
+        {
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT3A_AS_1_1_1_1, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            int bppDXT3A = (int)XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT3A_AS_1_1_1_1);
+            int BppResult = 4;
+            byte[] buffer = new byte[alignedHeight * alignedWidth * BppResult];
+
+            int nBlockWidth = (int)(alignedWidth / blockWidth);
+            int nBlockHeight = (int)(alignedHeight / blockWidth);
+
+            for (int y = 0; y < nBlockHeight; y++)
+            {
+                for (int x = 0; x < nBlockWidth; x++)
+                {
+                    int i;
+                    int blockDataStart = ((y * nBlockWidth) + x) * 8;
+                    ushort[] alphaData = new ushort[] {
+                        (ushort)((data[blockDataStart + 1] << 8) + data[blockDataStart + 0]),
+                        (ushort)((data[blockDataStart + 3] << 8) + data[blockDataStart + 2]),
+                        (ushort)((data[blockDataStart + 5] << 8) + data[blockDataStart + 4]),
+                        (ushort)((data[blockDataStart + 7] << 8) + data[blockDataStart + 6]) };
+                    byte[,] alpha = new byte[4, 4];
+                    int j = 0;
+                    while (j < 4)
+                    {
+                        i = 0;
+                        while (i < 4)
+                        {
+                            alpha[i, j] = (byte)((alphaData[j] & 15) * 16);
+                            alphaData[j] = (ushort)(alphaData[j] >> 4);
+                            i++;
+                        }
+                        j++;
+                    }
+                    uint code = BitConverter.ToUInt32(data, blockDataStart);
+                    for (int k = 0; k < 4; k++)
+                    {
+                        j = k ^ 1;
+                        for (i = 0; i < 4; i++)
+                        {
+                            int pixDataStart = (((int)alignedWidth * ((y * 4) + j)) * 4) + (((x * 4) + i) * 4);
+
+                            buffer[pixDataStart + 0] = (byte)(((alpha[i, j] >> 0) & 0x1) * 255);
+                            buffer[pixDataStart + 1] = (byte)(((alpha[i, j] >> 1) & 0x1) * 255);
+                            buffer[pixDataStart + 2] = (byte)(((alpha[i, j] >> 2) & 0x1) * 255);
+                            buffer[pixDataStart + 3] = (byte)(((alpha[i, j] >> 3) & 0x1) * 255);
+                            code >>= 2;
+                        }
+                    }
+                }
+            }
+            return buffer;
+        }
+
         private static byte[] DecodeDxt5(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[width * height * 4];
@@ -1129,6 +1205,10 @@ namespace TagTool.Bitmaps
                     bitmRaw = DecodeA8Y8(bitmRaw, virtualWidth, virtualHeight);
                     break;
 
+                case BitmapFormat.Y16:
+                    bitmRaw = DecodeY16(bitmRaw, virtualWidth, virtualHeight);
+                    break;
+
                 case BitmapFormat.R5G6B5:
                     bitmRaw = DecodeR5G6B5(bitmRaw, virtualWidth, virtualHeight);
                     break;
@@ -1172,6 +1252,10 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.ReachDxt3aAlpha:
                     bitmRaw = DecodeDxt3A(bitmRaw, virtualWidth, virtualHeight);
                     break;
+
+               /* case BitmapFormat.Dxt3a1111:
+                    bitmRaw = DecodeDxt3A1111(bitmRaw, virtualWidth, virtualHeight);
+                    break;*/
 
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.ReachDxnMonoAlpha:
@@ -1311,6 +1395,7 @@ namespace TagTool.Bitmaps
                     texPitch = 8;
                     break;
 
+                case BitmapFormat.Y16:
                 default:
                     blockSizeX = 1;
                     blockSizeY = 1;
