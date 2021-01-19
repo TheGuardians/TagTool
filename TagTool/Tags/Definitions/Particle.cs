@@ -16,7 +16,8 @@ namespace TagTool.Tags.Definitions
         public FlagsValue Flags;
 
         public List<Attachment> Attachments;
-        public AppearanceFlagsValue AppearanceFlags;
+        //public AppearanceFlagsValue AppearanceFlags;
+        public int AppearanceFlags;
         public ParticleBillboardStyleValue ParticleBillboardStyle;
         public short RuntimeMTextureArraySize;
         public short FirstSequenceIndex;

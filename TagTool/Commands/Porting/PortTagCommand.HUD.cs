@@ -34,11 +34,11 @@ namespace TagTool.Commands.Porting
 
         private ChudDefinition.HudWidget.RenderDatum ConvertRenderData(ChudDefinition.HudWidget.RenderDatum renderData)
         {
-            //For some reason, the turbulence shader in H:O only works if the following unknown is 1.
-            //So if the turbulance shader is selected, set the following unknown to 1.
+            // Writing to the distortion surface requires an additive blend mode
+            // This is actually still set in-engine like H3, but sabers code involving this field overwrites it
             if (renderData.ShaderIndex == ChudDefinition.HudWidget.RenderDatum.ShaderIndexValue.Turbulence)
             {
-                renderData.Unknown = 1;
+                renderData.BlendModeHO = ChudDefinition.HudWidget.RenderDatum.ChudBlendMode.Additive;
             }
 
             switch (BlamCache.Version)

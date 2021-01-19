@@ -38,7 +38,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x17C, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x1B4, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x1C8, Align = 0x8, MinVersion = CacheVersion.HaloReach)]
         public class LightVolumeSystemBlock : TagStructure
 		{
             public StringId LightVolumeName;

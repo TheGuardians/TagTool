@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "particle_model", Tag = "pmdf", Size = 0x90)]
+    [TagStructure(Name = "particle_model", Tag = "pmdf", Size = 0x90, MaxVersion = Cache.CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "particle_model", Tag = "pmdf", Size = 0xA8, MinVersion = Cache.CacheVersion.HaloReach)]
     public class ParticleModel : TagStructure
 	{
         public RenderGeometry Geometry;

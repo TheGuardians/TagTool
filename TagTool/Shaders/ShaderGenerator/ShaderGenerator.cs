@@ -374,7 +374,7 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             if(mappings.Count > 0)
             {
-                table[usage] = new RenderMethodTemplate.PackedInteger_10_6
+                table[usage] = new RenderMethodTemplate.TagBlockIndex
                 {
                     Offset = (ushort)rmt2.Parameters.Count,
                     Count = (ushort)mappings.Count
@@ -444,16 +444,16 @@ namespace TagTool.Shaders.ShaderGenerator
 
             rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
             rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
-            rmt2.EntryPoints = new List<RenderMethodTemplate.PackedInteger_10_6>();
+            rmt2.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
 
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
-                var rmt2Drawmode = new RenderMethodTemplate.PackedInteger_10_6();
+                var rmt2Drawmode = new RenderMethodTemplate.TagBlockIndex();
 
                 if(generator.IsEntryPointSupported(mode))
                 {
                     while (rmt2.EntryPoints.Count < (int)mode) // makeup count, this is to prevent all entry points being added
-                        rmt2.EntryPoints.Add(new RenderMethodTemplate.PackedInteger_10_6());
+                        rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
 
                     rmt2.EntryPoints.Add(rmt2Drawmode);
                     rmt2Drawmode.Offset = (ushort)rmt2.ParameterTables.Count();
@@ -463,7 +463,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     var registerOffsets = new RenderMethodTemplate.ParameterTable();
 
                     for (int i = 0; i < registerOffsets.Values.Length; i++)
-                        registerOffsets.Values[i] = new RenderMethodTemplate.PackedInteger_10_6();
+                        registerOffsets.Values[i] = new RenderMethodTemplate.TagBlockIndex();
 
                     rmt2.ParameterTables.Add(registerOffsets);
 
@@ -656,7 +656,7 @@ namespace TagTool.Shaders.ShaderGenerator
                         optionBlock.Type = cache.StringTable.AddString(optionName);
 
                     optionBlock.Option = null;
-                    if (rmopName != null && !cache.TagCache.TryGetTag<RenderMethodOption>(rmopName, out optionBlock.Option))
+                    if (rmopName != null && rmopName != "" && !cache.TagCache.TryGetTag<RenderMethodOption>(rmopName, out optionBlock.Option))
                     {
                         Console.WriteLine($"Generating rmop \"{rmopName}\"");
 

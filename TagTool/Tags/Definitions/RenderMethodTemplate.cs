@@ -20,7 +20,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public EntryPointBitMaskReach ValidEntryPointsReach;
 
-        public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables by usage
+        public List<TagBlockIndex> EntryPoints; // Ranges of ParameterTables by usage
         public List<ParameterTable> ParameterTables; // Ranges of Parameters
         public List<ParameterMapping> Parameters; 
         public List<ShaderArgument> RealParameterNames;
@@ -32,7 +32,7 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x2)]
-        public class PackedInteger_10_6 : TagStructure
+        public class TagBlockIndex : TagStructure
 		{
             public ushort Offset { get => GetOffset(); set => SetOffset(value); }
             public ushort Count { get => GetCount(); set => SetCount(value); }
@@ -63,9 +63,9 @@ namespace TagTool.Tags.Definitions
         public class ParameterTable : TagStructure
 		{
             [TagField(Length = (int)ParameterUsage.Count)]
-            public PackedInteger_10_6[] Values = new PackedInteger_10_6[(int)ParameterUsage.Count];
+            public TagBlockIndex[] Values = new TagBlockIndex[(int)ParameterUsage.Count];
 
-            public PackedInteger_10_6 this[ParameterUsage usage]
+            public TagBlockIndex this[ParameterUsage usage]
             {
                 get { return Values[(int)usage]; }
                 set { Values[(int)usage] = value; }

@@ -5,28 +5,28 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "contrail_system", Tag = "cntl", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "contrail_system", Tag = "cntl", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "contrail_system", Tag = "cntl", Size = 0xC)]
     public class ContrailSystem : TagStructure
 	{
         public List<ContrailSystemBlock> Contrail;
 
-        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused1;
-
-        [TagStructure(Size = 0x26C, Align = 0x10)]
+        [TagStructure(Size = 0x26C, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x294, Align = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class ContrailSystemBlock : TagStructure
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public uint Unknown1;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+            public float Unknown5;
+            public float Unknown6;
+            public float Unknown7;
+            public float Unknown8;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float UnknownReach;
 
             public TagMapping ShaderFunction1;
             public TagMapping ShaderFunction2;

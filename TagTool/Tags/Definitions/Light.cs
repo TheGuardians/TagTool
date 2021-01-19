@@ -13,33 +13,26 @@ namespace TagTool.Tags.Definitions
         public float LightRange;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float MaxIntensityRange;
-
+        public float UnknownIntensity;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown0;
 
         public float NearWidth;
         public float HeightStretch;
-        public Angle FieldOfView;
+        public float FieldOfView;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public Angle UnknownAngle;
-
+        public float UnknownAngle;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float FrustumLightSpread;
-
+        public float MaxIntensityRangeReach;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float FrustumMinimumViewDistanceReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown1;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float FrustumMinimumViewDistance;
-
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown2;
-
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short Unknown3;
-
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short Unknown4;
 
@@ -56,12 +49,13 @@ namespace TagTool.Tags.Definitions
         public uint Unknown10;
         public TagFunction Function2 = new TagFunction { Data = new byte[0] };
         public CachedTag GelMap;
-        public float Unknown11;
-        public float Duration;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float Unknown12;
+        public float FrustumMinimumViewDistance;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public float MaxIntensityRange;
+
+        public float Unknown12;
         public float Unknown13;
 
         public sbyte Unknown14;

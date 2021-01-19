@@ -255,7 +255,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<ModelAnimationGraph.SkeletonNode> Skelnodescopy = Animation.SkeletonNodes.DeepClone();
             foreach(var skelnode in Skelnodescopy)
             {
-                if ((skelnode.ModelFlags &= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel) > 0)
+                if (skelnode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel))
                     Animation.SkeletonNodes.RemoveAt(Animation.SkeletonNodes.FindIndex(x => x.Name.Equals(skelnode.Name)));
             }
 

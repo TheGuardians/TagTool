@@ -480,6 +480,29 @@ namespace TagTool.Commands.Porting
             switch (blamDefinition)
 			{
 				case AreaScreenEffect sefc:
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        sefc.GlobalFlags = sefc.GlobalFlagsReach;
+                        sefc.GlobalHiddenFlags = sefc.GlobalHiddenFlagsReach;
+
+                        foreach (var screenEffect in sefc.ScreenEffects)
+                        {
+                            screenEffect.Flags = screenEffect.FlagsReach;
+                            screenEffect.Delay = screenEffect.DelayReach;
+                            screenEffect.InputVariable = screenEffect.InputVariableReach;
+                            screenEffect.RangeVariable = screenEffect.RangeVariableReach;
+                            screenEffect.ObjectFalloff = screenEffect.ObjectFalloffReach;
+                            screenEffect.Tron = screenEffect.TronReach;
+                            screenEffect.RadialBlur = screenEffect.RadialBlurReach;
+                            screenEffect.RadialBlurDirection = screenEffect.RadialBlurDirectionReach;
+                            screenEffect.HorizontalBlur = screenEffect.HorizontalBlurReach;
+                            screenEffect.VerticalBlur = screenEffect.VerticalBlurReach;
+                            screenEffect.Unknown4 = screenEffect.Unknown4Reach;
+                            screenEffect.HudTransparency = screenEffect.HudTransparencyReach;
+                            screenEffect.FovIn = screenEffect.FovInReach;
+                            screenEffect.FovOut = screenEffect.FovOutReach;
+                        }
+                    }
 					if (BlamCache.Version < CacheVersion.Halo3ODST)
 					{
 						sefc.GlobalHiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
@@ -699,6 +722,11 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertLensFlare(lens);
 					break;
 
+                case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
+                    ligh.FrustumMinimumViewDistance = ligh.FrustumMinimumViewDistanceReach;
+                    ligh.MaxIntensityRange = ligh.MaxIntensityRangeReach;
+                    break;
+
                 case Model hlmt:
                     foreach (var target in hlmt.Targets)
                     {
@@ -722,6 +750,11 @@ namespace TagTool.Commands.Porting
                     {
                         int flagsH3 = (int)particle.FlagsH3;
                         particle.Flags = (Particle.FlagsValue)((flagsH3 & 0x3) + ((int)(flagsH3 & 0xFFFFFFFC) << 1));
+                    }
+                    else if (BlamCache.Version >= CacheVersion.HaloReach) // Shift all flags above 9 by 2
+                    {
+                        int flagsReach = particle.AppearanceFlags;
+                        particle.AppearanceFlags = ((flagsReach & 0xFF) + ((int)(flagsReach & 0xFFFFFC00) >> 2));
                     }
                     // temp prevent odst prt3 using cheap shader as we dont have the entry point shader
                     if (particle.Flags.HasFlag(Particle.FlagsValue.UsesCheapShader))

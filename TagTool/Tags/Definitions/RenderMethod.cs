@@ -97,7 +97,7 @@ namespace TagTool.Tags.Definitions
             public List<RealConstant> RealConstants;
             public List<uint> IntegerConstants;
             public uint BooleanConstants; // Each bit indicates true/false. SourceIndex = bit index
-            public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables
+            public List<TagBlockIndex> EntryPoints; // Ranges of ParameterTables
             public List<ParameterTable> ParameterTables; // Ranges of Parameters by usage
             public List<ParameterMapping> Parameters; // Mapping of constants functions, and registers
             public List<ShaderFunction> Functions; // Functions for animated parameters
@@ -118,14 +118,14 @@ namespace TagTool.Tags.Definitions
                 multiply = 2,
                 alpha_blend = 3,
                 double_multiply = 4,
-                multiply_add__2 = 5, // not sure why this is here, works tho
+                pre_multiplied_alpha = 5,
                 maximum = 6,
                 multiply_add = 7,
                 add_src_times_dstalpha = 8,
                 add_src_times_srcalpha = 9,
                 inv_alpha_blend = 10,
-                pre_multiplied_alpha__2 = 11, // blend factor of 0
-                pre_multiplied_alpha = 12 // blend factor of -1
+                separate_alpha_blend = 11,
+                separate_alpha_blend_additive = 12
             }
 
             [Flags]
@@ -156,7 +156,7 @@ namespace TagTool.Tags.Definitions
 
                 public sbyte ExternMode;
                 public sbyte XFormArgumentIndex;
-                public PackedInteger_10_6 Functions = new PackedInteger_10_6(); // Range of Functions
+                public TagBlockIndex Functions = new TagBlockIndex(); // Range of Functions
 
                 public enum SamplerFilterMode : byte
                 {
@@ -258,9 +258,9 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x6)]
             public class ParameterTable : TagStructure
             {
-                public PackedInteger_10_6 Texture = new PackedInteger_10_6();
-                public PackedInteger_10_6 RealVertex = new PackedInteger_10_6();
-                public PackedInteger_10_6 RealPixel = new PackedInteger_10_6();
+                public TagBlockIndex Texture = new TagBlockIndex();
+                public TagBlockIndex RealVertex = new TagBlockIndex();
+                public TagBlockIndex RealPixel = new TagBlockIndex();
             }
 
             [TagStructure(Size = 0x4)]

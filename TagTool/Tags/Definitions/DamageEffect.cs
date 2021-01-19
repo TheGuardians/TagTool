@@ -1,6 +1,9 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,13 +11,12 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnline106708)]
     public class DamageEffect : TagStructure
 	{
-        public float RadiusMin;
-        public float RadiusMax;
+        public Bounds<float> Radius; // world units
         public float CutoffScale;
-        public uint Flags;
+        public FlagsValue Flags;
         public SideEffectValue SideEffect;
         public CategoryValue Category;
-        public uint Flags2;
+        public FlagsValue1 Flags2;
         public float AreaOfEffectCoreRadius;
         public float DamageLowerBound;
         public float DamageUpperBoundMin;
@@ -37,8 +39,8 @@ namespace TagTool.Tags.Definitions
         public float AiStunBoundsMax;
         public float ShakeRadius;
         public float EmpRadius;
-        public float Unknown1;
-        public float Unknown2;
+        public float AOESpikeRadius;
+        public float AOESpikeDamageBump;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown3 = 1.0f;
@@ -68,6 +70,38 @@ namespace TagTool.Tags.Definitions
         public float OutwardVelocity;
         public float OutwardRadius;
         public float OutwardExponent;
+
+        [Flags]
+        public enum FlagsValue : uint
+        {
+            DonTScaleDamageByDistance = 1 << 0,
+            /// <summary>
+            /// area of effect damage only affects players
+            /// </summary>
+            AreaDamagePlayersOnly = 1 << 1,
+            AffectsModelTargets = 1 << 2
+        }
+
+        [Flags]
+        public enum FlagsValue1 : uint
+        {
+            DoesNotHurtOwner = 1 << 0,
+            CanCauseHeadshots = 1 << 1,
+            PingsResistantUnits = 1 << 2,
+            DoesNotHurtFriends = 1 << 3,
+            DoesNotPingUnits = 1 << 4,
+            DetonatesExplosives = 1 << 5,
+            OnlyHurtsShields = 1 << 6,
+            CausesFlamingDeath = 1 << 7,
+            DamageIndicatorsAlwaysPointDown = 1 << 8,
+            SkipsShields = 1 << 9,
+            OnlyHurtsOneInfectionForm = 1 << 10,
+            TransferDamageAlwaysUsesMinimum = 1 << 11,
+            InfectionFormPop = 1 << 12,
+            IgnoreSeatScaleForDirDmg = 1 << 13,
+            ForcesHardPing = 1 << 14,
+            DoesNotHurtPlayers = 1 << 15
+        }
 
         public enum SideEffectValue : short
         {
