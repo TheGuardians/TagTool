@@ -63,14 +63,42 @@ namespace TagTool.Commands.Editing
                     {
                         if (collection.Count > 0)
                         {
-                            writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
-                            for (int i = 0; i < collection.Count; i++)
-                                DumpCommands(writer, cache, collection[i], $"{fieldName}[{i}]");
+                            if (fieldName.Contains("Function.Data"))
+                            {
+                                byte[] bytes = new byte[collection.Count];
+                                collection.CopyTo(bytes, 0);
+                                writer.WriteLine($"SetField {fieldName} {BitConverter.ToString(bytes).Replace("-", string.Empty)}");
+                            }
+                            else if (fieldName.Contains("].Data"))
+                            {
+                                string concat = "";
+                                for (int i = 0; i < collection.Count; i++)
+                                    concat += collection[i].ToString() + " ";
+                                writer.WriteLine($"SetField {fieldName} {concat}");
+                            }
+                            else if (fieldName.Contains("Unused"))
+                            {
+                                writer.WriteLine($"# Skipping {fieldName} containing \"Unused\"");
+                            }
+                            else
+                            {
+                                writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
+                                for (int i = 0; i < collection.Count; i++)
+                                    DumpCommands(writer, cache, collection[i], $"{fieldName}[{i}]");
+                            }
                         }
                     }
                     break;
                 default:
-                    writer.WriteLine($"SetField {fieldName} {FormatValue(data)}");
+                    //if (data != null && data.ToString().Contains("|"))
+                    if (fieldName.Contains("Flags"))
+                    {
+                        string flaglist = data.ToString();
+                        flaglist = flaglist.Replace(" ", string.Empty);
+                        writer.WriteLine($"SetField {fieldName} {flaglist}");
+                    }
+                    else
+                        writer.WriteLine($"SetField {fieldName} {FormatValue(data)}");
                     break;
             }
         }
