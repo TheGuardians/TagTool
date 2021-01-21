@@ -388,6 +388,7 @@ namespace TagTool.Commands.Porting
                         Console.WriteLine("###WARNING: Reach animation has >1 animation data block, whereas HO only supports 1");
                     animation.AnimationData = animation.AnimationDataBlock[0];
 
+                    animation.AnimationData.AnimationType = (ModelAnimationGraph.FrameType)Enum.Parse(typeof(ModelAnimationGraph.FrameType), animation.AnimationData.AnimationTypeReach.ToString());
                     animation.AnimationData.PreviousVariantSibling = animation.PreviousVariantSiblingReach;
                     animation.AnimationData.NextVariantSibling = animation.NextVariantSiblingReach;
                     animation.AnimationData.DesiredCompression = animation.AnimationData.DesiredCompressionReach;

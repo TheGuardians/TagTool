@@ -221,7 +221,15 @@ namespace TagTool.Tags.Definitions
             Overlay,
             Replacement
         }
-        
+
+        public enum FrameTypeReach : sbyte
+        {
+            None,
+            Base,
+            Overlay,
+            Replacement
+        }
+
         [TagStructure(Size = 0x88, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.HaloReach)]
         public class Animation : TagStructure
@@ -273,7 +281,12 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public byte Unknown0;
                 public short FrameCount;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public FrameType AnimationType;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public FrameTypeReach AnimationTypeReach;
+
                 public AnimationMovementDataType FrameInfoType;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public CompressionValue DesiredCompressionReach;
