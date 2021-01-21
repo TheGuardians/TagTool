@@ -249,6 +249,7 @@ namespace TagTool.Geometry
             // mutated at runtime. The AABB center and half-extents
             // are still there however. This field may not be 
             // correctly named however this  number is always used for it.
+            poly.ShapeBase = new PhysicsModel.HavokShapeBase();
             poly.ShapeBase.Size = 0;
 
             poly.ShapeBase.Count = 128; // uncertain as to what this does.
