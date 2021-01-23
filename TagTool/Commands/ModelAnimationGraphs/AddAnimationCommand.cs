@@ -23,7 +23,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
-        private bool ReachFixup = false;
+        private bool BaseFixup = false;
 
         public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -50,8 +50,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             if (argStack.Count == 2)
             {
-                if (argStack.Pop().ToLower() == "reachfix")
-                    ReachFixup = true;
+                if (argStack.Pop().ToLower() == "basefix")
+                    BaseFixup = true;
                 else
                     return new TagToolError(CommandError.ArgInvalid);
             }
@@ -139,9 +139,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     return new TagToolError(CommandError.OperationFailed, errormessage);
                 }
 
-                //fixup Reach FP animations
-                if (ReachFixup)
-                    FixupReachFP(importer);
+                //fixup Base node position/rotation/scale
+                if (BaseFixup)
+                    FixupBaseNode(importer);
 
                 //Adjust imported nodes to ensure that they align with the jmad
                 AdjustImportedNodes(importer);
@@ -238,29 +238,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
             importer.AnimationNodes = newAnimationNodes;
         }
 
-        public void FixupReachFP(AnimationImporter importer)
+        public void FixupBaseNode(AnimationImporter importer)
         {
             var imported_nodes = importer.AnimationNodes;
 
             int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
             if (basenode_index != -1)
             {
-                //fixup rotated base node
+                //fixup base node
                 foreach (var Frame in imported_nodes[basenode_index].Frames)
                 {
                     Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
-                }
-            }
-
-            //fix weapon IK marker
-            if (Animation.Modes.Count > 0)
-            {
-                if (Animation.Modes[0].WeaponClass.Count > 0)
-                {
-                    if (Animation.Modes[0].WeaponClass[0].WeaponIk.Count > 0)
-                    {
-                        Animation.Modes[0].WeaponClass[0].WeaponIk[0].AttachToMarker = CacheContext.StringTable.GetStringId("left_hand_spartan_fp");
-                    }
+                    Frame.Translation = new RealPoint3d(0, 0, 0);
+                    Frame.Scale = 1.0f;
                 }
             }
         }
