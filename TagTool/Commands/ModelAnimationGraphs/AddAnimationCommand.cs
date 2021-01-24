@@ -23,7 +23,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
-        private bool BaseFixup = false;
+        private bool BaseFix = false;
+        private bool CameraFix = false;
 
         public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -31,7 +32,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "AddAnimation",
                   "Add an animation to a ModelAnimationGraph tag",
 
-                  "AddAnimation <filepath>",
+                  "AddAnimation [basefix] [camerafix] <filepath>",
 
                   "Add an animation to a ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
         {
@@ -43,17 +44,29 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count < 1 || args.Count > 2)
+            if (args.Count < 1 || args.Count > 3)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
-            if (argStack.Count == 2)
+            BaseFix = false;
+            CameraFix = false;
+            while (argStack.Count > 1)
             {
-                if (argStack.Pop().ToLower() == "basefix")
-                    BaseFixup = true;
-                else
-                    return new TagToolError(CommandError.ArgInvalid);
+                var arg = argStack.Peek();
+                switch (arg.ToLower())
+                {
+                    case "basefix":
+                        BaseFix = true;
+                        argStack.Pop();
+                        break;
+                    case "camerafix":
+                        CameraFix = true;
+                        argStack.Pop();
+                        break;
+                    default:
+                        return new TagToolError(CommandError.ArgInvalid);
+                }
             }
 
             List<FileInfo> fileList = new List<FileInfo>();
@@ -140,8 +153,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
 
                 //fixup Base node position/rotation/scale
-                if (BaseFixup)
+                if (BaseFix)
                     FixupBaseNode(importer);
+
+                //add camera_control node at position 0, useful for Halo:CE animations
+                if (CameraFix)
+                    AddCameraNode(importer);
 
                 //Adjust imported nodes to ensure that they align with the jmad
                 AdjustImportedNodes(importer);
@@ -253,6 +270,29 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     Frame.Scale = 1.0f;
                 }
             }
+        }
+
+        public void AddCameraNode(AnimationImporter importer)
+        {
+            var imported_nodes = importer.AnimationNodes;
+            int camera_index = imported_nodes.FindIndex(x => x.Name.Equals("camera_control"));
+            if (camera_index != -1)
+            {
+                Console.WriteLine("###ERROR: You already have a camera_control node! Skipping camerafix...");
+                return;
+            }
+            AnimationImporter.AnimationNode newnode = new AnimationImporter.AnimationNode
+            {
+                Name = "camera_control",
+                Frames = new List<AnimationImporter.AnimationFrame>(),
+                hasStaticRotation = true,
+                hasStaticTranslation= true
+            };
+            for(int i = 0; i < importer.frameCount; i++)
+            {
+                newnode.Frames.Add(new AnimationImporter.AnimationFrame());
+            }
+            importer.AnimationNodes.Add(newnode);
         }
     }
 }
