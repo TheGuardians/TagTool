@@ -78,7 +78,7 @@ namespace TagTool.Commands.Editing
                             }
                             else if (fieldName.Contains("Unused"))
                             {
-                                writer.WriteLine($"# Skipping {fieldName} containing \"Unused\"");
+                                writer.WriteLine($"#\tSkipping field containing keyword \"Unused\":\t{fieldName}");
                             }
                             else
                             {
