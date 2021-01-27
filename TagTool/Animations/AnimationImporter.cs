@@ -189,7 +189,7 @@ namespace TagTool.Animations
             return true;
         }
 
-        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, List<string> ModelList, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
+        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
         {
             //if the animation is of the overlay type, remove the base frame and subtract it from all other frames
             if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
@@ -226,9 +226,6 @@ namespace TagTool.Animations
                 }
             }
 
-            //Set default node positions for determining static data
-            SetDefaultNodePositions(CacheContext, ModelList);
-
             //setup static nodes
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
@@ -237,22 +234,15 @@ namespace TagTool.Animations
 
                 var currentnode = AnimationNodes[node_index];
 
-                var DefaultPositionFrame = new AnimationFrame
-                {
-                    Rotation = currentnode.DefaultRotation,
-                    Translation = currentnode.DefaultTranslation,
-                    Scale = currentnode.DefaultScale
-                };
-
-                if (!CompareRotations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedRotation)
+                if (!currentnode.hasAnimatedRotation)
                 {
                     currentnode.hasStaticRotation = true;
                 }
-                if (!CompareTranslations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedTranslation)
+                if (!currentnode.hasAnimatedTranslation)
                 {
                     currentnode.hasStaticTranslation = true;
                 }
-                if (Math.Abs(currentnode.Frames[0].Scale - currentnode.DefaultScale) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
+                if (!currentnode.hasAnimatedScale)
                 {
                     currentnode.hasStaticScale = true;
                 }

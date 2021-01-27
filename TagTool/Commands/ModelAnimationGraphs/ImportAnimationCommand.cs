@@ -15,63 +15,45 @@ using System.Threading.Tasks;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {
-    public class AddAnimationCommand : Command
+    public class ImportAnimationCommand : Command
     {
-        private GameCache CacheContext { get; }
+        private GameCacheHaloOnlineBase CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
         private ModelAnimationGraph.FrameType AnimationType = ModelAnimationGraph.FrameType.Base;
         private ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
-        private bool BaseFix = false;
-        private bool CameraFix = false;
+        bool NodesBuilt = false;
 
-        public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
+        public ImportAnimationCommand(GameCacheHaloOnlineBase cachecontext)
             : base(false,
 
-                  "AddAnimation",
-                  "Add an animation to a ModelAnimationGraph tag",
+                  "ImportAnimation",
+                  "Import animation(s) into a new ModelAnimationGraph tag",
 
-                  "AddAnimation [basefix] [camerafix] <filepath>",
+                  "ImportAnimation <filepath> <tagname>",
 
-                  "Add an animation to a ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
+                  "Import animation(s) into a new ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
         {
             CacheContext = cachecontext;
-            Animation = animation;
-            Jmad = jmad;
         }
 
         public override object Execute(List<string> args)
         {
-            //Arguments needed: <filepath>
-            if (args.Count < 1 || args.Count > 3)
+            //Arguments needed: <filepath> <tagname>
+            if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
-            BaseFix = false;
-            CameraFix = false;
-            while (argStack.Count > 1)
-            {
-                var arg = argStack.Peek();
-                switch (arg.ToLower())
-                {
-                    case "basefix":
-                        BaseFix = true;
-                        argStack.Pop();
-                        break;
-                    case "camerafix":
-                        CameraFix = true;
-                        argStack.Pop();
-                        break;
-                    default:
-                        return new TagToolError(CommandError.ArgInvalid);
-                }
-            }
+            string directoryarg = argStack.Pop();
+            string tagName = argStack.Pop();
+
+            CachedTag tag;
+            if (CacheContext.TagCache.TryGetTag(tagName + ".jmad", out tag))
+                return new TagToolError(CommandError.OperationFailed, "Selected TagName already exists in the cache!");
 
             List<FileInfo> fileList = new List<FileInfo>();
-
-            string directoryarg = argStack.Pop();
 
             if (Directory.Exists(directoryarg))
             {
@@ -87,7 +69,16 @@ namespace TagTool.Commands.ModelAnimationGraphs
             else
                 return new TagToolError(CommandError.FileNotFound);
 
-            Console.WriteLine($"###Adding {fileList.Count} animation(s)...");
+            Console.WriteLine($"###Importing {fileList.Count} animation(s)...");
+            NodesBuilt = false;
+
+            //set up a new animation tag
+            Animation = new ModelAnimationGraph
+            {
+                Animations = new List<ModelAnimationGraph.Animation>(),
+                ResourceGroups = new List<ModelAnimationGraph.ResourceGroup>(),
+                SkeletonNodes = new List<ModelAnimationGraph.SkeletonNode>()
+            };
 
             foreach (var filepath in fileList)
             {
@@ -140,16 +131,27 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     return new TagToolError(CommandError.OperationFailed, errormessage);
                 }
 
-                //fixup Base node position/rotation/scale
-                if (BaseFix)
-                    FixupBaseNode(importer);
+                if (!NodesBuilt)
+                {
+                    foreach(var node in importer.AnimationNodes)
+                    {
+                        StringId node_name = CacheContext.StringTable.GetStringId(node.Name);
+                        if (node_name == StringId.Invalid)
+                            node_name = CacheContext.StringTable.AddString(node.Name);
 
-                //add camera_control node at position 0, useful for Halo:CE animations
-                if (CameraFix)
-                    AddCameraNode(importer);
-
-                //Adjust imported nodes to ensure that they align with the jmad
-                AdjustImportedNodes(importer);
+                        ModelAnimationGraph.SkeletonNode newnode = new ModelAnimationGraph.SkeletonNode
+                        {
+                            Name = node_name,
+                            NextSiblingNodeIndex = node.NextSiblingNode,
+                            FirstChildNodeIndex = node.FirstChildNode,
+                            ParentNodeIndex = node.ParentNode
+                        };
+                        if (importer.AnimationNodes.IndexOf(node) == 0)
+                            newnode.ModelFlags |= ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.LocalRoot;
+                        Animation.SkeletonNodes.Add(newnode);
+                    }
+                    NodesBuilt = true;
+                }
 
                 //process node data in advance of serialization
                 importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, AnimationType, FrameInfoType);
@@ -163,8 +165,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 {
                     GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
                 };
+
                 newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
                 newResource.GroupMembers.AddressType = CacheAddressType.Definition;
+
                 //serialize the new resource into the cache
                 TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
 
@@ -205,82 +209,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 Animation.Animations.Add(AnimationBlock);
                 Console.WriteLine($"Added {file_name} successfully!");
             }
-            //save changes to the current tag
-            CacheContext.SaveStrings();
-            using (Stream cachestream = CacheContext.OpenCacheReadWrite())
+
+            tag = CacheContext.TagCacheGenHO.AllocateTag(CacheContext.TagCache.TagDefinitions.GetTagDefinitionType("jmad"), tagName);
+
+            //write out the tag
+            using (var stream = CacheContext.OpenCacheReadWrite())
             {
-                CacheContext.Serialize(cachestream, Jmad, Animation);
+                CacheContext.Serialize(stream, tag, Animation);
             }
+            CacheContext.SaveStrings();
+            CacheContext.SaveTagNames();
 
             Console.WriteLine("Done!");
             return true;
-        }
-
-        public void AdjustImportedNodes(AnimationImporter importer)
-        {
-            //now order imported nodes according to jmad nodes
-            List<AnimationImporter.AnimationNode> newAnimationNodes = new List<AnimationImporter.AnimationNode>();
-            foreach (var skellynode in Animation.SkeletonNodes)
-            {
-                string nodeName = CacheContext.StringTable.GetString(skellynode.Name);
-                int matching_index = importer.AnimationNodes.FindIndex(x => x.Name.Equals(nodeName));
-                if (matching_index == -1)
-                {
-                    Console.WriteLine($"###WARNING: No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
-                    newAnimationNodes.Add(new AnimationImporter.AnimationNode() { Name = nodeName, FirstChildNode = skellynode.FirstChildNodeIndex, NextSiblingNode = skellynode.NextSiblingNodeIndex, ParentNode = skellynode.ParentNodeIndex });
-                }
-                else
-                {
-                    AnimationImporter.AnimationNode matching_node = importer.AnimationNodes[matching_index];
-                    matching_node.FirstChildNode = skellynode.FirstChildNodeIndex;
-                    matching_node.NextSiblingNode = skellynode.NextSiblingNodeIndex;
-                    matching_node.ParentNode = skellynode.ParentNodeIndex;
-                    newAnimationNodes.Add(matching_node);
-                }
-            }
-
-            //set importer animation nodes to newly sorted list
-            importer.AnimationNodes = newAnimationNodes;
-        }
-
-        public void FixupBaseNode(AnimationImporter importer)
-        {
-            var imported_nodes = importer.AnimationNodes;
-
-            int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
-            if (basenode_index != -1)
-            {
-                //fixup base node
-                foreach (var Frame in imported_nodes[basenode_index].Frames)
-                {
-                    Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
-                    Frame.Translation = new RealPoint3d(0, 0, 0);
-                    Frame.Scale = 1.0f;
-                }
-            }
-        }
-
-        public void AddCameraNode(AnimationImporter importer)
-        {
-            var imported_nodes = importer.AnimationNodes;
-            int camera_index = imported_nodes.FindIndex(x => x.Name.Equals("camera_control"));
-            if (camera_index != -1)
-            {
-                Console.WriteLine("###ERROR: You already have a camera_control node! Skipping camerafix...");
-                return;
-            }
-            AnimationImporter.AnimationNode newnode = new AnimationImporter.AnimationNode
-            {
-                Name = "camera_control",
-                Frames = new List<AnimationImporter.AnimationFrame>(),
-                hasStaticRotation = true,
-                hasStaticTranslation= true
-            };
-            for(int i = 0; i < importer.frameCount; i++)
-            {
-                newnode.Frames.Add(new AnimationImporter.AnimationFrame());
-            }
-            importer.AnimationNodes.Add(newnode);
-        }
+        }        
     }
 }

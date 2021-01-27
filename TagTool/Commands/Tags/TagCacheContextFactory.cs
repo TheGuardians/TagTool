@@ -10,6 +10,7 @@ using TagTool.Commands.Modding;
 using TagTool.Commands.Bitmaps;
 using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.CollisionModels;
+using TagTool.Commands.ModelAnimationGraphs;
 using TagTool.Commands.Shaders;
 using TagTool.Commands.GUI;
 using TagTool.Commands.HUD;
@@ -91,6 +92,8 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new CollisionModelTestCommand(hoCache));
                 context.AddCommand(new ImportCollisionGeometryCommand(hoCache));
                 context.AddCommand(new Test2Command(hoCache));
+
+                context.AddCommand(new ImportAnimationCommand(hoCache));
             }
 
             if(cache is GameCacheHaloOnline)
