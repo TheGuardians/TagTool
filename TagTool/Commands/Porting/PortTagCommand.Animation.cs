@@ -303,6 +303,8 @@ namespace TagTool.Commands.Porting
 
                                 byte[] animationcodecdata = type3.Write(CacheContext);
                                 member.PackedDataSizes.CompressedDataSize = animationcodecdata.Length;
+                                //set out stream position to the start of the animated data block and write out the new codec
+                                destStream.Position = StaticDataSize;
                                 destWriter.WriteBlock(animationcodecdata);
                                 break;
 
