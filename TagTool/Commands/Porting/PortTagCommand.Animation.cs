@@ -81,7 +81,7 @@ namespace TagTool.Commands.Porting
 
                         if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type1)
                         {
-                            var Format1 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format1>(dataContext);
+                            var Format1 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.UncompressedHeader>(dataContext);
 
                             CacheContext.Serializer.Serialize(dataContext, Format1);
 
@@ -110,7 +110,7 @@ namespace TagTool.Commands.Porting
                         switch (codec.AnimationCodec)
                         {
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type3: // should merge with type1
-                                var header = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format1>(dataContext);
+                                var header = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.UncompressedHeader>(dataContext);
                                 CacheContext.Serializer.Serialize(dataContext, header);
 
                                 //perform fixups on offsets for our use
@@ -141,8 +141,8 @@ namespace TagTool.Commands.Porting
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type5:
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type6:
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type7:
-                                var overlay = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Overlay>(dataContext);
-                                CacheContext.Serializer.Serialize(dataContext, overlay);
+                                var compressedheader = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.CompressedHeader>(dataContext);
+                                CacheContext.Serializer.Serialize(dataContext, compressedheader);
 
                                 #region Description
                                 // Description by DemonicSandwich from http://remnantmods.com/forums/viewtopic.php?f=13&t=1574 (matches my previous observations)
@@ -157,7 +157,7 @@ namespace TagTool.Commands.Porting
                                 // You do not need a keyframe for each render frame.
                                 // Disadvantages:
                                 // It's a bit more complex to work with.
-                                // Since it's Keyrame Markers are only 1 byte in size, you're animation cannot be longer than 256 frames, or ~8.5 seconds for non - machine objects. > 12 bits for gen3, max 0xFFF frames
+                                // Since it's Keyrame Markers are only 1 byte in size, your animation cannot be longer than 256 frames, or ~8.5 seconds for non - machine objects. > 12 bits for gen3, max 0xFFF frames
                                 // Machines are still limited to 256 frames but the frames can be stretched out.
                                 #endregion
 
@@ -198,7 +198,7 @@ namespace TagTool.Commands.Porting
                                     ScaleFrameCount.Add(keyframes);
                                 }
 
-                                sourceStream.Position = overlay.RotationKeyframesOffset + StaticDataSize;
+                                sourceStream.Position = compressedheader.RotationKeyframesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -211,7 +211,7 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                sourceStream.Position = overlay.PositionKeyframesOffset + StaticDataSize;
+                                sourceStream.Position = compressedheader.PositionKeyframesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -224,7 +224,7 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                sourceStream.Position = overlay.ScaleKeyframesOffset + StaticDataSize;
+                                sourceStream.Position = compressedheader.ScaleKeyframesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -237,19 +237,19 @@ namespace TagTool.Commands.Porting
                                         else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
                                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
-                                sourceStream.Position = overlay.RotationFramesOffset + StaticDataSize;
+                                sourceStream.Position = compressedheader.RotationFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                                sourceStream.Position = overlay.PositionFramesOffset + StaticDataSize;
+                                sourceStream.Position = compressedheader.PositionFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                sourceStream.Position = overlay.ScaleFramesOffset + StaticDataSize;
+                                sourceStream.Position = compressedheader.ScaleFramesOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
@@ -258,27 +258,53 @@ namespace TagTool.Commands.Porting
 
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type8:
                                 // Type 8 is basically a type 3 but with rotation frames using 4 floats, or a realQuaternion
-                                var Format8 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format8>(dataContext);
+                                var Format8 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.UncompressedHeader>(dataContext);
                                 CacheContext.Serializer.Serialize(dataContext, Format8);
 
                                 for (int nodeIndex = 0; nodeIndex < codec.RotationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrameFloat>(dataContext));
 
-                                sourceStream.Position = Format8.PositionFramesOffset + StaticDataSize;
+                                sourceStream.Position = Format8.TranslationDataOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.TranslationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                sourceStream.Position = Format8.ScaleFramesOffset + StaticDataSize;
+                                sourceStream.Position = Format8.ScaleDataOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
-
                                 break;
 
+                            //highly experimental support for handling Reach type9 animations
+                            //uses Bonobo code to read the type9 animation, and hybrid code to write a type3 codec in its place
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type9:
+                                sourceStream.Position = StaticDataSize;
+                                Animations.Codecs.curve_codec type9 = (Animations.Codecs.curve_codec)new Animations.Codecs.curve_codec(member.FrameCount);
+                                type9.Read(sourceReader);
+
+                                //create a new type3 codec from the parsed type9 data
+                                Animations.Codecs._8byte_quantized_rotation_only type3 = new Animations.Codecs._8byte_quantized_rotation_only(member.FrameCount)
+                                {
+                                    Rotations = type9.Rotations,
+                                    Translations = type9.Translations,
+                                    Scales = type9.Scales,
+                                    RotationKeyFrames = type9.RotationKeyFrames,
+                                    TranslationKeyFrames = type9.TranslationKeyFrames,
+                                    ScaleKeyFrames = type9.ScaleKeyFrames,
+                                    RotatedNodeCount = type9.RotatedNodeCount,
+                                    TranslatedNodeCount = type9.TranslatedNodeCount,
+                                    ScaledNodeCount = type9.ScaledNodeCount,
+                                    ErrorValue = type9.ErrorValue,
+                                    CompressionRate = type9.CompressionRate
+                                };
+
+                                byte[] animationcodecdata = type3.Write(CacheContext);
+                                member.PackedDataSizes.CompressedDataSize = animationcodecdata.Length;
+                                destWriter.WriteBlock(animationcodecdata);
+                                break;
 
                             case ModelAnimationTagResource.AnimationCompressionFormats.None_:
                                 // empty data, copy buffer and skip
