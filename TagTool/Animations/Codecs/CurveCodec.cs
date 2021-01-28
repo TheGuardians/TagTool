@@ -28,6 +28,7 @@ namespace TagTool.Animations.Codecs
             this.PayloadDataOffset = reader.ReadUInt32();
             this.TotalCompressedSize = reader.ReadUInt32();
             int num1 = (int)reader.ReadUInt32();
+
             this.Rotations = new Quaternion[(int)this.RotatedNodeCount][];
             this.Translations = new RealPoint3d[(int)this.TranslatedNodeCount][];
             this.Scales = new float[(int)this.ScaledNodeCount][];
@@ -161,9 +162,9 @@ namespace TagTool.Animations.Codecs
                         RealPoint3d tangent2 = this.CalculateTangent(((int)num10 & 15) - 7, ((int)num11 & 15) - 7, ((int)num12 & 15) - 7, p1, p2);
                         RealPoint3d2 = this.CalculateCurvePosition((float)Math.Round((double)(index3 - num13) / (double)(num14 - num13), 2), tangent1, tangent2, p1, p2);
                     }
-                    RealPoint3d2.X = (float)(((double)num9 * (double)RealPoint3d2.X + (double)num6) * 100.0);
-                    RealPoint3d2.Y = (float)(((double)num9 * (double)RealPoint3d2.Y + (double)num7) * 100.0);
-                    RealPoint3d2.Z = (float)(((double)num9 * (double)RealPoint3d2.Z + (double)num8) * 100.0);
+                    RealPoint3d2.X = (float)(((double)num9 * (double)RealPoint3d2.X + (double)num6));
+                    RealPoint3d2.Y = (float)(((double)num9 * (double)RealPoint3d2.Y + (double)num7));
+                    RealPoint3d2.Z = (float)(((double)num9 * (double)RealPoint3d2.Z + (double)num8));
                     this.Translations[index1][index3] = RealPoint3d2;
                 }
             }
@@ -207,7 +208,7 @@ namespace TagTool.Animations.Codecs
                             num8 = reader.ReadByte();
                             float num12 = (float)reader.ReadInt16() / (float)short.MaxValue;
                             real1 = num11;
-                            real2 = (float)num12;
+                            real2 = num12;
                             num9 = intList[index2];
                             num10 = intList[index2 + 1];
                             ++index2;
@@ -279,12 +280,10 @@ namespace TagTool.Animations.Codecs
           RealPoint3d p1,
           RealPoint3d p2)
         {
-            double tangent1 = (double)this.CalculateTangent(xTanComponent, p1.X, p2.X);
+            float tangent1 = this.CalculateTangent(xTanComponent, p1.X, p2.X);
             float tangent2 = this.CalculateTangent(yTanComponent, p1.Y, p2.Y);
             float tangent3 = this.CalculateTangent(zTanComponent, p1.Z, p2.Z);
-            double num1 = (double)tangent2;
-            double num2 = (double)tangent3;
-            return new RealPoint3d((float)tangent1, (float)num1, (float)num2);
+            return new RealPoint3d(tangent1, tangent2, tangent3);
         }
 
         protected float CalculateCurvePosition(
@@ -309,14 +308,11 @@ namespace TagTool.Animations.Codecs
           Quaternion p1,
           Quaternion p2)
         {
-            double curvePosition1 = (double)this.CalculateCurvePosition(time, tan1.X, tan2.X, p1.X, p2.X);
+            float curvePosition1 = this.CalculateCurvePosition(time, tan1.X, tan2.X, p1.X, p2.X);
             float curvePosition2 = this.CalculateCurvePosition(time, tan1.Y, tan2.Y, p1.Y, p2.Y);
             float curvePosition3 = this.CalculateCurvePosition(time, tan1.Z, tan2.Z, p1.Z, p2.Z);
             float curvePosition4 = this.CalculateCurvePosition(time, tan1.W, tan2.W, p1.W, p2.W);
-            double num1 = (double)curvePosition2;
-            double num2 = (double)curvePosition3;
-            double num3 = (double)curvePosition4;
-            return new Quaternion((float)curvePosition1, (float)num1, (float)num2, (float)num3);
+            return new Quaternion(curvePosition1, curvePosition2, curvePosition3, curvePosition4);
         }
 
         protected RealPoint3d CalculateCurvePosition(
@@ -326,12 +322,10 @@ namespace TagTool.Animations.Codecs
           RealPoint3d p1,
           RealPoint3d p2)
         {
-            double curvePosition1 = (double)this.CalculateCurvePosition(time, tan1.X, tan2.X, p1.X, p2.X);
+            float curvePosition1 = this.CalculateCurvePosition(time, tan1.X, tan2.X, p1.X, p2.X);
             float curvePosition2 = this.CalculateCurvePosition(time, tan1.Y, tan2.Y, p1.Y, p2.Y);
             float curvePosition3 = this.CalculateCurvePosition(time, tan1.Z, tan2.Z, p1.Z, p2.Z);
-            double num1 = (double)curvePosition2;
-            double num2 = (double)curvePosition3;
-            return new RealPoint3d((float)curvePosition1, (float)num1, (float)num2);
+            return new RealPoint3d(curvePosition1, curvePosition2, curvePosition3);
         }
     }
 }
