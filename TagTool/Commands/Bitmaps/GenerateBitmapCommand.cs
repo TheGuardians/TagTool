@@ -37,73 +37,98 @@ namespace TagTool.Commands.Tags
 			if (args.Count != 2)
 				return new TagToolError(CommandError.ArgCount);
 
-			var tagname = args[0];
 			var imagePath = args[1];
 
-			if (!File.Exists(imagePath))
-				return new TagToolError(CommandError.FileNotFound, $"\"{imagePath}\"");
+            List<FileInfo> fileList = new List<FileInfo>();
 
-			CachedTag instance = null;
-			var tagGroup = Cache.TagCache.TagDefinitions.GetTagGroupFromTag(new Tag("bitm"));
+            if (Directory.Exists(imagePath))
+            {
+                foreach (var file in Directory.GetFiles(imagePath, "*.dds"))
+                {
+                    fileList.Add(new FileInfo(file));
+                }
+            }
+            else if (File.Exists(imagePath))
+            {
+                fileList.Add(new FileInfo(imagePath));
+            }
+            else
+                return new TagToolError(CommandError.FileNotFound, $"\"{imagePath}\"");
 
-			var groupTag = new Tag("bitm");
+            foreach (FileInfo file in fileList)
+            {
+                CachedTag instance = null;
+                var tagGroup = Cache.TagCache.TagDefinitions.GetTagGroupFromTag(new Tag("bitm"));
 
-			using (var stream = Cache.OpenCacheReadWrite())
-			{
-				if (instance == null)
-					instance = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag), args[0]);
+                var groupTag = new Tag("bitm");
 
-				Cache.Serialize(stream, instance, Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(groupTag)));
+                var tagname = args[0];
 
-				Cache.SaveTagNames();
-			}
+                if (fileList.Count > 1)
+                {
+                    if (!tagname.EndsWith("\\"))
+                        tagname += "\\";
 
-			using (var stream = Cache.OpenCacheReadWrite())
-			{
-				// importing
-				var bitmap = Cache.Deserialize<Bitmap>(stream, instance);
+                    tagname += file.Name.Substring(0,file.Name.Length-4);
+                }
 
-				bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
-				bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
-				bitmap.Resources.Add(new TagResourceReference());
+                using (var stream = Cache.OpenCacheReadWrite())
+                {
+                    if (instance == null)
+                        instance = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag), tagname);
 
-				var imageIndex = 0;
-				BitmapImageCurve curve = BitmapImageCurve.xRGB;
+                    Cache.Serialize(stream, instance, Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(groupTag)));
+
+                    Cache.SaveTagNames();
+                }
+
+                using (var stream = Cache.OpenCacheReadWrite())
+                {
+                    // importing
+                    var bitmap = Cache.Deserialize<Bitmap>(stream, instance);
+
+                    bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
+                    bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
+                    bitmap.Resources.Add(new TagResourceReference());
+
+                    var imageIndex = 0;
+                    BitmapImageCurve curve = BitmapImageCurve.xRGB;
 
 #if !DEBUG
-				try
-				{
+			    	try
+			    	{
 #endif
-					DDSFile file = new DDSFile();
+                    DDSFile dds = new DDSFile();
 
-					using (var imageStream = File.OpenRead(imagePath))
-					using (var reader = new EndianReader(imageStream))
-					{
-						file.Read(reader);
-					}
+                    using (var imageStream = File.OpenRead(file.FullName))
+                    using (var reader = new EndianReader(imageStream))
+                    {
+                        dds.Read(reader);
+                    }
 
-					var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file, curve);
-					var reference = Cache.ResourceCache.CreateBitmapResource(bitmapTextureInteropDefinition);
+                    var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, dds, curve);
+                    var reference = Cache.ResourceCache.CreateBitmapResource(bitmapTextureInteropDefinition);
 
-					// set the tag data
+                    // set the tag data
 
-					bitmap.Resources[imageIndex] = reference;
-					bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
+                    bitmap.Resources[imageIndex] = reference;
+                    bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
 
-					Cache.Serialize(stream, instance, bitmap);
+                    Cache.Serialize(stream, instance, bitmap);
 #if !DEBUG
-				}
-				catch (Exception ex)
-				{
-				    return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + ex.Message);
-				}
+			    	}
+			    	catch (Exception ex)
+			    	{
+			    	    return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + ex.Message);
+			    	}
 #endif
-					Console.WriteLine("Image imported successfully.");
-			}
+                    Console.WriteLine("Image imported successfully.");
+                }
 
-			var tagName = instance.Name ?? $"{tagname}";
+                var tagName = instance.Name ?? $"{tagname}";
 
-			Console.WriteLine($"[Index: 0x{instance.Index:X4}] {tagname}.{instance.Group}");
+                Console.WriteLine($"[Index: 0x{instance.Index:X4}] {tagname}.{instance.Group}");
+            }
 
 			return true;
 		}
