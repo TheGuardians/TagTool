@@ -441,10 +441,44 @@ namespace TagTool.Tags.Definitions
                 Hide
             }
 
+            public enum FrameEventTypeReach : short
+            {
+                None,
+                PrimaryKeyframe,
+                SecondaryKeyframe,
+                TertiaryKeyframe,
+                LeftFoot,
+                RightFoot,
+                AllowInterruption,
+                DoNotAllowInterruption,
+                BothFeetShuffle,
+                BodyImpact,
+                LeftFootLock,
+                LeftFootUnlock,
+                RightFootLock,
+                RightFootUnlock,
+                BlendRangeMarker,
+                StrideExpansion,
+                StrideContraction,
+                RagdollKeyframe,
+                DropWeaponKeyframe,
+                MatchA,
+                MatchB,
+                MatchC,
+                MatchD,
+                JetpackClosed,
+                JetpackOpen,
+                SoundEvent,
+                EffectEvent
+            }
+
             [TagStructure(Size = 0x4)]
             public class FrameEvent : TagStructure
 			{
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public FrameEventType Type;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public FrameEventTypeReach ReachType;
                 public short Frame;
             }
 

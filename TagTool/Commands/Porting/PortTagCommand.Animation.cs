@@ -428,11 +428,16 @@ namespace TagTool.Commands.Porting
                     animation.AnimationData.ProductionFlags = animation.ProductionFlagsReach;
                     animation.AnimationData.Heading = animation.AnimationData.HeadingReach;
                     animation.AnimationData.HeadingAngle = animation.AnimationData.HeadingAngleReach;
+                    animation.AnimationData.TranslationMagnitude = animation.AnimationData.TranslationMagnitudeReach;
                     animation.AnimationData.BlendScreen = animation.BlendScreenReach;
                     foreach (var soundevent in animation.AnimationData.SoundEvents)
                         soundevent.MarkerName = ConvertStringId(soundevent.MarkerName);
                     foreach (var effectevent in animation.AnimationData.EffectEvents)
                         effectevent.MarkerName = ConvertStringId(effectevent.MarkerName);
+                    foreach(var frameevent in animation.AnimationData.FrameEvents)
+                    {
+                        Enum.TryParse(frameevent.ReachType.ToString(), out frameevent.Type);
+                    };
 
                 }
 
