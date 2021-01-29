@@ -21,6 +21,8 @@ using TagTool.Commands.Files;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Scenarios;
 using TagTool.Cache.HaloOnline;
+using DefinitionsGen2 = TagTool.Tags.Definitions.Gen2;
+using CommandsGen2 = TagTool.Commands.Gen2;
 
 namespace TagTool.Commands.Editing
 {
@@ -139,7 +141,17 @@ namespace TagTool.Commands.Editing
                         break;
                 }
             }
-            
+
+            if (CacheVersionDetection.IsInGen(CacheGeneration.Second, cache.Version))
+            {
+                switch (tag.Group.Tag.ToString())
+                {
+                    case "sbsp":
+                        CommandsGen2.ScenarioStructureBSPs.BSPContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ScenarioStructureBsp)definition);
+                        break;
+                }
+            }
+
             var structure = TagStructure.GetTagStructureInfo(cache.TagCache.TagDefinitions.GetTagDefinitionType(tag.Group), cache.Version);
 
             commandContext.AddCommand(new ListFieldsCommand(cache, structure, definition));

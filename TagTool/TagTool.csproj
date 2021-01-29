@@ -233,14 +233,13 @@
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
     <Compile Include="Animations\AnimatedCodecHeader.cs" />
-    <Compile Include="Animations\AnimationCodec.cs" />
     <Compile Include="Animations\AnimationCodecHeader.cs" />
     <Compile Include="Animations\AnimationImporter.cs" />
-    <Compile Include="Animations\Codecs\UncompressedStaticCodec.cs" />
+    <Compile Include="Animations\Codecs\CodecBase.cs" />
+    <Compile Include="Animations\Codecs\8ByteQuantizedRotationOnlyCodec.cs" />
+    <Compile Include="Animations\Codecs\CurveCodec.cs" />
     <Compile Include="Animations\StaticCodecHeader.cs" />
     <Compile Include="Animations\AnimationCodecType.cs" />
-    <Compile Include="Animations\AnimationData.cs" />
-    <Compile Include="Animations\AnimationExtractor.cs" />
     <Compile Include="Animations\AnimationMovementDataType.cs" />
     <Compile Include="Animations\AnimationMovementData.cs" />
     <Compile Include="Audio\BlamSound.cs" />
@@ -326,6 +325,8 @@
     <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
     <Compile Include="Commands\Files\ExtractBlfImageCommand.cs" />
     <Compile Include="Commands\Forge\MaximizeBudgetCommand.cs" />
+    <Compile Include="Commands\Gen2\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\GUI\RescaleGUICommand.cs" />
     <Compile Include="Commands\Files\ImportFontsCommand.cs" />
     <Compile Include="Commands\HUD\RescaleHudTextCommand.cs" />
@@ -345,6 +346,7 @@
     <Compile Include="Commands\Modding\CreateModPackageCommand.cs" />
     <Compile Include="Commands\Modding\ExtractFontsCommand.cs" />
     <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ImportAnimationCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\RebuildFPAnimation.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AddAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />

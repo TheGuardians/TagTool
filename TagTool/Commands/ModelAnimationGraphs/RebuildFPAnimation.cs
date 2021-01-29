@@ -148,7 +148,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
                 if(matchingindex == -1)
                 {
-                    Console.WriteLine($"###ERROR: No existing animation found for animation {file_name}!");
+                    Console.WriteLine($"###WARNING: No existing animation found for animation {file_name}!");
                     continue;
                 }
 
@@ -159,7 +159,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 if (importer.Version >= 16394)
                 {
-                    string errormessage = "###ERROR: Only Halo:CE animation files are not currently supported because newer versions offer no benefits but add node-space complications. " +
+                    string errormessage = "###ERROR: Only Halo:CE animation files are currently supported because newer versions offer no benefits but add node-space complications. " +
                         "Please export your animations to Halo:CE format (JMA Version < 16394) and try importing again.";
                     return new TagToolError(CommandError.OperationFailed, errormessage);
                 }
@@ -172,7 +172,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 AdjustImportedNodes(importer);
 
                 //set up node flags for serialization
-                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, ModelList, AnimationType, FrameInfoType);
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, AnimationType, FrameInfoType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))

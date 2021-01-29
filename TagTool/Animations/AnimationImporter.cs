@@ -20,7 +20,7 @@ namespace TagTool.Animations
     {
         public List<AnimationNode> AnimationNodes;
         public int frameCount;
-        public uint nodeChecksum;
+        public int nodeChecksum;
         public int Version = 0;
         public double framerate = 30;
         public int rotatedNodeCount;
@@ -49,7 +49,7 @@ namespace TagTool.Animations
 
             if (model.HasAnimations && model.Animations[0].HasNodeAnimations)
             {
-                foreach(var modelnode in model.Animations[0].NodeAnimationChannels)
+                foreach (var modelnode in model.Animations[0].NodeAnimationChannels)
                 {
                     List<AnimationFrame> NodeFrames = new List<AnimationFrame>();
                 }
@@ -81,9 +81,16 @@ namespace TagTool.Animations
                 }
 
                 if (Version >= 16394)
-                    nodeChecksum = uint.Parse(textReader.ReadLine()); //version part 2
+                    try
+                    {
+                        nodeChecksum = int.Parse(textReader.ReadLine()); //version part 2
+                    }
+                    catch
+                    {
+                        nodeChecksum = (int)uint.Parse(textReader.ReadLine());
+                    }
                 frameCount = int.Parse(textReader.ReadLine());
-                if(frameCount < 1)
+                if (frameCount < 1)
                 {
                     Console.WriteLine("ERROR: Imported Animation doesn't have any frames!");
                     return false;
@@ -103,7 +110,14 @@ namespace TagTool.Animations
                     return false;
                 }
                 if (Version < 16394)
-                    nodeChecksum = uint.Parse(textReader.ReadLine());
+                    try
+                    {
+                        nodeChecksum = int.Parse(textReader.ReadLine());
+                    }
+                    catch
+                    {
+                        nodeChecksum = (int)uint.Parse(textReader.ReadLine());
+                    }
                 AnimationNodes = new List<AnimationNode>();
                 for (int i = 0; i < nodecount; i++)
                 {
@@ -149,7 +163,7 @@ namespace TagTool.Animations
                             Rotation = newRotation,
                             Translation = new RealPoint3d((float)(double.Parse(translation[0]) * 0.009999999776482582d), (float)(double.Parse(translation[1]) * 0.009999999776482582d), (float)(double.Parse(translation[2]) * 0.009999999776482582d)),
                             Scale = (float)double.Parse(scale)
-                        });                        
+                        });
                     }
                 }
             }
@@ -158,7 +172,7 @@ namespace TagTool.Animations
 
         public bool CompareTranslations(AnimationFrame Frame1, AnimationFrame Frame2)
         {
-            if(Math.Abs(Frame2.Translation.X - Frame1.Translation.X) >= 0.00009999999747378752 || 
+            if (Math.Abs(Frame2.Translation.X - Frame1.Translation.X) >= 0.00009999999747378752 ||
                Math.Abs(Frame2.Translation.Y - Frame1.Translation.Y) >= 0.00009999999747378752 ||
                Math.Abs(Frame2.Translation.Z - Frame1.Translation.Z) >= 0.00009999999747378752)
                 return false;
@@ -175,10 +189,10 @@ namespace TagTool.Animations
             return true;
         }
 
-        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, List<string> ModelList, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
+        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
         {
             //if the animation is of the overlay type, remove the base frame and subtract it from all other frames
-            if(AnimationType == ModelAnimationGraph.FrameType.Overlay)
+            if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
                 SetBaseRemoveOverlay();
 
             //Extract the movement data from the base node for serialization in its separate block
@@ -212,9 +226,6 @@ namespace TagTool.Animations
                 }
             }
 
-            //Set default node positions for determining static data
-            SetDefaultNodePositions(CacheContext, ModelList);
-
             //setup static nodes
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
@@ -223,22 +234,15 @@ namespace TagTool.Animations
 
                 var currentnode = AnimationNodes[node_index];
 
-                var DefaultPositionFrame = new AnimationFrame
-                {
-                    Rotation = currentnode.DefaultRotation,
-                    Translation = currentnode.DefaultTranslation,
-                    Scale = currentnode.DefaultScale
-                };
-
-                if (!CompareRotations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedRotation)
+                if (!currentnode.hasAnimatedRotation)
                 {
                     currentnode.hasStaticRotation = true;
                 }
-                if (!CompareTranslations(currentnode.Frames[0], DefaultPositionFrame) && !currentnode.hasAnimatedTranslation)
+                if (!currentnode.hasAnimatedTranslation)
                 {
                     currentnode.hasStaticTranslation = true;
                 }
-                if (Math.Abs(currentnode.Frames[0].Scale - currentnode.DefaultScale) >= 0.00009999999747378752 && !currentnode.hasAnimatedScale)
+                if (!currentnode.hasAnimatedScale)
                 {
                     currentnode.hasStaticScale = true;
                 }
@@ -277,12 +281,12 @@ namespace TagTool.Animations
             }
 
             using (MemoryStream stream = new MemoryStream())
-            using(EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+            using (EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
             {
                 var dataContext = new DataSerializationContext(writer);
 
                 //serialize the static data first if needed
-                if(buildstaticdata)
+                if (buildstaticdata)
                     groupmember.PackedDataSizes.StaticDataSize = (short)SerializeStaticData(CacheContext, dataContext, stream);
 
                 var datastartoffset = stream.Position.DeepClone();
@@ -372,7 +376,7 @@ namespace TagTool.Animations
 
             var datastartoffset = stream.Position.DeepClone();
             //write rotation frame data
-            foreach(var currentnode in AnimationNodes)
+            foreach (var currentnode in AnimationNodes)
             {
                 if (currentnode.hasStaticRotation)
                 {
@@ -390,7 +394,7 @@ namespace TagTool.Animations
             //record translation data offset to write to header later on
             var translationdataoffset = stream.Position.DeepClone();
             //write translation frame data
-            foreach(var currentnode in AnimationNodes)
+            foreach (var currentnode in AnimationNodes)
             {
                 if (currentnode.hasStaticTranslation)
                 {
@@ -443,7 +447,7 @@ namespace TagTool.Animations
             frameCount--;
             foreach (var node in AnimationNodes)
             {
-                if(node.Frames.Count > 0)
+                if (node.Frames.Count > 0)
                 {
                     //copy and then remove unnecessary base frame
                     AnimationFrame BaseFrame = node.Frames[0].DeepClone();
@@ -482,7 +486,7 @@ namespace TagTool.Animations
         }
 
         public void WriteRotationFrameData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext)
-        {      
+        {
             for (int node_index = 0; node_index < AnimationNodes.Count; node_index++)
             {
                 RealQuaternion previousValue = new RealQuaternion();
@@ -498,7 +502,7 @@ namespace TagTool.Animations
                         previousValue = currentvalue.DeepClone();
 
                         float[] Values = currentvalue.ToArray();
-                        for(var i = 0; i < Values.Length; i++)
+                        for (var i = 0; i < Values.Length; i++)
                         {
                             if (Values[i] > 1.0f)
                                 Values[i] = 1.0f;
@@ -524,7 +528,7 @@ namespace TagTool.Animations
                         */
                     }
                 }
-            }            
+            }
         }
 
         public void WriteTranslationFrameData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext)
@@ -557,7 +561,7 @@ namespace TagTool.Animations
                 case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
                     //extract data only from the first (root) node
                     //data collection starts at the end of the frames, moving backwards to the beginning
-                    for(int frame_index = AnimationNodes[0].Frames.Count - 2; frame_index >= 0; frame_index--)
+                    for (int frame_index = AnimationNodes[0].Frames.Count - 2; frame_index >= 0; frame_index--)
                     {
                         AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index];
                         AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index + 1];
@@ -588,7 +592,7 @@ namespace TagTool.Animations
             //record the offset at the beginning of the movementdata
             var datastartoffset = stream.Position.DeepClone();
 
-            foreach(var movementframe in MovementData)
+            foreach (var movementframe in MovementData)
             {
                 switch (MovementDataType)
                 {
@@ -609,7 +613,7 @@ namespace TagTool.Animations
                         break;
                 }
             }
-            
+
             //calculate size of movement data
             int size = (int)(stream.Position - datastartoffset);
 
@@ -651,7 +655,7 @@ namespace TagTool.Animations
             Flags.AddRange(rotationflags);
             Flags.AddRange(translationflags);
             Flags.AddRange(scaleflags);
-            
+
             return Flags;
         }
 
@@ -664,10 +668,10 @@ namespace TagTool.Animations
 
             //string tagname = @"objects\characters\masterchief\fp\fp";
             List<string> NoMatchList = new List<string>();
-            
+
             using (var CacheStream = CacheContext.OpenCacheReadWrite())
             {
-                for(var node_index = 0; node_index < AnimationNodes.Count; node_index++)
+                for (var node_index = 0; node_index < AnimationNodes.Count; node_index++)
                 {
                     var matching_index = -1;
                     foreach (var tagname in ModelList)
@@ -675,7 +679,7 @@ namespace TagTool.Animations
                         var mode_tag_ref = CacheContext.TagCacheGenHO.GetTag<RenderModel>(tagname);
                         var mode_tag = CacheContext.Deserialize<RenderModel>(CacheStream, mode_tag_ref);
                         var mode_nodes = mode_tag.Nodes;
-                    
+
                         for (var mode_node_index = 0; mode_node_index < mode_nodes.Count; mode_node_index++)
                         {
                             if (CacheContext.StringTable.GetString(mode_nodes[mode_node_index].Name) == AnimationNodes[node_index].Name)
@@ -691,7 +695,7 @@ namespace TagTool.Animations
                             break;
                     }
                     if (matching_index == -1)
-                        NoMatchList.Add(AnimationNodes[node_index].Name);                
+                        NoMatchList.Add(AnimationNodes[node_index].Name);
                 }
             }
             /*
@@ -707,14 +711,14 @@ namespace TagTool.Animations
             }
             */
 
-        }       
+        }
 
         public void FixupNodeTree(int Version)
         {
             //fixups for newer animation files with only the parent index present
-            if(Version >= 16394)
+            if (Version >= 16394)
             {
-                for(var currentindex = 0; currentindex < AnimationNodes.Count; currentindex++)
+                for (var currentindex = 0; currentindex < AnimationNodes.Count; currentindex++)
                 {
                     var node = AnimationNodes[currentindex];
                     if (node.ParentNode != -1)
@@ -730,7 +734,7 @@ namespace TagTool.Animations
                         if (AnimationNodes[node.ParentNode].FirstChildNode != -1)
                         {
                             int ChildIndex = AnimationNodes[node.ParentNode].FirstChildNode;
-                            while(AnimationNodes[ChildIndex].NextSiblingNode != -1)
+                            while (AnimationNodes[ChildIndex].NextSiblingNode != -1)
                             {
                                 ChildIndex = AnimationNodes[ChildIndex].NextSiblingNode;
                             }
@@ -762,32 +766,32 @@ namespace TagTool.Animations
 
         //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
         //later halo games also use this same format
-        public uint CalculateNodeListChecksum(int node_index, uint checksum = 0)
+        public int CalculateNodeListChecksum(int node_index, int checksum = 0)
         {
             AnimationNode node = AnimationNodes[node_index];
-            checksum = ((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
+            checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
             checksum += CalculateSingleNodeChecksum(node.Name);
-            checksum = ((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
+            checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
 
             int nextnodeindex = node.FirstChildNode;
-            while(nextnodeindex != -1)
+            while (nextnodeindex != -1)
             {
                 checksum = CalculateNodeListChecksum(nextnodeindex, checksum);
                 nextnodeindex = AnimationNodes[nextnodeindex].NextSiblingNode;
             }
 
-            return checksum = ((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
+            return checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
         }
 
-        public uint CalculateSingleNodeChecksum(string nodename)
+        public int CalculateSingleNodeChecksum(string nodename)
         {
-            uint checksum = 0;
+            int checksum = 0;
             foreach (var chardata in nodename.ToArray())
             {
-                checksum = (checksum >> 31 | checksum << 1) & 0xFFFFFFFF;
+                checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
                 checksum += (byte)chardata;
             }
-            return checksum & 0xFFFFFFFF;
+            return (int)(checksum & 0xFFFFFFFF);
         }
 
         public bool CompareSingleNode(List<ModelAnimationGraph.SkeletonNode> jmadNodes, GameCacheHaloOnlineBase CacheContext, int index)
@@ -796,7 +800,7 @@ namespace TagTool.Animations
             string NextSibling = "null";
             string FirstChild = "null";
             string Parent = "null";
-            if(jmadNodes[index].NextSiblingNodeIndex != -1)
+            if (jmadNodes[index].NextSiblingNodeIndex != -1)
                 NextSibling = CacheContext.StringTable.GetString(jmadNodes[jmadNodes[index].NextSiblingNodeIndex].Name);
             if (jmadNodes[index].FirstChildNodeIndex != -1)
                 FirstChild = CacheContext.StringTable.GetString(jmadNodes[jmadNodes[index].FirstChildNodeIndex].Name);
@@ -818,7 +822,7 @@ namespace TagTool.Animations
                 Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different name than the jmad ({Node})!");
                 return false;
             }
-            if(jmadNodes[index].NextSiblingNodeIndex != AnimationNodes[index].NextSiblingNode)
+            if (jmadNodes[index].NextSiblingNodeIndex != AnimationNodes[index].NextSiblingNode)
             {
                 Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different next sibling ({newSibling}) than the jmad ({NextSibling})!");
                 return false;
@@ -876,8 +880,8 @@ namespace TagTool.Animations
 
         public class AnimationFrame
         {
-            public RealQuaternion Rotation = new RealQuaternion(0,0,0,1);
-            public RealPoint3d Translation = new RealPoint3d(0,0,0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
+            public RealPoint3d Translation = new RealPoint3d(0, 0, 0);
             public float Scale = 1.0f;
         }
     }
