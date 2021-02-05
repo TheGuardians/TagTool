@@ -25,9 +25,9 @@ namespace TagTool.Commands.Tags
 				  "GenerateBitmap",
 				  "Creates a new bitm tag with a specified name from a DDS image.",
 
-				  "GenerateBitmap <desired name> <path to dds>",
+				  "GenerateBitmap <name or prefix> <path>",
 
-				  "Creates a new bitm tag with a specified name from a DDS image.")
+				  "Creates bitm tag(s) with a specified name from DDS image(s) at the provided path.\n\nIf <path> is a folder, a bitm is made for each DDS it contains and named with the convention <prefix>\\filename.")
 		{
 			Cache = cache;
 		}
