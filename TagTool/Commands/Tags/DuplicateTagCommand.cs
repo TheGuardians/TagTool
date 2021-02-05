@@ -13,10 +13,10 @@ namespace TagTool.Commands.Tags
             : base(false,
                   
                   "DuplicateTag",
-                  "Copies a tags data into a new tag.",
+                  "Copies a tag's data into a new tag and optionally names it.",
                   
-                  "DuplicateTag <tag>",
-                  "Copies a tags data into a new tag.")
+                  "DuplicateTag <tag> <desired name>",
+                  "Copies a tag's data into a new tag and optionally names it. Tag names are saved by this command.")
         {
             Cache = cache;
         }
@@ -39,7 +39,11 @@ namespace TagTool.Commands.Tags
                 var originalDefinition = Cache.Deserialize(stream, originalTag);
                 Cache.Serialize(stream, newTag, originalDefinition);
 
-                //Cache.SaveTagNames();
+                if (Cache is GameCacheHaloOnlineBase)
+                {
+                    var hoCache = Cache as GameCacheHaloOnlineBase;
+                    hoCache.SaveTagNames();
+                }
             }
 
             if (args.Count == 2)

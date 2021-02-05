@@ -39,6 +39,7 @@ namespace TagTool.Commands.Editing
                 {
                     found = true;
                     break;
+                    
                 }
             }
 
@@ -50,6 +51,9 @@ namespace TagTool.Commands.Editing
             {
                 if (request == context.Name || requestLow == context.Name.ToLower())
                     break;
+                else if (request == "tags" && context.Name.Contains("pak"))
+                    break;
+
                 ContextStack.Pop();
                 context = ContextStack.Context;
             }
