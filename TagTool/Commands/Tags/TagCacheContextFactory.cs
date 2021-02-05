@@ -47,6 +47,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListAllStringsCommand(cache));
             context.AddCommand(new StringIdCommand(cache));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
+            context.AddCommand(new DuplicateTagCommand(cache));
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
             context.AddCommand(new ListUnnamedTagsCommand(cache));
@@ -63,7 +64,6 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new SaveModdedTagsCommand(hoCache));
                 context.AddCommand(new CreateTagCommand(hoCache));
                 context.AddCommand(new ImportTagCommand(hoCache));
-                context.AddCommand(new DuplicateTagCommand(hoCache));
                 context.AddCommand(new TagDependencyCommand(hoCache));
                 context.AddCommand(new TagResourceCommand(hoCache));
                 context.AddCommand(new ListUnusedTagsCommand(hoCache));

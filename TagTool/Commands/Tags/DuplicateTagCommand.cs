@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class DuplicateTagCommand : Command
     {
-        public GameCacheHaloOnlineBase Cache { get; }
+        private GameCache Cache { get; }
 
-        public DuplicateTagCommand(GameCacheHaloOnlineBase cache)
+        public DuplicateTagCommand(GameCache cache)
             : base(false,
                   
                   "DuplicateTag",
@@ -39,7 +39,11 @@ namespace TagTool.Commands.Tags
                 var originalDefinition = Cache.Deserialize(stream, originalTag);
                 Cache.Serialize(stream, newTag, originalDefinition);
 
-                Cache.SaveTagNames();
+                if (Cache is GameCacheHaloOnlineBase)
+                {
+                    var hoCache = Cache as GameCacheHaloOnlineBase;
+                    hoCache.SaveTagNames();
+                }
             }
 
             if (args.Count == 2)
