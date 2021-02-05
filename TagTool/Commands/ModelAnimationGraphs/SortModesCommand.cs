@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
@@ -53,6 +54,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     }
                 }
             }
+
+            Console.WriteLine("Jmad modes sorted successfully.");
 
             return true;
         }
