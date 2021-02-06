@@ -59,7 +59,6 @@ namespace TagTool.Commands.CollisionModels
                 debug = true;
 
             Bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry.DeepClone();
-            CollisionGeometry Bsp_copy = Bsp.DeepClone();
 
             //make sure there is nothing in the bsp blocks before starting
             Bsp.Leaves.Clear();
@@ -106,14 +105,17 @@ namespace TagTool.Commands.CollisionModels
                 Console.WriteLine($"###Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
-            if (debug)
-            {                
-                if (!verify_collision_bsp(Bsp_copy))
-                {
-                    Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
-                    return false;
-                }            
-            }               
+            if (!prune_node_tree())
+            {
+                Console.WriteLine("###ERROR while pruning node tree!");
+                return false;
+            }
+            if (!verify_collision_bsp())
+            {
+                Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
+                return false;
+            }
+
             return true;
         }
 
@@ -1753,150 +1755,7 @@ namespace TagTool.Commands.CollisionModels
 
         ///////////////////////////////////////////
         //bsp/geo reduction stuff stored down here
-        ///////////////////////////////////////////
-       
-        public bool reduce_collision_bsp() //function unfinished, not needed yet
-        {
-            List<int> deleted_surface_array = new List<int>(new int[Bsp.Surfaces.Count]);
-            List<int> deleted_edge_array = new List<int>(new int[Bsp.Edges.Count]);
-            List<int> deleted_vertex_array = new List<int>(new int[Bsp.Vertices.Count]);
-
-            //make a list of valid and invalid surfaces
-            int new_surface_index = 0;
-            for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
-            {
-                deleted_surface_array[surface_index] = new_surface_index++;
-            }
-
-            //make a list of valid and invalid edges
-            int new_edge_index = 0;
-            for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
-            {
-                bool edge_is_valid = false;
-                if (Bsp.Edges[edge_index].LeftSurface != ushort.MaxValue)
-                {
-                    if (deleted_surface_array[Bsp.Edges[edge_index].LeftSurface] != -1)
-                        edge_is_valid = true;
-                }
-                else if (Bsp.Edges[edge_index].RightSurface != ushort.MaxValue)
-                {
-                    if (deleted_surface_array[Bsp.Edges[edge_index].RightSurface] != -1)
-                        edge_is_valid = true;
-                }
-                else if(edge_is_valid)
-                    deleted_edge_array[edge_index] = new_edge_index++;
-                else
-                    deleted_edge_array[edge_index] = -1;
-            }
-
-            //make a list of valid and invalid vertices
-            int new_vertex_index = 0;
-            for (int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
-            {
-                bool vertex_is_valid = true;
-                ushort current_edge_index = Bsp.Vertices[vertex_index].FirstEdge;
-                while (true)
-                {
-                    Edge edge_block = Bsp.Edges[current_edge_index];
-                    if (deleted_edge_array[Bsp.Vertices[vertex_index].FirstEdge] != -1)
-                        break;
-                    if (edge_block.EndVertex != vertex_index)
-                        current_edge_index = edge_block.ReverseEdge;
-                    else
-                        current_edge_index = edge_block.ForwardEdge;
-                    if (current_edge_index == Bsp.Vertices[vertex_index].FirstEdge || current_edge_index == ushort.MaxValue)
-                    {
-                        current_edge_index = 0;
-                        if (Bsp.Edges.Count <= 0)
-                        {
-                            deleted_vertex_array[vertex_index] = -1;
-                            vertex_is_valid = false;
-                        }
-                        while (true)
-                        {
-                            if (deleted_edge_array[current_edge_index] != -1)
-                            {
-                                Edge test_edge = Bsp.Edges[current_edge_index];
-                                if (test_edge.StartVertex == vertex_index || test_edge.EndVertex == vertex_index)
-                                {
-                                    break;
-                                }
-                            }
-                            if (++current_edge_index >= Bsp.Edges.Count)
-                            {
-                                deleted_vertex_array[vertex_index] = -1;
-                                vertex_is_valid = false;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-                if (vertex_is_valid)
-                {
-                    Bsp.Vertices[vertex_index].FirstEdge = (ushort)current_edge_index;
-                    deleted_vertex_array[vertex_index] = new_vertex_index++;
-                }
-            }
-
-            //INDEX REFERENCE FIXUPS BEGIN HERE
-
-            if (Bsp.Bsp2dReferences.Count > 0)
-            {
-                for (int bsp2dref_index = 0; bsp2dref_index < Bsp.Bsp2dReferences.Count; bsp2dref_index++)
-                {
-                    short bsp2dnode_index = Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex;
-                    if (bsp2dnode_index < 0)
-                    {
-                        int absolute_bsp2dnode_index = bsp2dnode_index & 0x7FFF;
-                        Bsp.Bsp2dReferences[bsp2dref_index].Bsp2dNodeIndex = (short)(deleted_surface_array[absolute_bsp2dnode_index] | 0x8000);
-                    }
-                }
-            }
-
-            //bsp2dnode children that have the 0x8000 flag actually encode surface indices, not other bsp2dnodes
-            if (Bsp.Bsp2dNodes.Count > 0)
-            {
-                for (int bsp2dnode_index = 0; bsp2dnode_index < Bsp.Bsp2dReferences.Count; bsp2dnode_index++)
-                {
-                    short leftchild_index = Bsp.Bsp2dNodes[bsp2dnode_index].LeftChild;
-                    if (leftchild_index < 0)
-                    {
-                        int absolute_leftchild_index = leftchild_index & 0x7FFF;
-                        Bsp.Bsp2dNodes[bsp2dnode_index].LeftChild = (short)(deleted_surface_array[absolute_leftchild_index] | 0x8000);
-                    }
-
-                    short rightchild_index = Bsp.Bsp2dNodes[bsp2dnode_index].RightChild;
-                    if (rightchild_index < 0)
-                    {
-                        int absolute_rightchild_index = rightchild_index & 0x7FFF;
-                        Bsp.Bsp2dNodes[bsp2dnode_index].RightChild = (short)(deleted_surface_array[absolute_rightchild_index] | 0x8000);
-                    }
-                }
-            }
-
-            for (int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
-            {
-                if (deleted_surface_array[surface_index] != -1)
-                {
-                    Bsp.Surfaces[surface_index].FirstEdge = (ushort)deleted_edge_array[Bsp.Surfaces[surface_index].FirstEdge];
-                }
-            }
-
-            for (int edge_index = 0; edge_index < Bsp.Edges.Count; edge_index++)
-            {
-                if (deleted_edge_array[edge_index] != -1)
-                {
-                    Bsp.Edges[edge_index].StartVertex = (ushort)deleted_vertex_array[Bsp.Edges[edge_index].StartVertex];
-                    Bsp.Edges[edge_index].EndVertex = (ushort)deleted_vertex_array[Bsp.Edges[edge_index].EndVertex];
-                    if (Bsp.Edges[edge_index].ForwardEdge != ushort.MaxValue)
-                        Bsp.Edges[edge_index].ForwardEdge = (ushort)deleted_edge_array[Bsp.Edges[edge_index].ForwardEdge];
-                    Bsp.Edges[edge_index].ReverseEdge = (ushort)deleted_edge_array[Bsp.Edges[edge_index].ReverseEdge];
-                }
-            }
-
-            return true;
-        }
+        ///////////////////////////////////////////     
 
         int surface_count_edges(int surface_index)
         {
@@ -1917,7 +1776,7 @@ namespace TagTool.Commands.CollisionModels
             return edge_count;
         }
 
-        public bool verify_collision_bsp(CollisionGeometry Bsp_copy)
+        public bool verify_collision_bsp()
         {
             for(var i = 0; i < Bsp.Bsp3dNodes.Count; i++)
             {
@@ -1949,25 +1808,54 @@ namespace TagTool.Commands.CollisionModels
                         return false;
                     }
                 }
+            }
 
-                /*
-                if (Bsp.Bsp3dNodes[i].Value != Bsp_copy.Bsp3dNodes[i].Value)
+            for(var j = 0; j < Bsp.Leaves.Count; j++)
+            {
+                var leaf = Bsp.Leaves[j];
+                if(leaf.FirstBsp2dReference < 0 || leaf.FirstBsp2dReference > Bsp.Bsp2dReferences.Count)
                 {
-                    Console.WriteLine($"###ERROR: Bsp3dnode {i} does not match!");
-                    Console.WriteLine($"{Bsp.Bsp3dNodes[i].Plane},{Bsp.Bsp3dNodes[i].BackChild},{Bsp.Bsp3dNodes[i].FrontChild}");
-                    Console.WriteLine($"{Bsp_copy.Bsp3dNodes[i].Plane},{Bsp_copy.Bsp3dNodes[i].BackChild},{Bsp_copy.Bsp3dNodes[i].FrontChild}");
+                    Console.WriteLine($"###ERROR leaf {j} has a bad bsp2d reference index {leaf.FirstBsp2dReference}"); 
                     return false;
                 }
-                */
+                if (leaf.Bsp2dReferenceCount == 0 && leaf.FirstBsp2dReference != uint.MaxValue)
+                {
+                    Console.WriteLine($"###ERROR leaf {j} has a bad bsp2d reference index {leaf.FirstBsp2dReference}");
+                    return false;
+                }
+                if (leaf.Bsp2dReferenceCount < 0 || leaf.FirstBsp2dReference + leaf.Bsp2dReferenceCount > Bsp.Bsp2dReferences.Count)
+                {
+                    Console.WriteLine($"###ERROR leaf {j} has a bad bsp2d reference count {leaf.Bsp2dReferenceCount}");
+                    return false;
+                }
             }
+
+            for (var k = 0; k < Bsp.Bsp2dReferences.Count; k++)
+            {
+                var ref2d = Bsp.Bsp2dReferences[k];
+                if((ref2d.PlaneIndex & 0x7FFF) < 0 || (ref2d.PlaneIndex & 0x7FFF) > Bsp.Planes.Count)
+                {
+                    Console.WriteLine($"###ERROR Bsp2dref {k} has a bad plane index {ref2d.PlaneIndex}");
+                    return false;
+                }
+                int root_node_index = ref2d.Bsp2dNodeIndex & 0x7FFF;
+                int count = (ref2d.Bsp2dNodeIndex & 0x8000) > 0 ? Bsp.Surfaces.Count : Bsp.Bsp2dNodes.Count;
+                if(root_node_index < 0 || root_node_index > count)
+                {
+                    Console.WriteLine($"###ERROR Bsp2dref {k} has a bad root index {ref2d.Bsp2dNodeIndex}");
+                    return false;
+                }
+            }
+
             //check depth of bsp3dtree
+            /*
             int back_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[0].BackChild);
             int front_count = count_bsp3d_nodes(Bsp.Bsp3dNodes[0].FrontChild);
             if (front_count > back_count)
                 back_count = front_count;
             if(debug && back_count > 128)
                 Console.WriteLine($"###WARNING:Depth of Bsp3dTree is {back_count} (max 128 ideally)");
-
+            */
             return true;
         }
 
@@ -1981,5 +1869,106 @@ namespace TagTool.Commands.CollisionModels
                 back_count = front_count;
             return back_count + 1;
         }
+
+        //function unfinished, is of dubious usefulness
+        public bool remove_floating_leaves()
+        {
+            List<int> leaf_array = new List<int>();
+            int leaf_count = 0;
+            foreach(var leaf_block in Bsp.Leaves)
+            {
+                if (leaf_block.Bsp2dReferenceCount > 0)
+                    leaf_array.Add(leaf_count++);
+                else
+                    leaf_array.Add(-1);
+            }
+            return true;
+        }
+
+        //this function removes unnecessary nodes in the tree,
+        //i.e. if there are one or more nodes that just lead to -1, they can be removed and the parent can just reference -1
+        public bool prune_node_tree()
+        {
+            //first collapse the node children, shifting -1 up through any unnecessary nodes
+            List<int> valid_node_array = new List<int>();
+            TagBlock<Bsp3dNode> Nodelist = Bsp.Bsp3dNodes.DeepClone();
+            Nodelist[0].FrontChild = collapse_node_children(Nodelist, Nodelist[0].FrontChild);
+            Nodelist[0].BackChild = collapse_node_children(Nodelist, Nodelist[0].BackChild);
+
+            //this function now does an inline replacement of the nodes block, removing nodes that only have -1 as children
+            int node_count = 0;
+            int pruned_nodes_count = 0;
+            foreach(var node in Nodelist)
+            {
+                if (node.FrontChild != 0xFFFFFF || node.BackChild != 0xFFFFFF)
+                {
+                    valid_node_array.Add(node_count++);
+                }
+                else
+                {
+                    valid_node_array.Add(-1);
+                    pruned_nodes_count++;
+                }
+            }
+
+            //adjust node children to match new node list
+            for(var i = 0; i < Nodelist.Count; i++)
+            {
+                if((Nodelist[i].FrontChild & 0x800000) == 0) //child is another node, not a leaf or -1
+                {
+                    Nodelist[i].FrontChild = valid_node_array[Nodelist[i].FrontChild];
+                }
+                if ((Nodelist[i].BackChild & 0x800000) == 0) //child is another node, not a leaf or -1
+                {
+                    Nodelist[i].BackChild = valid_node_array[Nodelist[i].BackChild];
+                }
+            }
+
+            //now complete the inline replacement of the node list
+            for(var n = 0; n < Nodelist.Count; n++)
+            {
+                if (valid_node_array[n] > n)
+                {
+                    Console.WriteLine("###ERROR: node_table[node_index]>node_index");
+                    return false;
+                }
+
+                if(valid_node_array[n] != -1)
+                {
+                    Nodelist[valid_node_array[n]] = Nodelist[n].DeepClone();
+                }
+            }
+
+            //remove extra nodes from the end of the tree
+            while (Nodelist.Count > node_count)
+                Nodelist.RemoveAt(Nodelist.Count - 1);
+
+            if (pruned_nodes_count > 0 && debug)
+                Console.WriteLine($"Pruned {pruned_nodes_count} nodes from tree!");
+
+            //write nodes out to main BSP
+            Bsp.Bsp3dNodes = Nodelist.DeepClone();
+            return true;
+        }
+
+        public int collapse_node_children(TagBlock<Bsp3dNode> Nodelist, int node_index)
+        {
+            int absolute_node_index = node_index & 0x7FFFFF;
+
+            if ((node_index & 0x800000) != 0) //if this child is a leaf or -1, just return it
+                return node_index;
+
+            //call this function again for both children of this node
+            int front_child_node_index = collapse_node_children(Nodelist, Nodelist[absolute_node_index].FrontChild);
+            int back_child_node_index = collapse_node_children(Nodelist, Nodelist[absolute_node_index].BackChild);
+            Nodelist[absolute_node_index].FrontChild = front_child_node_index;
+            Nodelist[absolute_node_index].BackChild = back_child_node_index;
+
+            //if either of this node's children are not -1, return this node index, otherwise return -1
+            if (front_child_node_index != 0xFFFFFF || back_child_node_index != 0xFFFFFF)
+                return node_index;
+            return back_child_node_index;
+        }
+
     }
 }
