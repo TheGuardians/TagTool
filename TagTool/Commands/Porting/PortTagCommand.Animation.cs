@@ -98,7 +98,7 @@ namespace TagTool.Commands.Porting
                             for (int i = 0; i < codec.ScaleNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
-                            if (sourceStream.Position != StaticDataSize)
+                            if (sourceStream.Position != StaticDataSize || destStream.Position != StaticDataSize)
                                 Console.WriteLine("###ERROR: Static Data Size did not match data sizes struct!");
 
                             //read next codec header
@@ -113,22 +113,17 @@ namespace TagTool.Commands.Porting
                                 var header = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.UncompressedHeader>(dataContext);
                                 CacheContext.Serializer.Serialize(dataContext, header);
 
-                                //perform fixups on offsets for our use
-                                var RotationDataOffset = sourceStream.Position.DeepClone();
-                                var TranslationDataOffset = RotationDataOffset + header.RotatedNodeBlockSize * codec.RotationNodeCount;
-                                var ScaleDataOffset = TranslationDataOffset + header.TranslatedNodeBlockSize * codec.TranslationNodeCount;
-
                                 for (int nodeIndex = 0; nodeIndex < codec.RotationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
-                                sourceStream.Position = TranslationDataOffset;
+                                sourceStream.Position = header.TranslationDataOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.TranslationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
-                                sourceStream.Position = ScaleDataOffset;
+                                sourceStream.Position = header.ScaleDataOffset + StaticDataSize;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
@@ -318,7 +313,7 @@ namespace TagTool.Commands.Porting
                                 continue;
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize)
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize || destStream.Position != StaticDataSize + CompressedDataSize)
                             Console.WriteLine("###ERROR: Compressed Data Size did not match data sizes struct!");
 
                         #region How Footer/Flags works
@@ -351,7 +346,7 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize)
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize)
                             Console.WriteLine("###ERROR: Static Node Flags Size did not match data sizes struct!");
 
                         if (AnimatedNodeFlagsSize > 0)
@@ -361,7 +356,7 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize)
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize)
                             Console.WriteLine("###ERROR: Animated Node Flags Size did not match data sizes struct!");
 
                         #endregion
@@ -389,7 +384,8 @@ namespace TagTool.Commands.Porting
                                 break;
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize)
+                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize ||
+                            destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize)
                             Console.WriteLine("###ERROR: Movement Data Size did not match data sizes struct!");
 
                         // set new data
