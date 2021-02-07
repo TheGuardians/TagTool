@@ -388,6 +388,18 @@ namespace TagTool.Commands.Porting
                             destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize)
                             Console.WriteLine("###ERROR: Movement Data Size did not match data sizes struct!");
 
+                        //convert pill offset data
+                        if(member.PackedDataSizes.PillOffsetData != 0)
+                        {
+                            for (int i = 0; i < member.FrameCount; i++)
+                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
+                        }
+
+                        if (member.AnimationData.Data.Length != destStream.ToArray().Length)
+                        {
+                            Console.WriteLine("###ERROR: Converted Animation Data was of a different length than the original!");
+                        }
+
                         // set new data
                         member.AnimationData.Data = destStream.ToArray();                        
                     }
