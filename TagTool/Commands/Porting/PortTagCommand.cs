@@ -590,10 +590,9 @@ namespace TagTool.Commands.Porting
                             {
                                 foreach (var framesblock in dynamicvaluesblock.Frames)
                                 {
-                                    //fix inverted vignette
-                                    float temp = framesblock.Dynamicvalue1; 
-                                    framesblock.Dynamicvalue1 = framesblock.Dynamicvalue2 * 1.5f;
-                                    framesblock.Dynamicvalue2 = temp * 1.5f;
+                                    // scale (since this is chud)
+                                    framesblock.Dynamicvalue1 *= 1.5f;
+                                    framesblock.Dynamicvalue2 *= 1.5f;
                                 }
                             }
                         }
