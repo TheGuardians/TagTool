@@ -129,7 +129,7 @@ namespace TagTool.Commands.Shaders
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                byte[] bytecode = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString());
+                byte[] bytecode = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString()).Bytecode;
                 var tag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
                 var pixl = Cache.Deserialize<PixelShader>(stream, tag);
                 pixl.Shaders[0].PCShaderBytecode = bytecode;
