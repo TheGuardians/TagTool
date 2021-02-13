@@ -27,6 +27,10 @@ namespace TagTool.Cache
         public override StringTable StringTable => null;
         public override ResourceCache ResourceCache => throw new NotImplementedException();
 
+        public ResourceCacheGen1 BitmapResources = null;
+        public ResourceCacheGen1 SoundResources = null;
+        public ResourceCacheGen1 LocalizationResources = null;
+
         public GameCacheGen1(MapFile mapFile, FileInfo file)
         {
             BaseMapFile = mapFile;
@@ -44,6 +48,15 @@ namespace TagTool.Cache
             {
                 TagCacheGen1 = new TagCacheGen1(reader, mapFile);
             }
+
+            var bitmapResourceCachePath = Path.Combine(Directory.FullName, "bitmaps.map");
+            if (File.Exists(bitmapResourceCachePath))
+                BitmapResources = new ResourceCacheGen1(this, bitmapResourceCachePath);
+
+            var soundResourceCachePath = Path.Combine(Directory.FullName, "sounds.map");
+            if (File.Exists(soundResourceCachePath))
+                SoundResources = new ResourceCacheGen1(this, soundResourceCachePath);
+
         }
 
         #region Serialization
