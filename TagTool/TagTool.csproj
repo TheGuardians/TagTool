@@ -264,6 +264,7 @@
     <Compile Include="Cache\Codecs\CodecDefinition.cs" />
     <Compile Include="Cache\Gen1\CachedTagGen1.cs" />
     <Compile Include="Cache\Gen1\GameCacheGen1.cs" />
+    <Compile Include="Cache\Gen1\ResourceCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagCacheGen1.cs" />
     <Compile Include="Cache\Gen1\TagGroupGen1.cs" />
     <Compile Include="Cache\Gen2\CachedTagGen2.cs" />
@@ -642,6 +643,7 @@
     <Compile Include="Serialization\ResourceDeserializer.cs" />
     <Compile Include="Serialization\ResourceSerializer.cs" />
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
+    <Compile Include="Shaders\ExplicitShader.cs" />
     <Compile Include="Shaders\ParameterUsage.cs" />
     <Compile Include="Shaders\RenderMethodExtern.cs" />
     <Compile Include="Shaders\EntryPoint.cs" />

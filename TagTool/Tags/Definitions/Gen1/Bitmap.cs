@@ -223,15 +223,14 @@ namespace TagTool.Tags.Definitions.Gen1
             public short MipmapCount;
             [TagField(Length = 0x2)]
             public byte[] Padding;
-            public int PixelsOffset;
-            [TagField(Length = 0x4)]
-            public byte[] Padding1;
-            [TagField(Length = 0x4)]
-            public byte[] Padding2;
-            [TagField(Length = 0x4)]
-            public byte[] Padding3;
-            [TagField(Length = 0x8)]
-            public byte[] Padding4;
+
+            public int ResourceOffset;
+            public uint ResourceSize;
+            public uint TagID;
+            public uint RuntimeResourcePointer;
+
+            public uint ResourceUnknown1;
+            public uint ResourceUnknown2;
             
             public enum TypeValue : short
             {

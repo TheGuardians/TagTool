@@ -4,6 +4,7 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
+using TagTool.Shaders;
 using HaloShaderGenerator.Shader;
 
 namespace TagTool.Commands.Shaders
@@ -21,8 +22,9 @@ namespace TagTool.Commands.Shaders
                 "GenerateShader <shader type> <options>",
 
                 "Generates a shader template\n" +
-                "<shader type> - Specify shader type, EX. \"shader\" for \'rmsh\'\n" +
-                "<options> - Specify the template\'s options as either integers or by names")
+                "<shader type> - Specify shader type, EX. \"shader\" for \'rmsh\'. Use \"explicit\" for explicit shaders.\n" +
+                "<options> - Specify the template\'s options as either integers or by names." +
+                "For explicit shaders, you should specify the name or the rasg shader index.")
         {
             Cache = cache;
         }
@@ -35,6 +37,10 @@ namespace TagTool.Commands.Shaders
                 return new TagToolError(CommandError.ArgCount);
 
             string shaderType = args[0].ToLower();
+
+            if (shaderType == "explicit")
+                return GenerateExplicitShader(args[1].ToLower());
+
             if (!SupportedShaderTypes.Contains(shaderType))
                 return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
 
@@ -101,6 +107,33 @@ namespace TagTool.Commands.Shaders
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
+            }
+
+            return true;
+        }
+
+        private object GenerateExplicitShader(string shader)
+        {
+            ExplicitShader value;
+            if (!Enum.TryParse(shader, out value))
+            {
+                if (!int.TryParse(shader, out int intValue))
+                    return new TagToolError(CommandError.ArgInvalid);
+                value = (ExplicitShader)intValue;
+            }
+
+            // TODO: write register info to tag
+            // TODO: vtsh support
+            // TODO: entry point support
+            // TODO: failsafes
+
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                byte[] bytecode = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString()).Bytecode;
+                var tag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
+                var pixl = Cache.Deserialize<PixelShader>(stream, tag);
+                pixl.Shaders[0].PCShaderBytecode = bytecode;
+                Cache.Serialize(stream, tag, pixl);
             }
 
             return true;

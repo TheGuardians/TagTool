@@ -523,17 +523,31 @@ namespace TagTool.Serialization
 
         public virtual TagData DeserializeTagData(EndianReader reader, ISerializationContext context)
         {
+            var tagData = new TagData();
+
             // Read size and pointer
             var startOffset = reader.BaseStream.Position;
             var size = reader.ReadInt32();
-            if (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version))
-                reader.BaseStream.Position = startOffset + 0xC;
+
+            if(CacheVersionDetection.IsInGen(CacheGeneration.First, Version))
+            {
+                reader.ReadUInt32(); // 1 when offset below is valid maybe
+                tagData.Gen1ExternalOffset = reader.ReadUInt32();
+            }
+            else if (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version))
+                 reader.BaseStream.Position = startOffset + 0xC;
+
             var pointer = reader.ReadUInt32();
+
+            tagData.Data = new byte[0];
+            tagData.Size = size;
+            tagData.Address = pointer;
+
             if (pointer == 0)
             {
                 // Null data reference
                 reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0x14 : 0x8);
-                return new TagData();
+                return tagData;
             }
 
             // Read the data
@@ -542,10 +556,8 @@ namespace TagTool.Serialization
             reader.Read(result, 0, size);
             reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0x14 : 0x8);
 
-            var tagData = new TagData();
-
             tagData.Data = result;
-            
+           
             return tagData;
         }
 

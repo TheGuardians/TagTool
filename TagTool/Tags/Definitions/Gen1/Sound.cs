@@ -77,6 +77,7 @@ namespace TagTool.Tags.Definitions.Gen1
         public short PromotionCount;
         [TagField(Length = 0x2)]
         public byte[] Padding3;
+
         [TagField(Length = 0x14)]
         public byte[] Padding4;
         /// <summary>
@@ -214,14 +215,20 @@ namespace TagTool.Tags.Definitions.Gen1
                 public float Gain;
                 public CompressionValue Compression;
                 public short NextPermutationIndex;
-                [TagField(Length = 0x14)]
-                public byte[] Padding;
+
+                public int Unknown0;
+                public uint Unknown1;
+                public uint TagID1;
+                public uint Unknown3;
+                public uint TagID2;
+
+
                 /// <summary>
                 /// sampled sound data
                 /// </summary>
-                public byte[] Samples;
-                public byte[] MouthData;
-                public byte[] SubtitleData;
+                public TagData Samples;
+                public TagData MouthData;
+                public TagData SubtitleData;
                 
                 public enum CompressionValue : short
                 {

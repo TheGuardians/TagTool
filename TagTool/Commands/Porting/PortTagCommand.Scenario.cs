@@ -1198,12 +1198,25 @@ namespace TagTool.Commands.Porting
                         var fireTeam = scnr.Squads[(int)squadIndex].Fireteams[(int)fireTeamIndex];
 
                         var unitInstance = scnr.VehiclePalette[fireTeam.VehicleTypeIndex].Object;
+
+                        if(unitInstance.Index == -1)
+                        {
+                            Console.WriteLine($"Warning: unit tag reference invalid in script in UpdateAiTestSeat! squads index {squadIndex} fireteam index {fireTeamIndex}");
+                            return;
+                        }
+
                         var unitDefinition = (Unit)CacheContext.Deserialize<Vehicle>(cacheStream, unitInstance);
 
                         var variantName = CacheContext.StringTable.GetString(unitDefinition.DefaultModelVariant);
 
                         if (fireTeam.VehicleVariant != StringId.Invalid)
                             variantName = CacheContext.StringTable.GetString(fireTeam.VehicleVariant);
+
+                        if (unitDefinition.Model.Index == -1)
+                        {
+                            Console.WriteLine($"Warning: unit model tag reference invalid in UpdateAiTestSeat! Unit {unitInstance.Name}");
+                            return;
+                        }
 
                         var modelDefinition = CacheContext.Deserialize<Model>(cacheStream, unitDefinition.Model);
                         var modelVariant = default(Model.Variant);
