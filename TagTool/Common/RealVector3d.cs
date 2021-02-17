@@ -42,10 +42,41 @@ namespace TagTool.Common
         public static bool operator !=(RealVector3d a, RealVector3d b) =>
             !a.Equals(b);
 
-        public static RealVector3d operator *(float k, RealVector3d a)
-        {
-            return new RealVector3d(k * a.I, k * a.J, k * a.K);
-        }
+        public static RealVector3d operator +(RealVector3d a, RealVector3d b) =>
+                    new RealVector3d(a.I + b.I, a.J + b.J, a.K + b.K);
+
+        public static RealVector3d operator +(RealVector3d a, float b) =>
+            new RealVector3d(a.I + b, a.J + b, a.K + b);
+
+        public static RealVector3d operator +(float a, RealVector3d b) =>
+            new RealVector3d(a + b.I, a + b.J, a + b.K);
+
+        public static RealVector3d operator -(RealVector3d a, RealVector3d b) =>
+            new RealVector3d(a.I - b.I, a.J - b.J, a.K - b.K);
+
+        public static RealVector3d operator -(RealVector3d a, float b) =>
+            new RealVector3d(a.I - b, a.J - b, a.K - b);
+
+        public static RealVector3d operator -(float a, RealVector3d b) =>
+            new RealVector3d(a - b.I, a - b.J, a - b.K);
+
+        public static RealVector3d operator *(RealVector3d a, RealVector3d b) =>
+            new RealVector3d(a.I * b.I, a.J * b.J, a.K * b.K);
+
+        public static RealVector3d operator *(RealVector3d a, float b) =>
+            new RealVector3d(a.I * b, a.J * b, a.K * b);
+
+        public static RealVector3d operator *(float a, RealVector3d b) =>
+            new RealVector3d(a * b.I, a * b.J, a * b.K);
+
+        public static RealVector3d operator /(RealVector3d a, RealVector3d b) =>
+            new RealVector3d(a.I / b.I, a.J / b.J, a.K / b.K);
+
+        public static RealVector3d operator /(RealVector3d a, float b) =>
+            new RealVector3d(a.I / b, a.J / b, a.K / b);
+
+        public static RealVector3d operator /(float a, RealVector3d b) =>
+            new RealVector3d(a / b.I, a / b.J, a / b.K);
 
         public override int GetHashCode() =>
             13 * 17 + I.GetHashCode()
@@ -95,6 +126,11 @@ namespace TagTool.Common
                 K = a.I * b.J - a.J * b.I
             };
             return Normalize(result);
+        }
+
+        public static float Magnitude(RealVector3d a)
+        {
+            return a.I * a.I + a.J * a.J + a.K * a.K;
         }
 
         public static float Norm(RealVector3d a)

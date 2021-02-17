@@ -209,6 +209,32 @@ namespace TagTool.Commands.CollisionModels
             surface_array = new_surface_array_B.DeepClone();
             return 2;
         }
+
+        public bool line_from_planes3d(RealPlane3d planeA, RealPlane3d planeB, ref RealVector3d clip_line_point, ref RealVector3d clip_line_vector)
+        {
+            RealVector3d vectorplaneA = new RealVector3d(planeA.I, planeA.J, planeA.K);
+            RealVector3d vectorplaneB = new RealVector3d(planeB.I, planeB.J, planeB.K);
+
+            //cross product of plane normal vectors
+            clip_line_vector = RealVector3d.CrossProduct(vectorplaneA, vectorplaneB);
+
+            //If the plane normal vectors are nearly identical, the planes won't overlap, so return false
+            float plane_normal_cross = RealVector3d.Magnitude(clip_line_vector);
+            if (Math.Abs(plane_normal_cross) < 0.00009999999747378752)
+                return false;
+
+            RealVector3d componentA = RealVector3d.CrossProduct(clip_line_vector, vectorplaneA);
+            RealVector3d componentB = RealVector3d.CrossProduct(clip_line_vector, vectorplaneB);
+            componentA = componentA * planeB.D;
+            componentB = componentB * planeA.D;
+
+            clip_line_point = componentA + componentB;
+
+            //divide clip line point by the magnitude of the cross product of the two plane normals
+            clip_line_point = clip_line_point / plane_normal_cross;
+
+            return true;
+        }
         
         public RealPlane3d plane_get_equation_parameters(int plane_index)
         {
