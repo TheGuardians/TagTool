@@ -193,6 +193,7 @@ namespace TagTool.Cache
         public override void SaveFonts(Stream fontStream)
         {
             BaseModPackage.FontPackage = new MemoryStream();
+            fontStream.Position = 0;
             fontStream.CopyTo(BaseModPackage.FontPackage);
         }
 
