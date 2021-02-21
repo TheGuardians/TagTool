@@ -442,6 +442,9 @@ namespace TagTool.Geometry.Utils
                     CollisionMaterialMapping.Add(surface.MaterialIndex, modelMaterialIndex);
 
                 surface.MaterialIndex = modelMaterialIndex;
+
+                //Remove breakable surface flags, as this object will no longer be linked to sbsp and will cause crashes
+                surface.Flags &= ~SurfaceFlags.Breakable;
             }
 
             // add the collision geometry
