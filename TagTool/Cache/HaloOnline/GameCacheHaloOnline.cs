@@ -98,6 +98,7 @@ namespace TagTool.Cache.HaloOnline
             
             using (var fontFileStream = fontFile.Create())
             {
+                stream.Position = 0;
                 stream.CopyTo(fontFileStream);
             }
         }

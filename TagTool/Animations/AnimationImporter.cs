@@ -79,16 +79,18 @@ namespace TagTool.Animations
                     textReader = new StreamReader(textStream, Encoding.Unicode, true);
                     Version = int.Parse(textReader.ReadLine()); //version
                 }
-
                 if (Version >= 16394)
+                {
+                    string tempchecksum = textReader.ReadLine();
                     try
                     {
-                        nodeChecksum = int.Parse(textReader.ReadLine()); //version part 2
+                        nodeChecksum = int.Parse(tempchecksum);//version part 2
                     }
-                    catch
+                    catch //this is to protect against any program that incorrectly writes the checksum as a uint
                     {
-                        nodeChecksum = (int)uint.Parse(textReader.ReadLine());
+                        nodeChecksum = (int)uint.Parse(tempchecksum);
                     }
+                }
                 frameCount = int.Parse(textReader.ReadLine());
                 if (frameCount < 1)
                 {
@@ -110,14 +112,17 @@ namespace TagTool.Animations
                     return false;
                 }
                 if (Version < 16394)
+                {
+                    string tempchecksum = textReader.ReadLine();
                     try
                     {
-                        nodeChecksum = int.Parse(textReader.ReadLine());
+                        nodeChecksum = int.Parse(tempchecksum);
                     }
-                    catch
+                    catch //this is to protect against any program that incorrectly writes the checksum as a uint
                     {
-                        nodeChecksum = (int)uint.Parse(textReader.ReadLine());
+                        nodeChecksum = (int)uint.Parse(tempchecksum);
                     }
+                }
                 AnimationNodes = new List<AnimationNode>();
                 for (int i = 0; i < nodecount; i++)
                 {
