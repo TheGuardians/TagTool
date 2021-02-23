@@ -17,6 +17,8 @@ namespace TagTool.Cache.Gen1
         public Gen1ResourceCacheHeader Header;
         public List<Gen1ResourceTableEntry> ResourceTable;
         public GameCacheGen1 Cache;
+        private Stream CacheStream = null;
+        private string CachePath;
 
         public enum Gen1ResourceCacheType : uint
         {
@@ -50,8 +52,9 @@ namespace TagTool.Cache.Gen1
         public ResourceCacheGen1(GameCacheGen1 cache, string path)
         {
             Cache = cache;
-            
-            using(var stream = File.OpenRead(path))
+            CachePath = path;
+
+            using (var stream = File.OpenRead(path))
             using(var reader = new EndianReader(stream, cache.Endianness))
             {
                 var dataContext = new DataSerializationContext(reader);
@@ -79,5 +82,35 @@ namespace TagTool.Cache.Gen1
                 }
             }
         }
+
+        public byte[] GetResourceData(int size, int offset)
+        {
+            if (size < 0 || offset < 0)
+                return null;
+
+            if(CacheStream == null)
+                CacheStream = File.OpenRead(CachePath);
+
+            if (offset + size > CacheStream.Length)
+                return null;
+
+            byte[] result = new byte[size];
+
+            CacheStream.Position = offset;
+
+            var readSize = CacheStream.Read(result, 0, size);
+
+            if (readSize != size)
+                return null;
+
+            return result;
+        }
+        ~ResourceCacheGen1()
+        {
+            if(CacheStream != null)
+                CacheStream.Dispose();
+        }
+
+
     }
 }

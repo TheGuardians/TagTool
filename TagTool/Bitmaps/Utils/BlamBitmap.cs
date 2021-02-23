@@ -25,6 +25,8 @@ public class BaseBitmap
     public int NearestHeight;
     public int NearestWidth;
 
+    public BaseBitmap() { }
+
     public BaseBitmap(Bitmap.Image image)
     {
         Height = image.Height;

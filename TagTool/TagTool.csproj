@@ -246,6 +246,7 @@
     <Compile Include="Audio\Converter\FSB4.cs" />
     <Compile Include="Audio\Converter\HeaderChunk.cs" />
     <Compile Include="Audio\Converter\SoundFile.cs" />
+    <Compile Include="Audio\Converter\ADPCM.cs" />
     <Compile Include="Audio\Converter\WAV.cs" />
     <Compile Include="Audio\Converter\XMA.cs" />
     <Compile Include="Audio\Converter\XMA2.cs" />

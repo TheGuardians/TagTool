@@ -145,6 +145,22 @@ namespace TagTool.Audio
             ffmpeg.WaitForExit();
         }
 
+        public static void ConvertADPCMToWAV(string ADPCMFileName, string WAVFileName)
+        {
+            ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+            {
+                Arguments = "-i " + ADPCMFileName + " -ar 44100 " + WAVFileName,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardError = false,
+                RedirectStandardOutput = false,
+                RedirectStandardInput = false
+            };
+            Process ffmpeg = Process.Start(info);
+            ffmpeg.WaitForExit();
+        }
+
         private static void ConvertToWAV(string XMAFileName, bool useTowav = true)
         {
             if (useTowav)
