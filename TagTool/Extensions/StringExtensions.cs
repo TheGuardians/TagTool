@@ -139,13 +139,21 @@ namespace System
             return true;
         }
 
-        public static string ToLength(this string str, int length)
+        public static string ToLength(this string str, uint length)
         {
             while (str.Length < length)
                 str += " ";
             while (str.Length > length)
                 str = str.Remove(str.Length - 1);
             return str;
+        }
+
+        public static string Repeat(this string str, uint repeats)
+        {
+            string result = str;
+            for (int i = 0; i < repeats; i++)
+                result += str;
+            return result;
         }
     }
 }
