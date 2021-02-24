@@ -138,5 +138,14 @@ namespace System
             result = str.Split(separator);
             return true;
         }
+
+        public static string ToLength(this string str, int length)
+        {
+            while (str.Length < length)
+                str += " ";
+            while (str.Length > length)
+                str = str.Remove(str.Length - 1);
+            return str;
+        }
     }
 }
