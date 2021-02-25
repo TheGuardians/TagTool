@@ -19,8 +19,11 @@ namespace TagTool.Commands.CollisionModels
         private bool debug = false;
         private int original_surface_count = 0;
         private List<int> surface_addendums = new List<int>();
+        //error geometry 
+        private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
+        private bool hasErrors = false;
 
-    public GenerateCollisionBSPCommand(ref CollisionModel definition) :
+        public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
 
                 "GenerateCollisionBSP",
@@ -55,6 +58,9 @@ namespace TagTool.Commands.CollisionModels
 
         public bool generate_bsp(int region_index, int permutation_index, int bsp_index, bool debug_arg = false)
         {
+            Errors = new ErrorGeometryBuilder();
+            hasErrors = false;
+
             if (debug_arg == true)
                 debug = true;
 
@@ -103,6 +109,8 @@ namespace TagTool.Commands.CollisionModels
             else
             {
                 Console.WriteLine($"###Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
+                if (hasErrors)
+                    Errors.WriteOBJ();
                 return false;
             }
             if (!prune_node_tree())
@@ -115,6 +123,9 @@ namespace TagTool.Commands.CollisionModels
                 Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
+
+            if (hasErrors)
+                Errors.WriteOBJ();
 
             return true;
         }
@@ -190,7 +201,7 @@ namespace TagTool.Commands.CollisionModels
             int new_surfaces_count = surface_counts.free_count + surface_counts.used_count;
             new_surface_array.used_count = new_surfaces_count;
 
-            //surfaces_check_if_zbuffered(new_surface_array);
+            surfaces_check_if_intersecting(new_surface_array);
 
             if (surface_plane_fits_negative * 4.0f <= surface_plane_fits_positive)
             {
@@ -221,24 +232,24 @@ namespace TagTool.Commands.CollisionModels
             clip_line_vector = RealVector3d.CrossProduct(vectorplaneA, vectorplaneB);
 
             //If the plane normal vectors are nearly identical, the planes won't overlap, so return false
-            float plane_normal_cross = RealVector3d.Magnitude(clip_line_vector);
-            if (Math.Abs(plane_normal_cross) < 0.00009999999747378752)
+            float vector_magnitude = RealVector3d.Magnitude(clip_line_vector);
+            if (Math.Abs(vector_magnitude) < 0.00009999999747378752)
                 return false;
 
             RealVector3d componentA = RealVector3d.CrossProduct(clip_line_vector, vectorplaneA);
-            RealVector3d componentB = RealVector3d.CrossProduct(clip_line_vector, vectorplaneB);
+            RealVector3d componentB = RealVector3d.CrossProduct(vectorplaneB, clip_line_vector);
             componentA = componentA * planeB.D;
             componentB = componentB * planeA.D;
 
             clip_line_point = componentA + componentB;
 
             //divide clip line point by the magnitude of the cross product of the two plane normals
-            clip_line_point = clip_line_point / plane_normal_cross;
+            clip_line_point = clip_line_point / vector_magnitude;
 
             return true;
         }
 
-        public bool intersecting_surface_get_clip_line_bounds(int surface_index, RealVector3d clip_line_point, RealVector3d clip_line_vector, ref float maxvalue, ref float minvalue)
+        public bool intersecting_surface_get_clip_line_bounds(int surface_index, RealVector3d clip_line_point, RealVector3d clip_line_vector, ref Bounds<float> Bounds)
         {
             Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
             int plane_index = (short)surface_block.Plane;
@@ -246,15 +257,20 @@ namespace TagTool.Commands.CollisionModels
             int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
             bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
             bool plane_index_negative = (plane_index & 0x8000) > 0;
-            int plane_mirror_check = plane_projection_parameter_greater_than_0 != plane_index_negative ? 1 : 0;
+
+            int plane_mirror_check = 0;
+            if (!plane_index_negative)
+                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 1 : 0;
+            else
+                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 0 : 1;
 
             RealPoint3d clip_line_point_vertex = new RealPoint3d(clip_line_point.I, clip_line_point.J, clip_line_point.K);
             RealPoint3d clip_line_vector_vertex = new RealPoint3d(clip_line_vector.I, clip_line_vector.J, clip_line_vector.K);
             RealPoint2d CoordsP = vertex_get_projection_relevant_coords(clip_line_point_vertex, plane_projection_axis, plane_mirror_check);
             RealPoint2d CoordsV = vertex_get_projection_relevant_coords(clip_line_vector_vertex, plane_projection_axis, plane_mirror_check);
 
-            maxvalue = float.MinValue;
-            minvalue = float.MaxValue;
+            Bounds.Upper = float.MinValue;
+            Bounds.Lower = float.MaxValue;
 
             int first_Edge_index = surface_block.FirstEdge;
             int current_edge_index = surface_block.FirstEdge;
@@ -290,12 +306,12 @@ namespace TagTool.Commands.CollisionModels
                     float cross_ratio = BAPA_cross / VBA_cross;
                     if (VBA_cross >= 0.0)
                     {
-                        if (cross_ratio < minvalue)
-                            minvalue = cross_ratio;
+                        if (cross_ratio < Bounds.Lower)
+                            Bounds.Lower = cross_ratio;
                     }
-                    else if (cross_ratio > maxvalue)
-                        maxvalue = cross_ratio;
-                    if (maxvalue > minvalue)
+                    else if (cross_ratio > Bounds.Upper)
+                        Bounds.Upper = cross_ratio;
+                    if (Bounds.Upper > Bounds.Lower)
                         return false;
                 }
                 current_edge_index = surface_is_right_of_edge ? edge_block.ReverseEdge : edge_block.ForwardEdge;
@@ -304,7 +320,7 @@ namespace TagTool.Commands.CollisionModels
             return true;
         }
 
-        public bool surfaces_check_if_zbuffered_internal(int surface_index_A, int surface_index_B, ref RealPoint3d Point0, ref RealPoint3d Point1)
+        public bool surfaces_check_if_intersecting_internal(int surface_index_A, int surface_index_B, ref RealPoint3d Point0, ref RealPoint3d Point1)
         {
             Surface surfaceA = Bsp.Surfaces[surface_index_A & 0x7FFFFFFF];
             Surface surfaceB = Bsp.Surfaces[surface_index_B & 0x7FFFFFFF];
@@ -325,42 +341,41 @@ namespace TagTool.Commands.CollisionModels
             if (!line_from_planes3d(plane_A, plane_B, ref clip_line_point, ref clip_line_vector))
                 return false;
 
-            float minvalueA = 0.0f;
-            float maxvalueA = 0.0f;
-            float minvalueB = 0.0f;
-            float maxvalueB = 0.0f;
-            if (!intersecting_surface_get_clip_line_bounds(surface_index_A, clip_line_point, clip_line_vector, ref maxvalueA, ref minvalueA) ||
-                !intersecting_surface_get_clip_line_bounds(surface_index_B, clip_line_point, clip_line_vector, ref maxvalueB, ref minvalueB))
+            Bounds<float> BoundsA = new Bounds<float>();
+            Bounds<float> BoundsB = new Bounds<float>();
+            if (!intersecting_surface_get_clip_line_bounds(surface_index_A, clip_line_point, clip_line_vector, ref BoundsA) ||
+                !intersecting_surface_get_clip_line_bounds(surface_index_B, clip_line_point, clip_line_vector, ref BoundsB))
                 return false;
 
-            if (maxvalueA <= maxvalueB)
-                maxvalueA = maxvalueB;
+            if (BoundsA.Upper <= BoundsB.Upper)
+                BoundsA.Upper = BoundsB.Upper;
 
-            maxvalueB = minvalueA <= minvalueB ? minvalueA : minvalueB;
+            BoundsB.Upper = BoundsA.Lower <= BoundsB.Lower ? BoundsA.Lower : BoundsB.Lower;
 
-            if (maxvalueB - maxvalueA <= 0.000099999997)
+            if (BoundsB.Upper - BoundsA.Upper <= 0.000099999997)
                 return false;
 
             //these two points will be used to identify the region of overlap
-            Point0 = point_from_point_and_vector(clip_line_point, clip_line_vector, maxvalueA);
-            Point1 = point_from_point_and_vector(clip_line_point, clip_line_vector, maxvalueB);
+            Point0 = point_from_point_and_vector(clip_line_point, clip_line_vector, BoundsA.Upper);
+            Point1 = point_from_point_and_vector(clip_line_point, clip_line_vector, BoundsB.Upper);
 
             return true;
         }
 
-        public RealPoint3d point_from_point_and_vector(RealVector3d vertex_A, RealVector3d vector_B, float interpolation_factor)
+        public RealPoint3d point_from_point_and_vector(RealVector3d vertex_A, RealVector3d vector_B, float vector_fraction)
         {
             return new RealPoint3d
             {
-                X = interpolation_factor * vector_B.I + vertex_A.I,
-                Y = interpolation_factor * vector_B.J + vertex_A.J,
-                Z = interpolation_factor * vector_B.K + vertex_A.K,
+                X = vector_fraction * vector_B.I + vertex_A.I,
+                Y = vector_fraction * vector_B.J + vertex_A.J,
+                Z = vector_fraction * vector_B.K + vertex_A.K,
             };
         }
 
-        public bool surfaces_check_if_zbuffered(surface_array_definition surface_array)
+        public bool surfaces_check_if_intersecting(surface_array_definition surface_array)
         {
-            if(surface_array.used_count > 0)
+            bool warning_posted = false;
+            if (surface_array.used_count > 0)
             {
                 for(int used_surface_index = 0; used_surface_index < surface_array.used_count; used_surface_index++)
                 {
@@ -380,13 +395,25 @@ namespace TagTool.Commands.CollisionModels
 
                         RealPoint3d Point0 = new RealPoint3d();
                         RealPoint3d Point1 = new RealPoint3d();
-                        if (surfaces_check_if_zbuffered_internal(surface_index, second_surface_index, ref Point0, ref Point1))
+                        if (surfaces_check_if_intersecting_internal(surface_index, second_surface_index, ref Point0, ref Point1))
                         {
-                            Console.WriteLine("### ERROR found z buffered triangles");
-                            Console.WriteLine("Point 0" + Point0 * 100.0f);
-                            Console.WriteLine("Point 1" + Point1 * 100.0f);
-                            surface_print_vertices(surface_index);
-                            surface_print_vertices(second_surface_index);
+                            if (!warning_posted)
+                            {
+                                Console.WriteLine("### ERROR found intersecting surfaces");
+                                warning_posted = true;
+                            }
+                            //Error geometry output
+                            hasErrors = true;
+                            List<int> ErrorIndices = new List<int>();
+                            Errors.Vertices.Add(Point0);
+                            ErrorIndices.Add(Errors.Vertices.Count);
+                            Errors.Vertices.Add(Point1);
+                            ErrorIndices.Add(Errors.Vertices.Count);
+                            Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                            {
+                                Type = ErrorGeometryBuilder.error_geometry_type.intersectingsurface,
+                                Indices = ErrorIndices
+                            });
                             return true;
                         }
                     }
@@ -655,13 +682,22 @@ namespace TagTool.Commands.CollisionModels
                     if (!warning_posted)
                     {
                         Console.WriteLine("###WARNING Overlapping surfaces found!");
-                        if (debug)
+                        foreach (int surface_index in plane_matched_surface_array.surface_array)
                         {
-                            foreach (int surface_index in plane_matched_surface_array.surface_array)
+                            int abs_surface_index = surface_index & 0x7FFFFFFF;
+                            //Error geometry output
+                            hasErrors = true;
+                            List<int> ErrorIndices = new List<int>();
+                            foreach (var vert in surface_get_vertices(abs_surface_index))
                             {
-                                int abs_surface_index = surface_index & 0x7FFFFFFF;
-                                surface_print_vertices(abs_surface_index);
+                                Errors.Vertices.Add(vert);
+                                ErrorIndices.Add(Errors.Vertices.Count);
                             }
+                            Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                            {
+                                Type = ErrorGeometryBuilder.error_geometry_type.overlappingsurface,
+                                Indices = ErrorIndices
+                            });
                         }
                         warning_posted = true;
                     }
@@ -768,13 +804,12 @@ namespace TagTool.Commands.CollisionModels
             return plane_fit;
         }
 
-        void surface_print_vertices(int surface_index)
+        List<RealPoint3d> surface_get_vertices(int surface_index)
         {
             Surface surface_block = Bsp.Surfaces[surface_index];
             int first_Edge_index = surface_block.FirstEdge;
             int current_edge_index = surface_block.FirstEdge;
             List<RealPoint3d> vertexlist = new List<RealPoint3d>();
-            Console.WriteLine($"Surface {surface_index}");
             do
             {
                 Edge edge_block = Bsp.Edges[current_edge_index];
@@ -790,7 +825,7 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
             while (current_edge_index != first_Edge_index);
-            debug_print_vertices(vertexlist);
+            return vertexlist;
         }
 
         public void debug_print_vertices(List<RealPoint3d> vertexlist)
@@ -2154,6 +2189,5 @@ namespace TagTool.Commands.CollisionModels
                 return node_index;
             return back_child_node_index;
         }
-
     }
 }

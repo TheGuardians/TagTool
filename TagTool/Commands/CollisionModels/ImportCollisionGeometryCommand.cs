@@ -25,6 +25,8 @@ namespace TagTool.Commands.CollisionModels
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
+        //error geometry 
+        private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
 
         public ImportCollisionGeometryCommand(GameCacheHaloOnlineBase cache)
             : base(false,
@@ -274,6 +276,22 @@ namespace TagTool.Commands.CollisionModels
                 if(indices.Count != 3)
                 {
                     Console.WriteLine($"###ERROR: Face {i} did not have exactly 3 vertices!");
+
+                    //Error geometry output
+                    List<int> ErrorIndices = new List<int>();
+                    foreach(var index in indices)
+                    {
+                        RealPoint3d tempvertex = new RealPoint3d(Vertices[index].X, Vertices[index].Y, Vertices[index].Z);
+                        Errors.Vertices.Add(tempvertex);
+                        ErrorIndices.Add(Errors.Vertices.Count);
+                    }
+                    Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                    {
+                        Type = ErrorGeometryBuilder.error_geometry_type.badsurface,
+                        Indices = ErrorIndices
+                    });
+                    Errors.WriteOBJ();
+
                     return false;
                 }
 
@@ -408,18 +426,46 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
-                        List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[point0_index].Point, Bsp.Vertices[point1_index].Point };
-                        debug_print_vertices(debugvertices);
+                        Console.WriteLine($"###ERROR: Edge is contacted by more than two surfaces!!");
+
+                        //Error geometry output
+                        List<int> ErrorIndices = new List<int>();
+
+                        Errors.Vertices.Add(Bsp.Vertices[point0_index].Point);
+                        ErrorIndices.Add(Errors.Vertices.Count);
+                        Errors.Vertices.Add(Bsp.Vertices[point1_index].Point);
+                        ErrorIndices.Add(Errors.Vertices.Count);
+
+                        Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                        {
+                            Type = ErrorGeometryBuilder.error_geometry_type.degenerateedge,
+                            Indices = ErrorIndices
+                        });
+                        Errors.WriteOBJ();
+
                         return -1;
                     }
                 }
                 if (Bsp.Edges[edge_index].StartVertex == point0_index &&
                     Bsp.Edges[edge_index].EndVertex == point1_index)
                 {
-                    Console.WriteLine($"###ERROR: Edge between the following vertices is contacted by more than two surfaces!!");
-                    List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[point0_index].Point, Bsp.Vertices[point1_index].Point };
-                    debug_print_vertices(debugvertices);
+                    Console.WriteLine($"###ERROR: Edge is contacted by more than two surfaces!!");
+
+                    //Error geometry output
+                    List<int> ErrorIndices = new List<int>();
+
+                    Errors.Vertices.Add(Bsp.Vertices[point0_index].Point);
+                    ErrorIndices.Add(Errors.Vertices.Count);
+                    Errors.Vertices.Add(Bsp.Vertices[point1_index].Point);
+                    ErrorIndices.Add(Errors.Vertices.Count);
+
+                    Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                    {
+                        Type = ErrorGeometryBuilder.error_geometry_type.degenerateedge,
+                        Indices = ErrorIndices
+                    });
+                    Errors.WriteOBJ();
+
                     return -1;
                 }
             }
@@ -454,9 +500,22 @@ namespace TagTool.Commands.CollisionModels
                 {
                     if (!forceimport)
                     {
-                        Console.WriteLine($"###ERROR: Edge with below vertices is open!");
-                        List<RealPoint3d> debugvertices = new List<RealPoint3d> { Bsp.Vertices[edge.StartVertex].Point, Bsp.Vertices[edge.EndVertex].Point };
-                        debug_print_vertices(debugvertices);
+                        Console.WriteLine($"###ERROR: Edge {edge_index} is open!");
+
+                        //Error geometry output
+                        List<int> ErrorIndices = new List<int>();
+
+                        Errors.Vertices.Add(Bsp.Vertices[edge.StartVertex].Point);
+                        ErrorIndices.Add(Errors.Vertices.Count);
+                        Errors.Vertices.Add(Bsp.Vertices[edge.EndVertex].Point);
+                        ErrorIndices.Add(Errors.Vertices.Count);
+
+                        Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                        {
+                            Type = ErrorGeometryBuilder.error_geometry_type.openedge,
+                            Indices = ErrorIndices
+                        });
+
                         result = false;
                     }
                     else
@@ -467,6 +526,10 @@ namespace TagTool.Commands.CollisionModels
                     }
                 }
             }
+
+            if(!result)
+                Errors.WriteOBJ();
+
             return result;
         }
 
