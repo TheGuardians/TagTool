@@ -65,7 +65,7 @@ namespace TagTool.Commands
                 if (File.Exists(tagCacheFile))
 					fileInfo = new FileInfo(tagCacheFile);
 				else
-					Console.WriteLine("Invalid path to a tag cache!");
+					Console.WriteLine("\nERROR: Invalid path to a tag cache!");
 
                 Console.WriteLine();
             }
