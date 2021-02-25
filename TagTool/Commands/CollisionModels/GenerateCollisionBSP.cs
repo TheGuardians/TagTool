@@ -681,7 +681,7 @@ namespace TagTool.Commands.CollisionModels
                 {
                     if (!warning_posted)
                     {
-                        Console.WriteLine("###WARNING Overlapping surfaces found!");
+                        Console.WriteLine("###ERROR Overlapping surfaces found!");
                         foreach (int surface_index in plane_matched_surface_array.surface_array)
                         {
                             int abs_surface_index = surface_index & 0x7FFFFFFF;

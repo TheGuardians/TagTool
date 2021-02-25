@@ -25,6 +25,8 @@ namespace TagTool.Commands.CollisionModels
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
+        private Vector3D MaxBounds = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
+        private Vector3D MinBounds = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
         //error geometry 
         private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
 
@@ -185,7 +187,29 @@ namespace TagTool.Commands.CollisionModels
                     Console.WriteLine($"Mesh {currentmesh.Name} has {Faces.Count} Faces!");
 
                 add_triangles(0);
+
+                //get object bounds
+                foreach(var vert in Vertices)
+                {
+                    if (vert.X < MinBounds.X)
+                        MinBounds.X = vert.X;
+                    if (vert.X > MaxBounds.X)
+                        MaxBounds.X = vert.X;
+                    if (vert.Y < MinBounds.Y)
+                        MinBounds.Y = vert.Y;
+                    if (vert.Y > MaxBounds.Y)
+                        MaxBounds.Y = vert.Y;
+                    if (vert.Z < MinBounds.Z)
+                        MinBounds.Z = vert.Z;
+                    if (vert.Z > MaxBounds.Z)
+                        MaxBounds.Z = vert.Z;
+                }
             }
+
+            //Print out object size so people know what they are importing
+            Console.WriteLine($"###Imported object will be {(MaxBounds.X - MinBounds.X) * 0.01} units in width, "+
+                $"{(MaxBounds.Y - MinBounds.Y) * 0.01} units in depth, and " +
+                $"{(MaxBounds.Z - MinBounds.Z) * 0.01} units in height");
 
             //this code calculates the ?perimeter of each triangle, and sorts them. 
             //This will effect the efficiency of bsp generation later --

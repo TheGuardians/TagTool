@@ -48,7 +48,7 @@ namespace TagTool.Commands.CollisionModels
                 if(OpenEdges.Count() > 0)
                 {
                     writer.WriteLine("usemtl red");
-                    writer.WriteLine("g open_edges");
+                    writer.WriteLine("o open_edges");
                     foreach(var entry in OpenEdges)
                     {
                         writer.Write("l"); //line
@@ -60,7 +60,7 @@ namespace TagTool.Commands.CollisionModels
                 if (DegenerateEdges.Count() > 0)
                 {
                     writer.WriteLine("usemtl blue");
-                    writer.WriteLine("g degenerate_edges");
+                    writer.WriteLine("o degenerate_edges");
                     foreach (var entry in DegenerateEdges)
                     {
                         writer.Write("l"); //line
@@ -72,7 +72,7 @@ namespace TagTool.Commands.CollisionModels
                 if (IntersectingSurfaces.Count() > 0)
                 {
                     writer.WriteLine("usemtl pink");
-                    writer.WriteLine("g intersecting_surfaces");
+                    writer.WriteLine("o intersecting_surfaces");
                     foreach (var entry in IntersectingSurfaces)
                     {
                         writer.Write("l"); //line
@@ -84,7 +84,7 @@ namespace TagTool.Commands.CollisionModels
                 if (OverlappingSurfaces.Count() > 0)
                 {
                     writer.WriteLine("usemtl orange");
-                    writer.WriteLine("g overlapping_surfaces");
+                    writer.WriteLine("o overlapping_surfaces");
                     foreach (var entry in OverlappingSurfaces)
                     {
                         writer.Write("f"); //face
@@ -96,7 +96,7 @@ namespace TagTool.Commands.CollisionModels
                 if (BadSurfaces.Count() > 0)
                 {
                     writer.WriteLine("usemtl red");
-                    writer.WriteLine("g bad_surfaces");
+                    writer.WriteLine("o bad_surfaces");
                     foreach (var entry in BadSurfaces)
                     {
                         writer.Write("f"); //face
@@ -121,13 +121,13 @@ namespace TagTool.Commands.CollisionModels
             using (var writer = File.CreateText(outputdir))
             {
                 writer.WriteLine("newmtl red");
-                writer.WriteLine("Ka 1.000 0.000 0.000");
+                writer.WriteLine("Kd 1.000 0.000 0.000");
                 writer.WriteLine("newmtl orange");
-                writer.WriteLine("Ka 1.000 0.500 0.000");
+                writer.WriteLine("Kd 1.000 0.500 0.000");
                 writer.WriteLine("newmtl pink");
-                writer.WriteLine("Ka 1.000 0.000 1.000");
+                writer.WriteLine("Kd 1.000 0.000 1.000");
                 writer.WriteLine("newmtl blue");
-                writer.WriteLine("Ka 0.000 0.000 1.000");
+                writer.WriteLine("Kd 0.000 0.000 1.000");
             }
 
             return true;
