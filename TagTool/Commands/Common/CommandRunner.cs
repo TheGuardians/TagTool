@@ -43,8 +43,10 @@ namespace TagTool.Commands.Common
                     EOF = true;
                     return;
                 case "exit":
-                    if (!ContextStack.Pop())
+                    if (ContextStack.IsBase())
                         Console.WriteLine("Cannot exit, already at base context! Use 'quit' to quit tagtool.");
+                    else
+                        ContextStack.Pop();
                     return;
             }
 

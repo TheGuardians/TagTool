@@ -56,13 +56,17 @@ namespace TagTool.Commands
         /// <summary>
         /// Pops the current context off the stack, making the previous one active.
         /// </summary>
-        /// <returns><c>true</c> if more contexts still remain on the stack, <c>false</c> if the stack is now empty.</returns>
         public bool Pop()
         {
+            if (IsBase())
+                return false;
+
             var context = ContextStack.Pop();
             ContextPopped?.Invoke(context);
 
-            return (ContextStack.Count != 0);
+            return true;
         }
+
+        public bool IsBase() => ContextStack.Count == 1;
     }
 }
