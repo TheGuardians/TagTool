@@ -315,6 +315,80 @@ namespace TagTool.Audio.Converter
 
     }
 
+    public class ADPCMWAVFMTChunk : HeaderChunk
+    {
+        public int SubchunkSize;
+        public short FormatCode;
+        public short Channels;
+        public int SampleRate;
+        public int ByteRate;
+        public short BlockAlign;
+        public short BitsPerSample;
+        public short ByteExtraData;
+        public ushort ExtraData;
+
+        public ADPCMWAVFMTChunk(int channels, int sampleRate, bool isXboxFormat)
+        {
+            Name = 0x666D7420;
+            SubchunkSize = 0x14;
+            FormatCode = (short)(isXboxFormat ? 0x0069 : 0x0011);
+            Channels = (short)channels;
+            SampleRate = sampleRate;
+            ByteRate = SampleRate * Channels / 2;
+            BlockAlign = (short)(Channels * 36);        // can change if IMA
+            BitsPerSample = 4;
+            ByteExtraData = 2;
+            ExtraData = 0x0040; // can change if IMA
+
+            ChunkSize = SubchunkSize + 4;
+        }
+
+        public ADPCMWAVFMTChunk()
+        {
+            Name = 0x666D7420;
+        }
+
+        override public void WriteChunk(EndianWriter writer)
+        {
+            writer.Format = EndianFormat.BigEndian;
+            writer.Write(Name);
+            writer.Format = EndianFormat.LittleEndian;
+            writer.Write(SubchunkSize);
+            writer.Write(FormatCode);
+            writer.Write(Channels);
+            writer.Write(SampleRate);
+            writer.Write(ByteRate);
+            writer.Write(BlockAlign);
+            writer.Write(BitsPerSample);
+            writer.Write(ByteExtraData);
+            writer.Write(ExtraData);
+        }
+
+        override public void ReadChunk(EndianReader reader)
+        {
+            reader.Format = EndianFormat.BigEndian;
+
+            if (reader.ReadUInt32() == Name)
+            {
+                reader.Format = EndianFormat.LittleEndian;
+                SubchunkSize = reader.ReadInt32();
+                var endOffset = reader.Position + SubchunkSize;
+                FormatCode = reader.ReadInt16();
+                Channels = reader.ReadInt16();
+                SampleRate = reader.ReadInt32();
+                ByteRate = reader.ReadInt32();
+                BlockAlign = reader.ReadInt16();
+                BitsPerSample = reader.ReadInt16();
+                ByteExtraData = reader.ReadInt16();
+                ExtraData = reader.ReadUInt16();
+                reader.SeekTo(endOffset);
+            }
+            reader.Format = EndianFormat.LittleEndian;
+
+        }
+
+    }
+
     public class DataChunk : HeaderChunk
     {
         public byte[] Data;

@@ -125,12 +125,12 @@ namespace TagTool.Commands.Shaders
 
                                 DisassembleShader(glps, entryShader, pixelShaderFilename, Cache, glps.Shaders[entryShader].GlobalCachePixelShaderIndex != -1 ? gpix : null);
                             }
-                            else if(glps.EntryPoints[entryIndex].Option.Count > 0)
+                            else if (glps.EntryPoints[entryIndex].Option.Count > 0)
                             {
-                                foreach(var option in glps.EntryPoints[entryIndex].Option)
+                                foreach (var option in glps.EntryPoints[entryIndex].Option)
                                 {
                                     var methodIndex = option.RenderMethodOptionIndex;
-                                    for(int i = 0; i < option.OptionMethodShaderIndices.Count; i++)
+                                    for (int i = 0; i < option.OptionMethodShaderIndices.Count; i++)
                                     {
                                         var optionIndex = i;
                                         string glpsFilename = entry.ToString().ToLower() + $"_{methodIndex}_{optionIndex}" + ".shared_pixel_shader";
@@ -250,6 +250,26 @@ namespace TagTool.Commands.Shaders
 
             if (cache.GetType() == typeof(GameCacheGen3))
             {
+                switch (definition)
+                {
+                    case PixelShader pixl:
+                        if (pixl.Shaders[shaderIndex].XboxShaderReference == null)
+                            return "NO DATA";
+                        break;
+                    case VertexShader vtsh:
+                        if (vtsh.Shaders[shaderIndex].XboxShaderReference == null)
+                            return "NO DATA";
+                        break;
+                    case GlobalPixelShader glps:
+                        if (glps.Shaders[shaderIndex].XboxShaderReference == null)
+                            return "NO DATA";
+                        break;
+                    case GlobalVertexShader glvs:
+                        if (glvs.Shaders[shaderIndex].XboxShaderReference == null)
+                            return "NO DATA";
+                        break;
+                }
+                
                 return DisassembleGen3Shader(definition, shaderIndex, path, gpix);
             }
             else if (Cache.GetType() == typeof(GameCacheHaloOnline))
@@ -268,11 +288,12 @@ namespace TagTool.Commands.Shaders
                 return null;
             }
             var tempFile = Path.GetTempFileName();
-            string disassembly = null;
+            string disassembly = "";
             string xsdArguments = " \"" + tempFile + "\"";
             byte[] microcode = new byte[0];
             byte[] debugData = new byte[0];
             byte[] constantData = new byte[0];
+            List<int> disassemblyConstants = new List<int>();
 
             //
             // Set the arguments for xsd.exe according to the XDK documentation
@@ -352,7 +373,37 @@ namespace TagTool.Commands.Shaders
                     RedirectStandardInput = false
                 };
                 Process xsd = Process.Start(info);
-                disassembly = xsd.StandardOutput.ReadToEnd();
+
+                // read disassembly + get all constants used in the shader
+                // this is a bit hacky, however is the only way it can be done atm
+
+                while (!xsd.StandardOutput.EndOfStream)
+                {
+                    string line = xsd.StandardOutput.ReadLine();
+                    disassembly += line + "\n";
+
+                    if (line.Length <= 4 || !line.Contains(" "))
+                        continue;
+
+                    var lineParts = line.Replace(",", "").Remove(0, 4).Split(' ');
+
+                    // [0] is the instruction, skip it
+                    for (int i = 1; i < lineParts.Length; i++)
+                    {
+                        if (lineParts[i].StartsWith("c") && char.IsDigit(lineParts[i][1]))
+                        {
+                            string registerString = lineParts[i];
+                            registerString = registerString.Remove(0, 1);
+                            registerString = registerString.Split('.')[0];
+                            registerString = registerString.Replace("_abs", "");
+
+                            int register = int.Parse(registerString);
+                            if (!disassemblyConstants.Contains(register))
+                                disassemblyConstants.Add(register);
+                        }
+                    }
+                }
+
                 xsd.WaitForExit();
             }
             catch (Exception e)
@@ -366,7 +417,7 @@ namespace TagTool.Commands.Shaders
 
             using (var writer = File.CreateText(filename))
             {
-                GenerateGen3ShaderHeader(definition, shaderIndex, writer, gpix);
+                GenerateGen3ShaderHeader(definition, shaderIndex, writer, gpix, disassemblyConstants);
                 writer.WriteLine(disassembly);
             }
 
@@ -374,10 +425,11 @@ namespace TagTool.Commands.Shaders
         }
 
 
-        private void GenerateGen3ShaderHeader(object definition, int shaderIndex, StreamWriter writer, GlobalCacheFilePixelShaders gpix)
+        private void GenerateGen3ShaderHeader(object definition, int shaderIndex, StreamWriter writer, GlobalCacheFilePixelShaders gpix, List<int> disassemblyConstants = null)
         {
             List<ShaderParameter> parameters = null;
             List<RealQuaternion> constants = new List<RealQuaternion>();
+            List<int> usedConstants = new List<int>();
 
             if (definition.GetType() == typeof(PixelShader) || definition.GetType() == typeof(GlobalPixelShader))
             {
@@ -435,42 +487,83 @@ namespace TagTool.Commands.Shaders
                 parameters = shaderBlock.XboxParameters;
             }
 
-            List<string> parameterNames = new List<string>();
-
-            for (int i = 0; i < parameters.Count; i++)
-                parameterNames.Add(Cache.StringTable.GetString(parameters[i].ParameterName));
-
+            List<ShaderParameter> orderedParameters = OrderParameters(parameters);
 
             WriteHeaderLine(writer);
             WriteHeaderLine(writer, "Generated by TagTool and Xbox Shader Disassembler");
             WriteHeaderLine(writer);
-            WriteHeaderLine(writer, "Parameters");
+            WriteHeaderLine(writer, "Parameters:");
             WriteHeaderLine(writer);
+
+            uint regNameLength = 0;
+
             for (int i = 0; i < parameters.Count; i++)
             {
                 var param = parameters[i];
-                WriteHeaderLine(writer, $"    {GetTypeString(param.RegisterType, param.RegisterCount)} {parameterNames[i]};");
+                string paramName = Cache.StringTable.GetString(parameters[i].ParameterName);
+                WriteHeaderLine(writer, $"\t{GetTypeString(param.RegisterType, param.RegisterCount)} {paramName};");
+
+                if (paramName.Length > regNameLength)
+                    regNameLength = (uint)paramName.Length;
             }
+
             WriteHeaderLine(writer);
             WriteHeaderLine(writer);
-            WriteHeaderLine(writer, "Registers");
+            WriteHeaderLine(writer, "Registers:");
             WriteHeaderLine(writer);
-            // sort later
-            for (int i = 0; i < parameters.Count; i++)
+            WriteHeaderLine(writer, $"\t\t{"Name".ToLength(regNameLength)} {"Reg".ToLength(6)}{"Size".ToLength(4)}");
+            WriteHeaderLine(writer, $"\t\t{"-".Repeat(regNameLength - 1)} ----- ----");
+
+            for (int i = 0; i < orderedParameters.Count; i++)
             {
-                var param = parameters[i];
-                WriteHeaderLine(writer, $"    {parameterNames[i]} {GetRegisterString(param.RegisterType, param.RegisterIndex)} {param.RegisterCount}");
+                var param = orderedParameters[i];
+
+                if (param.RegisterType == ShaderParameter.RType.Vector)
+                {
+                    // store used registers to sort literal constants
+                    for (int j = 0; j < param.RegisterCount; j++)
+                        usedConstants.Add(j + param.RegisterIndex);
+                }
+
+                string name = Cache.StringTable.GetString(orderedParameters[i].ParameterName).ToLength(regNameLength);
+                string reg = GetRegisterString(param.RegisterType, param.RegisterIndex).ToLength(6);
+                string size = param.RegisterCount.ToString().ToLength(4);
+
+                WriteHeaderLine(writer, $"\t\t{name} {reg}{size}");
             }
+
             WriteHeaderLine(writer);
             WriteHeaderLine(writer);
-            WriteHeaderLine(writer, "Constants");
+            WriteHeaderLine(writer, "Constants:");
             WriteHeaderLine(writer);
-            int constantregister = 255;
+
+            int constantRegister = 255;
+            List<int> validConstants = new List<int>();
             for (int i = 0; i < constants.Count; i++)
             {
-                WriteHeaderLine(writer, $"    c{constantregister} {constants[i]} ");
-                constantregister--;
+                while (true)
+                {
+                    if (!usedConstants.Contains(constantRegister))
+                    {
+                        if (disassemblyConstants.Contains(constantRegister))
+                            break;
+                        validConstants.Add(constantRegister);
+                    }
+
+                    constantRegister--;
+                    if (constantRegister < 0)
+                    {
+                        //Console.WriteLine("Constant register could not be matched, using highest available.");
+                        constantRegister = validConstants[0];
+                        validConstants.RemoveAt(0);
+                        break;
+                    }
+                }
+
+                WriteHeaderLine(writer, $"\t\tc{constantRegister} {constants[i]} ");
+                constantRegister--;
             }
+
             WriteHeaderLine(writer);
         }
 
@@ -491,6 +584,8 @@ namespace TagTool.Commands.Shaders
                     result = "b";
                     break;
                 case ShaderParameter.RType.Integer:
+                    result = "i";
+                    break;
                 case ShaderParameter.RType.Vector:
                     result = "c";
                     break;
@@ -616,6 +711,61 @@ namespace TagTool.Commands.Shaders
             }
 
             return constants;
+        }
+
+        private List<ShaderParameter> OrderParameters(List<ShaderParameter> parameters)
+        {
+            List<ShaderParameter> result = new List<ShaderParameter>();
+            Dictionary<int, int> tempMapping = new Dictionary<int, int>();
+
+            int boolCount = 128;
+            int intCount = 16;
+            int vectorCount = 256;
+            int samplerCount = 16;
+
+            // bool
+            for (int i = 0; i < parameters.Count; i++)
+                if (parameters[i].RegisterType == ShaderParameter.RType.Boolean)
+                    tempMapping.Add(parameters[i].RegisterIndex, i);
+
+            for (int i = 0; i <= boolCount; i++)
+                if (tempMapping.ContainsKey(i))
+                    result.Add(parameters[tempMapping[i]]);
+
+            tempMapping.Clear();
+
+            // integer
+            for (int i = 0; i < parameters.Count; i++)
+                if (parameters[i].RegisterType == ShaderParameter.RType.Integer)
+                    tempMapping.Add(parameters[i].RegisterIndex, i);
+
+            for (int i = 0; i <= intCount; i++)
+                if (tempMapping.ContainsKey(i))
+                    result.Add(parameters[tempMapping[i]]);
+
+            tempMapping.Clear();
+
+            // vector
+            for (int i = 0; i < parameters.Count; i++)
+                if (parameters[i].RegisterType == ShaderParameter.RType.Vector)
+                    tempMapping.Add(parameters[i].RegisterIndex, i);
+
+            for (int i = 0; i <= vectorCount; i++)
+                if (tempMapping.ContainsKey(i))
+                    result.Add(parameters[tempMapping[i]]);
+
+            tempMapping.Clear();
+
+            // sampler
+            for (int i = 0; i < parameters.Count; i++)
+                if (parameters[i].RegisterType == ShaderParameter.RType.Sampler)
+                    tempMapping.Add(parameters[i].RegisterIndex, i);
+
+            for (int i = 0; i <= samplerCount; i++)
+                if (tempMapping.ContainsKey(i))
+                    result.Add(parameters[tempMapping[i]]);
+
+            return result;
         }
     }
 }

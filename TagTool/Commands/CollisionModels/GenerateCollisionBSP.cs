@@ -19,8 +19,11 @@ namespace TagTool.Commands.CollisionModels
         private bool debug = false;
         private int original_surface_count = 0;
         private List<int> surface_addendums = new List<int>();
+        //error geometry 
+        private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
+        private bool hasErrors = false;
 
-    public GenerateCollisionBSPCommand(ref CollisionModel definition) :
+        public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
 
                 "GenerateCollisionBSP",
@@ -55,6 +58,9 @@ namespace TagTool.Commands.CollisionModels
 
         public bool generate_bsp(int region_index, int permutation_index, int bsp_index, bool debug_arg = false)
         {
+            Errors = new ErrorGeometryBuilder();
+            hasErrors = false;
+
             if (debug_arg == true)
                 debug = true;
 
@@ -103,6 +109,8 @@ namespace TagTool.Commands.CollisionModels
             else
             {
                 Console.WriteLine($"###Failed to build collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
+                if (hasErrors)
+                    Errors.WriteOBJ();
                 return false;
             }
             if (!prune_node_tree())
@@ -115,6 +123,9 @@ namespace TagTool.Commands.CollisionModels
                 Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
+
+            if (hasErrors)
+                Errors.WriteOBJ();
 
             return true;
         }
@@ -190,6 +201,8 @@ namespace TagTool.Commands.CollisionModels
             int new_surfaces_count = surface_counts.free_count + surface_counts.used_count;
             new_surface_array.used_count = new_surfaces_count;
 
+            surfaces_check_if_intersecting(new_surface_array);
+
             if (surface_plane_fits_negative * 4.0f <= surface_plane_fits_positive)
             {
                 surface_array = new_surface_array.DeepClone();
@@ -219,21 +232,194 @@ namespace TagTool.Commands.CollisionModels
             clip_line_vector = RealVector3d.CrossProduct(vectorplaneA, vectorplaneB);
 
             //If the plane normal vectors are nearly identical, the planes won't overlap, so return false
-            float plane_normal_cross = RealVector3d.Magnitude(clip_line_vector);
-            if (Math.Abs(plane_normal_cross) < 0.00009999999747378752)
+            float vector_magnitude = RealVector3d.Magnitude(clip_line_vector);
+            if (Math.Abs(vector_magnitude) < 0.00009999999747378752)
                 return false;
 
             RealVector3d componentA = RealVector3d.CrossProduct(clip_line_vector, vectorplaneA);
-            RealVector3d componentB = RealVector3d.CrossProduct(clip_line_vector, vectorplaneB);
+            RealVector3d componentB = RealVector3d.CrossProduct(vectorplaneB, clip_line_vector);
             componentA = componentA * planeB.D;
             componentB = componentB * planeA.D;
 
             clip_line_point = componentA + componentB;
 
             //divide clip line point by the magnitude of the cross product of the two plane normals
-            clip_line_point = clip_line_point / plane_normal_cross;
+            clip_line_point = clip_line_point / vector_magnitude;
 
             return true;
+        }
+
+        public bool intersecting_surface_get_clip_line_bounds(int surface_index, RealVector3d clip_line_point, RealVector3d clip_line_vector, ref Bounds<float> Bounds)
+        {
+            Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
+            int plane_index = (short)surface_block.Plane;
+            Plane plane_block = Bsp.Planes[surface_block.Plane & 0x7FFF];
+            int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
+            bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
+            bool plane_index_negative = (plane_index & 0x8000) > 0;
+
+            int plane_mirror_check = 0;
+            if (!plane_index_negative)
+                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 1 : 0;
+            else
+                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 0 : 1;
+
+            RealPoint3d clip_line_point_vertex = new RealPoint3d(clip_line_point.I, clip_line_point.J, clip_line_point.K);
+            RealPoint3d clip_line_vector_vertex = new RealPoint3d(clip_line_vector.I, clip_line_vector.J, clip_line_vector.K);
+            RealPoint2d CoordsP = vertex_get_projection_relevant_coords(clip_line_point_vertex, plane_projection_axis, plane_mirror_check);
+            RealPoint2d CoordsV = vertex_get_projection_relevant_coords(clip_line_vector_vertex, plane_projection_axis, plane_mirror_check);
+
+            Bounds.Upper = float.MinValue;
+            Bounds.Lower = float.MaxValue;
+
+            int first_Edge_index = surface_block.FirstEdge;
+            int current_edge_index = surface_block.FirstEdge;
+            do
+            {
+                Edge edge_block = Bsp.Edges[current_edge_index];
+                bool surface_is_right_of_edge = edge_block.RightSurface == surface_index;
+
+                Vertex VertexA = Bsp.Vertices[surface_is_right_of_edge ? edge_block.EndVertex : edge_block.StartVertex];
+                Vertex VertexB = Bsp.Vertices[surface_is_right_of_edge ? edge_block.StartVertex : edge_block.EndVertex];
+                RealPoint2d CoordsA = vertex_get_projection_relevant_coords(VertexA.Point, plane_projection_axis, plane_mirror_check);
+                RealPoint2d CoordsB = vertex_get_projection_relevant_coords(VertexB.Point, plane_projection_axis, plane_mirror_check);
+
+                RealPoint2d diffBA = CoordsB - CoordsA;
+                RealPoint2d diffPA = CoordsP - CoordsA;
+
+                //VBA cross should be the cross product between:
+                //      the plane projected vector between this edge's two vertices
+                //      the plane projected clip line vector
+                float VBA_cross = diffBA.Y * CoordsV.X - CoordsV.Y * diffBA.X;
+                //BAPA cross should be the cross product between:
+                //      the plane projected vector between this edge's two vertices
+                //      the plane projected vector between the clip line point and the first vertex on the edge
+                float BAPA_cross = diffBA.X * diffPA.Y - diffBA.Y * diffPA.X;
+
+                if(VBA_cross == 0.0)
+                {
+                    if (BAPA_cross < 0.0)
+                        return false;
+                }
+                else
+                {
+                    float cross_ratio = BAPA_cross / VBA_cross;
+                    if (VBA_cross >= 0.0)
+                    {
+                        if (cross_ratio < Bounds.Lower)
+                            Bounds.Lower = cross_ratio;
+                    }
+                    else if (cross_ratio > Bounds.Upper)
+                        Bounds.Upper = cross_ratio;
+                    if (Bounds.Upper > Bounds.Lower)
+                        return false;
+                }
+                current_edge_index = surface_is_right_of_edge ? edge_block.ReverseEdge : edge_block.ForwardEdge;
+            }
+            while (current_edge_index != first_Edge_index);
+            return true;
+        }
+
+        public bool surfaces_check_if_intersecting_internal(int surface_index_A, int surface_index_B, ref RealPoint3d Point0, ref RealPoint3d Point1)
+        {
+            Surface surfaceA = Bsp.Surfaces[surface_index_A & 0x7FFFFFFF];
+            Surface surfaceB = Bsp.Surfaces[surface_index_B & 0x7FFFFFFF];
+            int plane_index_A = surfaceA.Plane & 0x7FFF;
+            int plane_index_B = surfaceB.Plane & 0x7FFF;
+            RealPlane3d plane_A = Bsp.Planes[plane_index_A].Value;
+            RealPlane3d plane_B = Bsp.Planes[plane_index_B].Value;
+
+            Plane_Relationship relationshipA = determine_surface_plane_relationship(surface_index_A, plane_index_B, new RealPlane3d());
+            Plane_Relationship relationshipB = determine_surface_plane_relationship(surface_index_B, plane_index_A, new RealPlane3d());
+
+            //the two surfaces should each be on both sides of the plane belonging to the other surface if they are z-buffered
+            if (relationshipA != Plane_Relationship.BothSidesofPlane || relationshipB != Plane_Relationship.BothSidesofPlane)
+                return false;
+
+            RealVector3d clip_line_point = new RealVector3d();
+            RealVector3d clip_line_vector = new RealVector3d();
+            if (!line_from_planes3d(plane_A, plane_B, ref clip_line_point, ref clip_line_vector))
+                return false;
+
+            Bounds<float> BoundsA = new Bounds<float>();
+            Bounds<float> BoundsB = new Bounds<float>();
+            if (!intersecting_surface_get_clip_line_bounds(surface_index_A, clip_line_point, clip_line_vector, ref BoundsA) ||
+                !intersecting_surface_get_clip_line_bounds(surface_index_B, clip_line_point, clip_line_vector, ref BoundsB))
+                return false;
+
+            if (BoundsA.Upper <= BoundsB.Upper)
+                BoundsA.Upper = BoundsB.Upper;
+
+            BoundsB.Upper = BoundsA.Lower <= BoundsB.Lower ? BoundsA.Lower : BoundsB.Lower;
+
+            if (BoundsB.Upper - BoundsA.Upper <= 0.000099999997)
+                return false;
+
+            //these two points will be used to identify the region of overlap
+            Point0 = point_from_point_and_vector(clip_line_point, clip_line_vector, BoundsA.Upper);
+            Point1 = point_from_point_and_vector(clip_line_point, clip_line_vector, BoundsB.Upper);
+
+            return true;
+        }
+
+        public RealPoint3d point_from_point_and_vector(RealVector3d vertex_A, RealVector3d vector_B, float vector_fraction)
+        {
+            return new RealPoint3d
+            {
+                X = vector_fraction * vector_B.I + vertex_A.I,
+                Y = vector_fraction * vector_B.J + vertex_A.J,
+                Z = vector_fraction * vector_B.K + vertex_A.K,
+            };
+        }
+
+        public bool surfaces_check_if_intersecting(surface_array_definition surface_array)
+        {
+            bool warning_posted = false;
+            if (surface_array.used_count > 0)
+            {
+                for(int used_surface_index = 0; used_surface_index < surface_array.used_count; used_surface_index++)
+                {
+                    int surface_index = surface_array.surface_array[surface_array.free_count + used_surface_index] & 0x7FFFFFFF;
+                    while (surface_index >= original_surface_count)
+                    {
+                        surface_index = surface_addendums[surface_index];
+                    }
+                    //compare this surface with every other used surface currently in the array
+                    for (int second_used_surface_index = 0; second_used_surface_index < surface_array.used_count; second_used_surface_index++)
+                    {
+                        int second_surface_index = surface_array.surface_array[surface_array.free_count + second_used_surface_index] & 0x7FFFFFFF;
+                        while (second_surface_index >= original_surface_count)
+                        {
+                            second_surface_index = surface_addendums[second_surface_index];
+                        }
+
+                        RealPoint3d Point0 = new RealPoint3d();
+                        RealPoint3d Point1 = new RealPoint3d();
+                        if (surfaces_check_if_intersecting_internal(surface_index, second_surface_index, ref Point0, ref Point1))
+                        {
+                            if (!warning_posted)
+                            {
+                                Console.WriteLine("### ERROR found intersecting surfaces");
+                                warning_posted = true;
+                            }
+                            //Error geometry output
+                            hasErrors = true;
+                            List<int> ErrorIndices = new List<int>();
+                            Errors.Vertices.Add(Point0);
+                            ErrorIndices.Add(Errors.Vertices.Count);
+                            Errors.Vertices.Add(Point1);
+                            ErrorIndices.Add(Errors.Vertices.Count);
+                            Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                            {
+                                Type = ErrorGeometryBuilder.error_geometry_type.intersectingsurface,
+                                Indices = ErrorIndices
+                            });
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
         
         public RealPlane3d plane_get_equation_parameters(int plane_index)
@@ -495,14 +681,23 @@ namespace TagTool.Commands.CollisionModels
                 {
                     if (!warning_posted)
                     {
-                        Console.WriteLine("###WARNING Overlapping surfaces found!");
-                        if (debug)
+                        Console.WriteLine("###ERROR Overlapping surfaces found!");
+                        foreach (int surface_index in plane_matched_surface_array.surface_array)
                         {
-                            foreach (int surface_index in plane_matched_surface_array.surface_array)
+                            int abs_surface_index = surface_index & 0x7FFFFFFF;
+                            //Error geometry output
+                            hasErrors = true;
+                            List<int> ErrorIndices = new List<int>();
+                            foreach (var vert in surface_get_vertices(abs_surface_index))
                             {
-                                int abs_surface_index = surface_index & 0x7FFFFFFF;
-                                surface_print_vertices(abs_surface_index);
+                                Errors.Vertices.Add(vert);
+                                ErrorIndices.Add(Errors.Vertices.Count);
                             }
+                            Errors.Geometry.Add(new ErrorGeometryBuilder.error_geometry
+                            {
+                                Type = ErrorGeometryBuilder.error_geometry_type.overlappingsurface,
+                                Indices = ErrorIndices
+                            });
                         }
                         warning_posted = true;
                     }
@@ -609,13 +804,12 @@ namespace TagTool.Commands.CollisionModels
             return plane_fit;
         }
 
-        void surface_print_vertices(int surface_index)
+        List<RealPoint3d> surface_get_vertices(int surface_index)
         {
             Surface surface_block = Bsp.Surfaces[surface_index];
             int first_Edge_index = surface_block.FirstEdge;
             int current_edge_index = surface_block.FirstEdge;
             List<RealPoint3d> vertexlist = new List<RealPoint3d>();
-            Console.WriteLine($"Surface {surface_index}");
             do
             {
                 Edge edge_block = Bsp.Edges[current_edge_index];
@@ -631,7 +825,7 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
             while (current_edge_index != first_Edge_index);
-            debug_print_vertices(vertexlist);
+            return vertexlist;
         }
 
         public void debug_print_vertices(List<RealPoint3d> vertexlist)
@@ -685,7 +879,7 @@ namespace TagTool.Commands.CollisionModels
                             Bsp.Leaves[leaf_index].FirstBsp2dReference = (uint)bsp2drefindex;
 
                         //not 100% sure what this is checking
-                        bool plane_index_negative = plane_index < 0;
+                        bool plane_index_negative = (plane_index & 0x8000) > 0;
                         int plane_mirror_check = plane_projection_parameter_greater_than_0 != plane_index_negative ? 1 : 0;
 
                         int bsp2dnodeindex = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, plane_matched_surface_array);
@@ -1249,7 +1443,7 @@ namespace TagTool.Commands.CollisionModels
             }
         }
 
-        public RealPoint2d vertex_get_projection_relevant_coords(Vertex vertex_block, int plane_projection_axis, int plane_mirror_check)
+        public RealPoint2d vertex_get_projection_relevant_coords(RealPoint3d vertex_block, int plane_projection_axis, int plane_mirror_check)
         {
             //plane mirror check = "projection_sign"
             RealPoint2d relevant_coords = new RealPoint2d();
@@ -1260,25 +1454,25 @@ namespace TagTool.Commands.CollisionModels
             switch (vertex_coord_A)
             {
                 case 0:
-                    relevant_coords.X = vertex_block.Point.X;
+                    relevant_coords.X = vertex_block.X;
                     break;
                 case 1:
-                    relevant_coords.X = vertex_block.Point.Y;
+                    relevant_coords.X = vertex_block.Y;
                     break;
                 case 2:
-                    relevant_coords.X = vertex_block.Point.Z;
+                    relevant_coords.X = vertex_block.Z;
                     break;
             }
             switch (vertex_coord_B)
             {
                 case 0:
-                    relevant_coords.Y = vertex_block.Point.X;
+                    relevant_coords.Y = vertex_block.X;
                     break;
                 case 1:
-                    relevant_coords.Y = vertex_block.Point.Y;
+                    relevant_coords.Y = vertex_block.Y;
                     break;
                 case 2:
-                    relevant_coords.Y = vertex_block.Point.Z;
+                    relevant_coords.Y = vertex_block.Z;
                     break;
             }
             return relevant_coords;
@@ -1301,7 +1495,7 @@ namespace TagTool.Commands.CollisionModels
                 else
                     edge_vertex = Bsp.Vertices[surface_edge_block.StartVertex];
 
-                RealPoint2d relevant_coords = vertex_get_projection_relevant_coords(edge_vertex, plane_projection_axis, plane_mirror_check);
+                RealPoint2d relevant_coords = vertex_get_projection_relevant_coords(edge_vertex.Point, plane_projection_axis, plane_mirror_check);
                 pointlist.Add(relevant_coords);
 
                 double plane_equation_vertex_input = bsp2dnodeblock.Plane.I * relevant_coords.X + bsp2dnodeblock.Plane.J * relevant_coords.Y - bsp2dnodeblock.Plane.D;
@@ -1549,13 +1743,13 @@ namespace TagTool.Commands.CollisionModels
                     RealPoint2d Coords2;
                     if (surface_edge_block.RightSurface == surface_index)
                     {
-                        Coords1 = vertex_get_projection_relevant_coords(end_vertex, plane_projection_axis, plane_mirror_check);
-                        Coords2 = vertex_get_projection_relevant_coords(start_vertex, plane_projection_axis, plane_mirror_check);
+                        Coords1 = vertex_get_projection_relevant_coords(end_vertex.Point, plane_projection_axis, plane_mirror_check);
+                        Coords2 = vertex_get_projection_relevant_coords(start_vertex.Point, plane_projection_axis, plane_mirror_check);
                     }
                     else
                     {
-                        Coords2 = vertex_get_projection_relevant_coords(end_vertex, plane_projection_axis, plane_mirror_check);
-                        Coords1 = vertex_get_projection_relevant_coords(start_vertex, plane_projection_axis, plane_mirror_check);
+                        Coords2 = vertex_get_projection_relevant_coords(end_vertex.Point, plane_projection_axis, plane_mirror_check);
+                        Coords1 = vertex_get_projection_relevant_coords(start_vertex.Point, plane_projection_axis, plane_mirror_check);
                     }
 
                     Bsp2dNode current_bsp2dnode_block = generate_bsp2d_plane_parameters(Coords1, Coords2);
@@ -1995,6 +2189,5 @@ namespace TagTool.Commands.CollisionModels
                 return node_index;
             return back_child_node_index;
         }
-
     }
 }

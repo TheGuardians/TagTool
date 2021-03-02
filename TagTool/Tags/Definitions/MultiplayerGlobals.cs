@@ -63,10 +63,10 @@ namespace TagTool.Tags.Definitions
 				{
                     [TagField(Flags = Label)]
                     public StringId Name;
-                    public List<Permuation> Permuations;
+                    public List<Permutation> Permutations;
 
                     [TagStructure(Size = 0x1C)]
-                    public class Permuation : TagStructure
+                    public class Permutation : TagStructure
 					{
                         [TagField(Flags = Label)]
                         public StringId Name;

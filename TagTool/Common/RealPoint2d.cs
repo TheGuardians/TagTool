@@ -17,6 +17,24 @@ namespace TagTool.Common
             Y = y;
         }
 
+        public static RealPoint2d operator +(RealPoint2d a, RealPoint2d b) =>
+            new RealPoint2d(a.X + b.X, a.Y + b.Y);
+
+        public static RealPoint2d operator +(RealPoint2d a, float b) =>
+            new RealPoint2d(a.X + b, a.Y + b);
+
+        public static RealPoint2d operator +(float a, RealPoint2d b) =>
+            new RealPoint2d(a + b.X, a + b.Y);
+
+        public static RealPoint2d operator -(RealPoint2d a, RealPoint2d b) =>
+            new RealPoint2d(a.X - b.X, a.Y - b.Y);
+
+        public static RealPoint2d operator -(RealPoint2d a, float b) =>
+            new RealPoint2d(a.X - b, a.Y - b);
+
+        public static RealPoint2d operator -(float a, RealPoint2d b) =>
+            new RealPoint2d(a - b.X, a - b.Y);
+
         public bool Equals(RealPoint2d other) =>
             (X == other.X) &&
             (Y == other.Y);
