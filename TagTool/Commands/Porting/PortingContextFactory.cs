@@ -62,11 +62,6 @@ namespace TagTool.Commands.Porting
                     var portTagCommand = new PortTagGen2Command(hoCache, gen2cache);
                     context.AddCommand(portTagCommand);
                 }
-                else if (portingCache is GameCacheGen1 gen1cache)
-                {
-                    var portTagCommand = new PortTagGen1Command(hoCache, gen1cache);
-                    context.AddCommand(portTagCommand);
-                }
             }
         }
     }

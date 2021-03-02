@@ -17,7 +17,6 @@ namespace TagTool.Cache.Gen1
         public Gen1ResourceCacheHeader Header;
         public List<Gen1ResourceTableEntry> ResourceTable;
         public GameCacheGen1 Cache;
-        public string path;
 
         public enum Gen1ResourceCacheType : uint
         {
@@ -46,6 +45,7 @@ namespace TagTool.Cache.Gen1
             [TagField(Flags = TagFieldFlags.Runtime)]
             public string ResourceName = "";
         }
+
 
         public ResourceCacheGen1(GameCacheGen1 cache, string path)
         {
@@ -79,34 +79,5 @@ namespace TagTool.Cache.Gen1
                 }
             }
         }
-
-        public byte[] GetTagResource(int size, int offset)
-        {
-
-            if (size == 0 || offset == 0)
-            {
-                return null;
-            }
-
-            byte[] resource = new byte[size];
-
-            using (var stream = File.OpenRead(path))
-            {
-                stream.Seek(offset, SeekOrigin.Begin);
-                stream.Read(resource, 0, resource.Length);
-            }
-
-            return resource;
-        }
-
-        public bool IsResourceValid(ResourceData tagResource)
-        {
-            if (tagResource == null || tagResource.ResourceTypeIndex == -1)
-                return false;
-            else
-                return true;
-        }
-
-
     }
 }
