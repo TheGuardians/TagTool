@@ -263,10 +263,7 @@ namespace TagTool.Tags.Definitions
             public List<AlienScoutPhysics> AlienScout;
             public List<AlienFighterPhysics> AlienFighter;
             public List<TurretPhysics> Turret;
-
-            [TagField(Flags = Padding, Length = 12)]
-            public byte[] Unused = new byte[12]; // tag_block
-
+            public List<VehicleMantis> Mantis;
             public List<VtolPhysics> Vtol;
             public List<ChopperPhysics> Chopper;
             public List<GuardianPhysics> Guardian;
@@ -380,14 +377,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4C)]
         public class HumanPlanePhysics : TagStructure
         {
-            public float MaximumForwardSpeed;
-            public float MaximumReverseSpeed;
-            public float SpeedAcceleration;
-            public float SpeedDeceleration;
-            public float MaximumLeftSlide;
-            public float MaximumRightSlide;
-            public float SlideAcceleration;
-            public float SlideDeceleration;
+            public VehicleVelocityControl VelocityControl;
             public float MaximumUpRise;
             public float MaximumDownRise;
             public float RiseAcceleration;
@@ -421,15 +411,7 @@ namespace TagTool.Tags.Definitions
         public class AlienScoutPhysics : TagStructure
         {
             public VehicleSteeringControl Steering;
-
-            public float MaximumForwardSpeed;
-            public float MaximumReverseSpeed;
-            public float SpeedAcceleration;
-            public float SpeedDeceleration;
-            public float MaximumLeftSlide;
-            public float MaximumRightSlide;
-            public float SlideAcceleration;
-            public float SlideDeceleration;
+            public VehicleVelocityControl VelocityControl;
 
             public VehicleScoutPhysicsFlags Flags;
 
@@ -454,15 +436,8 @@ namespace TagTool.Tags.Definitions
         {
             public VehicleSteeringControl Steering;
             public VehicleTurningControl Turning;
+            public VehicleVelocityControl VelocityControl;
 
-            public float MaximumForwardSpeed;
-            public float MaximumReverseSpeed;
-            public float SpeedAcceleration;
-            public float SpeedDeceleration;
-            public float MaximumLeftSlide;
-            public float MaximumRightSlide;
-            public float SlideAcceleration;
-            public float SlideDeceleration;
             public float SlideAccelAgainstDirection;
             public float FlyingTorqueScale;
             public RealEulerAngles2d FixedGunOffset;
@@ -526,12 +501,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x70)]
         public class ChopperPhysics : TagStructure
         {
-            public Angle SteeringOverdampenCuspAngle;
-            public float SteeringOverdampenExponent;
-
-            public Angle MaximumLeftTurn;
-            public Angle MaximumRightTurnNegative;
-            public Angle TurnRate;
+            public VehicleSteeringControl SteeringControl;
+            public VehicleTurningControl TurningControl;
 
             public EnginePhysics Engine;
 
@@ -554,16 +525,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x030)]
         public class GuardianPhysics : TagStructure
         {
-            public Angle OverdampenCuspAngle;
-            public float OverdampenExponent;
-            public float MaximumForwardSpeed;
-            public float MaximumReverseSpeed;
-            public float SpeedAcceleration;
-            public float SpeedDeceleration;
-            public float MaximumLeftSlide;
-            public float MaximumRightSlide;
-            public float SlideAcceleration;
-            public float SlideDeceleration;
+            public VehicleSteeringControl SteeringControl;
+            public VehicleVelocityControl VelocityControl;
             public float TorqueScale;
             public float AntiGravityForceZOffset;
         }
@@ -923,7 +886,6 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public float OverdampenCuspAngleOld;
-
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public Angle OverdampenCuspAngleNew;
 
@@ -943,6 +905,110 @@ namespace TagTool.Tags.Definitions
             public float MaximumLeftTurn;
             public float MaximumRightTurn;
             public float TurnRate;
+        }
+
+        [TagStructure(Size = 0x20)]
+        public class VehicleVelocityControl : TagStructure
+        {
+            public float MaximumForwardSpeed;
+            public float MaximumReverseSpeed;
+            public float SpeedAcceleration;
+            public float SpeedDeceleration;
+            public float MaximumLeftSlide;
+            public float MaximumRightSlide;
+            public float SlideAcceleration;
+            public float SlideDeceleration;
+        }
+
+        [TagStructure(Size = 0xAC)]
+        public class VehicleMantis : TagStructure
+        {
+            public VehicleSteeringControl SteeringContol;
+            public VehicleTurningControl TurningControl;
+            public VehicleVelocityControl VelocityControl;
+            public WalkerPhysicsDefinition WalkerPhysics;
+        }
+
+        [TagStructure(Size = 0x78)]
+        public class WalkerPhysicsDefinition : TagStructure
+        {
+            public RealVector3d MaximumLegMotion;
+            public float MaximumTurn;
+
+            public List<WalkerPhysicsLeg> Legs;
+
+            public float LegApexDraction;
+            public float LiftExponent;
+            public float DropExponent;
+            public RealVector3d ObjectSpacePivotPosition;
+            public float WalkCyclePause;
+
+            public short StablePlantedLegs;
+            [TagField(Flags = Padding, Length = 0x2)]
+            public byte UnusedPadding;
+
+            public float TimeWithoutPlantBuffer;
+            public float NotAlongUpGravityScale;
+
+            public float SpeedAccelerationLimit;
+            public float SpeedAccelerationMatchScale;
+            public float SlideAccelerationLimit;
+            public float SlideAccelerationMatchScale;
+            public float TurnAccelerationLimit;
+            public float TurnAccelerationMatchScale;
+
+            public float JumpSetTime;
+            public float JumpSetInterpolationFraction;
+            public float JumpLeapTime;
+            public float JumpRecoveryTime;
+            public float JumpRecoveryFraction;
+            public float JumpLegSetDistance;
+            public float JumpLegDistance;
+        }
+
+        [TagStructure(Size = 0xA0)]
+        public class WalkerPhysicsLeg : TagStructure
+        {
+            [Flags]
+            public enum LegFlags : int
+            {
+                None,
+                ContrainedPlant = 1 << 0,
+            }
+
+            public byte LegGroup;
+            public byte LegSide;
+            public byte LegSideOrder;
+            public byte Valid;
+
+            public StringId HipNodeAName;
+            public StringId HipNodeBName;
+            public StringId KneeNodeAName;
+            public StringId KneeNodeBName;
+            public StringId FootMarkerName;
+
+            [TagField(Flags = Padding, Length = 0x3C)]
+            public byte[] UnusedPadding;
+
+            public LegFlags Flags;
+
+            public RealVector3d RuntimeInitialOriginToHipOffset;
+            public RealVector3d RuntimePivotCenterToHipOffset;
+            public float RuntimeUpperLegLength;
+            public float RuntimeLowerLegLength;
+            public short RuntimeHipNodeAIndex;
+            public short RuntimeHipNodeBIndex;
+            public short RuntimeKneeNodeAIndex;
+            public short RuntimeKneeNodeBIndex;
+            public short RuntimeFootMarkerGroupIndex;
+            public short RuntimeFootNodeIndex;
+            public short RuntimeHipNodeIndex;
+            public short RuntimeKneeNodeIndex;
+
+            public RealVector3d PlantConstraintPosition;
+
+            [TagField(Flags = Padding, Length = 0xC)]
+            public byte[] UnusedPadding1;
         }
     }
 }
