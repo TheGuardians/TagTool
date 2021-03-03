@@ -85,7 +85,7 @@ namespace TagTool.Commands.RenderModels
 			{
 				builder.BeginRegion(region.Name);
 
-				string[] altconventions = { ":", "_" };
+				string[] altconventions = { ":", "-" };
 
 				var regionName = Cache.StringTable.GetString(region.Name);
 
@@ -111,8 +111,7 @@ namespace TagTool.Commands.RenderModels
                         //quick fix to allow simple import of single mesh objects
                         if (scene.Meshes.Count == 1 && Definition.Regions.Count == 1 && Definition.Regions[0].Permutations.Count == 1)
                         {
-                            Console.WriteLine($"###WARNING: No mesh(es) found for region '{regionName}' permutation '{permName}'");
-                            Console.WriteLine($"###Only one mesh/region/permutation is present, so importing anyways!");
+                            Console.WriteLine($"Importing one mesh for sole region|permutation '{regionName}'|'{permName}'");
                             permMeshes.Add(scene.Meshes[0]);
                         }
                         else
