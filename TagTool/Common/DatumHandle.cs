@@ -71,17 +71,17 @@ namespace TagTool.Common
 
             if (args.Count != 2)
             {
-                error = $"{args.Count} arguments supplied; should be 4";
+                error = $"ERROR: {args.Count} arguments supplied; should be 4";
                 return false;
             }
             else if (!ushort.TryParse(args[0], out ushort salt))
             {
-                error = $"Unable to parse \"{args[0]}\" (salt) as `ushort`.";
+                error = $"ERROR: Unable to parse \"{args[0]}\" (salt) as `ushort`.";
                 return false;
             }
             else if (!ushort.TryParse(args[1], out ushort index))
             {
-                error = $"Unable to parse \"{args[1]}\" (index) as `ushort`.";
+                error = $"ERROR: Unable to parse \"{args[1]}\" (index) as `ushort`.";
                 return false;
             }
             else

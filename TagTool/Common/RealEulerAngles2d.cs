@@ -63,17 +63,17 @@ namespace TagTool.Common
             result = null;
             if (args.Count != 2)
             {
-                error = $"{args.Count} arguments supplied; should be 2";
+                error = $"ERROR: {args.Count} arguments supplied; should be 2";
                 return false;
             }
             else if (!float.TryParse(args[0], out float yaw))
             {
-                error = $"Unable to parse \"{args[0]}\" (yaw) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[0]}\" (yaw) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[1], out float pitch))
             {
-                error = $"Unable to parse \"{args[1]}\" (pitch) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[1]}\" (pitch) as `float`.";
                 return false;
             }
             else

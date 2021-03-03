@@ -43,17 +43,17 @@ namespace TagTool.Common
 
             if (args.Count != 2)
             {
-                error = $"{args.Count} arguments supplied; should be 4";
+                error = $"ERROR: {args.Count} arguments supplied; should be 4";
                 return false;
             }
             else if (!short.TryParse(args[0], out short x))
             {
-                error = $"Unable to parse \"{args[0]}\" (x) as `short`.";
+                error = $"ERROR: Unable to parse \"{args[0]}\" (x) as `short`.";
                 return false;
             }
             else if (!short.TryParse(args[1], out short y))
             {
-                error = $"Unable to parse \"{args[1]}\" (y) as `short`.";
+                error = $"ERROR: Unable to parse \"{args[1]}\" (y) as `short`.";
                 return false;
             }
             else

@@ -64,7 +64,7 @@ namespace TagTool.Common
 
             if (argCount * 2 != args.Count)
             {
-                error = $"{args.Count} arguments supplied; should be {argCount * 2}";
+                error = $"ERROR: {args.Count} arguments supplied; should be {argCount * 2}";
                 return false;
             }
 
@@ -72,7 +72,7 @@ namespace TagTool.Common
             var max = SetFieldCommand.ParseArgs(cache, argType, null, args.Skip(argCount).Take(argCount).ToList());
             if (min.Equals(false) || max.Equals(false))
             {
-                error = $"Invalid value parsed.";
+                error = $"ERROR: Invalid value parsed.";
                 return false;
             }
 

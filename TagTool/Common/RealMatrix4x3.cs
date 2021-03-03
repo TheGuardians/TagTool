@@ -135,67 +135,67 @@ namespace TagTool.Common
 
             if (args.Count != 12)
             {
-                error = $"{args.Count} arguments supplied; should be 12";
+                error = $"ERROR: {args.Count} arguments supplied; should be 12";
                 return false;
             }
             else if (!float.TryParse(args[0], out float M11))
             {
-                error = $"Unable to parse \"{args[0]}\" (M11) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[0]}\" (M11) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[1], out float M12))
             {
-                error = $"Unable to parse \"{args[1]}\" (M12) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[1]}\" (M12) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[2], out float M13))
             {
-                error = $"Unable to parse \"{args[2]}\" (M13) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[2]}\" (M13) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[3], out float M21))
             {
-                error = $"Unable to parse \"{args[3]}\" (M21) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[3]}\" (M21) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[4], out float M22))
             {
-                error = $"Unable to parse \"{args[4]}\" (M22) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[4]}\" (M22) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[5], out float M23))
             {
-                error = $"Unable to parse \"{args[5]}\" (M23) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[5]}\" (M23) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[6], out float M31))
             {
-                error = $"Unable to parse \"{args[6]}\" (M31) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[6]}\" (M31) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[7], out float M32))
             {
-                error = $"Unable to parse \"{args[7]}\" (M32) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[7]}\" (M32) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[8], out float M33))
             {
-                error = $"Unable to parse \"{args[8]}\" (M33) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[8]}\" (M33) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[9], out float M41))
             {
-                error = $"Unable to parse \"{args[9]}\" (M41) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[9]}\" (M41) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[10], out float M42))
             {
-                error = $"Unable to parse \"{args[10]}\" (M42) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[10]}\" (M42) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[11], out float M43))
             {
-                error = $"Unable to parse \"{args[11]}\" (M43) as `float`.";
+                error = $"ERROR: Unable to parse \"{args[11]}\" (M43) as `float`.";
                 return false;
             }
             else
