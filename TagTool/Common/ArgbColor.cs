@@ -60,27 +60,27 @@ namespace TagTool.Common
             result = null;
             if (args.Count != 4)
             {
-                error = $"ERROR: {args.Count} arguments supplied; should be 4";
+                error = $"{args.Count} arguments supplied; should be 4";
                 return false;
             }
             else if (!byte.TryParse(args[0], out byte a))
             {
-                error = $"ERROR: Unable to parse \"{args[0]}\" (a) as `byte`.";
+                error = $"Unable to parse \"{args[0]}\" (a) as `byte`.";
                 return false;
             }
             else if (!byte.TryParse(args[1], out byte r))
             {
-                error = $"ERROR: Unable to parse \"{args[1]}\" (r) as `byte`.";
+                error = $"Unable to parse \"{args[1]}\" (r) as `byte`.";
                 return false;
             }
             else if (!byte.TryParse(args[2], out byte g))
             {
-                error = $"ERROR: Unable to parse \"{args[2]}\" (g) as `byte`.";
+                error = $"Unable to parse \"{args[2]}\" (g) as `byte`.";
                 return false;
             }
             else if (!byte.TryParse(args[3], out byte b))
             {
-                error = $"ERROR: Unable to parse \"{args[3]}\" (b) as `byte`.";
+                error = $"Unable to parse \"{args[3]}\" (b) as `byte`.";
                 return false;
             }
             else

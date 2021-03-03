@@ -62,17 +62,17 @@ namespace TagTool.Common
             result = null;
             if (args.Count != 2)
             {
-                error = $"ERROR: {args.Count} arguments supplied; should be 2";
+                error = $"{args.Count} arguments supplied; should be 2";
                 return false;
             }
             else if (!float.TryParse(args[0], out float x))
             {
-                error = $"ERROR: Unable to parse \"{args[0]}\" (x) as `float`.";
+                error = $"Unable to parse \"{args[0]}\" (x) as `float`.";
                 return false;
             }
             else if (!float.TryParse(args[1], out float y))
             {
-                error = $"ERROR: Unable to parse \"{args[1]}\" (y) as `float`.";
+                error = $"Unable to parse \"{args[1]}\" (y) as `float`.";
                 return false;
             }
             else

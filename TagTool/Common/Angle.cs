@@ -75,12 +75,12 @@ namespace TagTool.Common
             result = null;
             if (args.Count != 1)
             {
-                error = $"ERROR: {args.Count} arguments supplied; should be 1";
+                error = $"{args.Count} arguments supplied; should be 1";
                 return false;
             }
             else if (!float.TryParse(args[0], out float _value))
             {
-                error = $"ERROR: Unable to parse \"{args[0]}\" as `float`.";
+                error = $"Unable to parse \"{args[0]}\" as `float`.";
                 return false;
             }
             else
