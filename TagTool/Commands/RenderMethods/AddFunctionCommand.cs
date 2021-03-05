@@ -19,10 +19,10 @@ namespace TagTool.Commands.RenderMethods
                  "Binds a function to animate the specified parameter in this render method.",
 
                  "AddFunction <parameter> <type> <function index>",
-                 "Binds a function to animate the specified parameter in this render method." +
-                 "Parameter: Name of the parameter to bind the function to." +
-                 "Type: Type of parameter - Real or Texture (Int and Bool are not supported)." +
-                 "Function Index: Index of the functions block that you want the parameter to use."/* +
+                 "Binds a function to animate the specified parameter in this render method.\n" +
+                 "Parameter: Name of the parameter to bind the function to.\n" +
+                 "Type: Type of parameter - Real or Texture (Int and Bool are not supported).\n" +
+                 "Function Index: Index of the functions block that you want the parameter to use.\n"/* +
                  "Function Types: " + string.Join(", ", Enum.GetNames(typeof(RenderMethod.ShaderFunction.FunctionType)))*/)
         {
             Cache = cache;
