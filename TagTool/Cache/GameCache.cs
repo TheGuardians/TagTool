@@ -17,6 +17,7 @@ namespace TagTool.Cache
     {
         public string DisplayName = "default";
         public CacheVersion Version;
+        public CachePlatform Platform;
         public EndianFormat Endianness;
         public TagSerializer Serializer;
         public TagDeserializer Deserializer;

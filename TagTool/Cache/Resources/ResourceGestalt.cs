@@ -6,7 +6,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache.Resources
 {
-    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214, MaxVersion = CacheVersion.HaloReach)]
     public class ResourceGestalt : TagStructure
 	{
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]

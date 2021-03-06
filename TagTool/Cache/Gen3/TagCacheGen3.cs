@@ -10,49 +10,46 @@ using System.Diagnostics;
 
 namespace TagTool.Cache.Gen3
 {
-    [TagStructure(Size = 0x28, Platform = CachePlatform.Only32Bit)]
-    [TagStructure(Size = 0x50, Platform = CachePlatform.Only64Bit)]
+    [TagStructure(Size = 0x28, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x50, Platform = CachePlatform.MCC)]
     public class TagCacheGen3Header
     {
         public int TagGroupCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag TagGroupSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
-        public uint TagGroupsAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public ulong TagGroupsAddress64;
+
+        public PlatformUnsignedValue TagGroupsAddress;
 
         public int TagInstancesCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag TagInstancesSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
-        public uint TagInstancesAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public ulong TagInstancesAddress64;
+
+        public PlatformUnsignedValue TagInstancesAddress;
 
         public int GlobalIndicesCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag GlobalIndicesSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
-        public uint GlobalIndicesAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public ulong GlobalIndicesAddress64;
+
+        public PlatformUnsignedValue GlobalIndicesAddress;
+
 
         public int InteropsCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public Tag InteropsSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
-        public uint InteropsAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public ulong InteropsAddress64;
 
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
+        public Tag InteropsSignature = new Tag("343i");
+
+        public PlatformUnsignedValue InteropAddress;
+
+        [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown1;
 
         public int CRC;
         public Tag Signature = new Tag("tags");
 
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown2;
     }
 
@@ -110,9 +107,11 @@ namespace TagTool.Cache.Gen3
             return new CachedTagGen3(-1, new TagGroupGen3(), null);
         }
 
-        public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable)
+        public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, CachePlatform platform)
         {
             Version = baseMapFile.Version;
+            CachePlatform = baseMapFile.CachePlatform;
+
             TagDefinitions = new TagDefinitionsGen3();
             Groups = new List<TagGroupGen3>();
             Instances = new List<CachedTagGen3>();
@@ -122,24 +121,30 @@ namespace TagTool.Cache.Gen3
             var tagNamesHeader = gen3Header.GetTagNameHeader();
             var tagMemoryHeader = gen3Header.GetTagMemoryHeader();
 
-            switch (Version)
+
+            if(CachePlatform == CachePlatform.Original)
             {
-                case CacheVersion.Halo3Beta:
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                    TagsKey = "";
-                    break;
-                case CacheVersion.HaloReach:
-                case CacheVersion.Halo4:
-                    TagsKey = "LetsAllPlayNice!";
-                    break;
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Beta:
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                        TagsKey = "";
+                        break;
+                    case CacheVersion.HaloReach:
+                    case CacheVersion.Halo4:
+                        TagsKey = "LetsAllPlayNice!";
+                        break;
+                }
             }
+            else
+                TagsKey = "";
 
             uint sectionOffset;
 
             uint tagNamesOffsetsTableOffset;
             uint tagNamesBufferOffset;
-            ulong addressMask;
+            ulong tagDataSectionOffset;
 
             if (Version > CacheVersion.Halo3Beta)
             {
@@ -153,39 +158,28 @@ namespace TagTool.Cache.Gen3
                 tagNamesOffsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, tagNamesHeader.TagNameIndicesOffset);
                 tagNamesBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, tagNamesHeader.TagNamesBufferOffset);
 
-                addressMask = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                (gen3Header.VirtualBaseAddress64 - (ulong)sectionOffset) :
-                (ulong)(gen3Header.VirtualBaseAddress32 - sectionOffset);
+                tagDataSectionOffset = gen3Header.VirtualBaseAddress.Value - sectionOffset;
             }
             else
             {
                 tagNamesOffsetsTableOffset = tagNamesHeader.TagNameIndicesOffset;
                 tagNamesBufferOffset = tagNamesHeader.TagNamesBufferOffset;
-                addressMask = gen3Header.VirtualBaseAddress32 - tagMemoryHeader.MemoryBufferOffset;
+                tagDataSectionOffset = gen3Header.VirtualBaseAddress.Get32BitValue() - tagMemoryHeader.MemoryBufferOffset;
             }
 
-            var tagTableHeaderOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                (gen3Header.TagTableHeaderOffset64 - addressMask) :
-                ((ulong)gen3Header.TagTableHeaderOffset32 - addressMask);
+            var tagTableHeaderOffset = gen3Header.TagTableHeaderOffset.Value - tagDataSectionOffset;
 
             reader.SeekTo((long)tagTableHeaderOffset);
 
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(baseMapFile.Version);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
 
             Header = deserializer.Deserialize<TagCacheGen3Header>(dataContext);
 
-            var tagGroupsOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                Header.TagGroupsAddress64 - addressMask :
-                (ulong)Header.TagGroupsAddress32 - addressMask;
+            var tagGroupsOffset = Header.TagGroupsAddress.Value - tagDataSectionOffset;
+            var tagInstancesOffset = Header.TagInstancesAddress.Value - tagDataSectionOffset;
+            var globalIndicesOffset = Header.GlobalIndicesAddress.Value - tagDataSectionOffset;
 
-            var tagInstancesOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                Header.TagInstancesAddress64 - addressMask :
-                (ulong)Header.TagInstancesAddress32 - addressMask;
-
-            var globalIndicesOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                Header.GlobalIndicesAddress64 - addressMask :
-                (ulong)Header.GlobalIndicesAddress32 - addressMask;
 
             #region Read Tag Groups
 
@@ -217,9 +211,17 @@ namespace TagTool.Cache.Gen3
                 var tagGroup = groupIndex == -1 ? new TagGroupGen3() : Groups[groupIndex];
                 uint ID = (uint)((reader.ReadInt16() << 16) | i);
 
-                var offset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                    (uint)((ulong)gen3Header.SectionTable.SectionAddressToOffsets[2] + (ulong)gen3Header.SectionTable.Sections[2].Offset + (((ulong)reader.ReadUInt32() * 4) - (gen3Header.VirtualBaseAddress64 - 0x50000000))) :
-                    (uint)(reader.ReadUInt32() - addressMask);
+                uint offset;
+
+                if(platform == CachePlatform.MCC)
+                {
+                    ulong tagAddress = reader.ReadUInt32();
+                    offset = (uint)((tagAddress << 2) - tagDataSectionOffset);
+                }
+                else
+                {
+                    offset = (uint)(reader.ReadUInt32() - tagDataSectionOffset);
+                }
 
                 CachedTagGen3 tag = new CachedTagGen3(groupIndex, ID, offset, i, tagGroup);
                 Instances.Add(tag);

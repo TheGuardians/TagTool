@@ -49,9 +49,9 @@ namespace TagTool.Geometry
                 var resourceWriter = new EndianWriter(new MemoryStream(), EndianFormat.LittleEndian);
                 var dataContext = new DataSerializationContext(null, resourceWriter);
                 var block = dataContext.CreateBlock();
-                var info = TagStructure.GetTagStructureInfo(resource.GetType(), CacheVersion.HaloOnline235640);
+                var info = TagStructure.GetTagStructureInfo(resource.GetType(), CacheVersion.HaloOnline235640, CachePlatform.Original);
 
-                new TagSerializer(CacheVersion.HaloOnline235640).Serialize(dataContext, resource);
+                new TagSerializer(CacheVersion.HaloOnline235640, CachePlatform.Original).Serialize(dataContext, resource);
 
                 block.Stream.Position = 0;
                 outStream = block.Stream;

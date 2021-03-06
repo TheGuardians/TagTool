@@ -21,22 +21,23 @@ namespace TagTool.Cache
         public string VistaSharedTagCacheName;
         public FileInfo VistaSharedTagCacheFile;
         public GameCacheGen2 VistaSharedTagCache;
-
+        public ResourceCacheGen2 ResourceCacheGen2;
         public Dictionary<string, GameCacheGen2> ResourceCacheReferences = new Dictionary<string, GameCacheGen2>();
 
         public override TagCache TagCache => TagCacheGen2;
         public override StringTable StringTable => StringTableGen2;
 
-        public override ResourceCache ResourceCache => throw new NotImplementedException();
+        public override ResourceCache ResourceCache => ResourceCacheGen2;
 
         public GameCacheGen2(MapFile mapFile, FileInfo file)
         {
             BaseMapFile = mapFile;
             CacheFile = file;
             Version = BaseMapFile.Version;
+            Platform = BaseMapFile.CachePlatform;
             CacheFile = file;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             Endianness = BaseMapFile.EndianFormat;
             DisplayName = mapFile.Header.GetName() + ".map";
             Directory = file.Directory;
@@ -69,7 +70,7 @@ namespace TagTool.Cache
                         TagCacheGen2 = TagCacheGen2.Combine(TagCacheGen2, VistaSharedTagCache.TagCacheGen2);
             }
 
-            
+            ResourceCacheGen2 = new ResourceCacheGen2(this);
         }
 
         private bool LoadVistaSharedTagCache()

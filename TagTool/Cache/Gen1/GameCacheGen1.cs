@@ -36,9 +36,10 @@ namespace TagTool.Cache
             BaseMapFile = mapFile;
             CacheFile = file;
             Version = BaseMapFile.Version;
+            Platform = BaseMapFile.CachePlatform;
             CacheFile = file;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             Endianness = BaseMapFile.EndianFormat;
             DisplayName = mapFile.Header.GetName() + ".map";
             Directory = file.Directory;

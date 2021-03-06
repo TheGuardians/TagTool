@@ -58,7 +58,7 @@ namespace TagTool.Cache.Gen1
             using(var reader = new EndianReader(stream, cache.Endianness))
             {
                 var dataContext = new DataSerializationContext(reader);
-                var deserializer = new TagDeserializer(cache.Version);
+                var deserializer = new TagDeserializer(cache.Version, cache.Platform);
                 stream.Position = 0;
 
                 Header = deserializer.Deserialize<Gen1ResourceCacheHeader>(dataContext);

@@ -83,7 +83,7 @@ namespace TagTool.Tags.Definitions
 
         public List<ChangeColor> ChangeColors;
 
-        [TagField(Platform = CachePlatform.Xbox360)]
+        [TagField(Gen = CacheGeneration.Third)]
         public List<PredictedResource> PredictedResources;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -632,7 +632,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public GameObjectTypeHalo2 Halo2;
 
-        [TagField(Platform = CachePlatform.Xbox360)]
+        [TagField(Gen = CacheGeneration.Third)]
         public sbyte Unknown1;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
@@ -647,7 +647,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameObjectTypeHalo3Retail HaloReach;
 
-        [TagField(Platform = CachePlatform.OnlyPC | CachePlatform.Xbox)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public sbyte Unknown2;
     }
 

@@ -160,7 +160,7 @@ namespace TagTool.Commands.Editing
 
             if (isTagStructure)
             {
-				foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(elementType))
+				foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(elementType, Cache.Version, Cache.Platform))
 					{
 						var fieldType = tagFieldInfo.FieldType;
 

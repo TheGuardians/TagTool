@@ -33,7 +33,10 @@ namespace TagTool.Tags.Definitions
 
         public List<LanguageBlock> Languages;
 
-        public List<RuntimePermutationFlag> RuntimePermutationFlags;
+        /// <summary>
+        /// Bit vector
+        /// </summary>
+        public List<sbyte> RuntimePermutationFlags;
 
         public TagFunction Unknown2 = new TagFunction { Data = new byte[0] };
         public uint Unknown3;

@@ -25,7 +25,7 @@ namespace TagTool.Cache.ModPackages
             Package = package;
             Cache = cache;
             ExistingResources = new Dictionary<string, ResourcePage>();
-            ResourceCache = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, package.ResourcesStream);
+            ResourceCache = new ResourceCacheHaloOnline(package.PackageVersion, package.PackagePlatform, package.ResourcesStream);
         }
 
         public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location) => ResourceCache;

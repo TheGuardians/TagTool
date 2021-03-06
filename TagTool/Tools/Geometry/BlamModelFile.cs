@@ -63,7 +63,7 @@ namespace TagTool.Tools.Geometry
         public void SerializeToFile(EndianWriter writer)
         {
             var context = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708, CachePlatform.Original);
 
             writer.BaseStream.Position = Constants.HeaderSize;
             context.PointerOffset = Constants.HeaderSize;

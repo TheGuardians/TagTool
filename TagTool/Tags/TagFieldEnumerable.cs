@@ -73,26 +73,27 @@ namespace TagTool.Tags
 				// Ensure that fields are in declaration order - GetFields does NOT guarantee 
 				foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
 				{
-					var attr = TagStructure.GetTagFieldAttribute(type, field);
+					var attr = TagStructure.GetTagFieldAttribute(type, field, CacheVersion.Unknown, CachePlatform.All);
 
-                    if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version))
+                    if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version) && CacheVersionDetection.AttributeInPlatform(attr, Info.CachePlatform))
                     {
-                        CreateTagFieldInfo(field, attr, Info.Version, ref offset);
+                        CreateTagFieldInfo(field, attr, Info.Version, Info.CachePlatform, ref offset);
                     }
 				}
 			}
 		}
 
-		/// <summary>
-		/// Creates and adds a <see cref="Tags.TagFieldInfo"/> to the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
-		/// </summary>
-		/// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="Tags.TagFieldInfo"/> from.</param>
-		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="Tags.TagFieldInfo"/>.</param>
-		/// <param name="targetVersion">The target <see cref="CacheVersion"/> the <see cref="Tags.TagFieldInfo"/> belongs to.</param>
-		/// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
-		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, ref uint offset)
+        /// <summary>
+        /// Creates and adds a <see cref="Tags.TagFieldInfo"/> to the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
+        /// </summary>
+        /// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="Tags.TagFieldInfo"/> from.</param>
+        /// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="Tags.TagFieldInfo"/>.</param>
+        /// <param name="targetVersion">The target <see cref="CacheVersion"/> the <see cref="Tags.TagFieldInfo"/> belongs to.</param>
+        /// <param name="cachePlatform"></param>
+        /// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
+        private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform, ref uint offset)
 		{
-			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion);
+			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion, cachePlatform);
 
 			if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
 				throw new InvalidOperationException();

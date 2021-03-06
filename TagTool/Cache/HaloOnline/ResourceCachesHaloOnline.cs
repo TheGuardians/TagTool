@@ -52,7 +52,7 @@ namespace TagTool.Cache.HaloOnline
 
                 using (var stream = file.Open(FileMode.OpenOrCreate))
                 {
-                    resourceCache = new ResourceCacheHaloOnline(Cache.Version, stream);
+                    resourceCache = new ResourceCacheHaloOnline(Cache.Version, Cache.Platform, stream);
                 }
 
                 cache = new LoadedResourceCache

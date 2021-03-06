@@ -218,7 +218,7 @@ namespace TagTool.Cache.HaloOnline
             }
         }
 
-        private T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        private new T GetResourceDefinition<T>(TagResourceReference resourceReference)
         {
             return (T)GetResourceDefinition(resourceReference, typeof(T));
         }
@@ -241,7 +241,7 @@ namespace TagTool.Cache.HaloOnline
             using (var dataReader = new EndianReader(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
-                var deserializer = new ResourceDeserializer(Cache.Version);
+                var deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
                 // deserialize without access to the data
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
                 return deserializer.Deserialize(context, definitionType);
@@ -328,7 +328,7 @@ namespace TagTool.Cache.HaloOnline
             using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
-                var serializer = new ResourceSerializer(Cache.Version);
+                var serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
                 serializer.Serialize(context, resourceDefinition);
 
                 var data = dataStream.ToArray();

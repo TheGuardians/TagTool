@@ -5,10 +5,23 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
+    [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x44,  MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
     public class PlaybackParameter : TagStructure
 	{
+        /// <summary>
+        /// the distance below which this sound no longer gets louder
+        /// </summary>
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float MininumDistance; // world units
+
+        /// <summary>
+        /// the distance beyond which this sound is no longer audible
+        /// </summary>
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float MaximumDistance; // world units
+
         [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public FieldDisableFlagsValue FieldDisableFlags;
 
@@ -19,10 +32,13 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float MaximumBendPerSecondReach;
 
-
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public float DistanceA;
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public float DistanceB;
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public float DistanceC;
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public float DistanceD;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -35,23 +51,69 @@ namespace TagTool.Audio
         public float DistanceH;
 
 
+        /// <summary>
+        /// fraction of requests to play this sound that will be ignored (0 means always play.)
+        /// </summary>
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float SkipFraction;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float MaximumBendPerSecond;
+        public float MaximumBendPerSecond;  // cents
 
 
+        /// <summary>
+        /// these settings control random variation of volume and pitch.
+        ///  the second parameter gets clipped to the first.
+        /// </summary>
 
-        public float GainBase;
-        public float GainVariance;
+        /// <summary>
+        /// sound's random gain will start here
+        /// </summary>
+        public float GainBase;  // dB
+
+        /// <summary>
+        /// sound's gain will be randomly modulated within this range
+        /// </summary>
+        public float GainVariance; // dB
+
+        /// <summary>
+        /// the sound's pitch will be modulated randomly within this range.
+        /// </summary>
         public Bounds<short> RandomPitchBounds;
-        public Bounds<Angle> ConeAngleBounds;
+
+        /// <summary>
+        /// these settings allow sounds to be directional, fading as they turn away from the listener
+        /// </summary>
+        /// <summary>
+        /// within the cone defined by this angle and the sound's direction, the sound plays with a gain of 1.0.
+        /// </summary>
+        public Angle InnerConeAngle; // degrees
+
+        /// <summary>
+        /// outside the cone defined by this angle and the sound's direction, the sound plays with a gain of OUTER CONE GAIN. (0
+        /// means the sound does not attenuate with direction.)
+        /// </summary>
+        public Angle OuterConeAngle; // degrees
+
+        /// <summary>
+        /// the gain to use when the sound is directed away from the listener
+        /// </summary>
         public float OuterConeGain;
+
+        /// <summary>
+        /// NOTE: this will only apply when the sound is started via script
+        /// azimuth:
+        ///     0 => front
+        ///     90 => left
+        ///     180 => back
+        ///   
+        /// 270 => right
+        /// 
+        /// </summary>
         public FlagsValue Flags;
         public Angle Azimuth;
-        public float PositionalGain;
-        public float FirstPersonGain;
+        public float PositionalGain;    // dB
+        public float FirstPersonGain;    // dB
 
         [Flags]
         public enum FieldDisableFlagsValue : int

@@ -365,7 +365,7 @@ namespace TagTool.Commands.Tags
 
             private void VisitTagStructure(TagStructure tagStructure)
             {
-                foreach (var field in tagStructure.GetTagFieldEnumerable(_cache.Version))
+                foreach (var field in tagStructure.GetTagFieldEnumerable(_cache.Version, _cache.Platform))
                 {
                     var data = field.GetValue(tagStructure);
                     VisitData(data);

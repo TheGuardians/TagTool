@@ -171,7 +171,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
         public class Image : TagStructure
 		{
@@ -258,6 +259,11 @@ namespace TagTool.Tags.Definitions
             public int MipMapOffset;
             public int RasterizerTextureReference;
             public int RuntimeAddress;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public int Unknown30;
+            [TagField(Platform = CachePlatform.MCC)]
+            public int Unknown34;
         }
 
     }

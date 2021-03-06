@@ -32,7 +32,7 @@ namespace TagTool.Audio
             }
         }
 
-        public BlamSound(SampleRate sampleRate, EncodingValue encoding, Compression compression, uint sampleCount, byte[] data, int bitsPerSample)
+        public BlamSound(SampleRate sampleRate, EncodingValue encoding, Compression compression, uint sampleCount, byte[] data)
         {
             SampleRate = sampleRate;
             Encoding = encoding;

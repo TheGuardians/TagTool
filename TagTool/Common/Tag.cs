@@ -115,7 +115,7 @@ namespace TagTool.Common
             var structureType = cache.TagCache.TagDefinitions.GetTagDefinitionType(name);
             if (structureType != null)
             {
-                var attribute = TagStructure.GetTagStructureAttribute(structureType);
+                var attribute = TagStructure.GetTagStructureAttribute(structureType, cache.Version, cache.Platform);
                 return new Tag(attribute.Tag);
             }
             
@@ -157,7 +157,7 @@ namespace TagTool.Common
             
             if (structureType != null)
             {
-                var attribute = TagStructure.GetTagStructureAttribute(structureType);
+                var attribute = TagStructure.GetTagStructureAttribute(structureType, cache.Version, cache.Platform);
                 result = new Tag(attribute.Tag);
                 return true;
             }

@@ -34,6 +34,8 @@ namespace TagTool.Commands.Files
                 output.Directory.Create();
 
             CacheVersion version = CacheVersion.Halo3Retail;
+            CachePlatform cachePlatform = CachePlatform.Original;
+
             // todo: support little endian
             /*if (args.Count == 3)
             {
@@ -41,7 +43,7 @@ namespace TagTool.Commands.Files
                     version = tempVersion;
             }*/
 
-            Blf blf = new Blf(version);
+            Blf blf = new Blf(version, cachePlatform);
 
             using (var stream = file.OpenRead())
             using (var reader = new EndianReader(stream))

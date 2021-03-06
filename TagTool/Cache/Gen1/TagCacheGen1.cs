@@ -59,11 +59,14 @@ namespace TagTool.Cache.Gen1
         public TagCacheGen1(EndianReader reader, MapFile mapFile)
         {
             TagDefinitions = new TagDefinitionsGen1();
+            Version = mapFile.Version;
+            CachePlatform = mapFile.CachePlatform;
+
             var tagDataSectionOffset = (uint)mapFile.Header.GetTagTableHeaderOffset();
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(mapFile.Version);
+            var deserializer = new TagDeserializer(mapFile.Version, mapFile.CachePlatform);
             Header = deserializer.Deserialize<TagCacheGen1Header>(dataContext);
 
             if (mapFile.Version == CacheVersion.HaloXbox)
@@ -147,7 +150,7 @@ namespace TagTool.Cache.Gen1
 
             for (var i = 0u; i < sbspRefsCount; i++)
             {
-                uint sbspRefOffset = AddressToOffset(sbspRefsAddress + i * TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspsBlock), Version));
+                uint sbspRefOffset = AddressToOffset(sbspRefsAddress + i * TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspsBlock), Version, CachePlatform));
 
                 reader.BaseStream.Position = sbspRefOffset;
                 uint sbspHeaderOffset = reader.ReadUInt32();

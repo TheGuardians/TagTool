@@ -348,7 +348,7 @@ namespace TagTool.Commands.Modding
 
         private T ConvertStructure<T>(ModPackage modPack, T data) where T : TagStructure
         {
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), BaseCache.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), BaseCache.Version, BaseCache.Platform))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
 

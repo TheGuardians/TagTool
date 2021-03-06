@@ -74,7 +74,7 @@ namespace TagTool.Geometry
             //
 
             foreach(var clusterVisibility in geometry.MeshClusterVisibility)
-                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, clusterVisibility.MoppData);
+                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, clusterVisibility.MoppData);
 
             //
             // Port resource definition
@@ -285,7 +285,7 @@ namespace TagTool.Geometry
                         if (indexBuffer == null)
                             continue;
 
-                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, DestCache.Version, indexBuffer);
+                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, indexBuffer);
                     }
 
                     // create index buffers for decorators, gen3 didn't have them
@@ -428,7 +428,7 @@ namespace TagTool.Geometry
             //
 
             foreach (var clusterVisibility in geometry.MeshClusterVisibility)
-                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, clusterVisibility.MoppData);
+                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, clusterVisibility.MoppData);
 
             //
             // Port resource definition
@@ -523,7 +523,7 @@ namespace TagTool.Geometry
                         if (indexBuffer == null)
                             continue;
 
-                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, DestCache.Version, indexBuffer);
+                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, indexBuffer);
                     }
 
                     // create index buffers for decorators, gen3 didn't have them

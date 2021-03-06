@@ -149,7 +149,7 @@ namespace TagTool.Commands.Porting.Gen2
 
         private T ConvertStructure<T>(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
         {
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen2Cache.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen2Cache.Version, Gen2Cache.Platform))
             {
                 var attr = tagFieldInfo.Attribute;
                 if (!CacheVersionDetection.AttributeInCacheVersion(attr, Gen2Cache.Version))

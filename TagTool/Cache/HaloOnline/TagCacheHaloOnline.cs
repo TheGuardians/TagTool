@@ -43,10 +43,15 @@ namespace TagTool.Cache.HaloOnline
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
+
+            CachePlatform = CachePlatform.Original;
         }
 
         private void CreateTagCache(Stream stream)
         {
+            CachePlatform = CachePlatform.Original;
+            Version = CacheVersion.HaloOnline106708;
+
             TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
             {
                 TagTableOffset = 0x20,
@@ -55,7 +60,7 @@ namespace TagTool.Cache.HaloOnline
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(Version, CachePlatform);
             serializer.Serialize(dataContext, header);
             Header = header;
             stream.Position = 0;
@@ -66,7 +71,7 @@ namespace TagTool.Cache.HaloOnline
             // Read file header
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
 
             Header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
 
@@ -418,7 +423,7 @@ namespace TagTool.Cache.HaloOnline
             Header.TagCount = Tags.Count;
             writer.BaseStream.Position = 0;
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(Version, CachePlatform);
             serializer.Serialize(dataContext, Header);
         }
 

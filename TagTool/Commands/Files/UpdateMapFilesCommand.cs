@@ -66,6 +66,8 @@ namespace TagTool.Commands.Files
                             using (var reader = new EndianReader(stream))
                             {
                                 CacheVersion version = CacheVersion.Halo3Retail;
+                                CachePlatform platform = CachePlatform.Original;
+
                                 switch (reader.Length)
                                 {
                                     case 0x4e91:
@@ -77,7 +79,7 @@ namespace TagTool.Commands.Files
                                     default:
                                         throw new Exception("Unexpected map info file size");
                                 }
-                                mapInfo = new Blf(version);
+                                mapInfo = new Blf(version, platform);
                                 mapInfo.Read(reader);
                                 mapInfo.ConvertBlf(Cache.Version);
                             }
@@ -153,6 +155,8 @@ namespace TagTool.Commands.Files
                             using (var reader = new EndianReader(stream))
                             {
                                 CacheVersion version = CacheVersion.Halo3Retail;
+                                CachePlatform platform = CachePlatform.Original;
+
                                 switch (reader.Length)
                                 {
                                     case 0x4e91:
@@ -164,7 +168,7 @@ namespace TagTool.Commands.Files
                                     default:
                                         throw new Exception("Unexpected map info file size");
                                 }
-                                mapInfo = new Blf(version);
+                                mapInfo = new Blf(version, platform);
                                 mapInfo.Read(reader);
                                 mapInfo.ConvertBlf(Cache.Version);
                             }

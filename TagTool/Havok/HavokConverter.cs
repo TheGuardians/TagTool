@@ -314,19 +314,19 @@ namespace TagTool.Havok
             return moppData;
         }
 
-        public static byte[] ConvertHkpMoppData(CacheVersion sourceVersion, CacheVersion destVersion, byte[] data)
+        public static byte[] ConvertHkpMoppData(CacheVersion sourceVersion, CacheVersion destVersion, CachePlatform inCache, CachePlatform outCache, byte[] data)
         {
             if (data == null || data.Length == 0)
                 return data;
 
             byte[] result;
-            using (var inputReader = new EndianReader(new MemoryStream(data), CacheVersionDetection.IsLittleEndian(sourceVersion) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            using (var inputReader = new EndianReader(new MemoryStream(data), CacheVersionDetection.IsLittleEndian(sourceVersion, inCache) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
             using (var outputStream = new MemoryStream())
-            using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(destVersion) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(destVersion, outCache) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
             {
                 var dataContext = new DataSerializationContext(inputReader, outputWriter);
-                var deserializer = new TagDeserializer(sourceVersion);
-                var serializer = new TagSerializer(destVersion);
+                var deserializer = new TagDeserializer(sourceVersion, CachePlatform.Original);
+                var serializer = new TagSerializer(destVersion, CachePlatform.Original);
                 while (!inputReader.EOF)
                 {
                     var header = deserializer.Deserialize<HkpMoppCode>(dataContext);

@@ -43,17 +43,12 @@ namespace TagTool.Cache
             var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
 
             if (Version == CacheVersion.Halo3Beta)
-                return address - (headerGen3.VirtualBaseAddress32 - headerGen3.GetTagMemoryHeader().MemoryBufferOffset);
+                return address - (headerGen3.VirtualBaseAddress.Get32BitValue() - headerGen3.GetTagMemoryHeader().MemoryBufferOffset);
 
-            var baseAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                headerGen3.VirtualBaseAddress64 :
-                (ulong)headerGen3.VirtualBaseAddress32;
 
-            var unpackedAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                (((ulong)address << 2) + 0x50000000) :
-                (ulong)address;
+            var unpackedAddress = Platform == CachePlatform.MCC ? (((ulong)address << 2) ) : address;
 
-            return (uint)(unpackedAddress - (baseAddress - (ulong)headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
+            return (uint)(unpackedAddress - (headerGen3.VirtualBaseAddress.Value - headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
         }
 
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
@@ -63,8 +58,10 @@ namespace TagTool.Cache
             BaseMapFile = mapFile;
             Version = BaseMapFile.Version;
             CacheFile = file;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Platform = BaseMapFile.CachePlatform;
+
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             Endianness = BaseMapFile.EndianFormat;
 
             var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
@@ -77,7 +74,7 @@ namespace TagTool.Cache
             using(var reader = new EndianReader(cacheStream, Endianness))
             {
                 StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
-                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3);
+                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3, Platform);
                 ResourceCacheGen3 = new ResourceCacheGen3(this);
 
                 if(TagCacheGen3.Instances.Count > 0)
@@ -86,8 +83,8 @@ namespace TagTool.Cache
                         LocaleTables = new List<LocaleTable>();
                     else
                     {
-                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
-                        LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                        //var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
+                        //LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
                     }
                 }
             }

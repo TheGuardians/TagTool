@@ -36,22 +36,27 @@ namespace TagTool.Cache.Gen2
 
             if(cacheFileType != 0)
             {
-                string filename = "";
+                string cacheName = "";
                 switch (cacheFileType)
                 {
                     case 1:
-                        filename = Path.Combine(Cache.Directory.FullName, "mainmenu.map");
+                        cacheName = "mainmenu.map";
                         break;
                     case 2:
-                        filename = Path.Combine(Cache.Directory.FullName, "shared.map");
+                        cacheName = "shared.map";
                         break;
                     case 3:
-                        filename = Path.Combine(Cache.Directory.FullName, "single_player_shared.map");
+                        cacheName = "single_player_shared.map";
                         break;
 
                 }
-                // TODO: make this a function call with a stored reference to caches in the base cache or something better than this
-                sourceCache = (GameCacheGen2)GameCache.Open(new FileInfo(filename));
+                if (Cache.ResourceCacheReferences.ContainsKey(cacheName))
+                    sourceCache = Cache.ResourceCacheReferences[cacheName];
+                else
+                {
+                    Console.WriteLine($"Warning: failed to find cache for resource 0x{resourceAddress:X8}");
+                    return null;
+                }
             }
             else
                 sourceCache = Cache;

@@ -491,8 +491,6 @@ namespace TagTool.Commands.Porting
         {
             var scenarioName = Path.GetFileName(scenarioTag.Name);
 
-            var blf = new TagTool.BlamFile.Blf(CacheVersion.HaloOnline106708);
-
             MapFile map = new MapFile();
             var header = new CacheFileHeaderGenHaloOnline();
 
@@ -505,7 +503,7 @@ namespace TagTool.Commands.Porting
             header.HeaderSignature = new Tag("head");
             header.FooterSignature = new Tag("foot");
             header.FileVersion = map.MapVersion;
-            header.Build = CacheVersionDetection.GetBuildName(cache.Version);
+            header.Build = CacheVersionDetection.GetBuildName(cache.Version, cache.Platform);
 
             switch (scnr.MapType)
             {
@@ -530,7 +528,7 @@ namespace TagTool.Commands.Porting
 
             header.FileLength = 0x3390;
 
-            map.MapFileBlf = new Blf(cache.Version);
+            map.MapFileBlf = new Blf(cache.Version, cache.Platform);
             map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
             map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
             map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };

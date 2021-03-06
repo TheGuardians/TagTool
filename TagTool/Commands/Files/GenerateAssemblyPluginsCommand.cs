@@ -51,7 +51,7 @@ namespace TagTool.Commands.Files
                     {
                         try
                         {
-                            ConvertTagDefinition(tagType.Key.Tag, tagType.Value, assemblyVersion.Key, path);
+                            ConvertTagDefinition(tagType.Key.Tag, tagType.Value, assemblyVersion.Key, CachePlatform.Original, path);
                         }
                         catch (ArgumentException)
                         {
@@ -59,7 +59,7 @@ namespace TagTool.Commands.Files
                         }
                     }
                     else
-                        ConvertTagDefinition(tagType.Key.Tag, tagType.Value, assemblyVersion.Key);
+                        ConvertTagDefinition(tagType.Key.Tag, tagType.Value, assemblyVersion.Key, CachePlatform.Original);
                 }
             }
 
@@ -544,12 +544,13 @@ namespace TagTool.Commands.Files
                 /// </summary>
                 /// <param name="type">The structure to return fields for.</param>
                 /// <param name="cacheVersion">The cache version to return fields for.</param>
+                /// <param name="cachePlatform"></param>
                 /// <param name="fieldName">The name of the structure reference. If no name can be given provide null rather than an empty string.</param>
                 /// <param name="offset">The offset of the reference if applicable, or 0.</param>
                 /// <returns>A list of AssemblyPluginFields</returns>
-                public static List<AssemblyPluginField> ReferencedStructure(Type type, CacheVersion cacheVersion, string fieldName, ref int offset)
+                public static List<AssemblyPluginField> ReferencedStructure(Type type, CacheVersion cacheVersion, CachePlatform cachePlatform, string fieldName, ref int offset)
                 {
-                    ConvertTagStructure(type, cacheVersion, out List<AssemblyPluginField> referenceStructurePluginFields, out int size, ref offset);
+                    ConvertTagStructure(type, cacheVersion, cachePlatform, out List <AssemblyPluginField> referenceStructurePluginFields, out int size, ref offset);
 
                     //For inline classes,
                     //Add the name of the inline reference
@@ -603,9 +604,10 @@ namespace TagTool.Commands.Files
             /// <param name="tagFieldAttribute">The tag field attribute attached to the field, or null.</param>
             /// <param name="offset">The offset of the tag field.</param>
             /// <param name="cacheVersion">The cache version to return fields for.</param>
+            /// <param name="cachePlatform"></param>
             /// <param name="fieldName">The name of the field in the BlamCore tag definition.</param>
             /// <returns>A list of AssemblyPluginFields representing the given field type.</returns>
-            public static List<AssemblyPluginField> GetAssemblyPluginFields(Type fieldType, TagFieldAttribute tagFieldAttribute, ref int offset, CacheVersion cacheVersion, string fieldName)
+            public static List<AssemblyPluginField> GetAssemblyPluginFields(Type fieldType, TagFieldAttribute tagFieldAttribute, ref int offset, CacheVersion cacheVersion, CachePlatform cachePlatform, string fieldName)
             {
                 List<AssemblyPluginField> assemblyPluginFields = new List<AssemblyPluginField>();
                 AssemblyPluginFieldTypes assemblyPluginFieldType = GetAssemblyPluginFieldType(fieldType);
@@ -667,7 +669,7 @@ namespace TagTool.Commands.Files
                     if (elementAssemblyPluginFieldType == AssemblyPluginFieldTypes.undefined && (elementType.IsClass || (elementType.IsValueType && !elementType.IsEnum)) && !elementType.IsGenericType)
                     {
                         int childClassOffset = 0; // here
-                        reflexiveAssemblyPluginField.children = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, null, ref childClassOffset);
+                        reflexiveAssemblyPluginField.children = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, cachePlatform, null, ref childClassOffset);
                         reflexiveAssemblyPluginField.attributes.Add("entrySize", "0x" + childClassOffset.ToString("X"));
                         assemblyPluginFields.Add(reflexiveAssemblyPluginField);
                     }
@@ -675,7 +677,7 @@ namespace TagTool.Commands.Files
                     {
                         int childOffset = 0;
                         //Handles stuff like a list of tag references.
-                        reflexiveAssemblyPluginField.children.AddRange(GetAssemblyPluginFields(elementType, tagFieldAttribute, ref childOffset, cacheVersion, null)); //This tagFieldAttribute arg should probably be null.
+                        reflexiveAssemblyPluginField.children.AddRange(GetAssemblyPluginFields(elementType, tagFieldAttribute, ref childOffset, cacheVersion, cachePlatform, null)); //This tagFieldAttribute arg should probably be null.
                         reflexiveAssemblyPluginField.attributes.Add("entrySize", "0x" + childOffset.ToString("X"));
                         assemblyPluginFields.Add(reflexiveAssemblyPluginField);
                     }
@@ -789,7 +791,7 @@ namespace TagTool.Commands.Files
                         {
                             for (int i = 0; i < tagFieldAttribute.Length; i++)
                             {
-                                List<AssemblyPluginField> structureFields = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, null, ref offset);
+                                List<AssemblyPluginField> structureFields = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, cachePlatform, null, ref offset);
                                 var comment = new AssemblyPluginField(AssemblyPluginFieldTypes.comment, fieldName);
                                 comment.attributes["name"] = comment.attributes["name"] + " " + i.ToString();
                                 assemblyPluginFields.Add(comment);
@@ -801,7 +803,7 @@ namespace TagTool.Commands.Files
                     else if ((fieldType.IsClass || (fieldType.IsValueType && !fieldType.IsEnum)) && !fieldType.IsGenericType)
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.comment, fieldName));
-                        assemblyPluginFields.AddRange(CommonFieldTypes.ReferencedStructure(fieldType, cacheVersion, null, ref offset));
+                        assemblyPluginFields.AddRange(CommonFieldTypes.ReferencedStructure(fieldType, cacheVersion, cachePlatform, null, ref offset));
                     }
                     else
                         throw new NotImplementedException($"Undefined field type \"{fieldType}\" not implemented.");
@@ -943,12 +945,13 @@ namespace TagTool.Commands.Files
             /// </summary>
             /// <param name="structureType">The structure type to find fields from.</param>
             /// <param name="cacheVersion">The cache version to return fields for.</param>
+            /// <param name="platform"></param>
             /// <param name="pluginFields">The output fields.</param>
             /// <param name="size">The size of the structure.</param>
-            public static void ConvertTagStructure(Type structureType, CacheVersion cacheVersion, out List<AssemblyPluginField> pluginFields, out int size)
+            public static void ConvertTagStructure(Type structureType, CacheVersion cacheVersion, CachePlatform platform, out List<AssemblyPluginField> pluginFields, out int size)
             {
                 int offset = 0;
-                ConvertTagStructure(structureType, cacheVersion, out pluginFields, out size, ref offset);
+                ConvertTagStructure(structureType, cacheVersion, platform, out pluginFields, out size, ref offset);
             }
 
             /// <summary>
@@ -960,10 +963,11 @@ namespace TagTool.Commands.Files
             /// </summary>
             /// <param name="structureType">The structure type to find fields from.</param>
             /// <param name="cacheVersion">The cache version to return fields for.</param>
+            /// <param name="cachePlatform"></param>
             /// <param name="pluginFields">The output fields.</param>
             /// <param name="size">The size of the structure.</param>
             /// <param name="offset">The offset of the structure within the tag. Useful for structure references within structures.</param>
-            public static void ConvertTagStructure(Type structureType, CacheVersion cacheVersion, out List<AssemblyPluginField> pluginFields, out int size, ref int offset)
+            public static void ConvertTagStructure(Type structureType, CacheVersion cacheVersion, CachePlatform cachePlatform, out List<AssemblyPluginField> pluginFields, out int size, ref int offset)
             {
                 pluginFields = new List<AssemblyPluginField>();
 
@@ -991,20 +995,26 @@ namespace TagTool.Commands.Files
                 {
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
-                    if (!CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) || tagFieldAttribute.Flags.HasFlag(Runtime))
+
+                    var fieldIsInVersion = CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) && CacheVersionDetection.AttributeInPlatform(tagFieldAttribute, cachePlatform);
+
+                    if (!fieldIsInVersion || tagFieldAttribute.Flags.HasFlag(Runtime))
                         continue;
 
-                    pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
+                    pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, cachePlatform, fieldInfo.Name));
                 }
 
                 foreach (FieldInfo fieldInfo in structureFields)
                 {
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
-                    if (!CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) || tagFieldAttribute.Flags.HasFlag(Runtime))
+
+                    var fieldIsInVersion = CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) && CacheVersionDetection.AttributeInPlatform(tagFieldAttribute, cachePlatform);
+
+                    if (!fieldIsInVersion || tagFieldAttribute.Flags.HasFlag(Runtime))
                         continue;
 
-                    pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
+                    pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, cachePlatform, fieldInfo.Name));
                 }
 
                 size = offset;
@@ -1031,12 +1041,13 @@ namespace TagTool.Commands.Files
         /// <param name="tagGroup">The tag group, this is how assembly plugin files are named.</param>
         /// <param name="tagType">The type of tag to convert.</param>
         /// <param name="cacheVersion">The game to convert tag fields for.</param>
-        public void ConvertTagDefinition(Tag tagGroup, Type tagType, CacheVersion cacheVersion)
+        /// <param name="cachePlatform"></param>
+        public void ConvertTagDefinition(Tag tagGroup, Type tagType, CacheVersion cacheVersion, CachePlatform cachePlatform)
         {
             if (!Directory.Exists("Plugins"))
                 Directory.CreateDirectory("Plugins");
 
-            ConvertTagDefinition(tagGroup, tagType, cacheVersion, "Plugins");
+            ConvertTagDefinition(tagGroup, tagType, cacheVersion, cachePlatform, "Plugins");
         }
 
         /// <summary>
@@ -1048,8 +1059,9 @@ namespace TagTool.Commands.Files
         /// <param name="tagGroup">The tag group, this is how assembly plugin files are named.</param>
         /// <param name="tagType">The type of tag to convert.</param>
         /// <param name="cacheVersion">The game to convert tag fields for.</param>
+        /// <param name="cachePlatform"></param>
         /// <param name="pluginsDirectory">The path to save the plugin files to.</param>
-        public void ConvertTagDefinition(Tag tagGroup, Type tagType, CacheVersion cacheVersion, string pluginsDirectory)
+        public void ConvertTagDefinition(Tag tagGroup, Type tagType, CacheVersion cacheVersion, CachePlatform cachePlatform, string pluginsDirectory)
         {
             if (!Directory.Exists(pluginsDirectory))
                 throw new ArgumentException("Illegal plugins directory path!");
@@ -1066,7 +1078,7 @@ namespace TagTool.Commands.Files
             Console.WriteLine("Converting tag definition {0} for {1} to an assembly plugin at {3}\\{1}\\{2}.xml", tagGroup.ToString(), gameName, tagGroup.ToString().Replace('<', '_').Replace('>', '_'), pluginsDirectory);
 #endif
 
-            AssemblyPluginField.ConvertTagStructure(tagType, cacheVersion, out List<AssemblyPluginField> pluginFields, out int size);
+            AssemblyPluginField.ConvertTagStructure(tagType, cacheVersion, cachePlatform, out List <AssemblyPluginField> pluginFields, out int size);
 
             List<string> xmlNodesText = new List<string>
             {

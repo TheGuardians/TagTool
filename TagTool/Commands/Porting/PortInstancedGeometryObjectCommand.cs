@@ -124,7 +124,7 @@ namespace TagTool.Commands.Porting
             if (int.TryParse(identifier, out index))
                 return index;
 
-            var labelField = FindLabelField(block[0].GetType(), BlamCache.Version);
+            var labelField = FindLabelField(block[0].GetType(), BlamCache.Version, BlamCache.Platform);
 
             object expectedValue = null;
             if (labelField.FieldType == typeof(StringId))
@@ -142,9 +142,9 @@ namespace TagTool.Commands.Porting
             return -1;
         }
 
-        private static TagFieldInfo FindLabelField(Type type, CacheVersion version)
+        private static TagFieldInfo FindLabelField(Type type, CacheVersion version, CachePlatform platform)
         {
-            return TagStructure.GetTagFieldEnumerable(type, version)
+            return TagStructure.GetTagFieldEnumerable(type, version, platform)
                 .FirstOrDefault(field => field.Attribute != null && field.Attribute.Flags.HasFlag(TagFieldFlags.Label));
         }
 

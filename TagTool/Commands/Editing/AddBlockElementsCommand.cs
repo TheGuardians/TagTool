@@ -155,7 +155,7 @@ namespace TagTool.Commands.Editing
 
             var element = (TagStructure)instance;
 
-            foreach (var tagFieldInfo in element.GetTagFieldEnumerable(Cache.Version))
+            foreach (var tagFieldInfo in element.GetTagFieldEnumerable(Cache.Version, Cache.Platform))
             {
                 var fieldType = tagFieldInfo.FieldType;
 

@@ -243,6 +243,7 @@
     <Compile Include="Animations\AnimationMovementDataType.cs" />
     <Compile Include="Animations\AnimationMovementData.cs" />
     <Compile Include="Audio\BlamSound.cs" />
+    <Compile Include="Audio\Converter\ASF.cs" />
     <Compile Include="Audio\Converter\FSB4.cs" />
     <Compile Include="Audio\Converter\HeaderChunk.cs" />
     <Compile Include="Audio\Converter\SoundFile.cs" />
@@ -257,6 +258,7 @@
     <Compile Include="BlamFile\MapVariantGenerator.cs" />
     <Compile Include="Cache\CachedTag.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGen4.cs" />
+    <Compile Include="Cache\CacheFile\PlatformTypes.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGenHaloOnline.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGen3.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGen2.cs" />
@@ -281,7 +283,9 @@
     <Compile Include="Cache\Gen4\LocalesTableGen4.cs" />
     <Compile Include="Cache\Gen4\ResourceCacheGen4.cs" />
     <Compile Include="Cache\Gen4\StringIdResolverHalo4.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHalo3MCC.cs" />
     <Compile Include="Cache\Gen3\StringIdResolverHalo3Beta.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHalo3ODSTMCC.cs" />
     <Compile Include="Cache\Gen3\TagGroupGen3.cs" />
     <Compile Include="Cache\Gen4\StringTableGen4.cs" />
     <Compile Include="Cache\Gen4\TagCacheGen4.cs" />
@@ -372,6 +376,7 @@
     <Compile Include="Commands\Porting\Gen1\PortTagGen1Command.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Animations.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Sound.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Physics.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />

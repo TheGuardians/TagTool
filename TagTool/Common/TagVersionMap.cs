@@ -77,7 +77,7 @@ namespace TagTool.Common
         public void WriteCsv(TextWriter writer)
         {
             // Write a list of versions being represented
-            writer.WriteLine(string.Join(",", _versionMaps.Keys.Select(CacheVersionDetection.GetBuildName)));
+            // TODO: idk what this is used for hmmm writer.WriteLine(string.Join(",", _versionMaps.Keys.Select(CacheVersionDetection.GetBuildName)));
 
             // Write a list of timestamps for the versions
             writer.WriteLine(string.Join(",", _versionMaps.Keys.Select(v => CacheVersionDetection.GetTimestamp(v).ToString("X16"))));
