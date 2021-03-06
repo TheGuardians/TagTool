@@ -6,9 +6,7 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Beta)]
     public class PermutationChunk : TagStructure
 	{
-        
         public int Offset;
-
 
         /// <summary>
         /// Encoded size, to get the real size apply a mask of 0x3FFFFF. It should always have the bit 0x400000 activated.
@@ -49,6 +47,24 @@ namespace TagTool.Audio
             RuntimeIndex = -1;
             LastSample = lastSample;
             FirstSample = firstSample;
+        }
+    }
+
+    [TagStructure(Size = 0xC)]
+    public class Gen2PermutationChunk : TagStructure
+    {
+        public TagResourceReference ResourceReference;
+
+        /// <summary>
+        /// Encoded size, to get the real size apply a mask of 0x3FFFFF.
+        /// </summary>
+        public int EncodedSize;
+
+        public int RuntimeIndex;
+
+        public int GetSize()
+        {
+            return EncodedSize & 0x3FFFFFF;
         }
     }
 }

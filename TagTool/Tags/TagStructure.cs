@@ -11,20 +11,20 @@ namespace TagTool.Tags
         private static readonly Dictionary<CacheVersion, VersionedCache> VersionedCaches =
             new Dictionary<CacheVersion, VersionedCache> { };
 
-        public static TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown) =>
-            VersionedCaches[version].GetTagStructureAttribute(type, version);
+        public static TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version, CachePlatform cachePlatform) =>
+            VersionedCaches[version].GetTagStructureAttribute(type, version, cachePlatform);
 
-        public static TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version = CacheVersion.Unknown) =>
-            VersionedCaches[version].GetTagStructureInfo(type, version);
+        public static TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version, CachePlatform cachePlatform) =>
+            VersionedCaches[version].GetTagStructureInfo(type, version, cachePlatform);
 
-        public static TagFieldEnumerable GetTagFieldEnumerable(Type type, CacheVersion version = CacheVersion.Unknown) =>
-            GetTagFieldEnumerable(GetTagStructureInfo(type, version));
+        public static TagFieldEnumerable GetTagFieldEnumerable(Type type, CacheVersion version, CachePlatform cachePlatform) =>
+            GetTagFieldEnumerable(GetTagStructureInfo(type, version, cachePlatform));
 
         public static TagFieldEnumerable GetTagFieldEnumerable(TagStructureInfo info) =>
             VersionedCaches[info.Version].GetTagFieldEnumerable(info);
 
-        public static TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version = CacheVersion.Unknown) =>
-            VersionedCaches[version].GetTagFieldAttribute(type, field, version);
+        public static TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version, CachePlatform cachePlatform) =>
+            VersionedCaches[version].GetTagFieldAttribute(type, field, version, cachePlatform);
 
         static TagStructure()
         {
@@ -33,17 +33,17 @@ namespace TagTool.Tags
                     VersionedCaches[version] = new VersionedCache(version);
         }
 
-        public TagStructureAttribute GetTagStructureAttribute(CacheVersion version = CacheVersion.Unknown) =>
-            GetTagStructureAttribute(GetType(), version);
+        public TagStructureAttribute GetTagStructureAttribute(CacheVersion version, CachePlatform cachePlatform) =>
+            GetTagStructureAttribute(GetType(), version, cachePlatform);
 
-        public TagStructureInfo GetTagStructureInfo(CacheVersion version = CacheVersion.Unknown) =>
-            GetTagStructureInfo(GetType(), version);
+        public TagStructureInfo GetTagStructureInfo(CacheVersion version, CachePlatform cachePlatform) =>
+            GetTagStructureInfo(GetType(), version, cachePlatform);
 
-        public TagFieldEnumerable GetTagFieldEnumerable(CacheVersion version = CacheVersion.Unknown) =>
-            GetTagFieldEnumerable(GetType(), version);
+        public TagFieldEnumerable GetTagFieldEnumerable(CacheVersion version, CachePlatform cachePlatform) =>
+            GetTagFieldEnumerable(GetType(), version, cachePlatform);
 
-        public TagFieldAttribute GetTagFieldAttribute(FieldInfo fieldInfo, CacheVersion version = CacheVersion.Unknown) =>
-            GetTagFieldAttribute(GetType(), fieldInfo, version);
+        public TagFieldAttribute GetTagFieldAttribute(FieldInfo fieldInfo, CacheVersion version, CachePlatform cachePlatform) =>
+            GetTagFieldAttribute(GetType(), fieldInfo, version, cachePlatform);
 
         public virtual void PreConvert(CacheVersion from, CacheVersion to)
         {
@@ -69,13 +69,13 @@ namespace TagTool.Tags
             private readonly Dictionary<FieldInfo, TagFieldAttribute> TagFieldAttributes =
                 new Dictionary<FieldInfo, TagFieldAttribute> { };
 
-            public TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version = CacheVersion.Unknown)
+            public TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version, CachePlatform cachePlatform)
             {
                 if (!TagStructureInfos.TryGetValue(type, out TagStructureInfo info))
                     lock (TagStructureInfos)
                     {
                         if (!TagStructureInfos.TryGetValue(type, out info))
-                            TagStructureInfos[type] = info = new TagStructureInfo(type, version);
+                            TagStructureInfos[type] = info = new TagStructureInfo(type, version, cachePlatform);
                     }
                 return info;
             }
@@ -91,14 +91,14 @@ namespace TagTool.Tags
                 return enumerator;
             }
 
-            public TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
+            public TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version, CachePlatform cachePlatform)
             {
                 TagStructureAttribute GetStructureAttribute()
                 {
                     // First match against any TagStructureAttributes that have version restrictions
                     var attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
                         .Cast<TagStructureAttribute>()
-                        .Where(a => CacheVersionDetection.IsInPlatform(a.Platform, version))
+                        .Where(a => CacheVersionDetection.ComparePlatform(a.Platform, cachePlatform))
                         .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
 
                     if (attrib == null)
@@ -123,7 +123,7 @@ namespace TagTool.Tags
                 return attribute;
             }
 
-            public TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version = CacheVersion.Unknown)
+            public TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version, CachePlatform cachePlatform)
             {
                 if (field.DeclaringType != type && !type.IsSubclassOf(field.DeclaringType))
                     throw new ArgumentException(nameof(field), new TypeAccessException(type.FullName));
@@ -141,7 +141,7 @@ namespace TagTool.Tags
             public VersionedCache(CacheVersion version) => Version = version;
         }
 
-        public static uint GetStructureSize(Type type, CacheVersion version = CacheVersion.Unknown)
+        public static uint GetStructureSize(Type type, CacheVersion version, CachePlatform cachePlatform)
         {
             uint size = 0;
 
@@ -149,7 +149,7 @@ namespace TagTool.Tags
 
             while(currentType != typeof(object))
             {
-                var attribute = VersionedCaches[version].GetTagStructureAttribute(currentType, version);
+                var attribute = VersionedCaches[version].GetTagStructureAttribute(currentType, version, cachePlatform);
 
                 currentType = currentType.BaseType;
 

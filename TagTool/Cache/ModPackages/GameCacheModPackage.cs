@@ -31,9 +31,11 @@ namespace TagTool.Cache
         {
             ModPackageFile = file;
             Version = CacheVersion.HaloOnline106708;
+            Platform = CachePlatform.Original;
+
             Endianness = EndianFormat.LittleEndian;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             Directory = file.Directory;
             BaseCacheReference = baseCache;
             BaseCacheStream = baseCache.OpenCacheRead();
@@ -53,8 +55,10 @@ namespace TagTool.Cache
 
             Version = CacheVersion.HaloOnline106708;
             Endianness = EndianFormat.LittleEndian;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Platform = CachePlatform.Original;
+
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             BaseModPackage = new ModPackage(unmanagedResourceStream: largeResourceStream);
             BaseCacheReference = baseCache;
             BaseCacheStream = baseCache.OpenCacheRead();
@@ -220,7 +224,7 @@ namespace TagTool.Cache
                 case PageableResource resource:
                     return ConvertResource(resource);
                 case TagStructure tagStruct:
-                    foreach (var field in tagStruct.GetTagFieldEnumerable(Version))
+                    foreach (var field in tagStruct.GetTagFieldEnumerable(Version, Platform))
                         field.SetValue(data, ConvertResources(field.GetValue(tagStruct)));
                     break;
                 case IList collection:

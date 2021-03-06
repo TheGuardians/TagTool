@@ -16,11 +16,7 @@ namespace TagTool.Cache
         public int FileLength;
         public int FileCompressedLength;
 
-        [TagField(Platform = CachePlatform.Only32Bit)]
-        public uint TagTableHeaderOffset32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public ulong TagTableHeaderOffset64;
-
+        public PlatformUnsignedValue TagTableHeaderOffset;
 
         public TagMemoryHeader TagMemoryHeader;
 
@@ -52,7 +48,7 @@ namespace TagTool.Cache
         public ulong SharedTimestamp;
         public ulong CampaignTimestamp;
 
-        [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+        [TagField(Platform = CachePlatform.MCC)]
         public ulong MultiplayerTimestamp;
 
         [TagField(Length = 0x20)]
@@ -77,17 +73,14 @@ namespace TagTool.Cache
         public int Unknown20;
         public int Unknown21_1;
 
-        [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+        [TagField(Platform = CachePlatform.MCC)]
         public int Unknown21_2;
 
-        [TagField(Platform = CachePlatform.Only32Bit)]
-        public uint VirtualBaseAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
-        public ulong VirtualBaseAddress64;
+        public PlatformUnsignedValue VirtualBaseAddress;
 
         public int XDKVersion;
 
-        [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+        [TagField(Platform = CachePlatform.MCC)]
         public int Unknown21_3;
 
         [TagField(Length = (int)CacheFilePartitionTypeBeta.Count, MaxVersion = CacheVersion.Halo3Beta)]
@@ -135,10 +128,13 @@ namespace TagTool.Cache
         [TagField(Length = 4, MinVersion = CacheVersion.Halo3Retail)]
         public int[] CompressionGUID;
 
-        [TagField(Length = 0x2B38, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 0x2B38, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public byte[] UnknownFileData;
 
-        [TagField(Length = 0x7000, MinVersion = CacheVersion.HaloReach)]
+        [TagField(Length = 0x2AF0, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public byte[] UnknownFileDataMCC;
+
+        [TagField(Length = 0x7000, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         public byte[] UnknownReach;
 
         public Tag FooterSignature;
@@ -149,7 +145,7 @@ namespace TagTool.Cache
 
         public override Tag GetFootTag() => FooterSignature;
         public override Tag GetHeadTag() => HeaderSignature;
-        public override ulong GetTagTableHeaderOffset() => TagTableHeaderOffset32;
+        public override ulong GetTagTableHeaderOffset() => TagTableHeaderOffset.Value;
         public override string GetName() => Name;
         public override string GetBuild() => Build;
         public override string GetScenarioPath() => null;

@@ -48,7 +48,7 @@ namespace TagTool.Commands.Files
                 using (var destStream = destFile.Create())
                 using (var writer = new EndianWriter(destStream))
                 {
-                    Blf campaignBlf = new Blf(CacheVersion.Halo3Retail);
+                    Blf campaignBlf = new Blf(CacheVersion.Halo3Retail, CachePlatform.Original);
                     campaignBlf.Read(reader);
                     campaignBlf.ConvertBlf(Cache.Version);
                     campaignBlf.Write(writer);
@@ -61,7 +61,7 @@ namespace TagTool.Commands.Files
                 using (var reader = new EndianReader(stream))
                 using (var writer = new EndianWriter(campaignFileStream, leaveOpen:true))
                 {
-                    Blf campaignBlf = new Blf(CacheVersion.Halo3Retail);
+                    Blf campaignBlf = new Blf(CacheVersion.Halo3Retail, CachePlatform.Original);
                     campaignBlf.Read(reader);
                     campaignBlf.ConvertBlf(Cache.Version);
                     campaignBlf.Write(writer);

@@ -17,6 +17,7 @@ namespace TagTool.Cache
     {
         public string DisplayName = "default";
         public CacheVersion Version;
+        public CachePlatform Platform;
         public EndianFormat Endianness;
         public TagSerializer Serializer;
         public TagDeserializer Deserializer;
@@ -70,10 +71,6 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
                     return new GameCacheGen3(map, file);
 
                 case CacheVersion.HaloOnline106708:

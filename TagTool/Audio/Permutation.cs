@@ -65,4 +65,17 @@ namespace TagTool.Audio
             SequencedBit = (1 << 0)
         }
     }
+
+    [TagStructure(Size = 0x10)]
+    public class Gen2Permutation : TagStructure
+    {
+        public short Name;
+        public short EncodedSkipFraction;
+        public sbyte EncodedGain; // dB
+        public sbyte PermutationInfoIndex;
+        public short LanguageNeutralTime; // ms
+        public int SampleSize;
+        public short FirstChunk;
+        public short ChunkCount;
+    }
 }

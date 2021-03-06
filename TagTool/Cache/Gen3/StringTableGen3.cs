@@ -13,38 +13,56 @@ namespace TagTool.Cache.Gen3
         public StringTableGen3(EndianReader reader, MapFile baseMapFile) : base()
         {
             Version = baseMapFile.Version;
-
+            
             var gen3Header = (CacheFileHeaderGen3)baseMapFile.Header;
             var stringIDHeader = gen3Header.GetStringIDHeader();
 
-            switch (Version)
+            var cachePlatform = baseMapFile.CachePlatform;
+
+            if(cachePlatform == CachePlatform.Original)
             {
-                case CacheVersion.Halo3Beta:
-                    Resolver = new StringIdResolverHalo3Beta();
-                    break;
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Beta:
+                        Resolver = new StringIdResolverHalo3Beta();
+                        break;
 
-                case CacheVersion.Halo3Retail:
-                    Resolver = new StringIdResolverHalo3();
-                    break;
+                    case CacheVersion.Halo3Retail:
+                        Resolver = new StringIdResolverHalo3();
+                        break;
 
-                case CacheVersion.Halo3ODST:
-                    Resolver = new StringIdResolverHalo3ODST();
-                    break;
+                    case CacheVersion.Halo3ODST:
+                        Resolver = new StringIdResolverHalo3ODST();
+                        break;
 
-                case CacheVersion.HaloReach:
-                    Resolver = new StringIdResolverHaloReach();
-                    StringKey = "ILikeSafeStrings";
-                    break;
+                    case CacheVersion.HaloReach:
+                        Resolver = new StringIdResolverHaloReach();
+                        StringKey = "ILikeSafeStrings";
+                        break;
 
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
-                    Resolver = new StringIdResolverHaloReachMCC();
-                    break;
+                    default:
+                        throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version, cachePlatform));
+                }
+            }
+            else if(cachePlatform == CachePlatform.MCC)
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                        Resolver = new StringIdResolverHalo3MCC();
+                        break;
 
-                default:
-                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
+                    case CacheVersion.Halo3ODST:
+                        Resolver = new StringIdResolverHalo3ODSTMCC();
+                        break;
+
+                    case CacheVersion.HaloReach:
+                        Resolver = new StringIdResolverHaloReachMCC();
+                        break;
+
+                    default:
+                        throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version, cachePlatform));
+                }
             }
 
             var sectionTable = gen3Header.SectionTable;

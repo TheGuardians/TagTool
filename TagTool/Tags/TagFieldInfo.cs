@@ -140,14 +140,15 @@ namespace TagTool.Tags
 			return getter;
 		}
 
-		/// <summary>
-		/// Gets the size of a tag-field.
-		/// </summary>
-		/// <param name="type">The <see cref="Type"/> of the field.</param>
-		/// <param name="attr">The <see cref="TagFieldAttribute"/> of the field.</param>
-		/// <param name="targetVersion">The <see cref="CacheVersion"/> to target.</param>
-		/// <returns></returns>
-		public static uint GetFieldSize(Type type, TagFieldAttribute attr, CacheVersion targetVersion)
+        /// <summary>
+        /// Gets the size of a tag-field.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> of the field.</param>
+        /// <param name="attr">The <see cref="TagFieldAttribute"/> of the field.</param>
+        /// <param name="targetVersion">The <see cref="CacheVersion"/> to target.</param>
+        /// <param name="cachePlatform"></param>
+        /// <returns></returns>
+        public static uint GetFieldSize(Type type, TagFieldAttribute attr, CacheVersion targetVersion, CachePlatform cachePlatform)
 		{
             if (attr.Flags.HasFlag(Runtime))
                 return 0;
@@ -178,6 +179,8 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(Angle):
 				case TypeCode.Object when type == typeof(VertexShaderReference):
 				case TypeCode.Object when type == typeof(PixelShaderReference):
+				case TypeCode.Object when type == typeof(PlatformUnsignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
+				case TypeCode.Object when type == typeof(PlatformSignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
 					return 0x04;
 
 				case TypeCode.Double:
@@ -192,6 +195,8 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(RealVector2d):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Beta, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagBlock<>) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Beta, CacheVersion.Halo2Vista):
+				case TypeCode.Object when type == typeof(PlatformUnsignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._64Bit:
+				case TypeCode.Object when type == typeof(PlatformSignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._64Bit:
 					return 0x08;
 
 				case TypeCode.Object when type == typeof(RealRgbColor):
@@ -230,19 +235,19 @@ namespace TagTool.Tags
 					return (uint)attr.Length;
 
 				case TypeCode.Object when type.IsArray && attr.Length != 0:
-					return TagFieldInfo.GetFieldSize(type.GetElementType(), attr, targetVersion) * (uint)attr.Length;
+					return TagFieldInfo.GetFieldSize(type.GetElementType(), attr, targetVersion, cachePlatform) * (uint)attr.Length;
 
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Bounds<>):
-					return TagFieldInfo.GetFieldSize(type.GenericTypeArguments[0], attr, targetVersion) * 2;
+					return TagFieldInfo.GetFieldSize(type.GenericTypeArguments[0], attr, targetVersion, cachePlatform) * 2;
 
 				case TypeCode.Object when type.IsEnum:
-					return TagFieldInfo.GetFieldSize(type.GetEnumUnderlyingType(), attr, targetVersion);
+					return TagFieldInfo.GetFieldSize(type.GetEnumUnderlyingType(), attr, targetVersion, cachePlatform);
 
                 case TypeCode.Object when type.IsSubclassOf(typeof(TagStructure)):
-                    return TagStructure.GetTagStructureInfo(type, targetVersion).TotalSize;
+                    return TagStructure.GetTagStructureInfo(type, targetVersion, cachePlatform).TotalSize;
 
                 default:
-					return TagStructure.GetTagStructureInfo(type, targetVersion).TotalSize;
+					return TagStructure.GetTagStructureInfo(type, targetVersion, cachePlatform).TotalSize;
 			}
 		}
 	}

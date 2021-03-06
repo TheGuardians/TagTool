@@ -4,7 +4,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Strings
 {

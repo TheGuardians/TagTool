@@ -6,6 +6,8 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
+using Gen2Sound = TagTool.Tags.Definitions.Gen2.Sound;
+using Gen2SoundCacheFileGestalt = TagTool.Tags.Definitions.Gen2.SoundCacheFileGestalt;
 
 namespace TagTool.Audio
 {
@@ -15,6 +17,8 @@ namespace TagTool.Audio
         private static readonly string XMAFile = BaseFileName + ".xma";
         private static readonly string WAVFile = BaseFileName + ".wav";
         private static readonly string MP3File = BaseFileName + ".mp3";
+        private static readonly string ADPCMFile = BaseFileName + ".adpcm";
+        private static readonly string OGGFile = BaseFileName + ".ogg";
 
         public static string GetSoundCacheFileName(string tagName, CacheVersion version, string cacheFilePath, int pitch_range_index, int permutation_index)
         {
@@ -39,6 +43,119 @@ namespace TagTool.Audio
             var basePermutationCacheName = Path.Combine(newPath, endName); //combine the last portion of the tag name with the new path
 
             return $"{basePermutationCacheName}_{pitch_range_index}_{permutation_index}.wav";
+        }
+
+        public static BlamSound ConvertGen2Sound(GameCache cache, Gen2SoundCacheFileGestalt soundGestalt, Gen2Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
+        {
+            ClearFiles();
+
+            var sampleRate = sound.SampleRate.GetSampleRateHz();
+            var channelCount = Encoding.GetChannelCount(sound.Encoding);
+
+            var absolutePitchRanceIndex = sound.PitchRangeIndex + pitchRangeIndex;
+            var absolutePermutationIndex = soundGestalt.PitchRanges[absolutePitchRanceIndex].FirstPermutation + permutationIndex;
+            var sampleCount = (uint)soundGestalt.Permutations[absolutePermutationIndex].SampleSize;
+            var encoding = channelCount == 2 ? EncodingValue.Stereo : EncodingValue.Mono;
+
+            BlamSound blamSound = new BlamSound(sound.SampleRate, encoding, sound.Compression, sampleCount, data);
+
+            bool cachedSoundExists = false;
+
+            if (useSoundCache)
+            {
+                var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                if (File.Exists(fileName))
+                    cachedSoundExists = true;
+            }
+
+            if (!useSoundCache || !cachedSoundExists)
+            {
+                if (sound.Compression == Compression.IMAADPCM)
+                {
+                    var soundFile = new IMAADPCM(data, channelCount, sampleRate);
+                    using (var fileStream = File.Create(ADPCMFile))
+                    using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                    {
+                        soundFile.Write(writer);
+                    }
+
+                    ConvertADPCMToWAV(ADPCMFile, WAVFile, " -ar 44100 ");
+                    blamSound.SampleRate = new SampleRate { value = SampleRate.SampleRateValue._44khz };
+                }
+                else if (sound.Compression == Compression.XboxADPCM)
+                {
+                    var soundFile = new XboxADPCM(data, channelCount, sampleRate);
+
+                    using (var fileStream = File.Create(ADPCMFile))
+                    using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                    {
+                        soundFile.Write(writer);
+                    }
+
+                    ConvertADPCMToWAV(ADPCMFile, WAVFile, " -ar 44100 ");
+                    blamSound.SampleRate = new SampleRate { value = SampleRate.SampleRateValue._44khz };
+
+                }
+                else if (sound.Compression == Compression.PCM_BigEndian)
+                {
+                    throw new NotImplementedException($"PCM in big endian not supported");
+                }
+                else
+                {
+                    var soundFile = new WAVFile(data, channelCount, sampleRate);
+
+                    using (var fileStream = File.Create(WAVFile))
+                    using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                    {
+                        soundFile.Write(writer);
+                    }
+                }
+
+                blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
+
+                DeleteFile(WAVFile);
+
+                WriteWAVFile(blamSound, WAVFile);
+
+                // store WAV file in cache if it does not exist.
+                if (useSoundCache && !cachedSoundExists)
+                {
+                    var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                    WriteWAVFile(blamSound, fileName);
+                }
+
+            }
+            else
+            {
+                // read and update blamSound from existing cache file.
+                var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                ReadWAVFile(blamSound, fileName);
+                // write a temporary copy to WAVFile
+                WriteWAVFile(blamSound, WAVFile);
+            }
+
+            // we know blamSound is now in PCM format with proper sample count and wav data, headerless
+
+            if (targetFormat == Compression.MP3)
+            {
+                ConvertToMP3(WAVFile);
+                blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
+            }
+            else if (targetFormat == Compression.PCM)
+            {
+                blamSound.UpdateFormat(Compression.PCM, PrepareWAVForFMOD(WAVFile));
+            }
+            else if (targetFormat == Compression.Tagtool_WAV)
+            {
+                blamSound.Data = File.ReadAllBytes(WAVFile);
+            }
+            else if (targetFormat == Compression.XMA)
+            {
+                // convert to XMA here
+                blamSound.UpdateFormat(Compression.XMA, File.ReadAllBytes(XMAFile));
+            }
+            ClearFiles();
+            return blamSound;
         }
 
         public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
@@ -145,11 +262,11 @@ namespace TagTool.Audio
             ffmpeg.WaitForExit();
         }
 
-        public static void ConvertADPCMToWAV(string ADPCMFileName, string WAVFileName)
+        public static void ConvertADPCMToWAV(string ADPCMFileName, string WAVFileName, string specialOption="")
         {
             ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
             {
-                Arguments = "-i " + ADPCMFileName + " -ar 44100 " + WAVFileName,
+                Arguments = "-i " + ADPCMFileName + $" {specialOption} " + WAVFileName,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = false,
@@ -244,6 +361,8 @@ namespace TagTool.Audio
             DeleteFile(XMAFile);
             DeleteFile(WAVFile);
             DeleteFile(MP3File);
+            DeleteFile(OGGFile);
+            DeleteFile(ADPCMFile);
         }
 
         private static void DeleteFile(string name)

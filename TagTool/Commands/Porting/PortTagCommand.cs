@@ -1314,7 +1314,7 @@ namespace TagTool.Commands.Porting
 
         private T ConvertStructure<T>(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
 		{
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version, CacheContext.Platform))
             {
                 var attr = tagFieldInfo.Attribute;
 
@@ -1477,7 +1477,7 @@ namespace TagTool.Commands.Porting
 
 		private TagFunction ConvertTagFunction(TagFunction function)
 		{
-			return TagFunction.ConvertTagFunction(CacheVersionDetection.IsLittleEndian(BlamCache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian, function);
+			return TagFunction.ConvertTagFunction(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian, function);
 		}
 
         private Vehicle.VehicleFlagBits ConvertVehicleFlags(Vehicle.VehicleFlagBits flags)

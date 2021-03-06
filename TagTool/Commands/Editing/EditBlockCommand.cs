@@ -30,7 +30,7 @@ namespace TagTool.Commands.Editing
             Cache = cache;
             ContextStack = contextStack;
             Tag = tag;
-            Structure = TagStructure.GetTagStructureInfo(value.GetType(), Cache.Version);
+            Structure = TagStructure.GetTagStructureInfo(value.GetType(), Cache.Version, Cache.Platform);
             Owner = value;
         }
 
@@ -114,7 +114,7 @@ namespace TagTool.Commands.Editing
                 contextName = $"{blockName}[{blockIndex}]";
             }
 
-            var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType(), Cache.Version);
+            var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType(), Cache.Version, Cache.Platform);
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(Cache, blockStructure, blockValue));

@@ -119,7 +119,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
             public Compression Compression;
             [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-            public EncodingH2 Encoding;
+            public Gen2Encoding Encoding;
 
             // Halo 3 Section
             [TagField(MinVersion = CacheVersion.Halo3Beta)]

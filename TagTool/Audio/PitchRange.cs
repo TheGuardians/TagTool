@@ -56,4 +56,15 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<Permutation> Permutations;
     }
+
+    [TagStructure(Size = 0xC)]
+    public class Gen2PitchRange : TagStructure
+    {
+        public short Name;
+        public short Parameters;
+        public short EncodedPermutationData;
+        public short FirstRuntimePermutationFlagIndex;
+        public short FirstPermutation;
+        public short PermutationCount;
+    }
 }

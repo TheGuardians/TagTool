@@ -36,9 +36,10 @@ namespace TagTool.Cache.HaloOnline
             TagsFile = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
             TagNamesFile = new FileInfo(Path.Combine(directory.FullName, "tag_list.csv"));
             StringIdCacheFile = new FileInfo(Path.Combine(directory.FullName, "string_ids.dat"));
+            Platform = CachePlatform.Original;
 
             Endianness = EndianFormat.LittleEndian;
-
+            
             using (var tagsStream = OpenFileStream(TagsFile))
             {
                 FindVersion(new EndianReader(tagsStream));
@@ -51,8 +52,8 @@ namespace TagTool.Cache.HaloOnline
             }
 
             DisplayName = Version.ToString();
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
           
             ResourceCaches = new ResourceCachesHaloOnline(this);
         }
@@ -80,7 +81,7 @@ namespace TagTool.Cache.HaloOnline
                 
 
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
+            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708, Platform);
 
             TagCacheHaloOnlineHeader header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(header.CreationTime, out var closestVersion)))

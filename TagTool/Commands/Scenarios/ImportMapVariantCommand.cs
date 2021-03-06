@@ -51,7 +51,7 @@ namespace TagTool.Commands.Scenarios
             using (var stream = sandboxMapFile.OpenRead())
             {
                 var reader = new EndianReader(stream);
-                var blf = new Blf(Cache.Version);
+                var blf = new Blf(Cache.Version, Cache.Platform);
                 if (!blf.Read(reader))
                     return new TagToolError(CommandError.FileType, "Not a valid sandbox.map file");
 

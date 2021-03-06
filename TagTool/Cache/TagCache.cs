@@ -11,8 +11,8 @@ namespace TagTool.Cache
 {
     public abstract class TagCache
     {
-        // TODO: refactor TagGroup to contain a string instead of string ID
         public CacheVersion Version;
+        public CachePlatform CachePlatform;
         public TagDefinitions TagDefinitions;
         public virtual IEnumerable<CachedTag> TagTable { get; }
         public int Count => TagTable.Count();
@@ -52,7 +52,7 @@ namespace TagTool.Cache
 
             try
             {
-                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
+                var structure = TagStructure.GetTagStructureInfo(type, Version, CachePlatform).Structure;
 
                 if (structure == null)
                 {
@@ -211,7 +211,7 @@ namespace TagTool.Cache
 
             if (type != null)
             {
-                var attribute = TagStructure.GetTagStructureAttribute(type);
+                var attribute = TagStructure.GetTagStructureAttribute(type, Version, CachePlatform);
                 result = new Tag(attribute.Tag);
                 return true;
             }
@@ -252,7 +252,7 @@ namespace TagTool.Cache
             if (TryGetTag<T>(name, out var result))
                 return result;
 
-            var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
+            var attribute = TagStructure.GetTagStructureAttribute(typeof(T), Version, CachePlatform);
             var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
 
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");

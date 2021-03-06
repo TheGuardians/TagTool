@@ -9,10 +9,14 @@ using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Tags.Definitions;
-using TagTool.Tags.Definitions.Gen1;
+using TagTool.Bitmaps;
+using TagTool.Bitmaps.Utils;
+using TagTool.Bitmaps.DDS;
+
+using TagTool.Tags.Definitions.Gen2;
 using TagTool.Audio.Converter;
 using TagTool.Audio;
+using TagTool.Cache.Gen2;
 
 namespace TagTool.Commands
 {
@@ -24,52 +28,6 @@ namespace TagTool.Commands
         public TestCommand(GameCache cache) : base(false, "Test", "Test", "Test", "Test")
         {
             Cache = cache;
-        }
-
-        public void RegenShaderGLVS()
-        {
-            using (var stream = Cache.OpenCacheReadWrite())
-            {
-                var generator = new HaloShaderGenerator.Shader.ShaderGenerator();
-                // recompile glvs
-
-                var tag = Cache.TagCache.GetTag(@"shaders\shader_shared_vertex_shaders", "glvs");
-
-                var glvs = Cache.Deserialize<GlobalVertexShader>(stream, tag);
-                // world rigid skinned
-                for (int i = 0; i < 3; i++)
-                {
-                    var vertexBlock = glvs.VertexTypes[i];
-                    for (int j = 0; j < vertexBlock.DrawModes.Count; j++)
-                    {
-                        var entryPoint = vertexBlock.DrawModes[j];
-                        var entryPointEnum = (ShaderStage)j;
-                        if (entryPoint.ShaderIndex != -1)
-                        {
-                            if (generator.IsEntryPointSupported(entryPointEnum) && generator.IsVertexShaderShared(entryPointEnum))
-                            {
-                                var result = generator.GenerateSharedVertexShader((HaloShaderGenerator.Globals.VertexType)i, entryPointEnum);
-                                glvs.Shaders[entryPoint.ShaderIndex] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateVertexShaderBlock(Cache, result);
-                            }
-                        }
-                    }
-                }
-
-                Cache.Serialize(stream, tag, glvs);
-
-                // recompile glps
-
-                tag = Cache.TagCache.GetTag(@"shaders\shader_shared_pixel_shaders", "glps");
-                var glps = Cache.Deserialize<GlobalPixelShader>(stream, tag);
-
-                for (int i = 0; i < 2; i++)
-                {
-                    var result = generator.GenerateSharedPixelShader(ShaderStage.Shadow_Generate, 2, i);
-                    glps.Shaders[i] = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GeneratePixelShaderBlock(Cache, result);
-                }
-                Cache.Serialize(stream, tag, glps);
-
-            }
         }
 
         public byte[] GetCacheRawData(uint resourceAddress, int size)
@@ -118,43 +76,287 @@ namespace TagTool.Commands
             if (args.Count > 0)
                 return false;
 
+            var destDirectory = "Sounds";
+
+            using(var stream = File.OpenRead("test.wma"))
+            using(var reader = new EndianReader(stream, EndianFormat.LittleEndian))
+            {
+                ASFHeader header = new ASFHeader();
+                header.Read(reader);
+            }
+
+
+
             using (var stream = Cache.OpenCacheRead())
             {
-                //var ugh = Cache.Deserialize<SoundCacheFileGestalt>(stream, Cache.TagCache.GetTag("i've got a lovely bunch of coconuts.ugh!"));
+                var ughShared = Cache.Version == CacheVersion.Halo2Vista ? (Cache as GameCacheGen2).VistaSharedTagCache.TagCache.FindFirstInGroup("ugh!") : null;
+                var ugh = Cache.TagCache.FindFirstInGroup("ugh!");
 
+                SoundCacheFileGestalt sharedSoundCacheGestalt = ughShared != null ? Cache.Deserialize<SoundCacheFileGestalt>(stream, ughShared) : null;
+                SoundCacheFileGestalt fileSoundCacheGestalt = Cache.Deserialize<SoundCacheFileGestalt>(stream, ugh);
 
                 foreach (var tag in Cache.TagCache.NonNull())
                 {
-                    if (tag.IsInGroup("snd!"))
+                    if (tag.IsInGroup("snd!") && tag.Name.Contains("music"))
                     {
-                        var soundTag = Cache.Deserialize<TagTool.Tags.Definitions.Sound>(stream, tag);
+                        var soundCacheGestalt = (tag as CachedTagGen2).IsShared ? sharedSoundCacheGestalt : fileSoundCacheGestalt;
 
-                        if (soundTag.PlatformCodec.Compression == Compression.FSB4)
-                        {
-                            Console.WriteLine($"{tag.Name}");
-                        }
 
-                        /*
-                        foreach (var pitchRange in soundTag.PitchRanges)
+                        var prefixFilename = tag.Name.Replace('\\', '_').Replace(' ', '_').ToLower();
+
+                        var sound = Cache.Deserialize<Sound>(stream, tag);
+                        // Console.WriteLine($"Processing {tag.Name}.snd!");
+
+                        var channels = Encoding.GetChannelCount(sound.Encoding);
+                        var sampleRate = sound.SampleRate.GetSampleRateHz();
+
+                        for (int i = 0; i < sound.PitchRangeCount; i++)
                         {
-                            foreach(var permutation in pitchRange.Permutations)
+                            var pitchRangeIndex = i + sound.PitchRangeIndex;
+                            var pitchRange = soundCacheGestalt.PitchRanges[pitchRangeIndex];
+
+                            for (int j = 0; j < pitchRange.PermutationCount; j++)
                             {
-                                if(permutation.FirstSample != 0)
-                                {
-                                    Console.WriteLine($"{tag.Name} first sample index: {permutation.FirstSample} format: {soundTag.PlatformCodec.Compression}");
-                                    break;
-                                }
+                                var permutationIndex = j + pitchRange.FirstPermutation;
+                                var permutation = soundCacheGestalt.Permutations[permutationIndex];
+
+                                var permutationSize = 0;
                                 
+                                // compute total size
+                                for(int k = 0; k < permutation.ChunkCount; k++)
+                                {
+                                    var permutationChunkIndex = permutation.FirstChunk + k;
+                                    var chunk = soundCacheGestalt.Chunks[permutationChunkIndex];
+                                    permutationSize += chunk.GetSize();
+                                }
+
+                                byte[] data = new byte[permutationSize];
+                                var currentOffset = 0;
+
+                                // move Data
+                                for (int k = 0; k < permutation.ChunkCount; k++)
+                                {
+                                    var permutationChunkIndex = permutation.FirstChunk + k;
+                                    var chunk = soundCacheGestalt.Chunks[permutationChunkIndex];
+                                    var chunkSize = chunk.GetSize();
+                                    byte[] chunkData = (Cache.ResourceCache as ResourceCacheGen2).GetResourceDataFromHandle(chunk.ResourceReference, chunkSize);
+                                    Array.Copy(chunkData, 0, data, currentOffset, chunkSize);
+                                    currentOffset += chunkSize;
+                                }
+
+                                // convert and save sound
+
+                                BlamSound blamSound = SoundConverter.ConvertGen2Sound(Cache, soundCacheGestalt, sound, i, j, data, Compression.Tagtool_WAV, false, "", tag.Name);
+                                var wavFileName = prefixFilename + $"_{i}_{j}.wav";
+                                var outputPath = $"Sounds\\{wavFileName}";
+
+
+                                if (File.Exists(outputPath))
+                                    File.Delete(outputPath);
+
+                                Console.WriteLine($"{wavFileName}: pitch range {i}, permutation {j} sample count: {blamSound.SampleCount}");
+                                using (EndianWriter output = new EndianWriter(new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+                                {
+                                    output.WriteBlock(blamSound.Data);
+                                }
                             }
-                        }*/
-
-
+                        }
                     }
                 }
             }
 
             return true;
         }
+
+        /*
+        public object ExecuteSoundHalo1(List<string> args)
+        {
+            if (args.Count > 0)
+                return false;
+
+            var destDirectory = "Sounds";
+
+            using (var stream = Cache.OpenCacheRead())
+            {
+                foreach(var tag in Cache.TagCache.NonNull())
+                {
+                    if (tag.IsInGroup("snd!"))
+                    {
+                        var prefixFilename = tag.Name.Replace('\\', '_').Replace(' ', '_').ToLower();
+
+                        var sound = Cache.Deserialize<Sound>(stream, tag);
+                        Console.WriteLine($"Processing {tag.Name}.snd!");
+
+                        for(int i = 0; i < sound.PitchRanges.Count; i++)
+                        {
+                            var pitchRange = sound.PitchRanges[i];
+                            for(int j = 0; j < pitchRange.Permutations.Count; j++)
+                            {
+                                var permutation = pitchRange.Permutations[j];
+
+                                byte[] data = (Cache as GameCacheGen1).SoundResources.GetResourceData((int)permutation.Samples.Size, (int)permutation.Samples.Gen1ExternalOffset);
+                                
+
+                                var channels = sound.Encoding == Sound.EncodingValue.Mono ? 1 : 2;
+                                var sampleRate = sound.SampleRate == Sound.SampleRateValue._22khz ? 22050 : 44100;
+
+                                var fileName = prefixFilename + $"_{i}_{j}.adpcm";
+                                var wavFileName = prefixFilename + $"_{i}_{j}.wav";
+                                var oggFileName = prefixFilename + $"_{i}_{j}.ogg";
+
+                                if (sound.Compression == Sound.CompressionValue.XboxAdpcm || sound.Compression == Sound.CompressionValue.ImaAdpcm)
+                                {
+                                    var soundFile = new XboxADPCM(data, channels, sampleRate);
+
+                                    using (var fileStream = File.Create(Path.Combine(destDirectory, fileName)))
+                                    using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                                    {
+                                        soundFile.Write(writer);
+                                    }
+
+                                    SoundConverter.ConvertADPCMToWAV($"Sounds\\{fileName}", $"Sounds\\{wavFileName}");
+
+                                    if (File.Exists($"Sounds\\{fileName}"))
+                                        File.Delete($"Sounds\\{fileName}");
+                                }
+                                else if(sound.Compression == Sound.CompressionValue.None)
+                                {
+                                    Console.WriteLine("Found PCM sound data");
+                                    var soundFile = new WAVFile(data, channels, sampleRate);
+                                    using (var fileStream = File.Create(Path.Combine(destDirectory, wavFileName)))
+                                    using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                                    {
+                                        soundFile.Write(writer);
+                                    }
+                                }
+                                else if(sound.Compression == Sound.CompressionValue.Ogg)
+                                {
+                                    using (var fileStream = File.Create(Path.Combine(destDirectory, oggFileName)))
+                                    using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                                    {
+                                        writer.Write(data);
+                                    }
+
+                                    SoundConverter.ConvertADPCMToWAV($"Sounds\\{oggFileName}", $"Sounds\\{wavFileName}");
+
+                                    if (File.Exists($"Sounds\\{oggFileName}"))
+                                        File.Delete($"Sounds\\{oggFileName}");
+                                }
+                                
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public object ExecuteBitmapHalo1(List<string> args)
+        {
+            if (args.Count > 0)
+                return false;
+
+            var destDirectory = "Bitmaps";
+
+            using (var stream = Cache.OpenCacheRead())
+            {
+                foreach (var tag in Cache.TagCache.NonNull())
+                {
+                    if (tag.IsInGroup("bitm"))
+                    {
+                        var fileName = tag.Name.Replace('\\', '_').Replace(' ', '_').ToLower() + ".dds";
+
+                        var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
+                        Console.WriteLine($"Processing {tag.Name}.bitm");
+
+                        foreach (var image in bitmap.Bitmaps)
+                        {
+                            if (image.ResourceSize <= 0 || image.ResourceOffset < 0)
+                            {
+                                Console.WriteLine("Invalid resource for bitmap.");
+                                continue;
+                            }
+
+                            byte[] data = (Cache as GameCacheGen1).BitmapResources.GetResourceData((int)image.ResourceSize, image.ResourceOffset);
+
+                            BaseBitmap resultBitmap = new BaseBitmap();
+
+                            resultBitmap.Width = image.Width;
+                            resultBitmap.Height = image.Height;
+                            resultBitmap.MipMapCount = image.MipmapCount;
+                            resultBitmap.Data = data;
+
+                            switch (image.Type)
+                            {
+                                case Bitmap.BitmapDataBlock.TypeValue._2dTexture:
+                                    resultBitmap.Type = BitmapType.Texture2D;
+                                    break;
+                                case Bitmap.BitmapDataBlock.TypeValue._3dTexture:
+                                    resultBitmap.Type = BitmapType.Texture3D;
+                                    break;
+                                case Bitmap.BitmapDataBlock.TypeValue.CubeMap:
+                                    resultBitmap.Type = BitmapType.CubeMap;
+                                    break;
+                                case Bitmap.BitmapDataBlock.TypeValue.White:
+                                    Console.WriteLine("Unknown bitmap type White");
+                                    continue;
+                            }
+
+                            switch (image.Format)
+                            {
+                                case Bitmap.BitmapDataBlock.FormatValue.Dxt1:
+                                    resultBitmap.Format = BitmapFormat.Dxt1;
+                                    break;
+
+                                case Bitmap.BitmapDataBlock.FormatValue.Dxt3:
+                                    resultBitmap.Format = BitmapFormat.Dxt3;
+                                    break;
+
+                                case Bitmap.BitmapDataBlock.FormatValue.Dxt5:
+                                    resultBitmap.Format = BitmapFormat.Dxt5;
+                                    break;
+
+                                case Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
+                                    resultBitmap.Format = BitmapFormat.A8R8G8B8;
+                                    break;
+
+                                case Bitmap.BitmapDataBlock.FormatValue.A8:
+                                    resultBitmap.Format = BitmapFormat.A8;
+                                    break;
+
+
+                                case Bitmap.BitmapDataBlock.FormatValue.Y8:
+                                    resultBitmap.Format = BitmapFormat.Y8;
+                                    break;
+
+
+                                case Bitmap.BitmapDataBlock.FormatValue.A8y8:
+                                    resultBitmap.Format = BitmapFormat.A8Y8;
+                                    break;
+
+                                default:
+                                    Console.WriteLine($"Format {image.Format} requires conversion");
+                                    continue;
+                            }
+
+                            DDSFile bitmapFile = new DDSFile(resultBitmap);
+
+                            using (var fileStream = File.Create(Path.Combine(destDirectory, fileName)))
+                            using (var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                            {
+                                bitmapFile.Write(writer);
+                            }
+                            Console.WriteLine("Successfully extracted!");
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+    */
     }
 }
 

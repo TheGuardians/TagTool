@@ -47,8 +47,9 @@ namespace TagTool.Commands.Files
                 return new TagToolError(CommandError.CustomMessage, "Invalid image");
 
             CacheVersion version = CacheVersion.HaloOnline106708;
+            CachePlatform cachePlatform = CachePlatform.Original;
 
-            Blf blf = new Blf(version)
+            Blf blf = new Blf(version, cachePlatform)
             {
                 StartOfFile = new BlfChunkStartOfFile
                 {

@@ -68,12 +68,12 @@ namespace TagTool.BlamFile
 
         private Blf GenerateBlf(ContentItemMetadata metadata, MapVariant mapVariant)
         {
-            var blf = new Blf(CacheVersion.HaloOnline106708);
+            var blf = new Blf(CacheVersion.HaloOnline106708, CachePlatform.Original);
 
             blf.StartOfFile = new BlfChunkStartOfFile()
             {
                 Signature = new Tag("_blf"),
-                Length = (int)TagStructure.GetStructureSize(typeof(BlfChunkStartOfFile), _cache.Version),
+                Length = (int)TagStructure.GetStructureSize(typeof(BlfChunkStartOfFile), _cache.Version, _cache.Platform),
                 MajorVersion = 1,
                 MinorVersion = 2,
                 ByteOrderMarker = -2
@@ -83,7 +83,7 @@ namespace TagTool.BlamFile
             blf.ContentHeader = new BlfContentHeader()
             {
                 Signature = new Tag("chdr"),
-                Length = (int)TagStructure.GetStructureSize(typeof(BlfContentHeader), _cache.Version),
+                Length = (int)TagStructure.GetStructureSize(typeof(BlfContentHeader), _cache.Version, _cache.Platform),
                 MajorVersion = 9,
                 MinorVersion = 3,
                 BuildVersion = 0xffffa0d4,
@@ -95,7 +95,7 @@ namespace TagTool.BlamFile
             blf.MapVariant = new BlfMapVariant()
             {
                 Signature = new Tag("mapv"),
-                Length = (int)TagStructure.GetStructureSize(typeof(BlfMapVariant), _cache.Version),
+                Length = (int)TagStructure.GetStructureSize(typeof(BlfMapVariant), _cache.Version, _cache.Platform),
                 MajorVersion = 12,
                 MinorVersion = 1,
                 MapVariant = mapVariant,
@@ -106,7 +106,7 @@ namespace TagTool.BlamFile
             blf.MapVariantTagNames = new BlfMapVariantTagNames()
             {
                 Signature = new Tag("tagn"),
-                Length = (int)TagStructure.GetStructureSize(typeof(BlfMapVariantTagNames), _cache.Version),
+                Length = (int)TagStructure.GetStructureSize(typeof(BlfMapVariantTagNames), _cache.Version, _cache.Platform),
                 MajorVersion = 1,
                 MinorVersion = 0,
                 Names = Enumerable.Range(0, 256).Select(x => new TagName() { Name = "" }).ToArray()
@@ -125,7 +125,7 @@ namespace TagTool.BlamFile
             blf.EndOfFile = new BlfChunkEndOfFile()
             {
                 Signature = new Tag("_eof"),
-                Length = (int)TagStructure.GetStructureSize(typeof(BlfChunkEndOfFile), _cache.Version),
+                Length = (int)TagStructure.GetStructureSize(typeof(BlfChunkEndOfFile), _cache.Version, _cache.Platform),
                 MajorVersion = 1,
                 MinorVersion = 1,
                 AuthenticationDataSize = 0,

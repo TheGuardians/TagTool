@@ -22,6 +22,22 @@ namespace TagTool.Audio
                     return 1;
             }
         }
+
+        public static int GetChannelCount(Gen2Encoding value)
+        {
+            switch (value)
+            {
+                case Gen2Encoding.Codec:
+                    return 2;
+
+                case Gen2Encoding.Stereo:
+                    return 2;
+
+                case Gen2Encoding.Mono:
+                default:
+                    return 1;
+            }
+        }
     }
 
     public enum EncodingValue : sbyte
@@ -32,7 +48,7 @@ namespace TagTool.Audio
         _51Surround
     }
 
-    public enum EncodingH2 : sbyte
+    public enum Gen2Encoding : sbyte
     {
         Mono,
         Stereo,

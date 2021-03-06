@@ -222,7 +222,7 @@ namespace TagTool.Commands
 
         private object CopyStructure(TagStructure data, Type type, GameCacheHaloOnline srcCacheContext, Stream srcStream, GameCacheHaloOnline destCacheContext, Stream destStream)
         {
-            foreach (var field in data.GetTagFieldEnumerable(srcCacheContext.Version))
+            foreach (var field in data.GetTagFieldEnumerable(srcCacheContext.Version, srcCacheContext.Platform))
                 field.SetValue(data, CopyData(field.GetValue(data), srcCacheContext, srcStream, destCacheContext, destStream));
 
             return data;

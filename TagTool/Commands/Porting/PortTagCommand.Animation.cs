@@ -67,9 +67,9 @@ namespace TagTool.Commands.Porting
                     }
 
                     using (var sourceStream = new MemoryStream(animationData))
-                    using (var sourceReader = new EndianReader(sourceStream, CacheVersionDetection.IsLittleEndian(BlamCache.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+                    using (var sourceReader = new EndianReader(sourceStream, CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
                     using (var destStream = new MemoryStream())
-                    using (var destWriter = new EndianWriter(destStream, CacheVersionDetection.IsLittleEndian(CacheContext.Version) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+                    using (var destWriter = new EndianWriter(destStream, CacheVersionDetection.IsLittleEndian(CacheContext.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
                     {
                         var dataContext = new DataSerializationContext(sourceReader, destWriter);
 

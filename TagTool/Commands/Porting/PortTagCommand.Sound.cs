@@ -190,7 +190,7 @@ namespace TagTool.Commands.Porting
             var extraInfo = new ExtraInfo()
             {
                 LanguagePermutations = new List<ExtraInfo.LanguagePermutation>(),
-                EncodedPermutationSections = new List<ExtraInfo.EncodedPermutationSection>()
+                EncodedPermutationSections = new List<ExtraInfo.EncodedDialogueSectionBlock>()
             };
 
             for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)

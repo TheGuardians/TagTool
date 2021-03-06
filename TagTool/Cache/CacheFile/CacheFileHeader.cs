@@ -15,9 +15,9 @@ namespace TagTool.Cache
                 return false;
         }
 
-        public static CacheFileHeader Read(CacheVersion version, EndianReader reader)
+        public static CacheFileHeader Read(CacheVersion version, CachePlatform cachePlatform, EndianReader reader)
         {
-            var deserializer = new TagDeserializer(version);
+            var deserializer = new TagDeserializer(version, cachePlatform);
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
 

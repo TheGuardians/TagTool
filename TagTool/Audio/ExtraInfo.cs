@@ -6,6 +6,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Audio
 {
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
@@ -14,8 +15,8 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<LanguagePermutation> LanguagePermutations;
 
-        [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<EncodedPermutationSection> EncodedPermutationSections;
+        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+        public List<EncodedDialogueSectionBlock> EncodedPermutationSections;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown1;
@@ -28,6 +29,9 @@ namespace TagTool.Audio
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public TagResourceReference FacialAnimationResource;
+
+        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+        public GlobalGeometryBlockInfoStruct GeometryBlockInfo;
 
 
         [TagStructure(Size = 0xC)]
@@ -83,15 +87,18 @@ namespace TagTool.Audio
             }
         }
 
-        [TagStructure(Size = 0x2C)]
-        public class EncodedPermutationSection : TagStructure
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3Beta)]
+        public class EncodedDialogueSectionBlock : TagStructure
 		{
             public byte[] EncodedData;
-            public List<SoundDialogueInfoBlock> SoundDialogueInfo;
+            public List<PermutationDialogueInfo> SoundDialogueInfo;
+
+            [TagField(MinVersion = CacheVersion.Halo3Beta)]
             public List<UnknownBlock> Unknown;
 
             [TagStructure(Size = 0x10)]
-            public class SoundDialogueInfoBlock : TagStructure
+            public class PermutationDialogueInfo : TagStructure
 			{
                 public uint MouthDataOffset;
                 public uint MouthDataLength;
@@ -132,6 +139,44 @@ namespace TagTool.Audio
                         public sbyte Unknown6;
                         public sbyte Unknown7;
                     }
+                }
+            }
+        }
+
+        [TagStructure(Size = 0x24, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+        public class GlobalGeometryBlockInfoStruct : TagStructure
+        {
+            public int BlockOffset;
+            public int BlockSize;
+            public int SectionDataSize;
+            public int ResourceDataSize;
+            public List<GlobalGeometryBlockResourceBlock> Resources;
+
+            public uint Unknown1;
+
+            public short OwnerTagSectionOffset;
+
+            public ushort Unknown2;
+            public uint Unknown3;
+
+            [TagStructure(Size = 0x10)]
+            public class GlobalGeometryBlockResourceBlock : TagStructure
+            {
+                public TypeValue Type;
+
+                public sbyte Unknown1;
+                public ushort Unknown2;
+
+                public short PrimaryLocator;
+                public short SecondaryLocator;
+                public int ResourceDataSize;
+                public int ResourceDataOffset;
+
+                public enum TypeValue : sbyte
+                {
+                    TagBlock,
+                    TagData,
+                    VertexBuffer
                 }
             }
         }

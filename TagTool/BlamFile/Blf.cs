@@ -13,6 +13,7 @@ namespace TagTool.BlamFile
     public class Blf
     {
         public CacheVersion Version;
+        public CachePlatform CachePlatform;
         public EndianFormat Format;
 
         public BlfFileContentFlags ContentFlags;
@@ -33,9 +34,10 @@ namespace TagTool.BlamFile
         public BlfMapImage MapImage;
         public byte[] JpegImage;
 
-        public Blf(CacheVersion version)
+        public Blf(CacheVersion version, CachePlatform cachePlatform)
         {
             Version = version;
+            CachePlatform = cachePlatform;
         }
 
         public bool Read(EndianReader reader)
@@ -43,7 +45,7 @@ namespace TagTool.BlamFile
             if (!IsValid(reader))
                 return false;
 
-            var deserializer = new TagDeserializer(Version);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
 
             while (!reader.EOF)
             {
@@ -154,7 +156,7 @@ namespace TagTool.BlamFile
             if (!ContentFlags.HasFlag(BlfFileContentFlags.StartOfFile) || !ContentFlags.HasFlag(BlfFileContentFlags.EndOfFile))
                 return false;
 
-            TagSerializer serializer = new TagSerializer(Version, Format);
+            TagSerializer serializer = new TagSerializer(Version, CachePlatform, Format);
             writer.Format = Format;
             var dataContext = new DataSerializationContext(writer);
             
@@ -237,7 +239,7 @@ namespace TagTool.BlamFile
                 return false;
             }
 
-            var deserializer = new TagDeserializer(Version);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
             var dataContext = new DataSerializationContext(reader);
 
             var header = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
@@ -258,7 +260,7 @@ namespace TagTool.BlamFile
         {
             reader.Format = EndianFormat.LittleEndian;
             var startOfFile = reader.Position;
-            var chunkHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(BlfChunkHeader), Version).TotalSize;
+            var chunkHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(BlfChunkHeader), Version, CachePlatform).TotalSize;
             reader.SeekTo(startOfFile + chunkHeaderSize);
             if(reader.ReadInt16() == -2)
             {

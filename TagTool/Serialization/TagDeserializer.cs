@@ -19,14 +19,17 @@ namespace TagTool.Serialization
     public class TagDeserializer
     {
         public CacheVersion Version { get; }
+        public CachePlatform CachePlatform { get; }
 
         /// <summary>
         /// Constructs a tag deserializer for a specific engine version.
         /// </summary>
         /// <param name="version">The engine version to target.</param>
-        public TagDeserializer(CacheVersion version)
+        /// <param name="cachePlatform"></param>
+        public TagDeserializer(CacheVersion version, CachePlatform cachePlatform)
         {
             Version = version;
+            CachePlatform = cachePlatform;
         }
 
         /// <summary>
@@ -49,7 +52,7 @@ namespace TagTool.Serialization
         /// <returns>The object that was read.</returns>
         public object Deserialize(ISerializationContext context, Type structureType)
         {
-			var info = TagStructure.GetTagStructureInfo(structureType, Version);
+			var info = TagStructure.GetTagStructureInfo(structureType, Version, CachePlatform);
 			var reader = context.BeginDeserialize(info);
             var result = DeserializeStruct(reader, context, info);
             context.EndDeserialize(info, result);
@@ -69,7 +72,7 @@ namespace TagTool.Serialization
             var baseOffset = reader.BaseStream.Position;
             var instance = Activator.CreateInstance(info.Types[0]);
 
-			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info.Types[0], info.Version))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info.Types[0], info.Version, info.CachePlatform))
                 DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
 
 			if (info.TotalSize > 0)
@@ -91,7 +94,9 @@ namespace TagTool.Serialization
         {
             var attr = tagFieldInfo.Attribute;
 
-            if (attr.Flags.HasFlag(Runtime) || !CacheVersionDetection.AttributeInCacheVersion(attr, Version))
+            var isInVersion = CacheVersionDetection.AttributeInCacheVersion(attr, Version) && CacheVersionDetection.AttributeInPlatform(attr, CachePlatform);
+
+            if (attr.Flags.HasFlag(Runtime) || !isInVersion)
                 return;
 
             if (tagFieldInfo.FieldType.IsArray && attr.Flags.HasFlag(Relative))
@@ -101,8 +106,10 @@ namespace TagTool.Serialization
                     attr.Field,
                     BindingFlags.Instance | BindingFlags.Public);
 
-                var attr2 = TagStructure.GetTagFieldAttribute(type, field);
-                if(CacheVersionDetection.AttributeInCacheVersion(attr2, Version))
+                var attr2 = TagStructure.GetTagFieldAttribute(type, field, CacheVersion.Unknown, CachePlatform.All);
+
+                isInVersion = CacheVersionDetection.AttributeInCacheVersion(attr2, Version) && CacheVersionDetection.AttributeInPlatform(attr2, CachePlatform);
+                if (isInVersion)
                 {
                     attr.Length = (int)Convert.ChangeType(field.GetValue(instance), typeof(int));
                 }
@@ -297,6 +304,7 @@ namespace TagTool.Serialization
             if (valueType == typeof(Angle))
                 return Angle.FromRadians(reader.ReadSingle(compression));
 
+
             if (valueType == typeof(DatumHandle))
                 return new DatumHandle(reader.ReadUInt32());
 
@@ -326,8 +334,14 @@ namespace TagTool.Serialization
 			if (valueType == typeof(PixelShaderReference))
                 return DeserializePixelShaderReference(reader, context);
 
+            if (valueType == typeof(PlatformUnsignedValue))
+                return DeserializePlatfornUnsignedValue(reader);
+
+            if (valueType == typeof(PlatformSignedValue))
+                return DeserializePlatfornSignedValue(reader);
+
             // Assume the value is a structure
-            return DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(valueType, Version));
+            return DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform));
         }
 
         /// <summary>
@@ -617,7 +631,37 @@ namespace TagTool.Serialization
             return Activator.CreateInstance(rangeType, min, max);
         }
 
-		public PixelShaderReference DeserializePixelShaderReference(EndianReader reader, ISerializationContext context)
+        public PlatformUnsignedValue DeserializePlatfornUnsignedValue(EndianReader reader)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+            switch (platformType)
+            {
+                case PlatformType._64Bit:
+                    return new PlatformUnsignedValue(reader.ReadUInt64());
+
+                default:
+                case PlatformType._32Bit:
+                    return new PlatformUnsignedValue(reader.ReadUInt32());
+                
+            }
+        }
+
+        public PlatformSignedValue DeserializePlatfornSignedValue(EndianReader reader)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+            switch (platformType)
+            {
+                case PlatformType._64Bit:
+                    return new PlatformSignedValue(reader.ReadInt64());
+
+                default:
+                case PlatformType._32Bit:
+                    return new PlatformSignedValue(reader.ReadInt32());
+
+            }
+        }
+
+        public PixelShaderReference DeserializePixelShaderReference(EndianReader reader, ISerializationContext context)
 		{
 			// This reference is a uint32 pointer, we'll be moving the stream position around. Right before returning
 			// from this method 'reader.SeekTo(endPosition)' will bring us to where the serializer expects the next
@@ -632,13 +676,13 @@ namespace TagTool.Serialization
 			var headerOffset = context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			reader.SeekTo(headerOffset);
 
-			var header = (PixelShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(PixelShaderHeader)));
+			var header = (PixelShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(PixelShaderHeader), Version, CachePlatform));
 
 			if (header.ShaderDataAddress == 0)
 				return null;
 
 			var debugHeaderOffset = reader.Position;
-			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader)));
+			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader), Version, CachePlatform));
 
 			if ((debugHeader.Magic >> 16) != 0x102A)
 				return null;
@@ -719,13 +763,13 @@ namespace TagTool.Serialization
 			var headerOffset = context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			reader.SeekTo(headerOffset);
 
-			var header = (VertexShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(VertexShaderHeader)));
+			var header = (VertexShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(VertexShaderHeader), Version, CachePlatform));
 
 			if (header.ShaderDataAddress == 0)
 				return null;
 
 			var debugHeaderOffset = reader.Position;
-			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader)));
+			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader), Version, CachePlatform));
 
 			if ((debugHeader.Magic >> 16) != 0x102A)
 				return null;

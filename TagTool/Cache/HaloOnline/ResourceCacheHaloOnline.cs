@@ -25,6 +25,7 @@ namespace TagTool.Cache.HaloOnline
     public class ResourceCacheHaloOnline
     {
         public CacheVersion Version;
+        public CachePlatform CachePlatform;
         public ResourceCacheHaloOnlineHeader Header;
 
         private List<Resource> Resources;
@@ -37,9 +38,10 @@ namespace TagTool.Cache.HaloOnline
             get { return Resources.Count; }
         }
 
-        public ResourceCacheHaloOnline(CacheVersion version, Stream stream)
+        public ResourceCacheHaloOnline(CacheVersion version, CachePlatform cachePlatform, Stream stream)
         {
             Version = version;
+            CachePlatform = cachePlatform;
             Resources = new List<Resource>();
             if (stream.Length == 0)
                 CreateEmptyResourceCache(stream);
@@ -66,7 +68,7 @@ namespace TagTool.Cache.HaloOnline
             var addresses = new List<uint>();
             var sizes = new List<uint>();
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(Version);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
             Header = deserializer.Deserialize<ResourceCacheHaloOnlineHeader>(dataContext);
 
             reader.SeekTo(Header.ResourceTableOffset);
@@ -114,7 +116,7 @@ namespace TagTool.Cache.HaloOnline
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708, CachePlatform.Original);
             serializer.Serialize(dataContext, Header);
             stream.Position = 0;
         }

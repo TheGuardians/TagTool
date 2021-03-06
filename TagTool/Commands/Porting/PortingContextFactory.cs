@@ -23,23 +23,20 @@ namespace TagTool.Commands.Porting
 
         public static SoundCacheFileGestalt LoadSoundGestalt(GameCache cache, Stream cacheStream)
         {
-            CachedTag blamTag = null;
-
-            foreach (var tag in cache.TagCache.TagTable)
-            {
-                if (tag.Group.Tag == "ugh!")
-                {
-                    blamTag = tag;
-                    break;
-                }
-            }
-
+            CachedTag blamTag = cache.TagCache.FindFirstInGroup("ugh!");
             if (blamTag == null)
                 return null;
 
-            SoundCacheFileGestalt result = cache.Deserialize<SoundCacheFileGestalt>(cacheStream, blamTag);
+            return cache.Deserialize<SoundCacheFileGestalt>(cacheStream, blamTag);
+        }
 
-            return result;
+        public static TagTool.Tags.Definitions.Gen2.SoundCacheFileGestalt LoadGen2SoundGestalt(GameCache cache, Stream cacheStream)
+        {
+            CachedTag blamTag = cache.TagCache.FindFirstInGroup("ugh!");
+            if (blamTag == null)
+                return null;
+
+            return cache.Deserialize<TagTool.Tags.Definitions.Gen2.SoundCacheFileGestalt>(cacheStream, blamTag);
         }
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)

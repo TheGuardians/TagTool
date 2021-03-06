@@ -74,6 +74,8 @@ namespace TagTool.Cache.Gen2
         public TagCacheGen2(EndianReader reader, MapFile mapFile)
         {
             Version = mapFile.Version;
+            CachePlatform = mapFile.CachePlatform;
+
             TagDefinitions = new TagDefinitionsGen2();
             IsShared = mapFile.Header.GetCacheType() == CacheFileType.Shared || 
                         mapFile.Header.GetCacheType() == CacheFileType.SharedCampaign;
@@ -82,13 +84,13 @@ namespace TagTool.Cache.Gen2
             reader.SeekTo(tagDataSectionOffset);
 
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(mapFile.Version);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
             Header = deserializer.Deserialize<TagCacheGen2Header>(dataContext);
 
 
 
             uint tagCacheVirtualAddress;
-            var headerSize = TagStructure.GetStructureSize(typeof(TagCacheGen2Header), Version);
+            var headerSize = TagStructure.GetStructureSize(typeof(TagCacheGen2Header), Version, CachePlatform);
             if (Version > CacheVersion.Halo2Beta)
                 tagCacheVirtualAddress = (Header.TagGroupsOffset - headerSize);
             else
@@ -209,7 +211,7 @@ namespace TagTool.Cache.Gen2
             for (uint i = 0u; i < sbspCount; i++)
             {
                 // seek to the sbsp reference offset
-                uint sbspRefSize = TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspReferenceBlock), mapFile.Version);
+                uint sbspRefSize = TagStructure.GetStructureSize(typeof(Scenario.ScenarioStructureBspReferenceBlock), Version, CachePlatform);
                 reader.BaseStream.Position = (sbspsRefsAddress + i * sbspRefSize) + magic;
 
                 // read the tag data addresses from the cache file globals sbsp header

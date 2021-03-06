@@ -16,7 +16,7 @@ namespace TagTool.Serialization
     {
         public const int DefaultResourceAlign = 0;
 
-        public ResourceSerializer(CacheVersion version) : base(version) {  }
+        public ResourceSerializer(CacheVersion version, CachePlatform cachePlatform) : base(version, cachePlatform) {  }
 
         /// <summary>
         /// Serializes a tag structure into a context.
@@ -32,7 +32,7 @@ namespace TagTool.Serialization
             var resourceContext = context as ResourceDefinitionSerializationContext;
 
             // Serialize the structure to a data block
-            var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version);
+            var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version, CachePlatform);
             context.BeginSerialize(info);
             var tagStream = new MemoryStream();
             var structBlock = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)context.CreateBlock();
@@ -126,7 +126,7 @@ namespace TagTool.Serialization
             writer.Write(0);
         }
 
-        public override void SerializeTagBlock(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object list, Type listType, TagFieldAttribute valueInfo)
+        public override void SerializeTagBlock(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object list, Type listType, TagFieldAttribute valueInfo)
         {
             if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
                 throw new Exception($"Invalid context type given resource deserialization");
@@ -165,7 +165,7 @@ namespace TagTool.Serialization
             var enumerableList = (System.Collections.IEnumerable)list;
 
             foreach (var val in enumerableList)
-                SerializeValue(version, resourceContext, tagStream, resourceBlock2, val, null, elementType);
+                SerializeValue(resourceContext, tagStream, resourceBlock2, val, null, elementType);
 
             // Ensure the block is aligned correctly
             var align = 0x10;
@@ -201,7 +201,7 @@ namespace TagTool.Serialization
             writer.Write(0);
         }
 
-        public override void SerializeD3DStructure(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
+        public override void SerializeD3DStructure(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
         {
             if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
                 throw new Exception($"Invalid context type given resource deserialization");
@@ -229,7 +229,7 @@ namespace TagTool.Serialization
             // Serialize the value to a temporary block
             var resourceBlock2 = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)context.CreateBlock();
             resourceBlock2.BlockType = addressType;
-            SerializeValue(version, context, tagStream, resourceBlock2, def, null, genericType);
+            SerializeValue(context, tagStream, resourceBlock2, def, null, genericType);
 
             // Finalize the block and write the pointer
 

@@ -203,7 +203,7 @@ namespace TagTool.Commands.Editing
             if (index < 0 || index >= elements.Count)
                 return null;
 
-            foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], Cache.Version))
+            foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], Cache.Version, Cache.Platform))
             {
                 if (info.Attribute == null || !info.Attribute.Flags.HasFlag(Label))
                     continue;

@@ -13,7 +13,7 @@ namespace TagTool.Audio
         /// <summary>
         /// the apparent pitch when these samples are played at their recorded pitch.
         /// </summary>
-        public short NaturalPitch;
+        public short NaturalPitch;  // cents
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public short FirstDeterministicFlagIndex;
@@ -21,12 +21,12 @@ namespace TagTool.Audio
         /// <summary>
         /// the range of pitches that will be represented using this sample.
         /// </summary>
-        public Bounds<short> BendBounds;
+        public Bounds<short> BendBounds;    // cents
 
         /// <summary>
         /// the range of pitches that map to full gain.
         /// </summary>
-        public Bounds<short> FullVolumeBounds;
+        public Bounds<short> MaxGainPitchBounds;    // cents
 
         /// <summary>
         /// the actual pitch will be clamped to this

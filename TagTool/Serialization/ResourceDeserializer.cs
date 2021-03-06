@@ -19,7 +19,7 @@ namespace TagTool.Serialization
     public class ResourceDeserializer : TagDeserializer
     {
 
-        public ResourceDeserializer(CacheVersion version) : base(version) { }
+        public ResourceDeserializer(CacheVersion version, CachePlatform cachePlatform) : base(version, cachePlatform) { }
 
         /// <summary>
         /// Deserializes a value which is pointed to by an address.

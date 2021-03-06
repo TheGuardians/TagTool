@@ -15,7 +15,7 @@ namespace TagTool.Tags
         /// </summary>
         /// <param name="structureType">The tag structure type to analyze.</param>
         public TagStructureInfo(Type structureType)
-            : this(structureType, CacheVersion.Unknown)
+            : this(structureType, CacheVersion.Unknown, CachePlatform.All)
         {
         }
 
@@ -24,19 +24,24 @@ namespace TagTool.Tags
         /// </summary>
         /// <param name="structureType">The tag structure type to analyze.</param>
         /// <param name="version">The engine version to compare attributes against.</param>
-        public TagStructureInfo(Type structureType, CacheVersion version)
+        /// <param name="cachePlatform"></param>
+        public TagStructureInfo(Type structureType, CacheVersion version, CachePlatform cachePlatform)
         {
             Version = version;
+            CachePlatform = cachePlatform;
             GroupTag = new Tag(-1);
             ParentGroupTag = new Tag(-1);
             GrandparentGroupTag = new Tag(-1);
-            Analyze(structureType, version);
+            Analyze(structureType, version, cachePlatform);
         }
 
         /// <summary>
         /// Gets the engine version that was used to construct the info object.
         /// </summary>
         public CacheVersion Version { get; private set; }
+
+
+        public CachePlatform CachePlatform { get; private set; }
 
         /// <summary>
         /// Gets the structure types in the structure's inheritance hierarchy in order from child to base.
@@ -69,19 +74,19 @@ namespace TagTool.Tags
         /// </summary>
         public Tag GrandparentGroupTag { get; private set; }
 
-        private void Analyze(Type mainType, CacheVersion version)
+        private void Analyze(Type mainType, CacheVersion version, CachePlatform cachePlatform)
         {
             // Get the attribute for the main structure type
-            Structure = TagStructure.GetTagStructureAttribute(mainType, version);
+            Structure = TagStructure.GetTagStructureAttribute(mainType, version, cachePlatform);
             if (Structure == null)
-                throw new InvalidOperationException($"No `{nameof(TagStructureAttribute)}` for `{version.ToString()}` found on `{mainType.Name}`.");
+                throw new InvalidOperationException($"No `{nameof(TagStructureAttribute)}` for `{version}` platform `{cachePlatform}` found on `{mainType.Name}`.");
 
 			// Scan through the type's inheritance hierarchy and analyze each TagStructure attribute
 			var currentType = mainType;
             Types = new List<Type>();
             while (currentType != null)
             {
-                var attrib = (currentType != mainType) ? TagStructure.GetTagStructureAttribute(currentType, version) : Structure;
+                var attrib = (currentType != mainType) ? TagStructure.GetTagStructureAttribute(currentType, version, cachePlatform) : Structure;
                 if (attrib != null)
                 {
                     Types.Add(currentType);

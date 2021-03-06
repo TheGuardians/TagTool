@@ -20,16 +20,19 @@ namespace TagTool.Serialization
 
         public CacheVersion Version { get; }
         public EndianFormat Format { get; }
+        public CachePlatform CachePlatform { get; }
 
         /// <summary>
         /// Constructs a tag serializer for a specific engine version.
         /// </summary>
         /// <param name="version">The engine version to target.</param>
+        /// <param name="cachePlatform">Cache platform of the engine</param>
         /// <param name="format">EndianFormat, default to little endian</param>
-        public TagSerializer(CacheVersion version, EndianFormat format=EndianFormat.LittleEndian)
+        public TagSerializer(CacheVersion version, CachePlatform cachePlatform, EndianFormat format=EndianFormat.LittleEndian)
         {
             Version = version;
             Format = format;
+            CachePlatform = cachePlatform;
         }
 
         /// <summary>
@@ -41,7 +44,7 @@ namespace TagTool.Serialization
         public virtual void Serialize(ISerializationContext context, object tagStructure, uint? offset = null)
         {
             // Serialize the structure to a data block
-            var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version);
+            var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version, CachePlatform);
             context.BeginSerialize(info);
             var tagStream = new MemoryStream();
             var structBlock = context.CreateBlock();
@@ -68,7 +71,7 @@ namespace TagTool.Serialization
             var baseOffset = block.Stream.Position;
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info))
-				SerializeProperty(info.Version, context, tagStream, block, structure, tagFieldInfo, baseOffset);
+				SerializeProperty(context, tagStream, block, structure, tagFieldInfo, baseOffset);
 
             // Honor the struct size if it's defined
             if (info.TotalSize > 0)
@@ -86,7 +89,6 @@ namespace TagTool.Serialization
         /// <summary>
         /// Serializes a property.
         /// </summary>
-        /// <param name="version"></param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
@@ -94,7 +96,7 @@ namespace TagTool.Serialization
         /// <param name="tagFieldInfo">The field enumerator.</param>
         /// <param name="baseOffset">The base offset of the structure from the start of its block.</param>
         /// <exception cref="System.InvalidOperationException">Offset for property \ + property.Name + \ is outside of its structure</exception>
-        private void SerializeProperty(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
+        private void SerializeProperty(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
             if (tagFieldInfo.Attribute.Flags.HasFlag(Runtime))
                 return;
@@ -106,15 +108,15 @@ namespace TagTool.Serialization
             {
                 if (objectValue.GetType() == tagFieldInfo.FieldType || tagFieldInfo.FieldType == typeof(CachedTag))
                 {
-                    SerializeValue(version, context, tagStream, block,
+                    SerializeValue(context, tagStream, block,
                                     objectValue, tagFieldInfo.Attribute, tagFieldInfo.FieldType);
                 }
                 else
-                    throw new Exception($"TagFieldInfo.GetValue return type {objectValue.GetType().ToString()} is not the same as the FieldInfo Type {tagFieldInfo.FieldType.ToString()}!");
+                    throw new Exception($"TagFieldInfo.GetValue return type {objectValue.GetType()} is not the same as the FieldInfo Type {tagFieldInfo.FieldType}!");
             }
             else
             {
-                SerializeValue(version, context, tagStream, block,
+                SerializeValue(context, tagStream, block,
                                     objectValue, tagFieldInfo.Attribute, tagFieldInfo.FieldType);
             }
         }
@@ -122,14 +124,13 @@ namespace TagTool.Serialization
         /// <summary>
         /// Serializes a value.
         /// </summary>
-        /// <param name="version"></param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
         /// <param name="val">The value.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
         /// <param name="valueType">Type of the value.</param>
-        public void SerializeValue(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, TagFieldAttribute valueInfo, Type valueType)
+        public void SerializeValue(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, TagFieldAttribute valueInfo, Type valueType)
         {
             // Call the data block's PreSerialize callback to determine if the value should be mutated
             val = block.PreSerialize(valueInfo, val);
@@ -139,7 +140,7 @@ namespace TagTool.Serialization
             if (valueType.IsPrimitive)
                 SerializePrimitiveValue(block.Writer, val, valueType);
             else
-                SerializeComplexValue(version, context, tagStream, block, val, valueInfo, valueType);
+                SerializeComplexValue(context, tagStream, block, val, valueInfo, valueType);
         }
 
         /// <summary>
@@ -193,17 +194,16 @@ namespace TagTool.Serialization
         /// <summary>
         /// Serializes a complex value.
         /// </summary>
-        /// <param name="version"></param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
         /// <param name="value">The value.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
         /// <param name="valueType">Type of the value.</param>
-        private void SerializeComplexValue(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object value, TagFieldAttribute valueInfo, Type valueType)
+        private void SerializeComplexValue(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object value, TagFieldAttribute valueInfo, Type valueType)
         {
             if (valueInfo != null && valueInfo.Flags.HasFlag(Pointer))
-                SerializeIndirectValue(version, context, tagStream, block, value, valueType);
+                SerializeIndirectValue(context, tagStream, block, value, valueType);
             else if (valueType.IsEnum)
                 SerializePrimitiveValue(block.Writer, value, valueType.GetEnumUnderlyingType());
             else if (valueType == typeof(string))
@@ -233,9 +233,9 @@ namespace TagTool.Serialization
                 SerializeColor(block, (ArgbColor)value);
             else if (value is RealBoundingBox boundingBox)
             {
-                SerializeRange(version, context, tagStream, block, boundingBox.XBounds);
-                SerializeRange(version, context, tagStream, block, boundingBox.YBounds);
-                SerializeRange(version, context, tagStream, block, boundingBox.ZBounds);
+                SerializeRange(context, tagStream, block, boundingBox.XBounds);
+                SerializeRange(context, tagStream, block, boundingBox.YBounds);
+                SerializeRange(context, tagStream, block, boundingBox.ZBounds);
             }
             else if (valueType == typeof(RealEulerAngles2d))
                 SerializeEulerAngles(block, (RealEulerAngles2d)value);
@@ -274,21 +274,25 @@ namespace TagTool.Serialization
             else if (valueType == typeof(PixelShaderReference))
                 block.Writer.Write(0); // TODO: fix  (not used in halo online)
             else if (valueType.IsArray)
-                SerializeInlineArray(version, context, tagStream, block, (Array)value, valueInfo, valueType);
+                SerializeInlineArray(context, tagStream, block, (Array)value, valueInfo, valueType);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
-                SerializeTagBlockAsList(version, context, tagStream, block, value, valueType, valueInfo);
+                SerializeTagBlockAsList(context, tagStream, block, value, valueType, valueInfo);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TagBlock<>))
-                SerializeTagBlock(version, context, tagStream, block, value, valueType, valueInfo);
+                SerializeTagBlock(context, tagStream, block, value, valueType, valueInfo);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
-                SerializeD3DStructure(version, context, tagStream, block, value, valueType);
+                SerializeD3DStructure(context, tagStream, block, value, valueType);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
-                SerializeRange(version, context, tagStream, block, value);
+                SerializeRange(context, tagStream, block, value);
+            else if (valueType == typeof(PlatformUnsignedValue))
+                SerializePlatformUnsignedValue(block, (PlatformUnsignedValue)value);
+            else if (valueType == typeof(PlatformSignedValue))
+                SerializePlatformSignedValue(block, (PlatformSignedValue)value);
             else
             {
                 if (value == null)
                     value = Activator.CreateInstance(valueType);
 
-                SerializeStruct(context, tagStream, block, TagStructure.GetTagStructureInfo(valueType, version), value);
+                SerializeStruct(context, tagStream, block, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform), value);
             }
         }
 
@@ -444,14 +448,13 @@ namespace TagTool.Serialization
         /// <summary>
         /// Serializes an inline array.
         /// </summary>
-        /// <param name="version"></param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
         /// <param name="data">The array.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
         /// <param name="valueType">The type of the value.</param>
-        private void SerializeInlineArray(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, Array data, TagFieldAttribute valueInfo, Type valueType)
+        private void SerializeInlineArray(ISerializationContext context, MemoryStream tagStream, IDataBlock block, Array data, TagFieldAttribute valueInfo, Type valueType)
         {
             if (valueInfo == null || valueInfo.Length == 0)
                 throw new ArgumentException("Cannot serialize an inline array with no count set");
@@ -466,20 +469,19 @@ namespace TagTool.Serialization
 
             // Serialize each element into the current block
             foreach (var element in data)
-                SerializeValue(version, context, tagStream, block, element, null, elementType);
+                SerializeValue(context, tagStream, block, element, null, elementType);
         }
 
         /// <summary>
         /// Serializes a tag block.
         /// </summary>
-        /// <param name="version"></param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
         /// <param name="list">The list of values in the tag block.</param>
         /// <param name="listType">Type of the list.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
-        public virtual void SerializeTagBlock(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object list, Type listType, TagFieldAttribute valueInfo)
+        public virtual void SerializeTagBlock(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object list, Type listType, TagFieldAttribute valueInfo)
         {
             var writer = block.Writer;
             var count = 0;
@@ -504,7 +506,7 @@ namespace TagTool.Serialization
             var enumerableList = (System.Collections.IEnumerable)list;
 
             foreach (var val in enumerableList)
-                SerializeValue(version, context, tagStream, tagBlock, val, null, elementType);
+                SerializeValue(context, tagStream, tagBlock, val, null, elementType);
 
             // Ensure the block is aligned correctly
             var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
@@ -519,14 +521,13 @@ namespace TagTool.Serialization
         /// <summary>
         /// Serializes a tag block.
         /// </summary>
-        /// <param name="version"></param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
         /// <param name="list">The list of values in the tag block.</param>
         /// <param name="listType">Type of the list.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
-        private void SerializeTagBlockAsList(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object list, Type listType, TagFieldAttribute valueInfo)
+        private void SerializeTagBlockAsList(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object list, Type listType, TagFieldAttribute valueInfo)
         {
             var writer = block.Writer;
             var count = 0;
@@ -551,7 +552,7 @@ namespace TagTool.Serialization
             var enumerableList = (System.Collections.IEnumerable)list;
 
             foreach (var val in enumerableList)
-                SerializeValue(version, context, tagStream, tagBlock, val, null, elementType);
+                SerializeValue(context, tagStream, tagBlock, val, null, elementType);
 
             // Ensure the block is aligned correctly
             var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
@@ -563,7 +564,7 @@ namespace TagTool.Serialization
             writer.Write(0);
         }
 
-        private void SerializeIndirectValue(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
+        private void SerializeIndirectValue(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
         {
             var writer = block.Writer;
             if (val == null)
@@ -574,13 +575,13 @@ namespace TagTool.Serialization
 
             // Serialize the value to a temporary block
             var valueBlock = context.CreateBlock();
-            SerializeValue(version, context, tagStream, valueBlock, val, null, valueType);
+            SerializeValue(context, tagStream, valueBlock, val, null, valueType);
 
             // Finalize the block and write the pointer
             block.WritePointer(valueBlock.Finalize(tagStream), valueType);
         }
 
-        public virtual void SerializeD3DStructure(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
+        public virtual void SerializeD3DStructure(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
         {
             var writer = block.Writer;
 
@@ -594,12 +595,46 @@ namespace TagTool.Serialization
 
             // Serialize the value to a temporary block
             var valueBlock = context.CreateBlock();
-            SerializeValue(version, context, tagStream, valueBlock, val, null, valueType);
+            SerializeValue(context, tagStream, valueBlock, val, null, valueType);
 
             // Finalize the block and write the pointer
             block.WritePointer(valueBlock.Finalize(tagStream), valueType);
             writer.Write(0);
             writer.Write(0);
+        }
+
+        public virtual void SerializePlatformUnsignedValue(IDataBlock block, PlatformUnsignedValue value)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+
+            var writer = block.Writer;
+            switch (platformType)
+            {
+                case PlatformType._32Bit:
+                    writer.Write(value.Get32BitValue());
+                    break;
+
+                case PlatformType._64Bit:
+                    writer.Write(value.Get64BitValue());
+                    break;
+            }
+        }
+
+        public virtual void SerializePlatformSignedValue(IDataBlock block, PlatformSignedValue value)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+
+            var writer = block.Writer;
+            switch (platformType)
+            {
+                case PlatformType._32Bit:
+                    writer.Write(value.Get32BitValue());
+                    break;
+
+                case PlatformType._64Bit:
+                    writer.Write(value.Get64BitValue());
+                    break;
+            }
         }
 
         private void SerializeColor(IDataBlock block, RealRgbColor color)
@@ -724,14 +759,14 @@ namespace TagTool.Serialization
             block.Writer.Write(mat.m43);
         }
 
-        private void SerializeRange(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val)
+        private void SerializeRange(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val)
         {
             var type = val.GetType();
             var boundsType = type.GenericTypeArguments[0];
             var lower = type.GetProperty("Lower").GetValue(val);
             var upper = type.GetProperty("Upper").GetValue(val);
-            SerializeValue(version, context, tagStream, block, lower, null, boundsType);
-            SerializeValue(version, context, tagStream, block, upper, null, boundsType);
+            SerializeValue(context, tagStream, block, lower, null, boundsType);
+            SerializeValue(context, tagStream, block, upper, null, boundsType);
         }
     }
 }
