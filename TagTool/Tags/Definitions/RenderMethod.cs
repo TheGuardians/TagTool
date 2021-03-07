@@ -31,7 +31,7 @@ namespace TagTool.Tags.Definitions
         public SortingLayerValue SortingLayer;
         public byte Version;
         public int SkyAtmospherePropertiesIndex; // skya AtmosphereProperties block index
-        public int Unknown2; // usually -1
+        public int Unknown2; // usually -1 (prediction B index)
 
         [TagStructure(Size = 0x2)]
         public class RenderMethodDefinitionOptionIndex : TagStructure
@@ -88,8 +88,11 @@ namespace TagTool.Tags.Definitions
             public List<ShaderFunction> Functions;
         }
 
-        [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+
+
+        [TagStructure(Size = 0x8C, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public class ShaderProperty : TagStructure
         {
             public CachedTag Template;
@@ -110,6 +113,10 @@ namespace TagTool.Tags.Definitions
             public short[] QueryableProperties; 
             [TagField(Length = 0x1C, MinVersion = CacheVersion.HaloReach)]
             public short[] QueryablePropertiesReach;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public TagResourceReference ResourceReference;
+
 
             public enum AlphaBlendModeValue : uint
             {

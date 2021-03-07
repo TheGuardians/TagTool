@@ -64,14 +64,14 @@ namespace TagTool.Tags.Definitions
 
         public float AutoaimWidth;
 
-        public LockOnFlagBits LockonFlags; //bitfield32
+        public LockOnFlagBits LockonFlags; // int
         public float LockonDistance;
 
         public short PhysicsControlNodeIndex;
         public short Unknown29;
 
-        public uint Unknown30;
-        public uint Unknown31;
+        public float CosineStationaryTurningThreshold;
+        public float CrouchTransitionVelocity;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown32;

@@ -23,7 +23,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
             public byte Unknown;
-            public byte Unknown2;
+            public byte Unknown2;   // layer
             public List<StateDatum> StateData;
             public List<PlacementDatum> PlacementData;
             public List<AnimationDatum> AnimationData;
@@ -1438,8 +1438,10 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+
+            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             public class TextWidget : TagStructure
 			{
                 [TagField(Flags = Label)]
@@ -1452,13 +1454,19 @@ namespace TagTool.Tags.Definitions
                 public List<AnimationDatum> AnimationData;
                 public List<RenderDatum> RenderData;
                 public int WidgetIndex;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public FlagsValue Flags;
+
 				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
 				public FlagsValue_H3 Flags_H3;
                 public FontValue Font;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public short Unknown4;
+
                 public StringId String;
 
                 [Flags]

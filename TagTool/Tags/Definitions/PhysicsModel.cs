@@ -563,26 +563,47 @@ namespace TagTool.Tags.Definitions
             public byte RuntimeCollisionGroup;
         }
 
-        [TagStructure(Size = 0x14)]
+        [TagStructure(Size = 0x14, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x24, Platform = CachePlatform.MCC)]
         public class HavokShapeBase : TagStructure
         {
-            public int FieldPointerSkip;
+            public PlatformUnsignedValue FieldPointerSkip;
             public short Size;
             public short Count;
             public int Offset;
-            public int UserData;
+            public PlatformUnsignedValue UserData;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public int Type;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public int Unknown;
+
             public float Radius;
         }
 
-        [TagStructure(Size = 0x8)]
+
+        [TagStructure(Size = 0x8, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x18, Platform = CachePlatform.MCC)]
         public class HavokShapeReference : TagStructure
         {
+            [TagField(Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue RuntimePointer;
+
             public BlamShapeType Shapetype;
             public short ShapeIndex;
+
+            [TagField(Platform = CachePlatform.MCC, Flags = TagFieldFlags.Padding, Length = 4)]
+            public byte[] Padding1;
+
             public uint ChildShapeSize;
+
+            [TagField(Platform = CachePlatform.MCC, Flags = TagFieldFlags.Padding, Length = 4)]
+            public byte[] Padding2;
         }
         
-        [TagStructure(Size = 0x40)]
+        [TagStructure(Size = 0x40, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x50, Platform = CachePlatform.MCC)]
         public class Shape : TagStructure
 		{
             public StringId Name;
@@ -608,11 +629,13 @@ namespace TagTool.Tags.Definitions
             public byte[] Pad = new byte[0xC];
         }
 
-        [TagStructure(Size = 0x30, Align = 0x10)]
+        [TagStructure(Size = 0x30, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x50, Align = 0x10, Platform = CachePlatform.MCC)]
         public class Sphere : Shape
         {
             public HavokShapeBase ConvexBase;
             public uint FieldPointerSkip;
+
             public HavokShapeReference ShapeReference;
 
             public RealVector3d Translation;

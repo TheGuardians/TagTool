@@ -6,8 +6,10 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
+
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class CameraFxSettings : TagStructure
 	{
         public ExposureBlock Exposure;
@@ -31,26 +33,40 @@ namespace TagTool.Tags.Definitions
         public CameraFxStrength ConstantLight;
         public CameraFxStrength DynamicLight;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public SsaoPropertiesBlock SsaoProperties;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public CameraFxValue UnknownIntensity1;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public List<UnknownBlock1> Unknown33;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public List<UnknownBlock2> Unknown34;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public List<UnknownBlock3> Unknown35;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public List<UnknownBlock4> Unknown36;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public List<UnknownBlock5> Unknown37;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public List<UnknownBlock6> Unknown38;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         public GodraysPropertiesBlock GodraysProperties;
 
         [Flags]
@@ -116,7 +132,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown25;
         }
 
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10)]
         public class SsaoPropertiesBlock : TagStructure
         {
             public FlagsValue Flags;
