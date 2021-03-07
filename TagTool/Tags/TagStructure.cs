@@ -110,7 +110,7 @@ namespace TagTool.Tags
                     // If nothing was found, find the first attribute without any version restrictions
                     return attrib ?? type.GetCustomAttributes(typeof(TagStructureAttribute), false)
                         .Cast<TagStructureAttribute>()
-                        .FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown);
+                        .FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown && a.Platform == CachePlatform.All);
                 }
 
                 if (!TagStructureAttributes.TryGetValue(type, out TagStructureAttribute attribute))
@@ -128,13 +128,31 @@ namespace TagTool.Tags
                 if (field.DeclaringType != type && !type.IsSubclassOf(field.DeclaringType))
                     throw new ArgumentException(nameof(field), new TypeAccessException(type.FullName));
 
+                TagFieldAttribute GetFieldAttribute()
+                {
+                    // First match against any TagFieldAttributes that have version restrictions
+                    var attrib = field.GetCustomAttributes(typeof(TagFieldAttribute), false)
+                        .Cast<TagFieldAttribute>()
+                        .Where(a => CacheVersionDetection.ComparePlatform(a.Platform, cachePlatform))
+                        .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
+
+                    if (attrib == null)
+                        attrib = field.GetCustomAttributes(typeof(TagFieldAttribute), false)
+                            .Cast<TagFieldAttribute>()
+                            .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
+                            .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
+
+                    // If nothing was found, return the default attribute (other code is necessary down the line to check the return of this function
+                    return attrib ?? field.GetCustomAttributes<TagFieldAttribute>(false).DefaultIfEmpty(TagFieldAttribute.Default).First();
+                }
+
                 if (!TagFieldAttributes.TryGetValue(field, out TagFieldAttribute attribute))
                     lock (TagFieldAttributes)
                     {
                         if (!TagFieldAttributes.TryGetValue(field, out attribute))
-                            TagFieldAttributes[field] = attribute =
-                                field.GetCustomAttributes<TagFieldAttribute>(false).DefaultIfEmpty(TagFieldAttribute.Default).First();
+                            TagFieldAttributes[field] = attribute = GetFieldAttribute();
                     }
+
                 return attribute;
             }
 

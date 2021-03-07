@@ -8,7 +8,7 @@ namespace TagTool.Tags
     /// <summary>
     /// Attribute for automatically-serializable values in a tag.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class TagFieldAttribute : Attribute
     {
 		public static readonly TagFieldAttribute Default = new TagFieldAttribute();

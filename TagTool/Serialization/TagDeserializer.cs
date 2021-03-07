@@ -106,7 +106,7 @@ namespace TagTool.Serialization
                     attr.Field,
                     BindingFlags.Instance | BindingFlags.Public);
 
-                var attr2 = TagStructure.GetTagFieldAttribute(type, field, CacheVersion.Unknown, CachePlatform.All);
+                var attr2 = TagStructure.GetTagFieldAttribute(type, field, Version, CachePlatform);
 
                 isInVersion = CacheVersionDetection.AttributeInCacheVersion(attr2, Version) && CacheVersionDetection.AttributeInPlatform(attr2, CachePlatform);
                 if (isInVersion)
