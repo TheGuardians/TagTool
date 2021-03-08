@@ -28,9 +28,8 @@ namespace TagTool.Commands.RenderModels
 
 				"Replaces the render_geometry of the current render_model tag " +
 				"with geometry compiled from a COLLADA scene file (.DAE)\n" +
-                "Your collada file must contain a single mesh for every permutation.\n\n" +
-                "For 3ds Max name your meshes as {region}:{permutation} (e.g. hull:base)\n" +
-                "For Blender name them as {region}_{permutation}Mesh (e.g. hull_baseMesh)")
+                "Your DAE file must contain a single mesh for every permutation.\n" +
+                "Name your meshes as {region}:{permutation} (e.g. hull:base)\n")
 		{
 			Cache = cache;
 			Tag = tag;
@@ -85,7 +84,7 @@ namespace TagTool.Commands.RenderModels
 			{
 				builder.BeginRegion(region.Name);
 
-				string[] altconventions = { ":", "_" };
+				string[] altconventions = { ":", "-" };
 
 				var regionName = Cache.StringTable.GetString(region.Name);
 
@@ -102,17 +101,18 @@ namespace TagTool.Commands.RenderModels
                     var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
 					foreach (string entry in altconventions)
 					{
-					    var tempMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
-					    permMeshes.AddRange(tempMeshes);
-					}
-					
-					if (permMeshes.Count == 0)
+					    //var tempMeshesA = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
+                        var tempMeshes = scene.Meshes.Where(i => i.Name.Contains($"{regionName}{entry}{permName}")).ToList();
+                        //permMeshes.AddRange(tempMeshesA);
+                        permMeshes.AddRange(tempMeshes);
+                    }
+
+                    if (permMeshes.Count == 0)
                     {
                         //quick fix to allow simple import of single mesh objects
                         if (scene.Meshes.Count == 1 && Definition.Regions.Count == 1 && Definition.Regions[0].Permutations.Count == 1)
                         {
-                            Console.WriteLine($"###WARNING: No mesh(es) found for region '{regionName}' permutation '{permName}'");
-                            Console.WriteLine($"###Only one mesh/region/permutation is present, so importing anyways!");
+                            Console.WriteLine($"Importing one mesh for sole region|permutation '{regionName}'|'{permName}'");
                             permMeshes.Add(scene.Meshes[0]);
                         }
                         else

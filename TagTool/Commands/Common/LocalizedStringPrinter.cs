@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
@@ -40,12 +41,51 @@ namespace TagTool.Commands.Common
             return display;
         }
 
+        static string EncodeNonAsciiCharacters(string value)
+        {
+            var specialchars = new Dictionary<char, string>
+            {
+                {'\r', "\\r" },
+                {'\n', "\\n" },
+                {'\t', "\\t" }
+            };
+
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in value)
+            {
+                if (c > 127)
+                {
+                    // This character is too big for ASCII
+                    string encodedValue = "\\u" + ((int)c).ToString("x4");
+                    sb.Append(encodedValue);
+                }
+                else if (specialchars.ContainsKey(c))
+                {
+                    sb.Append(specialchars[c]);
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
+
+
+
         public static void PrintStrings(ICollection<DisplayString> strings)
         {
             var stringIdWidth = strings.Max(s => s.StringID.Length);
             var format = string.Format("{{0,-{0}}}  {{1}}", stringIdWidth);
+            string unicodefix = "";
+
             foreach (var str in strings)
-                Console.WriteLine(format, str.StringID, str.String);
+            {
+                unicodefix = EncodeNonAsciiCharacters(str.String);
+
+                //Console.WriteLine(format, str.StringID, str.String);
+                Console.WriteLine(format, str.StringID, unicodefix);
+            }
         }
 
         public class DisplayString

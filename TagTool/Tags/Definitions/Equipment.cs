@@ -98,7 +98,7 @@ namespace TagTool.Tags.Definitions
             UseForcedSecondaryChangeColor = 1 << 6,
             CanNotBePickedUpByPlayer = 1 << 7,
             IsRemovedFromWorldOnDeactivation = 1 << 8,
-            IsDroppedByPlayer = 1 << 9,
+            NotDroppedByPlayer = 1 << 9,
             IsDroppedByAi = 1 << 10
         }
 
