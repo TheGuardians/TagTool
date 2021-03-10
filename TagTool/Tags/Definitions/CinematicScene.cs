@@ -35,9 +35,7 @@ namespace TagTool.Tags.Definitions
             public StringId Variant;
             public CachedTag PuppetAnimation;
             public CachedTag PuppetObject;
-
-            public short Flags;
-            public short Unknown1;
+            public int Flags;
             public int Unknown2;
             public int Unknown3;
 

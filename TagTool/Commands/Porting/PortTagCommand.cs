@@ -1187,14 +1187,17 @@ namespace TagTool.Commands.Porting
                             {
                                 new Vehicle.HumanPlanePhysics
                                 {
-                                    MaximumForwardSpeed = vehi.MaximumForwardSpeed,
-                                    MaximumReverseSpeed = vehi.MaximumReverseSpeed,
-                                    SpeedAcceleration = vehi.SpeedAcceleration,
-                                    SpeedDeceleration = vehi.SpeedDeceleration,
-                                    MaximumLeftSlide = vehi.MaximumLeftSlide,
-                                    MaximumRightSlide = vehi.MaximumRightSlide,
-                                    SlideAcceleration = vehi.SlideAcceleration,
-                                    SlideDeceleration = vehi.SlideDeceleration,
+                                    VelocityControl = new Vehicle.VehicleVelocityControl
+                                    {
+                                        MaximumForwardSpeed = vehi.MaximumForwardSpeed,
+                                        MaximumReverseSpeed = vehi.MaximumReverseSpeed,
+                                        SpeedAcceleration = vehi.SpeedAcceleration,
+                                        SpeedDeceleration = vehi.SpeedDeceleration,
+                                        MaximumLeftSlide = vehi.MaximumLeftSlide,
+                                        MaximumRightSlide = vehi.MaximumRightSlide,
+                                        SlideAcceleration = vehi.SlideAcceleration,
+                                        SlideDeceleration = vehi.SlideDeceleration,
+                                    },
                                     MaximumUpRise = vehi.MaximumForwardSpeed,
                                     MaximumDownRise = vehi.MaximumForwardSpeed,
                                     RiseAcceleration = vehi.SpeedAcceleration,
@@ -1219,14 +1222,17 @@ namespace TagTool.Commands.Porting
                                 new Vehicle.AlienScoutPhysics
                                 {
                                     Steering = vehi.Steering,
-                                    MaximumForwardSpeed = vehi.MaximumForwardSpeed,
-                                    MaximumReverseSpeed = vehi.MaximumReverseSpeed,
-                                    SpeedAcceleration = vehi.SpeedAcceleration,
-                                    SpeedDeceleration = vehi.SpeedDeceleration,
-                                    MaximumLeftSlide = vehi.MaximumLeftSlide,
-                                    MaximumRightSlide = vehi.MaximumRightSlide,
-                                    SlideAcceleration = vehi.SlideAcceleration,
-                                    SlideDeceleration = vehi.SlideDeceleration,
+                                    VelocityControl = new Vehicle.VehicleVelocityControl
+                                    {
+                                        MaximumForwardSpeed = vehi.MaximumForwardSpeed,
+                                        MaximumReverseSpeed = vehi.MaximumReverseSpeed,
+                                        SpeedAcceleration = vehi.SpeedAcceleration,
+                                        SpeedDeceleration = vehi.SpeedDeceleration,
+                                        MaximumLeftSlide = vehi.MaximumLeftSlide,
+                                        MaximumRightSlide = vehi.MaximumRightSlide,
+                                        SlideAcceleration = vehi.SlideAcceleration,
+                                        SlideDeceleration = vehi.SlideDeceleration,
+                                    },
                                     Flags = Vehicle.VehicleScoutPhysicsFlags.None, // TODO
                                     DragCoefficient = 0.0f,
                                     ConstantDeceleration = 0.0f,
@@ -1267,14 +1273,17 @@ namespace TagTool.Commands.Porting
                                         MaximumRightTurn = vehi.MaximumRightTurn,
                                         TurnRate = vehi.TurnRate
                                     },
-                                    MaximumForwardSpeed = vehi.MaximumForwardSpeed,
-                                    MaximumReverseSpeed = vehi.MaximumReverseSpeed,
-                                    SpeedAcceleration = vehi.SpeedAcceleration,
-                                    SpeedDeceleration = vehi.SpeedDeceleration,
-                                    MaximumLeftSlide = vehi.MaximumLeftSlide,
-                                    MaximumRightSlide = vehi.MaximumRightSlide,
-                                    SlideAcceleration = vehi.SlideAcceleration,
-                                    SlideDeceleration = vehi.SlideDeceleration,
+                                    VelocityControl = new Vehicle.VehicleVelocityControl
+                                    {
+                                        MaximumForwardSpeed = vehi.MaximumForwardSpeed,
+                                        MaximumReverseSpeed = vehi.MaximumReverseSpeed,
+                                        SpeedAcceleration = vehi.SpeedAcceleration,
+                                        SpeedDeceleration = vehi.SpeedDeceleration,
+                                        MaximumLeftSlide = vehi.MaximumLeftSlide,
+                                        MaximumRightSlide = vehi.MaximumRightSlide,
+                                        SlideAcceleration = vehi.SlideAcceleration,
+                                        SlideDeceleration = vehi.SlideDeceleration,
+                                    },
                                     SlideAccelAgainstDirection = 1.0f,
                                     FlyingTorqueScale = vehi.FlyingTorqueScale,
                                     FixedGunOffset = vehi.FixedGunOffset,
