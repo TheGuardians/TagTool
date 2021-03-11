@@ -194,6 +194,7 @@ namespace TagTool.Cache
 		{
 			switch (version)
 			{
+				case CacheVersion.Halo3Beta:
 				case CacheVersion.Halo3Retail:
 				case CacheVersion.Halo3ODST:
 				case CacheVersion.HaloReach:
