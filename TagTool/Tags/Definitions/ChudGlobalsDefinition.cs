@@ -332,7 +332,7 @@ namespace TagTool.Tags.Definitions
             public ArgbColor DistantWaypointBlip;
             public ArgbColor FriendlyWaypoint;
             public ArgbColor GlobalDynamic16;
-            public ArgbColor GlobalDynamic17;
+            public ArgbColor HostileWaypoint;
             public ArgbColor GlobalDynamic18;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
