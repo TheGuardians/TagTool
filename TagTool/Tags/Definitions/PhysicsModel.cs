@@ -7,25 +7,34 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
+	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x18C, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
+	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
 	{
         public PhysicsModelFlags Flags;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float MassScale;
+
         public float Mass;
         public float LowFrequencyDeactivationScale;
         public float HighFrequencyDeactivationScale;
-        public float CustomShapeRadius;
-        public float MaximumPenetrationDepthScale;
-        public sbyte ImportVersion;
 
-        [TagField(Flags = Padding, Length = 3)]
+		[TagField(MinVersion = CacheVersion.Halo3Retail)]
+		public float CustomShapeRadius;
+
+		[TagField(MinVersion = CacheVersion.Halo3Retail)]
+		public float MaximumPenetrationDepthScale;
+
+		[TagField(MinVersion = CacheVersion.Halo3Retail)]
+		public sbyte ImportVersion;
+
+        [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused;
 
-        public List<DampedSprintMotor> DampedSpringMotors;
+        public List<DampedSpringMotor> DampedSpringMotors;
         public List<PositionMotor> PositionMotors;
         public List<PhantomType> PhantomTypes;
         public List<PoweredChain> PoweredChains;
@@ -90,7 +99,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class DampedSprintMotor : TagStructure
+        public class DampedSpringMotor : TagStructure
 		{
             public StringId Name;
             public float MaximumForce;
@@ -116,7 +125,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class PhantomTypeFlags : TagStructure
         {
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = CacheVersion.Halo3Beta)]
             public Halo2Bits Halo2;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
@@ -355,7 +364,7 @@ namespace TagTool.Tags.Definitions
             public short Index;
         }
 
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
         public class PoweredChain : TagStructure
 		{
             public List<Node> Nodes;
@@ -436,7 +445,8 @@ namespace TagTool.Tags.Definitions
             ExtraHuge
         }
 
-        [TagStructure(Size = 0xB0, MaxVersion = CacheVersion.HaloOnline700123)]
+		[TagStructure(Size = 0x90, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
+		[TagStructure(Size = 0xB0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
         public class RigidBody : TagStructure
 		{
@@ -465,15 +475,25 @@ namespace TagTool.Tags.Definitions
             public float LinearDampening;
             public float AngularDampening;
             public RealPoint3d CenterOfMassOffset;
-            public float WaterPhysicsX0;
-            public float WaterPhysicsX1;
-            public float WaterPhysicsY0;
-            public float WaterPhysicsY1;
-            public float WaterPhysicsZ0;
-            public float WaterPhysicsZ1;
-            public uint RuntimeShapePointer;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public float WaterPhysicsX0;
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public float WaterPhysicsX1;
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public float WaterPhysicsY0;
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public float WaterPhysicsY1;
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public float WaterPhysicsZ0;
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public float WaterPhysicsZ1;
+
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public uint RuntimeShapePointer;
+            [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown9;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public BlamShapeType ShapeType;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -499,9 +519,12 @@ namespace TagTool.Tags.Definitions
             public uint Unknown10;
             public float BoundingSpherePad;
             public byte CollisionQualityOverrideType;
+
             [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
             public byte[] Pad3 = new byte[1];
+
             public short RuntimeFlags;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float MassBodyOverride;
             [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 8)]
