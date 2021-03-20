@@ -61,21 +61,20 @@ namespace TagTool.Tags.Definitions
         
         public List<InstanceGroup> InstanceGroups;
 
-        public List<Material> Materials;
-
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<Material> OmahaMaterials;
+        public List<Material> ReachMaterialsOld;
+
+        public List<Material> Materials;
 
         public List<GlobalDamageInfoBlock> NewDamageInfo;
 
         //this block has been inlined into the tag for Halo Reach, but the old block above was also preserved
-        //TODO: write the def for this inlined block (blame Hari for not doing this yet)
-        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x3C)]
-        public byte[] OmahaDamageInfo = new byte[0x3C];
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public OmahaDamageInfoBlock OmahaDamageInfo;
 
         //Halo Reach preserves an old H3/ODST style targets block here, but we will ignore it in favor of unifying the blocks between versions
         [TagField(MinVersion = CacheVersion.HaloReach, Length = 0xC)]
-        public byte[] OldTargets = new byte[0xC];
+        public byte[] ReachTargetsOld = new byte[0xC];
 
         public List<Target> Targets;
 
@@ -410,6 +409,330 @@ namespace TagTool.Tags.Definitions
                 EliteEnergyShield,
                 Ice,
                 HunterShield
+            }
+        }
+
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.HaloReach)]
+        public class OmahaDamageInfoBlock : TagStructure
+        {
+            public FlagsValue Flags;
+            public float MaxVitality;
+
+            public StringId GlobalIndirectMaterialName;
+            public short IndirectDamageSection;
+            public short ShieldedStateDamageSection;
+
+            public DamageReportingType CollisionDamageReportingType;
+            public DamageReportingType ResponseDamageReportingType;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] pad0 = new byte[2];
+
+            public List<OmahaDamageSection> DamageSections;
+            public List<DamageConstraint> DamageConstraints;
+            public List<Node> Nodes;
+
+            public short RuntimeIndirectMaterialIndex;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] pad1 = new byte[2];
+
+            [TagStructure(Size = 0x10)]
+            public class Node : TagStructure
+            {
+                public short RuntimeDamagePart;
+                [TagField(Flags = Padding, Length = 14)]
+                public byte[] Unused1 = new byte[14];
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class DamageConstraint : TagStructure
+            {
+                public StringId PhysicsModelConstraintName;
+                public StringId DamageConstraintName;
+                public StringId DamageConstraintGroupName;
+                public float GroupProbabilityScale;
+                public TypeValue Type;
+                public short Index;
+
+                public enum TypeValue : short
+                {
+                    Hinge,
+                    LimitedHinge,
+                    Ragdoll,
+                    StiffSpring,
+                    BallAndSocket,
+                    Prismatic
+                }
+            }
+
+            [TagStructure(Size = 0xB4, MinVersion = CacheVersion.HaloReach)]
+            public class OmahaDamageSection : TagStructure
+            {
+                public StringId Name;
+                public FlagsValue Flags;
+                public float VitalityPercentage;
+                public StringId ShieldMaterialName;
+
+                public float StunTime;
+                public float MinimumStunDamage;
+                public float RechargeTime;
+
+                public List<RechargeSpeedCurve> RechargeSpeedCurves;
+                public List<RechargeFraction> RechargeFractions;
+
+                public CachedTag RechargingEffect;
+                public float PreRechargeEffectWarnTime;
+                public CachedTag PreRechargeEffect;
+                public StringId PreRechargeEffectMarker;
+                public CachedTag PreRechargeAbortEffect;
+                public StringId PreRechargeAbortEffectMarker;
+                public float OverchargeTime;
+                public float OverchargeFraction;
+                public float PreDecayTime;
+                public float DecayTime;
+                public StringId ResurrectionRestoredRegionName;
+
+                public List<OmahaInstantResponse> InstantResponses;
+                public List<DamageTransfer> SectionDamageTransfers;
+                public List<Rendering> RenderingParameters;
+
+                public float RuntimeRechargeVelocity;
+                public float RuntimeOverchargeVelocity;
+                public short RuntimeResurrectionRestoredRegionIndex;
+                public short RuntimeGlobalShieldMaterialType;
+
+                [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
+                public class Rendering : TagStructure
+                {
+                    public CachedTag ThirdPersonImpactParameters;
+                    public CachedTag FirstPersonImpactParameters;
+                }
+
+                [Flags]
+                public enum FlagsValue : int
+                {
+                    None,
+                    AbsorbsBodyDamage = 1 << 0,
+                    TakesFullDamageWhenObjectDies = 1 << 1,
+                    CannotDieWithRiders = 1 << 2,
+                    TakesFullDamageWhenObjectDestroyed = 1 << 3,
+                    RestoredOnRessurection = 1 << 4,
+                    Unused5 = 1 << 5,
+                    Unused6 = 1 << 6,
+                    Headshotable = 1 << 7,
+                    IgnoresShields = 1 << 8,
+                    TakesFullDamageWhenShieldDepleted = 1 << 9,
+                    Networked = 1 << 10,
+                    AllowDamageResponseOverflow = 1 << 11
+                }
+
+                [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloReach)]
+                public class OmahaInstantResponse : TagStructure
+                {
+                    public FlagsValue Flags;
+                    public StringId Label;
+                    public float DamageThreshold;
+                    public CachedTag GenericTransitionEffect;
+                    public StringId GenericEffectMarker;
+                    public CachedTag SpecificTransitionEffect;
+                    public StringId SpecificEffectMarker;
+                    public CachedTag TransitionDamageEffect;
+                    public StringId DamageEffectMarkerName;
+                    public CachedTag LoopingEffect;
+
+                    public List<RegionTransition> RegionTransitions;
+                    public List<DamageTransfer> ResponseDamageTransfers;
+
+                    public short DestroyInstanceGroupIndex;
+                    public CustomResponseBehaviorValue CustomResponseBehavior;
+                    public StringId CustomResponseLabel;
+                    public float ResponseDelay;
+                    public CachedTag DelayEffect;
+                    public StringId DelayEffectMarkerName;
+                    public List<SeatEject> SeatEjections;
+                    public float SkipFraction;
+                    public StringId DestroyedChildObjectMarkerName;
+                    public float TotalDamageThreshold;
+                    public StringId ConstraintGroupName;
+                    public ConstraintDamageTypeValue ConstraintDamageType;
+                    public short Unknown;
+
+                    [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
+                    public class SeatEject : TagStructure
+                    {
+                        public StringId Label;
+                    }
+
+                    [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
+                    public class RegionTransition : TagStructure
+                    {
+                        public StringId Region;
+                        public NewStateValue State;
+                        public short RuntimeRegionIndex;
+
+                        public enum NewStateValue : short
+                        {
+                            Default,
+                            MinorDamage,
+                            MediumDamage,
+                            MajorDamage,
+                            Destroyed
+                        }
+                    }
+
+                    public enum CustomResponseBehaviorValue : short
+                    {
+                        PlaysAlways,
+                        PlaysIfLabelsMatch,
+                        PlaysIfLabelsDiffer
+                    }
+
+                    public enum ConstraintDamageTypeValue : short
+                    {
+                        None,
+                        DestroyOneOfGroup,
+                        DestroyEntireGroup,
+                        LoosenOneOfGroup,
+                        LoosenEntireGroup
+                    }
+
+                    [Flags]
+                    public enum FlagsValue : int
+                    {
+                        None,
+
+                        /// <summary>
+                        /// When the response fires the object dies regardless of its current health.
+                        /// </summary>
+                        KillsObject = 1 << 0,
+
+                        /// <summary>
+                        /// From halo 1 - disallows melee for a unit.
+                        /// </summary>
+                        InhibitsMeleeAttack = 1 << 1,
+
+                        /// <summary>
+                        /// From halo 1 - disallows weapon fire for a unit.
+                        /// </summary>
+                        InhibitsWeaponAttack = 1 << 2,
+
+                        /// <summary>
+                        /// From halo 1 - disallows walking for a unit.
+                        /// </summary>
+                        InhibitsWalking = 1 << 3,
+
+                        /// <summary>
+                        /// From halo 1 - makes the unit drop its current weapon.
+                        /// </summary>
+                        ForcesDropWeapon = 1 << 4,
+
+                        KillsWeaponPrimaryTrigger = 1 << 5,
+                        KillsWeaponSecondaryTrigger = 1 << 6,
+
+                        /// <summary>
+                        /// When the response fires the object is destroyed.
+                        /// </summary>
+                        DestroysObject = 1 << 7,
+
+                        /// <summary>
+                        /// Destroys the primary trigger on the unit's current weapon.
+                        /// </summary>
+                        DamagesWeaponPrimaryTrigger = 1 << 8,
+
+                        /// <summary>
+                        /// Destroys the secondary trigger on the unit's current weapon.
+                        /// </summary>
+                        DamagesWeaponSecondaryTrigger = 1 << 9,
+
+                        LightDamageLeftTurn = 1 << 10,
+                        MajorDamageLeftTurn = 1 << 11,
+                        LightDamageRightTurn = 1 << 12,
+                        MajorDamageRightTurn = 1 << 13,
+                        LightDamageEngine = 1 << 14,
+                        MajorDamageEngine = 1 << 15,
+                        KillsObjectNoPlayerSolo = 1 << 16,
+                        CausesDetonation = 1 << 17,
+                        FiresOnCreation = 1 << 18,
+                        KillsVariantObjects = 1 << 19,
+                        ForceUnattachedEffects = 1 << 20,
+                        FiresUnderThreshold = 1 << 21,
+                        TriggersSpecialDeath = 1 << 22,
+                        OnlyOnSpecialDeath = 1 << 23,
+                        OnlyNotOnSpecialDeath = 1 << 24,
+                        BucklesGiants = 1 << 25,
+                        CausesSpDetonation = 1 << 26,
+                        SkipSoundsOnGenericEffect = 1 << 27,
+                        KillsGiants = 1 << 28,
+                        SkipSoundsOnSpecialDeath = 1 << 29,
+                        CauseHeadDismemberment = 1 << 30,
+                        CauseLeftLegDismemberment = 1 << 31
+                    }
+                }
+
+                [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
+                public class DamageTransfer : TagStructure
+                {
+                    public FlagsValue Flags;
+                    public float TransferAmount;
+                    public TransferFunction Function;
+                    public short DamageSectionIndex;
+                    public StringId SeatLabel;
+
+                    public enum TransferFunction : short
+                    {
+                        percent,
+                        points,
+                        ceiling
+                    }
+
+                    [Flags]
+                    public enum FlagsValue : int
+                    {
+                        None,
+                        TransferDamagetoParentSection = 1 << 0,
+                        TransferDamagetoParent = 1 << 1,
+                        TransferDamagetoChildren = 1 << 2,
+                        TransferDamagetoSeats = 1 << 3,
+                        TransferDirectDamage = 1 << 4,
+                        TransferAOEExposedDamage = 1 << 5,
+                        TransferAOEObstructedDamage = 1 << 6,
+                    }
+                }
+
+                [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
+                public class RechargeSpeedCurve : TagStructure
+                {
+                    public TagFunction Function;
+                }
+
+                [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
+                public class RechargeFraction : TagStructure
+                {
+                    public float VitalityPercentage;
+                }
+            }
+
+            [Flags]
+            public enum FlagsValue : int
+            {
+                None,
+                TakesShieldDamageForChildren = 1 << 0,
+                TakesBodyDamageForChildren = 1 << 1,
+                AlwaysShieldsFriendlyDamage = 1 << 2,
+                PassesAreaDamageToChildren = 1 << 3,
+                ParentNeverTakesBodyDamageForChildren = 1 << 4,
+                OnlyDamagedByExplosives = 1 << 5,
+                ParentNeverTakesShieldDamageForChildren = 1 << 6,
+                CannotDieFromDamage = 1 << 7,
+                PassesAttachedDamageToRiders = 1 << 8,
+                ShieldDepletionIsPermanent = 1 << 9,
+                ShieldDepletionForceHardPing = 1 << 10,
+                AiDoNotDamageWithoutPlayer = 1 << 11,
+                HealthRegrowsWhileDead = 1 << 12,
+                ShieldRechargePlaysOnlyWhenEmpty = 1 << 13,
+                IgnoreForceMinimumTransfer = 1 << 14,
+                OrphanFromPostprocessAutogen = 1 << 15,
+                OnlyDamagedByBoardingDamage = 1 << 16
             }
         }
 
