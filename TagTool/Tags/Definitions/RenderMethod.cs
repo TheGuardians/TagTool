@@ -63,7 +63,13 @@ namespace TagTool.Tags.Definitions
                 TranslationX,
                 TranslationY,
                 FrameIndex,
-                Alpha
+                Alpha,
+                // NEW (MS23 only)
+                ChangeColorPrimary,
+                ChangeColorSecondary,
+                ChangeColorTertiary,
+                ChangeColorQuaternary,
+                ChangeColorQuinary,
             }
         }
 
