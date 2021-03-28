@@ -80,7 +80,7 @@ namespace TagTool.Commands.Shaders
 
                             if (rmt2.PixelShader == null)
                             {
-                                Console.WriteLine("ERROR: Template pixel shader was null");
+                                new TagToolError(CommandError.CustomError, "Template pixel shader was null");
                                 continue;
                             }
 

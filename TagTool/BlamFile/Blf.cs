@@ -1,5 +1,6 @@
 ﻿using System;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -194,7 +195,7 @@ namespace TagTool.BlamFile
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: No data, image will not be written to BLF");
+                    new TagToolError(CommandError.CustomError, "No data, image will not be written to BLF");
                 }
             }
 

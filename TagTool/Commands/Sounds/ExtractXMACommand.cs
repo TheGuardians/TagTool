@@ -87,7 +87,7 @@ namespace TagTool.Commands.Sounds
 
             if (xmaData == null)
             {
-                Console.WriteLine($"ERROR: Failed to find sound data!");
+                new TagToolError(CommandError.CustomError, "Failed to find sound data!");
                 return;
             }
 

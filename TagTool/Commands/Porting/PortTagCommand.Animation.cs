@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags;
@@ -99,7 +100,7 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                             if (sourceStream.Position != StaticDataSize || destStream.Position != StaticDataSize)
-                                Console.WriteLine("###ERROR: Static Data Size did not match data sizes struct!");
+                                new TagToolError(CommandError.CustomError, "Static Data Size did not match data sizes struct!");
 
                             //read next codec header
                             codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
@@ -308,13 +309,13 @@ namespace TagTool.Commands.Porting
                                 member.AnimationData.Data = sourceStream.ToArray();
                                 continue;
                             default:
-                                Console.WriteLine($"###ERROR: Animation codec {codec.AnimationCodec.ToString()} not supported!");
+                                new TagToolError(CommandError.CustomError, $"Animation codec {codec.AnimationCodec.ToString()} not supported!");
                                 member.AnimationData.Data = null;
                                 continue;
                         }
 
                         if (sourceStream.Position != StaticDataSize + CompressedDataSize || destStream.Position != StaticDataSize + CompressedDataSize)
-                            Console.WriteLine("###ERROR: Compressed Data Size did not match data sizes struct!");
+                            new TagToolError(CommandError.CustomError, "Compressed Data Size did not match data sizes struct!");
 
                         #region How Footer/Flags works
                         // Better description by DemonicSandwich from http://remnantmods.com/forums/viewtopic.php?f=13&t=1574 : Node List Block: (matches my previous observations)
@@ -347,7 +348,7 @@ namespace TagTool.Commands.Porting
                         }
 
                         if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize)
-                            Console.WriteLine("###ERROR: Static Node Flags Size did not match data sizes struct!");
+                            new TagToolError(CommandError.CustomError, "Static Node Flags Size did not match data sizes struct!");
 
                         if (AnimatedNodeFlagsSize > 0)
                         {
@@ -357,7 +358,7 @@ namespace TagTool.Commands.Porting
                         }
 
                         if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize)
-                            Console.WriteLine("###ERROR: Animated Node Flags Size did not match data sizes struct!");
+                            new TagToolError(CommandError.CustomError, "Animated Node Flags Size did not match data sizes struct!");
 
                         #endregion
 
@@ -386,7 +387,7 @@ namespace TagTool.Commands.Porting
 
                         if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize ||
                             destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize)
-                            Console.WriteLine("###ERROR: Movement Data Size did not match data sizes struct!");
+                            new TagToolError(CommandError.CustomError, "Movement Data Size did not match data sizes struct!");
 
                         //convert pill offset data
                         if(member.PackedDataSizes.PillOffsetData != 0)
@@ -397,7 +398,7 @@ namespace TagTool.Commands.Porting
 
                         if (member.AnimationData.Data.Length != destStream.ToArray().Length)
                         {
-                            Console.WriteLine("###ERROR: Converted Animation Data was of a different length than the original!");
+                            new TagToolError(CommandError.CustomError, "Converted Animation Data was of a different length than the original!");
                         }
 
                         // set new data

@@ -8,6 +8,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags;
+using TagTool.IO;
 using TagTool.Commands.Porting;
 
 namespace TagTool.Commands.Porting
@@ -56,7 +57,7 @@ namespace TagTool.Commands.Porting
             if (Gen1Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen1Tag.Group.Tag) == null ||
                 Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen1Tag.Group.Tag) == null)
             {
-                Console.WriteLine($"ERROR: Failed to convert tag '{gen1Tag}' Group not supported. Returning null");
+                new TagToolError(CommandError.CustomError, $"Failed to convert tag '{gen1Tag}' Group not supported. Returning null");
                 return null;
             }
             return ConvertTagInternal(cacheStream, gen1CacheStream, resourceStreams, gen1Tag);
@@ -181,7 +182,7 @@ namespace TagTool.Commands.Porting
 
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
@@ -189,7 +190,7 @@ namespace TagTool.Commands.Porting
 
             if (!Cache.TagCache.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
@@ -203,7 +204,7 @@ namespace TagTool.Commands.Porting
 
             if (result.Count == 0)
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 

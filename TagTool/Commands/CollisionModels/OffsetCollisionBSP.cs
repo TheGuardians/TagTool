@@ -48,7 +48,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             }
             else
             {
-                Console.WriteLine($"### Failed to offset collision bsp!");
+                new TagToolError(CommandError.CustomError, "Failed to offset collision bsp!");
                 return false;
             }
         }
@@ -81,7 +81,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 }
                 else
                 {
-                    Console.WriteLine($"### ERROR: Plane {plane_index} could not be regenerated!");
+                    new TagToolError(CommandError.CustomError, $"Plane {plane_index} could not be regenerated!");
                     return false;
                 }
             }
@@ -424,7 +424,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             //no matching vertex has been found
             if (matching_vertex_index == -1)
             {
-                Console.WriteLine($"###ERROR: Could not find a vertex to generate a 2d plane for node {node_index}");
+                new TagToolError(CommandError.CustomError, $"Could not find a vertex to generate a 2d plane for node {node_index}");
                 return false;
             }
 
@@ -544,7 +544,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
 
                 if (!recalculate_bsp2dnodes(node_index, plane_block, plane_projection_axis, plane_mirror_check, plane_matching_vertices))
                 {
-                    Console.WriteLine($"###ERROR: Could not regenerate bsp2dnode {node_index}");
+                    new TagToolError(CommandError.CustomError, $"Could not regenerate bsp2dnode {node_index}");
                     return false;
                 }
                 

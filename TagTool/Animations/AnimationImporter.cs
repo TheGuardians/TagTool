@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags.Resources;
 using TagTool.Tags;
@@ -56,7 +57,7 @@ namespace TagTool.Animations
             }
             else
             {
-                Console.WriteLine("###ERROR: Model has no animations!");
+                new TagToolError(CommandError.CustomError, "Model has no animations!");
                 return false;
             }
             return true;
@@ -94,21 +95,21 @@ namespace TagTool.Animations
                 frameCount = int.Parse(textReader.ReadLine());
                 if (frameCount < 1)
                 {
-                    Console.WriteLine("ERROR: Imported Animation doesn't have any frames!");
+                    new TagToolError(CommandError.CustomError, "Imported Animation doesn't have any frames!");
                     return false;
                 }
                 framerate = double.Parse(textReader.ReadLine()); //framerate
                 int actorCount = int.Parse(textReader.ReadLine()); //actor count
                 if (actorCount < 1)
                 {
-                    Console.WriteLine("ERROR: Imported Animation doesn't have any actors!");
+                    new TagToolError(CommandError.CustomError, "Imported Animation doesn't have any actors!");
                     return false;
                 }
                 textReader.ReadLine(); //actor name
                 int nodecount = int.Parse(textReader.ReadLine());
                 if (nodecount < 1)
                 {
-                    Console.WriteLine("ERROR: Imported Animation doesn't have any nodes!");
+                    new TagToolError(CommandError.CustomError, "Imported Animation doesn't have any nodes!");
                     return false;
                 }
                 if (Version < 16394)
@@ -824,22 +825,22 @@ namespace TagTool.Animations
 
             if (AnimationNodes[index].Name != Node)
             {
-                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different name than the jmad ({Node})!");
+                new TagToolError(CommandError.CustomError, $"Node '{AnimationNodes[index].Name}' has a different name than the jmad ({Node})!");
                 return false;
             }
             if (jmadNodes[index].NextSiblingNodeIndex != AnimationNodes[index].NextSiblingNode)
             {
-                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different next sibling ({newSibling}) than the jmad ({NextSibling})!");
+                new TagToolError(CommandError.CustomError, $"Node '{AnimationNodes[index].Name}' has a different next sibling ({newSibling}) than the jmad ({NextSibling})!");
                 return false;
             }
             if (jmadNodes[index].FirstChildNodeIndex != AnimationNodes[index].FirstChildNode)
             {
-                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different first child ({newChild}) than the jmad ({FirstChild})!");
+                new TagToolError(CommandError.CustomError, $"Node '{AnimationNodes[index].Name}' has a different first child ({newChild}) than the jmad ({FirstChild})!");
                 return false;
             }
             if (jmadNodes[index].ParentNodeIndex != AnimationNodes[index].ParentNode)
             {
-                Console.WriteLine($"###ERROR: Node '{AnimationNodes[index].Name}' has a different parent ({newParent}) than the jmad ({Parent})!");
+                new TagToolError(CommandError.CustomError, $"Node '{AnimationNodes[index].Name}' has a different parent ({newParent}) than the jmad ({Parent})!");
                 return false;
             }
 

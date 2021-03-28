@@ -6,6 +6,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
+using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Commands.Porting;
 using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
@@ -57,7 +58,7 @@ namespace TagTool.Commands.Porting.Gen2
             if (Gen2Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen2Tag.Group.Tag) == null ||
                 Cache.TagCache.TagDefinitions.GetTagDefinitionType(gen2Tag.Group.Tag) == null)
             {
-                Console.WriteLine($"ERROR: Failed to convert tag '{gen2Tag}' Group not supported. Returning null");
+                new TagToolError(CommandError.CustomError, $"Failed to convert tag '{gen2Tag}' Group not supported. Returning null");
                 return null;
             }
             return ConvertTagInternal(cacheStream, gen2CacheStream, resourceStreams, gen2Tag);
@@ -192,7 +193,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
@@ -200,7 +201,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             if (!Cache.TagCache.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
@@ -214,7 +215,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             if (result.Count == 0)
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 

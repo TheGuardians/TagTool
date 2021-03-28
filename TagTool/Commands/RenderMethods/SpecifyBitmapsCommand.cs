@@ -50,7 +50,7 @@ namespace TagTool.Commands.RenderMethods
 
                     if (!Cache.TagCache.TryGetCachedTag(Console.ReadLine(), out var shaderMap))
                     {
-                        Console.WriteLine($"ERROR: Invalid bitmap name, setting to null.");
+                        new TagToolError(CommandError.CustomError, "Invalid bitmap name, setting to null.");
                         shaderMaps[mapTemplate.Name] = null;
                     }
 

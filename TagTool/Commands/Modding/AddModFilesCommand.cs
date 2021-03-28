@@ -31,7 +31,6 @@ namespace TagTool.Commands.Modding
             var directory = new DirectoryInfo(path);
             if (!directory.Exists)
             {
-                Console.WriteLine($"ERROR: Directory does not exist.");
                 return new TagToolError(CommandError.DirectoryNotFound);
             }
 

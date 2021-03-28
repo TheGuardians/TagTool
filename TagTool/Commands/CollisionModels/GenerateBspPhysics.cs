@@ -62,7 +62,7 @@ namespace TagTool.Commands.CollisionModels
             Console.WriteLine("NOOOO you can't just generate mopps with that shitty code! (begin mopp generation)");
             if (!generate_mopp_codes(ref Permutation))
             {
-                Console.WriteLine("ERROR: Failed to build mopps!");
+                new TagToolError(CommandError.CustomError, "Failed to build mopps!");
                 return false;
             }
             else
@@ -95,14 +95,14 @@ namespace TagTool.Commands.CollisionModels
         {
             if(IntPtr.Size == 8)
             {
-                Console.WriteLine("ERROR: Mopp generation can only be performed with x86 Tagtool!!");
+                new TagToolError(CommandError.CustomError, "Mopp generation can only be performed with x86 Tagtool!!");
                 return false;
             }
 
             int hModule = LoadLibrary(dllpath);
             if (hModule == 0) 
             {
-                Console.WriteLine("ERROR: Could not load NifMopp.dll!");
+                new TagToolError(CommandError.CustomError, "Could not load NifMopp.dll!");
                 return false;
             }
 
@@ -134,7 +134,7 @@ namespace TagTool.Commands.CollisionModels
                 List<int> vertex_indices = surface_collect_vertices(surface_index);
                 if (vertex_indices.Count > 3)
                 {
-                    Console.WriteLine("ERROR: Mopp generation only accepts triangles!!");
+                    new TagToolError(CommandError.CustomError, "Mopp generation only accepts triangles!!");
                     return false;
                 }
                 t[surface_index] = new Triangle { a = (short)vertex_indices[0], b = (short)vertex_indices[1], c = (short)vertex_indices[2] };                

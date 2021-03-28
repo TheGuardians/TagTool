@@ -192,7 +192,7 @@ namespace TagTool.Commands.RenderModels
 
                                             if (!nodes.ContainsKey(bonefix))
                                             {
-                                                Console.WriteLine($"###ERROR: There is no node {bonefix} to match bone {bone.Name}");
+                                                new TagToolError(CommandError.CustomError, $"There is no node {bonefix} to match bone {bone.Name}");
                                                 return false;
                                             }
 
