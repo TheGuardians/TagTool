@@ -18,6 +18,7 @@ namespace TagTool.Commands.Video
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, Bink bink)
         {
             commandContext.AddCommand(new ExtractBinkFileCommand(cache, tag, bink));
+            commandContext.AddCommand(new ImportBinkFileCommand(cache, tag, bink));
         }
     }
 }
