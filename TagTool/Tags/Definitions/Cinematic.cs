@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         public int Unknown11;
 
         public int Unknown12;
-        public CachedTag BinkMovie;
+        public CachedTag Unknown13; // possible bik reference, though I was unable to get it working ingame
 
         // Scripts are in ASCIIZ format, they will probably need conversion to work in HO
         public byte[] ImportScriptHeader;
