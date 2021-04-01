@@ -80,7 +80,7 @@ namespace TagTool.Commands.Common
             var command = ContextStack.Context.GetCommand(commandName);
             if (command == null)
             {
-                Console.WriteLine("Unable to find command: " + commandName);
+                new TagToolError(CommandError.CustomError,$"Unable to find command \"{commandName}\"");
                 return;
             }
             Console.WriteLine("{0}: {1}", command.Name, command.Description);
