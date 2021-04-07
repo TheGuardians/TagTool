@@ -112,7 +112,7 @@ namespace TagTool.Commands.RenderModels
                         //quick fix to allow simple import of single mesh objects
                         if (scene.Meshes.Count == 1 && Definition.Regions.Count == 1 && Definition.Regions[0].Permutations.Count == 1)
                         {
-                            Console.WriteLine($"Importing one mesh for sole region|permutation '{regionName}'|'{permName}'");
+                            Console.WriteLine($"Importing single mesh for {regionName}|{permName}...");
                             permMeshes.Add(scene.Meshes[0]);
                         }
                         else
