@@ -193,8 +193,8 @@ namespace TagTool.Commands.Shaders
                         {
                             if (option.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
                             {
-                                realConstant.Arg0 = option.DefaultBitmapScale;
-                                realConstant.Arg1 = option.DefaultBitmapScale;
+                                realConstant.Arg0 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
+                                realConstant.Arg1 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
                                 realConstant.Arg2 = 0;
                                 realConstant.Arg3 = 0;
                             }
