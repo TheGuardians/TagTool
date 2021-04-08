@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using System;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
@@ -41,8 +42,72 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class DefaultBitmap : TagStructure
 		{
-            public int Unknown;
+            public DefaultBitmapFlags Flags;
             public CachedTag Bitmap;
+
+            [Flags]
+            public enum DefaultBitmapFlags : int
+            {
+                None = 0,
+                DoNotLoad = 1 << 0,
+            }
+
+            public enum RasterizerDefaultBitmap
+            {
+                default_white,
+                default_normal,
+                default_cubemap,
+                default_environment_map,
+                color_bars,
+                color_black,
+                color_black_transparent,
+                color_gray,
+                auto_exposure_weight,
+                auto_exposure_weight_4x3,
+                stencil_dither_pattern,
+                noise_warp,
+                ripple_pattern,
+            };
+
+            public static bool ParseDefaultBitmap(string input, out RasterizerDefaultBitmap rasterizerDefaultBitmap)
+            {
+                if (Enum.TryParse(input, out rasterizerDefaultBitmap))
+                    return true;
+
+                switch (input)
+                {
+                    case "color_white":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_white;
+                        break;
+                    case "color_vector":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_normal;
+                        break;
+                    case "default_dynamic_cubemap":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_cubemap;
+                        break;
+                    case "color_black_alpha_black":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.color_black_transparent;
+                        break;
+                    case "gray_50_percent":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.color_gray;
+                        break;
+                    case "dither_pattern2":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.stencil_dither_pattern;
+                        break;
+                    case "random4_warp":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.noise_warp;
+                        break;
+                    case "water_ripples":
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.ripple_pattern;
+                        break;
+                    default:
+                        //Console.WriteLine("WARNING: Could not parse default bitmap, using default_white.");
+                        rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_white;
+                        return false;
+                }
+
+                return true;
+            }
         }
 
         [TagStructure(Size = 0x10)]
