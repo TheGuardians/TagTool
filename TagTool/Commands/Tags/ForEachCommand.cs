@@ -167,7 +167,8 @@ namespace TagTool.Commands.Tags
 
                 Console.WriteLine();
                 Console.WriteLine($"{tagName}.{instance.Group}:");
-                ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
+                foreach (var commandToExecute in commandsToExecute)
+                    ContextStack.Context.GetCommand(commandToExecute[0]).Execute(commandToExecute.Skip(1).ToList());
 
                 while (ContextStack.Context != rootContext) ContextStack.Pop();
 

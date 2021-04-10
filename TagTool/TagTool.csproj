@@ -437,6 +437,7 @@
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
     <Compile Include="Commands\Tags\RebuildCacheFileCommand.cs" />
     <Compile Include="Commands\Tags\Test2Command.cs" />
+    <Compile Include="Commands\Video\ImportBinkFileCommand.cs" />
     <Compile Include="Common\RSAUtil.cs" />
     <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Types.cs" />
@@ -1208,6 +1209,7 @@
     <Compile Include="Tags\Resources\SoundResourceDefinition.cs" />
     <Compile Include="Havok\BipedPhysicsFlags.cs" />
     <Compile Include="Tools\Geometry\BlamModelFile.cs" />
+    <Compile Include="Video\Utils\VideoUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TagTool.ico" />

@@ -19,7 +19,7 @@ namespace TagTool.Commands.RenderMethods
                  "SetBitmap",
                  "Sets the bitmap for the specified texture parameter in the render_method.",
 
-                 "SetBitmap <textureParameterName> <tagname>",
+                 "SetBitmap <textureParameterName> <tagname or default bitmap> [transform]",
 
 				 "Sets the bitmap for the specified texture constant in the render_method.")
         {
@@ -30,25 +30,28 @@ namespace TagTool.Commands.RenderMethods
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 2)
+            if (args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
-			var properties = Definition.ShaderProperties[0];
+            CachedTag tagInstance = null;
+            RenderMethodTemplate template = null;
+            using (var cacheStream = Cache.OpenCacheRead())
+            {
+                if (!Cache.TagCache.TryGetCachedTag(args[1], out tagInstance))
+                {
+                    if (!RasterizerGlobals.DefaultBitmap.ParseDefaultBitmap(args[1], out RasterizerGlobals.DefaultBitmap.RasterizerDefaultBitmap defaultBitmap))
+                        return new TagToolError(CommandError.ArgInvalid, $"Bitmap \"{args[1]}\" does not exist");
 
-			RenderMethodTemplate template = null;
+                    // potentially unsafe but no point editing shaders if no rasg tag is present
+                    RasterizerGlobals rasg = Cache.Deserialize<RasterizerGlobals>(cacheStream, Cache.TagCache.FindFirstInGroup("rasg"));
 
-			using (var cacheStream = Cache.OpenCacheRead())
-				template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
+                    tagInstance = rasg.DefaultBitmaps[(int)defaultBitmap].Bitmap;
+                }
 
-			object output = null;
+                template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, Definition.ShaderProperties[0].Template);
+            }
 
-			if (!Cache.TagCache.TryGetCachedTag(args[1], out var tagInstance))
-				return new TagToolError(CommandError.ArgInvalid, $"Bitmap does not exist in current cache: {args[1]}");
-
-			output = tagInstance;
-
-            var parameterIndex = -1;
-
+            int parameterIndex = -1;
 			for (var i = 0; i < template.TextureParameterNames.Count; i++)
             {
                 if (Cache.StringTable.GetString(template.TextureParameterNames[i].Name) == args[0])
@@ -58,19 +61,57 @@ namespace TagTool.Commands.RenderMethods
                 }
             }
 
-			if (parameterIndex < 0 || parameterIndex >= properties.TextureConstants.Count)
+			if (parameterIndex < 0)
 				return new TagToolError(CommandError.ArgInvalid, $"Invalid texture parameter name: {args[0]}");
-			else
-			{
-				properties.TextureConstants[parameterIndex].Bitmap = tagInstance;
-				Console.WriteLine(string.Format("{0}: CachedTag = [0x{1}] {2}.bitmap", args[0], tagInstance.Index.ToString("X4"), tagInstance.Name));
-			}
 
-			//var argument = properties.TextureConstants[parameterIndex];
+            Definition.ShaderProperties[0].TextureConstants[parameterIndex].Bitmap = tagInstance;
 
-			Console.WriteLine();
+            int realIndex = Definition.ShaderProperties[0].TextureConstants[parameterIndex].XFormArgumentIndex;
+            if (realIndex == -1)
+            {
+                for (var i = 0; i < template.RealParameterNames.Count; i++)
+                {
+                    if (Cache.StringTable.GetString(template.RealParameterNames[i].Name) == args[0])
+                    {
+                        realIndex = i;
+                        break;
+                    }
+                }
+            }
 
+            var realConstants = Definition.ShaderProperties[0].RealConstants[realIndex];
+
+            switch (args.Count - 2)
+            {
+                case 1:
+                    realConstants.Arg0 = TryParseFloatString(args[2]);
+                    break;
+                case 2:
+                    realConstants.Arg0 = TryParseFloatString(args[2]);
+                    realConstants.Arg1 = TryParseFloatString(args[3]);
+                    break;
+                case 3:
+                    realConstants.Arg0 = TryParseFloatString(args[2]);
+                    realConstants.Arg1 = TryParseFloatString(args[3]);
+                    realConstants.Arg2 = TryParseFloatString(args[4]);
+                    break;
+                case 4:
+                    realConstants.Arg0 = TryParseFloatString(args[2]);
+                    realConstants.Arg1 = TryParseFloatString(args[3]);
+                    realConstants.Arg2 = TryParseFloatString(args[4]);
+                    realConstants.Arg3 = TryParseFloatString(args[5]);
+                    break;
+            }
+
+            Console.WriteLine($"{args[0]}: {tagInstance.Name}.bitmap, [{realConstants.Arg0}, {realConstants.Arg1}, {realConstants.Arg2}, {realConstants.Arg3}]");
             return true;
+        }
+
+        float TryParseFloatString(string input)
+        {
+            if (float.TryParse(input, out float result))
+                return result;
+            return 0.0f;
         }
     }
 }
