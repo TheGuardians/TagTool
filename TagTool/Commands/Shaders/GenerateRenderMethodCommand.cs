@@ -198,7 +198,7 @@ namespace TagTool.Commands.Shaders
                                 realConstant.Arg2 = 0;
                                 realConstant.Arg3 = 0;
                             }
-                            if (option.Type == RenderMethodOption.OptionBlock.OptionDataType.IntegerColor)
+                            else if (option.Type == RenderMethodOption.OptionBlock.OptionDataType.IntegerColor)
                             {
                                 realConstant.Arg0 = (float)option.DefaultColor.Red / 255;
                                 realConstant.Arg1 = (float)option.DefaultColor.Green / 255;
