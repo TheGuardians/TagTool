@@ -73,8 +73,8 @@ namespace TagTool.Tags.Definitions
         public OmahaDamageInfoBlock OmahaDamageInfo;
 
         //Halo Reach preserves an old H3/ODST style targets block here, but we will ignore it in favor of unifying the blocks between versions
-        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0xC)]
-        public byte[] ReachTargetsOld = new byte[0xC];
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Target> ReachTargetsOld;
 
         public List<Target> Targets;
 

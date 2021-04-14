@@ -22,6 +22,7 @@ namespace TagTool.Commands.CollisionModels
         //error geometry 
         private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
         private bool hasErrors = false;
+        public bool NoPhantom = false;
 
         public GenerateCollisionBSPCommand(ref CollisionModel definition) :
             base(true,
@@ -113,23 +114,54 @@ namespace TagTool.Commands.CollisionModels
                     Errors.WriteOBJ();
                 return false;
             }
-            if (!prune_node_tree())
-            {
-                Console.WriteLine("###ERROR while pruning node tree!");
-                return false;
-            }
             if (!verify_collision_bsp())
             {
                 Console.WriteLine($"###Failed to verify collision bsp R{region_index}P{permutation_index}B{bsp_index}!");
                 return false;
             }
-
+            if (!prune_node_tree())
+            {
+                Console.WriteLine($"###Failed to prune node tree!");
+                return false;
+            }
             if (hasErrors)
                 Errors.WriteOBJ();
 
             return true;
         }
 
+        public int nophantom_bsp_tree_decision_switch(ref surface_array_definition surface_array)
+        {
+            int surface_array_total_count = surface_array.used_count + surface_array.free_count;
+            if (surface_array_total_count <= 0)
+                return 2;
+            int free_surfaces_positive = 0;
+            int used_surfaces_positive = 0;
+            int used_surfaces_negative = 0;
+            for (int surface_index_index = 0; surface_index_index < surface_array_total_count; surface_index_index++)
+            {
+                int surface_index = surface_array.surface_array[surface_index_index];
+                if (surface_index_index >= surface_array.free_count) //surface is used
+                {
+                    if (surface_index >= 0)
+                        used_surfaces_positive++;
+                    else
+                        used_surfaces_negative++;
+                }
+                else //surface is free
+                {
+                    if (surface_index < 0)
+                        return 1; //if there is a free surface with a negative surface index, create bsp3dnodes
+                    free_surfaces_positive++;
+                }
+            }
+
+            if (used_surfaces_positive < used_surfaces_negative)
+                return 3;
+            else
+                return 2;
+        }
+        
         public int bsp_tree_decision_switch(ref surface_array_definition surface_array)
         {
             int surface_array_total_count = surface_array.used_count + surface_array.free_count;
@@ -453,7 +485,13 @@ namespace TagTool.Commands.CollisionModels
 
         public bool build_bsp_tree_main(surface_array_definition surface_array, ref int bsp3dnode_index)
         {
-            switch (bsp_tree_decision_switch(ref surface_array))
+            int switch_arg = 3;
+            if(NoPhantom)
+                switch_arg = nophantom_bsp_tree_decision_switch(ref surface_array);
+            else
+                switch_arg = bsp_tree_decision_switch(ref surface_array);
+
+            switch (switch_arg)
             {
                 case 1: //construct bsp3d nodes
                     plane_splitting_parameters splitting_parameters = find_surface_splitting_plane(surface_array);
@@ -475,6 +513,11 @@ namespace TagTool.Commands.CollisionModels
                     int current_bsp3dnode_index = Bsp.Bsp3dNodes.Count - 1;
                     int back_child_node_index = -1;
                     int front_child_node_index = -1;
+
+                    //check whether geometry fits within appropriate limits
+                    if (!collision_bsp_check_counts())
+                        return false;
+
                     //this function is recursive, and continues branching until no more 3d nodes can be made
                     if(build_bsp_tree_main(back_surface_array,ref back_child_node_index) && build_bsp_tree_main(front_surface_array, ref front_child_node_index))
                     {
@@ -561,6 +604,60 @@ namespace TagTool.Commands.CollisionModels
                     Console.WriteLine("###ERROR couldn't decide what to build.");
                     return false;
             }
+        }
+
+        public bool collision_bsp_check_counts()
+        {
+            int max_surfaces = 32767;
+            int max_edges = 65535;
+            int max_vertices = 65535;
+            int max_2drefs = 65535;
+            int max_2dnodes = 32767;
+            int max_3dnodes = 32767;
+            int max_planes = 65535;
+            int max_leaves = 32767;
+
+            if(Bsp.Surfaces.Count > max_surfaces)
+            {
+                Console.WriteLine($"###ERROR: Number of surfaces ({Bsp.Surfaces.Count}) exceeded the maximum allowable ({max_surfaces})");
+                return false;
+            }
+            if (Bsp.Vertices.Count > max_vertices)
+            {
+                Console.WriteLine($"###ERROR: Number of vertices ({Bsp.Vertices.Count}) exceeded the maximum allowable ({max_vertices})");
+                return false;
+            }
+            if (Bsp.Edges.Count > max_edges)
+            {
+                Console.WriteLine($"###ERROR: Number of edges ({Bsp.Edges.Count}) exceeded the maximum allowable ({max_edges})");
+                return false;
+            }
+            if (Bsp.Bsp2dReferences.Count > max_2drefs)
+            {
+                Console.WriteLine($"###ERROR: Number of bsp2dreferences ({Bsp.Bsp2dReferences.Count}) exceeded the maximum allowable ({max_2drefs})");
+                return false;
+            }
+            if (Bsp.Bsp2dNodes.Count > max_2dnodes)
+            {
+                Console.WriteLine($"###ERROR: Number of bsp2dnodes ({Bsp.Bsp2dNodes.Count}) exceeded the maximum allowable ({max_2dnodes})");
+                return false;
+            }
+            if (Bsp.Bsp3dNodes.Count > max_3dnodes)
+            {
+                Console.WriteLine($"###ERROR: Number of bsp3dnodes ({Bsp.Bsp3dNodes.Count}) exceeded the maximum allowable ({max_3dnodes})");
+                return false;
+            }
+            if (Bsp.Planes.Count > max_planes)
+            {
+                Console.WriteLine($"###ERROR: Number of planes ({Bsp.Planes.Count}) exceeded the maximum allowable ({max_planes})");
+                return false;
+            }
+            if (Bsp.Leaves.Count > max_leaves)
+            {
+                Console.WriteLine($"###ERROR: Number of leaves ({Bsp.Leaves.Count}) exceeded the maximum allowable ({max_leaves})");
+                return false;
+            }
+            return true;
         }
 
         public int surfaces_reset_for_leaf_building(ref surface_array_definition surface_array)
@@ -953,17 +1050,6 @@ namespace TagTool.Commands.CollisionModels
                 //if this edge spans the plane, then create a new dividing edge
                 if(edge_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
                 {
-                    if (Bsp.Vertices.Count >= ushort.MaxValue)
-                    {
-                        Console.WriteLine("###ERROR: Vertex count overflow (>65535 vertices) during bsp generation!");
-                        return false;
-                    }
-                    if (Bsp.Edges.Count >= ushort.MaxValue - 1)
-                    {
-                        Console.WriteLine("###ERROR: Edge count overflow (>65535 edges) during bsp generation!");
-                        return false;
-                    }
-
                     //allocate new edges and vertex
                     Bsp.Vertices.Add(new Vertex());
                     int new_vertex_index_A = Bsp.Vertices.Count - 1;
@@ -1258,12 +1344,6 @@ namespace TagTool.Commands.CollisionModels
 
                         case Plane_Relationship.BothSidesofPlane: //surface is both in front of and behind plane
                             split_plane_count++;
-
-                            if (Bsp.Surfaces.Count >= ushort.MaxValue - 1)
-                            {
-                                Console.WriteLine("###ERROR: Surface count overflow (>65535 surfaces) during bsp generation!");
-                                return false;
-                            }
 
                             Bsp.Surfaces.Add(new Surface());
                             Bsp.Surfaces.Add(new Surface());
