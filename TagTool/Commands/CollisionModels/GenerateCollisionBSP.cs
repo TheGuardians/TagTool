@@ -156,7 +156,7 @@ namespace TagTool.Commands.CollisionModels
                 }
             }
 
-            if (used_surfaces_positive < used_surfaces_negative)
+            if (used_surfaces_positive > used_surfaces_negative)
                 return 3;
             else
                 return 2;
