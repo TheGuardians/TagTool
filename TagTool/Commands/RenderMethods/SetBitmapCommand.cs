@@ -66,6 +66,8 @@ namespace TagTool.Commands.RenderMethods
 
             Definition.ShaderProperties[0].TextureConstants[parameterIndex].Bitmap = tagInstance;
 
+            var realConstants = Definition.ShaderProperties[0].RealConstants[0];
+
             int realIndex = Definition.ShaderProperties[0].TextureConstants[parameterIndex].XFormArgumentIndex;
             if (realIndex == -1)
             {
@@ -79,31 +81,38 @@ namespace TagTool.Commands.RenderMethods
                 }
             }
 
-            var realConstants = Definition.ShaderProperties[0].RealConstants[realIndex];
-
-            switch (args.Count - 2)
+            if (realIndex != -1)
             {
-                case 1:
-                    realConstants.Arg0 = TryParseFloatString(args[2]);
-                    break;
-                case 2:
-                    realConstants.Arg0 = TryParseFloatString(args[2]);
-                    realConstants.Arg1 = TryParseFloatString(args[3]);
-                    break;
-                case 3:
-                    realConstants.Arg0 = TryParseFloatString(args[2]);
-                    realConstants.Arg1 = TryParseFloatString(args[3]);
-                    realConstants.Arg2 = TryParseFloatString(args[4]);
-                    break;
-                case 4:
-                    realConstants.Arg0 = TryParseFloatString(args[2]);
-                    realConstants.Arg1 = TryParseFloatString(args[3]);
-                    realConstants.Arg2 = TryParseFloatString(args[4]);
-                    realConstants.Arg3 = TryParseFloatString(args[5]);
-                    break;
+                realConstants = Definition.ShaderProperties[0].RealConstants[realIndex];
+                
+                switch (args.Count - 2)
+                {
+                    case 1:
+                        realConstants.Arg0 = TryParseFloatString(args[2]);
+                        break;
+                    case 2:
+                        realConstants.Arg0 = TryParseFloatString(args[2]);
+                        realConstants.Arg1 = TryParseFloatString(args[3]);
+                        break;
+                    case 3:
+                        realConstants.Arg0 = TryParseFloatString(args[2]);
+                        realConstants.Arg1 = TryParseFloatString(args[3]);
+                        realConstants.Arg2 = TryParseFloatString(args[4]);
+                        break;
+                    case 4:
+                        realConstants.Arg0 = TryParseFloatString(args[2]);
+                        realConstants.Arg1 = TryParseFloatString(args[3]);
+                        realConstants.Arg2 = TryParseFloatString(args[4]);
+                        realConstants.Arg3 = TryParseFloatString(args[5]);
+                        break;
+                }
+                
+                Console.WriteLine($"{args[0]}: {tagInstance.Name}.bitmap, [{realConstants.Arg0}, {realConstants.Arg1}, {realConstants.Arg2}, {realConstants.Arg3}]");
             }
-
-            Console.WriteLine($"{args[0]}: {tagInstance.Name}.bitmap, [{realConstants.Arg0}, {realConstants.Arg1}, {realConstants.Arg2}, {realConstants.Arg3}]");
+            else
+            {
+                Console.WriteLine($"{args[0]}: {tagInstance.Name}.bitmap");
+            }
             return true;
         }
 
