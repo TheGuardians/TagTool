@@ -216,6 +216,8 @@ namespace TagTool.Commands.Editing
                     return Cache.StringTable.GetString((StringId)value);
                 else if (info.FieldType.IsPrimitive && Tag.IsInGroup("scnr"))
                     return GetLabel((IList)typeof(Scenario).GetField(nameof(Scenario.ObjectNames)).GetValue(Owner), Convert.ToInt32(value));
+                else if (info.FieldType == typeof(CachedTag))
+                    return value != null ? value.ToString() : "Null";
                 else
                     return value.ToString();
             }
