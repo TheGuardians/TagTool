@@ -63,6 +63,9 @@ namespace TagTool.Geometry
                 _writer.WriteLine("vt {0} {1}", vertex.TexCoords.I, 1 - vertex.TexCoords.J);
 
             var partIndex = 0;
+            
+            if (indicesList.Count != 0)
+                _writer.WriteLine($"o {name}");
 
             foreach (var indices in indicesList)
             {
