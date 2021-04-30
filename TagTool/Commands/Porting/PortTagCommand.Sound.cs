@@ -190,7 +190,7 @@ namespace TagTool.Commands.Porting
             var extraInfo = new ExtraInfo()
             {
                 LanguagePermutations = new List<ExtraInfo.LanguagePermutation>(),
-                EncodedPermutationSections = new List<ExtraInfo.EncodedPermutationSection>()
+                FacialAnimationInfo = new List<ExtraInfo.FacialAnimationInfoBlock>()
             };
 
             for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
@@ -235,10 +235,10 @@ namespace TagTool.Commands.Porting
 
             if (sound.SoundReference.ExtraInfoIndex != -1)
             {
-                foreach (var section in BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections)
+                foreach (var section in BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].FacialAnimationInfo)
                 {
                     var newSection = section.DeepClone();
-                    extraInfo.EncodedPermutationSections.Add(newSection);
+                    extraInfo.FacialAnimationInfo.Add(newSection);
                 }
             }
 
