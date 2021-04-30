@@ -9,6 +9,7 @@ using TagTool.BlamFile;
 using TagTool.Tags;
 using System.Runtime.InteropServices;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using System.Text.RegularExpressions;
 
 namespace TagTool.Cache
@@ -783,7 +784,7 @@ namespace TagTool.Cache
             catch(ArgumentException e)
             {
                 Console.WriteLine(e.Message);
-                Console.WriteLine("ERROR: Failed to parse version number, setting it to default");
+                new TagToolError(CommandError.CustomError, "Failed to parse version number, setting it to default");
                 Metadata.VersionMajor = 1;
                 Metadata.VersionMinor = 0;
             }

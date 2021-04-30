@@ -62,8 +62,8 @@ namespace TagTool.Commands.Common
             // Try to execute it
             if (!ExecuteCommand(ContextStack.Context, commandArgs))
             {
-                Console.WriteLine("ERROR: Unrecognized command \"{0}\"", commandArgs[0]);
-                Console.WriteLine("Use \"help\" to list available commands.");
+                new TagToolError(CommandError.CustomError, $"Unrecognized command \"{commandArgs[0]}\"\n"
+                + "Use \"help\" to list available commands.");
             }
 
             // Undo redirection
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Common
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR: " + e.Message);
+                new TagToolError(CommandError.CustomError, e.Message);
                 Console.WriteLine("STACKTRACE: " + Environment.NewLine + e.StackTrace);
                 ConsoleHistory.Dump("hott_*_crash.log");
             }

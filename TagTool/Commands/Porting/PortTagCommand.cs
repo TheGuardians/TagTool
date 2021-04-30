@@ -1614,7 +1614,7 @@ namespace TagTool.Commands.Porting
                 result = BlamCache.TagCache.TagTable.ToList().FindAll(item => item != null && regex.IsMatch(item.ToString() + "." + item.Group.Tag));
                 if (result.Count == 0)
                 {
-                    Console.WriteLine($"ERROR: Invalid regex: {tagSpecifier}");
+                    new TagToolError(CommandError.CustomError, $"Invalid regex: {tagSpecifier}");
                     return new List<CachedTag>();
                 }
                 return result;
@@ -1622,7 +1622,7 @@ namespace TagTool.Commands.Porting
 
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
@@ -1630,7 +1630,7 @@ namespace TagTool.Commands.Porting
 
             if (!CacheContext.TagCache.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
@@ -1644,7 +1644,7 @@ namespace TagTool.Commands.Porting
 
             if (result.Count == 0)
             {
-                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                new TagToolError(CommandError.CustomError, $"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 

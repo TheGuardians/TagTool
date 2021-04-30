@@ -23,7 +23,7 @@ namespace TagTool.Commands.RenderModels
             context.AddCommand(new SpecifyShadersCommand(cache, tag, renderModel));
             context.AddCommand(new DumpRenderGeometryCommand(cache, renderModel.Geometry));
             context.AddCommand(new ReplaceRenderGeometryCommand(cache, tag, renderModel));
-            context.AddCommand(new ExtractModelCommand(cache, renderModel));
+            context.AddCommand(new ExtractModelCommand(cache, tag, renderModel));
             context.AddCommand(new ExtractBitmapsCommand(cache, renderModel));
             context.AddCommand(new ExtractBMFCommand(cache, renderModel));
         }

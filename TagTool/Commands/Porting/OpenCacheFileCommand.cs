@@ -48,7 +48,7 @@ namespace TagTool.Commands.Porting
 
             if (!fileName.Exists)
             {
-                Console.WriteLine($"ERROR: Cache \"{fileName.FullName}\" does not exist.");
+                new TagToolError(CommandError.CustomError, $"Cache \"{fileName.FullName}\" does not exist.");
                 return true;
             }
                 

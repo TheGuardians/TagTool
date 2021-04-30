@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Scripting;
@@ -757,7 +758,7 @@ namespace TagTool.Commands.Porting
             // Some script expressions use opcode as a script reference. Only continue if it is a reference
             if (!ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
             {
-                Console.WriteLine($"ERROR: not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
+                new TagToolError(CommandError.CustomError, $"not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
                 return;
             }
 
@@ -809,7 +810,7 @@ namespace TagTool.Commands.Porting
 
             if (!ScriptInfo.Scripts[BlamCache.Version].ContainsKey(expr.Opcode))
             {
-                Console.WriteLine($"ERROR: not in {BlamCache.Version} opcode table: 0x{expr.Opcode:X3}. (ConvertScriptExpressionOpcode)");
+                new TagToolError(CommandError.CustomError, $"not in {BlamCache.Version} opcode table: 0x{expr.Opcode:X3}. (ConvertScriptExpressionOpcode)");
                 return;
             }
 

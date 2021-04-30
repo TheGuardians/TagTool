@@ -11,66 +11,68 @@ namespace TagTool.Commands.RenderModels
     class ExtractModelCommand : Command
     {
         private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private RenderModel Definition { get; }
 
-        public ExtractModelCommand(GameCache cacheContext, RenderModel model)
+        public ExtractModelCommand(GameCache cacheContext, CachedTag tag, RenderModel model)
             : base(true,
 
                   "ExtractModel",
-                  "Extracts the current render model definition. (filetypes: obj, dae)",
+                  "Extracts the current render model definition. (supported filetypes: obj, dae)",
 
-                  "ExtractModel [variant name] <filetype> <filename>",
+                  "ExtractModel [variant name] <filename>",
 
                   "Extracts a variant of the render model to a file. \n" +
-                  "Supported file types: obj, dae")
+                  "If no extension is found, a dae named for the tag will be extracted to the folder that ends the path.")
         {
             Cache = cacheContext;
+            Tag = tag;
             Definition = model;
         }
         
         public override object Execute(List<string> args)
         {
-            string variantName;
-            string fileType;
-            string modelFileName;
+            string variantName = "*";
+            string fileType = "dae";
+            string modelFileName = "";
 
-            if(args.Count == 2)
+            switch (args.Count)
             {
-                variantName = "*";
-                fileType = args[0].ToLower();
-                modelFileName = args[1];
-            }
-            else if (args.Count == 3)
-            {
-                variantName = args[0];
-                fileType = args[1].ToLower();
-                modelFileName = args[2];
-            }
-            else
-                return new TagToolError(CommandError.ArgCount);
+                case (1):
+                    modelFileName = args[0];
+                    if (args[0].Contains("."))
+                        fileType = modelFileName.Substring(modelFileName.LastIndexOf('.') + 1).ToLower();
+                    break;
 
-			if (!modelFileName.Contains("."))
-				modelFileName += "." + fileType;
-
-            switch (fileType)
-            {
-                case "obj":
-                case "dae":
+                case (2):
+                    variantName = args[0];
+                    modelFileName = args[1];
                     break;
 
                 default:
-                    return new TagToolError(CommandError.ArgInvalid, $"Unsupported file type \"{fileType}\"");
+                    return new TagToolError(CommandError.ArgCount);
             }
-            
+
+            if (!modelFileName.Contains("."))
+            {
+                if (Tag.Name != null)
+                {
+                    var split = Tag.Name.Split('\\');
+                    modelFileName += "\\" + split[split.Length - 1];
+                }
+                else
+                    modelFileName += "\\" + Tag.Index.ToString("X8");
+
+                modelFileName += "." + fileType;
+            }
+
             if (Definition.Geometry.Resource == null)
             {
-                Console.WriteLine("Render model does not have a resource associated with it");
+                new TagToolError(CommandError.CustomError, "Render model does not have a resource associated with it!");
                 return true;
             }
 
-            //
             // Deserialize the resource definition
-            //
 
             var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
             Definition.Geometry.SetResourceBuffers(definition);
@@ -88,11 +90,16 @@ namespace TagTool.Commands.RenderModels
                 switch (fileType)
                 {
                     case "obj":
-                        return extractor.ExportObject(modelFile);
-
+                        extractor.ExportObject(modelFile);
+                        break;
                     case "dae":
-                        return extractor.ExportCollada(modelFile);
+                        extractor.ExportCollada(modelFile);
+                        break;
+                    default:
+                        return new TagToolError(CommandError.ArgInvalid, $"Unsupported file type \"{fileType}\"");
                 }
+
+                Console.WriteLine($"Model successfully extracted to \"{modelFileName}\"");
             }
 
             return true;

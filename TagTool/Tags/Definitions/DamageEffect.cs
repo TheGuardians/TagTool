@@ -19,8 +19,7 @@ namespace TagTool.Tags.Definitions
         public FlagsValue1 Flags2;
         public float AreaOfEffectCoreRadius;
         public float DamageLowerBound;
-        public float DamageUpperBoundMin;
-        public float DamageUpperBoundMax;
+        public Bounds<float> DamageUpperBound;
         public Angle DamageInnerConeAngle;
         public Angle DamageOuterConeAngle;
         public float ActiveCamoflageDamage;
@@ -35,41 +34,39 @@ namespace TagTool.Tags.Definitions
         public StringId SpecificDamage;
         public StringId SpecialDamage;
         public float AiStunRadius;
-        public float AiStunBoundsMin;
-        public float AiStunBoundsMax;
+        public Bounds<float> AiStunBounds;
         public float ShakeRadius;
         public float EmpRadius;
         public float AOESpikeRadius;
         public float AOESpikeDamageBump;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown3 = 1.0f;
+        public float Unknown_HO = 1.0f;
 
         public List<PlayerResponseBlock> PlayerResponses;
         public CachedTag DamageResponse;
-        public float Duration;
-        public FunctionType FadeFunction;
-        public short Unknown4;
-        public Angle Rotation;
-        public float Pushback;
-        public float JitterMin;
-        public float JitterMax;
-        public float Duration2;
-        public FunctionType FalloffFunction;
-        public short Unknown5;
-        public float RandomTranslation;
-        public Angle RandomRotation;
-        public WobbleFunctionValue WobbleFunction;
-        public short Unknown6;
-        public float WobbleFunctionPeriod;
-        public float WobbleWeight;
+        public float CameraImpulseDuration;
+        public FunctionType CameraImpulseFadeFunction;
+        public short Unknown;
+        public Angle CameraImpulseRotation;
+        public float CameraImpulsePushback;
+        public Bounds<float> CameraImpulseJitter;
+        public float CameraShakeDuration;
+        public FunctionType CameraShakeFalloffFunction;
+        public short Unknown2;
+        public float CameraShakeRandomTranslation;
+        public Angle CameraShakeRandomRotation;
+        public WobbleFunctionValue CameraShakeWobbleFunction;
+        public short Unknown3;
+        public float CameraShakeWobbleFunctionPeriod;
+        public float CameraShakeWobbleWeight;
         public CachedTag Sound;
-        public float ForwardVelocity;
-        public float ForwardRadius;
-        public float ForwardExponent;
-        public float OutwardVelocity;
-        public float OutwardRadius;
-        public float OutwardExponent;
+        public float BreakingEffectForwardVelocity;
+        public float BreakingEffectForwardRadius;
+        public float BreakingEffectForwardExponent;
+        public float BreakingEffectOutwardVelocity;
+        public float BreakingEffectOutwardRadius;
+        public float BreakingEffectOutwardExponent;
 
         [Flags]
         public enum FlagsValue : uint

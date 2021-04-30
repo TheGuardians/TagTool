@@ -61,7 +61,7 @@ namespace TagTool.Commands.Strings
 
             if (Cache.StringTable.Contains(str))
             {
-                Console.WriteLine("ERROR: That string already exists!");
+                new TagToolError(CommandError.CustomError, "That string already exists!");
                 return true;
             }
 
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Strings
             if (str != null)
                 Console.WriteLine(str);
             else
-                Console.WriteLine("ERROR: Unable to find a string with ID 0x{0:X}.", stringId);
+                new TagToolError(CommandError.CustomError, $"Unable to find a string with ID 0x{stringId:X}.");
 
             return true;
         }
@@ -160,7 +160,7 @@ namespace TagTool.Commands.Strings
 
             if (strings.Count == 0)
             {
-                Console.WriteLine("ERROR: No strings found!");
+                new TagToolError(CommandError.CustomError, "No strings found!");
                 return true;
             }
 

@@ -212,7 +212,7 @@ namespace TagTool.Tags.Definitions
                 NoncombatVehicle = 1 << 9,
                 DoesNotCauseCollisionDamage = 1 << 10,
                 AiAutoTurret = 1 << 11,
-                AiSentryTurret = 1 << 12,
+                Hydraulics = 1 << 12,
                 IgnoreKillVolumes = 1 << 13,
                 TargetableWhenOpen = 1 << 14,
                 ReduceWeaponAccelWhenOnGround = 1 << 15,

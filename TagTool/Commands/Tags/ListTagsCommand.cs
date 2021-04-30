@@ -31,6 +31,11 @@ namespace TagTool.Commands.Tags
         {
             var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : Tag.Parse(Cache, args[0]);
 
+            if (groupTag == "{????}")
+            {
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+            }
+
             if (args.Count > 0 && !args[0].EndsWith(":"))
                 args.RemoveAt(0);
 

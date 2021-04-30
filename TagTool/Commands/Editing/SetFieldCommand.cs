@@ -450,7 +450,7 @@ namespace TagTool.Commands.Editing
 
                 var blamType = Activator.CreateInstance(type) as IBlamType;
                 if (!blamType.TryParse(cache, args, out blamType, out string error))
-                    Console.WriteLine("ERROR: " + error);
+                    new TagToolError(CommandError.CustomError, error);
                 return blamType;
             }
             else if (type == typeof(CachedTag))

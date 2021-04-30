@@ -30,14 +30,14 @@ namespace TagTool.Tags.Definitions
         public CachedTag DetonationEffect;
         public float CampaignGroundScale;
         public float MultiplayerGroundScale;
-        public float SmallHoldScale;
-        public float SmallHolsterScale;
-        public float MediumHoldScale;
-        public float MediumHolsterScale;
-        public float LargeHoldScale;
-        public float LargeHolsterScale;
-        public float HugeHoldScale;
-        public float HugeHolsterScale;
+        public float SmallUnitHoldScale;
+        public float SmallUnitHolsterScale;
+        public float MediumUnitHoldScale;
+        public float MediumUnitHolsterScale;
+        public float LargeUnitHoldScale;
+        public float LargeUnitHolsterScale;
+        public float HugeUnitHoldScale;
+        public float HugeUnitHolsterScale;
         public float GroundedFrictionLength;
         public float GroundedFrictionUnknown;
 

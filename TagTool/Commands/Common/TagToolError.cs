@@ -24,13 +24,15 @@ namespace TagTool.Commands.Common
     {
         public TagToolError(CommandError cmdError, string customMessage = null)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
+
             if (cmdError != CommandError.None)
             {
                 bool showHelpMessage = true;
 
                 if (cmdError != CommandError.CustomMessage && cmdError != CommandError.CustomError)
                 {
-                    string outputLine = "ERROR: ";
+                    string outputLine = "\nERROR: ";
 
                     switch (cmdError)
                     {
@@ -51,10 +53,10 @@ namespace TagTool.Commands.Common
                             outputLine += "Invalid syntax used";
                             break;
                         case CommandError.DirectoryNotFound:
-                            outputLine += "The specified directory could not be found";
+                            outputLine += "The specified directory could not be found!";
                             break;
                         case CommandError.FileNotFound:
-                            outputLine += "The specified file could not be found";
+                            outputLine += "The specified file could not be found!";
                             break;
                         case CommandError.FileIO:
                             outputLine += "A file IO operation could not be completed";
@@ -79,7 +81,10 @@ namespace TagTool.Commands.Common
                 bool hasCustomMessage = customMessage != null && customMessage != "";
 
                 if (cmdError == CommandError.CustomError && hasCustomMessage)
-                    Console.WriteLine("ERROR: " + customMessage);
+                {
+                    Console.WriteLine("\nERROR: " + customMessage);
+                    showHelpMessage = false;
+                }
 
                 else if (hasCustomMessage)
                     Console.WriteLine("> " + customMessage);
@@ -87,6 +92,8 @@ namespace TagTool.Commands.Common
                 if (showHelpMessage)
                     Console.WriteLine($"\nEnter \"Help {CommandRunner.CurrentCommandName}\" for command syntax.");
             }
+
+            Console.ResetColor();
         }
     }
 }

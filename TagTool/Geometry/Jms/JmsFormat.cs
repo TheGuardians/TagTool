@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Commands.Common;
 using TagTool.Common;
 
 namespace TagTool.Geometry.Jms
@@ -33,7 +34,7 @@ namespace TagTool.Geometry.Jms
             }
             catch (Exception)
             {
-                Console.WriteLine("ERROR: Invalid JMS.");
+                new TagToolError(CommandError.CustomError, "Invalid JMS.");
                 return false;
             }
             return true;
@@ -48,7 +49,7 @@ namespace TagTool.Geometry.Jms
                     Version = int.Parse(stream.ReadLine());
                     if (Version != 8200) // 8200 supports both CE and H2
                     {
-                        Console.WriteLine("ERROR: Invalid JMS");
+                        new TagToolError(CommandError.CustomError, "Invalid JMS");
                         return;
                     }
 

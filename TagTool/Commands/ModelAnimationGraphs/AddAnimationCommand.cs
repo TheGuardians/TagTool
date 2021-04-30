@@ -118,7 +118,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
-                        Console.WriteLine($"###ERROR: Filetype {file_extension.ToUpper()} not recognized!");
+                        new TagToolError(CommandError.CustomError, $"Filetype {file_extension.ToUpper()} not recognized!");
                         return false;
                 }
 
@@ -135,9 +135,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 if(importer.Version >= 16394)
                 {
-                    string errormessage = "###ERROR: Only Halo:CE animation files are currently supported because newer versions offer no benefits but add node-space complications. " + 
+                    string errormessage = "Only Halo:CE animation files are currently supported because newer versions offer no benefits but add node-space complications. " + 
                         "Please export your animations to Halo:CE format (JMA Version < 16394) and try importing again.";
-                    return new TagToolError(CommandError.OperationFailed, errormessage);
+                    return new TagToolError(CommandError.CustomError, errormessage);
                 }
 
                 //fixup Base node position/rotation/scale
@@ -266,7 +266,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             int camera_index = imported_nodes.FindIndex(x => x.Name.Equals("camera_control"));
             if (camera_index != -1)
             {
-                Console.WriteLine("###ERROR: You already have a camera_control node! Skipping camerafix...");
+                new TagToolError(CommandError.CustomError, "You already have a camera_control node! Skipping camerafix...");
                 return;
             }
             AnimationImporter.AnimationNode newnode = new AnimationImporter.AnimationNode
