@@ -536,7 +536,7 @@ namespace TagTool.Shaders.ShaderMatching
                         case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(Options, applyFixes);
                         //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(Options, applyFixes);
                         //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(Options, applyFixes);
-                        //case "zonly":           return HaloShaderGenerator.ZOnly.ZOnlyGenerator(Options, applyFixes);
+                        case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(Options, applyFixes);
                     }
 
                     Console.WriteLine($"\"{Type}\" shader generation is currently unsupported.");

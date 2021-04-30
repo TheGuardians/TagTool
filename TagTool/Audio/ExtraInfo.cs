@@ -88,7 +88,7 @@ namespace TagTool.Audio
 		{
             public byte[] EncodedData;
             public List<SoundDialogueInfoBlock> SoundDialogueInfo;
-            public List<UnknownBlock> Unknown;
+            public List<FacialAnimationDataBlock> FacialAnimationData;
 
             [TagStructure(Size = 0x10)]
             public class SoundDialogueInfoBlock : TagStructure
@@ -100,7 +100,7 @@ namespace TagTool.Audio
             }
 
             [TagStructure(Size = 0xC)]
-            public class UnknownBlock : TagStructure
+            public class FacialAnimationDataBlock : TagStructure
 			{
                 public List<FacialAnimationPermutation> FacialAnimationPermutations;
 
@@ -111,26 +111,58 @@ namespace TagTool.Audio
                     public float EndTime;
                     public float BlendIn;
                     public float BlendOut;
-                    public List<UnknownBlock2_1> Unknown5;
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 0xC)]
+                    public byte[] Pad = new byte[0xC];
                     public List<FacialAnimationCurve> FacialAnimationCurves;
-
-                    [TagStructure(Size = 0x8)]
-                    public class UnknownBlock2_1 : TagStructure
-					{
-                        public uint Unknown1;
-                        public uint Unknown2;
-                    }
 
                     [TagStructure(Size = 0x8)]
                     public class FacialAnimationCurve : TagStructure
 					{
-                        public short AnimationStartTime;
-                        public sbyte Unknown2;
-                        public sbyte Unknown3;
-                        public sbyte Unknown4;
-                        public sbyte Unknown5;
-                        public sbyte Unknown6;
-                        public sbyte Unknown7;
+                        public short Time;
+                        public FacialAnimationTrack Track1;
+                        public FacialAnimationTrack Track2;
+                        public FacialAnimationTrack Track3;
+                        public sbyte Track1Weight;
+                        public sbyte Track2Weight;
+                        public sbyte Track3Weight;
+
+                        public enum FacialAnimationTrack : byte
+                        {
+                            Silence,
+                            Eat,
+                            Earth,
+                            If,
+                            Ox,
+                            Oat,
+                            Wet,
+                            Size,
+                            Church,
+                            Fave,
+                            Though,
+                            Told,
+                            Bump,
+                            New,
+                            Roar,
+                            Cage,
+                            Eyebrow_Raise,
+                            Blink,
+                            Orientation_Head_Pitch,
+                            Orientation_Head_Roll,
+                            Orientation_Head_Yaw,
+                            Emphasis_Head_Pitch,
+                            Emphasis_Head_Roll,
+                            Emphasis_Head_Yaw,
+                            Gaze_Eye_Pitch,
+                            Gaze_Eye_Yaw,
+                            happy,
+                            sad,
+                            angry,
+                            disgusted,
+                            scared,
+                            surprised,
+                            pain,
+                            shout
+                        }
                     }
                 }
             }
