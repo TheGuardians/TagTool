@@ -29,7 +29,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "zonly", "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
 
         public override object Execute(List<string> args)
         {
@@ -46,12 +46,21 @@ namespace TagTool.Commands.Shaders
 
             args.RemoveAt(0); // we should only have options from this point
 
-            // get relevant rmdf
-            if (!Cache.TagCache.TryGetTag($"shaders\\{shaderType}.rmdf", out var rmdfTag))
-                return new TagToolError(CommandError.TagInvalid, $"Could not find rmdf tag for \"{shaderType}\"");
-
             using (var stream = Cache.OpenCacheReadWrite())
             {
+                // get relevant rmdf
+                if (!Cache.TagCache.TryGetTag($"shaders\\{shaderType}.rmdf", out CachedTag rmdfTag))
+                {
+                    // don't need actual options yet - we just need to initialize the generator (input option indices are verified using rmdf, which we don't have yet)
+                    List<byte> fakeOptions = new List<byte>();
+                    for (int i = 0; i < args.Count; i++)
+                        fakeOptions.Add(0);
+
+                    rmdfTag = GenerateRmdf(stream, shaderType, fakeOptions.ToArray());
+                    if (rmdfTag == null)
+                        return new TagToolError(CommandError.TagInvalid, $"Could not find or generate rmdf tag for \"{shaderType}\"");
+                }
+
                 var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
 
                 if (rmdf.GlobalVertexShader == null || rmdf.GlobalPixelShader == null)
@@ -104,12 +113,51 @@ namespace TagTool.Commands.Shaders
                     case "halogram":        GenerateHalogram(stream, options, rmt2TagName, rmdf); break;
                     case "custom":          GenerateCustom(stream, options, rmt2TagName, rmdf); break;
                     case "screen":          GenerateScreen(stream, options, rmt2TagName, rmdf); break;
+                    case "zonly":           GenerateZOnly(stream, options, rmt2TagName, rmdf); break;
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
             }
 
             return true;
+        }
+
+        HaloShaderGenerator.Generator.IShaderGenerator GetShaderGenerator(string shaderType, byte[] options, bool applyFixes = false)
+        {
+            switch (shaderType)
+            {
+                case "beam":            return new HaloShaderGenerator.Beam.BeamGenerator(options, applyFixes);
+                case "black":           return new HaloShaderGenerator.Black.ShaderBlackGenerator();
+                case "contrail":        return new HaloShaderGenerator.Contrail.ContrailGenerator(options, applyFixes);
+                //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(options, applyFixes);
+                case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(options, applyFixes);
+                case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(options, applyFixes);
+                //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(options, applyFixes);
+                //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(options, applyFixes);
+                case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(options, applyFixes);
+                case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(options, applyFixes);
+                case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(options, applyFixes);
+                case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(options, applyFixes);
+                case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(options, applyFixes);
+                //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(options, applyFixes);
+                //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(options, applyFixes);
+                case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(options, applyFixes);
+            }
+            return null;
+        }
+
+        private CachedTag GenerateRmdf(Stream stream, string shaderType, byte[] options)
+        {
+            var generator = GetShaderGenerator(shaderType, options, true);
+            if (generator == null)
+                return null;
+
+            var rmdf = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out _, out _);
+            CachedTag rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
+            Cache.Serialize(stream, rmdfTag, rmdf);
+            if (Cache is GameCacheHaloOnlineBase)
+                (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+            return rmdfTag;
         }
 
         private object GenerateExplicitShader(string shader)
@@ -364,6 +412,25 @@ namespace TagTool.Commands.Shaders
             HaloShaderGenerator.Screen.Blend_Mode blend_mode = (HaloShaderGenerator.Screen.Blend_Mode)options[4];
 
             var generator = new HaloShaderGenerator.Screen.ScreenGenerator(warp, _base, overlay_a, overlay_b, blend_mode);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateZOnly(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            HaloShaderGenerator.ZOnly.Test test = (HaloShaderGenerator.ZOnly.Test)options[0];
+
+            var generator = new HaloShaderGenerator.ZOnly.ZOnlyGenerator(test);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
