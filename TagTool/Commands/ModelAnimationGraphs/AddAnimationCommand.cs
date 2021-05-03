@@ -25,6 +25,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private CachedTag Jmad { get; set; }
         private bool BaseFix = false;
         private bool CameraFix = false;
+        private bool ScaleFix = false;
 
         public AddAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -32,7 +33,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "AddAnimation",
                   "Add an animation to a ModelAnimationGraph tag",
 
-                  "AddAnimation [basefix] [camerafix] <filepath>",
+                  "AddAnimation [basefix] [camerafix] [scalefix] <filepath>",
 
                   "Add an animation to a ModelAnimationGraph tag from an animation in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format")
         {
@@ -51,6 +52,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             BaseFix = false;
             CameraFix = false;
+            ScaleFix = false;
             while (argStack.Count > 1)
             {
                 var arg = argStack.Peek();
@@ -62,6 +64,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                     case "camerafix":
                         CameraFix = true;
+                        argStack.Pop();
+                        break;
+                    case "scalefix":
+                        ScaleFix = true;
                         argStack.Pop();
                         break;
                     default:
@@ -130,6 +136,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
+                importer.ScaleFix = ScaleFix;
                 if (!importer.Import(filepath.FullName))
                     continue;
 

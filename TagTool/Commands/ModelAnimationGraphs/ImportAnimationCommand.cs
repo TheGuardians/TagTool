@@ -24,6 +24,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private bool isWorldRelative { get; set; }
         private CachedTag Jmad { get; set; }
         bool NodesBuilt = false;
+        private bool ScaleFix = false;
 
         public ImportAnimationCommand(GameCacheHaloOnlineBase cachecontext)
             : base(false,
@@ -121,6 +122,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
+                importer.ScaleFix = ScaleFix;
                 if (!importer.Import(filepath.FullName))
                     continue;
 

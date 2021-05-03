@@ -33,6 +33,7 @@ namespace TagTool.Animations
         public bool buildstaticdata = false;
         private List<MovementDataDxDyDzDyaw> MovementData = new List<MovementDataDxDyDzDyaw>();
         public ModelAnimationTagResource.GroupMemberMovementDataType MovementDataType;
+        public bool ScaleFix = false;
 
         public bool AssimpImport(string fileName)
         {
@@ -98,6 +99,11 @@ namespace TagTool.Animations
                     new TagToolError(CommandError.CustomError, "Imported Animation doesn't have any frames!");
                     return false;
                 }
+                else if(frameCount > 2048)
+                {
+                    new TagToolError(CommandError.CustomError, "Imported Animation has too many frames (must be <= 2048)!");
+                    return false;
+                }
                 framerate = double.Parse(textReader.ReadLine()); //framerate
                 int actorCount = int.Parse(textReader.ReadLine()); //actor count
                 if (actorCount < 1)
@@ -147,6 +153,8 @@ namespace TagTool.Animations
                 //add first child and next sibling nodes for newer animation formats, or parent nodes for old formats
                 FixupNodeTree(Version);
 
+                RealPoint3d maxtranslation = new RealPoint3d(); 
+
                 //populate node frames values
                 for (int frame_index = 0; frame_index < frameCount; frame_index++)
                 {
@@ -164,13 +172,34 @@ namespace TagTool.Animations
                         //normalize the quaternion
                         newRotation.Normalize();
 
+                        var newTranslation = new RealPoint3d((float)(double.Parse(translation[0]) * 0.009999999776482582d), (float)(double.Parse(translation[1]) * 0.009999999776482582d), (float)(double.Parse(translation[2]) * 0.009999999776482582d));
+
+                        if (ScaleFix)
+                            newTranslation *= 39.3700787f;
+
+                        //store the maximum translation values for debug purposes
+                        if (Math.Abs(newTranslation.X) > maxtranslation.X)
+                            maxtranslation.X = Math.Abs(newTranslation.X);
+                        if (Math.Abs(newTranslation.Y) > maxtranslation.Y)
+                            maxtranslation.Y = Math.Abs(newTranslation.Y);
+                        if (Math.Abs(newTranslation.Z) > maxtranslation.Z)
+                            maxtranslation.Z = Math.Abs(newTranslation.Z);
+
                         AnimationNodes[node_index].Frames.Add(new AnimationFrame
                         {
                             Rotation = newRotation,
-                            Translation = new RealPoint3d((float)(double.Parse(translation[0]) * 0.009999999776482582d), (float)(double.Parse(translation[1]) * 0.009999999776482582d), (float)(double.Parse(translation[2]) * 0.009999999776482582d)),
+                            Translation = newTranslation,
                             Scale = (float)double.Parse(scale)
                         });
                     }
+                }
+
+                //check the max translation values to determine whether or not to print a debug message
+                if(maxtranslation.X * 100.0f < 39.37f &&
+                    maxtranslation.Y * 100.0f < 39.37f &&
+                    maxtranslation.Z * 100.0f < 39.37f)
+                {
+                    Console.WriteLine("###WARNING: Maximum translation values were very small! (< 1 unit). If your animation does not appear correctly, try using the 'scalefix' argument!");
                 }
             }
             return true;
