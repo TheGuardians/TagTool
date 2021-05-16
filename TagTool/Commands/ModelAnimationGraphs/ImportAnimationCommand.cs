@@ -85,6 +85,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
             {
                 string file_extension = filepath.Extension;
 
+                AnimationType = ModelAnimationGraph.FrameType.Base;
+                isWorldRelative = false;
+                FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.None;
+
                 switch (file_extension.ToUpper())
                 {
                     case ".JMM":

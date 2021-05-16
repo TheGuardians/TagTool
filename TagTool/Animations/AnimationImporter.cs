@@ -174,6 +174,8 @@ namespace TagTool.Animations
 
                         var newTranslation = new RealPoint3d((float)(double.Parse(translation[0]) * 0.009999999776482582d), (float)(double.Parse(translation[1]) * 0.009999999776482582d), (float)(double.Parse(translation[2]) * 0.009999999776482582d));
 
+                        //the halo engine uses inches as its units for animations. 
+                        //this converts meters to inches
                         if (ScaleFix)
                             newTranslation *= 39.3700787f;
 
