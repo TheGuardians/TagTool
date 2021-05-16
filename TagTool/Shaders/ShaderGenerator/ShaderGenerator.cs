@@ -210,8 +210,6 @@ namespace TagTool.Shaders.ShaderGenerator
 
         public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, Stream cacheStream, IShaderGenerator generator, string shaderType, out GlobalPixelShader glps, out GlobalVertexShader glvs)
         {
-            Console.WriteLine($"Generating rmdf for \"{shaderType}\"");
-
             var rmdf = new RenderMethodDefinition();
 
             glps = GenerateSharedPixelShader(cache, generator);

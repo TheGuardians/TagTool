@@ -15,7 +15,7 @@ namespace TagTool.Audio
         public List<LanguagePermutation> LanguagePermutations;
 
         [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<EncodedPermutationSection> EncodedPermutationSections;
+        public List<FacialAnimationInfoBlock> FacialAnimationInfo;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown1;
@@ -84,12 +84,12 @@ namespace TagTool.Audio
         }
 
         [TagStructure(Size = 0x2C)]
-        public class EncodedPermutationSection : TagStructure
+        public class FacialAnimationInfoBlock : TagStructure
 		{
-            public byte[] EncodedData;
-            public List<SoundDialogueInfoBlock> SoundDialogueInfo;
-            public List<FacialAnimationDataBlock> FacialAnimationData;
-
+            public byte[] EncodedData; // legacy CE-H2 data, apparently can still be used
+            public List<SoundDialogueInfoBlock> SoundDialogueInfo; // ditto
+            public List<FacialAnimationPermutation> FacialAnimationPermutations;
+			
             [TagStructure(Size = 0x10)]
             public class SoundDialogueInfoBlock : TagStructure
 			{
@@ -100,31 +100,31 @@ namespace TagTool.Audio
             }
 
             [TagStructure(Size = 0xC)]
-            public class FacialAnimationDataBlock : TagStructure
+            public class FacialAnimationPermutation : TagStructure
 			{
-                public List<FacialAnimationPermutation> FacialAnimationPermutations;
+                public List<FacialAnimationBlock> FacialAnimation;
 
                 [TagStructure(Size = 0x28)]
-                public class FacialAnimationPermutation : TagStructure
+                public class FacialAnimationBlock : TagStructure
 				{
                     public float StartTime;
                     public float EndTime;
                     public float BlendIn;
                     public float BlendOut;
                     [TagField(Flags = TagFieldFlags.Padding, Length = 0xC)]
-                    public byte[] Pad = new byte[0xC];
+                    public byte[] Pad = new byte[0xC]; // possibly offset & size, unused
                     public List<FacialAnimationCurve> FacialAnimationCurves;
 
                     [TagStructure(Size = 0x8)]
                     public class FacialAnimationCurve : TagStructure
 					{
-                        public short Time;
-                        public FacialAnimationTrack Track1;
-                        public FacialAnimationTrack Track2;
-                        public FacialAnimationTrack Track3;
-                        public sbyte Track1Weight;
-                        public sbyte Track2Weight;
-                        public sbyte Track3Weight;
+                        public short AnimationStartTime;
+                        public FacialAnimationTrack FirstTrack;
+                        public FacialAnimationTrack SecondTrack;
+                        public FacialAnimationTrack ThirdTrack;
+                        public sbyte FirstPoseWeight;
+                        public sbyte SecondPoseWeight;
+                        public sbyte ThirdPoseWeight;
 
                         public enum FacialAnimationTrack : byte
                         {

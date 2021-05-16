@@ -22,8 +22,9 @@ namespace TagTool.Commands.Shaders
                 "GenerateShader <shader type> <options>",
 
                 "Generates a shader template\n" +
-                "<shader type> - Specify shader type, EX. \"shader\" for \'rmsh\'. Use \"explicit\" for explicit shaders.\n" +
-                "<options> - Specify the template\'s options as either integers or by names." +
+                "<shader type> - Specify shader type, EX. \"shader\" for \'rmsh\'.\n" +
+                "Use \"explicit\" for explicit shaders, and \"glvs\" or \"glps\" for global shaders.\n" +
+                "<options> - Specify the template\'s options as either integers or by names.\n" +
                 "For explicit shaders, you should specify the name or the rasg shader index.")
         {
             Cache = cache;
@@ -40,6 +41,8 @@ namespace TagTool.Commands.Shaders
 
             if (shaderType == "explicit")
                 return GenerateExplicitShader(args[1].ToLower());
+            else if (shaderType == "glvs" || shaderType == "glps")
+                return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
 
             if (!SupportedShaderTypes.Contains(shaderType))
                 return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
@@ -146,6 +149,30 @@ namespace TagTool.Commands.Shaders
             return null;
         }
 
+        HaloShaderGenerator.Generator.IShaderGenerator GetGlobalShaderGenerator(string shaderType, bool applyFixes = false)
+        {
+            switch (shaderType)
+            {
+                case "beam":            return new HaloShaderGenerator.Beam.BeamGenerator(applyFixes);
+                case "black":           return new HaloShaderGenerator.Black.ShaderBlackGenerator();
+                case "contrail":        return new HaloShaderGenerator.Contrail.ContrailGenerator(applyFixes);
+                //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(applyFixes);
+                case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(applyFixes);
+                case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(applyFixes);
+                //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
+                //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(applyFixes);
+                case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(applyFixes);
+                case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(applyFixes);
+                case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(applyFixes);
+                case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(applyFixes);
+                case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(applyFixes);
+                case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(applyFixes);
+                //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
+                case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(applyFixes);
+            }
+            return null;
+        }
+
         private CachedTag GenerateRmdf(Stream stream, string shaderType, byte[] options)
         {
             var generator = GetShaderGenerator(shaderType, options, true);
@@ -184,6 +211,30 @@ namespace TagTool.Commands.Shaders
                 Cache.Serialize(stream, tag, pixl);
             }
 
+            Console.WriteLine($"Generated explicit shader for {value}");
+            return true;
+        }
+
+        private object GenerateGlobalShader(string shaderType, bool pixel)
+        {
+            var generator = GetGlobalShaderGenerator(shaderType, true);
+            if (generator == null)
+                return new TagToolError(CommandError.ArgInvalid, $"\"{shaderType}\"");
+
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                CachedTag rmdfTag = Cache.TagCache.GetTag($"shaders\\{shaderType}.rmdf");
+                RenderMethodDefinition rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
+
+                TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out var glps, out var glvs);
+
+                if (pixel)
+                    Cache.Serialize(stream, rmdf.GlobalPixelShader, glps);
+                else
+                    Cache.Serialize(stream, rmdf.GlobalVertexShader, glvs);
+            }
+
+            Console.WriteLine($"Generated global {(pixel ? "pixel" : "vertex")} shader for {shaderType}");
             return true;
         }
 
