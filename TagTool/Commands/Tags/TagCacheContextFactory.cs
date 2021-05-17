@@ -36,7 +36,9 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ClearCommand());
             context.AddCommand(new EchoCommand());
             context.AddCommand(new HelpCommand(contextStack));
+            context.AddCommand(new ListVariablesCommand(contextStack));
             context.AddCommand(new SetLocaleCommand());
+            context.AddCommand(new SetVariableCommand(contextStack));
             context.AddCommand(new StopwatchCommand());
             context.AddCommand(new ConvertPluginsCommand(cache));
             context.AddCommand(new ListTagsCommand(cache));

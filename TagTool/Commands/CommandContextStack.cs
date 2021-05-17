@@ -13,6 +13,11 @@ namespace TagTool.Commands
         private Stack<CommandContext> ContextStack { get; } = new Stack<CommandContext>();
 
         /// <summary>
+        /// Stores argument variables and their values that are used when running commands.
+        /// </summary>
+        public Dictionary<string, string> ArgumentVariables = new Dictionary<string, string>();
+
+        /// <summary>
         /// An event that is fired when a context is popped from the stack
         /// </summary>
         public event Action<CommandContext> ContextPopped;
