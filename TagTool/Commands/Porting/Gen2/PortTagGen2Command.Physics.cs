@@ -9,7 +9,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        public PhysicsModel ConverPhysicsModel(CachedTag tag, PhysicsModelGen2 gen2PhysicsModel)
+        public PhysicsModel ConvertPhysicsModel(CachedTag tag, PhysicsModelGen2 gen2PhysicsModel)
         {
             var physicsModel = new PhysicsModel()
             {
@@ -37,54 +37,97 @@ namespace TagTool.Commands.Porting.Gen2
                 LimitedHingeConstraints = new List<PhysicsModel.LimitedHingeConstraint>(),
                 Phantoms = new List<PhysicsModel.Phantom>()
             };
-            
-            //convert pills
-            //TODO: FINISH CONVERSION
-            foreach(var gen2pill in gen2PhysicsModel.Pills)
+
+            //convert rigid bodies
+            foreach (var gen2rig in gen2PhysicsModel.RigidBodies)
             {
-                physicsModel.Pills.Add(new PhysicsModel.Pill
+                PhysicsModel.RigidBody newRig = new PhysicsModel.RigidBody
                 {
-                    Name = gen2pill.Name,
-                    MaterialIndex = gen2pill.Material,
-                    RuntimeMaterialType = (short)gen2pill.Flags,
-                    RelativeMassScale = gen2pill.RelativeMassScale,
-                    Restitution = gen2pill.Restitution,
-                    Friction = gen2pill.Friction,
-                    Volume = gen2pill.Volume,
-                    Mass = gen2pill.Mass,
-                    MassDistributionIndex = gen2pill.MassDistributionIndex,
-                    PhantomIndex = (sbyte)gen2pill.Phantom,
+                    Node = gen2rig.Node,
+                    Region = gen2rig.Region,
+                    Permutation = gen2rig.Permutation,
+                    SerializedShapes = gen2rig.SerializedShapes,
+                    BoundingSphereOffset = gen2rig.BoundingSphereOffset,
+                    BoundingSphereRadius = gen2rig.BoundingSphereRadius,
+                    Flags = (PhysicsModel.RigidBody.RigidBodyFlags)gen2rig.Flags,
+                    MotionType = (PhysicsModel.RigidBody.MotionTypeValue)gen2rig.MotionType,
+                    NoPhantomPowerAltRigidBody = gen2rig.NoPhantomPowerAlt,
+                    Size = (PhysicsModel.RigidBodySize)gen2rig.Size,
+                    InertiaTensorScale = gen2rig.InertiaTensorScale,
+                    LinearDampening = gen2rig.LinearDamping,
+                    AngularDampening = gen2rig.AngularDamping,
+                    CenterOfMassOffset = gen2rig.CenterOffMassOffset,
+                    ShapeType = (Havok.BlamShapeType)gen2rig.ShapeType,
+                    ShapeIndex = gen2rig.Shape,
+                    Mass = gen2rig.Mass,
+                    CenterOfMass = gen2rig.CenterOfMass,
+                    CenterOfMassRadius = gen2rig.CenterofMassRadius,
+                    InertiaTensorX = gen2rig.IntertiaTensorX,
+                    InertiaTensorXRadius = gen2rig.IntertiaTensorXRadius,
+                    InertiaTensorY = gen2rig.IntertiaTensorY,
+                    InertiaTensorYRadius = gen2rig.IntertiaTensorYRadius,
+                    InertiaTensorZ = gen2rig.IntertiaTensorZ,
+                    InertiaTensorZRadius = gen2rig.IntertiaTensorZRadius,
+                    BoundingSpherePad = gen2rig.BoundingSpherePad
+                };
+                physicsModel.RigidBodies.Add(newRig);
+            }
+
+            //convert pills
+            foreach (var gen2pill in gen2PhysicsModel.Pills)
+            {
+                PhysicsModel.Pill newPill = new PhysicsModel.Pill
+                {
                     Bottom = gen2pill.Bottom,
                     BottomRadius = gen2pill.BottomRadius,
                     Top = gen2pill.Top,
                     TopRadius = gen2pill.TopRadius
-                });
+                };
+                ConvertHavokShape(newPill, gen2pill);
+                physicsModel.Pills.Add(newPill);
             }
 
-            //convert materials
-            foreach (var gen2material in gen2PhysicsModel.Materials)
+            //convert boxes
+            foreach (var gen2box in gen2PhysicsModel.Boxes)
             {
-                physicsModel.Materials.Add(new PhysicsModel.Material
+                PhysicsModel.Box newBox = new PhysicsModel.Box
                 {
-                    Name = gen2material.Name,
-                    MaterialName = gen2material.GlobalMaterialName,
-                    PhantomType = gen2material.PhantomType,
-                    //this seems to be a default value
-                    RuntimeCollisionGroup = byte.MaxValue
-                });
+                    HalfExtents = gen2box.HalfExtents,
+                    HalfExtentsRadius = gen2box.HalfExtentsRadius,
+                    RotationI = gen2box.RotationI,
+                    RotationIRadius = gen2box.RotationIRadius,
+                    RotationJ = gen2box.RotationJ,
+                    RotationJRadius = gen2box.RotationJRadius,
+                    RotationK = gen2box.RotationK,
+                    RotationKRadius = gen2box.RotationKRadius,
+                    Translation = gen2box.Translation,
+                    TranslationRadius = gen2box.TranslationRadius,
+                    ConvexBase = ConvertHavokShapeBase(gen2box.ShapeBase)
+                };
+                ConvertHavokShape(newBox, gen2box);
+                physicsModel.Boxes.Add(newBox);
             }
 
-            //convert lists
-            foreach (var gen2list in gen2PhysicsModel.Lists)
+            //convert polyhedra
+            foreach (var gen2poly in gen2PhysicsModel.Polyhedra)
             {
-                physicsModel.Lists.Add(new PhysicsModel.List
+                PhysicsModel.Polyhedron newPoly = new PhysicsModel.Polyhedron
                 {
-                    Size = gen2list.Size,
-                    Count = gen2list.Count,
-                    ChildShapesSize = gen2list.ChildShapesSize,
-                    ChildShapesCapacity = (uint)gen2list.ChildShapesCapacity
-                    //TODO: Calculate Half Extents and Radius
-                });
+                    AabbHalfExtents = gen2poly.AabbHalfExtents,
+                    AabbHalfExtentsRadius = gen2poly.AabbHalfExtentsRadius,
+                    AabbCenter = gen2poly.AabbCenter,
+                    AabbCenterRadius = gen2poly.AabbCenterRadius,
+                    FieldPointerSkip = gen2poly.FieldPointerSkip,
+                    FourVectorsSize = gen2poly.FourVectorsSize,
+                    FourVectorsCapacity = (uint)gen2poly.FourVectorsCapacity,
+                    NumVertices = gen2poly.NumVertices,
+                    m_useSpuBuffer = gen2poly.m_useSpuBuffer,
+                    PlaneEquationsSize = gen2poly.PlaneEquationsSize,
+                    PlaneEquationsCapacity = (uint)gen2poly.PlaneEquationsCapacity,
+                    Connectivity = gen2poly.Connectivity
+                };
+                ConvertHavokShape(newPoly, gen2poly);
+                physicsModel.Polyhedra.Add(newPoly);
             }
 
             //convert polyhedronfourvectors
@@ -108,6 +151,46 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PlaneEquation = gen2peq.PlaneEquation
                 });
+            }
+
+            //convert materials
+            foreach (var gen2material in gen2PhysicsModel.Materials)
+            {
+                physicsModel.Materials.Add(new PhysicsModel.Material
+                {
+                    Name = gen2material.Name,
+                    MaterialName = gen2material.GlobalMaterialName,
+                    PhantomType = gen2material.PhantomType,
+                    //this seems to be a default value
+                    RuntimeCollisionGroup = byte.MaxValue
+                });
+            }
+
+            //convert lists
+            foreach (var gen2list in gen2PhysicsModel.Lists)
+            {
+                physicsModel.Lists.Add(new PhysicsModel.List
+                {
+                    FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
+                    Size = gen2list.ShapeBase.Size,
+                    Count = gen2list.ShapeBase.Count,
+                    Offset = gen2list.ShapeBase.Offset,
+                    ChildShapesSize = gen2list.ChildShapesSize,
+                    ChildShapesCapacity = (uint)gen2list.ChildShapesCapacity
+                    //TODO: Calculate Half Extents and Radius
+                });
+            }
+
+            //convert list shapes
+            foreach (var gen2listshape in gen2PhysicsModel.ListShapes)
+            {
+                physicsModel.ListShapes.Add(new PhysicsModel.ListShape
+                {
+                    ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
+                    ShapeIndex = gen2listshape.Shape,
+                    CollisionFilter = (uint)gen2listshape.CollisionFilter
+                });
+                //TODO: Shape Size + NumChildShapes
             }
 
             //convert regions
@@ -153,6 +236,36 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             return physicsModel;
+        }
+
+        public void ConvertHavokShape(PhysicsModel.Shape newShape, PhysicsModelGen2.HavokShape gen2shape)
+        {
+            newShape.Name = gen2shape.Name;
+            newShape.MaterialIndex = gen2shape.Material;
+            newShape.MaterialFlags = (PhysicsModel.MaterialFlags)gen2shape.Flags;
+            newShape.RelativeMassScale = gen2shape.RelativeMassScale;
+            newShape.Friction = gen2shape.Friction;
+            newShape.Restitution = gen2shape.Restitution;
+            newShape.Volume = gen2shape.Volume;
+            newShape.Mass = gen2shape.Mass;
+            newShape.MassDistributionIndex = gen2shape.MassDistributionIndex;
+            newShape.PhantomIndex = (sbyte)gen2shape.Phantom;
+
+            newShape.ShapeBase = ConvertHavokShapeBase(gen2shape.ShapeBase);
+            return;
+        }
+
+        public PhysicsModel.HavokShapeBase ConvertHavokShapeBase(PhysicsModelGen2.HavokShapeBase gen2shapebase)
+        {
+            PhysicsModel.HavokShapeBase newShapeBase = new PhysicsModel.HavokShapeBase
+            {
+                FieldPointerSkip = gen2shapebase.FieldPointerSkip,
+                Size = gen2shapebase.Size,
+                Count = gen2shapebase.Count,
+                Offset = gen2shapebase.Offset,
+                Radius = gen2shapebase.Radius
+            };
+            return newShapeBase;
         }
     }
 }

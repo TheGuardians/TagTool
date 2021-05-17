@@ -452,7 +452,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short Node;
             public short Region;
-            public short Permutations;
+            public short Permutation;
             public short SerializedShapes;
             public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
@@ -474,7 +474,7 @@ namespace TagTool.Tags.Definitions
             public float InertialTensorScaleZ;
             public float LinearDampening;
             public float AngularDampening;
-            public RealPoint3d CenterOfMassOffset;
+            public RealVector3d CenterOfMassOffset;
 
 			[TagField(MinVersion = CacheVersion.Halo3Retail)]
 			public float WaterPhysicsX0;
@@ -728,14 +728,19 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x70, Align = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class List : TagStructure
 		{
-            public int Unknown;
+            public int FieldPointerSkip;
             public short Size;
             public short Count;
             public int Offset;
-            public int Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
+            public int UserData;
+
+            public int FieldPointerSkip0;
+            public byte DisableWelding;
+            public byte CollectionType;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
+            public byte[] Pad0 = new byte[0x2];
+            public int FieldPointerSkip1;
+
             public int ChildShapesSize;
             public uint ChildShapesCapacity;
 
