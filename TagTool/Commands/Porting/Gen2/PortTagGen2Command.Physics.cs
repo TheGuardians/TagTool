@@ -122,6 +122,9 @@ namespace TagTool.Commands.Porting.Gen2
                 physicsModel.Boxes.Add(newBox);
             }
 
+            int usedfourvectorcount = 0;
+            int polyhedra_index = 0;
+
             //convert polyhedra
             foreach (var gen2poly in gen2PhysicsModel.Polyhedra)
             {
@@ -133,29 +136,42 @@ namespace TagTool.Commands.Porting.Gen2
                     AabbCenterRadius = gen2poly.AabbCenterRadius,
                     //FieldPointerSkip = gen2poly.FieldPointerSkip,
                     FourVectorsSize = gen2poly.FourVectorsSize,
-                    FourVectorsCapacity = (uint)gen2poly.FourVectorsCapacity,
+                    FourVectorsCapacity = (uint)gen2poly.FourVectorsSize | 0x80000000,
                     NumVertices = gen2poly.NumVertices,
-                    m_useSpuBuffer = gen2poly.m_useSpuBuffer,
+                    m_useSpuBuffer = gen2poly.Unknown,
                     PlaneEquationsSize = gen2poly.PlaneEquationsSize,
-                    PlaneEquationsCapacity = (uint)gen2poly.PlaneEquationsCapacity,
-                    Connectivity = gen2poly.Connectivity
+                    PlaneEquationsCapacity = (uint)gen2poly.PlaneEquationsSize | 0x80000000,
+                    ProxyCollisionGroup = -1 //doesn't exist in H2
                 };
-                ConvertHavokShape(newPoly, gen2poly);
-                physicsModel.Polyhedra.Add(newPoly);
-            }
 
-            //convert polyhedronfourvectors
-            foreach (var gen2vector in gen2PhysicsModel.PolyhedronFourVectors)
-            {
-                physicsModel.PolyhedronFourVectors.Add(new PhysicsModel.PolyhedronFourVector
+                //the first three fourvectors are stored inside the polyhedron in H2
+                for(var i = 0; i < gen2poly.FourVectorsSize; i++)
                 {
-                    FourVectorsX = gen2vector.FourVectorsX,
-                    FourVectorsXRadius = gen2vector.FourVectorsXRadius,
-                    FourVectorsY = gen2vector.FourVectorsY,
-                    FourVectorsYRadius = gen2vector.FourVectorsYRadius,
-                    FourVectorsZ = gen2vector.FourVectorsZ,
-                    FourVectorsZRadius = gen2vector.FourVectorsZRadius
-                });
+                    PhysicsModelGen2.PolyhedronFourVectorsBlock gen2vector;
+                    switch (i)
+                    {
+                        case 0:
+                            gen2vector = gen2poly.FourVectorsA;
+                            break;
+                        case 1:
+                            gen2vector = gen2poly.FourVectorsB;
+                            break;
+                        case 2:
+                            gen2vector = gen2poly.FourVectorsC;
+                            break;
+                        default:
+                            gen2vector = gen2PhysicsModel.PolyhedronFourVectors[usedfourvectorcount++];
+                            break;
+                    }
+                    physicsModel.PolyhedronFourVectors.Add(ConvertPolyhedronFourVector(gen2vector));
+                }
+
+                ConvertHavokShape(newPoly, gen2poly);
+
+                //not sure what this is for, but just matching existing tags
+                newPoly.ShapeBase.Offset = 32 + 128 * polyhedra_index++;
+
+                physicsModel.Polyhedra.Add(newPoly);
             }
 
             //convert polyhedron plane equations
@@ -190,13 +206,15 @@ namespace TagTool.Commands.Porting.Gen2
                     Count = gen2list.ShapeBase.Count,
                     Offset = gen2list.ShapeBase.Offset,
                     ChildShapesSize = gen2list.ChildShapesSize,
-                    ChildShapesCapacity = (uint)gen2list.ChildShapesCapacity
-                    //TODO: Calculate Half Extents and Radius
+                    ChildShapesCapacity = (uint)gen2list.ChildShapesSize | 0x80000000,
+                    UserData = 10 //seems to be a default value
+                    //TODO: Half Extents and Radius?
                 });
 
                 //convert list shapes
-                foreach (var gen2listshape in gen2list.CollisionFilter)
+                for(var i = 0; i < gen2list.ChildShapesSize; i++)
                 {
+                    var gen2listshape = gen2list.CollisionFilter[i];
                     physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                     {
                         ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
@@ -204,7 +222,7 @@ namespace TagTool.Commands.Porting.Gen2
                         CollisionFilter = (uint)gen2listshape.CollisionFilter,
                         NumChildShapes = (uint)gen2list.ChildShapesSize
                     });
-                    //TODO: Shape Size + NumChildShapes
+                    //TODO: Shape Size?
                 }
             }
 
@@ -281,6 +299,19 @@ namespace TagTool.Commands.Porting.Gen2
                 Radius = gen2shapebase.Radius
             };
             return newShapeBase;
+        }
+
+        public PhysicsModel.PolyhedronFourVector ConvertPolyhedronFourVector(PhysicsModelGen2.PolyhedronFourVectorsBlock gen2vector)
+        {
+            return new PhysicsModel.PolyhedronFourVector
+            {
+                FourVectorsX = gen2vector.FourVectorsX,
+                FourVectorsXRadius = gen2vector.FourVectorsXRadius,
+                FourVectorsY = gen2vector.FourVectorsY,
+                FourVectorsYRadius = gen2vector.FourVectorsYRadius,
+                FourVectorsZ = gen2vector.FourVectorsZ,
+                FourVectorsZRadius = gen2vector.FourVectorsZRadius
+            };
         }
     }
 }

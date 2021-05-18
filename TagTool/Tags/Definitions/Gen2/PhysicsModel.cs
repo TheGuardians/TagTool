@@ -481,14 +481,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public uint FieldPointerSkip;
             public int FourVectorsSize;
             public int FourVectorsCapacity;
-            public int NumVertices;
+            public uint Unknown;
             public PolyhedronFourVectorsBlock FourVectorsA;
             public PolyhedronFourVectorsBlock FourVectorsB;
             public PolyhedronFourVectorsBlock FourVectorsC;
-            public uint m_useSpuBuffer;
+            public int NumVertices;
+            public uint FieldPointerSkip2;
             public int PlaneEquationsSize;
             public int PlaneEquationsCapacity;
-            public uint Connectivity;
         }
 
         [TagStructure(Size = 0x30)]
