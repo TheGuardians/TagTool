@@ -11,6 +11,7 @@ using TagTool.Tags;
 using TagTool.Commands.Porting;
 using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
 using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
+using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -78,6 +79,9 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case ModelAnimationGraphGen2 modelAnimationGraph:
                     definition = ConvertModelAnimationGraph(tag, modelAnimationGraph);
+                    break;
+                case PhysicsModelGen2 physicsModel:
+                    definition = ConvertPhysicsModel(tag, physicsModel);
                     break;
             }
 

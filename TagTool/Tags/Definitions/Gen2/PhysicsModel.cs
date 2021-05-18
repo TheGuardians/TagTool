@@ -55,6 +55,32 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<PrismaticConstraintsBlock> PrismaticConstraints;
         public List<PhantomsBlock> Phantoms;
 
+        [TagStructure(Size = 0x30)]
+        public class HavokShape : TagStructure
+        {
+            public StringId Name;
+            public short Material;
+            public short Flags;
+            public float RelativeMassScale;
+            public float Friction;
+            public float Restitution;
+            public float Volume;
+            public float Mass;
+            public short MassDistributionIndex;
+            public short Phantom;
+            public HavokShapeBase ShapeBase;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class HavokShapeBase : TagStructure
+        {
+            public int FieldPointerSkip;
+            public short Size;
+            public short Count;
+            public int Offset;
+            public float Radius;
+        }
+
         [Flags]
         public enum FlagsValue : uint
         {
@@ -232,10 +258,9 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             public short Node;
             public short Region;
-            public short Permutattion;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
-            public RealPoint3d BoudingSphereOffset;
+            public short Permutation;
+            public short SerializedShapes;
+            public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
             public FlagsValue Flags;
             public MotionTypeValue MotionType;
@@ -258,17 +283,13 @@ namespace TagTool.Tags.Definitions.Gen2
             public short Shape;
             public float Mass; // kg*
             public RealVector3d CenterOfMass;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown;
+            public float CenterofMassRadius;
             public RealVector3d IntertiaTensorX;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+            public float IntertiaTensorXRadius;
             public RealVector3d IntertiaTensorY;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
+            public float IntertiaTensorYRadius;
             public RealVector3d IntertiaTensorZ;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
+            public float IntertiaTensorZRadius;
             /// <summary>
             /// the bounding sphere for this rigid body will be outset by this much
             /// </summary>
@@ -358,51 +379,19 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
 
-        [TagStructure(Size = 0x80)]
-        public class SpheresBlock : TagStructure
+        [TagStructure(Size = 0x50)]
+        public class SpheresBlock : HavokShape
         {
-            public StringId Name;
-            public short Material;
-            public FlagsValue Flags;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            [TagField(Length = 0x2)]
-            public byte[] Unknown;
-            public short Phantom;
-
-            public int FieldPointerSkip;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public float Radius;
-
-            public int FieldPointerSkip1;
-            public short Size1;
-            public short Count1;
-            public int Offset1;
-            public float Radius1;
+            public HavokShapeBase ConvexBase;
 
             public RealVector3d RotationI;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown6;
+            public float MagnitudeI;
             public RealVector3d RotationJ;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown7;
+            public float MagnitudeJ;
             public RealVector3d RotationK;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown8;
+            public float MagnitudeK;
             public RealVector3d Translation;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown9;
-
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                Unused = 1 << 0
-            }
+            public float TranslationRadius;
         }
 
         [TagStructure(Size = 0xB0)]
@@ -444,66 +433,22 @@ namespace TagTool.Tags.Definitions.Gen2
             }
         }
 
-        [TagStructure(Size = 0x50)]
-        public class PillsBlock : TagStructure
+        [TagStructure(Size = 0x20)]
+        public class PillsBlock : HavokShape
         {
-            public StringId Name;
-            public short Material;
-            public FlagsValue Flags;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            public short MassDistributionIndex;
-            public short Phantom;
-
-            public int FieldPointerSkip;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public float Radius;
-
             public RealVector3d Bottom;
             public float BottomRadius;
             public RealVector3d Top;
             public float TopRadius;
-
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                Unused = 1 << 0
-            }
         }
 
-        [TagStructure(Size = 0x90)]
-        public class BoxesBlock : TagStructure
+        [TagStructure(Size = 0x60)]
+        public class BoxesBlock : HavokShape
         {
-            public StringId Name;
-            public short Material;
-            public FlagsValue Flags;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            public short MassDistributionIndex;
-            public short Phantom;
-
-            public int FieldPointerSkip;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public float Radius;
-
             public RealVector3d HalfExtents;
             public float HalfExtentsRadius;
 
-            public int FieldPointerSkip1;
-            public short Size1;
-            public short Count1;
-            public int Offset1;
-            public float Radius1;
+            public HavokShapeBase ConvexBase;
 
             public RealVector3d RotationI;
             public float RotationIRadius;
@@ -513,77 +458,22 @@ namespace TagTool.Tags.Definitions.Gen2
             public float RotationKRadius;
             public RealVector3d Translation;
             public float TranslationRadius;
-
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                Unused = 1 << 0
-            }
         }
 
-        [TagStructure(Size = 0x60)]
-        public class TrianglesBlock : TagStructure
+        [TagStructure(Size = 0x30)]
+        public class TrianglesBlock : HavokShape
         {
-            public StringId Name;
-            public short Material;
-            public FlagsValue Flags;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            [TagField(Length = 0x2)]
-            public byte[] Unknown;
-            public short Phantom;
-
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
-            public short Size;
-            public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
-            public float Radius;
-
             public RealVector3d PointA;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
+            public float HavokwPointA;
             public RealVector3d PointB;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown4;
+            public float HavokwPointB;
             public RealVector3d PointC;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown5;
-
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                Unused = 1 << 0
-            }
+            public float HavokwPointC;
         }
 
-        [TagStructure(Size = 0x100)]
-        public class PolyhedraBlock : TagStructure
+        [TagStructure(Size = 0xD0)]
+        public class PolyhedraBlock : HavokShape
         {
-            public StringId Name;
-            public short Material;
-            public FlagsValue Flags;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            [TagField(Length = 0x2)]
-            public byte[] Unknown;
-            public short Phantom;
-
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
-            public short Size;
-            public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
-            public float Radius;
-
             public RealVector3d AabbHalfExtents;
             public float AabbHalfExtentsRadius;
             public RealVector3d AabbCenter;
@@ -591,18 +481,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public uint FieldPointerSkip;
             public int FourVectorsSize;
             public int FourVectorsCapacity;
+            public uint Unknown;
+            public PolyhedronFourVectorsBlock FourVectorsA;
+            public PolyhedronFourVectorsBlock FourVectorsB;
+            public PolyhedronFourVectorsBlock FourVectorsC;
             public int NumVertices;
-            public PolyhedronFourVectorsBlock FourVectors;
-            public uint m_useSpuBuffer;
+            public uint FieldPointerSkip2;
             public int PlaneEquationsSize;
             public int PlaneEquationsCapacity;
-            public uint Connectivity;
-
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                Unused = 1 << 0
-            }
         }
 
         [TagStructure(Size = 0x30)]
@@ -642,14 +528,8 @@ namespace TagTool.Tags.Definitions.Gen2
         [TagStructure(Size = 0x38)]
         public class ListsBlock : TagStructure
         {
-            [TagField(Length = 0x4)]
-            public byte[] Unknown;
-            public short Size;
-            public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
+            public HavokShapeBase ShapeBase;
+
             public int ChildShapesSize;
             public int ChildShapesCapacity;
             [TagField(Length = 4)]

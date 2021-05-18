@@ -60,7 +60,7 @@ namespace TagTool.Commands.Common
             }
 
             // Try to execute it
-            if (!ExecuteCommand(ContextStack.Context, commandArgs))
+            if (!ExecuteCommand(ContextStack.Context, commandArgs, ContextStack.ArgumentVariables))
             {
                 new TagToolError(CommandError.CustomError, $"Unrecognized command \"{commandArgs[0]}\"\n"
                 + "Use \"help\" to list available commands.");
@@ -77,7 +77,7 @@ namespace TagTool.Commands.Common
 
         public static string CurrentCommandName = "";
 
-        private static bool ExecuteCommand(CommandContext context, List<string> commandAndArgs)
+        private static bool ExecuteCommand(CommandContext context, List<string> commandAndArgs, Dictionary<string, string> argVariables)
         {
             if (commandAndArgs.Count == 0)
                 return true;
@@ -90,6 +90,18 @@ namespace TagTool.Commands.Common
 
             // Execute it
             commandAndArgs.RemoveAt(0);
+
+            // Replace argument variables with their values
+            if (!command.IgnoreArgumentVariables)
+            {
+                for (int i = 0; i < commandAndArgs.Count; i++)
+                {
+                    foreach (var variable in argVariables)
+                    {
+                        commandAndArgs[i] = commandAndArgs[i].Replace(variable.Key, variable.Value);
+                    }
+                }
+            }
 
 #if !DEBUG
             try

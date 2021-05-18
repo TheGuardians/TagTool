@@ -165,22 +165,41 @@ namespace TagTool.Shaders.ShaderGenerator
             var glps = new GlobalPixelShader { EntryPoints = new List<GlobalPixelShader.EntryPointBlock>(), Shaders = new List<PixelShaderBlock>() };
             foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
             {
-                var entryPointBlock = new GlobalPixelShader.EntryPointBlock {ShaderIndex = -1 };
+                var entryPointBlock = new GlobalPixelShader.EntryPointBlock { ShaderIndex = -1 };
                 glps.EntryPoints.Add(entryPointBlock);
-                if (generator.IsEntryPointSupported(entryPoint) && generator.IsPixelShaderShared(entryPoint))
+
+                if (generator.IsEntryPointSupported(entryPoint) && 
+                    generator.IsPixelShaderShared(entryPoint))
                 {
-                    for (int i = 0; i < generator.GetMethodCount(); i++)
+                    if (generator.IsSharedPixelShaderWithoutMethod(entryPoint))
                     {
-                        if(generator.IsMethodSharedInEntryPoint(entryPoint, i))
+                        entryPointBlock.ShaderIndex = glps.Shaders.Count;
+                        var result = generator.GenerateSharedPixelShader(entryPoint, 0, 0);
+                        glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
+                    }
+
+                    else if (generator.IsSharedPixelShaderUsingMethods(entryPoint))
+                    {
+                        for (int i = 0; i < generator.GetMethodCount(); i++)
                         {
-                            entryPointBlock.Option = new List<GlobalPixelShader.EntryPointBlock.OptionBlock>();
-                            var optionBlock = new GlobalPixelShader.EntryPointBlock.OptionBlock { RenderMethodOptionIndex = (short)i, OptionMethodShaderIndices = new List<int>() };
-                            entryPointBlock.Option.Add(optionBlock);
-                            for (int option = 0; option < generator.GetMethodOptionCount(i); option++)
+                            if (generator.IsMethodSharedInEntryPoint(entryPoint, i))
                             {
-                                optionBlock.OptionMethodShaderIndices.Add(glps.Shaders.Count);
-                                var result = generator.GenerateSharedPixelShader(entryPoint, i, option);
-                                glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
+                                entryPointBlock.Option = new List<GlobalPixelShader.EntryPointBlock.OptionBlock>();
+
+                                var optionBlock = new GlobalPixelShader.EntryPointBlock.OptionBlock 
+                                { 
+                                    RenderMethodOptionIndex = (short)i, 
+                                    OptionMethodShaderIndices = new List<int>() 
+                                };
+
+                                entryPointBlock.Option.Add(optionBlock);
+
+                                for (int option = 0; option < generator.GetMethodOptionCount(i); option++)
+                                {
+                                    optionBlock.OptionMethodShaderIndices.Add(glps.Shaders.Count);
+                                    var result = generator.GenerateSharedPixelShader(entryPoint, i, option);
+                                    glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
+                                }
                             }
                         }
                     }
