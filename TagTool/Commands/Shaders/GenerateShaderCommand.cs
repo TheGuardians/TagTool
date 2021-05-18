@@ -189,8 +189,7 @@ namespace TagTool.Commands.Shaders
 
         private object GenerateExplicitShader(string shader)
         {
-            ExplicitShader value;
-            if (!Enum.TryParse(shader, out value))
+            if (!Enum.TryParse(shader, out ExplicitShader value))
             {
                 if (!int.TryParse(shader, out int intValue))
                     return new TagToolError(CommandError.ArgInvalid);
@@ -204,11 +203,16 @@ namespace TagTool.Commands.Shaders
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                byte[] bytecode = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString()).Bytecode;
-                var tag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
-                var pixl = Cache.Deserialize<PixelShader>(stream, tag);
-                pixl.Shaders[0].PCShaderBytecode = bytecode;
-                Cache.Serialize(stream, tag, pixl);
+                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString());
+
+                int pixelShaderIndex = 0; // TODO
+
+                CachedTag pixlTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
+                var pixl = Cache.Deserialize<PixelShader>(stream, pixlTag);
+
+                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = result.Bytecode;
+
+                Cache.Serialize(stream, pixlTag, pixl);
             }
 
             Console.WriteLine($"Generated explicit shader for {value}");
@@ -226,12 +230,16 @@ namespace TagTool.Commands.Shaders
                 CachedTag rmdfTag = Cache.TagCache.GetTag($"shaders\\{shaderType}.rmdf");
                 RenderMethodDefinition rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
 
-                TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out var glps, out var glvs);
-
                 if (pixel)
+                {
+                    GlobalPixelShader glps = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateSharedPixelShader(Cache, generator);
                     Cache.Serialize(stream, rmdf.GlobalPixelShader, glps);
+                }
                 else
+                {
+                    GlobalVertexShader glvs = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateSharedVertexShader(Cache, generator);
                     Cache.Serialize(stream, rmdf.GlobalVertexShader, glvs);
+                }
             }
 
             Console.WriteLine($"Generated global {(pixel ? "pixel" : "vertex")} shader for {shaderType}");
