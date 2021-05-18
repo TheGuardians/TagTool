@@ -482,7 +482,9 @@ namespace TagTool.Tags.Definitions.Gen2
             public int FourVectorsSize;
             public int FourVectorsCapacity;
             public int NumVertices;
-            public PolyhedronFourVectorsBlock FourVectors;
+            public PolyhedronFourVectorsBlock FourVectorsA;
+            public PolyhedronFourVectorsBlock FourVectorsB;
+            public PolyhedronFourVectorsBlock FourVectorsC;
             public uint m_useSpuBuffer;
             public int PlaneEquationsSize;
             public int PlaneEquationsCapacity;
