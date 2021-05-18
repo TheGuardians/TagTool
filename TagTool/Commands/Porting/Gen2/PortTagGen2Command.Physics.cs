@@ -87,6 +87,20 @@ namespace TagTool.Commands.Porting.Gen2
                 physicsModel.Pills.Add(newPill);
             }
 
+            //convert spheres
+            //TODO: Shape reference?
+            foreach (var gen2sphere in gen2PhysicsModel.Spheres)
+            {
+                PhysicsModel.Sphere newSphere = new PhysicsModel.Sphere
+                {
+                    ConvexBase = ConvertHavokShapeBase(gen2sphere.ConvexBase),
+                    Translation = gen2sphere.Translation,
+                    TranslationRadius = gen2sphere.TranslationRadius
+                };
+                ConvertHavokShape(newSphere, gen2sphere);
+                physicsModel.Spheres.Add(newSphere);
+            }
+
             //convert boxes
             foreach (var gen2box in gen2PhysicsModel.Boxes)
             {
@@ -179,18 +193,18 @@ namespace TagTool.Commands.Porting.Gen2
                     ChildShapesCapacity = (uint)gen2list.ChildShapesCapacity
                     //TODO: Calculate Half Extents and Radius
                 });
-            }
 
-            //convert list shapes
-            foreach (var gen2listshape in gen2PhysicsModel.ListShapes)
-            {
-                physicsModel.ListShapes.Add(new PhysicsModel.ListShape
+                //convert list shapes
+                foreach (var gen2listshape in gen2list.CollisionFilter)
                 {
-                    ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
-                    ShapeIndex = gen2listshape.Shape,
-                    CollisionFilter = (uint)gen2listshape.CollisionFilter
-                });
-                //TODO: Shape Size + NumChildShapes
+                    physicsModel.ListShapes.Add(new PhysicsModel.ListShape
+                    {
+                        ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
+                        ShapeIndex = gen2listshape.Shape,
+                        CollisionFilter = (uint)gen2listshape.CollisionFilter
+                    });
+                    //TODO: Shape Size + NumChildShapes
+                }
             }
 
             //convert regions
