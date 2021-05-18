@@ -131,7 +131,7 @@ namespace TagTool.Commands.Porting.Gen2
                     AabbHalfExtentsRadius = gen2poly.AabbHalfExtentsRadius,
                     AabbCenter = gen2poly.AabbCenter,
                     AabbCenterRadius = gen2poly.AabbCenterRadius,
-                    FieldPointerSkip = gen2poly.FieldPointerSkip,
+                    //FieldPointerSkip = gen2poly.FieldPointerSkip,
                     FourVectorsSize = gen2poly.FourVectorsSize,
                     FourVectorsCapacity = (uint)gen2poly.FourVectorsCapacity,
                     NumVertices = gen2poly.NumVertices,
@@ -185,7 +185,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 physicsModel.Lists.Add(new PhysicsModel.List
                 {
-                    FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
+                    //FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
                     Size = gen2list.ShapeBase.Size,
                     Count = gen2list.ShapeBase.Count,
                     Offset = gen2list.ShapeBase.Offset,
@@ -201,7 +201,8 @@ namespace TagTool.Commands.Porting.Gen2
                     {
                         ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
                         ShapeIndex = gen2listshape.Shape,
-                        CollisionFilter = (uint)gen2listshape.CollisionFilter
+                        CollisionFilter = (uint)gen2listshape.CollisionFilter,
+                        NumChildShapes = (uint)gen2list.ChildShapesSize
                     });
                     //TODO: Shape Size + NumChildShapes
                 }
@@ -273,10 +274,10 @@ namespace TagTool.Commands.Porting.Gen2
         {
             PhysicsModel.HavokShapeBase newShapeBase = new PhysicsModel.HavokShapeBase
             {
-                FieldPointerSkip = gen2shapebase.FieldPointerSkip,
+                //FieldPointerSkip = gen2shapebase.FieldPointerSkip,
                 Size = gen2shapebase.Size,
                 Count = gen2shapebase.Count,
-                Offset = gen2shapebase.Offset,
+                //Offset = gen2shapebase.Offset,
                 Radius = gen2shapebase.Radius
             };
             return newShapeBase;
