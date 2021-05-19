@@ -775,7 +775,7 @@ namespace TagTool.Tags.Definitions
             public float MaxShieldVitality;
             public StringId GlobalShieldMaterialName;
             public float MinStunDamage2;
-            public float StunTime2;
+            public float ShieldStunTime;
             public float ShieldRechargeTime;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
