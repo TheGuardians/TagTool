@@ -144,28 +144,35 @@ namespace TagTool.Commands.Porting.Gen2
                     ProxyCollisionGroup = -1 //doesn't exist in H2
                 };
 
-                //the first three fourvectors are stored inside the polyhedron in H2
-                for(var i = 0; i < gen2poly.FourVectorsSize; i++)
+                //sets of three or less fourvectors are stored inside the polyhedron block in H2
+                if(gen2poly.FourVectorsSize <= 3)
                 {
-                    PhysicsModelGen2.PolyhedronFourVectorsBlock gen2vector;
-                    switch (i)
+                    for (var i = 0; i < gen2poly.FourVectorsSize; i++)
                     {
-                        case 0:
-                            gen2vector = gen2poly.FourVectorsA;
-                            break;
-                        case 1:
-                            gen2vector = gen2poly.FourVectorsB;
-                            break;
-                        case 2:
-                            gen2vector = gen2poly.FourVectorsC;
-                            break;
-                        default:
-                            gen2vector = gen2PhysicsModel.PolyhedronFourVectors[usedfourvectorcount++];
-                            break;
-                    }
-                    physicsModel.PolyhedronFourVectors.Add(ConvertPolyhedronFourVector(gen2vector));
+                        PhysicsModelGen2.PolyhedronFourVectorsBlock gen2vector = new PhysicsModelGen2.PolyhedronFourVectorsBlock();
+                        switch (i)
+                        {
+                            case 0:
+                                gen2vector = gen2poly.FourVectorsA;
+                                break;
+                            case 1:
+                                gen2vector = gen2poly.FourVectorsB;
+                                break;
+                            case 2:
+                                gen2vector = gen2poly.FourVectorsC;
+                                break;
+                        }
+                        physicsModel.PolyhedronFourVectors.Add(ConvertPolyhedronFourVector(gen2vector));
+                    }                              
                 }
-
+                else
+                {
+                    for (var i = 0; i < gen2poly.FourVectorsSize; i++)
+                    {
+                        PhysicsModelGen2.PolyhedronFourVectorsBlock gen2vector = gen2PhysicsModel.PolyhedronFourVectors[usedfourvectorcount++];
+                        physicsModel.PolyhedronFourVectors.Add(ConvertPolyhedronFourVector(gen2vector));
+                    }
+                }
                 ConvertHavokShape(newPoly, gen2poly);
 
                 //not sure what this is for, but just matching existing tags
