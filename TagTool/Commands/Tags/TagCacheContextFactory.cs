@@ -90,7 +90,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new RescaleHudTextCommand(cache));
                 context.AddCommand(new ImportFontsCommand(hoCache));
 
-                context.AddCommand(new PhysicsModelTestCommand(cache));
+                context.AddCommand(new GeneratePhysicsModelCommand(cache));
                 context.AddCommand(new CollisionModelTestCommand(hoCache));
                 context.AddCommand(new ImportCollisionGeometryCommand(hoCache));
                 context.AddCommand(new Test2Command(hoCache));
