@@ -106,7 +106,8 @@ namespace TagTool.Commands.Editing
 
             if (index < 0)
             {
-                Console.WriteLine("TagBlock is already null!");
+                new TagToolError(CommandError.OperationFailed, "TagBlock is already null!");
+                while (ContextStack.Context != previousContext) ContextStack.Pop();
                 return true;
             }
 
