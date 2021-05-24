@@ -52,7 +52,7 @@ namespace TagTool.Commands.RenderModels
 			var sceneFile = new FileInfo(args[0]);
 
 			if (!sceneFile.Exists)
-				throw new FileNotFoundException(sceneFile.FullName);
+				return new TagToolError(CommandError.FileNotFound);
 
 			if (sceneFile.Extension.ToLower() != ".dae")
 				return new TagToolError(CommandError.FileType, $"\"{sceneFile.FullName}\"");
