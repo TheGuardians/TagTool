@@ -1,4 +1,5 @@
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Havok;
 using TagTool.Tags.Definitions;
 using SimpleJSON;
@@ -24,16 +25,6 @@ namespace TagTool.Geometry
                 RigidBodies = new List<PhysicsModel.RigidBody>(),
                 Nodes = new List<PhysicsModel.Node>()
             };
-            var node = new PhysicsModel.Node
-            {
-                Child = -1,
-                Sibling = -1,
-                Parent = -1,
-                //the 'default' stringid
-                Name = new StringId(1)
-            };
-
-            _phmo.Nodes.Add(node);
 
             _phmo.Materials = new List<PhysicsModel.Material>();
             var material = new PhysicsModel.Material
@@ -47,104 +38,124 @@ namespace TagTool.Geometry
             _phmo.Materials.Add(material);
         }
 
-        public bool ParseFromFile(string fname)
+        public bool ParseFromFile(string fname, bool mopps)
         {
             BlenderPhmoReader reader = new BlenderPhmoReader(fname);
             fileStruct = reader.ReadFile();
             if (fileStruct == null)
             {
-                Console.WriteLine("Could not parse file.");
+                new TagToolError(CommandError.CustomError, "Could not parse file!");
                 return false;
             }
 
             //create a rigidbody for the phmo
-            var rigidbody = new PhysicsModel.RigidBody
+            var defaultRigidBody = new PhysicsModel.RigidBody
             {
+                Node = -1,  //this default value prevents offset from render model when there is only one rigid body.
                 Mass = 100f, //probably not important
-                CenterOfMass = new RealVector3d(0.0f, 0.0f, 0.25f), //probably not important
+                CenterOfMass = new RealVector3d(0.0f, 0.0f, 0.0f), //actually is important. use 0 as default.
                 ShapeIndex = 0, //important
-                MotionType = PhysicsModel.RigidBody.MotionTypeValue.Keyframed // keyframed movement for now.
+                MotionType = PhysicsModel.RigidBody.MotionTypeValue.Box // box by default.
             };
 
             var shapedefs = fileStruct.AsArray;
+
             if (shapedefs.Count < 1)
             {
-                Console.WriteLine("No shapes!");
+                new TagToolError(CommandError.CustomError, "No shapes found!");
                 return false;
-            }
-            else if (shapedefs.Count < 2)
-            {
-                //optimise the phmo by avoiding the use of the list-shape
-                // as a level of indirection for multiple shapes.
-                //Also for ease of shape encoding, AddShape returns the 
-                //shape-type added. 'Unused0' is used to represent failure.
-                if (AddShape(_phmo, shapedefs[0]) == BlamShapeType.TriangleMesh)
-                {
-                    return false;
-                }
-
-                rigidbody.ShapeType = BlamShapeType.Polyhedron;
-                
-                //this field does not have any influence
-                //rigidbody.BoundingSphereRadius = 0.5f;
             }
             else
             {
-                MemoryStream moppCodeBlockStream = BlenderPhmoMoppUtil.GenerateForBlenderPhmoJsonFile(fname);
-
-                rigidbody.ShapeType = BlamShapeType.Mopp;
-                rigidbody.ShapeIndex = 0;
+                PhysicsModel.List shapeList = new PhysicsModel.List();
 
                 //phmo needs to use shapelist and listelements reflexives
                 _phmo.Lists = new List<PhysicsModel.List>();
                 _phmo.ListShapes = new List<PhysicsModel.ListShape>();
-                _phmo.Mopps = new List<CMoppBvTreeShape>();
-                
-                var moppTagblock = new CMoppBvTreeShape
-                {
-                    ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80},
-                    Type = 27,
-                    Child = new HkpSingleShapeContainer { Type = BlamShapeType.List, Index = 0}
-                };
-                
-                _phmo.MoppData = moppCodeBlockStream.ToArray();
 
-
-                _phmo.Mopps.Add(moppTagblock);
-                
-                //_phmo.MoppCodes = new 
-                PhysicsModel.List shapeList = new PhysicsModel.List();
-
-                Console.WriteLine("Loading multiple shapes");
                 int amountAdded = 0;
-                foreach (JSONNode listelem in fileStruct.AsArray)
+
+                foreach (JSONNode listelem in shapedefs)
                 {
                     BlamShapeType typeAdded = AddShape(_phmo, listelem);
                     if (typeAdded == BlamShapeType.TriangleMesh)
                     {
-                        Console.WriteLine("Failed loading shape.");
+                        new TagToolError(CommandError.CustomError, "Failed to load shape!");
                         return false;
                     }
 
-                    PhysicsModel.ListShape shapeElem = new PhysicsModel.ListShape
+                    var shapeElem = new PhysicsModel.ListShape
                     {
                         ShapeType = typeAdded,
                         //assumes the shape added should be at the end of the respected list.
                         ShapeIndex = (short)(GetNumberOfShapes(_phmo, typeAdded) - 1)
                     };
+
                     _phmo.ListShapes.Add(shapeElem);
+
+                    if (!mopps)
+                    {
+                        var lastPoly = _phmo.Polyhedra[_phmo.Polyhedra.Count - 1];
+                        var i = lastPoly.AabbCenter.I;
+                        var j = lastPoly.AabbCenter.J;
+                        var k = lastPoly.AabbCenter.K;
+
+                        PhysicsModel.RigidBody shapeRigidBody = new PhysicsModel.RigidBody
+                        {
+                            Node = -1,  //this will have to be set manually.
+                            Mass = lastPoly.Mass, //probably not important
+                            CenterOfMass = new RealVector3d(i, j, k), //use center from corresponding polyhedron
+                            ShapeType = typeAdded,
+                            ShapeIndex = (short)(GetNumberOfShapes(_phmo, typeAdded) - 1), //important
+                            MotionType = PhysicsModel.RigidBody.MotionTypeValue.Box // box by default.
+                        };
+
+                        _phmo.RigidBodies.Add(shapeRigidBody);
+                    }
+
+                    PhysicsModel.Node node = new PhysicsModel.Node
+                    {
+                        Child = -1,
+                        Sibling = -1,
+                        Parent = -1,
+                        //the 'default' stringid
+                        Name = new StringId(1)
+                    };
+
+                    _phmo.Nodes.Add(node);
+
                     amountAdded++;
-
-
                 }
+
                 shapeList.Count = 128;
                 shapeList.ChildShapesSize = amountAdded;
                 shapeList.ChildShapesCapacity = (uint)(amountAdded + 0x80000000);
                 _phmo.Lists.Add(shapeList);
-                Console.WriteLine("Added {0} shapes.", amountAdded);
-            }
 
-            _phmo.RigidBodies.Add(rigidbody);
+                Console.WriteLine("Added {0} shapes.", amountAdded);
+
+                if (mopps)
+                {
+                    MemoryStream moppCodeBlockStream = BlenderPhmoMoppUtil.GenerateForBlenderPhmoJsonFile(fname);
+
+                    defaultRigidBody.ShapeType = BlamShapeType.Mopp;
+                    defaultRigidBody.ShapeIndex = 0;
+
+                    _phmo.Mopps = new List<CMoppBvTreeShape>();
+
+                    var moppTagblock = new CMoppBvTreeShape
+                    {
+                        ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80 },
+                        Type = 27,
+                        Child = new HkpSingleShapeContainer { Type = BlamShapeType.List, Index = 0 }
+                    };
+
+                    _phmo.MoppData = moppCodeBlockStream.ToArray();
+                    _phmo.Mopps.Add(moppTagblock);
+                    //_phmo.MoppCodes = new
+                    _phmo.RigidBodies.Add(defaultRigidBody);
+                }
+            }
 
             return true;
         }
@@ -290,6 +301,8 @@ namespace TagTool.Geometry
             poly.Volume = 0.1f;
 
             phmo.Polyhedra.Add(poly);
+
+
 
             return true;
         }

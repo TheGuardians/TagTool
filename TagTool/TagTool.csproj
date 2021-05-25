@@ -547,7 +547,7 @@
     <Compile Include="Commands\Models\ListVariantsCommand.cs" />
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
-    <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
+    <Compile Include="Commands\PhysicsModels\GeneratePhysicsModel.cs" />
     <Compile Include="Commands\RenderMethods\ListArgumentsCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListBitmapsCommand.cs" />
     <Compile Include="Commands\RenderMethods\RenderMethodContextFactory.cs" />
