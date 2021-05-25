@@ -234,6 +234,8 @@ namespace TagTool.Cache
         private PageableResource ConvertResource(PageableResource resource)
         {
             resource.GetLocation(out ResourceLocation location);
+            if (location == ResourceLocation.None)
+                return resource;
             if (location == ResourceLocation.Mods)
                 return resource;
 
