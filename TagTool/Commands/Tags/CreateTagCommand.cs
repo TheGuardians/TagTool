@@ -5,6 +5,7 @@ using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Tags
 {
@@ -27,10 +28,38 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || args.Count > 2)
+            if (args.Count < 1 || args.Count > 3)
                 return new TagToolError(CommandError.ArgCount);
 
             var groupTagString = args[0];
+
+            var tagNameString = "";
+            var tagIndexString = "";
+
+            if(args.Count >= 2)
+            {
+                if (args[1].StartsWith("0x") && args.Count == 3)
+                {
+                    tagNameString = args[2];
+                    tagIndexString = args[1];
+                }
+                else
+                if (!args[1].StartsWith("0x") && args.Count == 3)
+                {
+                    tagNameString = args[1];
+                    tagIndexString = args[2];
+                }
+                else
+                if (args[1].StartsWith("0x") && args.Count == 2)
+                {
+                    tagIndexString = args[1];
+                }
+                else
+                if (!args[1].StartsWith("0x") && args.Count == 2)
+                {
+                    tagNameString = args[1];
+                }
+            }
 
             if (groupTagString.Length > 4)
                 return new TagToolError(CommandError.ArgInvalid, $"Invalid group tag: {groupTagString}");
@@ -48,7 +77,7 @@ namespace TagTool.Commands.Tags
                 groupTag = new Tag(new string(chars));
             }
 
-            if ((args.Count == 2 && !args[1].StartsWith("0x")) && Cache.TagCache.TryGetCachedTag(args[1] + "." + args[0], out var previoustag))
+            if (args.Count >= 2 && tagNameString != "" && Cache.TagCache.TryGetCachedTag(tagNameString + "." + args[0], out var previoustag))
             {
                 Console.WriteLine($"TagName already Exists at [Index: 0x{previoustag.Index:X4}] {previoustag.Name}.{previoustag.Group}");
                 return true;
@@ -59,13 +88,13 @@ namespace TagTool.Commands.Tags
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                if (args.Count == 2 && args[1].StartsWith("0x"))
+                if (args.Count >= 2 && tagIndexString != "")
                 {
                     var tagIndex = -1;
 
-                    if (!Cache.TagCache.TryGetCachedTag(args[1], out instance))
+                    if (!Cache.TagCache.TryGetCachedTag(tagIndexString, out instance))
                     {
-                        tagIndex = Convert.ToInt32(args[1], 16);
+                        tagIndex = Convert.ToInt32(tagIndexString, 16);
                     }
                     else
                     {
@@ -73,7 +102,7 @@ namespace TagTool.Commands.Tags
                     }
 
                     while (tagIndex >= Cache.TagCache.Count)
-                        Cache.TagCache.AllocateTag(new TagGroup());
+                        Cache.TagCache.AllocateTag(new TagGroupGen3());
 
                     if (tagIndex < Cache.TagCache.Count)
                     {
@@ -92,18 +121,14 @@ namespace TagTool.Commands.Tags
                 if (instance == null)
                     instance = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag));
 
+
+                if (tagNameString != "") //if Tagname is supplied
+                {
+                    instance.Name = tagNameString;
+                    Cache.SaveTagNames(null);
+                }
+
                 Cache.Serialize(stream, instance, Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(groupTag)));
-            }
-
-            if (args.Count == 2 && !args[1].StartsWith("0x"))//if Tag name is supplied
-            {
-                if (!Cache.TagCache.TryGetCachedTag("*", out var tag))
-                    return new TagToolError(CommandError.TagInvalid);
-
-                tag.Name = args[1];
-                Cache.SaveTagNames(null);
-                Console.WriteLine($"[Index: 0x{tag.Index:X4}] {tag.Name}.{tag.Group}");
-                return true;
             }
 
             var tagName = instance.Name ?? $"0x{instance.Index:X4}";
