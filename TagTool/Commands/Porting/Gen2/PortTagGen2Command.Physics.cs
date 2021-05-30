@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
@@ -37,6 +38,60 @@ namespace TagTool.Commands.Porting.Gen2
                 LimitedHingeConstraints = new List<PhysicsModel.LimitedHingeConstraint>(),
                 Phantoms = new List<PhysicsModel.Phantom>()
             };
+
+            //convert phantom types
+            foreach (var gen2phantomtype in gen2PhysicsModel.PhantomTypes)
+            {
+                PhysicsModel.PhantomType newPhantomType = new PhysicsModel.PhantomType
+                {
+                    Flags = new PhysicsModel.PhantomTypeFlags
+                    {
+                        Halo2 = (PhysicsModel.PhantomTypeFlags.Halo2Bits)gen2phantomtype.Flags
+                    },
+                    MinimumSize = (PhysicsModel.PhantomTypeSize)gen2phantomtype.MinimumSize,
+                    MaximumSize = (PhysicsModel.PhantomTypeSize)gen2phantomtype.MaximumSize,
+                    MarkerName = gen2phantomtype.MarkerName,
+                    AlignmentMarkerName = gen2phantomtype.AlignmentMarkerName,
+                    HookesLawE = gen2phantomtype.HookesLawE,
+                    LinearDeadRadius = gen2phantomtype.LinearDeadRadius,
+                    CenterAcceleration = gen2phantomtype.CenterAcc,
+                    CenterMaxLevel = gen2phantomtype.CenterMaxVel,
+                    AxisAcceleration = gen2phantomtype.AxisAcc,
+                    AxisMaxVelocity = gen2phantomtype.AxisMaxVel,
+                    DirectionAcceleration = gen2phantomtype.DirectionAcc,
+                    DirectionMaxVelocity = gen2phantomtype.DirectionMaxVel,
+                    AlignmentHookesLawE = gen2phantomtype.AlignmentHookesLawE,
+                    AlignmentAcceleration = gen2phantomtype.AlignmentAcc,
+                    AlignmentMaxVelocity = gen2phantomtype.AlignmentMaxVel
+                };
+                //fix up phantom type flags
+                PhysicsModel.PhantomTypeFlags flags = newPhantomType.Flags;
+                if (flags.Halo2.ToString().Contains("Unknown"))
+                {
+                    foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo2Bits)))
+                        if (flag.ToString().StartsWith("Unknown") && flags.Halo2.HasFlag((PhysicsModel.PhantomTypeFlags.Halo2Bits)flag))
+                            flags.Halo2 &= ~(PhysicsModel.PhantomTypeFlags.Halo2Bits)flag;
+                }
+                if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
+                    Console.WriteLine($"###WARNING: Some phantom type flags failed to convert!");
+
+                physicsModel.PhantomTypes.Add(newPhantomType);
+            }
+
+            //convert phantom shapes
+            foreach (var gen2phantom in gen2PhysicsModel.Phantoms)
+            {
+                PhysicsModel.Phantom newPhantom = new PhysicsModel.Phantom
+                {
+                    ShapeType = (Havok.BlamShapeType)gen2phantom.ShapeType,
+                    ShapeIndex = gen2phantom.ShapeIndex,
+                    ShapeBase = ConvertHavokShapeBaseNoRadius(gen2phantom.ShapeBase),
+                    PhantomShape = ConvertHavokShapeBaseNoRadius(gen2phantom.PhantomShape),
+                    Unknown4 = gen2phantom.Unknown4
+                };
+                //ConvertHavokShape(newPhantom, gen2phantom);
+                physicsModel.Phantoms.Add(newPhantom);
+            }
 
             //convert rigid bodies
             foreach (var gen2rig in gen2PhysicsModel.RigidBodies)
@@ -95,7 +150,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     ConvexBase = ConvertHavokShapeBase(gen2sphere.ConvexBase),
                     Translation = gen2sphere.Translation,
-                    TranslationRadius = gen2sphere.TranslationRadius
+                    TranslationRadius = gen2sphere.TranslationRadius,
                 };
                 ConvertHavokShape(newSphere, gen2sphere);
                 physicsModel.Spheres.Add(newSphere);
@@ -275,6 +330,10 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             }
 
+            //throw a warning if there are mopps (rare, maybe never?), because they can't be converted
+            if (gen2PhysicsModel.Mopps.Count > 0)
+                Console.WriteLine("###WARNING: Cannot convert Halo 2 mopps!");
+
             return physicsModel;
         }
 
@@ -304,6 +363,18 @@ namespace TagTool.Commands.Porting.Gen2
                 Count = gen2shapebase.Count,
                 //Offset = gen2shapebase.Offset,
                 Radius = gen2shapebase.Radius
+            };
+            return newShapeBase;
+        }
+
+        public PhysicsModel.HavokShapeBaseNoRadius ConvertHavokShapeBaseNoRadius(PhysicsModelGen2.HavokShapeBaseNoRadius gen2shapebase)
+        {
+            PhysicsModel.HavokShapeBaseNoRadius newShapeBase = new PhysicsModel.HavokShapeBaseNoRadius
+            {
+                //FieldPointerSkip = gen2shapebase.FieldPointerSkip,
+                Size = gen2shapebase.Size,
+                Count = gen2shapebase.Count
+                //Offset = gen2shapebase.Offset
             };
             return newShapeBase;
         }
