@@ -261,22 +261,20 @@ namespace TagTool.Commands.Porting.Gen2
             //convert lists
             foreach (var gen2list in gen2PhysicsModel.Lists)
             {
-                physicsModel.Lists.Add(new PhysicsModel.List
-                {
-                    //FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
-                    Size = gen2list.ShapeBase.Size,
-                    Count = gen2list.ShapeBase.Count,
-                    Offset = gen2list.ShapeBase.Offset,
-                    ChildShapesSize = gen2list.ChildShapesSize,
-                    ChildShapesCapacity = (uint)gen2list.ChildShapesSize | 0x80000000,
-                    UserData = 10 //seems to be a default value
-                    //TODO: Half Extents and Radius?
-                });
+                int childshapescount = gen2list.ChildShapesSize;
 
                 //convert list shapes
-                for(var i = 0; i < gen2list.ChildShapesSize; i++)
+                for (var i = 0; i < gen2list.ChildShapesSize; i++)
                 {
                     var gen2listshape = gen2list.CollisionFilter[i];
+
+                    //remove any invalid shape types
+                    if((PhysicsModelGen2.ListsBlock.ShapeTypeValue.MultiSphere < gen2listshape.ShapeType) && (gen2listshape.ShapeType < PhysicsModelGen2.ListsBlock.ShapeTypeValue.List))
+                    {
+                        childshapescount--;
+                        continue;
+                    }
+
                     physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                     {
                         ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
@@ -286,6 +284,18 @@ namespace TagTool.Commands.Porting.Gen2
                     });
                     //TODO: Shape Size?
                 }
+
+                physicsModel.Lists.Add(new PhysicsModel.List
+                {
+                    //FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
+                    Size = gen2list.ShapeBase.Size,
+                    Count = gen2list.ShapeBase.Count,
+                    Offset = gen2list.ShapeBase.Offset,
+                    ChildShapesSize = childshapescount,
+                    ChildShapesCapacity = (uint)childshapescount | 0x80000000,
+                    UserData = 10 //seems to be a default value
+                    //TODO: Half Extents and Radius?
+                });
             }
 
             //convert regions
