@@ -79,7 +79,7 @@ namespace TagTool.Tags.Definitions
                     case "color_white":
                         rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_white;
                         break;
-                    case "color_vector":
+                    case "default_vector":
                         rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_normal;
                         break;
                     case "default_dynamic_cubemap":
