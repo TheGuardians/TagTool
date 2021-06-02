@@ -54,6 +54,7 @@ namespace TagTool.Commands.Tags
             using (var scriptWriter = new StreamWriter(scriptFile.Exists ? scriptFile.Open(FileMode.Open, FileAccess.ReadWrite) : scriptFile.Create()))
             {
                 var tagIndices = new HashSet<int>();
+                var ignoredTagIndicies = new HashSet<int>();
 
                 void LoadTagDependencies(int index)
                 {
@@ -101,6 +102,19 @@ namespace TagTool.Commands.Tags
                     LoadTagDependencies(instance.Index);
                 }
 
+                Console.WriteLine("Please specify the tags to be ignored:");
+
+                string ignoreLine;
+
+                while ((ignoreLine = Console.ReadLine()) != "")
+                {
+                    if (!Cache.TagCache.TryGetTag(ignoreLine, out var instance))
+                        continue;
+
+                    ignoredTagIndicies.Add(instance.Index);
+                }
+
+
                 /*foreach (var index in tagIndices)
                 {
                     var instance = CacheContext.GetTag(index);
@@ -130,6 +144,9 @@ namespace TagTool.Commands.Tags
                     var tagName = instance.Name ?? $"{name}_0x{instance.Index:X4}";
 
                     var groupName = instance.Group;
+
+                    if (ignoredTagIndicies.Contains(instance.Index))
+                        continue;
 
                     var file = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}.{groupName}"));
                     var data = Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, instance);
@@ -167,6 +184,9 @@ namespace TagTool.Commands.Tags
                     var groupName = instance.Group;
 
                     var tagDefinition = Cache.Deserialize(cacheStream, instance);
+
+                    if (ignoredTagIndicies.Contains(instance.Index))
+                        continue;
 
                     FileInfo ExportResource(PageableResource pageable, string resourceGroup, string suffix = "")
                     {
@@ -422,6 +442,9 @@ namespace TagTool.Commands.Tags
                     var instance = (CachedTagHaloOnline)Cache.TagCache.GetTag(index);
 
                     if (instance == null)
+                        continue;
+
+                    if (ignoredTagIndicies.Contains(instance.Index))
                         continue;
 
                     var tagName = instance.Name ?? $"{name}_0x{instance.Index:X4}";
