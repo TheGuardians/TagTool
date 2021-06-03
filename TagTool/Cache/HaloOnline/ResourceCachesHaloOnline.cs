@@ -44,7 +44,7 @@ namespace TagTool.Cache.HaloOnline
 
         private LoadedResourceCache LoadResourceCache(ResourceLocation location)
         {
-            if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
+            if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache) && location != ResourceLocation.None)
             {
                 ResourceCacheHaloOnline resourceCache;
 

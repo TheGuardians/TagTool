@@ -81,6 +81,15 @@ namespace TagTool.Tags.Definitions.Gen2
             public float Radius;
         }
 
+        [TagStructure(Size = 0xC)]
+        public class HavokShapeBaseNoRadius : TagStructure
+        {
+            public int FieldPointerSkip;
+            public short Size;
+            public short Count;
+            public int Offset;
+        }
+
         [Flags]
         public enum FlagsValue : uint
         {
@@ -595,12 +604,7 @@ namespace TagTool.Tags.Definitions.Gen2
         [TagStructure(Size = 0x14)]
         public class MoppsBlock : TagStructure
         {
-            [TagField(Length = 0x4)]
-            public byte[] Unknown;
-            public short Size;
-            public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+            public HavokShapeBaseNoRadius ShapeBase;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
             public short List;
@@ -1042,22 +1046,31 @@ namespace TagTool.Tags.Definitions.Gen2
         [TagStructure(Size = 0x20)]
         public class PhantomsBlock : TagStructure
         {
-            [TagField(Length = 0x4)]
-            public byte[] Unknown;
-            public short Size;
-            public short Count;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown2;
-            public short Size1;
-            public short Count1;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown3;
+            public HavokShapeBaseNoRadius ShapeBase;         
+            public ShapeTypeValue ShapeType;
+            public short ShapeIndex;
+            public uint Unknown4;
+            public HavokShapeBaseNoRadius PhantomShape;
+
+            public enum ShapeTypeValue : short
+            {
+                Sphere,
+                Pill,
+                Box,
+                Triangle,
+                Polyhedron,
+                MultiSphere,
+                Unused0,
+                Unused1,
+                Unused2,
+                Unused3,
+                Unused4,
+                Unused5,
+                Unused6,
+                Unused7,
+                List,
+                Mopp
+            }
         }
     }
 }

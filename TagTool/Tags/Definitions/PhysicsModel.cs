@@ -597,6 +597,16 @@ namespace TagTool.Tags.Definitions
             public float Radius;
         }
 
+        [TagStructure(Size = 0x10)]
+        public class HavokShapeBaseNoRadius : TagStructure
+        {
+            public int FieldPointerSkip;
+            public short Size;
+            public short Count;
+            public int Offset;
+            public int UserData;
+        }
+
         [TagStructure(Size = 0x8)]
         public class HavokShapeReference : TagStructure
         {
@@ -882,20 +892,14 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x2C, Align = 0x10)]
         public class Phantom : TagStructure
 		{
-            public int Unknown;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown2;
+            public HavokShapeBaseNoRadius ShapeBase;
+
             public BlamShapeType ShapeType;
             public short ShapeIndex;
-            public uint Unknown3;
             public uint Unknown4;
-            public int Unknown5;
-            public short Size2;
-            public short Count2;
-            public int Offset2;
-            public int Unknown6;
+            public uint Unknown5;
+
+            public HavokShapeBaseNoRadius PhantomShape;
         }
     }
 }
