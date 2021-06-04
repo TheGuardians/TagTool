@@ -511,7 +511,7 @@ namespace TagTool.Cache.HaloOnline
 
         public override CachedTag GetTag(int index)
         {
-            if (index < 0 || index > Tags.Count)
+            if (index < 0 || index >= Tags.Count)
                 return null;
             return Tags[index];
         }

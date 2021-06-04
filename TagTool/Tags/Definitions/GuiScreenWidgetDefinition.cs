@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 using System.Collections.Generic;
 using TagTool.Tags.GUI;
 
@@ -8,7 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "gui_screen_widget_definition", Tag = "scn3", Size = 0xA8)]
     public class GuiScreenWidgetDefinition : TagStructure
 	{
-        public uint Flags;
+        public GuiScreenWidgetFlags Flags;
         public GuiDefinition GuiRenderBlock;
         public CachedTag Strings;
         public CachedTag Parent;
@@ -31,7 +32,7 @@ namespace TagTool.Tags.Definitions
         public class GroupWidget : TagStructure
 		{
             public CachedTag Parent;
-            public uint Flags;
+            public GroupWidgetsFlags Flags;
             public GuiDefinition GuiRenderBlock;
             public List<ListWidget> ListWidgets;
             public List<TextWidget> TextWidgets;
@@ -42,11 +43,11 @@ namespace TagTool.Tags.Definitions
             public class ListWidget : TagStructure
 			{
                 public CachedTag Parent;
-                public uint Flags;
+                public ListWidgetsFlags Flags;
                 public GuiDefinition GuiRenderBlock;
                 public StringId DataSourceName;
                 public CachedTag Skin;
-                public int Unknown2;
+                public int RowCount;
                 public List<ListWidgetItem> ListWidgetItems;
                 public CachedTag UpArrowBitmap;
                 public CachedTag DownArrowBitmap;
@@ -54,7 +55,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x30)]
                 public class ListWidgetItem : TagStructure
 				{
-                    public uint Flags;
+                    public ListWidgetItemsFlags Flags;
                     public GuiDefinition GuiRenderBlock;
                     public StringId Target;
                 }
@@ -64,7 +65,7 @@ namespace TagTool.Tags.Definitions
             public class TextWidget : TagStructure
 			{
                 public CachedTag Parent;
-                public uint Flags;
+                public TextWidgetsFlags Flags;
                 public GuiDefinition GuiRenderBlock;
                 public StringId DataSourceName;
                 public StringId TextString;
@@ -77,7 +78,7 @@ namespace TagTool.Tags.Definitions
             public class BitmapWidget : TagStructure
 			{
                 public CachedTag Parent;
-                public uint Flags;
+                public BitmapWidgetsFlags Flags;
                 public GuiDefinition GuiRenderBlock;
                 public CachedTag Bitmap;
                 public CachedTag Unknown2;
@@ -240,5 +241,233 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTag Legend;
         }
+    }
+
+    [Flags]
+    public enum GuiScreenWidgetFlags : int
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        Bit3 = 1 << 3,
+        Bit4 = 1 << 4,
+        Bit5 = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        Bit10 = 1 << 10,
+        Bit11 = 1 << 11,
+        Bit12 = 1 << 12,
+        Bit13 = 1 << 13,
+        Bit14 = 1 << 14,
+        Bit15 = 1 << 15,
+        Bit16 = 1 << 16,
+        Bit17 = 1 << 17,
+        Bit18 = 1 << 18,
+        Bit19 = 1 << 19,
+        Bit20 = 1 << 20,
+        Bit21 = 1 << 21,
+        Bit22 = 1 << 22,
+        Bit23 = 1 << 23,
+        Bit24 = 1 << 24,
+        Bit25 = 1 << 25,
+        Bit26 = 1 << 26,
+        Bit27 = 1 << 27,
+        Bit28 = 1 << 28,
+        Bit29 = 1 << 29,
+        Bit30 = 1 << 30,
+        Bit31 = 1 << 31
+    }
+
+    [Flags]
+    public enum GroupWidgetsFlags : int
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        InitiallyHidden = 1 << 3,
+        Bit4 = 1 << 4,
+        Bit5 = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        Bit10 = 1 << 10,
+        Bit11 = 1 << 11,
+        Bit12 = 1 << 12,
+        Bit13 = 1 << 13,
+        Bit14 = 1 << 14,
+        Bit15 = 1 << 15,
+        Bit16 = 1 << 16,
+        Bit17 = 1 << 17,
+        Bit18 = 1 << 18,
+        Bit19 = 1 << 19,
+        Bit20 = 1 << 20,
+        Bit21 = 1 << 21,
+        Bit22 = 1 << 22,
+        Bit23 = 1 << 23,
+        Bit24 = 1 << 24,
+        Bit25 = 1 << 25,
+        Bit26 = 1 << 26,
+        Bit27 = 1 << 27,
+        Bit28 = 1 << 28,
+        Bit29 = 1 << 29,
+        Bit30 = 1 << 30,
+        Bit31 = 1 << 31
+    }
+
+    [Flags]
+    public enum ListWidgetsFlags : int
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        Bit3 = 1 << 3,
+        Horizontal = 1 << 4,
+        Loops = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        Bit10 = 1 << 10,
+        Bit11 = 1 << 11,
+        Bit12 = 1 << 12,
+        Bit13 = 1 << 13,
+        Bit14 = 1 << 14,
+        Bit15 = 1 << 15,
+        Bit16 = 1 << 16,
+        Bit17 = 1 << 17,
+        Bit18 = 1 << 18,
+        Bit19 = 1 << 19,
+        Bit20 = 1 << 20,
+        Bit21 = 1 << 21,
+        Bit22 = 1 << 22,
+        Bit23 = 1 << 23,
+        Bit24 = 1 << 24,
+        Bit25 = 1 << 25,
+        Bit26 = 1 << 26,
+        Bit27 = 1 << 27,
+        Bit28 = 1 << 28,
+        Bit29 = 1 << 29,
+        Bit30 = 1 << 30,
+        Bit31 = 1 << 31
+    }
+
+    [Flags]
+    public enum ListWidgetItemsFlags : int
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        Bit3 = 1 << 3,
+        Bit4 = 1 << 4,
+        Bit5 = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        Bit10 = 1 << 10,
+        Bit11 = 1 << 11,
+        Bit12 = 1 << 12,
+        Bit13 = 1 << 13,
+        Bit14 = 1 << 14,
+        Bit15 = 1 << 15,
+        Bit16 = 1 << 16,
+        Bit17 = 1 << 17,
+        Bit18 = 1 << 18,
+        Bit19 = 1 << 19,
+        Bit20 = 1 << 20,
+        Bit21 = 1 << 21,
+        Bit22 = 1 << 22,
+        Bit23 = 1 << 23,
+        Bit24 = 1 << 24,
+        Bit25 = 1 << 25,
+        Bit26 = 1 << 26,
+        Bit27 = 1 << 27,
+        Bit28 = 1 << 28,
+        Bit29 = 1 << 29,
+        Bit30 = 1 << 30,
+        Bit31 = 1 << 31
+    }
+
+    [Flags]
+    public enum TextWidgetsFlags : int
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        LeftAlignment = 1 << 3,
+        RightAlignment = 1 << 4,
+        Bit5 = 1 << 5,
+        AllCaps = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        Bit10 = 1 << 10,
+        Bit11 = 1 << 11,
+        Bit12 = 1 << 12,
+        WrapAtBounds = 1 << 13,
+        Bit14 = 1 << 14,
+        Bit15 = 1 << 15,
+        Bit16 = 1 << 16,
+        Bit17 = 1 << 17,
+        Bit18 = 1 << 18,
+        Bit19 = 1 << 19,
+        Bit20 = 1 << 20,
+        Bit21 = 1 << 21,
+        Bit22 = 1 << 22,
+        Bit23 = 1 << 23,
+        Bit24 = 1 << 24,
+        Bit25 = 1 << 25,
+        Bit26 = 1 << 26,
+        Bit27 = 1 << 27,
+        Bit28 = 1 << 28,
+        Bit29 = 1 << 29,
+        Bit30 = 1 << 30,
+        Bit31 = 1 << 31
+    }
+
+    [Flags]
+    public enum BitmapWidgetsFlags : int
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        ScaleToBounds = 1 << 3,
+        ReplaceWithBlur = 1 << 4,
+        Bit5 = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        ReplaceWithWhite = 1 << 10,
+        ReplaceWithBlack = 1 << 11,
+        Bit12 = 1 << 12,
+        Bit13 = 1 << 13,
+        Bit14 = 1 << 14,
+        Bit15 = 1 << 15,
+        Bit16 = 1 << 16,
+        Bit17 = 1 << 17,
+        Bit18 = 1 << 18,
+        Bit19 = 1 << 19,
+        Bit20 = 1 << 20,
+        Bit21 = 1 << 21,
+        Bit22 = 1 << 22,
+        Bit23 = 1 << 23,
+        Bit24 = 1 << 24,
+        Bit25 = 1 << 25,
+        Bit26 = 1 << 26,
+        Bit27 = 1 << 27,
+        Bit28 = 1 << 28,
+        Bit29 = 1 << 29,
+        Bit30 = 1 << 30,
+        Bit31 = 1 << 31
     }
 }

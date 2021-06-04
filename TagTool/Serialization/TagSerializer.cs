@@ -360,7 +360,7 @@ namespace TagTool.Serialization
             if (referencedTag != null && valueInfo != null && valueInfo.ValidTags != null)
                 foreach (string tag in valueInfo.ValidTags)
                     if (!referencedTag.IsInGroup(tag))
-                       throw new Exception($"Invalid group for tag reference: {referencedTag.Group.Tag}");
+                        Console.WriteLine($"ERROR: Invalid group for tag reference: {referencedTag.Group.Tag}");
 
             block.AddTagReference(referencedTag, valueInfo == null ? false : valueInfo.Flags.HasFlag(Short));
 
