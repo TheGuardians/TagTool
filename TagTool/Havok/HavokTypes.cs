@@ -17,6 +17,21 @@ namespace TagTool.Havok
         public static readonly uint LOCKED_FLAG = 0x40000000;  // Indicates that the array will never have its dtor called (read in from packfile for instance)
     };
 
+    /// <summary>
+    /// Havok runtime pointer, uint32 when 32 bit,  uint64 when 64 bit
+    /// </summary>
+    public class HavokPointer
+    {
+        public ulong Pointer;
+
+        public HavokPointer(ulong pointer) { Pointer = pointer; }
+        public HavokPointer(uint pointer) { Pointer = pointer; }
+
+        public uint Get32BitValue() => (uint)(Pointer);
+        public ulong Get64BitValue() => Pointer;
+    }
+
+
     public enum BlamShapeType : short
     {
         Sphere,
@@ -70,11 +85,18 @@ namespace TagTool.Havok
         public byte[] Padding2;
     }
 
-    [TagStructure(Size = 0xC)]
+    [TagStructure(Size = 0xC, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x18, Platform = CachePlatform.MCC)]
     public class HkpMoppBvTreeShape : HkpShape
     {
         public HkpSingleShapeContainer Child;
-        public uint MoppCodeAddress;
+
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, Platform = CachePlatform.MCC)]
+        public byte[] Padding3;
+
+        public HavokPointer MoppCodeAddress;
+
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ReachUnknown9;
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -85,27 +107,42 @@ namespace TagTool.Havok
         public float ReachUnknown12;
     }
 
-    [TagStructure(Size = 0x4)]
+    [TagStructure(Size = 0x4, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x8, Platform = CachePlatform.MCC)]
     public class CMoppBvTreeShape : HkpMoppBvTreeShape
     {
         public float Scale;
+
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, Platform = CachePlatform.MCC)]
+        public byte[] Padding4;
     }
 
-    [TagStructure(Size = 0x4)]
+    [TagStructure(Size = 0x4, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x8, Platform = CachePlatform.MCC)]
     public class HkpShapeContainer : TagStructure
     {
-        public uint VfTableAddress;
+        public HavokPointer VfTableAddress;
     }
 
-    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class HkpShape : TagStructure
     {
-        public uint VfTableAddress;
+        public HavokPointer VfTableAddress;
         public HkpReferencedObject ReferencedObject;
-        public uint UserDataAddress;
+
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, Platform = CachePlatform.MCC)]       // aligns to 0x10
+        public byte[] Padding1;
+
+        public HavokPointer UserDataAddress;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Type;
+
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, Platform = CachePlatform.MCC)]       // aligns to 0x10
+        public byte[] Padding2;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ReachUnknown1;
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -134,13 +171,19 @@ namespace TagTool.Havok
         public short Index;
     }
 
-    [TagStructure(Size = 0x8)]
+    [TagStructure(Size = 0x8, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x10, Platform = CachePlatform.MCC)]
     public class HkpShapeCollection : HkpShape
     {
         public HkpShapeContainer Container;
         public bool DisableWelding;
-        [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte CollectionType;
+
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
+
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+        public byte[] Padding4;
     }
 
     [TagStructure(Size = 0xC)]

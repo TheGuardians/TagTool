@@ -95,6 +95,11 @@ namespace TagTool.Tags
         /// Used when the string written must absolutely be null terminated. For example Maxscript doesn't read fixed length strings
         /// </summary>
         public bool ForceNullTerminated = false;
+
+        /// <summary>
+        /// If PlatformAlign is true, the stream is aligned to either 8 bytes or 16 bytes depending on the cache platform, before reading/writing.
+        /// </summary>
+        public bool PlatformAlign = false;
     }
 
     [Flags]

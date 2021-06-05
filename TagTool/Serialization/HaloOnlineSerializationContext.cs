@@ -99,6 +99,12 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
+        public CacheVersion GetVersion() => Context.Version;
+
+        public CachePlatform GetCachePlatform() => Context.Platform;
+
+        public PlatformType GetPlatformType() => CacheVersionDetection.GetPlatformType(Context.Platform);
+
         private class TagDataBlock : IDataBlock
         {
             private readonly HaloOnlineSerializationContext _context;

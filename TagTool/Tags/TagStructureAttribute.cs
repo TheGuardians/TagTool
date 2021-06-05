@@ -51,5 +51,10 @@ namespace TagTool.Tags
 		/// The platforms that the structure is available on.
 		/// </summary>
 		public CachePlatform Platform { get; set; } = CachePlatform.All;
+
+		/// <summary>
+		/// If PlatformAlign is true, the tag structure is padded to align to either 8 bytes or 16 bytes.
+		/// </summary>
+		public bool PlatformAlign = false;
 	}
 }

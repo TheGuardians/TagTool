@@ -68,5 +68,9 @@ namespace TagTool.Serialization
         IDataBlock CreateBlock();
 
         void AddResourceBlock(int count, CacheAddress address, IList block);
+
+        CacheVersion GetVersion();
+        CachePlatform GetCachePlatform();
+        PlatformType GetPlatformType();
     }
 }

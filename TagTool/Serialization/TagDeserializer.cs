@@ -10,6 +10,7 @@ using static TagTool.Tags.TagFieldFlags;
 using BindingFlags = System.Reflection.BindingFlags;
 using System.IO;
 using System.Linq;
+using TagTool.Havok;
 
 namespace TagTool.Serialization
 {
@@ -337,6 +338,9 @@ namespace TagTool.Serialization
             if (valueType == typeof(PlatformUnsignedValue))
                 return DeserializePlatfornUnsignedValue(reader);
 
+            if (valueType == typeof(HavokPointer))
+                return DeserializeHavokPointer(reader);
+
             if (valueType == typeof(PlatformSignedValue))
                 return DeserializePlatfornSignedValue(reader);
 
@@ -629,6 +633,21 @@ namespace TagTool.Serialization
             var min = DeserializeValue(reader, context, null, boundsType);
             var max = DeserializeValue(reader, context, null, boundsType);
             return Activator.CreateInstance(rangeType, min, max);
+        }
+
+        public HavokPointer DeserializeHavokPointer(EndianReader reader)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+            switch (platformType)
+            {
+                case PlatformType._64Bit:
+                    return new HavokPointer(reader.ReadUInt64());
+
+                default:
+                case PlatformType._32Bit:
+                    return new HavokPointer(reader.ReadUInt32());
+
+            }
         }
 
         public PlatformUnsignedValue DeserializePlatfornUnsignedValue(EndianReader reader)

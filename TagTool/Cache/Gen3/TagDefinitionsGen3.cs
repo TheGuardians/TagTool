@@ -38,6 +38,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("cine", "cinematic"), typeof(Cinematic) },
             { new TagGroupGen3("cisc", "cinematic_scene"), typeof(CinematicScene) },
             { new TagGroupGen3("clwd", "cloth"), typeof(Cloth) },
+            { new TagGroupGen3("cmpu", "compute_shader"), typeof(ComputeShader) },
             { new TagGroupGen3("cmoe", "camo"), typeof(Camo) },
             { new TagGroupGen3("cntl", "contrail_system"), typeof(ContrailSystem) },
             { new TagGroupGen3("cobj", "obje", "custom_object"), typeof(CustomObject) },

@@ -38,7 +38,7 @@ namespace TagTool.Serialization
             var structBlock = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)context.CreateBlock();
             structBlock.BlockType = resourceContext.InitialAddressType;
             structBlock.Writer.Format = Format;
-            SerializeStruct(context, tagStream, structBlock, info, tagStructure);
+            SerializeTagStructure(context, tagStream, structBlock, info, tagStructure);
 
             // Finalize the block and write all of the tag data out
             var mainStructOffset = offset ?? structBlock.Finalize(tagStream);

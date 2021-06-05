@@ -83,6 +83,12 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
+        public CacheVersion GetVersion() => Cache.Version;
+
+        public CachePlatform GetCachePlatform() => Cache.Platform;
+
+        public PlatformType GetPlatformType() => CacheVersionDetection.GetPlatformType(Cache.Platform);
+
         private class DataBlock : IDataBlock
         {
             public MemoryStream Stream { get; private set; }

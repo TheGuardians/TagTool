@@ -11,6 +11,7 @@ using TagTool.Commands.Porting;
 using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
 using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
 
+
 namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command

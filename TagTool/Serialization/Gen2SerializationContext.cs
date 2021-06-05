@@ -100,5 +100,11 @@ namespace TagTool.Serialization
         {
             throw new NotImplementedException();
         }
+
+        public CacheVersion GetVersion() => GameCache.Version;
+
+        public CachePlatform GetCachePlatform() => GameCache.Platform;
+
+        public PlatformType GetPlatformType() => CacheVersionDetection.GetPlatformType(GameCache.Platform);
     }
 }

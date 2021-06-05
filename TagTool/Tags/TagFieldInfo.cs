@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Havok;
 using TagTool.Shaders;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -181,6 +182,7 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(PixelShaderReference):
 				case TypeCode.Object when type == typeof(PlatformUnsignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
 				case TypeCode.Object when type == typeof(PlatformSignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
+				case TypeCode.Object when type == typeof(HavokPointer) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
 					return 0x04;
 
 				case TypeCode.Double:
@@ -197,6 +199,7 @@ namespace TagTool.Tags
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagBlock<>) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Beta, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(PlatformUnsignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._64Bit:
 				case TypeCode.Object when type == typeof(PlatformSignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._64Bit:
+				case TypeCode.Object when type == typeof(HavokPointer) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._64Bit:
 					return 0x08;
 
 				case TypeCode.Object when type == typeof(RealRgbColor):

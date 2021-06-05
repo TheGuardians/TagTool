@@ -77,6 +77,12 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
+        public CacheVersion GetVersion() => CacheVersion.Unknown;
+
+        public CachePlatform GetCachePlatform() => CachePlatform.All;
+
+        public PlatformType GetPlatformType() => PlatformType._32Bit;
+
         private class GenericDataBlock : IDataBlock
         {
             public MemoryStream Stream { get; private set; }

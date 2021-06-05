@@ -9,6 +9,7 @@ using System.Text;
 using TagTool.Tags;
 using static System.Runtime.InteropServices.CharSet;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Havok;
 
 namespace TagTool.Serialization
 {
@@ -49,7 +50,7 @@ namespace TagTool.Serialization
             var tagStream = new MemoryStream();
             var structBlock = context.CreateBlock();
             structBlock.Writer.Format = Format;
-            SerializeStruct(context, tagStream, structBlock, info, tagStructure);
+            SerializeTagStructure(context, tagStream, structBlock, info, tagStructure);
 
             // Finalize the block and write all of the tag data out
             var mainStructOffset = offset ?? structBlock.Finalize(tagStream);
@@ -57,8 +58,146 @@ namespace TagTool.Serialization
             context.EndSerialize(info, data, mainStructOffset);
         }
 
+        public void PlatformAlignStream(Stream stream)
+        {
+            var platform = CacheVersionDetection.GetPlatformType(CachePlatform);
+            var align = platform == PlatformType._64Bit ? 0x10 : 0x8;
+
+            var currentPos = stream.Position;
+            var alignedPos = (currentPos + align - 1) & ~(align - 1);
+
+            if( alignedPos > currentPos)
+            {
+                var byteCount = alignedPos - currentPos;
+                var pad = new byte[byteCount];
+                pad.Initialize();
+                stream.Write(pad, 0, (int)byteCount);
+            }
+        }
+
         /// <summary>
-        /// Serializes a structure into a temporary memory block.
+        /// Get the required alignment for a given type.
+        /// In C,C++, variables (includes struct members, heap and stack variables) must be aligned to be efficiently read by the CPU. The compiler
+        /// automatically aligns variables depending on their type inside a struct by adding padding. For example, variable of size 0x1 does not need any alignment.
+        /// Variables of size 0x2 need to be aligned to 0x2, i.e a short cannot be  read/written at an odd address.
+        /// Variables of size 0x4 need to be aligned to 0x4, variables of size 0x8 need to be aligned to 0x8.
+        /// </summary>
+        /// <param name="valueType"></param>
+        /// <returns></returns>
+        public int GetTypeAlignment(Type valueType)
+        {
+            if (valueType.IsPrimitive)
+            {
+                switch (Type.GetTypeCode(valueType))
+                {
+                    case TypeCode.Boolean:
+                    case TypeCode.Byte:
+                    case TypeCode.SByte:
+                        return 0x1;
+
+                    case TypeCode.UInt16:
+                    case TypeCode.Int16:
+                        return 0x2;
+
+                    case TypeCode.UInt32:
+                    case TypeCode.Int32:
+                    case TypeCode.Single:
+                        return 0x4;
+
+                    case TypeCode.Double:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                        return 0x8;
+
+                    default:
+                        throw new ArgumentException("Unsupported type " + valueType.Name);
+                }
+            }
+            else
+            {
+                // classes that require specific alignment are placed here, this includes pointer wrappers and so on
+
+                var platform = CacheVersionDetection.GetPlatformType(CachePlatform);
+
+                
+                if (valueType == typeof(PlatformUnsignedValue) || valueType == typeof(HavokPointer) || valueType == typeof(PlatformSignedValue))
+                    return platform == PlatformType._32Bit ? 0x4 : 0x8;
+                else if (valueType.IsEnum)
+                    return GetTypeAlignment(valueType.GetEnumUnderlyingType());
+                else if (valueType == typeof(string))
+                    return 0x1;
+                else if (valueType == typeof(Tag))
+                    return 0x4;
+                else if (valueType.BaseType == typeof(CachedTag))
+                    return 0x4;
+                else if (valueType == typeof(CacheAddress))
+                    return 0x4;
+                else if (valueType == typeof(byte[]))
+                    return 0x1;
+                else if (valueType == typeof(TagData))
+                    return 0x4;
+                else if (valueType == typeof(RealRgbColor))
+                    return 0x4;
+                else if (valueType == typeof(RealArgbColor))
+                    return 0x4;
+                else if (valueType == typeof(ArgbColor))
+                    return 0x1;
+                else if (valueType == typeof(RealBoundingBox))
+                    return 0x4;
+                else if (valueType == typeof(RealEulerAngles2d))
+                    return 0x4;
+                else if (valueType == typeof(RealEulerAngles3d))
+                    return 0x4;
+                else if (valueType == typeof(Point2d))
+                    return 0x4;
+                else if (valueType == typeof(Rectangle2d))
+                    return 0x4;
+                else if (valueType == typeof(RealRectangle3d))
+                    return 0x4;
+                else if (valueType == typeof(RealPoint2d))
+                    return 0x4;
+                else if (valueType == typeof(RealPoint3d))
+                    return 0x4;
+                else if (valueType == typeof(RealVector2d))
+                    return 0x4;
+                else if (valueType == typeof(RealVector3d))
+                    return 0x4;
+                else if (valueType == typeof(RealQuaternion))
+                    return 0x4;
+                else if (valueType == typeof(RealPlane2d))
+                    return 0x4;
+                else if (valueType == typeof(RealPlane3d))
+                    return 0x4;
+                else if (valueType == typeof(RealMatrix4x3))
+                    return 0x4;
+                else if (valueType == typeof(StringId))
+                    return 0x4;
+                else if (valueType == typeof(Angle))
+                    return 0x4;
+                else if (valueType == typeof(DatumHandle))
+                    return 0x4;
+                else if (valueType == typeof(VertexShaderReference))
+                    return 0x4;
+                else if (valueType == typeof(PixelShaderReference))
+                    return 0x4;
+                else if (valueType.IsArray)
+                    return GetTypeAlignment(valueType.GetElementType());
+                else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
+                    return 0x4;
+                else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TagBlock<>))
+                    return 0x4;
+                else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
+                    return 0x4;
+                else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
+                    return GetTypeAlignment(valueType.GenericTypeArguments[0]);
+            }
+
+            Console.WriteLine($"Warning, no alignment defined for type {valueType}, using 0x4");
+            return 0x4;
+        }
+
+        /// <summary>
+        /// Serializes a tag structure into a temporary memory block.
         /// </summary>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
@@ -66,7 +205,7 @@ namespace TagTool.Serialization
         /// <param name="info">Information about the tag structure type.</param>
         /// <param name="structure">The structure to serialize.</param>
         /// <exception cref="System.InvalidOperationException">Structure type must have TagStructureAttribute</exception>
-        public void SerializeStruct(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagStructureInfo info, object structure)
+        public void SerializeTagStructure(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagStructureInfo info, object structure)
         {
             var baseOffset = block.Stream.Position;
 
@@ -84,6 +223,9 @@ namespace TagTool.Serialization
             // Honor alignment
             if (info.Structure.Align > 0)
                 block.SuggestAlignment(info.Structure.Align);
+
+            if(info.Structure.PlatformAlign == true)
+                PlatformAlignStream(block.Stream);
         }
 
         /// <summary>
@@ -137,10 +279,15 @@ namespace TagTool.Serialization
             if (val != null)
                 valueType = val.GetType(); // TODO: Fix hax
 
+            var requiredAlignment = GetTypeAlignment(valueType);
+
             if (valueType.IsPrimitive)
                 SerializePrimitiveValue(block.Writer, val, valueType);
             else
                 SerializeComplexValue(context, tagStream, block, val, valueInfo, valueType);
+
+            if(valueInfo.PlatformAlign == true)
+                PlatformAlignStream(block.Stream);
         }
 
         /// <summary>
@@ -285,6 +432,8 @@ namespace TagTool.Serialization
                 SerializeRange(context, tagStream, block, value);
             else if (valueType == typeof(PlatformUnsignedValue))
                 SerializePlatformUnsignedValue(block, (PlatformUnsignedValue)value);
+            else if (valueType == typeof(HavokPointer))
+                SerializeHavokPointer(block, (HavokPointer)value);
             else if (valueType == typeof(PlatformSignedValue))
                 SerializePlatformSignedValue(block, (PlatformSignedValue)value);
             else
@@ -292,7 +441,7 @@ namespace TagTool.Serialization
                 if (value == null)
                     value = Activator.CreateInstance(valueType);
 
-                SerializeStruct(context, tagStream, block, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform), value);
+                SerializeTagStructure(context, tagStream, block, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform), value);
             }
         }
 
@@ -604,6 +753,23 @@ namespace TagTool.Serialization
         }
 
         public virtual void SerializePlatformUnsignedValue(IDataBlock block, PlatformUnsignedValue value)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+
+            var writer = block.Writer;
+            switch (platformType)
+            {
+                case PlatformType._32Bit:
+                    writer.Write(value.Get32BitValue());
+                    break;
+
+                case PlatformType._64Bit:
+                    writer.Write(value.Get64BitValue());
+                    break;
+            }
+        }
+
+        public virtual void SerializeHavokPointer(IDataBlock block, HavokPointer value)
         {
             var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
 
