@@ -16,17 +16,18 @@ namespace TagTool.Commands.PhysicsModels
         public GeneratePhysicsModelCommand(GameCache cache)
             : base(false,
                   
-                "PhysicsModelTest",
-                "Physics model import command (Test)",
-                
-                "PhysicsModelTest [mopp] <filepath> <tagname>",
+				"GeneratePhysicsModel",
+				"Physics model import command.",
 
-                "Generates a physics model (phmo) tag from a JSON created using Gurten's Blender exporter.\n" +
-                "The Blender plugin can be found here: https://github.com/Gurten/Assembly/releases \n\n" +
+				"GeneratePhysicsModel [mopp] <filepath> <tagname>",
 
-                "By default, a new tag with the specified name is created. If the name already exists, a new phmo will overwrite it.\n\n" +
+				"Generates a physics model (phmo) tag from a JSON created using Gurten's Blender exporter.\n" +
+				"The model used to generate your JSON should be 1/100th the size of your render model.\n" +
+				"The Blender plugin can be found here: https://github.com/Gurten/Assembly/releases \n\n" +
+
+				"By default, a new tag with the specified name is created. If the name already exists, a new phmo will overwrite it.\n\n" +
                   
-                "Node and Region data must be populated manually.\n")
+				"Node and Region data must be populated manually.\n")
         {
             Cache = cache;
         }
