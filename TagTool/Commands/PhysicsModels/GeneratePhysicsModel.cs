@@ -46,8 +46,8 @@ namespace TagTool.Commands.PhysicsModels
                     tagname = args[1];
                     break;
                 case 3:
-                    path = args[0];
-                    if (args[1] == "mopp")
+                    path = args[1];
+                    if (args[0] == "mopp")
                         moppflag = true;
                     tagname = args[2];
                     break;
