@@ -98,8 +98,8 @@ namespace TagTool.Commands.Sounds
             int maxPermutationSampleCount = 0;
 
             if (pitchRangeCount <= 0)
-                return new TagToolError(CommandError.CustomError, "Invalid pitch range count! Import aborted.");
-            else if (pitchRangeCount == 1)
+                Console.WriteLine("WARNING: Pitch range count must be greater than 0! Proceeding with pitch range count of 1.");
+            if (pitchRangeCount <= 1)
                 Definition.ImportType = ImportType.SingleLayer;
             else
                 Definition.ImportType = ImportType.MultiLayer;
@@ -291,7 +291,10 @@ namespace TagTool.Commands.Sounds
 
                     pitchRange.Permutations.Add(perm);
 
-                    Console.WriteLine($"Permutation {i}: \"{fileList[i].Name}\", {bitRate}kb/s at {sampleRate}Hz for ~{sampleCount} samples");
+					if (argCount == 1)
+					{
+						Console.WriteLine($"Permutation {i}: \"{fileList[i].Name}\", {bitRate}kb/s at {sampleRate}Hz for ~{sampleCount} samples");
+					}
                 }
 
                 Definition.PitchRanges.Add(pitchRange);
