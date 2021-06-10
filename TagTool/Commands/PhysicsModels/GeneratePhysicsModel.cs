@@ -16,12 +16,13 @@ namespace TagTool.Commands.PhysicsModels
         public GeneratePhysicsModelCommand(GameCache cache)
             : base(false,
                   
-                "PhysicsModelTest",
-                "Physics model import command (Test)",
-                
-                "PhysicsModelTest [mopp] <filepath> <tagname>",
+                "GeneratePhysicsModel",
+                "Physics model import command.",
+
+                "GeneratePhysicsModel [mopp] <filepath> <tagname>",
 
                 "Generates a physics model (phmo) tag from a JSON created using Gurten's Blender exporter.\n" +
+                "The model used to generate your JSON should be 1/100th the size of your render model.\n" +
                 "The Blender plugin can be found here: https://github.com/Gurten/Assembly/releases \n\n" +
 
                 "By default, a new tag with the specified name is created. If the name already exists, a new phmo will overwrite it.\n\n" +
@@ -45,8 +46,8 @@ namespace TagTool.Commands.PhysicsModels
                     tagname = args[1];
                     break;
                 case 3:
-                    path = args[0];
-                    if (args[1] == "mopp")
+                    path = args[1];
+                    if (args[0] == "mopp")
                         moppflag = true;
                     tagname = args[2];
                     break;
