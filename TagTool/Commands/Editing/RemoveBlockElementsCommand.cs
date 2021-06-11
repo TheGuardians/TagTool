@@ -79,17 +79,16 @@ namespace TagTool.Commands.Editing
 
 
 
-            var fieldType = field.FieldType;
 
-            if ((field == null) ||
-                (!fieldType.IsGenericType) ||
-                (fieldType.GetInterface("IList") == null))
+            if ((field == null) || (!field.FieldType.IsGenericType) || (field.FieldType.GetInterface("IList") == null))
             {
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
                 Structure = previousStructure;
                 return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
+
+            var fieldType = field.FieldType;
 
             var blockValue = field.GetValue(Owner) as IList;
 
