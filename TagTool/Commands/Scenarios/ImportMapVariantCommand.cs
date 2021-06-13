@@ -40,7 +40,7 @@ namespace TagTool.Commands.Scenarios
 
             if(args.Count > 0)
             {
-                if(args[0] == "MapFile")
+                if(args[0].ToLower() == "mapfile")
                 {
                     importingIntoMapFile = true;
                     args.RemoveAt(0);
