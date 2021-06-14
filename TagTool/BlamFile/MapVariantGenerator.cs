@@ -264,6 +264,12 @@ namespace TagTool.BlamFile
             // Handle parent attachments
             //
 
+            if (parentNameIndex < 0 || parentNameIndex >= _scenario.ObjectNames.Count)
+            {
+                Console.WriteLine($"WARNING: parent object #{parentNameIndex} not found!");
+                return;
+            }
+
             var parentName = _scenario.ObjectNames[parentNameIndex];
             var parentScrnInstanceIndex = parentName.PlacementIndex;
             var parentScnrInstance = ObjectTypes[parentName.ObjectType.Halo3ODST].Instances[parentScrnInstanceIndex] as ScenarioInstance;
