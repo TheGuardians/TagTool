@@ -120,7 +120,7 @@ namespace TagTool.Commands.Editing
 
             for (var i = 0; i < CopyBlockElementsCommand.Elements.Count; i++)
             {
-                var element = CopyBlockElementsCommand.Elements[i];
+                var element = CopyBlockElementsCommand.Elements[i].DeepCloneV2();
 
                 if (index == -1)
                     blockValue.Add(element);
