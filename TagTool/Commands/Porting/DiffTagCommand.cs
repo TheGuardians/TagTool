@@ -103,7 +103,7 @@ namespace TagTool.Commands.Porting
         static void DiffTags(List<Difference> differences, Stream stream1, GameCache cache1, CachedTag tag1, Stream stream2, GameCache cache2, CachedTag tag2)
         {
             var def1 = cache1.Deserialize(stream1, tag1);
-            var def2 = cache1.Deserialize(stream2, tag2);
+            var def2 = cache2.Deserialize(stream2, tag2);
             DiffData(differences, def1.GetType(), cache1, def1, cache2, def2);
         }
 
@@ -178,7 +178,7 @@ namespace TagTool.Commands.Porting
                 else if (typeof(StringId).IsAssignableFrom(type))
                 {
                     var string1 = cache1.StringTable.GetString((StringId)data1);
-                    var string2 = cache1.StringTable.GetString((StringId)data2);
+                    var string2 = cache2.StringTable.GetString((StringId)data2);
                     if (string1 != string2)
                         differences.Add(new Difference(DifferenceKind.Value, path, string1, string2));
                 }

@@ -166,6 +166,8 @@ namespace TagTool.Commands.Editing
 
                     for (var i = 0; i < tagFieldInfo.Attribute.Length; i++)
                         array[i] = CreateElement(fieldType.GetElementType());
+
+                    tagFieldInfo.SetValue(element, array);
                 }
                 else
                 {
