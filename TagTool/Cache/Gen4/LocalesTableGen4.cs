@@ -4,7 +4,7 @@ using System.IO;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.BlamFile;
-using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Gen4;
 
 namespace TagTool.Cache.Gen4
 {
@@ -24,6 +24,7 @@ namespace TagTool.Cache.Gen4
                     localesKey = "";
                     break;
                 case CacheVersion.HaloReach:
+                case CacheVersion.Halo4:
                     localesKey = "BungieHaloReach!";
                     break;
             }
@@ -37,16 +38,16 @@ namespace TagTool.Cache.Gen4
                 LocaleTable table = new LocaleTable();
                 var languageIndex = (int)language;
 
-                var localeBlock = matg.LocaleGlobals[languageIndex];
+                var localeBlock = matg.LanguagePack[languageIndex];
 
-                if (localeBlock.StringCount == 0)
+                if (localeBlock.NumberOfStrings == 0)
                     continue;
 
 
-                var stringCount = localeBlock.StringCount;
-                var tableSize = localeBlock.LocaleTableSize;
-                var offsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.LocalizationSection, localeBlock.LocaleIndexTableAddress);
-                var tableOffset = sectionTable.GetOffset(CacheFileSectionType.LocalizationSection, localeBlock.LocaleDataIndexAddress);
+                var stringCount = localeBlock.NumberOfStrings;
+                var tableSize = localeBlock.StringDataSize;
+                var offsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.LocalizationSection, (uint)localeBlock.StringReferenceCacheOffset);
+                var tableOffset = sectionTable.GetOffset(CacheFileSectionType.LocalizationSection, (uint)localeBlock.StringDataCacheOffset);
 
                 reader.SeekTo(offsetsTableOffset);
                 var stringOffsets = new int[stringCount];

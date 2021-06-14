@@ -10,7 +10,6 @@ namespace TagTool.Cache.Gen4
     {
         public Dictionary<TagGroup, Type> Gen4Types = new Dictionary<TagGroup, Type>()
         {
-            /*
             {new TagGroupGen4("hlmt", "model"), typeof(Model) },
             {new TagGroupGen4("mode", "render_model"), typeof(RenderModel) },
             {new TagGroupGen4("impo", "imposter_model"), typeof(ImposterModel) },
@@ -159,7 +158,7 @@ namespace TagTool.Cache.Gen4
             {new TagGroupGen4("mech", "medal_challenge_aggregator_list"), typeof(MedalChallengeAggregatorList) },
             {new TagGroupGen4("coag", "commendation_aggregator_list"), typeof(CommendationAggregatorList) },
             {new TagGroupGen4("pegd", "player_enlistment_globals_definition"), typeof(PlayerEnlistmentGlobalsDefinition) },
-            {new TagGroupGen4("pfnd", "pathfinding"), typeof(PathfindingDefinition) },
+            {new TagGroupGen4("pfnd", "pathfinding"), typeof(Tags.Definitions.Gen4.Pathfinding) },
             {new TagGroupGen4("LMgS", "lightmapper_globa¬ls"), typeof(LightmapperGlobals) },
             {new TagGroupGen4("LMMg", "lightmap_model_globals"), typeof(LightmapModelGlobals) },
             {new TagGroupGen4("wgtz", "user_interface_globals_definition"), typeof(UserInterfaceGlobalsDefinition) },
@@ -273,7 +272,6 @@ namespace TagTool.Cache.Gen4
             {new TagGroupGen4("forg", "forge_globals"), typeof(ForgeGlobals) },
             {new TagGroupGen4("sigd", "SuppressedIncident"), typeof(SuppressedIncident) },
             {new TagGroupGen4("narg", "NarrativeGlobals"), typeof(NarrativeGlobals) }
-            */
         };
 
         public override Dictionary<TagGroup, Type> Types { get => Gen4Types; }

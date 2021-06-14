@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen4;
-using TagTool.Cache.Gen4;
 using TagTool.Cache.Resources;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Gen4;
 
 namespace TagTool.Cache
 {
