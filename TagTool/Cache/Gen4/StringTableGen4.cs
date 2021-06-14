@@ -4,18 +4,18 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.BlamFile;
 
-namespace TagTool.Cache.Gen3
+namespace TagTool.Cache.Gen4
 {
-    public class StringTableGen3 : StringTable
+    public class StringTableGen4 : StringTable
     {
         public string StringKey = "";
 
-        public StringTableGen3(EndianReader reader, MapFile baseMapFile) : base()
+        public StringTableGen4(EndianReader reader, MapFile baseMapFile) : base()
         {
             Version = baseMapFile.Version;
 
-            var gen3Header = (CacheFileHeaderGen3)baseMapFile.Header;
-            var stringIDHeader = gen3Header.GetStringIDHeader();
+            var Gen4Header = (CacheFileHeaderGen4)baseMapFile.Header;
+            var stringIDHeader = Gen4Header.GetStringIDHeader();
 
             switch (Version)
             {
@@ -38,13 +38,14 @@ namespace TagTool.Cache.Gen3
 
                 case CacheVersion.Halo4:
                     Resolver = new StringIdResolverHalo4();
+                    StringKey = "ILikeSafeStrings";
                     break;
 
                 default:
                     throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
             }
 
-            var sectionTable = gen3Header.SectionTable;
+            var sectionTable = Gen4Header.SectionTable;
 
             // means no strings
             if (sectionTable != null && sectionTable.Sections[(int)CacheFileSectionType.StringSection].Size == 0)
@@ -106,7 +107,7 @@ namespace TagTool.Cache.Gen3
         }
 
         /*
-         * To resize the stringId Buffer in Gen3 caches, there are a few values to update. The map file section table needs to be updated
+         * To resize the stringId Buffer in Gen4 caches, there are a few values to update. The map file section table needs to be updated
          * The 2 addresses for the buffer and index table in the map file header.
          */
 

@@ -63,23 +63,10 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<CampaignMetagameGlobalsBlock> CampaignMetagameGlobals;
         [TagField(ValidTags = new [] { "gmeg" })]
         public CachedTag GameMedalGlobals;
-        public LanguagePackDefinition LanguagePack1;
-        public LanguagePackDefinition LanguagePack2;
-        public LanguagePackDefinition LanguagePack3;
-        public LanguagePackDefinition LanguagePack4;
-        public LanguagePackDefinition LanguagePack5;
-        public LanguagePackDefinition LanguagePack6;
-        public LanguagePackDefinition LanguagePack7;
-        public LanguagePackDefinition LanguagePack8;
-        public LanguagePackDefinition LanguagePack9;
-        public LanguagePackDefinition LanguagePack10;
-        public LanguagePackDefinition LanguagePack11;
-        public LanguagePackDefinition LanguagePack12;
-        public LanguagePackDefinition LanguagePack13;
-        public LanguagePackDefinition LanguagePack14;
-        public LanguagePackDefinition LanguagePack15;
-        public LanguagePackDefinition LanguagePack16;
-        public LanguagePackDefinition LanguagePack17;
+
+        [TagField(Length = 17)]
+        public LanguagePackDefinition[] LanguagePack = new LanguagePackDefinition[17];
+
         [TagField(ValidTags = new [] { "rasg" })]
         public CachedTag RasterizerGlobalsRef;
         [TagField(ValidTags = new [] { "cfxs" })]

@@ -52,7 +52,8 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline700123:
                     return deserializer.Deserialize<CacheFileHeaderGenHaloOnline>(dataContext);
-
+                case CacheVersion.Halo4:
+                    return deserializer.Deserialize<CacheFileHeaderGen4>(dataContext);
             }
             return null;
         }
