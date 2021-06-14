@@ -771,6 +771,7 @@ namespace TagTool.Tags.Definitions.Gen4
                     }
                 }
                 
+                [TagStructure(Size = 0x0)]
                 public class GNullBlock : TagStructure
                 {
                 }
