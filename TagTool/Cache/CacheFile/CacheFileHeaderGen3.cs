@@ -7,7 +7,8 @@ namespace TagTool.Cache
 {
     [TagStructure(Size = 0x800, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x1E000, MinVersion = CacheVersion.Halo4)]
     public class CacheFileHeaderGen3 : CacheFileHeader
     {
         public Tag HeaderSignature;
@@ -20,7 +21,6 @@ namespace TagTool.Cache
         public uint TagTableHeaderOffset32;
         [TagField(Platform = CachePlatform.Only64Bit)]
         public ulong TagTableHeaderOffset64;
-
 
         public TagMemoryHeader TagMemoryHeader;
 
@@ -52,13 +52,9 @@ namespace TagTool.Cache
         public ulong SharedTimestamp;
         public ulong CampaignTimestamp;
 
-        [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
-        public ulong MultiplayerTimestamp;
-
         [TagField(Length = 0x20)]
         public string Name;
-
-        
+     
         public int Unknown13;
 
         [TagField(Length = 256)]
@@ -77,8 +73,8 @@ namespace TagTool.Cache
         public int Unknown20;
         public int Unknown21_1;
 
-        [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
-        public int Unknown21_2;
+        [TagField(Length = 0x10, MinVersion = CacheVersion.Halo4)]
+        public byte[] UnknownH4;
 
         [TagField(Platform = CachePlatform.Only32Bit)]
         public uint VirtualBaseAddress32;
@@ -86,9 +82,6 @@ namespace TagTool.Cache
         public ulong VirtualBaseAddress64;
 
         public int XDKVersion;
-
-        [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
-        public int Unknown21_3;
 
         [TagField(Length = (int)CacheFilePartitionTypeBeta.Count, MaxVersion = CacheVersion.Halo3Beta)]
         public CacheFilePartition[] PartitionsBeta = new CacheFilePartition[(int)CacheFilePartitionTypeBeta.Count];
@@ -140,6 +133,9 @@ namespace TagTool.Cache
 
         [TagField(Length = 0x7000, MinVersion = CacheVersion.HaloReach)]
         public byte[] UnknownReach;
+
+        [TagField(Length = 0x13FF0, MinVersion = CacheVersion.Halo4)]
+        public byte[] UnknownH4FileData;
 
         public Tag FooterSignature;
 

@@ -256,6 +256,7 @@
     <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="BlamFile\MapVariantGenerator.cs" />
     <Compile Include="Cache\CachedTag.cs" />
+    <Compile Include="Cache\CacheFile\CacheFileHeaderGen4.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGenHaloOnline.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGen3.cs" />
     <Compile Include="Cache\CacheFile\CacheFileHeaderGen2.cs" />
@@ -275,8 +276,17 @@
     <Compile Include="Cache\Gen2\StringTableGen2.cs" />
     <Compile Include="Cache\Gen2\GameCacheGen2.cs" />
     <Compile Include="Cache\Gen2\TagCacheGen2.cs" />
+    <Compile Include="Cache\Gen4\CachedTagGen4.cs" />
+    <Compile Include="Cache\Gen4\GameCacheGen4.cs" />
+    <Compile Include="Cache\Gen4\LocalesTableGen4.cs" />
+    <Compile Include="Cache\Gen4\ResourceCacheGen4.cs" />
+    <Compile Include="Cache\Gen4\StringIdResolverHalo4.cs" />
     <Compile Include="Cache\Gen3\StringIdResolverHalo3Beta.cs" />
     <Compile Include="Cache\Gen3\TagGroupGen3.cs" />
+    <Compile Include="Cache\Gen4\StringTableGen4.cs" />
+    <Compile Include="Cache\Gen4\TagCacheGen4.cs" />
+    <Compile Include="Cache\Gen4\TagDefinitionsGen4.cs" />
+    <Compile Include="Cache\Gen4\TagGroupGen4.cs" />
     <Compile Include="Cache\Interops\InteropDefinition.cs" />
     <Compile Include="Cache\Resources\CharacterUsage.cs" />
     <Compile Include="Cache\Resources\ModelVariantUsage.cs" />
@@ -643,6 +653,7 @@
     <Compile Include="Scripting\HsType.cs" />
     <Compile Include="Serialization\Gen2SerializationContext.cs" />
     <Compile Include="Serialization\Gen1SerializationContext.cs" />
+    <Compile Include="Serialization\Gen4SerializationContext.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Serialization\ResourceDefinitionSerializationContext.cs" />
     <Compile Include="Serialization\Gen3SerializationContext.cs" />

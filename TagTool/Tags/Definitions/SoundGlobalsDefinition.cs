@@ -4,8 +4,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x5C, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
-    [TagStructure(Size = 0x6C, MinVersion = CacheVersion.HaloReachMCC0824)]
+    [TagStructure(Size = 0x5C, MinVersion = CacheVersion.HaloReach)]
     public class SoundGlobalsDefinition : TagStructure
 	{
         [TagField(ValidTags = new[] { "sncl" })]
@@ -13,10 +12,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "sfx+" })]
         public CachedTag SoundEffects;
-
-        [TagField(ValidTags = new[] { "snmm" }, MinVersion = CacheVersion.HaloReachMCC0824)]
-        public CachedTag SoundMastering;
-
+        
         [TagField(ValidTags = new[] { "snmx" })]
         public CachedTag SoundMix;
 

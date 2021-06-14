@@ -102,14 +102,8 @@ namespace TagTool.Cache
                     return CacheVersion.HaloOnline700123;
                 case "11860.10.07.24.0147.omaha_relea":
                     return CacheVersion.HaloReach;
-                case "May 29 2019 00:44:52":
-                    return CacheVersion.HaloReachMCC0824;
-                case "Jun 24 2019 00:36:03":
-                    return CacheVersion.HaloReachMCC0887;
-                case "Jul 30 2019 14:17:16":
-                    return CacheVersion.HaloReachMCC1035;
-                case "Oct 24 2019 15:56:32":
-                    return CacheVersion.HaloReachMCC1211;
+                case "20810.12.09.22.1647.main":
+                    return CacheVersion.Halo4;
                 default:
                     return CacheVersion.Unknown;
             }
@@ -172,14 +166,9 @@ namespace TagTool.Cache
                     return "12.1.700123 cert_ms30_oct19";
                 case CacheVersion.HaloReach:
                     return "11860.10.07.24.0147.omaha_relea";
-                case CacheVersion.HaloReachMCC0824:
-                    return "May 29 2019 00:44:52";
-                case CacheVersion.HaloReachMCC0887:
-                    return "Jun 24 2019 00:36:03";
-                case CacheVersion.HaloReachMCC1035:
-                    return "Jul 30 2019 14:17:16";
-                case CacheVersion.HaloReachMCC1211:
-                    return "Oct 24 2019 15:56:32";
+                case CacheVersion.Halo4:
+                    return "20810.12.09.22.1647.main";
+
                 default:
                     return version.ToString();
             }
@@ -198,6 +187,7 @@ namespace TagTool.Cache
 				case CacheVersion.Halo3Retail:
 				case CacheVersion.Halo3ODST:
 				case CacheVersion.HaloReach:
+                case CacheVersion.Halo4:
 					return false;
 
                 case CacheVersion.HaloXbox:
@@ -221,10 +211,6 @@ namespace TagTool.Cache
 				case CacheVersion.HaloOnline554482:
 				case CacheVersion.HaloOnline571627:
 				case CacheVersion.HaloOnline700123:
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
                     return true;
 
 				default:
@@ -324,6 +310,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
+                case CacheVersion.Halo4:
                     return platform.HasFlag(CachePlatform.Xbox360);
 
                 case CacheVersion.HaloPC:
@@ -345,13 +332,6 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline700123:
                     return platform.HasFlag(CachePlatform.PC32Bit);
-
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
-                    var result = platform.HasFlag(CachePlatform.PC64Bit);
-                    return result;
 
                 default:
                     return false;
@@ -381,10 +361,6 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
                     return CacheGeneration.Third;
 
                 case CacheVersion.HaloOnline106708:
@@ -403,6 +379,9 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline700123:
                     return CacheGeneration.HaloOnline;
+
+                case CacheVersion.Halo4:
+                    return CacheGeneration.Fourth;
 
                 default:
                     return CacheGeneration.Unknown;
@@ -461,11 +440,7 @@ namespace TagTool.Cache
             130879952719550501, // V11_1_554482_Live
             130881889330693956, // HaloOnline571627
             130930071628935939, // HaloOnline700123
-            -1, // HaloReachXbox360
-            -1, // HaloReachMCC824
-            -1, // HaloReachMCC887
-            -1, // HaloReachMCC1035
-            -1, // HaloReachMCC1211
+            -1 //Halo 4
         };
     }
 
@@ -497,10 +472,7 @@ namespace TagTool.Cache
         HaloOnline571627,
         HaloOnline700123,
         HaloReach,
-        HaloReachMCC0824,
-        HaloReachMCC0887,
-        HaloReachMCC1035,
-        HaloReachMCC1211
+        Halo4
     }
 
     public enum CacheGeneration : int
@@ -509,7 +481,8 @@ namespace TagTool.Cache
         First = 1,
         Second = 2,
         Third = 3,
-        HaloOnline = 4
+        HaloOnline = 4,
+        Fourth = 5
     }
 
     [Flags]

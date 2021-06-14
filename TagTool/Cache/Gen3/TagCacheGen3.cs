@@ -130,6 +130,7 @@ namespace TagTool.Cache.Gen3
                     TagsKey = "";
                     break;
                 case CacheVersion.HaloReach:
+                case CacheVersion.Halo4:
                     TagsKey = "LetsAllPlayNice!";
                     break;
             }

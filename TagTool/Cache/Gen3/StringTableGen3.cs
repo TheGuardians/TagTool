@@ -36,11 +36,8 @@ namespace TagTool.Cache.Gen3
                     StringKey = "ILikeSafeStrings";
                     break;
 
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
-                    Resolver = new StringIdResolverHaloReachMCC();
+                case CacheVersion.Halo4:
+                    Resolver = new StringIdResolverHalo4();
                     break;
 
                 default:
