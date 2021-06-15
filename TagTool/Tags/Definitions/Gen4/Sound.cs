@@ -83,7 +83,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public class DeterministicspeechEventBlockStruct : TagStructure
             {
                 public SpeechEventInfoFlags Flags;
-                public StringId VoiceFilePath;
+                public uint VoiceFilePath;
                 public float EventDuration;
                 // Percent this file will be skipped when picked. 0 is always, 0.99 is almost never
                 public float SkipFraction;

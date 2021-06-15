@@ -81,8 +81,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public TracerpropertyRealStruct ProfileIntensity;
             public uint RuntimeMConstantperProfileProperties;
             public uint RuntimeMUsedstates;
-            [TagField(Length = 32)]
-            public string RuntimeMMaxprofileCount;
+            public uint RuntimeMMaxprofileCount;
             public GpuPropertyFunctionColorStruct RuntimeMGpudata;
             
             [Flags]

@@ -29,8 +29,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public float LodFeatherInDelta;
             public float InverseLodFeatherIn;
             // defaults to 30.0, ignored if 'lod enabled' not checked above
-            [TagField(Length = 32)]
-            public string LodOutDistance;
+            public float LodOutDistance;
             // defaults to 10.0, ignored if 'lod enabled' not checked above
             public float LodFeatherOutDelta;
             public float InverseLodFeatherOut;
@@ -43,8 +42,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public LightVolumePropertyReal ProfileAlpha;
             public LightVolumePropertyReal ProfileIntensity;
             public uint RuntimeMConstantPerProfileProperties;
-            [TagField(Length = 32)]
-            public string RuntimeMUsedStates;
+            public uint RuntimeMUsedStates;
             public uint RuntimeMMaxProfileCount;
             public GpuPropertyFunctionColorStruct RuntimeMGpuData;
             public List<LightVolumePrecompiledVertBlock> PrecompiledVertices;

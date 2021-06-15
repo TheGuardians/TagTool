@@ -190,7 +190,7 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag PlayerSoundBank;
         // Name of the EQ shareset in WWise to apply when this weapon is active
-        public StringId PlayerEqPresetName;
+        public uint PlayerEqPresetName;
         public int PlayerEqPresetHash;
         // Note - this is a direct event string - not a .sound
         public StringId ReloadCancelEvent;
@@ -1288,7 +1288,7 @@ namespace TagTool.Tags.Definitions.Gen4
             // Function to drive the RTPC
             public StringId Function;
             // WWise RTPC string name
-            public StringId RtpcName;
+            public uint RtpcName;
             public int RtpcNameHashValue;
         }
         

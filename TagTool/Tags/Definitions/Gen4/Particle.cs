@@ -41,8 +41,7 @@ namespace TagTool.Tags.Definitions.Gen4
         // separate from color, controls how the particle fades as a function of its input
         public ParticlePropertyScalarStructNew Alpha;
         // switches between modulate (multiply) and tint(preserve whites)
-        [TagField(Length = 32)]
-        public string TintFactor; // 0=modulate, 1=tint
+        public uint TintFactor; // 0=modulate, 1=tint
         public ParticleAnimationFlags AnimationFlags;
         // 0=first frame, 1=last frame
         public ParticlePropertyScalarStructNew FrameIndex;
@@ -53,8 +52,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public ShaderParticleStruct ActualShader;
         public uint RuntimeMUsedParticleStates;
         public uint RuntimeMConstantPerParticleProperties;
-        [TagField(Length = 32)]
-        public string RuntimeMConstantOverTimeProperties;
+        public uint RuntimeMConstantOverTimeProperties;
         public GpuDataStruct RuntimeMGpuData;
         
         [Flags]
@@ -631,9 +629,10 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
         
-        [TagStructure(Size = 0x34)]
+        [TagStructure(Size = 0x98)]
         public class ShaderParticleStruct : TagStructure
         {
+            public RenderMethod Method;
             public RealRgbColor BrightTint;
             public RealRgbColor AmbientTint;
             public float Contrast;
