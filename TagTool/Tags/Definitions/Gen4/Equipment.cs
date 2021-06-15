@@ -46,8 +46,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag EnergyChargedEffect;
         [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag UnableToActivateSound;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // High quality player sound bank to be prefetched. Can be empty.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag PlayerSoundBank;
         public List<EquipmentSoundRtpcblock> SoundRtpcs;
         public List<EquipmentSoundSweetenerBlock> SoundSweeteners;
@@ -1266,9 +1266,9 @@ namespace TagTool.Tags.Definitions.Gen4
                     public float CowCatcherSideDepth;
                     // offset from the unit's origin to put the origin of the cow-catcher at
                     public RealVector3d CowCatcherOffset;
-                    [TagField(ValidTags = new [] { "cddf" })]
                     // if "hide unit during transit" isn't checked, this can override the unit's collision damage definition during the
                     // teleport
+                    [TagField(ValidTags = new [] { "cddf" })]
                     public CachedTag CollisionDamageOverride;
                 }
             }
@@ -1408,8 +1408,8 @@ namespace TagTool.Tags.Definitions.Gen4
                 public float TravelSpeed;
                 // the speed you return to at the end of the teleport, if "hide unit during transit" isn't checked
                 public float DeactivationSpeed;
-                [TagField(ValidTags = new [] { "effe" })]
                 // an effect that will follow along the travel path
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag TraceEffect;
                 // offset from the unit's origin to put the effects at
                 public RealVector3d TraceEffectOffset;
@@ -1466,9 +1466,9 @@ namespace TagTool.Tags.Definitions.Gen4
                     public float CowCatcherSideDepth;
                     // offset from the unit's origin to put the origin of the cow-catcher at
                     public RealVector3d CowCatcherOffset;
-                    [TagField(ValidTags = new [] { "cddf" })]
                     // if "hide unit during transit" isn't checked, this can override the unit's collision damage definition during the
                     // teleport
+                    [TagField(ValidTags = new [] { "cddf" })]
                     public CachedTag CollisionDamageOverride;
                 }
             }
@@ -1504,14 +1504,14 @@ namespace TagTool.Tags.Definitions.Gen4
                 public RealVector3d SpawnOffsetFromPlayer; // world units
                 public float VerticalBobHeight; // world units
                 public float VerticalBobsPerSecond;
-                [TagField(ValidTags = new [] { "effe" })]
                 // effect played on the turret when it is spawned into the world
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag SpawnEffect;
                 public StringId SpawnEffectMarker;
                 public StringId SpawnDissolveType;
                 public StringId SpawnDissolveMarker;
-                [TagField(ValidTags = new [] { "effe" })]
                 // effect played on the turret while a biped or vehicle passes through it
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag CollisionPhaseEffect;
                 
                 [Flags]
@@ -1532,8 +1532,8 @@ namespace TagTool.Tags.Definitions.Gen4
                 public byte[] Padding;
                 // 'Other activation tell effect' will be applied to players within this distance
                 public float MaximumTellDistance; // wu
-                [TagField(ValidTags = new [] { "effe" })]
                 // applied to other players within maximum distance
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag ActivationTellEffect;
                 // within 'maxiumum tell distance' blip duration if 'Generate tell motion sensor blip' is checked
                 public int MotionSensorTellBlipTicks;
@@ -1567,14 +1567,14 @@ namespace TagTool.Tags.Definitions.Gen4
                 public float MaxProjectionDistance;
                 // Min energy required to activate shield.
                 public float MinRequiredEnergyLevel;
-                [TagField(ValidTags = new [] { "effe" })]
                 // Beam effect that links equipment to projected shield.
-                public CachedTag ProjectEffect;
                 [TagField(ValidTags = new [] { "effe" })]
+                public CachedTag ProjectEffect;
                 // Effect played at eventual shield projection point during warmup period.
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag WarmupEffect;
-                [TagField(ValidTags = new [] { "bloc" })]
                 // Crate created to represent projected shield.
+                [TagField(ValidTags = new [] { "bloc" })]
                 public CachedTag ShieldCrate;
             }
             
@@ -1599,8 +1599,8 @@ namespace TagTool.Tags.Definitions.Gen4
                 public float Strength;
                 // Initial speed of projectiles when thrown as an attack.
                 public float AttackSpeed;
-                [TagField(ValidTags = new [] { "effe" })]
                 // Beam effect that links equipment to each collected projectile.
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag CollectEffect;
             }
             
@@ -1642,11 +1642,11 @@ namespace TagTool.Tags.Definitions.Gen4
                 // Degrees away from the reticle at which targets are in the cone.
                 public float ConeAngleDegrees;
                 public List<EquipmenthackerDrainLevel> DrainLevels;
-                [TagField(ValidTags = new [] { "effe" })]
                 // an effect that will shoot out of your face
-                public CachedTag ConeEffect;
                 [TagField(ValidTags = new [] { "effe" })]
+                public CachedTag ConeEffect;
                 // an effect that will play on the target
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag TargetEffect;
                 
                 [Flags]
@@ -1668,11 +1668,11 @@ namespace TagTool.Tags.Definitions.Gen4
             [TagStructure(Size = 0x28)]
             public class EquipmentabilityTypeRemoteVehicleBlock : TagStructure
             {
-                [TagField(ValidTags = new [] { "obje" })]
                 // reference the equipment that will spawn the hologram that will pilot the remote vehicle
-                public CachedTag HologramSpawner;
                 [TagField(ValidTags = new [] { "obje" })]
+                public CachedTag HologramSpawner;
                 // reference the remote vehicle to be created
+                [TagField(ValidTags = new [] { "obje" })]
                 public CachedTag Vehicle;
                 // hologram gets loaded into this seat in the vehicle
                 public StringId SeatLabel;

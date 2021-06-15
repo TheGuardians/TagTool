@@ -28,8 +28,8 @@ namespace TagTool.Tags.Definitions.Gen4
             [TagStructure(Size = 0x24)]
             public class PlayerOrdnanceItemBlock : TagStructure
             {
-                [TagField(Length = 32)]
                 // This must match one of the global ordnance objects.
+                [TagField(Length = 32)]
                 public string OrdnanceName;
                 // chance that an ordnance from this group will be chosen
                 public float OrdnanceFrequency;

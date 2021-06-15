@@ -20,8 +20,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public DeviceLightmapFlags LightmapFlags;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
-        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         public CachedTag Open;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
@@ -35,8 +33,6 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         public CachedTag Repowered;
         public float DelayTime; // seconds
-        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding2;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         public CachedTag DelayEffect;
         public float AutomaticActivationRadius; // world units
@@ -51,8 +47,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public float MinTargetablePositionThreshold;
         // below this value and above the min, object becomes targetable
         public float MaxTargetablePositionThreshold;
-        [TagField(Length = 0x68, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding3;
         
         [Flags]
         public enum DeviceDefinitionFlags : uint

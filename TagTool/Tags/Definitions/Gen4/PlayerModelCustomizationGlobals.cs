@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "player_model_customization_globals", Tag = "pmcg", Size = 0xC8)]
     public class PlayerModelCustomizationGlobals : TagStructure
     {
-        [TagField(ValidTags = new [] { "mode" })]
         // used for string list generation
+        [TagField(ValidTags = new [] { "mode" })]
         public CachedTag SpartanRenderModel;
         [TagField(ValidTags = new [] { "mode" })]
         public CachedTag EliteRenderModel;

@@ -59,8 +59,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public byte[] Padding;
             public MidnightBooleanEnum SpecularContribution;
             public MidnightBooleanEnum DiffuseContribution;
-            [TagField(ValidTags = new [] { "bitm" })]
             // Bitmap file for spotlight. Cube map for point light. Gobo bitmap must be synced to xbox.
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag GoboTagPath;
             public LightScalarFunctionStruct Rotation; // [0-360 degrees]
             // Shape length and width of Gobo.

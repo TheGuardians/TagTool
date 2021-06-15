@@ -24,13 +24,13 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Rumble;
             [TagField(ValidTags = new [] { "csdt" })]
             public CachedTag CameraShake;
-            [TagField(ValidTags = new [] { "csdt" })]
             // falls back on camerashake if untuned
+            [TagField(ValidTags = new [] { "csdt" })]
             public CachedTag CameraShakeZoomed;
             [TagField(ValidTags = new [] { "sidt" })]
             public CachedTag SimulatedInput;
-            [TagField(ValidTags = new [] { "sidt" })]
             // falls back on simulated input if untuned
+            [TagField(ValidTags = new [] { "sidt" })]
             public CachedTag SimulatedInputZoomed;
             public List<DamageResponseGlobalSoundEffectBlockStruct> GlobalSoundEffect;
             

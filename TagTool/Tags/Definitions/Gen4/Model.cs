@@ -65,11 +65,11 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<ModelRegionBlock> RuntimeRegions;
         public List<ModelNodeBlock> RuntimeNodes;
         public int RuntimeNodeListChecksum;
-        [TagField(ValidTags = new [] { "udlg" })]
         // The default dialogue tag for this model (overriden by variants)
-        public CachedTag DefaultDialogue;
         [TagField(ValidTags = new [] { "udlg" })]
+        public CachedTag DefaultDialogue;
         // The default FEMALE dialogue tag for this model (overriden by variants)
+        [TagField(ValidTags = new [] { "udlg" })]
         public CachedTag DefaultDialogueFemale;
         public ModelFlags Flags;
         // The default dialogue tag for this model (overriden by variants)
@@ -985,13 +985,13 @@ namespace TagTool.Tags.Definitions.Gen4
                 public CachedTag RechargingEffect;
                 // (main shield only) how long before the recharge begins the pre-recharge effect fires
                 public float PreRechargeEffectWarnTime; // seconds
-                [TagField(ValidTags = new [] { "effe" })]
                 // (main shield only)
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag PreRechargeEffect;
                 // (main shield only)
                 public StringId PreRechargeEffectMarker;
-                [TagField(ValidTags = new [] { "effe" })]
                 // (main shield only) if the pre-recharge effect is aborted before the actual recharge starts, this effect plays
+                [TagField(ValidTags = new [] { "effe" })]
                 public CachedTag PreRechargeAbortEffect;
                 // (main shield only)
                 public StringId PreRechargeAbortEffectMarker;
@@ -1065,8 +1065,8 @@ namespace TagTool.Tags.Definitions.Gen4
                     public StringId SpecificEffectMarker;
                     public InstantaneousResponseDamageEffectStruct DamageEffect;
                     public InstantaneousResponseDamageEffectMarkerStruct DamageEffectMarker;
-                    [TagField(ValidTags = new [] { "effe" })]
                     // will play until the next response is triggered.
+                    [TagField(ValidTags = new [] { "effe" })]
                     public CachedTag LoopingEffect;
                     public List<DamageResponseRegionTransitionBlock> RegionTransitions;
                     public List<DamageTransferBlock> ResponseDamageTransfers;
@@ -1077,8 +1077,8 @@ namespace TagTool.Tags.Definitions.Gen4
                     // time to wait until firing the response. This delay is pre-empted if another timed response for the same section
                     // fires.
                     public float ResponseDelay; // seconds
-                    [TagField(ValidTags = new [] { "effe" })]
                     // plays while the timer is counting down
+                    [TagField(ValidTags = new [] { "effe" })]
                     public CachedTag DelayEffect;
                     public StringId DelayEffectMarkerName;
                     public List<SeatEjectionBlock> SeatEject;

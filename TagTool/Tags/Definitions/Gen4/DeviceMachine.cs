@@ -15,15 +15,11 @@ namespace TagTool.Tags.Definitions.Gen4
         public float DoorOpenTime; // seconds
         // maps position [0,1] to occlusion
         public Bounds<float> DoorOcclusionBounds;
-        [TagField(Length = 0x48, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
         public MachineCollisionResponses CollisionResponse;
         public short ElevatorNode;
-        [TagField(Length = 0x44, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
         public MachinePathfindingPolicyEnum PathfindingPolicy;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding2;
+        public byte[] Padding;
         // shield (or any damage section) to control
         public StringId ShieldName;
         // shield is on when this function is greater then 0.5f, off otherwise.

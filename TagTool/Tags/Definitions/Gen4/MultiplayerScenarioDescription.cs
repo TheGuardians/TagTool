@@ -19,8 +19,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag DescriptiveBitmap;
             [TagField(ValidTags = new [] { "unic" })]
             public CachedTag DisplayedMapName;
-            [TagField(Length = 32)]
             // this is the path to the directory containing the scenario tag file of the same name
+            [TagField(Length = 32)]
             public string ScenarioTagDirectoryPath;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;

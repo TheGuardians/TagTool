@@ -24,8 +24,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public float InteractionHoldTime; // seconds
         // A cui_screen to display when someone is using "interaction held"-type dispensers
         public StringId InteractionScreen;
-        [TagField(ValidTags = new [] { "bipd","vehi","weap","bloc" })]
         // This object will be spawned by the dispenser
+        [TagField(ValidTags = new [] { "bipd","vehi","weap","bloc" })]
         public CachedTag DispensedObject;
         // The model variant to use of the dispensed object
         public StringId DesiredVariantName;
@@ -45,8 +45,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public StringId SpawnMarkerName;
         // Creates the dispense effect at this marker name
         public StringId EffectMarkerName;
-        [TagField(ValidTags = new [] { "effe" })]
         // An effect created when the the dispenser dispenses something
+        [TagField(ValidTags = new [] { "effe" })]
         public CachedTag DispenseEffect;
         // The marker on the dispenser to use for attachment if we attach our dispensed object, origin if undefined
         public StringId DispenserAttachMarker;

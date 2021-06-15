@@ -14,7 +14,5 @@ namespace TagTool.Tags.Definitions.Gen4
         public int Yjnxhawao2;
         public int Yjnxhawao3;
         public int Yjnxhawao4;
-        [TagField(Length = 0x70, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
     }
 }

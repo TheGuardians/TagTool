@@ -445,6 +445,7 @@ namespace TagTool.Tags.Definitions.Gen4
                 DecoratorsAreLit = 1 << 4
             }
             
+            [TagStructure(Size = 0x0)]
             public class GNullBlock : TagStructure
             {
             }
@@ -829,14 +830,14 @@ namespace TagTool.Tags.Definitions.Gen4
             {
                 [TagField(ValidTags = new [] { "lsnd" })]
                 public CachedTag BackgroundSound;
-                [TagField(ValidTags = new [] { "lsnd" })]
                 // plays when rain is active, weather rate gets applied to scale.
+                [TagField(ValidTags = new [] { "lsnd" })]
                 public CachedTag WeatherSound;
-                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 // plays when entering this area
-                public CachedTag EntrySound;
                 [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
+                public CachedTag EntrySound;
                 // plays when leaving this area
+                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 public CachedTag ExitSound;
                 public float CutoffDistance;
                 public float InterpolationTime; // seconds

@@ -32,17 +32,15 @@ namespace TagTool.Tags.Definitions.Gen4
         public float InteractionHoldTime; // seconds
         // A cui_screen to display when someone is using "interaction held"-type controls
         public StringId InteractionScreen;
-        [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         // An effect to play when a user starts holding the interaction button on this control
+        [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         public CachedTag HoldStart;
-        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         // A sound to play when someone attempts to use this control while it is in use
+        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag ActionDeniedSound;
-        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
         public TeamuseRestrictionEnum MpTeamUseRestriction;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
+        public byte[] Padding;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         public CachedTag On;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]

@@ -38,8 +38,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<UserInterfaceGameScreenSequenceStepDefinition> GameNextRoundSequence;
         public List<UserInterfaceGameScreenSequenceStepDefinition> GameEndSequence;
         public List<UserInterfaceGameScreenSequenceStepDefinition> GameEndWithKillcamSequence;
-        [TagField(ValidTags = new [] { "uihg" })]
         // global settings for the HUD. Set this for ingame globals.
+        [TagField(ValidTags = new [] { "uihg" })]
         public CachedTag HudGlobals;
         [TagField(ValidTags = new [] { "ppod" })]
         public CachedTag PortraitPoses;

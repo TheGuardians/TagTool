@@ -17,8 +17,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public byte[] Padding;
         [TagField(ValidTags = new [] { "stli" })]
         public CachedTag StructureLightingTag;
-        [TagField(Length = 0x78, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
         
         public enum PathfindingPolicyEnum : short
         {

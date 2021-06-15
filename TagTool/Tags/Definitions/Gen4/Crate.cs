@@ -15,15 +15,15 @@ namespace TagTool.Tags.Definitions.Gen4
         public byte[] Padding;
         public List<CampaignMetagameBucketBlock> CampaignMetagameBucket;
         public int SelfDestructionTimer; // seconds
-        [TagField(ValidTags = new [] { "pman" })]
         // optional particleization effect definition, if you want this to particleize when it takes damage
+        [TagField(ValidTags = new [] { "pman" })]
         public CachedTag Particleize;
         // the animation set to use when this crate is grabbed
         public StringId GrabAnimationSet;
         // the string to display when the player can grab this object, from ui/hud/hud_messages
         public StringId GrabPickupString;
-        [TagField(ValidTags = new [] { "effe" })]
         // effect to play when a projectile bounces because of the "all projectiles bounce off" flag
+        [TagField(ValidTags = new [] { "effe" })]
         public CachedTag ProjectileBounceEffect;
         
         [Flags]

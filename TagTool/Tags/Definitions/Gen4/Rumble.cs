@@ -23,8 +23,6 @@ namespace TagTool.Tags.Definitions.Gen4
             {
                 public float Duration; // seconds
                 public MappingFunction DirtyWhore;
-                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
                 
                 [TagStructure(Size = 0x14)]
                 public class MappingFunction : TagStructure

@@ -104,8 +104,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float FovOut; // [0-1]
             // shakes the entire screen
             public float ScreenShake; // [0-1]
-            [TagField(ValidTags = new [] { "mat " })]
             // applies this shader to the entire screen
+            [TagField(ValidTags = new [] { "mat " })]
             public CachedTag ShaderEffect;
             
             [Flags]

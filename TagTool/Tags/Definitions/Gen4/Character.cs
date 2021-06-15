@@ -15,8 +15,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag ParentCharacter;
         [TagField(ValidTags = new [] { "unit" })]
         public CachedTag Unit;
-        [TagField(ValidTags = new [] { "crea" })]
         // Creature reference for swarm characters ONLY
+        [TagField(ValidTags = new [] { "crea" })]
         public CachedTag Creature;
         [TagField(ValidTags = new [] { "styl" })]
         public CachedTag Style;
@@ -179,14 +179,14 @@ namespace TagTool.Tags.Definitions.Gen4
             public GlobalAiGrenadeTypeEnum DefaultGrenadeType;
             public BehaviorTreeRootEnum BehaviorTreeRoot;
             public List<DisallowedWeaponsForTradingBlock> DisallowedWeaponsFromTrading;
-            [TagField(ValidTags = new [] { "weap" })]
             // Overrides initial primary weapon set in unit tag.
-            public CachedTag InitialPrimaryWeapon;
             [TagField(ValidTags = new [] { "weap" })]
+            public CachedTag InitialPrimaryWeapon;
             // Overrides initial secondary weapon set in unit tag.
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag InitialSecondaryWeapon;
-            [TagField(ValidTags = new [] { "eqip" })]
             // Fallback used if initial equipment not specified as drop item or in scenario.
+            [TagField(ValidTags = new [] { "eqip" })]
             public CachedTag InitialEquipment;
             
             [Flags]
@@ -370,8 +370,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float SuicideRadius;
             public float RuntimeBodyRechargeVelocity;
             public float RuntimeShieldRechargeVelocity;
-            [TagField(ValidTags = new [] { "weap" })]
             // If I'm being automatically resurrected then I pull out a ...
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag ResurrectWeapon;
             // If the player is hurting me, scale the damage by this amount. (0 value defaults to 1)
             public float PlayerDamageScale; // [0-1]
@@ -1051,8 +1051,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public Bounds<short> FightDangerMoveThresholdCooldown; // ticks
             // Chance of flanking when fighting someone who isn't paying attention to me
             public float FightFlankChance; // [0-1]
-            [TagField(ValidTags = new [] { "proj" })]
             // when I throw a grenade, forget what type I officially have
+            [TagField(ValidTags = new [] { "proj" })]
             public CachedTag OverrideGrenadeProjectile; // throw this type of projectile instead
             // Targets closer than this distance will not be attacked with a throw
             public float MinimumThrowDistance;
@@ -1134,8 +1134,8 @@ namespace TagTool.Tags.Definitions.Gen4
             // Chance that we will go berserk if we see a friendly AI of the same type (brute, etc) with higher standing get
             // killed
             public float LeaderKilledBerserkChance; // [0,1]
-            [TagField(ValidTags = new [] { "weap" })]
             // when I berserk, I pull out a ...
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag BerserkWeapon;
             // Chance that AI will play berserk anim after getting stuck with a grenade.  Zero is 50%
             public float PlayBerserkAnimChanceWhenStuck;
@@ -1305,8 +1305,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float ZigZagPeriod; // seconds
             // The likelihood of throwing down a grenade to cover our retreat
             public float RetreatGrenadeChance;
-            [TagField(ValidTags = new [] { "weap" })]
             // If I want to flee and I don't have flee animations with my current weapon, throw it away and try a ...
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag BackupWeapon;
             
             [Flags]
@@ -1506,8 +1506,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float ProximityRadius; // wus
             // chance of detonating if target enters the drain radius radius
             public float ProximityDetonationChance;
-            [TagField(ValidTags = new [] { "eqip" })]
             // if target enters radius and detonation is not chosen, deploy this equipment.
+            [TagField(ValidTags = new [] { "eqip" })]
             public CachedTag ProximityEquipment;
         }
         
@@ -2036,8 +2036,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float ProtectDamageAmount;
             // How long should we protect our special parts for?
             public float ProtectTime; // seconds
-            [TagField(ValidTags = new [] { "char" })]
             // What character should I throw up all over my target? Carrots?
+            [TagField(ValidTags = new [] { "char" })]
             public CachedTag SpewInfectionCharacter;
             // Probability of throwing up a bunch of infection forms when perimeterising
             public float SpewChance;
@@ -2075,8 +2075,8 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagStructure(Size = 0x24)]
         public class CharacterEquipmentBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "eqip" })]
             // The equipment item that is to be usable
+            [TagField(ValidTags = new [] { "eqip" })]
             public CachedTag Equipment;
             public CharacterEquipmentDefBits Flags;
             // The relative chance of this equipment being dropped with respect to the other pieces of equipment specified in this
@@ -2289,23 +2289,23 @@ namespace TagTool.Tags.Definitions.Gen4
             public float ResurrectionChargeUpTime;
             // If the resurrection target is not reached in this amount of time, the resurrection attempt is aborted.
             public float ResurrectionGiveUpTime;
-            [TagField(ValidTags = new [] { "effe" })]
             // The effect created on the ground when resurrecting a dead ally.
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag ResurrectionGroundEffect;
-            [TagField(ValidTags = new [] { "effe" })]
             // The effect created on the ground when scanning for a clear area before resurrection.
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag ResAreaScanStartEffect;
-            [TagField(ValidTags = new [] { "effe" })]
             // The effect created on the ground when area scan succeeds.
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag ResAreaScanSuccessEffect;
-            [TagField(ValidTags = new [] { "effe" })]
             // The effect created on the ground when area scan fails.
-            public CachedTag ResAreaScanFailureEffect;
-            [TagField(ValidTags = new [] { "bloc" })]
-            // Created by bishop when shard spawning.  Runs spawning logic.
-            public CachedTag ShardObject;
             [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag ResAreaScanFailureEffect;
+            // Created by bishop when shard spawning.  Runs spawning logic.
+            [TagField(ValidTags = new [] { "bloc" })]
+            public CachedTag ShardObject;
             // The effect created on the ground when spawning shards (pawns).
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag ShardSpawnGroundEffect;
             // Time it takes for bishop to place shards after arriving at destination.
             public float ShardCreationDelay;
@@ -2336,14 +2336,14 @@ namespace TagTool.Tags.Definitions.Gen4
         public class CharacterCombotronChildBlock : TagStructure
         {
             public RookFlags Flags;
-            [TagField(ValidTags = new [] { "weap" })]
             // When socketed, this guy turns into a weapon of the type referenced here
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag SocketWeapon;
-            [TagField(ValidTags = new [] { "obje" })]
             // When socketed, this guy turns into a child of the type referenced here
+            [TagField(ValidTags = new [] { "obje" })]
             public CachedTag SocketChild;
-            [TagField(ValidTags = new [] { "char" })]
             // Parent adopts this character definition when this guy is socketed
+            [TagField(ValidTags = new [] { "char" })]
             public CachedTag SocketCharacterDefinition;
             // How much damage does this guy absorb before de-socketing
             public float DamageThresholdWhenSocketed;
@@ -2351,8 +2351,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public Bounds<float> SocketingCooldown;
             // at what distance does the client particleize and attach to socket
             public Bounds<float> SocketingAttachDistance;
-            [TagField(ValidTags = new [] { "effe" })]
             // this effect plays while a child is socketing into a parent
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag EffectSocketing;
             
             [Flags]
@@ -2369,8 +2369,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public StringId LimbDismemberedAnimation;
             [TagField(ValidTags = new [] { "effe" })]
             public CachedTag BerserkPersistentMeleeEffect;
-            [TagField(ValidTags = new [] { "weap" })]
             // If I lose my firing arm then I pull out a ...
+            [TagField(ValidTags = new [] { "weap" })]
             public CachedTag AlternateWeapon;
         }
         
@@ -2446,8 +2446,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float ResurrectionTaskPriority;
             // Priority of the shield task generated while being resurrected.
             public float ShieldDuringResurrectionTaskPriority;
-            [TagField(ValidTags = new [] { "bloc" })]
             // Crate created to represent projected shield.
+            [TagField(ValidTags = new [] { "bloc" })]
             public CachedTag ShieldCrateOverride;
             
             [Flags]
@@ -2510,11 +2510,11 @@ namespace TagTool.Tags.Definitions.Gen4
             public float TeleportTrackingDistance;
             // How far from the target do we stop tracking
             public float TeleportTrackingLockdownDist;
-            [TagField(ValidTags = new [] { "effe" })]
             // Effect to play at teleport launch point
-            public CachedTag TeleportLaunchFx;
             [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag TeleportLaunchFx;
             // Effect to play at teleport destination point
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag TeleportLandFx;
             
             [Flags]

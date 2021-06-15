@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "armormod_globals", Tag = "armg", Size = 0x50)]
     public class ArmormodGlobals : TagStructure
     {
-        [TagField(ValidTags = new [] { "proj" })]
         // spawned by Explode On Death armormod
+        [TagField(ValidTags = new [] { "proj" })]
         public CachedTag Projectile;
         [TagField(ValidTags = new [] { "lsnd" })]
         public CachedTag LoopingSoundEffect;

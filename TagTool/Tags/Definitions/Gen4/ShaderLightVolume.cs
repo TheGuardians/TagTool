@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen4
 {
-    [TagStructure(Name = "shader_light_volume", Tag = "rmlv")]
+    [TagStructure(Name = "shader_light_volume", Tag = "rmlv", Size = 0x0)]
     public class ShaderLightVolume : RenderMethod
     {
     }

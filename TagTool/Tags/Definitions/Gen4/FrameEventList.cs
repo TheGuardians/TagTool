@@ -21,8 +21,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Sound;
             public KeyEventFlagsEnum Flags;
             public KeyEventInternalFlagsEnum InternalFlags;
-            [TagField(ValidTags = new [] { "hlmt" })]
             // optional. only allow this event when used on this model
+            [TagField(ValidTags = new [] { "hlmt" })]
             public CachedTag Model;
             // optional. only allow this event when used on this model variant
             public StringId Variant;
@@ -54,8 +54,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Effect;
             public KeyEventFlagsEnum Flags;
             public KeyEventInternalFlagsEnum InternalFlags;
-            [TagField(ValidTags = new [] { "hlmt" })]
             // optional. only allow this event when used on this model
+            [TagField(ValidTags = new [] { "hlmt" })]
             public CachedTag Model;
             // optional. only allow this event when used on this model variant
             public StringId Variant;

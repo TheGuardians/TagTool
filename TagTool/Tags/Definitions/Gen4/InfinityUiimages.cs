@@ -16,8 +16,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public class InfinityMissionSeasonImagesDefinition : TagStructure
         {
             public int SeasonNumber;
-            [TagField(ValidTags = new [] { "bitm" })]
             // displayed where the missions would be, when the epilogue is selected
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag EpilogueImage;
             public List<InfinityMissionImagesDefinition> SeasonImages;
             

@@ -28,8 +28,8 @@ namespace TagTool.Tags.Definitions.Gen4
             // defaults to 0.0, ignored if 'lod enabled' not checked above
             public float LodFeatherInDelta;
             public float InverseLodFeatherIn;
-            [TagField(Length = 32)]
             // defaults to 30.0, ignored if 'lod enabled' not checked above
+            [TagField(Length = 32)]
             public string LodOutDistance;
             // defaults to 10.0, ignored if 'lod enabled' not checked above
             public float LodFeatherOutDelta;

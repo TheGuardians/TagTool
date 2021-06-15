@@ -74,8 +74,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public float MaximumStunTime; // seconds
         public float FeignDeathChance; // [0,1]
         public float FeignRepeatChance; // [0,1]
-        [TagField(ValidTags = new [] { "char" })]
         // automatically created character when this unit is driven
+        [TagField(ValidTags = new [] { "char" })]
         public CachedTag SpawnedTurretCharacter;
         // number of actors which we spawn
         public Bounds<short> SpawnedActorCount;
@@ -102,9 +102,9 @@ namespace TagTool.Tags.Definitions.Gen4
         public byte[] Padding;
         [TagField(ValidTags = new [] { "jpt!" })]
         public CachedTag MeleeDamage;
-        [TagField(ValidTags = new [] { "weap" })]
         // when set, characters will melee with these settings rather than their actual held weapon. (for characters that
         // melee with an off hand)
+        [TagField(ValidTags = new [] { "weap" })]
         public CachedTag NativeMeleeOverride;
         public UnitBoardingMeleeStruct YourMomma;
         public GlobalChudBlipType MotionSensorBlipSize;
@@ -150,8 +150,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag ExitAndDetachWeapon;
         public short ExperienceForKill;
         public short ExperienceForAssist;
-        [TagField(ValidTags = new [] { "eqip" })]
         // this is where you stick an equipment that the biped will always have, to implement the bizarrely named hero assist
+        [TagField(ValidTags = new [] { "eqip" })]
         public CachedTag HeroAssistEquipment;
         // the speed above which units will bail out of a vehicle instead of just exiting
         public float BailoutThreshold; // wu/s
@@ -574,8 +574,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public class UnitPosturesBlock : TagStructure
         {
             public StringId Name;
-            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public RealVector3d PillOffset;
         }
         
@@ -628,8 +626,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public short VariantNumber;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
             [TagField(ValidTags = new [] { "udlg" })]
             public CachedTag Dialogue;
         }
@@ -694,8 +690,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float IdleScanningPitchMax; // degrees
             // 0 = infinite.  Idle scanning won't look at something that is closer than this distance
             public float IdleScanningMinInterestDistance; // world units
-            [TagField(ValidTags = new [] { "effe" })]
             // effect played on the turret when it goes into alert mode
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag AlertModeEffect;
             public StringId AlertModeEffectMarker;
             public StringId AlertModeEffectPrimaryScale;
@@ -740,11 +736,11 @@ namespace TagTool.Tags.Definitions.Gen4
                 public float PrimaryFireTime; // seconds
                 // how long the sentry waits before using its secondary weapon barrel
                 public float SecondaryFireTime; // seconds
-                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 // 1st person sound to play when targeted player enters sentry's alert range
-                public CachedTag PlayerEnteredAlertRangeSound;
                 [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
+                public CachedTag PlayerEnteredAlertRangeSound;
                 // 1st person sound to play when targeted player leaves sentry's alert range
+                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 public CachedTag PlayerExitedAlertRangeSound;
                 
                 [Flags]
@@ -796,8 +792,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public StringId InSeatString;
             // nathan is too lazy to make pings for each seat.
             public float PingScale;
-            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             // how much time it takes to evict a rider from a flipped vehicle
             public float TurnoverTime; // seconds
             [TagField(ValidTags = new [] { "sadt" })]
@@ -818,14 +812,10 @@ namespace TagTool.Tags.Definitions.Gen4
             public float MaxSpeedReference;
             // if >0, t is then modified by raising to this exponent and result is used to linearly interpolate yaw/pitch rates
             public float SpeedExponent;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
             public UnitCameraStruct UnitCamera;
             [TagField(ValidTags = new [] { "cusc" })]
             public CachedTag HudScreenReference;
             public StringId EnterSeatString;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding2;
             public Angle YawMinimum;
             public Angle YawMaximum;
             // only applies when an NPC is considering using this seat
@@ -834,8 +824,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public Angle YawMaximumForAiOperator;
             [TagField(ValidTags = new [] { "char" })]
             public CachedTag BuiltInGunner;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding3;
             // how close to the entry marker a unit must be
             public float EntryRadius;
             // angle from marker forward the unit must be
@@ -843,8 +831,6 @@ namespace TagTool.Tags.Definitions.Gen4
             // angle from unit facing the marker must be
             public Angle EntryMarkerFacingAngle;
             public float MaximumRelativeVelocity;
-            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding4;
             public float OpenTime; // seconds
             public float CloseTime; // seconds
             // creates an object function with this name that you can use to query the open state of this seat

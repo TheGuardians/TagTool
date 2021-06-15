@@ -35,8 +35,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public float SeatExitAccelersationScale;
         public float BlurSpeed;
         public StringId FlipMessage;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // High quality player sound bank to be prefetched. Can be empty.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag PlayerVehicleSoundBank;
         [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag SuspensionSound;

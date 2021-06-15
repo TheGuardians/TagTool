@@ -11,11 +11,11 @@ namespace TagTool.Tags.Definitions.Gen4
     public class Meter : TagStructure
     {
         public MeterFlags Flags;
-        [TagField(ValidTags = new [] { "bitm" })]
         // two bitmaps specifying the mask and the meter levels
-        public CachedTag StencilBitmaps;
         [TagField(ValidTags = new [] { "bitm" })]
+        public CachedTag StencilBitmaps;
         // optional bitmap to draw into the unmasked regions of the meter (modulated by the colors below)
+        [TagField(ValidTags = new [] { "bitm" })]
         public CachedTag SourceBitmap;
         public short StencilSequenceIndex;
         public short SourceSequenceIndex;

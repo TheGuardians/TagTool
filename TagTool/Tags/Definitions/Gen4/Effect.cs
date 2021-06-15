@@ -159,8 +159,8 @@ namespace TagTool.Tags.Definitions.Gen4
                 public RealEulerAngles2d RelativeOrientation;
                 public EffectPartScaleableValues AScalesValues;
                 public EffectPartScaleableValues BScalesValues;
-                [TagField(ValidTags = new [] { "pman" })]
                 // optional particleization effect definition, if you want this to particleize on spawn
+                [TagField(ValidTags = new [] { "pman" })]
                 public CachedTag Particleize;
                 
                 public enum EffectEnvironments : short

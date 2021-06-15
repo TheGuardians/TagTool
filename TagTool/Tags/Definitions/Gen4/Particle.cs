@@ -40,8 +40,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public ParticlePropertyScalarStructNew Intensity;
         // separate from color, controls how the particle fades as a function of its input
         public ParticlePropertyScalarStructNew Alpha;
-        [TagField(Length = 32)]
         // switches between modulate (multiply) and tint(preserve whites)
+        [TagField(Length = 32)]
         public string TintFactor; // 0=modulate, 1=tint
         public ParticleAnimationFlags AnimationFlags;
         // 0=first frame, 1=last frame

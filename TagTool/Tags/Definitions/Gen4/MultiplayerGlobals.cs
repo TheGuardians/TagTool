@@ -332,8 +332,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag CoOpSpawningGlobals;
             [TagField(ValidTags = new [] { "msit" })]
             public CachedTag MegaloStringIdTable;
-            [TagField(ValidTags = new [] { "kccd" })]
             // Used for non projectile killcams.
+            [TagField(ValidTags = new [] { "kccd" })]
             public CachedTag KillcamParameters;
             
             [TagStructure(Size = 0x10)]

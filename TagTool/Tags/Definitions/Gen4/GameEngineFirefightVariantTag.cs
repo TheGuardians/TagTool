@@ -44,8 +44,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public sbyte StartingCrate12;
             public sbyte StartingCrate13;
             public sbyte StartingCrate14;
-            [TagField(Length = 32)]
             // This event is always set for script
+            [TagField(Length = 32)]
             public string VariantEvent;
             public List<GameEngineFirefightPlayerGoalPropertiesBlock> MidnightPlayerGoalProperties;
             

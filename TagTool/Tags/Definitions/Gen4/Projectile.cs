@@ -46,13 +46,13 @@ namespace TagTool.Tags.Definitions.Gen4
         public float SuperDetTime;
         // The range within which supercombine will happen - outside this range, no supercombine
         public Bounds<float> SuperDetRange; // world units
-        [TagField(ValidTags = new [] { "obje" })]
         // An equipment reference that is attached to the target upon super detonation
+        [TagField(ValidTags = new [] { "obje" })]
         public CachedTag SuperDetBehavior;
         // if the weapon the projectile is tethered to loses its owner, this amount of time will pass before detonation
         public float TetherReleaseSafetyDelay;
-        [TagField(ValidTags = new [] { "effe" })]
         // effect
+        [TagField(ValidTags = new [] { "effe" })]
         public CachedTag DetonationStarted;
         [TagField(ValidTags = new [] { "effe" })]
         public CachedTag DetonationEffect;
@@ -60,8 +60,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag DetonationEffect1;
         [TagField(ValidTags = new [] { "jpt!" })]
         public CachedTag DetonationDamage;
-        [TagField(ValidTags = new [] { "obje" })]
         // An equipment reference that is attached to the target upon detonation
+        [TagField(ValidTags = new [] { "obje" })]
         public CachedTag DetonationBehavior;
         [TagField(ValidTags = new [] { "jpt!" })]
         public CachedTag AttachedDetonationDamage;
@@ -132,11 +132,11 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<BruteGrenadeBlock> BruteGrenade;
         public List<FireBombGrenadeBlock> FireBombGrenade;
         public List<ConicalProjectionBlock> ConicalSpread;
-        [TagField(ValidTags = new [] { "grfr" })]
         // If not present, the default from global.globals is used.
+        [TagField(ValidTags = new [] { "grfr" })]
         public CachedTag GroundedFrictionSettings;
-        [TagField(ValidTags = new [] { "kccd" })]
         // if not present, first person will be used.
+        [TagField(ValidTags = new [] { "kccd" })]
         public CachedTag KillcamParameters;
         public List<ProjectileSoundRtpcblock> SoundRtpcs;
         
@@ -376,24 +376,18 @@ namespace TagTool.Tags.Definitions.Gen4
             public short RuntimeMaterialIndex;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding2;
             public MaterialResponse PotentialResponse;
             public MaterialPossibleResponseFlags ResponseFlags;
             public float ChanceFraction; // [0,1]
             public Bounds<Angle> Between; // degrees
             public Bounds<float> And; // world units per second
-            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding3;
             public EffectScaleEnum ScaleEffectsBy;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding4;
+            public byte[] Padding2;
             // the angle of incidence is randomly perturbed by at most this amount to simulate irregularity.
             public Angle AngularNoise; // degrees
             // the velocity is randomly perturbed by at most this amount to simulate irregularity.
             public float VelocityNoise; // world units per second
-            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding5;
             // the fraction of the projectile's velocity lost on penetration
             public float InitialFriction;
             // the fraction of the projectile's velocity parallel to the surface lost on impact

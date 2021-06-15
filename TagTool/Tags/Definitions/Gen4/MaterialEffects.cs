@@ -11,8 +11,6 @@ namespace TagTool.Tags.Definitions.Gen4
     public class MaterialEffects : TagStructure
     {
         public List<MaterialEffectBlockV2> Effects;
-        [TagField(Length = 0x80, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
         
         [TagStructure(Size = 0x24)]
         public class MaterialEffectBlockV2 : TagStructure
@@ -35,8 +33,6 @@ namespace TagTool.Tags.Definitions.Gen4
                 public SweeneterModeEnum SweetenerMode;
                 [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
                 
                 public enum SweeneterModeEnum : sbyte
                 {

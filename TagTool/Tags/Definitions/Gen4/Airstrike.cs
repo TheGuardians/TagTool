@@ -29,11 +29,11 @@ namespace TagTool.Tags.Definitions.Gen4
             public float LaunchDuration; // seconds
             // number of rounds to fire per launch
             public int ShotsPerLaunch;
-            [TagField(ValidTags = new [] { "effe" })]
             // the effect that will be created when the strike fires.
-            public CachedTag FireEffect;
             [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag FireEffect;
             // the effect that will be created when the strike fires and is indoors
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag FireEffect1;
             public List<AirstrikeFireLocationBlock> FireOffsets;
             

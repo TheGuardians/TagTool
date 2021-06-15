@@ -13,10 +13,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public Angle MovingTurningSpeed; // degrees per second
         public BipedDefinitionFlags Flags;
         public Angle StationaryTurningThreshold;
-        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
-        [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
         [TagField(ValidTags = new [] { "bdpd" })]
         public CachedTag DeathProgramSelector;
         // when the biped transitions to ragdoll, this region will change to the destroyed state
@@ -25,8 +21,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public StringId AssassinationChudText;
         public float JumpVelocity; // world units per second
         public List<UnitTrickDefinitionBlock> Tricks;
-        [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding2;
         // the longest amount of time the biped can take to recover from a soft landing
         public float MaximumSoftLandingTime; // seconds
         // the longest amount of time the biped can take to recover from a hard landing
@@ -37,8 +31,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public float MinimumHardLandingVelocity; // world units per second
         // the velocity corresponding to the maximum landing time
         public float MaximumHardLandingVelocity; // world units per second
-        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding3;
         // 0 is the default.  Bipeds are stunned when damaged by vehicle collisions, also some are when they take emp damage
         public float StunDuration;
         public float StandingCameraHeight; // world units
@@ -59,14 +51,12 @@ namespace TagTool.Tags.Definitions.Gen4
         public float AutoaimWidth; // world units
         public short RuntimePhysicsControlNodeIndex;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding4;
+        public byte[] Padding;
         public float RuntimeCosineStationaryTurningThreshold;
         public float RuntimeCrouchTransitionVelocity;
         public float RuntimeCameraHeightVelocity;
         public short RuntimePelvisNodeIndex;
         public short RuntimeHeadNodeIndex;
-        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding5;
         public List<BipedWallProximityBlock> WallProximityFeelers;
         [TagField(ValidTags = new [] { "effe" })]
         public CachedTag AreaDamageEffect;
@@ -85,41 +75,41 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<ContactPointBlock> ContactPoints;
         // when the flood reanimate this guy, he turns into a ...
         public CachedTag ReanimationCharacter;
-        [TagField(ValidTags = new [] { "mffn" })]
         // the kind of muffins I create to cover my horrible transformation
+        [TagField(ValidTags = new [] { "mffn" })]
         public CachedTag ReanimationMorphMuffins;
         // when I die, out of the ashes of my death crawls a ...
         public CachedTag DeathSpawnCharacter;
         public short DeathSpawnCount;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding6;
+        public byte[] Padding1;
         public BipedLeapingDataStruct LeapingData;
         public BipedVaultingDataStruct VaultingData;
         public BipedGrabBipedDataStruct GrabBipedData;
         public BipedGrabObjectDataStruct GrabObjectData;
         public BipedGroundFittingDataStruct GroundFittingData;
-        [TagField(ValidTags = new [] { "pman" })]
         // optional particleization effect definition, if you want this to particleize when it dies
+        [TagField(ValidTags = new [] { "pman" })]
         public CachedTag DeathParticleize;
         public float MovementSpeedScale;
         public BipedMovementHipLeaningStruct MovementHipLean;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // Intended for biped vehicles (ie mantis)
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag PlayerBipedSoundBank;
-        [TagField(ValidTags = new [] { "lsnd" })]
         // plays when player is inside a RegenField
+        [TagField(ValidTags = new [] { "lsnd" })]
         public CachedTag RegenFieldLoopingSound;
-        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         // plays when player starts crouching
+        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag CrouchDownSound;
-        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         // plays when player stands up
+        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag CrouchUpSound;
-        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         // overrides shield impact sound, like when in a Mantis
-        public CachedTag ShieldImpactOverride;
         [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
+        public CachedTag ShieldImpactOverride;
         // overrides regular impact sound, like when in a Mantis
+        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag NonShieldImpactOverride;
         // increases radius of other sounds when piloting this biped (mech)
         public float SoundRadiusMultiplier;
@@ -282,12 +272,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public StringId LivingMaterialName;
             // collision material used when character is dead
             public StringId DeadMaterialName;
-            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public short RuntimeGlobalMaterialType;
             public short RuntimeDeadGlobalMaterialType;
-            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
             // don't be an asshole, edit something else!
             public List<SpheresBlockStruct> DeadSphereShapes;
             // don't be an asshole, edit something else!
@@ -665,8 +651,6 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagStructure(Size = 0x4)]
         public class ContactPointBlock : TagStructure
         {
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public StringId MarkerName;
         }
         

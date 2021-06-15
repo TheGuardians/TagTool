@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0x148)]
     public class DamageEffect : TagStructure
     {
-        [TagField(ValidTags = new [] { "obje" })]
         // if a reference is here, area of effect damage will attach the equipment to the target
+        [TagField(ValidTags = new [] { "obje" })]
         public CachedTag AreaOfEffectBehaviorEquipment;
         public Bounds<float> Radius; // world units
         public float CutoffScale; // [0,1]
@@ -48,18 +48,12 @@ namespace TagTool.Tags.Definitions.Gen4
         public float AltInstantaneousAcceleration; // [0,+inf]
         // set to zero to disable cap
         public float AccelerationCap;
-        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
-        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
         public float RiderDirectDamageScale;
         public float RiderMaximumTransferDamageScale;
         public float RiderMinimumTransferDamageScale;
         public float VehicleDamageMultiplier;
         // The maximum amount to apply the pain screen pose overlay
         public float SoftPingPainScreenScale; // [0,1]
-        [TagField(Length = 0x8C, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding2;
         public StringId GeneralDamage;
         public StringId SpecificDamage;
         public List<CustomDamageResponseLabelBlock> CustomResponseLabels;
@@ -99,18 +93,12 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag OldMeleeSound;
         public List<DamageEffectSoundBlockStruct> DamageSounds;
-        [TagField(Length = 0x70, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding3;
         public float ForwardVelocity; // world units per second
         public float ForwardRadius; // world units
         public float ForwardExponent;
-        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding4;
         public float OutwardVelocity; // world units per second
         public float OutwardRadius; // world units
         public float OutwardExponent;
-        [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding5;
         
         [Flags]
         public enum DamageEffectFlags : uint

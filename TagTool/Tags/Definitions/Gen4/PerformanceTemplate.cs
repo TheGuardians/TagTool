@@ -78,11 +78,11 @@ namespace TagTool.Tags.Definitions.Gen4
             {
                 public ScenarioPerformanceFragmentPlacementDefinition FragmentPlacement;
                 public ScenarioPerformanceFragmentType FragmentType;
-                [TagField(Length = 256)]
                 // maximum 256 characters, type just branch condition (with brackets) in case of branches
-                public string Fragment;
                 [TagField(Length = 256)]
+                public string Fragment;
                 // the script to branch to (with any arguments to it). Used only if type is branch
+                [TagField(Length = 256)]
                 public string BranchTarget;
                 
                 public enum ScenarioPerformanceFragmentPlacementDefinition : short

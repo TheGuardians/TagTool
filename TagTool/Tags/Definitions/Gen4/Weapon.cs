@@ -18,8 +18,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public short MaximumAlternateShotsLoaded;
         // how long after being readied it takes this weapon to switch its 'turned_on' attachment to 1.0
         public float TurnOnTime;
-        [TagField(ValidTags = new [] { "vmdx" })]
         // activated when this weapon is charging
+        [TagField(ValidTags = new [] { "vmdx" })]
         public CachedTag VisionMode;
         public float VisionCooldownTime; // seconds
         public float ReadyTime; // seconds
@@ -63,8 +63,8 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "jpt!","drdf" })]
         public CachedTag DetonationDamageEffect;
         public List<MeleeDamageParametersBlock> MeleeDamageParameters;
-        [TagField(ValidTags = new [] { "sndo","effe" })]
         // effect that is played in the air between two players that clang with this weapon
+        [TagField(ValidTags = new [] { "sndo","effe" })]
         public CachedTag ClangEffect;
         public GlobalDamageReportingEnum MeleeDamageReportingType;
         [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
@@ -76,8 +76,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public sbyte ZoomEffectTicks;
         [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
         public byte[] Padding1;
-        [TagField(ValidTags = new [] { "sndo","effe" })]
         // effect that is played while zoomed
+        [TagField(ValidTags = new [] { "sndo","effe" })]
         public CachedTag ZoomEffect;
         public AimAssistStruct WeaponAimAssist;
         public WeaponBarrelIronSightsStruct IronSightsModifiers;
@@ -146,8 +146,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<WeaponscaleshotStruct> ScaleshotParameters;
         public float RuntimeWeaponPowerOnVelocity;
         public float RuntimeWeaponPowerOffVelocity;
-        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding4;
         public float MaxMovementAcceleration;
         public float MaxMovementVelocity;
         public float MaxTurningAcceleration;
@@ -169,8 +167,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public float ExternalHeatAmount;
         // the amount of age the weapon recovers per second
         public float AgeRecoveredPerSecond; // [0,1]
-        [TagField(ValidTags = new [] { "sndo","effe" })]
         // the sound or effect played when the weapon's age reaches fully recovered
+        [TagField(ValidTags = new [] { "sndo","effe" })]
         public CachedTag AgeFullyRecovered;
         public RealVector3d FirstPersonWeaponOffset;
         public RealVector2d FirstPersonScopeSize;
@@ -188,8 +186,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public float TetherTransitionFromLinkedTime; // seconds
         public StringId UnitStowAnchorName;
         public List<WeaponScreenEffectBlock> ScreenEffects;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // High quality player sound bank to be prefetched. Can be empty.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag PlayerSoundBank;
         // Name of the EQ shareset in WWise to apply when this weapon is active
         public StringId PlayerEqPresetName;
@@ -477,29 +475,29 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag MeleeDamage;
             [TagField(ValidTags = new [] { "jpt!","drdf" })]
             public CachedTag MeleeResponse;
-            [TagField(ValidTags = new [] { "jpt!" })]
             // this is only important for the energy sword
+            [TagField(ValidTags = new [] { "jpt!" })]
             public CachedTag LungeMeleeDamage;
-            [TagField(ValidTags = new [] { "jpt!","drdf" })]
             // this is only important for the energy sword
+            [TagField(ValidTags = new [] { "jpt!","drdf" })]
             public CachedTag LungeMeleeResponse;
-            [TagField(ValidTags = new [] { "jpt!" })]
             // this is only important for the energy sword
+            [TagField(ValidTags = new [] { "jpt!" })]
             public CachedTag EmptyMeleeDamage;
-            [TagField(ValidTags = new [] { "jpt!","drdf" })]
             // this is only important for the energy sword
+            [TagField(ValidTags = new [] { "jpt!","drdf" })]
             public CachedTag EmptyMeleeResponse;
-            [TagField(ValidTags = new [] { "jpt!" })]
             // this is only important for the energy sword
+            [TagField(ValidTags = new [] { "jpt!" })]
             public CachedTag ClangMeleeDamage;
-            [TagField(ValidTags = new [] { "jpt!","drdf" })]
             // this is only important for the energy sword
-            public CachedTag ClangMeleeResponse;
-            [TagField(ValidTags = new [] { "jpt!" })]
-            // e.g. used by AR to damage sword guy when clanging sword attack
-            public CachedTag ClangMeleeAgainstMeleeWeaponDamage;
             [TagField(ValidTags = new [] { "jpt!","drdf" })]
+            public CachedTag ClangMeleeResponse;
             // e.g. used by AR to damage sword guy when clanging sword attack
+            [TagField(ValidTags = new [] { "jpt!" })]
+            public CachedTag ClangMeleeAgainstMeleeWeaponDamage;
+            // e.g. used by AR to damage sword guy when clanging sword attack
+            [TagField(ValidTags = new [] { "jpt!","drdf" })]
             public CachedTag ClangMeleeAgainstMeleeWeaponDamageResponse;
             [TagField(ValidTags = new [] { "effe" })]
             public CachedTag LungeMeleeExplosiveDamage;
@@ -627,8 +625,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public List<WeaponFirstPersonInterfaceBlock> FirstPerson;
             [TagField(ValidTags = new [] { "cusc" })]
             public CachedTag HudScreenReference;
-            [TagField(ValidTags = new [] { "cusc" })]
             // the parent of the weapon can indicate that this hud should be used instead of the default
+            [TagField(ValidTags = new [] { "cusc" })]
             public CachedTag AlternateHudScreenReference;
             
             [TagStructure(Size = 0x10)]
@@ -652,6 +650,7 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
         
+        [TagStructure(Size = 0x0)]
         public class GNullBlock : TagStructure
         {
         }
@@ -690,8 +689,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag ChamberingEffect;
             [TagField(ValidTags = new [] { "jpt!","drdf" })]
             public CachedTag ChamberingDamageEffect;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding4;
             public List<MagazineObjects> Magazines1;
             
             [Flags]
@@ -727,15 +724,13 @@ namespace TagTool.Tags.Definitions.Gen4
             public TriggerPredictionTypeEnum Prediction;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            [TagField(Length = 0x1C, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
             public WeaponTriggerAutofireStruct Autofire;
             public WeaponTriggerChargingStruct Charging;
-            [TagField(ValidTags = new [] { "effe" })]
             // created once player is able to release the tethered projectile
-            public CachedTag DoubleLatchProjectileReleasableEffect;
             [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag DoubleLatchProjectileReleasableEffect;
             // created when player releases the tethered projectile
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag DoubleLatchProjectileReleasedEffect;
             
             [Flags]
@@ -813,22 +808,22 @@ namespace TagTool.Tags.Definitions.Gen4
                 public short CancelledTriggerThrow;
                 // the amount of illumination given off when the weapon is fully charged
                 public float ChargedIllumination; // [0,1]
+                // the charging effect is created once when the trigger begins to charge
                 [TagField(ValidTags = new [] { "sndo","effe" })]
-                // the charging effect is created once when the trigger begins to charge
                 public CachedTag ChargingEffect;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // the charging effect is created once when the trigger begins to charge
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag ChargingDamageEffect;
-                [TagField(ValidTags = new [] { "drdf" })]
                 // plays every tick you're charging or charged, scaled to charging fraction
+                [TagField(ValidTags = new [] { "drdf" })]
                 public CachedTag ChargingContinuousDamageResponse;
                 // how much battery to drain per second when charged
                 public float ChargedDrainRate;
+                // the discharging effect is created once when the trigger releases its charge
                 [TagField(ValidTags = new [] { "sndo","effe" })]
-                // the discharging effect is created once when the trigger releases its charge
                 public CachedTag DischargeEffect;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // the discharging effect is created once when the trigger releases its charge
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag DischargeDamageEffect;
                 public List<WeaponTriggerChargingFireFraction> FireFractions;
                 
@@ -1119,50 +1114,50 @@ namespace TagTool.Tags.Definitions.Gen4
                 public short ShotCountLowerBound;
                 // the maximum number of times this firing effect will be used, once it has been chosen
                 public short ShotCountUpperBound;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag FiringEffect;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is loaded and will do critical damage
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag CriticalEffect;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is loaded but fired while overheated
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag MisfireEffect;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag EmptyEffect;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag OptionalSecondaryFiringEffect;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag FiringDamage;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is loaded and will do critical damage
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag CriticalDamage;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is loaded but fired while overheated
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag MisfireDamage;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag EmptyDamage;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag OptionalSecondaryFiringDamage;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag FiringRiderDamage;
-                [TagField(ValidTags = new [] { "sndo","effe" })]
                 // this effect is used when the weapon is loaded and will do critical damage
+                [TagField(ValidTags = new [] { "sndo","effe" })]
                 public CachedTag CriticalRiderDamage;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is loaded but fired while overheated
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag MisfireRiderDamage;
-                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 // this effect is used when the weapon is not loaded
-                public CachedTag EmptyRiderDamage;
                 [TagField(ValidTags = new [] { "jpt!","drdf" })]
+                public CachedTag EmptyRiderDamage;
                 // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new [] { "jpt!","drdf" })]
                 public CachedTag OptionalSecondaryFiringRiderDamage;
             }
         }
@@ -1197,8 +1192,8 @@ namespace TagTool.Tags.Definitions.Gen4
                 public float PowerChangePerShot;
                 // the change per second in power when you're at this level
                 public float PowerChangePerSecond;
-                [TagField(ValidTags = new [] { "proj" })]
                 // the projectile to fire at this level
+                [TagField(ValidTags = new [] { "proj" })]
                 public CachedTag Projectile;
                 // firing effects when firing at this level
                 public List<BarrelFiringEffectBlock> FiringEffects;
@@ -1217,50 +1212,50 @@ namespace TagTool.Tags.Definitions.Gen4
                     public short ShotCountLowerBound;
                     // the maximum number of times this firing effect will be used, once it has been chosen
                     public short ShotCountUpperBound;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is loaded and fired normally
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag FiringEffect;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is loaded and will do critical damage
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag CriticalEffect;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is loaded but fired while overheated
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag MisfireEffect;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is not loaded
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag EmptyEffect;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is not loaded
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag OptionalSecondaryFiringEffect;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is loaded and fired normally
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag FiringDamage;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is loaded and will do critical damage
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag CriticalDamage;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is loaded but fired while overheated
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag MisfireDamage;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is not loaded
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag EmptyDamage;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is loaded and fired normally
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag OptionalSecondaryFiringDamage;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is loaded and fired normally
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag FiringRiderDamage;
-                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     // this effect is used when the weapon is loaded and will do critical damage
+                    [TagField(ValidTags = new [] { "sndo","effe" })]
                     public CachedTag CriticalRiderDamage;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is loaded but fired while overheated
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag MisfireRiderDamage;
-                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     // this effect is used when the weapon is not loaded
-                    public CachedTag EmptyRiderDamage;
                     [TagField(ValidTags = new [] { "jpt!","drdf" })]
+                    public CachedTag EmptyRiderDamage;
                     // this effect is used when the weapon is loaded and fired normally
+                    [TagField(ValidTags = new [] { "jpt!","drdf" })]
                     public CachedTag OptionalSecondaryFiringRiderDamage;
                 }
             }

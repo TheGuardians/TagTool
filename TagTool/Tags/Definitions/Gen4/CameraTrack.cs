@@ -12,8 +12,6 @@ namespace TagTool.Tags.Definitions.Gen4
     {
         public CameraTrackFlags Flags;
         public List<CameraTrackControlPointBlock> ControlPoints;
-        [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
         
         [Flags]
         public enum CameraTrackFlags : uint
@@ -25,8 +23,6 @@ namespace TagTool.Tags.Definitions.Gen4
         {
             public RealVector3d Position;
             public RealQuaternion Orientation;
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
         }
     }
 }

@@ -43,11 +43,11 @@ namespace TagTool.Tags.Definitions.Gen4
         public float LargeUnit1;
         public float HugeUnit;
         public float HugeUnit1;
-        [TagField(ValidTags = new [] { "grfr" })]
         // If not present, the default from global.globals is used.
+        [TagField(ValidTags = new [] { "grfr" })]
         public CachedTag GroundedFrictionSettings;
-        [TagField(ValidTags = new [] { "obje" })]
         // Used to override the object tossed when item owner is killed.  Is overridden by tossed weapon override.
+        [TagField(ValidTags = new [] { "obje" })]
         public CachedTag TossedOverride;
         
         [Flags]

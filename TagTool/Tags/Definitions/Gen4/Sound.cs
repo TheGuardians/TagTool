@@ -25,8 +25,8 @@ namespace TagTool.Tags.Definitions.Gen4
         // Time the event will not retrigger for (global)
         public float DonTPlayTime;
         public int HiddenRuntimeInfoIndex;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // Reference to the sound bank tag this event is in. Can be empty.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag SoundBank;
         public List<SoundlipSyncInfoBlockStruct> LipsyncInfo;
         public int DeterministicFlagIndex;

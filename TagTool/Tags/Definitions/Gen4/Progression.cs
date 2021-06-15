@@ -13,16 +13,16 @@ namespace TagTool.Tags.Definitions.Gen4
         public int OrdnancePointsGainedOnKillingAnotherPlayer;
         public int OrdnancePointsGainedOnKillingAnNpc;
         public int OrdnancePointsLostOnDeath;
-        [TagField(ValidTags = new [] { "eqip" })]
         // special version of RS used by player to position droppod location
+        [TagField(ValidTags = new [] { "eqip" })]
         public CachedTag DroppodUiRemoteStrike;
         [TagField(ValidTags = new [] { "scen" })]
         public CachedTag DropPod;
-        [TagField(ValidTags = new [] { "effe" })]
         // spawned at drop location at start of fanfare delay
-        public CachedTag DropPodWarning;
         [TagField(ValidTags = new [] { "effe" })]
+        public CachedTag DropPodWarning;
         // used by random ordnance drop system for air drops
+        [TagField(ValidTags = new [] { "effe" })]
         public CachedTag DropPodLocator;
     }
 }

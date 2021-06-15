@@ -20,8 +20,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public CharacterPhysicsStruct Physics;
         [TagField(ValidTags = new [] { "jpt!" })]
         public CachedTag ImpactDamage;
-        [TagField(ValidTags = new [] { "jpt!" })]
         // if not specified, uses 'impact damage'
+        [TagField(ValidTags = new [] { "jpt!" })]
         public CachedTag ImpactShieldDamage;
         public List<CampaignMetagameBucketBlock> CampaignMetagameBucket;
         // if non-zero, the creature will destroy itself upon death after this much time
@@ -30,13 +30,13 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "cpem" })]
         public CachedTag BigBattleWeaponEmitter;
         public RealPoint3d BigBattleWeaponOffset;
-        [TagField(ValidTags = new [] { "cpem" })]
         // if you leave this empty, only the first emitter will fire
+        [TagField(ValidTags = new [] { "cpem" })]
         public CachedTag BigBattleWeaponEmitter2;
         public RealPoint3d BigBattleWeaponOffset2;
         public List<CreatureScalarTimingBlock> BigBattleWeaponFireTiming;
-        [TagField(ValidTags = new [] { "effe" })]
         // this fires a full effect from location up, oriented along vehicle's forward and up axes
+        [TagField(ValidTags = new [] { "effe" })]
         public CachedTag BigBattleExpensiveWeaponEffect;
         public Bounds<float> ExpensiveWeaponFireTime; // seconds
         [TagField(ValidTags = new [] { "effe" })]
@@ -97,12 +97,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public StringId LivingMaterialName;
             // collision material used when character is dead
             public StringId DeadMaterialName;
-            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public short RuntimeGlobalMaterialType;
             public short RuntimeDeadGlobalMaterialType;
-            [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
             // don't be an asshole, edit something else!
             public List<SpheresBlockStruct> DeadSphereShapes;
             // don't be an asshole, edit something else!

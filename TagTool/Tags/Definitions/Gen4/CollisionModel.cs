@@ -323,8 +323,6 @@ namespace TagTool.Tags.Definitions.Gen4
                     public short NodeIndex;
                     [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                     public byte[] Padding;
-                    [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding1;
                     public GlobalCollisionBspStruct Bsp;
                     
                     [TagStructure(Size = 0x6C)]
@@ -586,8 +584,6 @@ namespace TagTool.Tags.Definitions.Gen4
         {
             public short Node;
             public PathfindingSphereFlags Flags;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public RealPoint3d Center;
             public float Radius;
             

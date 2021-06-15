@@ -51,8 +51,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag CreationEffect;
         [TagField(ValidTags = new [] { "foot" })]
         public CachedTag MaterialEffects;
-        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         // this is the sound that is made when I am meleed.  This overrides the sweetener sound of my material.
+        [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
         public CachedTag MeleeSound;
         // if non-zero, any instances of this object will destroy themselves after this many seconds.
         public float SelfDestructTime; // seconds
@@ -69,11 +69,11 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<ObjectChangeColors> ChangeColors;
         public List<GNullBlock> PredictedResources;
         public List<MultiplayerObjectBlock> MultiplayerObject;
-        [TagField(ValidTags = new [] { "siin" })]
         // Set to a specific interpolation definition, or leave blank to inherit the default for the object type (there are
         // defaults for bipeds, vehicles, and crates in multiplayer_globals).  To disable interpolation on a particular object
         // whose type has interpolation by default, set this reference to the special
         // disable_interpolation.simulation_interpolation tag.
+        [TagField(ValidTags = new [] { "siin" })]
         public CachedTag SimulationInterpolation;
         public List<ObjectSpawnEffectsBlock> SpawnEffects;
         public List<ModeldissolveDataBlock> ModelDissolveData;
@@ -431,15 +431,11 @@ namespace TagTool.Tags.Definitions.Gen4
         {
             [TagField(ValidTags = new [] { "ant!","clwd" })]
             public CachedTag Type;
-            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
         }
         
         [TagStructure(Size = 0x18)]
         public class ObjectChangeColors : TagStructure
         {
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public List<ObjectChangeColorInitialPermutation> InitialPermutations;
             public List<ObjectChangeColorFunction> Functions;
             
@@ -475,6 +471,7 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
         
+        [TagStructure(Size = 0x0)]
         public class GNullBlock : TagStructure
         {
         }
@@ -632,14 +629,14 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagStructure(Size = 0x30)]
         public class ObjectSpawnEffectsBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "effe" })]
             // effect played when this object spawns in MP games
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag MultiplayerSpawnEffect;
-            [TagField(ValidTags = new [] { "effe" })]
             // effect played when this object spawns in Firefight games
-            public CachedTag SurvivalSpawnEffect;
             [TagField(ValidTags = new [] { "effe" })]
+            public CachedTag SurvivalSpawnEffect;
             // effect played when this object spawns in Campaign games
+            [TagField(ValidTags = new [] { "effe" })]
             public CachedTag CampaignSpawnEffect;
         }
         

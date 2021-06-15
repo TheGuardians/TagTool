@@ -18,17 +18,17 @@ namespace TagTool.Tags.Definitions.Gen4
         public int MapId;
         // Used to associate external resources with this map - e.g. PDA camera setting block names.
         public StringId MapName;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // Scenario-specific sound bank.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag ScenarioSoundBank;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // Another scenario-specific sound bank. All will be loaded.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag ScenarioSoundBankNumber2;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // Another scenario-specific sound bank. All will be loaded.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag ScenarioSoundBankNumber3;
-        [TagField(ValidTags = new [] { "sbnk" })]
         // Another scenario-specific sound bank. All will be loaded.
+        [TagField(ValidTags = new [] { "sbnk" })]
         public CachedTag ScenarioSoundBankNumber4;
         // This reverb will be used for inside areas when the listener is outside.
         public StringId InsideReverbName;
@@ -199,13 +199,13 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<HsReferencesBlock> SharedReferences;
         [TagField(ValidTags = new [] { "cfxs" })]
         public CachedTag CameraEffects;
-        [TagField(ValidTags = new [] { "sefc" })]
         // ignores the falloff curves
+        [TagField(ValidTags = new [] { "sefc" })]
         public CachedTag GlobalScreenEffect;
         [TagField(ValidTags = new [] { "ssao" })]
         public CachedTag GlobalSsao;
-        [TagField(ValidTags = new [] { "atgf" })]
         // settings that apply to the entire scenario
+        [TagField(ValidTags = new [] { "atgf" })]
         public CachedTag AtmosphereGlobals;
         [TagField(ValidTags = new [] { "sLdT" })]
         public CachedTag NewLightmaps;
@@ -232,8 +232,8 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "locs" })]
         public CachedTag LocationNameGlobals;
         public List<GarbageCollectionBlock> GarbageCollection;
-        [TagField(ValidTags = new [] { "cusc" })]
         // appears for the player through the scenario
+        [TagField(ValidTags = new [] { "cusc" })]
         public CachedTag HudScreenReference;
         [TagField(ValidTags = new [] { "sdzg" })]
         public CachedTag RequiredResources;
@@ -245,8 +245,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public OrdnanceFlags OrdnanceFlags1;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding4;
-        [TagField(ValidTags = new [] { "scen" })]
         // if set, overrides that in progression globals
+        [TagField(ValidTags = new [] { "scen" })]
         public CachedTag DropPod;
         public int OrdnanceDropCount;
         // zero means unlimited
@@ -511,8 +511,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public float CloudSpeed;
             // cloud movement direction, 0-360 degree
             public float CloudDirection;
-            [TagField(ValidTags = new [] { "bitm" })]
             // red channel is used
+            [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag CloudTexture;
             public short Name;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
@@ -736,8 +736,8 @@ namespace TagTool.Tags.Definitions.Gen4
             // Physics world will include this max point
             public RealPoint3d WorldBoundsMax;
             public List<ScenarioZoneSetLipsyncBlock> LipsyncSounds;
-            [TagField(ValidTags = new [] { "sbnk" })]
             // only for cinematics. If you try to use this for anything else without talking to me, i will stab you in the face
+            [TagField(ValidTags = new [] { "sbnk" })]
             public CachedTag CinematicSoundbank;
             // linear color, must check override flag above to use
             public RealRgbColor SkyClearColor;
@@ -804,6 +804,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public uint ExtraBspFlags;
         }
         
+        [TagStructure(Size = 0x0)]
         public class GNullBlock : TagStructure
         {
         }
@@ -8250,8 +8251,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public StringId Name;
             public SceneFlags Flags;
             public List<AiSceneTriggerBlock> TriggerConditions;
-            [TagField(Length = 0x20, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
             public List<AiSceneRoleBlock> Roles;
             
             [Flags]
@@ -8298,8 +8297,6 @@ namespace TagTool.Tags.Definitions.Gen4
                 public RoleGroupEnum Group;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                [TagField(Length = 0x24, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
                 public List<AiSceneRoleVariantsBlock> RoleVariants;
                 
                 public enum RoleGroupEnum : short
@@ -8919,10 +8916,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public short ZoneSet;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding2;
-            [TagField(Length = 0x24, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding3;
             
             [Flags]
             public enum ScenarioCutsceneCameraFlags : ushort
@@ -9131,8 +9124,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public List<AreaReferenceBlockStruct> SecondaryAreaSet;
             public List<SecondarySetTriggerBlock> SecondarySetTrigger;
             public List<SpecialMovementBlock> SpecialMovement;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding2;
             public List<OrderEndingBlock> OrderEndings;
             
             [Flags]
@@ -9266,8 +9257,6 @@ namespace TagTool.Tags.Definitions.Gen4
                 public OrderEndingDialogueEnum DialogueType;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
                 public List<TriggerReferences> Triggers;
                 
                 public enum CombinationRulesEnum : short
@@ -9322,8 +9311,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public CombinationRulesEnum CombinationRule;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            [TagField(Length = 0x18, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
             public List<OrderCompletionCondition> Conditions;
             
             [Flags]
@@ -9345,25 +9332,15 @@ namespace TagTool.Tags.Definitions.Gen4
                 public short Squad;
                 public short SquadGroup;
                 public short A;
-                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
                 public float X;
-                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
                 public short TriggerVolume;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding3;
-                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding4;
+                public byte[] Padding;
                 [TagField(Length = 32)]
                 public string ExitConditionScript;
                 public short ScriptIndex;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding5;
-                [TagField(Length = 0x24, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding6;
+                public byte[] Padding1;
                 public CompletionConditionFlags Flags;
                 
                 public enum ConditionTypeEnum : short
@@ -9431,14 +9408,14 @@ namespace TagTool.Tags.Definitions.Gen4
             {
                 [TagField(ValidTags = new [] { "lsnd" })]
                 public CachedTag BackgroundSound;
-                [TagField(ValidTags = new [] { "lsnd" })]
                 // plays when rain is active, weather rate gets applied to scale.
+                [TagField(ValidTags = new [] { "lsnd" })]
                 public CachedTag WeatherSound;
-                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 // plays when entering this area
-                public CachedTag EntrySound;
                 [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
+                public CachedTag EntrySound;
                 // plays when leaving this area
+                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 public CachedTag ExitSound;
                 public float CutoffDistance;
                 public float InterpolationTime; // seconds
@@ -9473,8 +9450,8 @@ namespace TagTool.Tags.Definitions.Gen4
         public class ScenarioCameraFxPaletteBlock : TagStructure
         {
             public StringId Name;
-            [TagField(ValidTags = new [] { "cfxs" })]
             // if empty, uses default
+            [TagField(ValidTags = new [] { "cfxs" })]
             public CachedTag ClusterCameraFxTag; // if empty, uses default
             public CameraFxPaletteFlags Flags;
             [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
@@ -11384,11 +11361,11 @@ namespace TagTool.Tags.Definitions.Gen4
                 {
                     public ScenarioPerformanceFragmentPlacementDefinition FragmentPlacement;
                     public ScenarioPerformanceFragmentType FragmentType;
-                    [TagField(Length = 256)]
                     // maximum 256 characters, type just branch condition (with brackets) in case of branches
-                    public string Fragment;
                     [TagField(Length = 256)]
+                    public string Fragment;
                     // the script to branch to (with any arguments to it). Used only if type is branch
+                    [TagField(Length = 256)]
                     public string BranchTarget;
                     
                     public enum ScenarioPerformanceFragmentPlacementDefinition : short

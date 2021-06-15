@@ -276,8 +276,8 @@ namespace TagTool.Tags.Definitions.Gen4
                 public CachedTag StartEvent;
                 [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 public CachedTag EndEvent;
-                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 // Must clear the effect without any transition - used for exiting levels, etc
+                [TagField(ValidTags = new [] { "scmb","sndo","snd!" })]
                 public CachedTag ImmediateStopEvent;
                 public List<PlatformSoundPlaybackLowpassBlockStruct> LowpassEffect;
                 public List<PlatformSoundPlaybackComponentBlockStruct> SoundComponents;

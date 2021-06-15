@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen4
 {
-    [TagStructure(Name = "effect_scenery", Tag = "efsc")]
+    [TagStructure(Name = "effect_scenery", Tag = "efsc", Size = 0x0)]
     public class EffectScenery : GameObject
     {
     }
