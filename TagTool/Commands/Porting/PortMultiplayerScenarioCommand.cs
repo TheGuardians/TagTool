@@ -476,6 +476,9 @@ namespace TagTool.Commands.Porting
                 // add the prematch camera
                 AddPrematchCamera(scnr, spawnPoint + new RealPoint3d(0, 0, 0.62f), new RealEulerAngles3d());
 
+                // add generic player starting profile
+                AddPlayerStartingProfile(scnr);
+
                 // finalize the scenario
                 destCache.Serialize(destStream, scnrTag, scnr);
             }
@@ -614,6 +617,17 @@ namespace TagTool.Commands.Porting
             });
         }
 
+        private void AddPlayerStartingProfile(Scenario scnr)
+        {
+            scnr.PlayerStartingProfile.Add(new PlayerStartingProfileBlock()
+            {
+                Name = "start_assault",
+                PrimaryWeapon = CacheContext.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap"),
+                PrimaryRoundsLoaded = 32,
+                PrimaryRoundsTotal = 108,
+                StartingFragGrenadeCount = 2
+            });
+        }
 
         private CachedTag CreateOrReplaceTag<T>(GameCache cache, string name) where T : TagStructure
         {
@@ -726,6 +740,7 @@ namespace TagTool.Commands.Porting
                 Scenario.BspAtlas?.Clear();
                 Scenario.CampaignPlayers?.Clear();
                 //Scenario.SoftCeilings?.Clear();
+                Scenario.PlayerStartingProfile?.Clear();
                 Scenario.PlayerStartingLocations?.Clear();
                 //Scenario.TriggerVolumes?.Clear();
                 Scenario.RecordedAnimations?.Clear();
