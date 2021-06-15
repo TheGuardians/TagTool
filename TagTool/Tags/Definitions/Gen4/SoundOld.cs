@@ -464,6 +464,18 @@ namespace TagTool.Tags.Definitions.Gen4
                     public int ResourceSampleOffset;
                     public int ResourceSampleSize;
                     
+                    public enum SoundCompressionEnum : short
+                    {
+                        None,
+                        XboxAdpcm,
+                        ImaAdpcm,
+                        None1,
+                        Wma,
+                        None2,
+                        Xma,
+                        XmaV20
+                    }
+                    
                     public enum SoundLanguageEnum : sbyte
                     {
                         English,

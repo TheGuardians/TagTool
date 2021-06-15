@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "script", Tag = "hsdt", Size = 0x74)]
     public class Script : TagStructure
     {
-        public List<HsSourceFilesBlock> SourceFiles;
+        public List<HsSourceFiles> SourceFiles;
         public List<HsScriptsBlock> Scripts;
         public List<HsGlobalsBlock> Globals;
         public List<HsinstancedVariablesBlock> InstancedVariables;
@@ -19,23 +19,6 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<HsSyntaxDatumBlock> HsSyntaxDatums;
         public byte[] ScriptStringData;
         public List<HsimportManifestBlock> ImportManifest;
-        
-        [TagStructure(Size = 0x38)]
-        public class HsSourceFilesBlock : TagStructure
-        {
-            [TagField(Length = 32)]
-            public string Name;
-            public byte[] Source;
-            public HsSourceFileFlags Flags;
-            
-            [Flags]
-            public enum HsSourceFileFlags : uint
-            {
-                GeneratedAtRuntime = 1 << 0,
-                AiFragments = 1 << 1,
-                AiPerformances = 1 << 2
-            }
-        }
         
         [TagStructure(Size = 0x20)]
         public class HsScriptsBlock : TagStructure

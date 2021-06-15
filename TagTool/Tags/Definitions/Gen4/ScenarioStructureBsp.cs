@@ -300,6 +300,21 @@ namespace TagTool.Tags.Definitions.Gen4
             public class ClusterTableBlock : TagStructure
             {
                 public List<SuperNodeMappingsBlock> SuperNodeMappings;
+                
+                [TagStructure(Size = 0x40)]
+                public class SuperNodeMappingsBlock : TagStructure
+                {
+                    [TagField(Length = 31)]
+                    public SuperNodeMappingIndexArray[]  Indices;
+                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                    public byte[] Padding;
+                    
+                    [TagStructure(Size = 0x2)]
+                    public class SuperNodeMappingIndexArray : TagStructure
+                    {
+                        public short Index;
+                    }
+                }
             }
         }
         
@@ -1050,6 +1065,14 @@ namespace TagTool.Tags.Definitions.Gen4
                 public Bounds<float> BoundsY;
                 public Bounds<float> BoundsZ;
                 public RealArgbColor Color;
+                
+                public enum ErrorReportTypes : sbyte
+                {
+                    Silent,
+                    Comment,
+                    Warning,
+                    Error
+                }
                 
                 public enum ErrorReportSource : sbyte
                 {

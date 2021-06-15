@@ -49,16 +49,16 @@ namespace TagTool.Tags.Definitions.Gen4
             public RealRgbColor ShadowColor;
             public MidnightDynamicShadowQualityModes DynamicShadowQuality;
             public MidnightBooleanEnum Shadows;
-            public MidnightBooleanEnum ScreenspaceLight;
-            public MidnightBooleanEnum IgnoreDynamicObjects;
+            public MidnightBooleanEnum1 ScreenspaceLight;
+            public MidnightBooleanEnum1 IgnoreDynamicObjects;
             // This should only be turned on if you have light linking data correctly setup
-            public MidnightBooleanEnum CinemaObjectsOnly;
-            public MidnightBooleanEnum CinemaOnly;
-            public MidnightBooleanEnum CinemaExclude;
+            public MidnightBooleanEnum1 CinemaObjectsOnly;
+            public MidnightBooleanEnum1 CinemaOnly;
+            public MidnightBooleanEnum1 CinemaExclude;
             [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            public MidnightBooleanEnum SpecularContribution;
-            public MidnightBooleanEnum DiffuseContribution;
+            public MidnightBooleanEnum1 SpecularContribution;
+            public MidnightBooleanEnum1 DiffuseContribution;
             // Bitmap file for spotlight. Cube map for point light. Gobo bitmap must be synced to xbox.
             [TagField(ValidTags = new [] { "bitm" })]
             public CachedTag GoboTagPath;
@@ -113,6 +113,12 @@ namespace TagTool.Tags.Definitions.Gen4
             }
             
             public enum MidnightBooleanEnum : short
+            {
+                Off,
+                On
+            }
+            
+            public enum MidnightBooleanEnum1 : sbyte
             {
                 Off,
                 On

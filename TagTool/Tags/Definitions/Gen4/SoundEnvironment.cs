@@ -33,7 +33,7 @@ namespace TagTool.Tags.Definitions.Gen4
             // for hf values, what frequency defines hf, from 20 to 20,000
             public float HfReference; // Hz
             // Name of the environment from WWise. This will be a DSP effect with Environmental Effect checked.
-            public StringId EnvironmentName;
+            public uint EnvironmentName;
             // 0 to 1 with 0 being none, and 1 being full.
             public float DryMixValue;
             // 0 to 1 with 0 being none, and 1 being full.

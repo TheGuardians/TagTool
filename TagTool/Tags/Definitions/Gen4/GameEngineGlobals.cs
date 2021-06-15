@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions.Gen4
             // for more info.
             public StringId DisplayString;
             public GameEngineEventInputEnum RequiredField;
-            public GameEngineEventInputEnum ExcludedAudience;
+            public GameEngineEventInputEnum1 ExcludedAudience;
             public GameEngineEventSplitscreenSuppressionEnum SplitscreenSuppression;
             public GameEngineEventFlags Flags;
             // This string can use a bunch of neat tokens for substitution of runtime data (e.g. player names).  See an engineer
@@ -71,6 +71,16 @@ namespace TagTool.Tags.Definitions.Gen4
                 CauseTeam,
                 EffectPlayer,
                 EffectTeam
+            }
+            
+            [Flags]
+            public enum GameEngineEventInputEnum1 : byte
+            {
+                None = 1 << 0,
+                CausePlayer = 1 << 1,
+                CauseTeam = 1 << 2,
+                EffectPlayer = 1 << 3,
+                EffectTeam = 1 << 4
             }
             
             public enum GameEngineEventSplitscreenSuppressionEnum : sbyte

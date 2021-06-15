@@ -516,29 +516,9 @@ namespace TagTool.Tags.Definitions.Gen4
                 [TagStructure(Size = 0x28)]
                 public class EmitterglobalForceBlock : TagStructure
                 {
-                    public EffectGlobalForceStruct GlobalForce;
+                    public EffectGlobalForce GlobalForce;
                     public RealVector3d Offset;
                     public RealVector3d Direction;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class EffectGlobalForceStruct : TagStructure
-                    {
-                        public GlobalforceFlags Flags;
-                        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                        public byte[] Padding;
-                        // positive pushes out, negative pulls in
-                        public float ForceStrength;
-                        // doesn't work on cylinders, due to shader constant constraints
-                        public float SphereFalloffBegin; // wus
-                        // doesn't work on cylinders, due to shader constant constraints
-                        public float SphereFalloffEnd; // wus
-                        
-                        [Flags]
-                        public enum GlobalforceFlags : byte
-                        {
-                            IsInfinitelyLongCylinder = 1 << 0
-                        }
-                    }
                 }
                 
                 [TagStructure(Size = 0x10)]

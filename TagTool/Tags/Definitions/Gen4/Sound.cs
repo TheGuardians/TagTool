@@ -14,11 +14,11 @@ namespace TagTool.Tags.Definitions.Gen4
         public SoundImportFlags ImportFlags;
         public SoundXsyncFlags XsyncFlags;
         // Sound event name.
-        public StringId EventName;
+        public uint EventName;
         // Optional sound event name for player only.
-        public StringId PlayerEventName;
+        public uint PlayerEventName;
         // Fallback sound event if the others don't play - should be an a guaranteed bank.
-        public StringId FallbackEventName;
+        public uint FallbackEventName;
         public float MaxRadius;
         // Max duration of this event. Enter manually for now - will auto-fill later.
         public float MaxDuration;

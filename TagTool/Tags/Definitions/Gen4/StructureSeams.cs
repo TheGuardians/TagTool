@@ -100,6 +100,14 @@ namespace TagTool.Tags.Definitions.Gen4
                 public Bounds<float> BoundsZ;
                 public RealArgbColor Color;
                 
+                public enum ErrorReportTypes : sbyte
+                {
+                    Silent,
+                    Comment,
+                    Warning,
+                    Error
+                }
+                
                 public enum ErrorReportSource : sbyte
                 {
                     None,

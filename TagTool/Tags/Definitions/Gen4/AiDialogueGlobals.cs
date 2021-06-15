@@ -230,7 +230,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public SpatialRelationEnum SpeakerCausePosition;
             public DialogueConditionFlags Conditions;
             // with respect to the subject, the cause is ...
-            public SpatialRelationEnum SpatialRelation;
+            public SpatialRelationEnum1 SpatialRelation;
             public DamageEnum DamageType;
             public GameTypeEnum GameType;
             public ActorTypeEnum SubjectActorType;
@@ -569,6 +569,22 @@ namespace TagTool.Tags.Definitions.Gen4
                 NoVehicle = 1 << 10,
                 VehicleDriver = 1 << 11,
                 VehiclePassenger = 1 << 12
+            }
+            
+            public enum SpatialRelationEnum1 : short
+            {
+                None,
+                VeryNear,
+                Near,
+                MediumRange,
+                Far,
+                VeryFar,
+                InFrontOf,
+                Behind,
+                Above,
+                Below,
+                Few,
+                InRange
             }
             
             public enum DamageEnum : short
