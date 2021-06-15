@@ -944,7 +944,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public short ScenarioDatumIndex;
         }
         
-        [TagStructure(Size = 0x180)]
+        [TagStructure(Size = 0x17C)]
         public class ScenarioSceneryBlock : TagStructure
         {
             public short Type;
@@ -953,294 +953,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioSceneryDatumStructV4 SceneryData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x14)]
             public class ScenarioSceneryDatumStructV4 : TagStructure
@@ -1427,7 +1139,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x174)]
+        [TagStructure(Size = 0x170)]
         public class ScenarioBipedBlock : TagStructure
         {
             public short Type;
@@ -1436,294 +1148,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioUnitStruct UnitData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioUnitStruct : TagStructure
@@ -1892,7 +1316,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x184)]
+        [TagStructure(Size = 0x180)]
         public class ScenarioVehicleBlock : TagStructure
         {
             public short Type;
@@ -1902,294 +1326,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioUnitStruct UnitData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
             public ScenarioVehicleDatumStruct VehicleData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioUnitStruct : TagStructure
@@ -2383,7 +1519,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x158)]
+        [TagStructure(Size = 0x154)]
         public class ScenarioEquipmentBlock : TagStructure
         {
             public short Type;
@@ -2391,273 +1527,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectDatumStruct ObjectData;
             public ScenarioEquipmentDatumStruct EquipmentData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
+
             [TagStructure(Size = 0x4)]
             public class ScenarioEquipmentDatumStruct : TagStructure
             {
@@ -2824,7 +1694,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x174)]
+        [TagStructure(Size = 0x170)]
         public class ScenarioWeaponBlock : TagStructure
         {
             public short Type;
@@ -2833,294 +1703,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioWeaponDatumStruct WeaponData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioWeaponDatumStruct : TagStructure
@@ -3308,7 +1890,7 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
         
-        [TagStructure(Size = 0x188)]
+        [TagStructure(Size = 0x184)]
         public class ScenarioMachineBlock : TagStructure
         {
             public short Type;
@@ -3318,294 +1900,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioDeviceStruct DeviceData;
             public ScenarioMachineStructV3 MachineData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioDeviceStruct : TagStructure
@@ -3817,7 +2111,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0xC4)]
+        [TagStructure(Size = 0xC0)]
         public class ScenarioTerminalBlock : TagStructure
         {
             public short Type;
@@ -3826,294 +2120,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioDeviceStruct DeviceData;
             public ScenarioTerminalStruct TerminalData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioDeviceStruct : TagStructure
@@ -4148,7 +2154,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x180)]
+        [TagStructure(Size = 0x17C)]
         public class ScenarioControlBlock : TagStructure
         {
             public short Type;
@@ -4158,294 +2164,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioDeviceStruct DeviceData;
             public ScenarioControlStruct ControlData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioDeviceStruct : TagStructure
@@ -4644,7 +2362,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x178)]
+        [TagStructure(Size = 0x174)]
         public class ScenarioDispenserBlock : TagStructure
         {
             public short Type;
@@ -4654,294 +2372,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioDeviceStruct DeviceData;
             public ScenarioDispenserStruct DispenserData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioDeviceStruct : TagStructure
@@ -5128,279 +2558,13 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0xD4)]
+        [TagStructure(Size = 0xD0)]
         public class ScenarioSoundSceneryBlock : TagStructure
         {
             public short Type;
             public short Name;
             public ScenarioObjectDatumStruct ObjectData;
             public SoundSceneryDatumStruct SoundScenery;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
             
             [TagStructure(Size = 0x34)]
             public class SoundSceneryDatumStruct : TagStructure
@@ -5448,7 +2612,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0xD0)]
+        [TagStructure(Size = 0xCC)]
         public class ScenarioGiantBlock : TagStructure
         {
             public short Type;
@@ -5457,294 +2621,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioUnitStruct UnitData;
             public ScenarioGiantDatumStruct GiantData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x8)]
             public class ScenarioUnitStruct : TagStructure
@@ -5794,7 +2670,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0x158)]
+        [TagStructure(Size = 0x154)]
         public class ScenarioEffectSceneryBlock : TagStructure
         {
             public short Type;
@@ -5802,272 +2678,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectDatumStruct ObjectData;
             public ScenarioEffectSceneryDatumStruct EffectSceneryData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
             
             [TagStructure(Size = 0x4)]
             public class ScenarioEffectSceneryDatumStruct : TagStructure
@@ -6227,7 +2837,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public CachedTag Name;
         }
         
-        [TagStructure(Size = 0xC0)]
+        [TagStructure(Size = 0xBC)]
         public class ScenarioSpawnerBlock : TagStructure
         {
             public short Type;
@@ -6236,294 +2846,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioEntityStruct EntityData;
             public ScenarioSpawnerStruct SpawnerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x4)]
             public class ScenarioEntityStruct : TagStructure
@@ -9548,7 +5870,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public float GameObjectResetHeight;
         }
         
-        [TagStructure(Size = 0x17C)]
+        [TagStructure(Size = 0x178)]
         public class ScenarioCrateBlock : TagStructure
         {
             public short Type;
@@ -9557,294 +5879,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public ScenarioObjectPermutationStruct PermutationData;
             public ScenarioCrateDatumStruct CrateData;
             public ScenarioMultiplayerObjectStruct MultiplayerData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
-            
-            [TagStructure(Size = 0x18)]
-            public class ScenarioObjectPermutationStruct : TagStructure
-            {
-                public StringId VariantName;
-                public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ArgbColor PrimaryColor;
-                public ArgbColor SecondaryColor;
-                public ArgbColor TertiaryColor;
-                public ArgbColor QuaternaryColor;
-                
-                [Flags]
-                public enum ScenarioObjectActiveChangeColorFlags : byte
-                {
-                    Primary = 1 << 0,
-                    Secondary = 1 << 1,
-                    Tertiary = 1 << 2,
-                    Quaternary = 1 << 3
-                }
-            }
             
             [TagStructure(Size = 0x10)]
             public class ScenarioCrateDatumStruct : TagStructure
@@ -10122,279 +6156,13 @@ namespace TagTool.Tags.Definitions.Gen4
             public int Tagindex;
             public StringId Subtitlename;
         }
-        
-        [TagStructure(Size = 0xA0)]
+
+        [TagStructure(Size = 0x9C)]
         public class ScenarioCreatureBlock : TagStructure
         {
             public short Type;
             public short Name;
             public ScenarioObjectDatumStruct ObjectData;
-            
-            [TagStructure(Size = 0x9C)]
-            public class ScenarioObjectDatumStruct : TagStructure
-            {
-                public ObjectLocationPlacementFlags PlacementFlags;
-                public RealPoint3d Position;
-                public RealEulerAngles3d Rotation;
-                public float Scale;
-                public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
-                public float GravityOverride;
-                public ObjectGravityFlags GravityFlags;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
-                public ScenarioobjectScriptFlags ScriptFlags;
-                public List<ScriptlistBlock> ForceEnabledScripts;
-                public List<ScriptlistBlock> DisabledScripts;
-                public ManualbspFlagsReferences ManualBspFlags;
-                public ObjectTransformFlags TransformFlags;
-                public NavMeshCuttingOverrideEnum NavMeshCutting;
-                public BooleanOverrideEnum NavMeshObstacle;
-                public ObjectNavmeshFlags NavMeshFlags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
-                public StringId LightAirprobeName;
-                public ScenarioObjectIdStruct ObjectId;
-                public ChanneldefinitionFlags LightChannels;
-                public short EditorFolder;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
-                public ScenarioObjectParentStruct ParentId;
-                public uint CanAttachToBspFlags;
-                // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
-                public float DirectionalAccelerationMult;
-                public List<CommandlinkBlock> CommandLinks;
-                
-                [Flags]
-                public enum ObjectLocationPlacementFlags : uint
-                {
-                    NotAutomatically = 1 << 0,
-                    Unused0 = 1 << 1,
-                    Unused1 = 1 << 2,
-                    Unused2 = 1 << 3,
-                    LockTypeToEnvObject = 1 << 4,
-                    LockTransformToEnvObject = 1 << 5,
-                    NeverPlaced = 1 << 6,
-                    LockNameToEnvObject = 1 << 7,
-                    CreateAtRest = 1 << 8,
-                    StoreOrientations = 1 << 9,
-                    PvsBound = 1 << 10,
-                    Startup = 1 << 11,
-                    AttachPhysically = 1 << 12,
-                    AttachWithScale = 1 << 13,
-                    NoParentLighting = 1 << 14
-                }
-                
-                [Flags]
-                public enum ObjectGravityFlags : byte
-                {
-                    ApplyOverride = 1 << 0,
-                    ApplyToChildrenAlso = 1 << 1
-                }
-                
-                public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
-                {
-                    Default,
-                    AlwaysPlaced,
-                    ManualBspPlacement
-                }
-                
-                [Flags]
-                public enum ScenarioobjectScriptFlags : byte
-                {
-                    ScriptsDisabled = 1 << 0,
-                    UseOverrideLists = 1 << 1,
-                    ScriptsAlwaysRun = 1 << 2
-                }
-                
-                [Flags]
-                public enum ObjectTransformFlags : ushort
-                {
-                    Mirrored = 1 << 0
-                }
-                
-                public enum NavMeshCuttingOverrideEnum : sbyte
-                {
-                    Default,
-                    Cut,
-                    NotCut
-                }
-                
-                public enum BooleanOverrideEnum : sbyte
-                {
-                    Default,
-                    Yes,
-                    No
-                }
-                
-                [Flags]
-                public enum ObjectNavmeshFlags : byte
-                {
-                    ChildrenInheritNavmeshInteraction = 1 << 0,
-                    NavmeshAlwaysLoaded = 1 << 1
-                }
-                
-                [Flags]
-                public enum ChanneldefinitionFlags : uint
-                {
-                    _0 = 1 << 0,
-                    _1 = 1 << 1,
-                    _2 = 1 << 2,
-                    _3 = 1 << 3,
-                    _4 = 1 << 4,
-                    _5 = 1 << 5,
-                    _6 = 1 << 6,
-                    _7 = 1 << 7,
-                    _8 = 1 << 8,
-                    _9 = 1 << 9,
-                    _10 = 1 << 10,
-                    _11 = 1 << 11,
-                    _12 = 1 << 12,
-                    _13 = 1 << 13,
-                    _14 = 1 << 14,
-                    _15 = 1 << 15,
-                    _16 = 1 << 16,
-                    _17 = 1 << 17,
-                    _18 = 1 << 18,
-                    _19 = 1 << 19,
-                    _20 = 1 << 20,
-                    _21 = 1 << 21,
-                    _22 = 1 << 22,
-                    _23 = 1 << 23,
-                    _24 = 1 << 24,
-                    _25 = 1 << 25,
-                    _26 = 1 << 26,
-                    _27 = 1 << 27,
-                    _28 = 1 << 28,
-                    _29 = 1 << 29,
-                    _30 = 1 << 30,
-                    _31 = 1u << 31
-                }
-                
-                [TagStructure(Size = 0x1C)]
-                public class ScenarioObjectNodeOrientationsBlock : TagStructure
-                {
-                    public short NodeCount;
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
-                    public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
-                    
-                    [TagStructure(Size = 0x1)]
-                    public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
-                    {
-                        public byte Data;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
-                    {
-                        public short Number;
-                    }
-                }
-                
-                [TagStructure(Size = 0x4)]
-                public class ScriptlistBlock : TagStructure
-                {
-                    public StringId ScriptName;
-                }
-                
-                [TagStructure(Size = 0x10)]
-                public class ManualbspFlagsReferences : TagStructure
-                {
-                    public List<ScenariobspReferenceBlock> ReferencesBlock;
-                    public int Flags;
-                    
-                    [TagStructure(Size = 0x10)]
-                    public class ScenariobspReferenceBlock : TagStructure
-                    {
-                        [TagField(ValidTags = new [] { "sbsp" })]
-                        public CachedTag StructureDesign;
-                    }
-                }
-                
-                [TagStructure(Size = 0x8)]
-                public class ScenarioObjectIdStruct : TagStructure
-                {
-                    public int UniqueId;
-                    public short OriginBspIndex;
-                    public ObjectTypeEnum Type;
-                    public ObjectSourceEnum Source;
-                    
-                    public enum ObjectTypeEnum : sbyte
-                    {
-                        Biped,
-                        Vehicle,
-                        Weapon,
-                        Equipment,
-                        Terminal,
-                        Projectile,
-                        Scenery,
-                        Machine,
-                        Control,
-                        Dispenser,
-                        SoundScenery,
-                        Crate,
-                        Creature,
-                        Giant,
-                        EffectScenery,
-                        Spawner
-                    }
-                    
-                    public enum ObjectSourceEnum : sbyte
-                    {
-                        Structure,
-                        Editor,
-                        Dynamic,
-                        Legacy,
-                        Sky,
-                        Parent
-                    }
-                }
-                
-                [TagStructure(Size = 0xC)]
-                public class ScenarioObjectParentStruct : TagStructure
-                {
-                    [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
-                    // if an object with this name exists, we attach to it as a child
-                    public short ParentObject;
-                    public StringId ParentMarker;
-                    public StringId ConnectionMarker;
-                }
-                
-                [TagStructure(Size = 0x14)]
-                public class CommandlinkBlock : TagStructure
-                {
-                    public InternalEventEnum Trigger;
-                    public int Target;
-                    public CommandEventEnum Command;
-                    public float Delay;
-                    public CommandlinkFlags Flags;
-                    
-                    public enum InternalEventEnum : int
-                    {
-                        OnBirth,
-                        OnDeath,
-                        OnInteract,
-                        OnInitSpawnerShard,
-                        OnInitKnightTaint
-                    }
-                    
-                    public enum CommandEventEnum : int
-                    {
-                        Interact,
-                        InitShardSpawn,
-                        InitKnightTaint
-                    }
-                    
-                    [Flags]
-                    public enum CommandlinkFlags : uint
-                    {
-                        FireOnce = 1 << 0
-                    }
-                }
-            }
         }
         
         [TagStructure(Size = 0x10)]
@@ -12443,6 +8211,294 @@ namespace TagTool.Tags.Definitions.Gen4
             // Value between 0.0 and 1.0 determines which line to use for tint.
             // A negative value will choose a random tint from the palette.
             public float TintGradientLookupVCoordinate;
+        }
+    }
+
+    [TagStructure(Size = 0x98)]
+    public class ScenarioObjectDatumStruct : TagStructure
+    {
+        public ObjectLocationPlacementFlags PlacementFlags;
+        public RealPoint3d Position;
+        public RealEulerAngles3d Rotation;
+        public float Scale;
+        public List<ScenarioObjectNodeOrientationsBlock> NodeOrientations;
+        public float GravityOverride;
+        public ObjectGravityFlags GravityFlags;
+        [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public ScenarioObjectBspPlacementPolicyDefinition BspPolicy;
+        public ScenarioobjectScriptFlags ScriptFlags;
+        public List<ScriptlistBlock> ForceEnabledScripts;
+        public List<ScriptlistBlock> DisabledScripts;
+        public ManualbspFlagsReferences ManualBspFlags;
+        public ObjectTransformFlags TransformFlags;
+        public NavMeshCuttingOverrideEnum NavMeshCutting;
+        public BooleanOverrideEnum NavMeshObstacle;
+        public ObjectNavmeshFlags NavMeshFlags;
+        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+        public StringId LightAirprobeName;
+        public ScenarioObjectIdStruct ObjectId;
+        public ChanneldefinitionFlags LightChannels;
+        public short EditorFolder;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
+        public ScenarioObjectParentStruct ParentId;
+        public uint CanAttachToBspFlags;
+        // Multiplier applied to all phantoms' direction acceleration factors.  Used to scale man-cannon strength.
+        public float DirectionalAccelerationMult;
+        public List<CommandlinkBlock> CommandLinks;
+
+        [Flags]
+        public enum ObjectLocationPlacementFlags : uint
+        {
+            NotAutomatically = 1 << 0,
+            Unused0 = 1 << 1,
+            Unused1 = 1 << 2,
+            Unused2 = 1 << 3,
+            LockTypeToEnvObject = 1 << 4,
+            LockTransformToEnvObject = 1 << 5,
+            NeverPlaced = 1 << 6,
+            LockNameToEnvObject = 1 << 7,
+            CreateAtRest = 1 << 8,
+            StoreOrientations = 1 << 9,
+            PvsBound = 1 << 10,
+            Startup = 1 << 11,
+            AttachPhysically = 1 << 12,
+            AttachWithScale = 1 << 13,
+            NoParentLighting = 1 << 14
+        }
+
+        [Flags]
+        public enum ObjectGravityFlags : byte
+        {
+            ApplyOverride = 1 << 0,
+            ApplyToChildrenAlso = 1 << 1
+        }
+
+        public enum ScenarioObjectBspPlacementPolicyDefinition : sbyte
+        {
+            Default,
+            AlwaysPlaced,
+            ManualBspPlacement
+        }
+
+        [Flags]
+        public enum ScenarioobjectScriptFlags : byte
+        {
+            ScriptsDisabled = 1 << 0,
+            UseOverrideLists = 1 << 1,
+            ScriptsAlwaysRun = 1 << 2
+        }
+
+        [Flags]
+        public enum ObjectTransformFlags : ushort
+        {
+            Mirrored = 1 << 0
+        }
+
+        public enum NavMeshCuttingOverrideEnum : sbyte
+        {
+            Default,
+            Cut,
+            NotCut
+        }
+
+        public enum BooleanOverrideEnum : sbyte
+        {
+            Default,
+            Yes,
+            No
+        }
+
+        [Flags]
+        public enum ObjectNavmeshFlags : byte
+        {
+            ChildrenInheritNavmeshInteraction = 1 << 0,
+            NavmeshAlwaysLoaded = 1 << 1
+        }
+
+        [Flags]
+        public enum ChanneldefinitionFlags : uint
+        {
+            _0 = 1 << 0,
+            _1 = 1 << 1,
+            _2 = 1 << 2,
+            _3 = 1 << 3,
+            _4 = 1 << 4,
+            _5 = 1 << 5,
+            _6 = 1 << 6,
+            _7 = 1 << 7,
+            _8 = 1 << 8,
+            _9 = 1 << 9,
+            _10 = 1 << 10,
+            _11 = 1 << 11,
+            _12 = 1 << 12,
+            _13 = 1 << 13,
+            _14 = 1 << 14,
+            _15 = 1 << 15,
+            _16 = 1 << 16,
+            _17 = 1 << 17,
+            _18 = 1 << 18,
+            _19 = 1 << 19,
+            _20 = 1 << 20,
+            _21 = 1 << 21,
+            _22 = 1 << 22,
+            _23 = 1 << 23,
+            _24 = 1 << 24,
+            _25 = 1 << 25,
+            _26 = 1 << 26,
+            _27 = 1 << 27,
+            _28 = 1 << 28,
+            _29 = 1 << 29,
+            _30 = 1 << 30,
+            _31 = 1u << 31
+        }
+
+        [TagStructure(Size = 0x1C)]
+        public class ScenarioObjectNodeOrientationsBlock : TagStructure
+        {
+            public short NodeCount;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<ScenarioObjectNodeOrientationsBitVectorBlock> BitVector;
+            public List<ScenarioObjectNodeOrientationsOrientationsBlock> Orientations;
+
+            [TagStructure(Size = 0x1)]
+            public class ScenarioObjectNodeOrientationsBitVectorBlock : TagStructure
+            {
+                public byte Data;
+            }
+
+            [TagStructure(Size = 0x2)]
+            public class ScenarioObjectNodeOrientationsOrientationsBlock : TagStructure
+            {
+                public short Number;
+            }
+        }
+
+        [TagStructure(Size = 0x4)]
+        public class ScriptlistBlock : TagStructure
+        {
+            public StringId ScriptName;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class ManualbspFlagsReferences : TagStructure
+        {
+            public List<ScenariobspReferenceBlock> ReferencesBlock;
+            public int Flags;
+
+            [TagStructure(Size = 0x10)]
+            public class ScenariobspReferenceBlock : TagStructure
+            {
+                [TagField(ValidTags = new[] { "sbsp" })]
+                public CachedTag StructureDesign;
+            }
+        }
+
+        [TagStructure(Size = 0x8)]
+        public class ScenarioObjectIdStruct : TagStructure
+        {
+            public int UniqueId;
+            public short OriginBspIndex;
+            public ObjectTypeEnum Type;
+            public ObjectSourceEnum Source;
+
+            public enum ObjectTypeEnum : sbyte
+            {
+                Biped,
+                Vehicle,
+                Weapon,
+                Equipment,
+                Terminal,
+                Projectile,
+                Scenery,
+                Machine,
+                Control,
+                Dispenser,
+                SoundScenery,
+                Crate,
+                Creature,
+                Giant,
+                EffectScenery,
+                Spawner
+            }
+
+            public enum ObjectSourceEnum : sbyte
+            {
+                Structure,
+                Editor,
+                Dynamic,
+                Legacy,
+                Sky,
+                Parent
+            }
+        }
+
+        [TagStructure(Size = 0xC)]
+        public class ScenarioObjectParentStruct : TagStructure
+        {
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            // if an object with this name exists, we attach to it as a child
+            public short ParentObject;
+            public StringId ParentMarker;
+            public StringId ConnectionMarker;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class CommandlinkBlock : TagStructure
+        {
+            public InternalEventEnum Trigger;
+            public int Target;
+            public CommandEventEnum Command;
+            public float Delay;
+            public CommandlinkFlags Flags;
+
+            public enum InternalEventEnum : int
+            {
+                OnBirth,
+                OnDeath,
+                OnInteract,
+                OnInitSpawnerShard,
+                OnInitKnightTaint
+            }
+
+            public enum CommandEventEnum : int
+            {
+                Interact,
+                InitShardSpawn,
+                InitKnightTaint
+            }
+
+            [Flags]
+            public enum CommandlinkFlags : uint
+            {
+                FireOnce = 1 << 0
+            }
+        }
+    }
+
+    [TagStructure(Size = 0x18)]
+    public class ScenarioObjectPermutationStruct : TagStructure
+    {
+        public StringId VariantName;
+        public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
+        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        public ArgbColor PrimaryColor;
+        public ArgbColor SecondaryColor;
+        public ArgbColor TertiaryColor;
+        public ArgbColor QuaternaryColor;
+
+        [Flags]
+        public enum ScenarioObjectActiveChangeColorFlags : byte
+        {
+            Primary = 1 << 0,
+            Secondary = 1 << 1,
+            Tertiary = 1 << 2,
+            Quaternary = 1 << 3
         }
     }
 }

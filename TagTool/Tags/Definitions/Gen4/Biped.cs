@@ -803,7 +803,7 @@ namespace TagTool.Tags.Definitions.Gen4
             // Function to drive the RTPC
             public StringId Function;
             // WWise RTPC string name
-            public StringId RtpcName;
+            public uint RtpcName;
         }
         
         [TagStructure(Size = 0x1C)]
