@@ -281,8 +281,7 @@ namespace TagTool.Tags.Definitions.Gen4
                 public PlayerTraitWaypoint Waypoint;
                 public PlayerTraitWaypoint GamertagVisible;
                 public PlayerTraitAura Aura;
-                [TagField(Length = 32)]
-                public string DeathEffect;
+                public StringId DeathEffect;
                 public StringId AttachedEffect;
                 
                 public enum PlayerTraitActiveCamo : sbyte

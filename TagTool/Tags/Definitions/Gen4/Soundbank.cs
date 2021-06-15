@@ -56,7 +56,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public class SoundBankBlock : TagStructure
         {
             // Name of the main sound bank.
-            public StringId SoundBankName;
+            public uint SoundBankName;
         }
     }
 }
