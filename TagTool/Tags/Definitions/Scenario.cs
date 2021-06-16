@@ -983,6 +983,28 @@ namespace TagTool.Tags.Definitions
             public short Unknown;
         }
 
+        [Flags]
+        public enum ScenarioDeviceFlags : int
+        {
+            None = 0,
+            InitiallyOpen = 1 << 0,
+            InitiallyOff = 1 << 1,
+            CanOnlyChangeOnce = 1 << 2,
+            PositionReversed = 1 << 3,
+            NotUsableFromAnySide = 1 << 4,
+            ClosesWithoutPower = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7,
+            Bit8 = 1 << 8,
+            Bit9 = 1 << 9,
+            Bit10 = 1 << 10,
+            Bit11 = 1 << 11,
+            Bit12 = 1 << 12,
+            Bit13 = 1 << 13,
+            Bit14 = 1 << 14,
+            Bit15 = 1 << 15
+        }
+
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnline106708)]
@@ -1013,11 +1035,33 @@ namespace TagTool.Tags.Definitions
 
             public short PowerGroup;
             public short PositionGroup;
-            public uint DeviceFlags;
-            public uint MachineFlags;
+            public ScenarioDeviceFlags DeviceFlags;
+            public ScenarioMachineFlags MachineFlags;
             public List<PathfindingReference> PathfindingReferences;
             public PathfindingPolicyValue PathfindingPolicy;
             public short Unknown11;
+
+            [Flags]
+            public enum ScenarioMachineFlags : int
+            {
+                None = 0,
+                DoesNotOperateAutomatically = 1 << 0,
+                OneSided = 1 << 1,
+                NeverAppearsLocked = 1 << 2,
+                OpenedByMeleeAttack = 1 << 3,
+                OneSidedForPlayer = 1 << 4,
+                DoesNotCloseAutomatically = 1 << 5,
+                IgnoresPlayer = 1 << 6,
+                IgnoresAi = 1 << 7,
+                Bit8 = 1 << 8,
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15
+            }
 
             [TagStructure]
             public class PathfindingReference : TagStructure
@@ -1112,10 +1156,24 @@ namespace TagTool.Tags.Definitions
 
             public short PowerGroup;
             public short PositionGroup;
-            public uint DeviceFlags;
-            public uint ControlFlags;
+            public ScenarioDeviceFlags DeviceFlags;
+            public ScenarioControlFlags ControlFlags;
             public short Unknown11;
             public short Unknown12;
+
+            [Flags]
+            public enum ScenarioControlFlags : int
+            {
+                None = 0,
+                UsableFromBothSides = 1 << 0,
+                Bit1 = 1 << 1,
+                Bit2 = 1 << 2,
+                Bit3 = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7
+            }
         }
 
         [TagStructure(Size = 0x1C)]
