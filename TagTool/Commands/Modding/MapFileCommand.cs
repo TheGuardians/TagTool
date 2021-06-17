@@ -123,6 +123,7 @@ namespace TagTool.Commands.Modding
             for (int i = 0; i < Cache.BaseModPackage.MapFileStreams.Count; i++)
             {
                 var mapStream = Cache.BaseModPackage.MapFileStreams[i];
+                mapStream.Position = 0;
                 var mapFile = new MapFile();
                 mapFile.Read(new EndianReader(mapStream));
                 mapStream.Position = 0;

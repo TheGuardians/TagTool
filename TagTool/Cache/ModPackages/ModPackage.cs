@@ -703,8 +703,12 @@ namespace TagTool.Cache
             {
                 StreamUtil.Align(writer.BaseStream, 0x10);
                 uint offset = (uint)(writer.BaseStream.Position - sectionOffset);
+
                 // write the contents
-                fileEntry.Value.CopyTo(writer.BaseStream);
+                var fileStream = fileEntry.Value;
+                fileStream.Position = 0;
+                fileStream.CopyTo(writer.BaseStream);
+                fileStream.Position = 0;
 
                 long endPos = writer.BaseStream.Position;
 
@@ -715,7 +719,7 @@ namespace TagTool.Cache
                 // write the table entry
                 var tableEntry = new FileTableEntry();
                 tableEntry.Path = fileEntry.Key;
-                tableEntry.Size = (uint)fileEntry.Value.Length;
+                tableEntry.Size = (uint)fileStream.Length;
                 tableEntry.Offset = offset;
                 serializer.Serialize(context, tableEntry);
 
