@@ -23,13 +23,14 @@ namespace TagTool.Tags.Definitions
         public CameraFxColor InherentBloomTint;
         public CameraFxColor LightingBloomTint;
 
-        public CameraFxStrength UnknownStrength1;
-        public CameraFxStrength UnknownStrength2;
+        public CameraFxStrength BlingIntensity;
+        public CameraFxStrength BlingSize;
 
-        public UnknownBlock Unknown;
+        public CameraFxStrength BlingAngle;
+        public CameraFxBlingCountStruct BlingCount;
 
-        public CameraFxStrength ConstantLight;
-        public CameraFxStrength DynamicLight;
+        public CameraFxStrength SelfIllumExposure;
+        public CameraFxStrength SelfIllumScale;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public SsaoPropertiesBlock SsaoProperties;
@@ -110,10 +111,10 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock : CameraFxStrength
+        public class CameraFxBlingCountStruct : TagStructure
         {
-            public short Unknown24;
-            public short Unknown25;
+            public FlagsValue Flags;
+            public short BlingSpikes;
         }
 
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
