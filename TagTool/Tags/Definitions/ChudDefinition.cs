@@ -9,11 +9,33 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "chud_definition", Tag = "chdt", Size = 0x18)]
     public class ChudDefinition : TagStructure
-	{
+    {
         public List<HudWidget> HudWidgets;
         public int LowClipCutoff;
         public int LowAmmoCutoff;
         public int AgeCutoff;
+
+        [Flags]
+        public enum WidgetFlags : byte
+        {
+            None,
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3
+        }
+
+        public enum LayerEnum : byte
+        {
+            Layer0,
+            Layer1,
+            Layer2,
+            Layer3,
+            Layer4,
+            Layer5,
+            UseParent,
+            AlwaysShowNoWarping
+        }
 
         [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
@@ -22,8 +44,8 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
-            public byte Unknown;
-            public byte Unknown2;
+            public WidgetFlags Unknown;
+            public LayerEnum Layer;
             public List<StateDatum> StateData;
             public List<PlacementDatum> PlacementData;
             public List<AnimationDatum> AnimationData;
@@ -1400,8 +1422,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(Flags = Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
-                public byte Unknown;
-                public byte Unknown2;
+                public WidgetFlags Unknown;
+                public LayerEnum Layer;
                 public List<StateDatum> StateData;
                 public List<PlacementDatum> PlacementData;
                 public List<AnimationDatum> AnimationData;
@@ -1445,8 +1467,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(Flags = Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
-                public byte Unknown1;
-                public byte Unknown2;
+                public WidgetFlags Unknown;
+                public LayerEnum Layer;
                 public List<StateDatum> StateData;
                 public List<PlacementDatum> PlacementData;
                 public List<AnimationDatum> AnimationData;
