@@ -211,16 +211,13 @@ namespace TagTool.Tags.Definitions
             ConservativelyRagdollAsFallback = 1 << 18
         }
 
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0xC)]
         public class CameraHeightBlock : TagStructure
 		{
             [TagField(Flags = Label)]
             public StringId Class;
             public float StandingHeightFraction;
             public float CrouchingHeightFraction;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
         }
 
         [Flags]
