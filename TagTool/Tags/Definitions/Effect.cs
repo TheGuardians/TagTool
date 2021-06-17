@@ -79,22 +79,26 @@ namespace TagTool.Tags.Definitions
         public class Event : TagStructure
 		{
             public StringId Name;
-            public int Unknown;
+            public EventFlags Flags;
+
+            public enum EventFlags : int
+            {
+                DisabledForDebugging = 1 << 0,
+                ParticlesDieWhenEffectEnds = 1 << 1,
+                LoopEventAgeDurationOverride = 1 << 2
+            }
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown2;
+            public EffectPriority Priority;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte Unknown3;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown5;
+            public short Unknown4;
 
             public float SkipFraction;
-            public float DelayBoundsMin;
-            public float DelayBoundsMax;
-            public float DurationBoundsMin;
-            public float DurationBoundsMax;
+            public Bounds<float> DelayBounds;
+            public Bounds<float> DurationBounds;
 
             public List<Part> Parts;
             public List<Acceleration> Accelerations;
@@ -177,7 +181,28 @@ namespace TagTool.Tags.Definitions
                 public byte[] Unused0;
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public ushort Flags;
+                public ParticleSystemFlags Flags;
+
+                public enum ParticleSystemFlags : ushort
+                {
+                    ParticlesFreezeWhenOffscreen = 1 << 0,
+                    ParticlesContinueAsUsualWhenOffscreen = 1 << 1,
+                    LodAlways1 = 1 << 2,
+                    Bit3 = 1 << 3,
+                    Bit4 = 1 << 4,
+                    DisabledForDebugging = 1 << 5,
+                    InheritEffectVelocity = 1 << 6,
+                    DontRenderSystem = 1 << 7,
+                    RenderWhenZoomed = 1 << 8,
+                    Bit9 = 1 << 9,
+                    Bit10 = 1 << 10,
+                    Bit11 = 1 << 11,
+                    Bit12 = 1 << 12,
+                    Bit13 = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15,
+                }
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public int FlagsReach;
 
@@ -200,7 +225,7 @@ namespace TagTool.Tags.Definitions
 
                 public List<Emitter> Emitters;
 
-                public float Unknown16;
+                public float RuntimeMaximumLifespan;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
 
