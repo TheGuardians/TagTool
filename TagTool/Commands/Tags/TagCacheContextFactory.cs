@@ -121,6 +121,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new NameTagCacheCommand(modCache));
                 context.AddCommand(new UpdateDescriptionCommand(modCache));
                 context.AddCommand(new SetModTypeCommand(modCache));
+                context.AddCommand(new Modding.MapFileCommand(modCache));
             }
 
             // porting related
