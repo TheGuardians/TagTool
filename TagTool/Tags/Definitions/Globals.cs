@@ -82,7 +82,7 @@ namespace TagTool.Tags.Definitions
         public List<FallingDamageBlock> FallingDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> Unknown60;
+        public List<ShieldBoostBlock> ShieldBoost;
 
         public List<Material> Materials;
 
@@ -284,19 +284,19 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<CrosshairLocationBlock> CrosshairLocations;
 
-            //Sprinting
+            //Running
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float SecondsToStart;
+            public float RunStartDelay;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float SecondsToFullSpeed;
+            public float RunFullSpeedTime;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float DecayRate;
+            public float RunDecayRate;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float FullSpeedMultiplier;
+            public float RunFullSpeedMultiplier;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float PeggedMagnitude;
+            public float RunPeggedMagnitude;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float PeggedAngularThreshold;
+            public float RunPeggedAngularThreshold;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Unknown4;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1052,9 +1052,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public float Unknown1;
 
-            public CachedTag Unknown2;
-            public CachedTag Unknown3;
-            public CachedTag Unknown4;
+            public CachedTag CoopCountdownSound;
+            public CachedTag CoopRespawnSound;
+            public CachedTag CoopRespawnEffect;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag Unknown7;
@@ -1063,9 +1063,9 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> BinocularZoomRange;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
+            public float Unknown5;
             [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown6;
+            public float Unknown6;
 
             public CachedTag FlashlightOn;
             public CachedTag FlashlightOff;
@@ -1227,11 +1227,11 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class UnknownBlock : TagStructure //Single block
+        public class ShieldBoostBlock : TagStructure //Single block
 		{
-            public uint Unknown1; //100
-            public uint Unknown2; //1
-            public uint Unknown3; //1
+            public float ShieldBoostDecay; //100
+            public float ShieldBoostRechargeTime; //1
+            public float ShieldBoostStunTime; //1
         }
 
         [Flags]
@@ -1485,7 +1485,7 @@ namespace TagTool.Tags.Definitions
             public List<MultiplierBlock> PrimarySkulls;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<MultiplierBlock> SecondarySkulls;
-            public int Unknown;
+            public int FriendlyDeathPenalty;
             public int DeathPenalty;
             public int BetrayalPenalty;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1494,9 +1494,9 @@ namespace TagTool.Tags.Definitions
             public float EmpWindow;
             
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
+            public float Unknown3;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
+            public float Unknown4;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown5;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]

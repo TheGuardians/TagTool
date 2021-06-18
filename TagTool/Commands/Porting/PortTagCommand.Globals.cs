@@ -45,13 +45,13 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
-                matg.Unknown60 = new List<Globals.UnknownBlock>
+                matg.ShieldBoost = new List<Globals.ShieldBoostBlock>
                 {
-                    new Globals.UnknownBlock
+                    new Globals.ShieldBoostBlock
                     {
-                        Unknown1 = 100,
-                        Unknown2 = 1,
-                        Unknown3 = 1
+                        ShieldBoostDecay = 100,
+                        ShieldBoostRechargeTime = 1,
+                        ShieldBoostStunTime = 1
                     }
                 };
 
