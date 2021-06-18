@@ -235,8 +235,8 @@ namespace TagTool.Geometry.Utils
         private Model GenerateModel(RenderModel renderModel, CollisionModel collisionModel)
         {
             var model = new Model();
-            model.ReduceToL1SuperLow = 300.0f;
-            model.ReduceToL2Low = 280.0f;
+            model.DisappearDistance = 300.0f;
+            model.BeginFadeDistance = 280.0f;
 
             // add the collision regions/permutations
             model.CollisionRegions = new List<Model.CollisionRegion>();
