@@ -94,7 +94,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte Unknown3;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public short Unknown4;
+            public sbyte Unknown4;
 
             public float SkipFraction;
             public Bounds<float> DelayBounds;
