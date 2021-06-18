@@ -484,32 +484,38 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x220, MinVersion = CacheVersion.HaloOnline106708)]
             public class MultiplayerConstant : TagStructure
 			{
-                public float Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public float Unknown5;
-                public float Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float Unknown9;
-                public float Unknown10;
-                public float Unknown11;
-                public float Unknown12;
-                public float Unknown13;
-                public float Unknown14;
-                public float Unknown15;
-                public float Unknown16;
-                public float Unknown17;
-                public float Unknown18;
-                public float Unknown19;
-                public float Unknown20;
-                public float Unknown21;
-                public float Unknown22;
-                public float Unknown23;
-                public float Unknown24;
-                public float Unknown25;
-                public float Unknown26;
+                public float ForbidEnemySpawnFullWeightRadius;
+                public float ForbidEnemySpawnFalloffRadius;
+                public float ForbidEnemySpawnUpperHeight;
+                public float ForbidEnemySpawnLowerHeight;
+                public float ForbidEnemySpawnWeight;
+
+                public float EnemySpawnBiasFullWeightRadius;
+                public float EnemySpawnBiasFalloffRadius;
+                public float EnemySpawnBiasUpperHeight;
+                public float EnemySpawnBiasLowerHeight;
+                public float EnemySpawnBiasWeight;
+
+                public float AllySpawnBiasFullWeightRadius;
+                public float AllySpawnBiasFalloffRadius;
+                public float AllySpawnBiasUpperHeight;
+                public float AllySpawnBiasLowerHeight;
+                public float AllySpawnBiasWeight;
+
+                public float SpectatedAllySpawnBiasFullWeightRadius;
+                public float SpectatedAllySpawnBiasFalloffRadius;
+                public float SpectatedAllySpawnBiasUpperHeight;
+                public float SpectatedAllySpawnBiasLowerHeight;
+                public float SpectatedAllySpawnBiasWeight;
+
+                public float ForbidAllySpawnFullWeightRadius;
+                public float ForbidAllySpawnFalloffRadius;
+                public float ForbidAllySpawnUpperHeight;
+                public float ForbidAllySpawnLowerHeight;
+                public float ForbidAllySpawnWeight;
+
+                public float SpawnInfluenceDuration;
+
                 public List<Weapon> Weapons;
                 public List<Vehicle> Vehicles;
                 public List<Projectile> Projectiles;
@@ -574,7 +580,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag Unknown71;
                 public CachedTag BombExplodeDamageEffect;
                 public CachedTag BombDefuseEffect;
-                public CachedTag CursorImpactEffect;
+                public CachedTag ForgeCursorImpactEffect;
                 public StringId BombDefusalString;
                 public StringId BlockedTeleporterString;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -601,10 +607,10 @@ namespace TagTool.Tags.Definitions
 				{
                     [TagField(Flags = Label)]
                     public CachedTag Type;
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                    public float FullWeightRadius;
+                    public float FalloffRadius;
+                    public float FalloffConeRadius;
+                    public float Weight;
                 }
 
                 [TagStructure(Size = 0x20)]
@@ -612,10 +618,10 @@ namespace TagTool.Tags.Definitions
 				{
                     [TagField(Flags = Label)]
                     public CachedTag Type;
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                    public float FullWeightRadius;
+                    public float FalloffRadius;
+                    public float FalloffConeRadius;
+                    public float Weight;
                 }
 
                 [TagStructure(Size = 0x1C)]
@@ -623,9 +629,9 @@ namespace TagTool.Tags.Definitions
 				{
                     [TagField(Flags = Label)]
                     public CachedTag Type;
-                    public float Unknown;
-                    public float Unknown2;
-                    public float Unknown3;
+                    public float LeadTime;
+                    public float CollisionCylinderRadius;
+                    public float Weight;
                 }
 
                 [TagStructure(Size = 0x14)]
@@ -633,7 +639,7 @@ namespace TagTool.Tags.Definitions
 				{
                     [TagField(Flags = Label)]
                     public CachedTag Type;
-                    public float Unknown;
+                    public float Weight;
                 }
             }
 
