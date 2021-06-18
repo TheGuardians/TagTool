@@ -326,11 +326,11 @@ namespace TagTool.Tags.Definitions
         public class ReactiveArmorBlock : TagStructure
 		{
             public float Unknown;
-            public float Unknown2;
+            public float DamageReflectionRatio;
             public uint Unknown3;
-            public CachedTag Unknown4;
+            public CachedTag ActivationEffect;
             public CachedTag Unknown5;
-            public CachedTag Unknown6;
+            public CachedTag MeleeImpactEffect;
             public CachedTag Unknown7;
         }
 
