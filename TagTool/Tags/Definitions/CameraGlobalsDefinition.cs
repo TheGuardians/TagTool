@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown47;
 
-        public float FallingDeathMinimumValocity;
+        public float FallingDeathMinimumVelocity;
 
         public float FlyingMaxBoostSpeed;
         public float FlyingBoostAccelerationTime;
