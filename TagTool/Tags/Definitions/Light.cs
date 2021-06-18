@@ -7,7 +7,25 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "light", Tag = "ligh", Size = 0xCC, MinVersion = CacheVersion.HaloReach)]
     public class Light : TagStructure
 	{
-        public uint Flags;
+        public LightFlags Flags;
+
+        public enum LightFlags : int
+        {
+            None = 0,
+            AllowShadowsAndGels = 1 << 0,
+            ShadowCasting = 1 << 1,
+            RenderFirstPersonOnly = 1 << 2,
+            RenderThirdPersonOnly = 1 << 3,
+            DontRenderSplitscreen = 1 << 4,
+            RenderWhileActiveCamo = 1 << 5,
+            RenderInMultiplayerOverride = 1 << 6,
+            MoveToCameraInFirstPerson = 1 << 7,
+            NeverPriorityCull = 1 << 8,
+            AffectedByGameCanUseFlashlights = 1 << 9,
+            ScreenspaceSpecularLighting = 1 << 10,
+            AlwaysOnForWeapon = 1 << 11
+        }
+
         public TypeValue Type;
         public short Unknown;
         public float LightRange;
@@ -17,9 +35,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown0;
 
-        public float NearWidth;
-        public float HeightStretch;
-        public float FieldOfView;
+        public float FrustumLightNearWidth;
+        public float FrustumLightHeightStretch;
+        public float FrustumLightFov;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float UnknownAngle;
@@ -36,12 +54,19 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short Unknown4;
 
-        public StringId FunctionName1;
-        public StringId FunctionName2;
-        public short Unknown5;
+        public enum ModifierEnum : short
+        {
+            None,
+            Plus,
+            Times
+        }
+
+        public StringId ColorChangeInputVariable;
+        public StringId ColorChangeRangeVariable;
+        public ModifierEnum OutputModifier;
         public short Unknown6;
-        public uint Unknown7;
-        public TagFunction Function1 = new TagFunction { Data = new byte[0] };
+        public StringId OutputModifierInput;
+        public TagFunction Function = new TagFunction { Data = new byte[0] };
         public StringId FunctionName3;
         public StringId FunctionName4;
         public short Unknown8;
