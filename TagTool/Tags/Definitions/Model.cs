@@ -29,11 +29,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public int CollisionModelChecksum;
 
-        public float ReduceToL1SuperLow;
-        public float ReduceToL2Low;
-        public float ReduceToL3Medium;
-        public float ReduceToL4High;
-        public float ReduceToL5SuperHigh;
+        public float DisappearDistance;
+        public float BeginFadeDistance;
+        public float AnimationDistance;
+        public float ShadowFadeDistance;
+        public float InstanceDisappearDistance;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short ImposterQuality; //TODO: verify definition
