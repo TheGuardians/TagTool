@@ -325,8 +325,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4C)]
         public class ReactiveArmorBlock : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
+            public float Unknown;
+            public float Unknown2;
             public uint Unknown3;
             public CachedTag Unknown4;
             public CachedTag Unknown5;
