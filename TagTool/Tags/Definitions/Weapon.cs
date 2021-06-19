@@ -151,9 +151,9 @@ namespace TagTool.Tags.Definitions
         public List<Magazine> Magazines;
         public List<Trigger> Triggers;
         public List<Barrel> Barrels;
-        public float Unknown25;
-        public float Unknown26;
-        public float MaximumMovementAcceleration;
+        public float WeaponPowerOnVelocity;
+        public float WeaponPowerOffVelocity;
+        public float MaxMovementAcceleration;
         public float MaximumMovementVelocity;
         public float MaximumTurningAcceleration;
         public float MaximumTurningVelocity;
@@ -170,7 +170,7 @@ namespace TagTool.Tags.Definitions
         public List<FirstPersonOffsetBlock> NewFirstPersonWeaponOffsets;
 
         public RealVector2d FirstPersonScopeSize;
-        public Bounds<float> ThirdPersonPitchBounds;
+        public Bounds<float> CameraPitchBounds3p;
         public float ZoomTransitionTime;
         public float MeleeWeaponDelay;
 
@@ -245,14 +245,14 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x80)]
         public class Magazine : TagStructure
 		{
-            public uint Flags;
+            public MagazineFlags Flags;
             public short RoundsRecharged;
             public short RoundsTotalInitial;
             public short RoundsTotalMaximum;
             public short RoundsTotalLoadedMaximum;
             public short MaximumRoundsHeld;
             public short Unknown;
-            public float ReloadTime;
+            public float ReloadDialogTime;
             public short RoundsReloaded;
             public short Unknown2;
             public float ChamberTime;
@@ -275,12 +275,22 @@ namespace TagTool.Tags.Definitions
                 public short Unknown;
                 public CachedTag Equipment;
             }
+
+            [Flags]
+            public enum MagazineFlags : uint
+            {
+                None = 0,
+                WastesRoundsWhenReloaded = 1 << 0,
+                EveryRoundMustBeChambered = 1 << 1,
+                Bit2 = 1 << 2,
+                Bit3 = 1 << 3
+            }
         }
 
         [TagStructure(Size = 0x90)]
         public class Trigger : TagStructure
 		{
-            public uint Flags;
+            public TriggerFlags Flags;
             public ButtonUsedValue ButtonUsed;
             public BehaviorValue Behavior;
             public short PrimaryBarrel;
@@ -295,17 +305,23 @@ namespace TagTool.Tags.Definitions
             public float ChargedTime;
             public OverchargeActionValue OverchargeAction;
             public ushort ChargeFlags;
-            public float ChargedIllumination;
+            public float ChargedIlluminationStrength;
             public float SpewTime;
             public CachedTag ChargingEffect;
             public CachedTag ChargingDamageEffect;
             public CachedTag ChargingResponse;
             public float ChargingAgeDegeneration;
-            public CachedTag Unknown2;
-            public CachedTag Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
+            public CachedTag DischargeEffect;
+            public CachedTag DischargeDamageEffect;
+            public uint TargetTrackingDecayTime;
+            public uint TargetTrackingLockTime;
             public uint Unknown6;
+
+            public enum TriggerFlags : uint
+            {
+                None = 0,
+                AutofireSingleActionOnly = 1 << 0
+            }
 
             public enum ButtonUsedValue : short
             {
@@ -383,10 +399,10 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> DamageError;
             public Angle BaseTurningSpeed;
             public Bounds<Angle> DynamicTurningSpeed;
-            public float DualWieldErrorAccelerationTime;
-            public float DualWieldErrorDecelerationTime;
-            public uint Unknown;
-            public uint Unknown2;
+            public float DualErrorAccelerationTime;
+            public float DualErrorDecelerationTime;
+            public float DualAccelerationRate;
+            public float DualDecelerationRate;
             public Angle DualWieldMinimumError;
             public Bounds<Angle> DualWieldErrorAngle;
             public float DualWieldDamageScale;
@@ -445,15 +461,15 @@ namespace TagTool.Tags.Definitions
             public float AngleChangeDecelerationTime;
             public AngleChangeFunctionValue AngleChangeFunction;
             public short Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float FiringEffectDecelerationTime;
-            public uint Unknown8;
+            public float AngleChangeAccelerationRate;
+            public float AngleChangeDecelerationRate;
+            public float IlluminationRecoveryRate;
+            public float EjectionPortRecoveryRate;
             public float RateOfFireAccelerationTime;
             public float RateOfFireDecelerationTime;
-            public uint Unknown9;
-            public float BloomRateOfDecay;
-            public List<FiringEffect> FiringEffects;            
+            public float ErrorAccelerationRate;
+            public float ErrorDecelerationRate;
+            public List<FiringEffectBlock> FiringEffects;
 
             public enum PredictionTypeValue : short
             {
@@ -538,22 +554,21 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC4)]
-            public class FiringEffect : TagStructure
+            public class FiringEffectBlock : TagStructure
 			{
-                public short ShotCountLowerBound;
-                public short ShotCountUpperBound;
-                public CachedTag FiringEffect2;
+                public Bounds<short> EffectUseCountRange;
+                public CachedTag FiringEffect;
                 public CachedTag MisfireEffect;
                 public CachedTag EmptyEffect;
-                public CachedTag UnknownEffect;
+                public CachedTag SecondaryEffect;
                 public CachedTag FiringResponse;
                 public CachedTag MisfireResponse;
                 public CachedTag EmptyResponse;
-                public CachedTag UnknownResponse;
+                public CachedTag SecondaryResponse;
                 public CachedTag RiderFiringResponse;
                 public CachedTag RiderMisfireResponse;
                 public CachedTag RiderEmptyResponse;
-                public CachedTag RiderUnknownResponse;
+                public CachedTag RiderSecondaryResponse;
             }
         }
 
