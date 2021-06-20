@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
     public class Weapon : Item
     {
         public WeaponFlags WeaponFlags;
-        public uint MoreFlags;
+        public SecondaryWeaponFlags MoreFlags;
         public StringId Unknown8;
         public SecondaryTriggerModeValue SecondaryTriggerMode;
         public short MaximumAlternateShotsLoaded;
@@ -66,7 +66,7 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> MagnificationBounds;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint MagnificationFlags;
+        public WeapMagnificationFlags MagnificationFlags;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float WeaponSwitchReadySpeed0Default;
 
@@ -235,6 +235,15 @@ namespace TagTool.Tags.Definitions
             CovenantTracking = 2,
         }
 
+        [Flags]
+        public enum WeapMagnificationFlags : uint
+        {
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3
+        }
+
         [TagStructure(Size = 0x20)]
         public class FirstPersonBlock : TagStructure
 		{
@@ -304,7 +313,7 @@ namespace TagTool.Tags.Definitions
             public float ChargingTime;
             public float ChargedTime;
             public OverchargeActionValue OverchargeAction;
-            public ushort ChargeFlags;
+            public TriggerChargingFlags ChargeFlags;
             public float ChargedIlluminationStrength;
             public float SpewTime;
             public CachedTag ChargingEffect;
@@ -371,6 +380,19 @@ namespace TagTool.Tags.Definitions
                 None,
                 Explode,
                 Discharge,
+            }
+
+            [Flags]
+            public enum TriggerChargingFlags : ushort
+            {
+                CanFireFromPartialCharge = 1 << 0,
+                LimitToCurrentRoundsLoaded = 1 << 1,
+                WontChargeUnlessTrackedTargetIsValid = 1 << 2,
+                Bit3 = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7
             }
         }
 
@@ -722,5 +744,19 @@ namespace TagTool.Tags.Definitions
             AllowsUnaimedLunge = 1 << 27,
             CannotBeUsedByPlayer = 1 << 28,
         }
+    }
+
+    [Flags]
+    public enum SecondaryWeaponFlags : uint
+    {
+        None = 0,
+        Bit0 = 1 << 0,
+        Bit1 = 1 << 1,
+        Bit2 = 1 << 2,
+        Bit3 = 1 << 3,
+        Bit4 = 1 << 4,
+        Bit5 = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7
     }
 }
