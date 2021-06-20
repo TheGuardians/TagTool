@@ -6,10 +6,10 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "effect_globals", Tag = "effg", Size = 0xC)]
     public class EffectGlobals : TagStructure
 	{
-        public List<UnknownBlock> Unknown;
+        public List<HoldbackBlock> Holdbacks;
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock : TagStructure
+        public class HoldbackBlock : TagStructure
 		{
             public EffectHoldbackTypeEnum HoldbackType;
 
