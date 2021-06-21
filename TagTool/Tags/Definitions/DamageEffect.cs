@@ -71,6 +71,7 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum FlagsValue : uint
         {
+            None = 0,
             DonTScaleDamageByDistance = 1 << 0,
             /// <summary>
             /// area of effect damage only affects players
@@ -82,6 +83,7 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum FlagsValue1 : uint
         {
+            None = 0,
             DoesNotHurtOwner = 1 << 0,
             CanCauseHeadshots = 1 << 1,
             PingsResistantUnits = 1 << 2,
