@@ -52,7 +52,7 @@ namespace TagTool.Commands.Strings
                     if (strings.Count == 0)
                         continue;
 
-                    Console.WriteLine("Strings found in {0:X8}.unic:", unicTag.Index);
+                    Console.WriteLine($"\nStrings found in {unicTag.Name}.unic:");
                     LocalizedStringPrinter.PrintStrings(strings);
 
                     found = true;
