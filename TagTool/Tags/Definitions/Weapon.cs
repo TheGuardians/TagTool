@@ -238,6 +238,7 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum WeapMagnificationFlags : uint
         {
+            None = 0,
             Bit0 = 1 << 0,
             Bit1 = 1 << 1,
             Bit2 = 1 << 2,
@@ -385,6 +386,7 @@ namespace TagTool.Tags.Definitions
             [Flags]
             public enum TriggerChargingFlags : ushort
             {
+                None = 0,
                 CanFireFromPartialCharge = 1 << 0,
                 LimitToCurrentRoundsLoaded = 1 << 1,
                 WontChargeUnlessTrackedTargetIsValid = 1 << 2,
