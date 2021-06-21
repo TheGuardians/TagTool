@@ -83,6 +83,7 @@ namespace TagTool.Tags.Definitions
 
             public enum EventFlags : int
             {
+                None = 0,
                 DisabledForDebugging = 1 << 0,
                 ParticlesDieWhenEffectEnds = 1 << 1,
                 LoopEventAgeDurationOverride = 1 << 2
@@ -185,6 +186,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum ParticleSystemFlags : ushort
                 {
+                    None = 0,
                     ParticlesFreezeWhenOffscreen = 1 << 0,
                     ParticlesContinueAsUsualWhenOffscreen = 1 << 1,
                     LodAlways1 = 1 << 2,
