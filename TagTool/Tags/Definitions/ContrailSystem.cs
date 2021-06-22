@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -16,8 +17,8 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public float Unknown1;
-            public float Unknown2;
+            public float ForwardScale;
+            public float ForwardOffsetFromSource;
             public float Unknown3;
             public float Unknown4;
             public float Unknown5;
@@ -50,8 +51,22 @@ namespace TagTool.Tags.Definitions
             public TagMapping ShaderFunction6;
             public TagMapping ShaderFunction7;
 
-            public ushort Unknown19_Flags;
+            public ContrailFlagsUnknown UnknownFlags;
             public ushort Unknown19_Unused;
+
+            [Flags]
+            public enum ContrailFlagsUnknown : ushort
+            {
+                None = 0,
+                Bit0 = 1 << 0,
+                Bit1 = 1 << 1,
+                Bit2 = 1 << 2,
+                Bit3 = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7,
+            }
 
             public RenderMethod RenderMethod;
 
@@ -77,31 +92,31 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10, Align = 0x10)]
             public class UnknownBlock : TagStructure
 			{
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
+                public float Unknown;
+                public float Unknown2;
+                public float Unknown3;
+                public float Unknown4;
             }
 
             [TagStructure(Size = 0x40, Align = 0x10)]
             public class CompiledFunction : TagStructure
 			{
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public uint Unknown11;
-                public uint Unknown12;
-                public uint Unknown13;
-                public uint Unknown14;
-                public uint Unknown15;
-                public uint Unknown16;
+                public float Unknown;
+                public float Unknown2;
+                public float Unknown3;
+                public float Unknown4;
+                public float Unknown5;
+                public float Unknown6;
+                public float Unknown7;
+                public float Unknown8;
+                public float Unknown9;
+                public float Unknown10;
+                public float Unknown11;
+                public float Unknown12;
+                public float Unknown13;
+                public float Unknown14;
+                public float Unknown15;
+                public float Unknown16;
             }
 
             [TagStructure(Size = 0x10, Align = 0x10)]
