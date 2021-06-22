@@ -152,6 +152,8 @@ namespace TagTool.Commands.Porting.Gen2
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen2Cache.Version))
             {
                 var attr = tagFieldInfo.Attribute;
+                if (!CacheVersionDetection.AttributeInCacheVersion(attr, Gen2Cache.Version))
+                    continue;
 
                 // skip the field if no conversion is needed
                 if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
