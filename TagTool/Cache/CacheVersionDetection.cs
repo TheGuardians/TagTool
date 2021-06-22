@@ -219,16 +219,15 @@ namespace TagTool.Cache
 		}
 
         /// <summary>
-        /// Determines whether a field exists in the given CacheVersion. Defines a priority : Version, Gen, Min/Max.
+        /// Determines whether a field exists in the given CacheVersion. Defines a priority : Versions, Gen, Min/Max.
         /// </summary>
         /// <param name="attr"></param>
         /// <param name="compare"></param>
         /// <returns></returns>
         public static bool AttributeInCacheVersion(TagFieldAttribute attr, CacheVersion compare)
         {
-            if (attr.Version != CacheVersion.Unknown)
-                if (attr.Version != compare)
-                    return false;
+            if (attr.Versions != null && Array.IndexOf(attr.Versions, compare) != -1)
+                return true;
 
             if (attr.Gen != CacheGeneration.Unknown)
                 if (!IsInGen(attr.Gen, compare))

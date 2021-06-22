@@ -138,22 +138,18 @@ namespace TagTool.Commands.Porting
             {
                 var attr = tagFieldInfo.Attribute;
 
-                if ((attr.Version != CacheVersion.Unknown && attr.Version == Gen1Cache.Version) ||
-                    (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Gen1Cache.Version, attr.MinVersion, attr.MaxVersion)))
-                {
-                    // skip the field if no conversion is needed
-                    if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
-                    tagFieldInfo.FieldType == typeof(string))
-                        continue;
+                // skip the field if no conversion is needed
+                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
+                tagFieldInfo.FieldType == typeof(string))
+                    continue;
 
-                    var oldValue = tagFieldInfo.GetValue(data);
-                    if (oldValue is null)
-                        continue;
+                var oldValue = tagFieldInfo.GetValue(data);
+                if (oldValue is null)
+                    continue;
 
-                    // convert the field
-                    var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
-                    tagFieldInfo.SetValue(data, newValue);
-                }
+                // convert the field
+                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
+                tagFieldInfo.SetValue(data, newValue);
             }
 
             return data;
