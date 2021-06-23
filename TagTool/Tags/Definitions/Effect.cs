@@ -185,6 +185,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ParticleSystemFlags Flags;
 
+                [Flags]
                 public enum ParticleSystemFlags : ushort
                 {
                     None = 0,
