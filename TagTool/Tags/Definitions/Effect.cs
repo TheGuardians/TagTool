@@ -81,6 +81,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public EventFlags Flags;
 
+            [Flags]
             public enum EventFlags : int
             {
                 None = 0,

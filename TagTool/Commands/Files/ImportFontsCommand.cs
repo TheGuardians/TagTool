@@ -15,7 +15,7 @@ namespace TagTool.Commands.Files
             : base(true,
 
                   "ImportFonts",
-                  "Import fonts into Halo Online cache.\n",
+                  "Import fonts into Halo Online cache.",
 
                   "ImportFonts <path to font_package.bin>",
 
