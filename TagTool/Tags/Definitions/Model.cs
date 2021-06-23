@@ -774,7 +774,7 @@ namespace TagTool.Tags.Definitions
 
             public float MaxShieldVitality;
             public StringId GlobalShieldMaterialName;
-            public float MinStunDamage2;
+            public float ShieldMinStunDamage;
             public float ShieldStunTime;
             public float ShieldRechargeTime;
 

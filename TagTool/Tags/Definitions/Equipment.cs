@@ -15,9 +15,9 @@ namespace TagTool.Tags.Definitions
         public float ActivationDelay;
         public short NumberOfUses;
         public EquipmentFlagBits EquipmentFlags;
-        public float Unknown9;
-        public float Unknown10;
-        public float Unknown11;
+        public float AiDangerRadius;
+        public float AiMinDeployDistance;
+        public float AiAwarenessDelay;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<OptionalUnitCameraBlock> OverrideCamera;
@@ -281,8 +281,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x20)]
         public class ConcussiveBlastBlock : TagStructure
 		{
-            public CachedTag Unknown;
-            public CachedTag Unknown2;
+            public CachedTag SecondaryActivationEffect;
+            public CachedTag SecondaryDamageEffect;
         }
 
         [TagStructure(Size = 0x28)]
@@ -309,15 +309,15 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C)]
         public class HologramBlock : TagStructure
 		{
-            public uint Unknown;
+            public float Unknown;
             public CachedTag ActiveEffect;
             public CachedTag Unknown2;
             public uint Unknown3;
             public uint Unknown4;
             public uint Unknown5;
             public CachedTag DeathEffect;
-            public uint Unknown6;
-            public uint Unknown7;
+            public float Unknown6;
+            public float Unknown7;
             public byte[] Function;
             public CachedTag NavPointHud;
         }
@@ -364,7 +364,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class LightningStrikeBlock : TagStructure
 		{
-            public uint MeleeTimeReduction;
+            public float MeleeTimeReduction;
             public CachedTag UnknownEffect;
         }
 
