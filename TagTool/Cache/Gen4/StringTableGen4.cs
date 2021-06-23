@@ -42,7 +42,7 @@ namespace TagTool.Cache.Gen4
                     break;
 
                 default:
-                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
+                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version, baseMapFile.CachePlatform));
             }
 
             var sectionTable = Gen4Header.SectionTable;

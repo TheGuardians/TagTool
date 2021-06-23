@@ -270,7 +270,7 @@ namespace TagTool.Cache.Gen4
             using (var secondaryDataReader = new EndianReader(secondaryDataStream, EndianFormat.BigEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataReader, secondaryDataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
-                var deserializer = new ResourceDeserializer(Cache.Version);
+                var deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
                 return deserializer.Deserialize(context, definitionType);
             }

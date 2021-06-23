@@ -10,49 +10,49 @@ using System.Diagnostics;
 
 namespace TagTool.Cache.Gen4
 {
-    [TagStructure(Size = 0x28, Platform = CachePlatform.Only32Bit)]
-    [TagStructure(Size = 0x50, Platform = CachePlatform.Only64Bit)]
+    [TagStructure(Size = 0x28, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x50, Platform = CachePlatform.MCC)]
     public class TagCacheGen4Header
     {
         public int TagGroupCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag TagGroupSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
+        [TagField(Platform = CachePlatform.Original)]
         public uint TagGroupsAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public ulong TagGroupsAddress64;
 
         public int TagInstancesCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag TagInstancesSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
+        [TagField(Platform = CachePlatform.Original)]
         public uint TagInstancesAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public ulong TagInstancesAddress64;
 
         public int GlobalIndicesCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag GlobalIndicesSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
+        [TagField(Platform = CachePlatform.Original)]
         public uint GlobalIndicesAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public ulong GlobalIndicesAddress64;
 
         public int InteropsCount;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public Tag InteropsSignature = new Tag("343i");
-        [TagField(Platform = CachePlatform.Only32Bit)]
+        [TagField(Platform = CachePlatform.Original)]
         public uint InteropsAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public ulong InteropsAddress64;
 
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown1;
 
         public int CRC;
         public Tag Signature = new Tag("tags");
 
-        [TagField(Platform = CachePlatform.Only64Bit)]
+        [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown2;
     }
 
@@ -112,6 +112,7 @@ namespace TagTool.Cache.Gen4
 
         public TagCacheGen4(EndianReader reader, MapFile baseMapFile, StringTableGen4 stringTable)
         {
+            CachePlatform = baseMapFile.CachePlatform;
             Version = baseMapFile.Version;
             TagDefinitions = new TagDefinitionsGen4();
             Groups = new List<TagGroupGen4>();
@@ -153,7 +154,7 @@ namespace TagTool.Cache.Gen4
                 tagNamesOffsetsTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, tagNamesHeader.TagNameIndicesOffset);
                 tagNamesBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, tagNamesHeader.TagNamesBufferOffset);
 
-                addressMask = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                addressMask = CachePlatform == CachePlatform.MCC ?
                 (Gen4Header.VirtualBaseAddress64 - (ulong)sectionOffset) :
                 (ulong)(Gen4Header.VirtualBaseAddress32 - sectionOffset);
             }
@@ -164,26 +165,26 @@ namespace TagTool.Cache.Gen4
                 addressMask = Gen4Header.VirtualBaseAddress32 - tagMemoryHeader.MemoryBufferOffset;
             }
 
-            var tagTableHeaderOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+            var tagTableHeaderOffset = CachePlatform == CachePlatform.MCC ?
                 (Gen4Header.TagTableHeaderOffset64 - addressMask) :
                 ((ulong)Gen4Header.TagTableHeaderOffset32 - addressMask);
 
             reader.SeekTo((long)tagTableHeaderOffset);
 
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(baseMapFile.Version);
+            var deserializer = new TagDeserializer(baseMapFile.Version, CachePlatform);
 
             Header = deserializer.Deserialize<TagCacheGen4Header>(dataContext);
 
-            var tagGroupsOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+            var tagGroupsOffset = CachePlatform == CachePlatform.MCC ?
                 Header.TagGroupsAddress64 - addressMask :
                 (ulong)Header.TagGroupsAddress32 - addressMask;
 
-            var tagInstancesOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+            var tagInstancesOffset = CachePlatform == CachePlatform.MCC ?
                 Header.TagInstancesAddress64 - addressMask :
                 (ulong)Header.TagInstancesAddress32 - addressMask;
 
-            var globalIndicesOffset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+            var globalIndicesOffset = CachePlatform == CachePlatform.MCC ?
                 Header.GlobalIndicesAddress64 - addressMask :
                 (ulong)Header.GlobalIndicesAddress32 - addressMask;
 
@@ -217,7 +218,7 @@ namespace TagTool.Cache.Gen4
                 var tagGroup = groupIndex == -1 ? new TagGroupGen4() : Groups[groupIndex];
                 uint ID = (uint)((reader.ReadInt16() << 16) | i);
 
-                var offset = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+                var offset = CachePlatform == CachePlatform.MCC ?
                     (uint)((ulong)Gen4Header.SectionTable.SectionAddressToOffsets[2] + (ulong)Gen4Header.SectionTable.Sections[2].Offset + (((ulong)reader.ReadUInt32() * 4) - (Gen4Header.VirtualBaseAddress64 - 0x50000000))) :
                     (uint)(reader.ReadUInt32() - addressMask);
 

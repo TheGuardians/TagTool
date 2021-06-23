@@ -611,11 +611,11 @@ namespace TagTool.Serialization
             switch (platformType)
             {
                 case PlatformType._32Bit:
-                    writer.Write(value.Get32BitValue());
+                    writer.Write(value?.Get32BitValue() ?? 0);
                     break;
 
                 case PlatformType._64Bit:
-                    writer.Write(value.Get64BitValue());
+                    writer.Write(value?.Get64BitValue() ?? 0);
                     break;
             }
         }
@@ -628,11 +628,11 @@ namespace TagTool.Serialization
             switch (platformType)
             {
                 case PlatformType._32Bit:
-                    writer.Write(value.Get32BitValue());
+                    writer.Write(value?.Get32BitValue() ?? 0);
                     break;
 
                 case PlatformType._64Bit:
-                    writer.Write(value.Get64BitValue());
+                    writer.Write(value?.Get64BitValue() ?? 0);
                     break;
             }
         }

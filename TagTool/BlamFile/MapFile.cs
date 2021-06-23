@@ -187,11 +187,12 @@ namespace TagTool.BlamFile
                 map.Version = version;
                 map.EndianFormat = EndianFormat.LittleEndian;
                 map.MapVersion = CacheFileVersion.HaloOnline;
+                map.CachePlatform = CachePlatform.Original;
 
                 header.HeaderSignature = new Tag("head");
                 header.FooterSignature = new Tag("foot");
                 header.FileVersion = map.MapVersion;
-                header.Build = CacheVersionDetection.GetBuildName(version, CachePlatform.Original);
+                header.Build = CacheVersionDetection.GetBuildName(version, map.CachePlatform);
 
                 switch (scnr.MapType)
                 {

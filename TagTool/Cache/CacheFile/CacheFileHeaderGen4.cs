@@ -17,9 +17,9 @@ namespace TagTool.Cache
         public int FileLength;
         public int FileCompressedLength;
 
-        [TagField(Platform = CachePlatform.Only32Bit)]
+        [TagField(Platform = CachePlatform.Original)]
         public uint TagTableHeaderOffset32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+         [TagField(Platform = CachePlatform.MCC)]
         public ulong TagTableHeaderOffset64;
 
         public TagMemoryHeader TagMemoryHeader;
@@ -76,9 +76,9 @@ namespace TagTool.Cache
         [TagField(Length = 0x10, MinVersion = CacheVersion.Halo4)]
         public byte[] UnknownH4;
 
-        [TagField(Platform = CachePlatform.Only32Bit)]
+        [TagField(Platform = CachePlatform.Original)]
         public uint VirtualBaseAddress32;
-        [TagField(Platform = CachePlatform.Only64Bit)]
+         [TagField(Platform = CachePlatform.MCC)]
         public ulong VirtualBaseAddress64;
 
         public int XDKVersion;

@@ -478,7 +478,7 @@ namespace TagTool.Commands.Tags
             {
                 case TagStructure tagStruct:
                     {
-                        foreach (var field in tagStruct.GetTagFieldEnumerable(cache.Version))
+                        foreach (var field in tagStruct.GetTagFieldEnumerable(cache.Version, cache.Platform))
                             DumpCommands(writer, cache, name, field.GetValue(data), fieldName != null ? $"{fieldName}.{field.Name}" : field.Name);
                     }
                     break;

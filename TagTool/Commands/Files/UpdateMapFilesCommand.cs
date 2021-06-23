@@ -52,6 +52,9 @@ namespace TagTool.Commands.Files
                     var mapFileName = $"{name}.map";
                     var targetPath = Path.Combine(Cache.Directory.FullName, mapFileName);
 
+                    if (!name.Contains("jungle"))
+                        continue;
+
                     MapFile map;
                     Blf mapInfo = null;
 

@@ -83,8 +83,8 @@ namespace TagTool.Cache
                         LocaleTables = new List<LocaleTable>();
                     else
                     {
-                        //var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
-                        //LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
+                        LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
                     }
                 }
             }

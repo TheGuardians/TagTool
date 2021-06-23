@@ -18,6 +18,7 @@ namespace TagTool.Cache
         /// The size of the partition. The sum of all partitions should be equal to the size of the tag section.
         /// </summary>
         public PlatformSignedValue Size;
+
     }
 
     public enum CacheFilePartitionType : int

@@ -75,7 +75,7 @@ namespace TagTool.Commands.Modding
             {
                 using (var mapVariantStream = File.OpenRead(args[1]))
                 {
-                    var mapVariantBlf = new Blf(Cache.Version);
+                    var mapVariantBlf = new Blf(Cache.Version, Cache.Platform);
                     if (!mapVariantBlf.Read(new EndianReader(mapVariantStream, Cache.Endianness)))
                         return new TagToolError(CommandError.CustomError, "Failed to read map variant");
 

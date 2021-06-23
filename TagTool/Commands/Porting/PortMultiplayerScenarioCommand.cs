@@ -496,6 +496,7 @@ namespace TagTool.Commands.Porting
 
             var scnr = cache.Deserialize<Scenario>(cacheStream, scenarioTag);
 
+            map.CachePlatform = cache.Platform;
             map.Version = cache.Version;
             map.EndianFormat = EndianFormat.LittleEndian;
             map.MapVersion = CacheFileVersion.HaloOnline;

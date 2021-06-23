@@ -13,6 +13,7 @@ namespace TagTool.Cache
     {
         public ulong Value;
 
+        public PlatformUnsignedValue() { Value = 0; }
         public PlatformUnsignedValue(ulong value) { Value = value; }
         public PlatformUnsignedValue(uint value) { Value = value; }
 
@@ -28,6 +29,7 @@ namespace TagTool.Cache
     {
         public long Value;
 
+        public PlatformSignedValue() { Value = 0; }
         public PlatformSignedValue(long value) { Value = value; }
         public PlatformSignedValue(int value) { Value = value; }
 

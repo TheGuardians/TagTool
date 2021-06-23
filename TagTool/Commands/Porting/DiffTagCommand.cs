@@ -142,8 +142,8 @@ namespace TagTool.Commands.Porting
                 {
                     var struct1 = (TagStructure)data1;
                     var struct2 = (TagStructure)data2;
-                    var fields1 = struct1.GetTagFieldEnumerable(cache1.Version);
-                    var fields2 = struct2.GetTagFieldEnumerable(cache2.Version);
+                    var fields1 = struct1.GetTagFieldEnumerable(cache1.Version, cache1.Platform);
+                    var fields2 = struct2.GetTagFieldEnumerable(cache2.Version, cache2.Platform);
                     var commonFields = fields1.Join(fields2, a => a.Name, b => b.Name, (a, b) => (a, b));
 
                     foreach (var (field1, field2) in commonFields)

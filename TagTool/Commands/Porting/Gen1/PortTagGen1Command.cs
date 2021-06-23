@@ -134,7 +134,7 @@ namespace TagTool.Commands.Porting
 
         private T ConvertStructure<T>(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
         {
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen1Cache.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen1Cache.Version, Gen1Cache.Platform))
             {
                 var attr = tagFieldInfo.Attribute;
                 if (!CacheVersionDetection.AttributeInCacheVersion(attr, Gen1Cache.Version))

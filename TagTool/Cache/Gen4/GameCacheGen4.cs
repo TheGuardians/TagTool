@@ -42,11 +42,11 @@ namespace TagTool.Cache
         {
             var headerGen4 = (CacheFileHeaderGen4)BaseMapFile.Header;
 
-            var baseAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+            var baseAddress = Platform == CachePlatform.MCC ?
                 headerGen4.VirtualBaseAddress64 :
                 (ulong)headerGen4.VirtualBaseAddress32;
 
-            var unpackedAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
+            var unpackedAddress = Platform == CachePlatform.MCC ?
                 (((ulong)address << 2) + 0x50000000) :
                 (ulong)address;
 
@@ -57,11 +57,12 @@ namespace TagTool.Cache
 
         public GameCacheGen4(MapFile mapFile, FileInfo file)
         {
+            Platform = mapFile.CachePlatform;
             BaseMapFile = mapFile;
             Version = BaseMapFile.Version;
             CacheFile = file;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             Endianness = BaseMapFile.EndianFormat;
 
             var headerGen4 = (CacheFileHeaderGen4)BaseMapFile.Header;
