@@ -122,9 +122,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10, Align = 0x10)]
             public class CompiledColorFunction : TagStructure
 			{
-                public float Red;
-                public float Green;
-                public float Blue;
+                public RealRgbColor Color;
                 public float Magnitude;
             }
         }
