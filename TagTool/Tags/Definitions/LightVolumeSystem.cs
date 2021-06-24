@@ -120,9 +120,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10)]
             public class RuntimeGpuColor : TagStructure
 			{
-                public float Red;
-                public float Green;
-                public float Blue;
+                public RealRgbColor Color;
                 public float Magnitude;
             }
         }
