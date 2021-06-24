@@ -124,6 +124,10 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "gmeg" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag MedalGlobals;
 
+        // TODO: proper alignment in serialization
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, Flags = Padding, Length = 4)]
+        public byte[] Padding1;
+
         [TagField(Length = 12)]
         public LocaleGlobalsBlock[] LocaleGlobals = new LocaleGlobalsBlock[12];
 
@@ -1563,18 +1567,11 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x50, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public class LocaleGlobalsBlock : TagStructure
         {
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
-            public uint Unknown1;
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
-            public uint Unknown2;
-
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public ulong Unknown1_64;
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public ulong Unknown2_64;
+            public PlatformUnsignedValue StringReferenceAddress;
+            public PlatformUnsignedValue StringDataAddress;
 
             public int StringCount;
             public int LocaleTableSize;
@@ -1589,8 +1586,8 @@ namespace TagTool.Tags.Definitions
 
             public uint Unknown3;
 
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown4;
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, Flags = TagFieldFlags.Padding, Length = 4)]
+            public byte[] Padding;
         }
 
         [TagStructure(Size = 0x54)]

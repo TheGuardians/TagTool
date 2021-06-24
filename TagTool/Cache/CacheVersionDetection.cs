@@ -169,6 +169,7 @@ namespace TagTool.Cache
 
                 case "Nov 24 2020 15:47:48":
                 case "Feb 19 2021 11:19:43":
+                case "Jun  9 2021 09:25:41":
                     version = CacheVersion.Halo3Retail;
                     cachePlatform = CachePlatform.MCC;
                     break;
