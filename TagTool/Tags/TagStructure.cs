@@ -8,29 +8,32 @@ namespace TagTool.Tags
 {
     public class TagStructure
     {
-        private static readonly Dictionary<CacheVersion, VersionedCache> VersionedCaches =
-            new Dictionary<CacheVersion, VersionedCache> { };
+        private static readonly Dictionary<(CacheVersion version, CachePlatform platform), VersionedCache> VersionedCaches =
+            new Dictionary<(CacheVersion version, CachePlatform platform), VersionedCache> { };
 
         public static TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version, CachePlatform cachePlatform) =>
-            VersionedCaches[version].GetTagStructureAttribute(type, version, cachePlatform);
+            VersionedCaches[(version, cachePlatform)].GetTagStructureAttribute(type, version, cachePlatform);
 
         public static TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version, CachePlatform cachePlatform) =>
-            VersionedCaches[version].GetTagStructureInfo(type, version, cachePlatform);
+            VersionedCaches[(version, cachePlatform)].GetTagStructureInfo(type, version, cachePlatform);
 
         public static TagFieldEnumerable GetTagFieldEnumerable(Type type, CacheVersion version, CachePlatform cachePlatform) =>
             GetTagFieldEnumerable(GetTagStructureInfo(type, version, cachePlatform));
 
         public static TagFieldEnumerable GetTagFieldEnumerable(TagStructureInfo info) =>
-            VersionedCaches[info.Version].GetTagFieldEnumerable(info);
+            VersionedCaches[(info.Version, info.CachePlatform)].GetTagFieldEnumerable(info);
 
         public static TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version, CachePlatform cachePlatform) =>
-            VersionedCaches[version].GetTagFieldAttribute(type, field, version, cachePlatform);
+            VersionedCaches[(version, cachePlatform)].GetTagFieldAttribute(type, field, version, cachePlatform);
 
         static TagStructure()
         {
             lock (VersionedCaches)
-                foreach (var version in Enum.GetValues(typeof(CacheVersion)) as CacheVersion[])
-                    VersionedCaches[version] = new VersionedCache(version);
+            {
+                foreach (var platform in Enum.GetValues(typeof(CachePlatform)) as CachePlatform[])
+                    foreach (var version in Enum.GetValues(typeof(CacheVersion)) as CacheVersion[])
+                        VersionedCaches[(version, platform)] = new VersionedCache(version, platform);
+            }      
         }
 
         public TagStructureAttribute GetTagStructureAttribute(CacheVersion version, CachePlatform cachePlatform) =>
@@ -56,6 +59,7 @@ namespace TagTool.Tags
         private class VersionedCache
         {
             private readonly CacheVersion Version;
+            private readonly CachePlatform Platform;
 
             private readonly Dictionary<Type, TagStructureAttribute> TagStructureAttributes =
                 new Dictionary<Type, TagStructureAttribute> { };
@@ -156,7 +160,11 @@ namespace TagTool.Tags
                 return attribute;
             }
 
-            public VersionedCache(CacheVersion version) => Version = version;
+            public VersionedCache(CacheVersion version, CachePlatform cachePlatform)
+            {
+                Version = version;
+                Platform = cachePlatform;
+            }
         }
 
         public static uint GetStructureSize(Type type, CacheVersion version, CachePlatform cachePlatform)
@@ -165,9 +173,9 @@ namespace TagTool.Tags
 
             var currentType = type;
 
-            while(currentType != typeof(object))
+            while (currentType != typeof(object))
             {
-                var attribute = VersionedCaches[version].GetTagStructureAttribute(currentType, version, cachePlatform);
+                var attribute = VersionedCaches[(version, cachePlatform)].GetTagStructureAttribute(currentType, version, cachePlatform);
 
                 currentType = currentType.BaseType;
 
