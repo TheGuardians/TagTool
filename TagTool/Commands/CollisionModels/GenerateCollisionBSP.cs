@@ -130,103 +130,80 @@ namespace TagTool.Commands.CollisionModels
             return true;
         }
 
-        public int nophantom_bsp_tree_decision_switch(ref surface_array_definition surface_array)
-        {
-            int surface_array_total_count = surface_array.used_count + surface_array.free_count;
-            if (surface_array_total_count <= 0)
-                return 2;
-            int free_surfaces_positive = 0;
-            int used_surfaces_positive = 0;
-            int used_surfaces_negative = 0;
-            for (int surface_index_index = 0; surface_index_index < surface_array_total_count; surface_index_index++)
-            {
-                int surface_index = surface_array.surface_array[surface_index_index];
-                if (surface_index_index >= surface_array.free_count) //surface is used
-                {
-                    if (surface_index >= 0)
-                        used_surfaces_positive++;
-                    else
-                        used_surfaces_negative++;
-                }
-                else //surface is free
-                {
-                    if (surface_index < 0)
-                        return 1; //if there is a free surface with a negative surface index, create bsp3dnodes
-                    free_surfaces_positive++;
-                }
-            }
-
-            if (used_surfaces_positive > used_surfaces_negative)
-                return 3;
-            else
-                return 2;
-        }
-        
         public int bsp_tree_decision_switch(ref surface_array_definition surface_array)
         {
+            //IMPORTANT NOTE: a negative surface index indicates a front face (in front of splitting plane), 
+            //whereas a positive surface index indicates a back face (behind splitting plane)
+
+            //Also, a used surface is one that has been on one of the node planes used thus far, 
+            //whereas a free surface has not been on any node planes
+
             int surface_array_total_count = surface_array.used_count + surface_array.free_count;
             if (surface_array_total_count <= 0)
                 return 2;
-            int free_surfaces_positive = 0;
-            int used_surfaces_positive = 0;
-            int used_surfaces_negative = 0;
+            int free_surfaces_backface = 0;
+            int used_surfaces_backface = 0;
+            int used_surfaces_frontface = 0;
+
+            //tabulate the free/used and front/back face counts
             for (int surface_index_index = 0; surface_index_index < surface_array_total_count; surface_index_index++)
             {
                 int surface_index = surface_array.surface_array[surface_index_index];
                 if(surface_index_index >= surface_array.free_count) //surface is used
                 {
                     if (surface_index >= 0)
-                        used_surfaces_positive++;
+                        used_surfaces_backface++;
                     else
-                        used_surfaces_negative++;
+                        used_surfaces_frontface++;
                 }
                 else //surface is free
                 {
                     if (surface_index < 0)
-                        return 1; //if there is a free surface with a negative surface index, create bsp3dnodes
-                    free_surfaces_positive++;
+                        return 1; //if there is a free surface that is a front face, create bsp3dnodes
+                    free_surfaces_backface++;
                 }
             }
-            bool no_free_surfaces_positive = free_surfaces_positive == 0;
-            bool no_used_surfaces_positive = used_surfaces_positive == 0;
-            if (free_surfaces_positive > 0)
-            {
-                if (no_used_surfaces_positive)
-                    return 1;
-            }
-            if (no_free_surfaces_positive && no_used_surfaces_positive)
+
+            //from here, all surfaces must be used or be backfaces, no free front faces must exist
+
+            //make 3dnodes if there are only FREE BACKFACES
+            if (free_surfaces_backface > 0 && used_surfaces_backface == 0)
+                return 1;          
+            //make 2dnodes if there are only USED FRONTFACES
+            if (free_surfaces_backface == 0 && used_surfaces_backface == 0)
                 return 2;
-            if(used_surfaces_negative > 0 || used_surfaces_positive <= 0)
+            //OTHERWISE RECALCULATE IF THERE IS A MIXTURE
+            if(used_surfaces_frontface > 0 || used_surfaces_backface <= 0)
                 return surface_array_recalculate_counts(ref surface_array);
+            //BUT FAIL if there are only USED BACKFACES
             return 3;
         }
 
         public int surface_array_recalculate_counts(ref surface_array_definition surface_array)
         {
-            bool used_count_zero = surface_array.used_count == 0;
-            bool used_count_negative = surface_array.used_count < 0;
-
             surface_array_definition surface_counts = new surface_array_definition();
             surface_array_definition new_surface_array = new surface_array_definition { surface_array = new List<int>(), free_count = 0, used_count = 0 };
-            double surface_plane_fits_negative = 0;
-            double surface_plane_fits_positive = 0;
+            double surface_areas_frontface = 0;
+            double surface_areas_backface = 0;
 
-            if (!used_count_negative && !used_count_zero)
+            //Iterate through used surfaces -- those than have been on node planes
+            //COMPARE combined surface area of front faces to combined surface area of backfaces
+            if (surface_array.used_count > 0)
             {
                 for(int surface_index_index = 0; surface_index_index < surface_array.used_count; surface_index_index++)
                 {
                     int surface_index = surface_array.surface_array[surface_index_index + surface_array.free_count];
-                    double current_surface_plane_fit = surface_calculate_plane_fit(surface_index & 0x7FFFFFFF);
+                    double current_surface_plane_fit = surface_calculate_area(surface_index & 0x7FFFFFFF);
                     new_surface_array.surface_array.Add(surface_index);
                     if (surface_index < 0)
                     {
                         surface_counts.used_count++;
-                        surface_plane_fits_negative += current_surface_plane_fit;
+                        surface_areas_frontface += current_surface_plane_fit;
                     }
                     else
                     {
                         surface_counts.free_count++;
-                        surface_plane_fits_positive += current_surface_plane_fit;
+                        surface_areas_backface += current_surface_plane_fit;
                     }
                 }
             }
@@ -235,7 +212,7 @@ namespace TagTool.Commands.CollisionModels
 
             surfaces_check_if_intersecting(new_surface_array);
 
-            if (surface_plane_fits_negative * 4.0f <= surface_plane_fits_positive)
+            if (surface_areas_frontface * 4.0f <= surface_areas_backface)
             {
                 surface_array = new_surface_array.DeepClone();
                 return 3;
@@ -255,33 +232,33 @@ namespace TagTool.Commands.CollisionModels
             return 2;
         }
 
-        public bool line_from_planes3d(RealPlane3d planeA, RealPlane3d planeB, ref RealVector3d clip_line_point, ref RealVector3d clip_line_vector)
+        public bool planes_get_intersection(RealPlane3d planeA, RealPlane3d planeB, ref RealVector3d intersection_point, ref RealVector3d intersection_vector)
         {
             RealVector3d vectorplaneA = new RealVector3d(planeA.I, planeA.J, planeA.K);
             RealVector3d vectorplaneB = new RealVector3d(planeB.I, planeB.J, planeB.K);
 
             //cross product of plane normal vectors
-            clip_line_vector = RealVector3d.CrossProduct(vectorplaneA, vectorplaneB);
+            intersection_vector = RealVector3d.CrossProduct(vectorplaneA, vectorplaneB);
 
             //If the plane normal vectors are nearly identical, the planes won't overlap, so return false
-            float vector_magnitude = RealVector3d.Magnitude(clip_line_vector);
+            float vector_magnitude = RealVector3d.Magnitude(intersection_vector);
             if (Math.Abs(vector_magnitude) < 0.00009999999747378752)
                 return false;
 
-            RealVector3d componentA = RealVector3d.CrossProduct(clip_line_vector, vectorplaneA);
-            RealVector3d componentB = RealVector3d.CrossProduct(vectorplaneB, clip_line_vector);
+            RealVector3d componentA = RealVector3d.CrossProduct(intersection_vector, vectorplaneA);
+            RealVector3d componentB = RealVector3d.CrossProduct(vectorplaneB, intersection_vector);
             componentA = componentA * planeB.D;
             componentB = componentB * planeA.D;
 
-            clip_line_point = componentA + componentB;
+            intersection_point = componentA + componentB;
 
-            //divide clip line point by the magnitude of the cross product of the two plane normals
-            clip_line_point = clip_line_point / vector_magnitude;
+            //divide intersection_point by the magnitude of the cross product of the two plane normals
+            intersection_point = intersection_point / vector_magnitude;
 
             return true;
         }
 
-        public bool intersecting_surface_get_clip_line_bounds(int surface_index, RealVector3d clip_line_point, RealVector3d clip_line_vector, ref Bounds<float> Bounds)
+        public bool intersecting_surface_get_intersection_line(int surface_index, RealVector3d intersection_point, RealVector3d intersection_vector, ref Bounds<float> Bounds)
         {
             Surface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
             int plane_index = (short)surface_block.Plane;
@@ -296,10 +273,10 @@ namespace TagTool.Commands.CollisionModels
             else
                 plane_mirror_check = plane_projection_parameter_greater_than_0 ? 0 : 1;
 
-            RealPoint3d clip_line_point_vertex = new RealPoint3d(clip_line_point.I, clip_line_point.J, clip_line_point.K);
-            RealPoint3d clip_line_vector_vertex = new RealPoint3d(clip_line_vector.I, clip_line_vector.J, clip_line_vector.K);
-            RealPoint2d CoordsP = vertex_get_projection_relevant_coords(clip_line_point_vertex, plane_projection_axis, plane_mirror_check);
-            RealPoint2d CoordsV = vertex_get_projection_relevant_coords(clip_line_vector_vertex, plane_projection_axis, plane_mirror_check);
+            RealPoint3d intersection_point_vertex = new RealPoint3d(intersection_point.I, intersection_point.J, intersection_point.K);
+            RealPoint3d intersection_vector_vertex = new RealPoint3d(intersection_vector.I, intersection_vector.J, intersection_vector.K);
+            RealPoint2d CoordsP = vertex_get_projection_relevant_coords(intersection_point_vertex, plane_projection_axis, plane_mirror_check);
+            RealPoint2d CoordsV = vertex_get_projection_relevant_coords(intersection_vector_vertex, plane_projection_axis, plane_mirror_check);
 
             Bounds.Upper = float.MinValue;
             Bounds.Lower = float.MaxValue;
@@ -321,11 +298,11 @@ namespace TagTool.Commands.CollisionModels
 
                 //VBA cross should be the cross product between:
                 //      the plane projected vector between this edge's two vertices
-                //      the plane projected clip line vector
+                //      the plane projected intersection vector
                 float VBA_cross = diffBA.Y * CoordsV.X - CoordsV.Y * diffBA.X;
                 //BAPA cross should be the cross product between:
                 //      the plane projected vector between this edge's two vertices
-                //      the plane projected vector between the clip line point and the first vertex on the edge
+                //      the plane projected vector between the intersection point and the first vertex on the edge
                 float BAPA_cross = diffBA.X * diffPA.Y - diffBA.Y * diffPA.X;
 
                 if(VBA_cross == 0.0)
@@ -368,15 +345,15 @@ namespace TagTool.Commands.CollisionModels
             if (relationshipA != Plane_Relationship.BothSidesofPlane || relationshipB != Plane_Relationship.BothSidesofPlane)
                 return false;
 
-            RealVector3d clip_line_point = new RealVector3d();
-            RealVector3d clip_line_vector = new RealVector3d();
-            if (!line_from_planes3d(plane_A, plane_B, ref clip_line_point, ref clip_line_vector))
+            RealVector3d intersection_point = new RealVector3d();
+            RealVector3d intersection_vector = new RealVector3d();
+            if (!planes_get_intersection(plane_A, plane_B, ref intersection_point, ref intersection_vector))
                 return false;
 
             Bounds<float> BoundsA = new Bounds<float>();
             Bounds<float> BoundsB = new Bounds<float>();
-            if (!intersecting_surface_get_clip_line_bounds(surface_index_A, clip_line_point, clip_line_vector, ref BoundsA) ||
-                !intersecting_surface_get_clip_line_bounds(surface_index_B, clip_line_point, clip_line_vector, ref BoundsB))
+            if (!intersecting_surface_get_intersection_line(surface_index_A, intersection_point, intersection_vector, ref BoundsA) ||
+                !intersecting_surface_get_intersection_line(surface_index_B, intersection_point, intersection_vector, ref BoundsB))
                 return false;
 
             if (BoundsA.Upper <= BoundsB.Upper)
@@ -388,8 +365,8 @@ namespace TagTool.Commands.CollisionModels
                 return false;
 
             //these two points will be used to identify the region of overlap
-            Point0 = point_from_point_and_vector(clip_line_point, clip_line_vector, BoundsA.Upper);
-            Point1 = point_from_point_and_vector(clip_line_point, clip_line_vector, BoundsB.Upper);
+            Point0 = point_from_point_and_vector(intersection_point, intersection_vector, BoundsA.Upper);
+            Point1 = point_from_point_and_vector(intersection_point, intersection_vector, BoundsB.Upper);
 
             return true;
         }
@@ -486,10 +463,7 @@ namespace TagTool.Commands.CollisionModels
         public bool build_bsp_tree_main(surface_array_definition surface_array, ref int bsp3dnode_index)
         {
             int switch_arg = 3;
-            if(NoPhantom)
-                switch_arg = nophantom_bsp_tree_decision_switch(ref surface_array);
-            else
-                switch_arg = bsp_tree_decision_switch(ref surface_array);
+            switch_arg = bsp_tree_decision_switch(ref surface_array);
 
             switch (switch_arg)
             {
@@ -800,17 +774,16 @@ namespace TagTool.Commands.CollisionModels
                     }
 
                     //this addendum to the function is a bit of black magic from H2Tool.exe. 
-                    //If there is no 2d plane that can satisfactorily separate the surfaces, remove the surface from the array that BEST fits the plane
-                    //I figure although this surface will no longer be referenced by index, it will still be selected for collision by default at the leaf level
-                    //This ultimately allows bsp compilation to complete even when there are overlapping surfaces
+                    //the surface with the smallest surface area is just removed from the leaf, as this is most likely to be the issue
+                    //This ultimately allows bsp compilation to complete even when there are 'overlapping' surfaces
                     int remove_surface_index = -1;
-                    double smallest_plane_fit = double.MaxValue;
+                    double smallest_surface_area = double.MaxValue;
                     for(var i = 0; i < plane_matched_surface_array.surface_array.Count; i++)
                     {
-                        double current_plane_fit = surface_calculate_plane_fit(plane_matched_surface_array.surface_array[i] & 0x7FFFFFFF);
-                        if(current_plane_fit < smallest_plane_fit)
+                        double current_surface_area = surface_calculate_area(plane_matched_surface_array.surface_array[i] & 0x7FFFFFFF);
+                        if(current_surface_area < smallest_surface_area)
                         {
-                            smallest_plane_fit = current_plane_fit;
+                            smallest_surface_area = current_surface_area;
                             remove_surface_index = i;
                         }
                     }
@@ -852,9 +825,9 @@ namespace TagTool.Commands.CollisionModels
             return bsp2dnode_index;
         }
 
-        public double surface_calculate_plane_fit(int surface_index)
+        public double surface_calculate_area(int surface_index)
         {
-            double plane_fit = 0;
+            double surface_area = 0;
             Surface surface_block = Bsp.Surfaces[surface_index];
             RealPlane3d plane = Bsp.Planes[surface_block.Plane & 0x7FFF].Value;
             int first_Edge_index = surface_block.FirstEdge;
@@ -883,8 +856,8 @@ namespace TagTool.Commands.CollisionModels
                     double v19 = d20.Z * d10.Y - d20.Y * d10.Z;
                     double v20 = d20.X * d10.Z - d20.Z * d10.X;
                     double v21 = d20.Y * d10.X - d20.X * d10.Y;
-                    double current_plane_fit = plane.I * v19 + plane.J * v20 + plane.K * v21;
-                    plane_fit += current_plane_fit;
+                    double current_surface_area = plane.I * v19 + plane.J * v20 + plane.K * v21;
+                    surface_area += current_surface_area;
 
                     current_edge_index = surface_is_right_of_edge ? edge_block.ReverseEdge : edge_block.ForwardEdge;
                     edge_block = Bsp.Edges[current_edge_index];
@@ -894,11 +867,11 @@ namespace TagTool.Commands.CollisionModels
             }
             //account for surfaces on the plane with an inverted normal
             if ((surface_block.Plane & 0x8000) > 0)
-                plane_fit = -plane_fit;
-            if (plane_fit <= 0.0)
+                surface_area = -surface_area;
+            if (surface_area <= 0.0)
                 return 0.0;
 
-            return plane_fit;
+            return surface_area;
         }
 
         List<RealPoint3d> surface_get_vertices(int surface_index)
