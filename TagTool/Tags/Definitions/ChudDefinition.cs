@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
         public enum WidgetFlags : byte
         {
             None,
-            Bit0 = 1 << 0,
+            BootSequenceOnly = 1 << 0,
             Bit1 = 1 << 1,
             Bit2 = 1 << 2,
             Bit3 = 1 << 3
@@ -44,7 +44,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
-            public WidgetFlags Unknown;
+            public WidgetFlags Flags;
             public LayerEnum Layer;
             public List<StateDatum> StateData;
             public List<PlacementDatum> PlacementData;
