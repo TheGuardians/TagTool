@@ -29,13 +29,15 @@ namespace TagTool.Commands.Modding
 
                 if (args.Count != 0)
                     path = args[0];
+                else if (Cache.ModPackageFile != null)
+                    path = Cache.ModPackageFile.FullName;
                 else
-                    path += "mods\\downloads\\" + Cache.BaseModPackage.Metadata.Name + ".pak";
+                    path += "mods\\downloads\\" + Cache.DisplayName;
             }
             else
             {
                 if (args.Count < 1)
-                    return new TagToolError(CommandError.ArgInvalid, "Expected path to save to");
+                    return new TagToolError(CommandError.ArgCount, "To save a mod pak from within another mod pak, you must provide a path.");
 
                 path = args[0];
             }
@@ -43,7 +45,7 @@ namespace TagTool.Commands.Modding
 			var file = new System.IO.FileInfo(path);
 
             if (!Cache.SaveModPackage(file))
-                return new TagToolError(CommandError.OperationFailed, "Failed to save mod package");
+                return new TagToolError(CommandError.OperationFailed, "Failed to save mod package.");
 			else
 				Console.WriteLine("ModPackage saved to \"" + path + "\".");
 
