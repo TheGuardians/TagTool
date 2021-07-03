@@ -42,7 +42,7 @@ namespace TagTool.Audio
 
             var basePermutationCacheName = Path.Combine(newPath, endName); //combine the last portion of the tag name with the new path
 
-            return $"{basePermutationCacheName}_{pitch_range_index}_{permutation_index}.wav";
+            return $"{basePermutationCacheName}_{pitch_range_index}_{permutation_index}.mp3";
         }
 
         public static BlamSound ConvertGen2Sound(GameCache cache, Gen2SoundCacheFileGestalt soundGestalt, Gen2Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
@@ -191,12 +191,11 @@ namespace TagTool.Audio
 
                 if (useSoundCache)
                 {
-                    var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
-                    if (File.Exists(fileName))
-                        cachedSoundExists = true;
+                    MP3FileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                    cachedSoundExists = File.Exists(MP3FileName);
                 }
 
-                if (!useSoundCache || !cachedSoundExists)
+                if (!cachedSoundExists)
                 {
                     if (channelCount > 2)
                     {
@@ -212,29 +211,15 @@ namespace TagTool.Audio
                         blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFileName, -1, false));
                     }
                     WriteWAVFile(blamSound, WAVFileName);
-
-                    // store WAV file in cache if it does not exist.
-                    if (useSoundCache && !cachedSoundExists)
-                    {
-                        var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
-                        WriteWAVFile(blamSound, fileName);
-                    }
-
-                }
-                else
-                {
-                    // read and update blamSound from existing cache file.
-                    var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
-                    ReadWAVFile(blamSound, fileName);
-                    // write a temporary copy to WAVFile
-                    WriteWAVFile(blamSound, WAVFileName);
                 }
 
                 // we know blamSound is now in PCM format with proper sample count and wav data, headerless
 
                 if (targetFormat == Compression.MP3)
                 {
-                    ConvertToMP3(WAVFileName, MP3FileName);
+                    if(!cachedSoundExists)
+                        ConvertToMP3(WAVFileName, MP3FileName);
+
                     blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3FileName));
                 }
                 else if (targetFormat == Compression.PCM)
@@ -255,7 +240,8 @@ namespace TagTool.Audio
             {
                 DeleteFile(XMAFileName);
                 DeleteFile(WAVFileName);
-                DeleteFile(MP3FileName);
+                if(!useSoundCache)
+                    DeleteFile(MP3FileName);
             }
         }
 
