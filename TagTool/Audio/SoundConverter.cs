@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using TagTool.Audio.Converter;
 using TagTool.Cache;
 using TagTool.Common;
@@ -47,7 +49,8 @@ namespace TagTool.Audio
 
         public static BlamSound ConvertGen2Sound(GameCache cache, Gen2SoundCacheFileGestalt soundGestalt, Gen2Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
         {
-            var baseFileName = $"{Path.GetFileNameWithoutExtension(tagName)}_{pitchRangeIndex}_{permutationIndex}_{DateTimeOffset.UtcNow.Ticks}";
+            var id = Guid.NewGuid();
+            var baseFileName = $"{id}";
             var ADPCMFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.adpcm");
             var XMAFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.xma");
             var WAVFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.wav");
@@ -175,7 +178,8 @@ namespace TagTool.Audio
 
         public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
         {
-            var baseFileName = $"{Path.GetFileNameWithoutExtension(tagName)}_{pitchRangeIndex}_{permutationIndex}_{DateTimeOffset.UtcNow.Ticks}";
+            var id = Guid.NewGuid();
+            var baseFileName = $"{id}";
             var XMAFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.xma");
             var WAVFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.wav");
             var MP3FileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.mp3");
@@ -268,12 +272,12 @@ namespace TagTool.Audio
             if (useTowav)
                 RunTool("towav", $" {XMAFileName}");
             else
-                RunTool("ffmpeg", $"-i \"{XMAFileName}\" -q:a 0 \"{WAVFileName}\"");
+                RunTool("ffmpeg", $"-i \"{XMAFileName}\" -y -q:a 0 \"{WAVFileName}\"");
         }
 
         private static void ConvertToMP3(string WAVFileName, string MP3FileName)
         {
-            RunTool("ffmpeg", $"-i \"{WAVFileName}\" -q:a 0 \"{MP3FileName}\"");
+            RunTool("ffmpeg", $"-i \"{WAVFileName}\" -y -q:a 0 \"{MP3FileName}\"");
         }
 
         private static void RunTool(string executableName, string arguments)

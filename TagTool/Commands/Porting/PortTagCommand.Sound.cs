@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Common;
@@ -16,8 +19,42 @@ namespace TagTool.Commands.Porting
     partial class PortTagCommand
     {
         private SoundCacheFileGestalt BlamSoundGestalt { get; set; } = null;
+        private Dictionary<Sound, Task> SoundConversionTasks = new Dictionary<Sound, Task>();
+        private SemaphoreSlim ConcurrencyLimiter = new SemaphoreSlim(12);
 
-        private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
+        class SoundConversionResult
+        {
+            public Sound Definition;
+            public byte[] Data;
+        }
+
+        private void WaitForPendingSoundConversion()
+        {
+            Task.WaitAll(SoundConversionTasks.Values.ToArray());
+        }
+
+        private Sound FinishConvertSound(SoundConversionResult result)
+        {
+            var task = SoundConversionTasks[result.Definition];
+            SoundConversionTasks.Remove(result.Definition);
+
+            if (!task.IsFaulted)
+            {
+                var sound = result.Definition;
+                var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(result.Data);
+                var resourceReference = CacheContext.ResourceCache.CreateSoundResource(resourceDefinition);
+                sound.Resource = resourceReference;
+                return sound;
+            }
+            else
+            {
+                // rethrow the exception
+                task.GetAwaiter().GetResult();
+                return null;
+            }
+        }
+
+        private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, CachedTag destTag, string blamTag_Name, Action<SoundConversionResult> callback)
         {
             if (BlamSoundGestalt == null)
                 BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
@@ -28,6 +65,25 @@ namespace TagTool.Commands.Porting
                 return null;
             }
 
+            ConcurrencyLimiter.Wait();
+            SoundConversionTasks.Add(sound, Task.Run(() =>
+            {
+                try
+                {
+                    SoundConversionResult result = ConvertSoundInternal(sound, blamTag_Name);
+                    callback(result);
+                }
+                finally
+                {
+                    ConcurrencyLimiter.Release();
+                }        
+            }));
+
+            return sound;
+        }
+
+        private SoundConversionResult ConvertSoundInternal(Sound sound, string blamTag_Name)
+        {
             //
             // Convert Sound Tag Data
             //
@@ -56,7 +112,7 @@ namespace TagTool.Commands.Porting
 
             sound.PlatformCodec.LoadMode = 0;
 
-            if(BlamCache.Version >= CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 // Fix playback parameters for reach
 
@@ -250,7 +306,7 @@ namespace TagTool.Commands.Porting
 
             if (sound.SoundReference.LanguageIndex != -1)
             {
-                if(BlamCache.Version < CacheVersion.HaloReach)
+                if (BlamCache.Version < CacheVersion.HaloReach)
                 {
                     sound.Languages = new List<LanguageBlock>();
 
@@ -304,12 +360,11 @@ namespace TagTool.Commands.Porting
 
             sound.Unknown12 = 0;
 
-            var data = soundDataAggregate.ToArray();
-            var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(data);
-            var resourceReference = CacheContext.ResourceCache.CreateSoundResource(resourceDefinition);
-            sound.Resource = resourceReference;
-
-            return sound;
+            return new SoundConversionResult()
+            {
+                Data = soundDataAggregate.ToArray(),
+                Definition = sound,
+            };
         }
 
         private SoundLooping ConvertSoundLooping(SoundLooping soundLooping)

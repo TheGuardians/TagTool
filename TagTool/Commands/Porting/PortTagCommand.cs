@@ -18,6 +18,7 @@ using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
 using TagTool.Commands.CollisionModels;
+using System.Collections.Concurrent;
 
 namespace TagTool.Commands.Porting
 {
@@ -37,6 +38,7 @@ namespace TagTool.Commands.Porting
         private readonly List<Tag> ResourceTagGroups = new List<Tag> { new Tag("snd!"), new Tag("bitm"), new Tag("Lbsp") }; // for null tag detection
 
         private DirectoryInfo TempDirectory { get; } = new DirectoryInfo(Path.GetTempPath());
+        private BlockingCollection<Action> _deferredActions = new BlockingCollection<Action>();
 
 		private static readonly string[] DoNotReplaceGroups = new[]
 		{
@@ -105,6 +107,9 @@ namespace TagTool.Commands.Porting
                         Flags = oldFlags;
                     }
 
+                    WaitForPendingSoundConversion();
+                    ProcessDeferredActions();
+
                     if (FlagIsSet(PortingFlags.Memory))
                         using (var cacheFileStream = CacheContext.OpenCacheReadWrite())
                         {
@@ -118,7 +123,6 @@ namespace TagTool.Commands.Porting
             }
             finally
             {
-
                 if (initialStringIdCount != CacheContext.StringTable.Count)
                     CacheContext.SaveStrings();
 
@@ -266,9 +270,19 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
+        private void ProcessDeferredActions()
+        {
+            while(_deferredActions.TryTake(out Action action))
+            {
+                action();
+            }
+        }
+
 		public CachedTag ConvertTagInternal(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag blamTag)
 		{
-			if (blamTag == null)
+            ProcessDeferredActions();
+
+            if (blamTag == null)
 				return null;
 
 			var groupTag = blamTag.Group.Tag;
@@ -476,6 +490,8 @@ namespace TagTool.Commands.Porting
             //
 
             ((TagStructure)blamDefinition).PostConvert(BlamCache.Version, CacheContext.Version);
+
+            bool isDeferred = false;
 
             switch (blamDefinition)
 			{
@@ -785,9 +801,19 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Sound sound:
-					blamDefinition = ConvertSound(cacheStream, blamCacheStream, resourceStreams, sound, blamTag.Name);
+                    //isDeferred = true;
+                    blamDefinition = ConvertSound(cacheStream, blamCacheStream, resourceStreams, sound, edTag, blamTag.Name, (SoundConversionResult result) =>
+                    {
+                        _deferredActions.Add(() =>
+                        {
+                            blamDefinition = FinishConvertSound(result);
+                            CacheContext.Serialize(cacheStream, edTag, blamDefinition);
+                    
+                            if (FlagIsSet(PortingFlags.Print))
+                                Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{(edTag.Group as TagGroupGen3).Name}");
+                        });
+                    });
 					break;
-
                 case SoundClasses sncl:
                     blamDefinition = ConvertSoundClasses(sncl, BlamCache.Version);
                     break;
@@ -876,10 +902,13 @@ namespace TagTool.Commands.Porting
                 return null;
             }
 
-			CacheContext.Serialize(cacheStream, edTag, blamDefinition);
+            if (!isDeferred)
+            {
+                CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
-			if (FlagIsSet(PortingFlags.Print))
-				Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{(edTag.Group as TagGroupGen3).Name}");
+                if (FlagIsSet(PortingFlags.Print))
+                    Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{(edTag.Group as TagGroupGen3).Name}");
+            }
 
 			return edTag;
 		}
