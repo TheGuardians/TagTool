@@ -98,7 +98,8 @@ namespace TagTool.Cache
         multiplayer = 1 << 1,
         campaign = 1 << 2,
         firefight = 1 << 3,
-        SignedBit = (1 << 4)
+        SignedBit = 1 << 4,
+        character = 1 << 5
     }
 
     [TagStructure(Size = 0x8)]

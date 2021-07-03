@@ -797,7 +797,7 @@ namespace TagTool.Cache
             }
 
             Console.WriteLine();
-            Console.WriteLine("Please enter the types of the mod package. Separated by a space [MainMenu Multiplayer Campaign Firefight]");
+            Console.WriteLine("Please enter the types of the mod package. Separated by a space [MainMenu Multiplayer Campaign Firefight Character]");
             string response = Console.ReadLine().Trim();
 
             Header.ModifierFlags = Header.ModifierFlags & ModifierFlags.SignedBit;
