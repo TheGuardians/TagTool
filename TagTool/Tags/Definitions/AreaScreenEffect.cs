@@ -12,9 +12,12 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class AreaScreenEffect : TagStructure
 	{
-        [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public GlobalFlagBits GlobalFlags;
-        [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public HiddenFlagBits GlobalHiddenFlags;
 
         public List<ScreenEffectBlock> ScreenEffects;
@@ -50,7 +53,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public ushort Unknown;
 
-            [TagField(CacheVersion.HaloReach, MaxVersion = CacheVersion.Halo3ODST)]
+            
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public FlagBits Flags;
             [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public FlagBits_HO Flags_HO;
@@ -80,7 +85,8 @@ namespace TagTool.Tags.Definitions
             //      NOTE: Not used for scenario global effects
             //
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Delay;
 
             /// <summary>
@@ -107,11 +113,14 @@ namespace TagTool.Tags.Definitions
 
             ///OBJECT FALLOFF 
             ///applies a falloff based on an object function - ignored if the effect is not attached to an object
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId InputVariable;
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId RangeVariable;
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public TagFunction ObjectFalloff = new TagFunction { Data = new byte[0] };
 
             public float LightIntensity;
@@ -131,32 +140,43 @@ namespace TagTool.Tags.Definitions
             public RealRgbColor ColorFilter; ///#this color is multiplied on top
             public RealRgbColor ColorFloor; ///#this color is subtracted
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Tron; ///tron:[0-1]#adds a full-screen tron effect
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float RadialBlur; ///{motion suck}:[-2, 2]#adds motion-blur towards or away from this screen effect
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public RealVector3d RadialBlurDirection; ///{motion suck direction}!:[do not edit]#do not edit" />
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float HorizontalBlur; ///[0-10] expensive#blurs the entire screen
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float VerticalBlur; ///[0-10] expensive#blurs the entire screen
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public float Vision; ///[0-1]#turns on the global vision mode
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Unknown4;
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float HudTransparency; ///[0-1]#fades the chud
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float FovIn;
 
-            [TagField(CacheVersion.Halo3ODST, MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float FovOut;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]

@@ -315,8 +315,9 @@ namespace TagTool.Cache
         /// <returns></returns>
         public static bool AttributeInCacheVersion(TagFieldAttribute attr, CacheVersion compare)
         {
-            if (attr.Versions != null && Array.IndexOf(attr.Versions, compare) != -1)
-                return true;
+            if (attr.Version != CacheVersion.Unknown)
+                if (attr.Version != compare)
+                    return false;
 
             if (attr.Gen != CacheGeneration.Unknown)
                 if (!IsInGen(attr.Gen, compare))

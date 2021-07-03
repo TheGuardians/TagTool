@@ -31,7 +31,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The set of versions the tag field is present in. (Can be combined with MinVersion/MaxVersion)
         /// </summary>
-        public CacheVersion[] Versions { get; set; }
+        public CacheVersion Version { get; set; } = CacheVersion.Unknown;
 
         /// <summary>
         /// The game generation of the tag field.
@@ -95,20 +95,6 @@ namespace TagTool.Tags
         /// Used when the string written must absolutely be null terminated. For example Maxscript doesn't read fixed length strings
         /// </summary>
         public bool ForceNullTerminated = false;
-
-        public TagFieldAttribute()
-        {
-
-        }
-
-        /// <summary>
-        /// Constructor that takes a set of versions. Can be used with <see cref="MinVersion"/> and <see cref="MaxVersion"/> if desired.
-        /// </summary>
-        /// <param name="versions">The set of versions this tag field is present in.</param>
-        public TagFieldAttribute(params CacheVersion[] versions)
-        {
-            Versions = versions;
-        }
     }
 
     [Flags]
