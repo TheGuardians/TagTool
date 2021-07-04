@@ -801,7 +801,7 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Sound sound:
-                    //isDeferred = true;
+                    isDeferred = true;
                     blamDefinition = ConvertSound(cacheStream, blamCacheStream, resourceStreams, sound, edTag, blamTag.Name, (SoundConversionResult result) =>
                     {
                         _deferredActions.Add(() =>
