@@ -8,6 +8,7 @@ using TagTool.Common;
 using TagTool.Tags.Definitions;
 using HaloShaderGenerator.Shader;
 using static TagTool.Tags.Definitions.RenderMethodTemplate;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Shaders.ShaderMatching
 {
@@ -119,13 +120,21 @@ namespace TagTool.Shaders.ShaderMatching
         public CachedTag FindClosestTemplate(CachedTag sourceRmt2Tag, RenderMethodTemplate sourceRmt2, bool canGenerate)
         {
             Debug.Assert(IsInitialized);
-
+    
             Rmt2Descriptor sourceRmt2Desc;
             if (!Rmt2Descriptor.TryParse(sourceRmt2Tag.Name, out sourceRmt2Desc))
                 throw new ArgumentException($"Invalid rmt2 name '{sourceRmt2Tag.Name}'", nameof(sourceRmt2Tag));
 
             // rebuild options to match base cache
             sourceRmt2Desc = RebuildRmt2Options(sourceRmt2Desc, BaseCacheStream, PortingCacheStream);
+
+            string tagName = $"shaders\\{sourceRmt2Desc.Type}_templates\\_{string.Join("_", sourceRmt2Desc.Options)}";
+
+            if (ShaderCache.ExportTemplate(BaseCacheStream, BaseCache, tagName, out CachedTag cachedRmt2Tag))
+            {
+                Console.WriteLine($"Found cached rmt2: {tagName}");
+                return cachedRmt2Tag;
+            }
 
             var relevantRmt2s = new List<Rmt2Pairing>();
 
@@ -234,7 +243,7 @@ namespace TagTool.Shaders.ShaderMatching
             // whatever can be used to narrow it down.
             Console.WriteLine($"No rmt2 match found for {sourceRmt2Tag.Name}");
 
-            if (canGenerate && TryGenerateTemplate(sourceRmt2Desc, out CachedTag generatedRmt2))
+            if (canGenerate && TryGenerateTemplate(tagName, sourceRmt2Desc, out CachedTag generatedRmt2))
             {
                 Console.WriteLine($"Generated rmt2 \"{generatedRmt2.Name}\"");
                 return generatedRmt2;
@@ -267,9 +276,8 @@ namespace TagTool.Shaders.ShaderMatching
             }
         }
 
-        private bool TryGenerateTemplate(Rmt2Descriptor rmt2Desc, out CachedTag generatedRmt2)
+        private bool TryGenerateTemplate(string tagName, Rmt2Descriptor rmt2Desc, out CachedTag generatedRmt2)
         {
-            string tagName = $"shaders\\{rmt2Desc.Type}_templates\\_{string.Join("_", rmt2Desc.Options)}";
             generatedRmt2 = null;
 
             var generator = rmt2Desc.GetGenerator(true);
@@ -295,11 +303,14 @@ namespace TagTool.Shaders.ShaderMatching
                 glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
             }
 
-            var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName);
+            var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName, out PixelShader pixl, out VertexShader vtsh);
 
             generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
 
             BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
+
+            ShaderCache.ImportTemplate(tagName, rmt2, pixl, vtsh);
+
             return true;
         }
 

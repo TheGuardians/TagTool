@@ -402,11 +402,16 @@ namespace TagTool.Shaders.ShaderGenerator
 
         public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, Stream cacheStream, RenderMethodDefinition rmdf, GlobalPixelShader glps, GlobalVertexShader glvs, IShaderGenerator generator, string shaderName)
         {
+            return GenerateRenderMethodTemplate(cache, cacheStream, rmdf, glps, glvs, generator, shaderName, out PixelShader pixl, out VertexShader vtsh);
+        }
+
+        public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, Stream cacheStream, RenderMethodDefinition rmdf, GlobalPixelShader glps, GlobalVertexShader glvs, IShaderGenerator generator, string shaderName, out PixelShader pixl, out VertexShader vtsh)
+        {
 
             var rmt2 = new RenderMethodTemplate();
 
-            var pixl = GeneratePixelShader(cache, generator);
-            var vtsh = GenerateVertexShader(cache, generator);
+            pixl = GeneratePixelShader(cache, generator);
+            vtsh = GenerateVertexShader(cache, generator);
 
 
             if (!cache.TagCache.TryGetTag(shaderName + ".pixl", out var pixlTag))

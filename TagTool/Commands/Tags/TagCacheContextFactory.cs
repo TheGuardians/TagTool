@@ -127,6 +127,7 @@ namespace TagTool.Commands.Tags
             // porting related
             context.AddCommand(new UseXSDCommand());
             context.AddCommand(new UseAudioCacheCommand());
+            context.AddCommand(new UseShaderCacheCommand());
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
         }
     }

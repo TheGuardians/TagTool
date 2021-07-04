@@ -430,6 +430,7 @@
     <Compile Include="Commands\Shaders\DumpDisassembledShadersCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateRenderMethodCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
+    <Compile Include="Commands\Shaders\UseShaderCacheCommand.cs" />
     <Compile Include="Commands\Shaders\UseXSDCommand.cs" />
     <Compile Include="Commands\Sounds\ExtractXMACommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
@@ -671,6 +672,7 @@
     <Compile Include="Shaders\ParameterUsage.cs" />
     <Compile Include="Shaders\RenderMethodExtern.cs" />
     <Compile Include="Shaders\EntryPoint.cs" />
+    <Compile Include="Shaders\ShaderCache.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderFunctions\ShaderFunctionHelper.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderBlackGenerator.cs" />
