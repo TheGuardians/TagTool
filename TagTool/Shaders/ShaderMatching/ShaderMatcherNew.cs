@@ -309,7 +309,7 @@ namespace TagTool.Shaders.ShaderMatching
 
             BaseCache.Serialize(BaseCacheStream, generatedRmt2, rmt2);
 
-            ShaderCache.ImportTemplate(tagName, rmt2, pixl, vtsh);
+            ShaderCache.ImportTemplate(BaseCache, tagName, rmt2, pixl, vtsh);
 
             return true;
         }

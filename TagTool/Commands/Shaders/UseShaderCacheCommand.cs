@@ -49,7 +49,7 @@ namespace TagTool.Commands.Shaders
                 }
             }
 
-            if (tagCacheFile.Exists)
+            if (tagCacheFile.Directory.Exists)
             {
                 ShaderCache = (GameCacheHaloOnline)GameCache.Open(tagCacheFile);
                 Console.WriteLine("Shader cache set successfully");

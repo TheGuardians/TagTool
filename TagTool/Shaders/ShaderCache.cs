@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Shaders;
+using TagTool.Common;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Shaders
 {
     public static class ShaderCache
     {
-        public static bool ImportTemplate(string tagName, RenderMethodTemplate rmt2, PixelShader pixl, VertexShader vtsh)
+        public static bool ImportTemplate(GameCache sourceCache, string tagName, RenderMethodTemplate rmt2, PixelShader pixl, VertexShader vtsh)
         {
             var shaderCache = UseShaderCacheCommand.ShaderCache;
             if (shaderCache == null)
@@ -18,13 +21,7 @@ namespace TagTool.Shaders
             {
                 try
                 {
-                    var cachedRmt2Tag = shaderCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
-                    var cachedRmt2 = rmt2.DeepCloneV2();
-                    cachedRmt2.PixelShader = shaderCache.TagCache.AllocateTag<PixelShader>(tagName);
-                    cachedRmt2.VertexShader = shaderCache.TagCache.AllocateTag<VertexShader>(tagName);
-                    shaderCache.Serialize(stream, cachedRmt2.PixelShader, pixl);
-                    shaderCache.Serialize(stream, cachedRmt2.VertexShader, vtsh);
-                    shaderCache.Serialize(stream, cachedRmt2Tag, cachedRmt2);
+                    ConvertTemplate(sourceCache, stream, shaderCache, tagName, rmt2, pixl, vtsh);
                     return true;
                 }
                 finally
@@ -43,25 +40,71 @@ namespace TagTool.Shaders
                 using (var stream = shaderCache.OpenCacheRead())
                 {
                     var cachedRmt2 = shaderCache.Deserialize<RenderMethodTemplate>(stream, cachedTemplateTag);
-
                     var cachedPixl = shaderCache.Deserialize<PixelShader>(stream, cachedRmt2.PixelShader);
-                    var pixlTag = destCache.TagCache.AllocateTag<PixelShader>(cachedTemplateTag.Name);
-                    cachedRmt2.PixelShader = pixlTag;
-                    destCache.Serialize(destCacheStream, pixlTag, cachedPixl);
+                    var cachedVtsh = shaderCache.Deserialize<VertexShader>(stream, cachedRmt2.VertexShader);
 
-                    var cachedVertexShader = shaderCache.Deserialize<VertexShader>(stream, cachedRmt2.VertexShader);
-                    var vtshTag = destCache.TagCache.AllocateTag<VertexShader>(cachedTemplateTag.Name);
-                    cachedRmt2.VertexShader = vtshTag;
-                    destCache.Serialize(destCacheStream, vtshTag, cachedVertexShader);
-
-                    rmt2Tag = destCache.TagCache.AllocateTag<RenderMethodTemplate>(cachedTemplateTag.Name);
-                    destCache.Serialize(destCacheStream, rmt2Tag, cachedRmt2);
+                    // allocate and fixup the shader tags
+                    rmt2Tag = ConvertTemplate(shaderCache, destCacheStream, destCache, tagName, cachedRmt2, cachedPixl, cachedVtsh);
                     return true;
                 }
             }
 
             rmt2Tag = null;
             return false;
+        }
+
+        private static CachedTag ConvertTemplate(GameCache sourceCache, Stream destCacheStream, GameCache destCache, string tagName, RenderMethodTemplate rmt2, PixelShader pixl, VertexShader vtsh)
+        {
+            // convert the data
+            var cachedRmt2 = (RenderMethodTemplate)ConvertData(sourceCache, destCache, rmt2.DeepCloneV2());
+            var cachedPixl = (PixelShader)ConvertData(sourceCache, destCache, pixl);
+            var cachedVtsh = (VertexShader)ConvertData(sourceCache, destCache, vtsh);
+
+            var cachedRmt2Tag = destCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
+            cachedRmt2.PixelShader = destCache.TagCache.AllocateTag<PixelShader>(tagName);
+            cachedRmt2.VertexShader = destCache.TagCache.AllocateTag<VertexShader>(tagName);
+
+            // serialize everything
+            destCache.Serialize(destCacheStream, cachedRmt2.PixelShader, cachedPixl);
+            destCache.Serialize(destCacheStream, cachedRmt2.VertexShader, cachedVtsh);
+            destCache.Serialize(destCacheStream, cachedRmt2Tag, cachedRmt2);
+
+            return cachedRmt2Tag;
+        }
+
+        private static object ConvertData(GameCache sourceCache, GameCache destCache, object data)
+        {
+            switch (data)
+            {
+                case StringId stringId:
+                    {
+                        var str = sourceCache.StringTable.GetString(stringId);
+                        var destStringId = destCache.StringTable.GetStringId(str);
+                        if (stringId != StringId.Invalid && destStringId == StringId.Invalid)
+                            return destCache.StringTable.AddString(str);
+                        else
+                            return destStringId;
+                    }
+                case CachedTag srcTag:
+                    {
+                        destCache.TagCache.TryGetTag($"{srcTag.Name}.{srcTag.Group}", out CachedTag destTag);
+                        return destTag;
+                    }
+                case TagStructure tagStruct:
+                    {
+                        foreach (var field in tagStruct.GetTagFieldEnumerable(sourceCache.Version, sourceCache.Platform))
+                            field.SetValue(data, ConvertData(sourceCache, destCache, field.GetValue(data)));
+                        return tagStruct;
+                    }
+                case IList collection:
+                    {
+                        for (int i = 0; i < collection.Count; i++)
+                            collection[i] = ConvertData(sourceCache, destCache, collection[i]);
+                        return collection;
+                    }
+                default:
+                    return data;
+            }
         }
     }
 }
