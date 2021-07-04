@@ -209,13 +209,12 @@ namespace TagTool.Audio
                         byte[] originalWAVdata = File.ReadAllBytes(WAVFileName);
                         byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x4E);
                         blamSound.UpdateFormat(Compression.PCM, truncatedWAVdata);
+                        WriteWAVFile(blamSound, WAVFileName);
                     }
                     else
                     {
                         ConvertToWAV(XMAFileName, WAVFileName, true);
-                        blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFileName, -1, false));
                     }
-                    WriteWAVFile(blamSound, WAVFileName);
                 }
 
                 // we know blamSound is now in PCM format with proper sample count and wav data, headerless
@@ -265,13 +264,13 @@ namespace TagTool.Audio
 
         public static void ConvertADPCMToWAV(string ADPCMFileName, string WAVFileName, string specialOption="")
         {
-            RunTool("ffmpeg", $"-i {ADPCMFileName} {specialOption} {WAVFileName}");
+            RunTool("ffmpeg", $"-i \"{ADPCMFileName}\" {specialOption} \"{WAVFileName}\"");
         }
 
         private static void ConvertToWAV(string XMAFileName, string WAVFileName, bool useTowav = true)
         {
             if (useTowav)
-                RunTool("towav", $" {XMAFileName}");
+                RunTool("towav", $" \"{XMAFileName}\"");
             else
                 RunTool("ffmpeg", $"-i \"{XMAFileName}\" -y -q:a 0 \"{WAVFileName}\"");
         }
