@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Cache.HaloOnline;
 using TagTool.Commands.Common;
@@ -30,35 +27,34 @@ namespace TagTool.Commands.Shaders
             if (args.Count != 1)
                 return new TagToolError(CommandError.ArgCount);
 
-            var directory = args[0];
+            var directory = new DirectoryInfo(args[0]);
+            var tagsFile = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
 
-            var tagCacheFile = new FileInfo(Path.Combine(directory, "tags.dat"));
-
-            if (!tagCacheFile.Exists)
+            if (!directory.Exists || !tagsFile.Exists)
             {
-                Console.Write("Shader cache does not exist. Create it? [y/n] ");
-                var answer = Console.ReadLine().ToLower();
-
-                if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return new TagToolError(CommandError.YesNoSyntax);
-
-                if (answer.StartsWith("y"))
+                if (!directory.Exists)
                 {
-                    tagCacheFile.Directory.Create();
-                    ShaderCache = new GameCacheHaloOnline(tagCacheFile.Directory);
-                }
-            }
+                    Console.Write("Shader cache directory does not exist. Create it? [y/n] ");
+                    var answer = Console.ReadLine().ToLower();
 
-            if (tagCacheFile.Directory.Exists)
-            {
-                ShaderCache = (GameCacheHaloOnline)GameCache.Open(tagCacheFile);
-                Console.WriteLine("Shader cache set successfully");
-                return true;
+                    if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
+                        return new TagToolError(CommandError.YesNoSyntax);
+
+                    if (!answer.StartsWith("y"))
+                        return true;
+
+                    directory.Create();
+                }
+
+                ShaderCache = new GameCacheHaloOnline(directory);
             }
             else
             {
-                return new TagToolError(CommandError.DirectoryNotFound, $"\"{directory}\"");
+                ShaderCache = (GameCacheHaloOnline)GameCache.Open(tagsFile);
             }
+
+            Console.WriteLine("Shader cache set successfully");
+            return true;
         }
     }
 }
