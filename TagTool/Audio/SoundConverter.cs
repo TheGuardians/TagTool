@@ -189,8 +189,7 @@ namespace TagTool.Audio
                 BlamSound blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
                 var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
                 var sampleRate = blamSound.SampleRate.GetSampleRateHz();
-                WriteXMAFile(blamSound, XMAFileName);
-
+                
                 bool cachedSoundExists = false;
 
                 if (useSoundCache)
@@ -201,6 +200,8 @@ namespace TagTool.Audio
 
                 if (!cachedSoundExists)
                 {
+                    WriteXMAFile(blamSound, XMAFileName);
+
                     if (channelCount > 2)
                     {
                         // channelCount is 4 or 6
