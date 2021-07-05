@@ -5,7 +5,7 @@ using TagTool.Tags;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0x3390, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x3390, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     public class CacheFileHeaderGenHaloOnline : CacheFileHeader
     {
         public Tag HeaderSignature;

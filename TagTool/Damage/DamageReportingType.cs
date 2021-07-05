@@ -15,7 +15,7 @@ namespace TagTool.Damage
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public Halo3ODSTValue Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public HaloOnlineValue HaloOnline;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]

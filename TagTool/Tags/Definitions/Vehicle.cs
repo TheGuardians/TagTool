@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x114, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x140, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x148, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x148, MinVersion = CacheVersion.HaloOnlineED)]
     public class Vehicle : Unit
     {
         public VehicleFlagBits VehicleFlags; // int
@@ -153,10 +153,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public HavokVehiclePhysics HavokPhysicsOld;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float Unknown31;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float Unknown32;
 
         [TagStructure(Size = 0x4)]
@@ -431,7 +431,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x64, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloOnlineED)]
         public class AlienFighterPhysics : TagStructure
         {
             public VehicleSteeringControl Steering;
@@ -450,17 +450,17 @@ namespace TagTool.Tags.Definitions
             public float CruisingThrottle;
             public float DiveSpeedScale;
 
-            [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnlineED)]
             public byte[] Unused = new byte[4];
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnlineED)]
         public class TurretPhysics : TagStructure
         {
             public float Unknown1;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float Unknown2;
         }
 

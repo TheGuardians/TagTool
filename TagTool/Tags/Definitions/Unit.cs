@@ -9,14 +9,14 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x130, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)] 
-    [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnline106708)] 
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnlineED)] 
     public class Unit : GameObject
     {
         public UnitFlagBits UnitFlags; // int
         public DefaultTeamValue DefaultTeam; // short
         public ConstantSoundVolumeValue ConstantSoundVolume; // short
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag HologramUnit;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -28,10 +28,10 @@ namespace TagTool.Tags.Definitions
 
         public UnitCamera Camera;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public UnitCamera SyncActionCamera;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public UnitAssassination Assassination;
 
         public UnitSeatAcceleration SeatAcceleration;
@@ -79,10 +79,10 @@ namespace TagTool.Tags.Definitions
         public CachedTag FlurryMeleeDamage;
         public CachedTag ObstacleSmashMeleeDamage;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag ShieldPopDamage;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag AssassinationDamage;
 
         public MotionSensorBlipSizeValue MotionSensorBlipSize; // short
@@ -113,7 +113,7 @@ namespace TagTool.Tags.Definitions
         public List<PoweredSeat> PoweredSeats;
         public List<Weapon> Weapons;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<TargetTrackingBlock> TargetTracking;
 
         public List<UnitSeat> Seats;

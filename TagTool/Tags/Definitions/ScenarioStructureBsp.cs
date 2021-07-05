@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x388, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3B8, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
     public class ScenarioStructureBsp : TagStructure
     {
@@ -82,7 +82,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<PlaneReference> Planes;
 
-        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnlineED)]
         public byte[] UnknownUnused1;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -192,11 +192,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
         public int Unknown86;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown87;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown88;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown89;
 
         [TagField(MinVersion = CacheVersion.HaloOnline301003)]
@@ -542,7 +542,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnlineED)]
             public class DecoratorGrid : TagStructure
             {
                 public short Amount;
@@ -742,7 +742,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnlineED)]
         public class InstancedGeometryInstance : TagStructure
         {
             public float Scale;

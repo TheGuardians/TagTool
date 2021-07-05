@@ -591,7 +591,7 @@ namespace TagTool.Tags.Definitions
             public List<FootTrackingDefaultsBlock> FootDefaults;
 
             [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach)]
             public class WeaponClassBlock : TagStructure
 			{
@@ -609,7 +609,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach, Length = 0xC)]
                 public byte[] RangedActions = new byte[0xC];
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public List<SyncActionGroup> SyncActionGroups;
 
                 [TagStructure(Size = 0x34, MaxVersion = CacheVersion.HaloOnline700123)]

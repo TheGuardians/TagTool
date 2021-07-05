@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x98, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xD4, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
-        [TagStructure(Size = 0xA0, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0xA0, MinVersion = CacheVersion.HaloOnlineED)]
         public class Class : TagStructure
 		{
             public short MaxSoundsPerTag;

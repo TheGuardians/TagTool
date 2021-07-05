@@ -6,7 +6,7 @@ using TagTool.Tags;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloReach)]
     public class PitchRange : TagStructure
 	{

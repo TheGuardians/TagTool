@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "ai_dialogue_globals", Tag = "adlg", Size = 0x4C, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "ai_dialogue_globals", Tag = "adlg", Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "ai_dialogue_globals", Tag = "adlg", Size = 0x5C, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "ai_dialogue_globals", Tag = "adlg", Size = 0x5C, MinVersion = CacheVersion.HaloOnlineED)]
     public class AiDialogueGlobals : TagStructure
     {
         public Bounds<float> StrikeDelayBounds;
@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
 
         public List<InvoluntaryDatum> InvoluntaryData;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
         public byte[] Unused2;
         
         [TagStructure(Size = 0x4)]

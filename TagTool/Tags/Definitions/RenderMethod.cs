@@ -153,7 +153,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
                 public SamplerFilterMode FilterModeH3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public SamplerFilterMode FilterMode;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public PackedSamplerFilterMode FilterModeODST; // not sure if the anisotropy is used

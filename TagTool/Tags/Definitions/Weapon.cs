@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x354, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x358, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x384, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline449175)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x384, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295)]
     public class Weapon : Item
     {
@@ -65,21 +65,21 @@ namespace TagTool.Tags.Definitions
         public short MagnificationLevels;
         public Bounds<float> MagnificationBounds;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public WeapMagnificationFlags MagnificationFlags;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float WeaponSwitchReadySpeed0Default;
 
         public Angle AutoaimAngle;
         public float AutoaimRangeLong;
         public float AutoaimRangeShort;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float AutoaimSafeRadius;
 
         public Angle MagnetismAngle;
         public float MagnetismRangeLong;
         public float MagnetismRangeShort;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float MagnetismSafeRadius;
 
         public Angle DeviationAngle;
@@ -89,17 +89,17 @@ namespace TagTool.Tags.Definitions
         public uint Unknown13;
         public uint Unknown14;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown15;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<Unit.TargetTrackingBlock> TargetTracking;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown16;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown17;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown18;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown19;
 
         public MovementPenalizedValue MovementPenalized;
@@ -121,9 +121,9 @@ namespace TagTool.Tags.Definitions
         public float ActiveCamoDing;
         public float CamoRegrowthRate;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown22;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown23;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -137,9 +137,9 @@ namespace TagTool.Tags.Definitions
         public TrackingType Tracking;
         public short UnknownEnum;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public SpecialHudVersionValue SpecialHudVersion;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public int SpecialHudIcon;
         
         [TagField(Flags = Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
@@ -399,7 +399,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x134, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x1AC, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x1AC, MinVersion = CacheVersion.HaloOnlineED)]
         public class Barrel : TagStructure
 		{
             public BarrelFlags Flags;
@@ -436,33 +436,33 @@ namespace TagTool.Tags.Definitions
             public Angle ProjectileMinimumError;
             public Bounds<Angle> ProjectileErrorAngle;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float ReloadPenalty;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float SwitchPenalty;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float ZoomPenalty;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float JumpPenalty;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<FiringPenaltyFunctionBlock> FiringPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<FiringCrouchedPenaltyFunctionBlock> FiringCrouchedPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<MovingPenaltyFunctionBlock> MovingPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<TurningPenaltyFunctionBlock> TurningPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float ErrorAngleMaximumRotation;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<DualFiringPenaltyFunctionBlock> DualFiringPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<DualFiringCrouchedPenaltyFunctionBlock> DualFiringCrouchedPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<DualMovingPenaltyFunctionBlock> DualMovingPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<DualTurningPenaltyFunctionBlock> DualTurningPenaltyFunction;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float DualErrorAngleMaximumRotation;
 
             public List<FirstPersonOffsetBlock> FirstPersonOffsets;
@@ -609,7 +609,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public Halo3Value Halo3;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public HaloOnlineValue HaloOnline;
 
         [Flags]
@@ -673,7 +673,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public OldWeaponFlags OldFlags;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public NewWeaponFlags NewFlags;
 
         [Flags]

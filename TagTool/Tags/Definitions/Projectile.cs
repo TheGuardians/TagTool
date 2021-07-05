@@ -8,7 +8,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "projectile", Tag = "proj", Size = 0x1A8, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "projectile", Tag = "proj", Size = 0x1AC, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "projectile", Tag = "proj", Size = 0x1AC, MinVersion = CacheVersion.HaloOnlineED)]
     public class Projectile : GameObject
     {
         public ProjectileFlagBits ProjectileFlags;
@@ -61,7 +61,7 @@ namespace TagTool.Tags.Definitions
         public float InitialVelocity;
         public float FinalVelocity;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float IndirectFireVelocity;
 
         public float AiVelocityScale;

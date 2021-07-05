@@ -6,7 +6,7 @@ using TagTool.Tags;
 namespace TagTool.Geometry.BspCollisionGeometry
 {
     [TagStructure(Size = 0xB8, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnlineED)]
     public class InstancedGeometryBlock : TagStructure
     {
         public int Checksum;
@@ -22,9 +22,9 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public short CompressionIndex;
         public float Unknown4;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public TagBlock<TagHkpMoppCode> UnknownBspPhysics;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint RuntimePointer;
     }
 }

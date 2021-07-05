@@ -75,13 +75,13 @@ namespace TagTool.Cache.HaloOnline
             // hackfix until we fix tag cache creation
             if (reader.BaseStream.Length == 0)
             {
-                Version = CacheVersion.HaloOnline106708;
+                Version = CacheVersion.HaloOnlineED;
                 return;
             }
                 
 
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708, Platform);
+            var deserializer = new TagDeserializer(CacheVersion.HaloOnlineED, Platform);
 
             TagCacheHaloOnlineHeader header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(header.CreationTime, out var closestVersion)))

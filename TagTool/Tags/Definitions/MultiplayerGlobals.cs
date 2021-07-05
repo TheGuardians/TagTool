@@ -23,10 +23,10 @@ namespace TagTool.Tags.Definitions
 
             public List<ArmorCustomizationBlock> ArmorCustomization;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<Consumable> Equipment;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<EnergyRegenerationBlock> EnergyRegeneration;
 
             public CachedTag MultiplayerStrings;
@@ -40,7 +40,7 @@ namespace TagTool.Tags.Definitions
             public List<WeaponSet> WeaponSets;
             public List<VehicleSet> VehicleSets;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<PodiumAnimation> PodiumAnimations;
 
             public CachedTag EngineSettings;
@@ -243,19 +243,19 @@ namespace TagTool.Tags.Definitions
             public CachedTag Bomb;
             public CachedTag VipZone;
             public CachedTag InGameStrings;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag Unknown;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag Unknown2;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag Unknown3;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag Unknown4;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag Unknown5;
             public List<Sound> Sounds;
             public List<LoopingSound> LoopingSounds;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<EventBlock> UnknownEvents;
             public List<EventBlock> GeneralEvents;
             public List<EventBlock> FlavorEvents;
@@ -298,13 +298,13 @@ namespace TagTool.Tags.Definitions
             public CachedTag SimulationInterpolation5;
             [TagField(MinVersion = CacheVersion.HaloOnline498295)]
             public CachedTag Unknown13;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag MenuMusic1;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag MenuMusic2;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag MenuMusic3;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag MenuMusic4;
 
             [TagStructure(Size = 0x10)]
@@ -331,7 +331,7 @@ namespace TagTool.Tags.Definitions
                 public TypeValue Type;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public EventValue Event_H3;
-                [TagField(Flags = Label, MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(Flags = Label, MinVersion = CacheVersion.HaloOnlineED)]
                 public StringId Event;
                 [TagField(Length = 256, MinVersion = CacheVersion.HaloOnline498295)]
                 public string Unknown_;
@@ -343,9 +343,9 @@ namespace TagTool.Tags.Definitions
                 public short Unknown2;
                 public StringId DisplayString;
                 public StringId DisplayMedal;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public uint Unknown3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public uint Unknown4;
                 public RequiredFieldValue RequiredField;
                 public RequiredFieldValue ExcludedAudience;
@@ -481,7 +481,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x21C, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x220, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagStructure(Size = 0x220, MinVersion = CacheVersion.HaloOnlineED)]
             public class MultiplayerConstant : TagStructure
 			{
                 public float ForbidEnemySpawnFullWeightRadius;
@@ -583,7 +583,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag ForgeCursorImpactEffect;
                 public StringId BombDefusalString;
                 public StringId BlockedTeleporterString;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public int Unknown72;
                 public StringId Unknown73;
                 public StringId SpawnAllowedDefaultRespawnString;

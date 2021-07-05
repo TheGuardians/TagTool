@@ -134,9 +134,9 @@ namespace TagTool.Tags.Definitions
         public CachedTag ShieldImpactThirdPerson;       
         public CachedTag ShieldImpactFirstPerson;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag OvershieldThirdPerson;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag OvershieldFirstPerson;
 
         //Reach has the model object data block inlined here
@@ -1082,12 +1082,12 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnlineED)]
         public class Target : TagStructure
 		{
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ByteFlags Flags1;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, Flags = TagFieldFlags.Padding, Length = 3)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, Flags = TagFieldFlags.Padding, Length = 3)]
             public byte[] pad = new byte[3];
 
             public StringId MarkerName;
@@ -1102,7 +1102,7 @@ namespace TagTool.Tags.Definitions
             public FlagsValue Flags;
             public float LockOnDistance;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public StringId TargetFilter;
 
             [Flags]

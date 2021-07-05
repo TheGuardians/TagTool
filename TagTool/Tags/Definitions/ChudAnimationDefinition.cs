@@ -67,11 +67,11 @@ namespace TagTool.Tags.Definitions
             public TagFunction Function = new TagFunction { Data = new byte[0] };
 
             [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnlineED)]
             public class AnimationBlock : TagStructure
 			{
                 public int FrameNumber;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public uint Unknown;
             }
         }

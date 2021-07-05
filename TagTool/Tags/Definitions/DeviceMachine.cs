@@ -5,7 +5,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x24, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x24, MinVersion = CacheVersion.HaloOnlineED)]
     public class DeviceMachine : Device
     {
         public TypeValue Type;
@@ -17,7 +17,7 @@ namespace TagTool.Tags.Definitions
         public PathfindingPolicyValue PathfindingPolicy;
         public short Unknown6;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
         public byte[] Unknown7;
  
         public enum TypeValue : short

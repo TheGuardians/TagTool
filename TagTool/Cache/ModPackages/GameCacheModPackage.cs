@@ -30,7 +30,7 @@ namespace TagTool.Cache
         public GameCacheModPackage(GameCacheHaloOnlineBase baseCache, FileInfo file)
         {
             ModPackageFile = file;
-            Version = CacheVersion.HaloOnline106708;
+            Version = CacheVersion.HaloOnlineED;
             Platform = CachePlatform.Original;
 
             Endianness = EndianFormat.LittleEndian;
@@ -53,7 +53,7 @@ namespace TagTool.Cache
             ModPackageFile = null;
             Directory = null;
 
-            Version = CacheVersion.HaloOnline106708;
+            Version = CacheVersion.HaloOnlineED;
             Endianness = EndianFormat.LittleEndian;
             Platform = CachePlatform.Original;
 
@@ -67,7 +67,7 @@ namespace TagTool.Cache
             // create copy of string table
             using (var stringStream = (baseCache as GameCacheHaloOnline).StringIdCacheFile.OpenRead())
             {
-                var newStringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, stringStream);
+                var newStringTable = new StringTableHaloOnline(CacheVersion.HaloOnlineED, stringStream);
                 StringTableHaloOnline = newStringTable;
                 BaseModPackage.StringTable = newStringTable;
             }

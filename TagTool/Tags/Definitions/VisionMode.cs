@@ -4,7 +4,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x188, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x194, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x194, MinVersion = CacheVersion.HaloOnlineED)]
     public class VisionMode : TagStructure
     {
         public sbyte Unknown1;
@@ -29,12 +29,12 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// This controls timing and distance of the pulse animation when VISR is active.
         /// </summary>
-        [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public class PingParametersBlock : TagStructure
         {
             public float PingDistance;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float VisionThroughWallsDistance;
             public float PingInterval; // 30 tick
             public float PingPulseDuration; // 30 tick

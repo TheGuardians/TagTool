@@ -298,10 +298,11 @@ namespace TagTool.BlamFile
                     switch (targetVersion)
                     {
                         case CacheVersion.Halo3ODST:
+                        case CacheVersion.HaloOnlineED:
                         case CacheVersion.HaloOnline106708:
                             ConvertHalo3ToODSTScenarioChunk();
                             Version = targetVersion;
-                            if (targetVersion == CacheVersion.HaloOnline106708)
+                            if (targetVersion == CacheVersion.HaloOnlineED)
                                 Format = EndianFormat.LittleEndian;
                             break;
                         default:
@@ -310,8 +311,9 @@ namespace TagTool.BlamFile
                     break;
 
                 case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
-                    if (targetVersion == CacheVersion.HaloOnline106708)
+                    if (targetVersion == CacheVersion.HaloOnlineED)
                         Format = EndianFormat.LittleEndian;
                     return;
 

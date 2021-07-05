@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0xC, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0xC, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0xC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class AreaScreenEffect : TagStructure
 	{
@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x84, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xE8, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0xF0, MinVersion = CacheVersion.HaloReach)]
         public class ScreenEffectBlock : TagStructure
 		{
@@ -57,7 +57,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public FlagBits Flags;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public FlagBits_HO Flags_HO;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]

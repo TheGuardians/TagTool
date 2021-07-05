@@ -46,7 +46,7 @@ namespace TagTool.Cache
 
         public int GetTagCacheCount() => TagCacheCount;
 
-        public CacheVersion PackageVersion = CacheVersion.HaloOnline106708;
+        public CacheVersion PackageVersion = CacheVersion.HaloOnlineED;
         public CachePlatform PackagePlatform = CachePlatform.Original;
 
         ~ModPackage()
@@ -76,7 +76,7 @@ namespace TagTool.Cache
                 TagCacheNames.Add(names);
                 CacheNames.Add("default");
                 Files = new Dictionary<string, Stream>();
-                StringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, null);
+                StringTable = new StringTableHaloOnline(CacheVersion.HaloOnlineED, null);
                 Header.SectionTable = new ModPackageSectionTable();
                 if (!unmanagedResourceStream)
                 {
@@ -594,7 +594,7 @@ namespace TagTool.Cache
             reader.Read(data, 0, size);
             stringIdCacheStream.Write(data, 0, size);
             stringIdCacheStream.Position = 0;
-            StringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, stringIdCacheStream);
+            StringTable = new StringTableHaloOnline(CacheVersion.HaloOnlineED, stringIdCacheStream);
         }
 
         private void ReadFontSection(EndianReader reader)

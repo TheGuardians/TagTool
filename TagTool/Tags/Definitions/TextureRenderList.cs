@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     // TODO: Update this for cert_ms30_oct19
-    [TagStructure(Name = "texture_render_list", Tag = "trdf", Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "texture_render_list", Tag = "trdf", Size = 0x48, MinVersion = CacheVersion.HaloOnlineED)]
     public class TextureRenderList : TagStructure
 	{
         public List<Bitmap> Bitmaps;

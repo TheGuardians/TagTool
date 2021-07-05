@@ -7,7 +7,7 @@ using TagTool.Tags;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
     public class Permutation : TagStructure
     {

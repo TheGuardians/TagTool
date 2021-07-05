@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 	{
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public ParameterValue_H3 ParameterH3;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public ParameterValue ParameterHO;
         public StringId Name;
         public StringId Description;

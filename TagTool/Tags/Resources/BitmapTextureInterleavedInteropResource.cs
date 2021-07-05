@@ -17,7 +17,7 @@ namespace TagTool.Tags.Resources
         /// Describes a bitmap.
         /// </summary>
         [TagStructure(Size = 0x40, MaxVersion = Cache.CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x58, MinVersion = Cache.CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x58, MinVersion = Cache.CacheVersion.HaloOnlineED)]
         public class BitmapInterleavedDefinition : TagStructure
         {
             public TagData PrimaryResourceData;

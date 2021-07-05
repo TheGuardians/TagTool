@@ -8,7 +8,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF0, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnlineED)]
     public class DamageEffect : TagStructure
 	{
         public Bounds<float> Radius; // world units
@@ -40,7 +40,7 @@ namespace TagTool.Tags.Definitions
         public float AOESpikeRadius;
         public float AOESpikeDamageBump;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float Unknown_HO = 1.0f;
 
         public List<PlayerResponseBlock> PlayerResponses;

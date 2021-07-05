@@ -68,7 +68,7 @@ namespace TagTool.BlamFile
 
         private Blf GenerateBlf(ContentItemMetadata metadata, MapVariant mapVariant)
         {
-            var blf = new Blf(CacheVersion.HaloOnline106708, CachePlatform.Original);
+            var blf = new Blf(CacheVersion.HaloOnlineED, CachePlatform.Original);
 
             blf.StartOfFile = new BlfChunkStartOfFile()
             {

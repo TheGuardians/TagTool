@@ -328,7 +328,7 @@ namespace TagTool.Scripting
                 [0x53] = "looping_sound_budget_reference",
                 [0x54] = "sound_budget_reference"
             },
-            [CacheVersion.HaloOnline106708] = new Dictionary<int, string>
+            [CacheVersion.HaloOnlineED] = new Dictionary<int, string>
             {
                 [0x00] = "unparsed",
                 [0x01] = "special_form",
@@ -496,7 +496,7 @@ namespace TagTool.Scripting
                 [0x444] = "global_playtest_mode",
                 [0x522] = "survival_performance_mode"
             },
-            [CacheVersion.HaloOnline106708] = new Dictionary<int, string>
+            [CacheVersion.HaloOnlineED] = new Dictionary<int, string>
             {
                 [0x2A] = "game_speed",
                 [0xBE] = "render_lightmap_shadows",
@@ -9925,7 +9925,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
                 }
             },
-            [CacheVersion.HaloOnline106708] = new Dictionary<int, ScriptInfo>
+            [CacheVersion.HaloOnlineED] = new Dictionary<int, ScriptInfo>
             {
                 [0x000] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin"),
                 [0x001] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin_random"),
@@ -14791,5 +14791,13 @@ namespace TagTool.Scripting
                 },
             }
         };
+
+        static ScriptInfo()
+        {
+            // TODO: cleanup script versioning
+            ValueTypes[CacheVersion.HaloOnline106708] = ValueTypes[CacheVersion.HaloOnlineED];
+            Globals[CacheVersion.HaloOnline106708] = Globals[CacheVersion.HaloOnlineED];
+            Scripts[CacheVersion.HaloOnline106708] = Scripts[CacheVersion.HaloOnlineED];
+        }
     }
 }

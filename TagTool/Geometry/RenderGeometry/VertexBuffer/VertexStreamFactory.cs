@@ -19,6 +19,7 @@ namespace TagTool.Geometry
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                     return new VertexStreamXbox(stream);
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                     return new VertexStreamMS23(stream);
                 case CacheVersion.HaloOnline235640:

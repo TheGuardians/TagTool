@@ -7,7 +7,7 @@ namespace TagTool.Cache.Resources
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
-    [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     public class ResourceData : TagStructure
 	{
         public CachedTag ParentTag;
@@ -15,7 +15,7 @@ namespace TagTool.Cache.Resources
 
         [TagField(Gen = CacheGeneration.Third)]
         public sbyte ResourceTypeIndex;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public TagResourceTypeGen3 ResourceType;
 
         public byte Flags;
@@ -35,7 +35,7 @@ namespace TagTool.Cache.Resources
         [TagField(Gen = CacheGeneration.Third)]
         public short SegmentIndex;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] DefinitionData;
 
         public CacheAddress DefinitionAddress;
@@ -43,7 +43,7 @@ namespace TagTool.Cache.Resources
         public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
         public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown2 = 1;
 
         [Flags]

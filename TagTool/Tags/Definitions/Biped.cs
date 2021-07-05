@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x1D4, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x21C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x240, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x240, MinVersion = CacheVersion.HaloOnlineED)]
     public class Biped : Unit
     {
         public Angle MovingTurningSpeed;
@@ -39,7 +39,7 @@ namespace TagTool.Tags.Definitions
 
         public float CrouchTransitionTime;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public TagFunction CrouchingCameraFunction = new TagFunction
         {
             // TODO: make high-level constructors...
@@ -53,7 +53,7 @@ namespace TagTool.Tags.Definitions
             }
         };
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<CameraHeightBlock> CameraHeights;
 
         public Angle CameraInterpolationStart;
@@ -183,7 +183,7 @@ namespace TagTool.Tags.Definitions
         public float PivotThrottleScale;
         public float PivotOffsetDampening;
         
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown4;
 
         [Flags]

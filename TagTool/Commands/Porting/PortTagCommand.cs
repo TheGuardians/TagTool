@@ -310,7 +310,7 @@ namespace TagTool.Commands.Porting
 				case "shit": // use the global shit tag until shit tags are port-able
 					if (CacheContext.TagCache.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
                         return shitInstance;
-                    if (BlamCache.Version < CacheVersion.HaloOnline106708)
+                    if (BlamCache.Version < CacheVersion.HaloOnlineED)
                         return CacheContext.Deserialize<RasterizerGlobals>(cacheStream, CacheContext.TagCache.GetTag<RasterizerGlobals>(@"globals\rasterizer_globals")).DefaultShieldImpact;
                     break;
 

@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "game_progression", Tag = "gpdt", Size = 0x3C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "game_progression", Tag = "gpdt", Size = 0x44, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "game_progression", Tag = "gpdt", Size = 0x44, MinVersion = CacheVersion.HaloOnlineED)]
     public class GameProgression : TagStructure
 	{
         public List<ProgressionVariable> IntegerProgressionValue;
@@ -20,7 +20,7 @@ namespace TagTool.Tags.Definitions
         public List<IntegerProgressionUnknownBlock> IntegerProgressionUnknown;
         public List<MapProgressionDataBlock> MapProgressionData;
 
-        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnlineED)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x4)]

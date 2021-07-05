@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnlineED)]
     public class CameraFxSettings : TagStructure
 	{
         public ExposureBlock Exposure;
@@ -32,26 +32,26 @@ namespace TagTool.Tags.Definitions
         public CameraFxStrength SelfIllumExposure;
         public CameraFxStrength SelfIllumScale;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public SsaoPropertiesBlock SsaoProperties;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CameraFxValue UnknownIntensity1;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock1> Unknown33;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock2> Unknown34;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock3> Unknown35;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock4> Unknown36;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock5> Unknown37;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock6> Unknown38;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public GodraysPropertiesBlock GodraysProperties;
 
         [Flags]
@@ -117,7 +117,7 @@ namespace TagTool.Tags.Definitions
             public short BlingSpikes;
         }
 
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public class SsaoPropertiesBlock : TagStructure
         {
             public FlagsValue Flags;

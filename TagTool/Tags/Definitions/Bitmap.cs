@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
 	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xA4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xAC, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
     public class Bitmap : TagStructure
@@ -65,13 +65,13 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// 0 = do not downsample source image
         /// </summary>
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public short MaxResolution;
 
         /// <summary>
         /// Index into global atlas if the texture is missing its required resources and has been atlased
         /// </summary>
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public short AtlasIndex;
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace TagTool.Tags.Definitions
         [TagField(Format = "[0,1]", MinVersion = CacheVersion.HaloReach)]
         public float TightBoundsThreshold;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<TightBinding> TightBoundsOld;
 
         public List<UsageOverride> UsageOverrides;
@@ -105,7 +105,7 @@ namespace TagTool.Tags.Definitions
         public List<TagResourceReference> InterleavedResources;
 
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public int UnknownB4;
 
         [TagStructure(Size = 0x8)]
@@ -211,7 +211,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public BitmapType Type;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public byte UnknownFlags;
 
             // Handle the BitmapFormat enum as a sbyte instead of a short. This converts the endianness indirectly.
@@ -225,7 +225,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public BitmapFormat Format;
 
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Unused2_2;
 
 

@@ -142,6 +142,7 @@ namespace TagTool.Commands.Scenarios
                 case CacheVersion.Halo3ODST:
                     return type.Halo3ODST.ToString();
 
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                     return type.HaloOnline.ToString();
 
@@ -161,6 +162,7 @@ namespace TagTool.Commands.Scenarios
                 case CacheVersion.Halo3ODST:
                     return (int)type.Halo3ODST;
 
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                     return (int)type.HaloOnline;
 

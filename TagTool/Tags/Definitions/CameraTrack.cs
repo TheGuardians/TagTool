@@ -7,7 +7,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x14, MinVersion = CacheVersion.HaloOnlineED)]
     public class CameraTrack : TagStructure
 	{
         public CameraTrackFlags Flags;
@@ -17,7 +17,7 @@ namespace TagTool.Tags.Definitions
 
         public List<CameraPoint> CameraPoints;
 
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnlineED)]
         public byte[] Unused2 = new byte[4];
 
         [TagStructure(Size = 0x1C)]

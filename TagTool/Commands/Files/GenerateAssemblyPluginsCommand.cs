@@ -746,7 +746,7 @@ namespace TagTool.Commands.Files
                     else if (fieldType == typeof(DatumHandle))
                     {
                         assemblyPluginFields.AddRange(
-                            cacheVersion > CacheVersion.Halo2Vista && cacheVersion < CacheVersion.HaloOnline106708 ?
+                            cacheVersion > CacheVersion.Halo2Vista && cacheVersion < CacheVersion.HaloOnlineED ?
                             new[]
                             {
                                 new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Identifier", ref offset),
@@ -1027,6 +1027,7 @@ namespace TagTool.Commands.Files
         /// </summary>
         static readonly Dictionary<CacheVersion, string> assemblyCacheVersions = new Dictionary<CacheVersion, string>()
         {
+            {CacheVersion.HaloOnlineED, "ElDewrito" },
             {CacheVersion.HaloOnline106708, "HaloOnline" },
             {CacheVersion.Halo3Retail, "Halo3" },
             {CacheVersion.Halo3ODST, "ODST" },

@@ -30,7 +30,7 @@ namespace TagTool.Geometry
         /// </summary>
         public RenderGeometryApiResourceDefinition Convert(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
-            if(DestCache.Version == CacheVersion.HaloOnline106708)
+            if(CacheVersionDetection.IsBetween(DestCache.Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
             {
                 if(CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.Halo3Beta, CacheVersion.Halo3ODST))
                 {

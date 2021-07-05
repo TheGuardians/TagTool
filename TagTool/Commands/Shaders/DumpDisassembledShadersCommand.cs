@@ -49,7 +49,7 @@ namespace TagTool.Commands.Shaders
                 {
                     if (tag.Name == null || tag.Name == "" || tag.Group.Tag != "rmdf")
                         continue;
-                    if (Cache.Version == CacheVersion.HaloOnline106708 && tag.Name.StartsWith("ms30\\"))
+                    if (Cache.Version == CacheVersion.HaloOnlineED && tag.Name.StartsWith("ms30\\"))
                         continue; // ignore ms30 in ms23, disassemble from ms30 directly instead
                     var pieces = tag.Name.Split('\\');
                     shaderTypes.Add(pieces[pieces.Length - 1]);

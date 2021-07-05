@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag GlobalStrings;
         public CachedTag DamageTypeStrings;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag UnknownStrings;
 
         public CachedTag MainMenuMusic;

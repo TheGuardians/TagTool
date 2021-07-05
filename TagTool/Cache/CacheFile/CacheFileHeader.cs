@@ -36,6 +36,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
                     return deserializer.Deserialize<CacheFileHeaderGen3>(dataContext);
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                 case CacheVersion.HaloOnline235640:
                 case CacheVersion.HaloOnline301003:

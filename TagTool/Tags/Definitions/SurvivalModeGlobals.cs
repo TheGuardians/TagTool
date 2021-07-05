@@ -6,7 +6,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
 	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
+	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnlineED)]
     public class SurvivalModeGlobals : TagStructure
 	{
         public uint Unknown;
@@ -18,13 +18,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public List<ArmorCustomization> ArmorCustomizations;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint Unknown3;
 
         [TagStructure(Size = 0x108, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x10C, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x10C, MinVersion = CacheVersion.HaloOnlineED)]
         public class SurvivalEvent : TagStructure
 		{
             public ushort Flags;
@@ -37,7 +37,7 @@ namespace TagTool.Tags.Definitions
             public TeamValue Team;
             public StringId DisplayString;
             public StringId DisplayMedal;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public uint Unknown3;
             public float DisplayDuration;
             public RequiredFieldValue RequiredField;

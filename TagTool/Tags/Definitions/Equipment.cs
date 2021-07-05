@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "equipment", Tag = "eqip", Size = 0xD4, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "equipment", Tag = "eqip", Size = 0xE0, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "equipment", Tag = "eqip", Size = 0x1B0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "equipment", Tag = "eqip", Size = 0x1B0, MinVersion = CacheVersion.HaloOnlineED)]
     public class Equipment : Item
     {
         public float UseDuration;
@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
         public float AiMinDeployDistance;
         public float AiAwarenessDelay;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<OptionalUnitCameraBlock> OverrideCamera;
 
         public List<HealthPackBlock> HealthPack;
@@ -39,50 +39,50 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<NewHealthPackBlock> NewHealthPack;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<ForcedReloadBlock> ForcedReload;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<ConcussiveBlastBlock> ConcussiveBlast;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<TankModeBlock> TankMode;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<MagPulseBlock> MagPulse;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<HologramBlock> Hologram;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<ReactiveArmorBlock> ReactiveArmor;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<BombRunBlock> BombRun;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<ArmorLockBlock> ArmorLock;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<AdrenalineBlock> Adrenaline;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<LightningStrikeBlock> LightningStrike;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<ScramblerBlock> Scrambler;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<WeaponJammerBlock> WeaponJammer;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<AmmoPackBlock> AmmoPack;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<VisionBlock> Vision;
 
         public CachedTag HudInterface;
         public CachedTag PickupSound;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag EmptySound;
 
         public CachedTag ActivationEffect;
         public CachedTag ActiveEffect;
         public CachedTag DeactivationEffect;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public StringId EnterAnimation;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public StringId IdleAnimation;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public StringId ExitAnimation;
 
         [Flags]
@@ -239,7 +239,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x2C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED)]
         public class InvincibilityBlock : TagStructure
 		{
             public StringId NewPlayerMaterial;
@@ -254,13 +254,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnlineED)]
         public class RegeneratorBlock : TagStructure
 		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag RegeneratingEffect;
         }
 

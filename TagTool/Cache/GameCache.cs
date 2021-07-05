@@ -39,7 +39,7 @@ namespace TagTool.Cache
         public static GameCache Open(FileInfo file)
         {
             MapFile map = new MapFile();
-            var estimatedVersion = CacheVersion.HaloOnline106708;
+            var estimatedVersion = CacheVersion.HaloOnlineED;
 
             using (var stream = file.OpenRead())
             using (var reader = new EndianReader(stream))
@@ -50,7 +50,7 @@ namespace TagTool.Cache
                     estimatedVersion = map.Version;
                 }
                 else if (file.Name.Equals("tags.dat"))
-                    estimatedVersion = CacheVersion.HaloOnline106708;
+                    estimatedVersion = CacheVersion.HaloOnlineED;
                 else
                     throw new Exception("Invalid file passed to GameCache constructor");
             }
@@ -73,6 +73,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     return new GameCacheGen3(map, file);
 
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                 case CacheVersion.HaloOnline235640:
                 case CacheVersion.HaloOnline301003:

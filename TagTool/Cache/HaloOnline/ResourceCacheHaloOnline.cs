@@ -116,7 +116,7 @@ namespace TagTool.Cache.HaloOnline
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708, CachePlatform.Original);
+            var serializer = new TagSerializer(CacheVersion.HaloOnlineED, CachePlatform.Original);
             serializer.Serialize(dataContext, Header);
             stream.Position = 0;
         }

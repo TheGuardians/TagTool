@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 {
 	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x18C, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
 	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnlineED)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
 	{

@@ -35,7 +35,7 @@ namespace TagTool.BlamFile
             var serializer = new TagSerializer(Version, CachePlatform, EndianFormat);
             serializer.Serialize(dataContext, Header);
 
-            if(Version == CacheVersion.HaloOnline106708)
+            if(CacheVersionDetection.IsBetween(Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
             {
                 if(MapFileBlf != null)
                     MapFileBlf.Write(writer);
@@ -178,7 +178,7 @@ namespace TagTool.BlamFile
 
         public static MapFile GenerateMapFile(CacheVersion version, Scenario scnr, CachedTag scenarioTag, Blf mapInfo = null)
         {
-            if(version == CacheVersion.HaloOnline106708)
+            if(version == CacheVersion.HaloOnlineED)
             {
                 MapFile map = new MapFile();
                 var header = new CacheFileHeaderGenHaloOnline();

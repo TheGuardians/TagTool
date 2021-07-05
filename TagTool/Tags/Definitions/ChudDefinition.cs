@@ -38,7 +38,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnlineED)]
         public class HudWidget : TagStructure
 		{
             [TagField(Flags = Label)]
@@ -51,7 +51,7 @@ namespace TagTool.Tags.Definitions
             public List<AnimationDatum> AnimationData;
             public List<RenderDatum> RenderData;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag ParallaxData;
 
             public List<BitmapWidget> BitmapWidgets;
@@ -84,7 +84,7 @@ namespace TagTool.Tags.Definitions
                 public Engine_H3 EngineFlags_H3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public Engine_ODST EngineFlags_ODST;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public Engine EngineFlags;
 
                 public PlayerType PlayerTypeFlags;
@@ -97,10 +97,10 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public MultiplayerEvents_H3 MultiplayerEventsFlags_H3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public MultiplayerEvents MultiplayerEventsFlags;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public UnitBase UnitBaseFlags;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public UnitBase_ODST UnitBaseFlags_ODST;
@@ -128,7 +128,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public ushort Unused;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public GeneralKudos GeneralKudosFlags;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]         
                 public GeneralKudos_H3 GeneralKudosFlags_H3;
@@ -136,11 +136,11 @@ namespace TagTool.Tags.Definitions
 				public UnitZoom UnitZoomFlags;
                 public UnitInventory UnitInventoryFlags;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public ushort Unused3;
 
                 public UnitGeneral UnitGeneralFlags;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public ushort Unused4;
 
                 public WeaponKudos WeaponKudosFlags;
@@ -162,11 +162,11 @@ namespace TagTool.Tags.Definitions
                 public short UnusedFlags3;
 
                 //HO EXCLUSIVE FLAGS
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public short UnusedFlags4;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public Consumable ConsumableFlags;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public EnergyMeter EnergyMeterFlags;
 
                 [Flags]
@@ -864,49 +864,49 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnlineED)]
             public class AnimationDatum : TagStructure
 			{
                 //HUD Initialize Animation
                 public AnimationFlags HUDInitializeFlags;
                 public AnimationFunction HUDInitializeFunction;
                 public CachedTag HUDInitialize;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float HUDInitializeUnknown;
 
                 //Idle Animation
                 public AnimationFlags IdleFlags;
                 public AnimationFunction IdleFunction;
                 public CachedTag Idle;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float IdleUnknown;
 
                 //Special State Animation
                 public AnimationFlags SpecialStateFlags;
                 public AnimationFunction SpecialStateFunction;
                 public CachedTag SpecialState;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float SpecialStateUnknown;
 
                 //Transition In Animation
                 public AnimationFlags TransitionInFlags;
                 public AnimationFunction TransitionInFunction;
                 public CachedTag TransitionIn;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float TransitionInUnknown;
 
                 //Transition Out Animation
                 public AnimationFlags TransitionOutFlags;
                 public AnimationFunction TransitionOutFunction;
                 public CachedTag TransitionOut;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float TransitionOutUnknown;
 
                 //Brief State Animation
                 public AnimationFlags BriefStateFlags;
                 public AnimationFunction BriefStateFunction;
                 public CachedTag BriefState;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float BriefStateUnknown;
 
                 [Flags]
@@ -934,11 +934,11 @@ namespace TagTool.Tags.Definitions
                 public ShaderIndexValue ShaderIndex;
                 [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
                 public byte[] Padding;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudBlendMode BlendModeHO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public InputValue_HO Input_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public InputValue_HO RangeInput_HO;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public InputValue_H3 Input_H3;
@@ -968,17 +968,17 @@ namespace TagTool.Tags.Definitions
                 public OutputColorValue OutputColorE;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public OutputColorValue OutputColorF;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorA_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorB_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorC_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorD_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorE_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorF_HO;
                 public OutputScalarValue OutputScalarA;
                 public OutputScalarValue OutputScalarB;

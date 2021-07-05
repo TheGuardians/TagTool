@@ -14,7 +14,7 @@ namespace TagTool.Tags.Resources
         public D3DStructure<BitmapDefinition> Texture;
 
         [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnlineED)]
         public class BitmapDefinition : TagStructure
 		{
             public TagData PrimaryResourceData;
@@ -24,7 +24,7 @@ namespace TagTool.Tags.Resources
     }
 
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
     public class BitmapTextureInteropDefinition
     {

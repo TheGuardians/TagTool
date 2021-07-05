@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound_ui_sounds", Tag = "sus!", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "sound_ui_sounds", Tag = "sus!", Size = 0x10, MinVersion = CacheVersion.HaloOnlineED)]
     public class SoundUiSounds : TagStructure
 	{
         public List<UiSound> UiSounds;

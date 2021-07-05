@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class OptionBlock : TagStructure
         {
