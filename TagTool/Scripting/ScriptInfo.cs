@@ -3853,6 +3853,27 @@ namespace TagTool.Scripting
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Short),
                 },
+                [0x34A] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_object")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.ObjectName),
+                },
+                [0x34B] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_cinematic_object")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long)
+                },
+                [0x34C] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_start_animation")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
+                },
                 [0x34D] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_destroy_object")
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
@@ -3889,6 +3910,16 @@ namespace TagTool.Scripting
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                },
+                [0x352] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_and_animate_object")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.ObjectName),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Boolean),
                 },
                 [0x353] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_and_animate_cinematic_object")
                 {
@@ -14706,7 +14737,58 @@ namespace TagTool.Scripting
                 [0x694] = new ScriptInfo(HsType.HaloOnlineValue.Void, "background_set")
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Short),
-                }
+                },
+
+                [0x6A1] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_start_animation_legacy")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId)
+                },
+                [0x6A2] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_object_legacy")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.ObjectName),
+                },
+                [0x6A3] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_and_animate_object_legacy")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.ObjectName),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Boolean)
+                },
+                [0x6A4] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_and_animate_object_no_animation_legacy")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.ObjectName),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Boolean)
+                },
+                [0x6A5] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_create_and_animate_cinematic_object_legacy")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Boolean)
+                },
+                [0x6A6] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_destroy_object_legacy")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object)
+                },
             }
         };
     }
