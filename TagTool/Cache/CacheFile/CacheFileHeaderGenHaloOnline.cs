@@ -43,27 +43,10 @@ namespace TagTool.Cache
 
         public int ExternalDependencies;
 
-
         public ulong Timestamp;
 
-        public ulong MainMenuTimestamp;
-
-        public ulong SharedTimestamp;
-
-        public ulong CampaignTimestamp;
-
-
-        public int Unknown1HighDateTime;
-
-        public int Unknown1LowDateTime;
-
-        public int Unknown2HighDateTime;
-
-        public int Unknown2LowDateTime;
-
-        public int Unknown3HighDateTime;
-
-        public int Unknown3LowDateTime;
+        [TagField(Length = 6)]
+        public ulong[] ExternalDependencyTimestamps;
 
         [TagField(Length = 0x20)]
         public string Name;

@@ -17,6 +17,7 @@ using TagTool.Tags.Definitions.Gen2;
 using TagTool.Audio.Converter;
 using TagTool.Audio;
 using TagTool.Cache.Gen2;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands
 {
@@ -71,8 +72,83 @@ namespace TagTool.Commands
             return data;
         }
 
+        private void UpgradeM23Cache(GameCacheHaloOnline cache)
+        {
+            var targetVersion = CacheVersion.HaloOnlineED;
+
+            // tags.dat
+            using (var stream = cache.TagsFile.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var writer = new EndianWriter(stream);
+                var reader = new EndianReader(stream);
+                var ctx = new DataSerializationContext(reader, writer);
+            
+                var header = cache.Deserializer.Deserialize<TagCacheHaloOnlineHeader>(ctx);
+                header.CreationTime = CacheVersionDetection.GetTimestamp(targetVersion);
+            
+                stream.Position = 0;
+                cache.Serializer.Serialize(ctx, header);
+            }
+            
+            // resource caches
+            foreach(var cacheName in ResourceCachesHaloOnline.ResourceCacheNames.Values)
+            {
+                var resourceCaches = (ResourceCachesHaloOnline)cache.ResourceCaches;
+                var resourceCacheFile = new FileInfo(Path.Combine(resourceCaches.Directory.FullName, cacheName));
+                if (!resourceCacheFile.Exists)
+                    continue;
+            
+                using (var stream = resourceCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+                {
+                    var writer = new EndianWriter(stream);
+                    var reader = new EndianReader(stream);
+                    var ctx = new DataSerializationContext(reader, writer);
+            
+                    var header = cache.Deserializer.Deserialize<ResourceCacheHaloOnlineHeader>(ctx);
+                    header.CreationTime = CacheVersionDetection.GetTimestamp(targetVersion);
+            
+                    stream.Position = 0;
+                    cache.Serializer.Serialize(ctx, header);
+                }
+            }
+            
+            // .map files
+            foreach(var file in cache.Directory.GetFiles("*.map", SearchOption.TopDirectoryOnly))
+            {
+                if (file.Extension != ".map")
+                    continue;
+            
+                MapFile mapFile;
+                using (var stream = file.Open(FileMode.Open, FileAccess.ReadWrite))
+                {
+                    var writer = new EndianWriter(stream);
+                    var reader = new EndianReader(stream);
+                    var ctx = new DataSerializationContext(reader, writer);
+            
+                    mapFile = new MapFile();
+                    mapFile.Read(reader);
+                }
+
+                var header = mapFile.Header as CacheFileHeaderGenHaloOnline;
+                mapFile.Version = targetVersion;
+                header.Timestamp = (ulong)CacheVersionDetection.GetTimestamp(mapFile.Version);
+                header.Build = CacheVersionDetection.GetBuildName(mapFile.Version, mapFile.CachePlatform);
+                for (int i = 0; i < header.ExternalDependencyTimestamps.Length; i++)
+                    header.ExternalDependencyTimestamps[i] = header.Timestamp;
+
+                using (var stream = file.Open(FileMode.Create, FileAccess.ReadWrite))
+                {
+                    var writer = new EndianWriter(stream);
+                    mapFile.Write(writer);
+                }
+            }
+        }
+
         public override object Execute(List<string> args)
         {
+            UpgradeM23Cache((GameCacheHaloOnline)Cache);
+            return true;
+
             if (args.Count > 0)
                 return false;
 
