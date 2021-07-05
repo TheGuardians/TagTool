@@ -104,8 +104,8 @@ namespace TagTool.Commands.Modding
             ModPackage.CacheNames.Add("default");
 
             // temporary cache for holding tags and resources
-            TagCacheHaloOnline modPackTagCache = new TagCacheHaloOnline(tagStream, ModPackage.StringTable, new Dictionary<int, string>());
-            ResourceCacheHaloOnline modPackResourceCache = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, CachePlatform.Original, ModPackage.ResourcesStream);
+            TagCacheHaloOnline modPackTagCache = new TagCacheHaloOnline(CacheContext.Version, tagStream, ModPackage.StringTable, new Dictionary<int, string>());
+            ResourceCacheHaloOnline modPackResourceCache = new ResourceCacheHaloOnline(CacheContext.Version, CacheContext.Platform, ModPackage.ResourcesStream);
 
             CreateDescription();
 

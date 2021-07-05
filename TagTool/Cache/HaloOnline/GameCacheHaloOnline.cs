@@ -48,7 +48,7 @@ namespace TagTool.Cache.HaloOnline
                     StringTableHaloOnline = new StringTableHaloOnline(Version, stream);
 
                 var names = TagCacheHaloOnline.LoadTagNames(TagNamesFile.FullName);
-                TagCacheGenHO = new TagCacheHaloOnline(tagsStream, StringTableHaloOnline, names);
+                TagCacheGenHO = new TagCacheHaloOnline(Version, tagsStream, StringTableHaloOnline, names);
             }
 
             DisplayName = Version.ToString();

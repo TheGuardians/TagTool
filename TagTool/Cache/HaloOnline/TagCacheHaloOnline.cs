@@ -32,8 +32,10 @@ namespace TagTool.Cache.HaloOnline
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
         public readonly StringTableHaloOnline StringTableReference;
         
-        public TagCacheHaloOnline(Stream stream, StringTableHaloOnline stringTable, Dictionary<int, string> names = null)
+        public TagCacheHaloOnline(CacheVersion version, Stream stream, StringTableHaloOnline stringTable, Dictionary<int, string> names = null)
         {
+            Version = version;
+            CachePlatform = CachePlatform.Original;
             TagDefinitions = new TagDefinitionsGen3();
             StringTableReference = stringTable;
             if (stream.Length != 0)
@@ -49,13 +51,10 @@ namespace TagTool.Cache.HaloOnline
 
         private void CreateTagCache(Stream stream)
         {
-            CachePlatform = CachePlatform.Original;
-            Version = CacheVersion.HaloOnline106708;
-
             TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
             {
-                TagTableOffset = 0x20,
-                CreationTime = 0x01D0631BCC791704
+                TagTableOffset = TagStructure.GetStructureSize(typeof(TagCacheHaloOnlineHeader), Version, CachePlatform),
+                CreationTime = CacheVersionDetection.GetTimestamp(Version)
             };
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);

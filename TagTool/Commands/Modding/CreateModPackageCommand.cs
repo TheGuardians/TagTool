@@ -61,7 +61,7 @@ namespace TagTool.Commands.Modding
 
 
             var referenceStream = new MemoryStream(); // will be reused by all base caches
-            var modTagCache = new TagCacheHaloOnline(referenceStream, modCache.BaseModPackage.StringTable);
+            var modTagCache = new TagCacheHaloOnline(Cache.Version, referenceStream, modCache.BaseModPackage.StringTable);
             for (var tagIndex = 0; tagIndex < Cache.TagCache.Count; tagIndex++)
             {
                 var srcTag = Cache.TagCache.GetTag(tagIndex);

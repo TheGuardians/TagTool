@@ -110,8 +110,8 @@ namespace TagTool.Cache.HaloOnline
         {
             Header = new ResourceCacheHaloOnlineHeader
             {
-                ResourceTableOffset = 0x20,
-                CreationTime = 0x01D0631BCC92931B
+                ResourceTableOffset = TagStructure.GetStructureSize(typeof(ResourceCacheHaloOnlineHeader), Version, CachePlatform),
+                CreationTime = CacheVersionDetection.GetTimestamp(Version)
             };
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);

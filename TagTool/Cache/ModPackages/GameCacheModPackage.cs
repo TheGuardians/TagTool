@@ -148,7 +148,7 @@ namespace TagTool.Cache
             if( index >= 0 && index < GetTagCacheCount())
             {
                 CurrentTagCacheIndex = index;
-                TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], StringTableHaloOnline, BaseModPackage.TagCacheNames[CurrentTagCacheIndex]);
+                TagCacheGenHO = new TagCacheHaloOnline(Version, BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], StringTableHaloOnline, BaseModPackage.TagCacheNames[CurrentTagCacheIndex]);
                 if(GetTagCacheCount() > 1)
                     DisplayName = BaseModPackage.Metadata.Name + $" {BaseModPackage.CacheNames[CurrentTagCacheIndex]}" + ".pak";
                 else
