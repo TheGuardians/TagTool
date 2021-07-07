@@ -291,17 +291,17 @@ namespace TagTool.Tags.Definitions
 
             //Running
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RunStartDelay;
+            public float SprintStartDelay;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RunFullSpeedTime;
+            public float SprintFullSpeedTime;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RunDecayRate;
+            public float SprintDecayRate;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RunFullSpeedMultiplier;
+            public float SprintFullSpeedMultiplier;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RunPeggedMagnitude;
+            public float SprintPeggedMagnitude;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RunPeggedAngularThreshold;
+            public float SprintPeggedAngularThreshold;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Unknown4;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
