@@ -26,10 +26,6 @@ namespace TagTool.Commands.Common
                 return;
             }
 
-            //use the # character to void lines in your script, so that they are not executed
-            if (commandLine.StartsWith("#"))
-                return;
-
             if (printInput)
                 Console.WriteLine(commandLine);
 
@@ -49,6 +45,9 @@ namespace TagTool.Commands.Common
                         ContextStack.Pop();
                     return;
             }
+
+            if (commandArgs[0].StartsWith("#"))
+                return; // ignore comments
 
             // Handle redirection
             var oldOut = Console.Out;
