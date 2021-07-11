@@ -62,51 +62,57 @@ namespace TagTool.Commands.RenderMethods
                     for (int methodIndex = 0; methodIndex < rmt2Descriptor.Options.Length; methodIndex++)
                     {
                         var optionTag = rmdf.Methods[methodIndex].ShaderOptions[rmt2Descriptor.Options[methodIndex]].Option;
-                        var rmop = Cache.Deserialize<RenderMethodOption>(stream, optionTag);
 
-                        foreach (var constantData in rmop.Options)
-                            if (Cache.StringTable.GetString(constantData.Name) == constantName)
-                            {
-                                // constant found, apply default value
+                        if (optionTag != null)
+                        {
+                            var rmop = Cache.Deserialize<RenderMethodOption>(stream, optionTag);
 
-                                if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
+                            foreach (var constantData in rmop.Options)
+                                if (Cache.StringTable.GetString(constantData.Name) == constantName)
                                 {
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultBitmapScale;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultBitmapScale;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = 0.0f;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = 0.0f;
-                                }
-                                else if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Boolean)
-                                {
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultIntBoolArgument;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultIntBoolArgument;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultIntBoolArgument;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultIntBoolArgument;
-                                }
-                                else if (constantData.DefaultColor.GetValue() > 0)
-                                {
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultColor.Red / 255.0f;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultColor.Green / 255.0f;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultColor.Blue / 255.0f;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultColor.Alpha / 255.0f;
-                                }
-                                else // float, float4
-                                {
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultFloatArgument;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultFloatArgument;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultFloatArgument;
-                                    Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultFloatArgument;
-                                }
+                                    // constant found, apply default value
 
-                                string argumentValues = $"" +
-                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg0}, " +
-                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg1}, " +
-                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg2}, " +
-                                    $"{Definition.ShaderProperties[0].RealConstants[index].Arg3}";
+                                    if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
+                                    {
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultBitmapScale;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultBitmapScale;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg2 = 0.0f;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg3 = 0.0f;
+                                    }
+                                    else if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Boolean)
+                                    {
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultIntBoolArgument;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultIntBoolArgument;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultIntBoolArgument;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultIntBoolArgument;
+                                    }
+                                    else if (constantData.DefaultColor.GetValue() > 0)
+                                    {
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultColor.Red / 255.0f;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultColor.Green / 255.0f;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultColor.Blue / 255.0f;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultColor.Alpha / 255.0f;
+                                    }
+                                    else // float, float4
+                                    {
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultFloatArgument;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultFloatArgument;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg2 = constantData.DefaultFloatArgument;
+                                        Definition.ShaderProperties[0].RealConstants[index].Arg3 = constantData.DefaultFloatArgument;
+                                    }
 
-                                Console.WriteLine($"\"{constantName}\" defaulted to \"{argumentValues}\"");
-                                return true;
-                            }
+                                    string argumentValues = $"" +
+                                        $"{Definition.ShaderProperties[0].RealConstants[index].Arg0}, " +
+                                        $"{Definition.ShaderProperties[0].RealConstants[index].Arg1}, " +
+                                        $"{Definition.ShaderProperties[0].RealConstants[index].Arg2}, " +
+                                        $"{Definition.ShaderProperties[0].RealConstants[index].Arg3}";
+
+                                    Console.WriteLine($"No values provided: \"{constantName}\" defaulted to \"{argumentValues}\"");
+                                    return true;
+                                }
+                        }
+                        else
+                            return new TagToolError(CommandError.ArgCount);
                     }
                 }
 
