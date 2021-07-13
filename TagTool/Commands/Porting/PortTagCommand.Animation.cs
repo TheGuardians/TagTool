@@ -65,7 +65,10 @@ namespace TagTool.Commands.Porting
                         AnimatedNodeFlagsSize = member.PackedDataSizes.AnimatedNodeFlags;
                         CompressedDataSize = member.PackedDataSizes.CompressedDataSize;
                         StaticDataSize = member.PackedDataSizes.StaticDataSize;
-                        member.PackedDataSizesReach = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructReach();
+                        member.PackedDataSizesReach = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructReach
+                        {
+                            UnknownDataSizesReach = new int[12]
+                        };
                     }
 
                     using (var sourceStream = new MemoryStream(animationData))
