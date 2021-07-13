@@ -193,17 +193,17 @@ namespace TagTool.Commands.CollisionModels
                 for(int surface_index_index = 0; surface_index_index < surface_array.used_count; surface_index_index++)
                 {
                     int surface_index = surface_array.surface_array[surface_index_index + surface_array.free_count];
-                    double current_surface_plane_fit = surface_calculate_area(surface_index & 0x7FFFFFFF);
+                    double current_surface_area = surface_calculate_area(surface_index & 0x7FFFFFFF);
                     new_surface_array.surface_array.Add(surface_index);
                     if (surface_index < 0)
                     {
                         surface_counts.used_count++;
-                        surface_areas_frontface += current_surface_plane_fit;
+                        surface_areas_frontface += current_surface_area;
                     }
                     else
                     {
                         surface_counts.free_count++;
-                        surface_areas_backface += current_surface_plane_fit;
+                        surface_areas_backface += current_surface_area;
                     }
                 }
             }

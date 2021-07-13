@@ -65,6 +65,7 @@ namespace TagTool.Commands.Porting
                         AnimatedNodeFlagsSize = member.PackedDataSizes.AnimatedNodeFlags;
                         CompressedDataSize = member.PackedDataSizes.CompressedDataSize;
                         StaticDataSize = member.PackedDataSizes.StaticDataSize;
+                        member.PackedDataSizesReach = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructReach();
                     }
 
                     using (var sourceStream = new MemoryStream(animationData))
@@ -314,7 +315,8 @@ namespace TagTool.Commands.Porting
                                 continue;
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize || destStream.Position != StaticDataSize + CompressedDataSize)
+                        if ((sourceStream.Position != StaticDataSize + CompressedDataSize || destStream.Position != StaticDataSize + CompressedDataSize)
+                            && codec.AnimationCodec != ModelAnimationTagResource.AnimationCompressionFormats.Type9)
                             new TagToolError(CommandError.CustomError, "Compressed Data Size did not match data sizes struct!");
 
                         #region How Footer/Flags works
@@ -347,7 +349,8 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize)
+                        if ((sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize)
+                            && codec.AnimationCodec != ModelAnimationTagResource.AnimationCompressionFormats.Type9)
                             new TagToolError(CommandError.CustomError, "Static Node Flags Size did not match data sizes struct!");
 
                         if (AnimatedNodeFlagsSize > 0)
@@ -357,7 +360,8 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize)
+                        if ((sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize || destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize)
+                            && codec.AnimationCodec != ModelAnimationTagResource.AnimationCompressionFormats.Type9) 
                             new TagToolError(CommandError.CustomError, "Animated Node Flags Size did not match data sizes struct!");
 
                         #endregion
@@ -385,18 +389,23 @@ namespace TagTool.Commands.Porting
                                 break;
                         }
 
-                        if (sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize ||
+                        if ((sourceStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize ||
                             destStream.Position != StaticDataSize + CompressedDataSize + StaticNodeFlagsSize + AnimatedNodeFlagsSize + MovementDataSize)
+                            && codec.AnimationCodec != ModelAnimationTagResource.AnimationCompressionFormats.Type9)
                             new TagToolError(CommandError.CustomError, "Movement Data Size did not match data sizes struct!");
 
                         //convert pill offset data
-                        if(member.PackedDataSizes.PillOffsetData != 0)
+                        if(member.PackedDataSizes.PillOffsetData > 0)
                         {
                             for (int i = 0; i < member.FrameCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
                         }
 
-                        if (member.AnimationData.Data.Length != destStream.ToArray().Length)
+                        //include the extra data in reach as a part of the data size calculations
+                        int reachextradata = member.PackedDataSizesReach.UnknownDataSizesReach.Sum();
+
+                        if ((member.AnimationData.Data.Length != destStream.ToArray().Length + reachextradata)
+                            && codec.AnimationCodec != ModelAnimationTagResource.AnimationCompressionFormats.Type9)
                         {
                             new TagToolError(CommandError.CustomError, "Converted Animation Data was of a different length than the original!");
                         }
