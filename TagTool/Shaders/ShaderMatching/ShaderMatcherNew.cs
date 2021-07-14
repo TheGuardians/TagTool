@@ -401,6 +401,9 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"albedo\patchy_emblem":
                                 optionName = "emblem_change_color";
                                 break;
+                            case @"albedo\four_change_color_applying_to_specular":
+                                optionName = "four_change_color";
+                                break;
                         }
 
                         // get basecache option index
