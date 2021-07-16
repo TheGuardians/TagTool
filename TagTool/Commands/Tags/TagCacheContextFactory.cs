@@ -15,6 +15,7 @@ using TagTool.Commands.Shaders;
 using TagTool.Commands.GUI;
 using TagTool.Commands.HUD;
 using TagTool.Cache.HaloOnline;
+using TagTool.Commands.Scenarios;
 
 namespace TagTool.Commands.Tags
 {
@@ -103,6 +104,7 @@ namespace TagTool.Commands.Tags
                 var hoCache = cache as GameCacheHaloOnline;
                 context.AddCommand(new RebuildCacheFileCommand(hoCache));
                 context.AddCommand(new CreateModPackageCommand(contextStack, hoCache));
+                context.AddCommand(new GenerateCanvasCommand(hoCache));
             }
 
             if (cache is GameCacheModPackage)
