@@ -23,6 +23,7 @@ using TagTool.Commands.Scenarios;
 using TagTool.Cache.HaloOnline;
 using DefinitionsGen2 = TagTool.Tags.Definitions.Gen2;
 using CommandsGen2 = TagTool.Commands.Gen2;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Editing
 {
@@ -41,7 +42,7 @@ namespace TagTool.Commands.Editing
             var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
-
+            commandContext.AddCommand(new ExecuteCSharpCommand(cache, definition));
             if (CacheVersionDetection.IsInGen(CacheGeneration.Third, cache.Version) || CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, cache.Version))
             {
                 switch (tag.Group.Tag.ToString())

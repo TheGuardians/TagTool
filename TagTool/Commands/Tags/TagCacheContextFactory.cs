@@ -35,6 +35,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DumpLogCommand());
             context.AddCommand(new RunCommands(contextStack));
             context.AddCommand(new ClearCommand());
+            context.AddCommand(new ExecuteCSharpCommand(cache));
             context.AddCommand(new EchoCommand());
             context.AddCommand(new HelpCommand(contextStack));
             context.AddCommand(new ListVariablesCommand(contextStack));

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TagTool.IO;
 
@@ -12,10 +13,22 @@ namespace TagTool.Commands.Common
     {
         public CommandContextStack ContextStack;
         public bool EOF { get; private set; } = false;
+        public static string CommandLine;
 
         public CommandRunner(CommandContextStack contextStack)
         {
             ContextStack = contextStack;
+        }
+
+        private string PreprocessCommandLine(string commandLine)
+        {
+            // Evaluate c# expresisons
+
+            commandLine = ExecuteCSharpCommand.EvaluateInlineExpressions(commandLine);
+            if (commandLine == null)
+                return null;
+
+            return commandLine;
         }
 
         public void RunCommand(string commandLine, bool printInput)
@@ -26,12 +39,19 @@ namespace TagTool.Commands.Common
                 return;
             }
 
+            CommandLine = commandLine = PreprocessCommandLine(commandLine);
+            if (commandLine == null)
+                return;
+
             if (printInput)
                 Console.WriteLine(commandLine);
 
             var commandArgs = ArgumentParser.ParseCommand(commandLine, out string redirectFile);
             if (commandArgs.Count == 0)
                 return;
+
+            if (commandArgs[0] == "cs")
+                redirectFile = null;
 
             switch (commandArgs[0].ToLower())
             {
