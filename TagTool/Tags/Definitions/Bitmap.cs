@@ -6,7 +6,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xA4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xA4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
 	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xAC, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
@@ -257,13 +257,8 @@ namespace TagTool.Tags.Definitions
 
             public int Unknown20;
             public int MipMapOffset;
-            public int RasterizerTextureReference;
-            public int RuntimeAddress;
-
-            [TagField(Platform = CachePlatform.MCC)]
-            public int Unknown30;
-            [TagField(Platform = CachePlatform.MCC)]
-            public int Unknown34;
+            public PlatformUnsignedValue RasterizerTextureReference;
+            public PlatformUnsignedValue RuntimeAddress;
         }
 
     }
