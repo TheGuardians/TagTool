@@ -39,7 +39,7 @@ namespace TagTool.BlamFile
             _scenario = scenario;
             _structureBsp = cache.Deserialize<ScenarioStructureBsp>(cacheStream, scenario.StructureBsps[0].StructureBsp);
             _forgeGlobals = cache.Deserialize<ForgeGlobalsDefinition>(cacheStream, _cache.TagCache.GetTag("*.forg"));
-            _forgePalette = new HashSet<CachedTag>(_forgeGlobals.Palette.Select(x => x.Object));
+            _forgePalette = new HashSet<CachedTag>(_forgeGlobals.Palette.Where(x => x.Object != null).Select(x => x.Object));
 
             ObjectTypes = new Dictionary<GameObjectTypeHalo3ODST, ObjectTypeDefinition>();
             ObjectTypes.Add(GameObjectTypeHalo3ODST.Biped, new ObjectTypeDefinition(_scenario.Bipeds, _scenario.BipedPalette));
