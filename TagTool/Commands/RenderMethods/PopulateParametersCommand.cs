@@ -73,7 +73,7 @@ namespace TagTool.Commands.RenderMethods
                         {
                             bool canBreak = false;
 
-                            foreach (var PCParameter in shader.PCParameters)
+                            foreach (var PCParameter in shader.PCConstantTable.Constants)
                                 if (PCParameter.RegisterType == TagTool.Shaders.ShaderParameter.RType.Vector && Cache.StringTable.GetString(PCParameter.ParameterName) == pixelRegisterName)
                                 {
                                     PixelRegisterPairings.Add(PCParameter.RegisterIndex, pixelRegisterName);
@@ -93,7 +93,7 @@ namespace TagTool.Commands.RenderMethods
                         {
                             bool canBreak = false;
 
-                            foreach (var PCParameter in shader.PCParameters)
+                            foreach (var PCParameter in shader.PCConstantTable.Constants)
                                 if (PCParameter.RegisterType == TagTool.Shaders.ShaderParameter.RType.Vector && Cache.StringTable.GetString(PCParameter.ParameterName) == vertexRegisterName)
                                 {
                                     VertexRegisterPairings.Add(PCParameter.RegisterIndex, vertexRegisterName);

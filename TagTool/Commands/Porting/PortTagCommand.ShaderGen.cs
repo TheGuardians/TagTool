@@ -472,7 +472,7 @@ namespace TagTool.Commands.Porting
             var pixelShaderBlock = new PixelShaderBlock
             {
                 PCShaderBytecode = shader_gen_result.Bytecode,
-                PCParameters = new List<ShaderParameter>()
+                PCConstantTable = new ShaderConstantTable() {  Constants = new List<ShaderParameter>() }
             };
 
             foreach (var register in shader_gen_result.Registers)
@@ -503,7 +503,7 @@ namespace TagTool.Commands.Porting
 
                 shaderParameter.ParameterName = cacheContext.StringTable.GetStringId(register.Name);
 
-                pixelShaderBlock.PCParameters.Add(shaderParameter);
+                pixelShaderBlock.PCConstantTable.Constants.Add(shaderParameter);
             }
 
             return pixelShaderBlock;

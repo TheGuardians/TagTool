@@ -676,6 +676,7 @@
     <Compile Include="Shaders\RenderMethodExtern.cs" />
     <Compile Include="Shaders\EntryPoint.cs" />
     <Compile Include="Shaders\ShaderCache.cs" />
+    <Compile Include="Shaders\ShaderConstantTable.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderFunctions\ShaderFunctionHelper.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderBlackGenerator.cs" />

@@ -311,7 +311,7 @@ namespace TagTool.Commands.Shaders
 
                 if (shader_block.XboxShaderReference != null)
                     constants = GetShaderConstants(shader_block.XboxShaderReference.ConstantData);
-                parameters = shader_block.XboxParameters;
+                parameters = shader_block.XBoxConstantTable.Constants;
             }
 
             if (typeof(T) == typeof(VertexShader) || typeof(T) == typeof(GlobalVertexShader))
@@ -337,7 +337,7 @@ namespace TagTool.Commands.Shaders
 
                 if (shaderBlock.XboxShaderReference != null)
                     constants = GetShaderConstants(shaderBlock.XboxShaderReference.ConstantData);
-                parameters = shaderBlock.XboxParameters;
+                parameters = shaderBlock.XBoxConstantTable.Constants;
             }
 
             List<string> parameterNames = new List<string>();

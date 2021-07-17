@@ -80,8 +80,11 @@ namespace TagTool.Shaders.ShaderGenerator
             var pixelShaderBlock = new PixelShaderBlock
             {
                 PCShaderBytecode = result.Bytecode,
-                PCParameters = GenerateShaderParametersFromGenerator(cache, result),
-                PCShaderType = ShaderType.PixelShader
+                PCConstantTable = new ShaderConstantTable
+                {
+                    Constants = GenerateShaderParametersFromGenerator(cache, result),
+                    ShaderType = ShaderType.PixelShader
+                }   
             };
 
             return pixelShaderBlock;
@@ -94,8 +97,11 @@ namespace TagTool.Shaders.ShaderGenerator
             var vertexShaderBlock = new VertexShaderBlock
             {
                 PCShaderBytecode = result.Bytecode,
-                PCParameters = GenerateShaderParametersFromGenerator(cache, result),
-                PCShaderType = ShaderType.VertexShader
+                PCConstantTable = new ShaderConstantTable()
+                {
+                    Constants = GenerateShaderParametersFromGenerator(cache, result),
+                    ShaderType = ShaderType.VertexShader
+                }
             };
 
             return vertexShaderBlock;
@@ -524,7 +530,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     Dictionary<string, int> pixelShaderIntegerMapping = new Dictionary<string, int>();
                     Dictionary<string, int> pixelShaderBooleanMapping = new Dictionary<string, int>();
                     
-                    foreach (var reg in pixelShader.PCParameters)
+                    foreach (var reg in pixelShader.PCConstantTable.Constants)
                     {
                         switch (reg.RegisterType)
                         {
@@ -548,7 +554,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     Dictionary<string, int> vertexShaderIntegerMapping = new Dictionary<string, int>();
                     Dictionary<string, int> vertexShaderBooleanMapping = new Dictionary<string, int>();
 
-                    foreach (var reg in vertexShader.PCParameters)
+                    foreach (var reg in vertexShader.PCConstantTable.Constants)
                     {
                         switch (reg.RegisterType)
                         {

@@ -143,7 +143,8 @@ namespace TagTool.Tags.Definitions
                 SfxDistort_ForceAlphaBlend = 1 << 2 // added by saber
             }
 
-            [TagStructure(Size = 0x18)]
+            [TagStructure(Size = 0x18, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x1C, Platform = CachePlatform.MCC)]
             public class TextureConstant : TagStructure
             {
                 [TagField(Flags = Label)]
@@ -160,9 +161,21 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public PackedSamplerFilterMode FilterModeReach;
 
+                [TagField(Platform = CachePlatform.MCC)]
+                public byte Unknown1;
+
                 public sbyte ExternMode;
                 public sbyte XFormArgumentIndex;
                 public TagBlockIndex Functions = new TagBlockIndex(); // Range of Functions
+
+                [TagField(Platform = CachePlatform.MCC)]
+                public byte Unknown2;
+
+                [TagField(Platform = CachePlatform.MCC)]
+                public byte Unknown3;
+
+                [TagField(Platform = CachePlatform.MCC)]
+                public byte Unknown4;
 
                 public enum SamplerFilterMode : byte
                 {

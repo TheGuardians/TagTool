@@ -443,7 +443,7 @@ namespace TagTool.Commands.Porting
 
                 if (bmGlpsIndex != -1 && edGlpsIndex != -1)
                 {
-                    foreach (var xboxParameter in externalGlps.Shaders[bmGlpsIndex].XboxParameters)
+                    foreach (var xboxParameter in externalGlps.Shaders[bmGlpsIndex].XBoxConstantTable.Constants)
                     {
                         RegisterID registerID = new RegisterID(xboxParameter.RegisterIndex, xboxParameter.RegisterType);
 
@@ -452,7 +452,7 @@ namespace TagTool.Commands.Porting
 
                         string xboxParameterName = BlamCache.StringTable.GetString(xboxParameter.ParameterName);
 
-                        foreach (var pcParameter in baseGlps.Shaders[edGlpsIndex].PCParameters)
+                        foreach (var pcParameter in baseGlps.Shaders[edGlpsIndex].PCConstantTable.Constants)
                         {
                             string pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
 
@@ -468,7 +468,7 @@ namespace TagTool.Commands.Porting
                 // pixl
                 for (int i = externalPixl.EntryPointShaders[entryPoint].Offset; i < externalPixl.EntryPointShaders[entryPoint].Offset + externalPixl.EntryPointShaders[entryPoint].Count; i++)
                 {
-                    foreach (var xboxParameter in externalPixl.Shaders[i].XboxParameters)
+                    foreach (var xboxParameter in externalPixl.Shaders[i].XBoxConstantTable.Constants)
                     {
                         RegisterID registerID = new RegisterID(xboxParameter.RegisterIndex, xboxParameter.RegisterType);
 
@@ -481,7 +481,7 @@ namespace TagTool.Commands.Porting
                         {
                             bool parameterFound = false;
 
-                            foreach (var pcParameter in basePixl.Shaders[j].PCParameters)
+                            foreach (var pcParameter in basePixl.Shaders[j].PCConstantTable.Constants)
                             {
                                 string pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
 
@@ -526,7 +526,7 @@ namespace TagTool.Commands.Porting
                         continue;
                     }
 
-                    foreach (var xboxParameter in externalGlvs.Shaders[externalGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].XboxParameters)
+                    foreach (var xboxParameter in externalGlvs.Shaders[externalGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].XBoxConstantTable.Constants)
                     {
                         RegisterID registerID = new RegisterID(xboxParameter.RegisterIndex, xboxParameter.RegisterType);
 
@@ -535,7 +535,7 @@ namespace TagTool.Commands.Porting
 
                         string xboxParameterName = BlamCache.StringTable.GetString(xboxParameter.ParameterName);
 
-                        foreach (var pcParameter in baseGlvs.Shaders[baseGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].PCParameters)
+                        foreach (var pcParameter in baseGlvs.Shaders[baseGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].PCConstantTable.Constants)
                         {
                             string pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
 
@@ -895,7 +895,7 @@ namespace TagTool.Commands.Porting
                     {
                         string[] parts = textureParameter.Split('\\');
 
-                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCConstantTable.Constants)
                         {
                             if (pcParameter.RegisterType == ShaderParameter.RType.Sampler && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
                             {
@@ -929,7 +929,7 @@ namespace TagTool.Commands.Porting
                         if (TextureConstantMapping.Keys.Contains(parts[0]))
                             registerName += "_xform"; // fixup
 
-                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCParameters)
+                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCConstantTable.Constants)
                         {
                             if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == registerName)
                             {
@@ -959,7 +959,7 @@ namespace TagTool.Commands.Porting
                     {
                         string[] parts = vertexParameter.Split('\\');
 
-                        foreach (var pcParameter in glvs.Shaders[vertexShaderIndex].PCParameters)
+                        foreach (var pcParameter in glvs.Shaders[vertexShaderIndex].PCConstantTable.Constants)
                         {
                             if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
                             {

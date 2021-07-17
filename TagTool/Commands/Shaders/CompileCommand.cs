@@ -97,7 +97,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as PixelShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable.Constants = existing_block.PCConstantTable.Constants;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -106,7 +106,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as GlobalPixelShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable.Constants = existing_block.PCConstantTable.Constants;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -124,7 +124,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as VertexShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable.Constants = existing_block.PCConstantTable.Constants;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -133,7 +133,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as GlobalVertexShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable = existing_block.PCConstantTable;
 
 
                     _definition.Shaders[index] = shader_data_block;

@@ -21,13 +21,27 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public List<DrawMode> DrawModes;
 
-            [TagStructure(Size = 0x10)]
+            [TagStructure(Size = 0x10, Platform = Cache.CachePlatform.Original)]
+            [TagStructure(Size = 0x14, Platform = Cache.CachePlatform.MCC)]
             public class DrawMode : TagStructure
 			{
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
+                public List<CategoryDependencyBlock> CategoryDependency;
                 public int ShaderIndex;
+
+                [TagField(Platform = Cache.CachePlatform.MCC)]
+                public int UnknownIndex;
+
+                [TagStructure(Size = 0x10)]
+                public class CategoryDependencyBlock : TagStructure
+                {
+                    public int DefinitionCategoryIndex;
+
+                    [TagStructure(Size = 0x4)]
+                    public class OptionDependencyBlock : TagStructure
+                    {
+                        public int CompiledShaderIndex;
+                    }
+                }
             }
         }
     }

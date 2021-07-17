@@ -430,44 +430,44 @@ namespace TagTool.Commands.Shaders
                     if (gpix == null && shaderIndex < pixl.Shaders.Count)
                     {
                         PixelShaderBlock shaderBlock = pixl.Shaders[shaderIndex];
-                        bool containsConstants = shaderBlock.PCParameters.Count > 0 || shaderBlock.XboxParameters.Count > 0;
-                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XboxParameters : shaderBlock.PCParameters);
+                        bool containsConstants = shaderBlock.PCConstantTable.Constants.Count > 0 || shaderBlock.XBoxConstantTable.Constants.Count > 0;
+                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XBoxConstantTable.Constants : shaderBlock.PCConstantTable.Constants);
                     }
                     else if (gpix != null)
                     {
                         PixelShaderBlock shaderBlock = gpix.Shaders[pixl.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
-                        bool containsConstants = shaderBlock.PCParameters.Count > 0 || shaderBlock.XboxParameters.Count > 0;
-                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XboxParameters : shaderBlock.PCParameters);
+                        bool containsConstants = shaderBlock.PCConstantTable.Constants.Count > 0 || shaderBlock.XBoxConstantTable.Constants.Count > 0;
+                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XBoxConstantTable.Constants : shaderBlock.PCConstantTable.Constants);
                     }
                     break;
                 case GlobalPixelShader glps:
                     if (gpix == null && shaderIndex < glps.Shaders.Count)
                     {
                         PixelShaderBlock shaderBlock = glps.Shaders[shaderIndex];
-                        bool containsConstants = shaderBlock.PCParameters.Count > 0 || shaderBlock.XboxParameters.Count > 0;
-                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XboxParameters : shaderBlock.PCParameters);
+                        bool containsConstants = shaderBlock.PCConstantTable.Constants.Count > 0 || shaderBlock.XBoxConstantTable.Constants.Count > 0;
+                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XBoxConstantTable.Constants : shaderBlock.PCConstantTable.Constants);
                     }
                     else if (gpix != null)
                     {
                         PixelShaderBlock shaderBlock = gpix.Shaders[glps.Shaders[shaderIndex].GlobalCachePixelShaderIndex];
-                        bool containsConstants = shaderBlock.PCParameters.Count > 0 || shaderBlock.XboxParameters.Count > 0;
-                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XboxParameters : shaderBlock.PCParameters);
+                        bool containsConstants = shaderBlock.PCConstantTable.Constants.Count > 0 || shaderBlock.XBoxConstantTable.Constants.Count > 0;
+                        return new CompiledShaderInfo(true, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XBoxConstantTable.Constants : shaderBlock.PCConstantTable.Constants);
                     }
                     break;
                 case VertexShader vtsh:
                     if (shaderIndex < vtsh.Shaders.Count)
                     {
                         VertexShaderBlock shaderBlock = vtsh.Shaders[shaderIndex];
-                        bool containsConstants = shaderBlock.PCParameters.Count > 0 || shaderBlock.XboxParameters.Count > 0;
-                        return new CompiledShaderInfo(false, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XboxParameters : shaderBlock.PCParameters);
+                        bool containsConstants = shaderBlock.PCConstantTable.Constants.Count > 0 || shaderBlock.XBoxConstantTable.Constants.Count > 0;
+                        return new CompiledShaderInfo(false, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XBoxConstantTable.Constants : shaderBlock.PCConstantTable.Constants);
                     }
                     break;
                 case GlobalVertexShader glvs:
                     if (shaderIndex < glvs.Shaders.Count)
                     {
                         VertexShaderBlock shaderBlock = glvs.Shaders[shaderIndex];
-                        bool containsConstants = shaderBlock.PCParameters.Count > 0 || shaderBlock.XboxParameters.Count > 0;
-                        return new CompiledShaderInfo(false, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XboxParameters : shaderBlock.PCParameters);
+                        bool containsConstants = shaderBlock.PCConstantTable.Constants.Count > 0 || shaderBlock.XBoxConstantTable.Constants.Count > 0;
+                        return new CompiledShaderInfo(false, containsConstants, shaderBlock.XboxShaderReference, isXbox ? shaderBlock.XBoxConstantTable.Constants : shaderBlock.PCConstantTable.Constants);
                     }
                     break;
             }
