@@ -114,6 +114,9 @@ namespace TagTool.Commands.Porting.Gen2
                     return data;
                 case TagStructure tagStructure: // much faster to pattern match a type than to check for custom attributes.
                     return ConvertStructure(cacheStream, gen2CacheStream, resourceStreams, tagStructure, definition, blamTagName);
+                case PlatformSignedValue _:
+                case PlatformUnsignedValue _:
+                    return data;
                 default:
                     Console.WriteLine($"WARNING: Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");
                     break;

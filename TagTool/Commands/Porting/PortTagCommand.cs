@@ -1067,8 +1067,11 @@ namespace TagTool.Commands.Porting
 				case PixelShaderReference _:
 				case VertexShaderReference _:
 					return null;
+                case PlatformSignedValue _:
+                case PlatformUnsignedValue _:
+                    return data;
 
-				default:
+                default:
 					Console.WriteLine($"WARNING: Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");
 					break;
 			}

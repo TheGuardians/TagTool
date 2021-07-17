@@ -215,9 +215,9 @@ namespace TagTool.Tags.Definitions
             public byte UnknownFlags;
 
             // Handle the BitmapFormat enum as a sbyte instead of a short. This converts the endianness indirectly.
-            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
-            public byte[] Unused2_1;
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
+           
+            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
             public byte[] Unused2_3;
 
             /// <summary>
@@ -225,6 +225,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public BitmapFormat Format;
 
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Unused2_2;
 

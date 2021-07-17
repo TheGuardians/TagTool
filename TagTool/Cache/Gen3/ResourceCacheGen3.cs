@@ -42,7 +42,10 @@ namespace TagTool.Cache.Gen3
                 using (var cacheStream = Cache.OpenCacheRead())
                 {
                     ResourceGestalt = Cache.Deserialize<ResourceGestalt>(cacheStream, Cache.TagCacheGen3.GlobalInstances["zone"]);
-                    ResourceLayoutTable = Cache.Deserialize<ResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);
+                    if(Cache.Platform == CachePlatform.MCC)
+                        ResourceLayoutTable = ResourceGestalt.LayoutTable;
+                    else
+                        ResourceLayoutTable = Cache.Deserialize<ResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);
                 }
             }
             isLoaded = true;
@@ -230,7 +233,7 @@ namespace TagTool.Cache.Gen3
         private void ApplyResourceDefinitionFixups(ResourceData tagResource, byte[] resourceDefinitionData)
         {
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
-            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
+            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, Cache.Endianness))
             {
                 for (int i = 0; i < tagResource.FixupLocations.Count; i++)
                 {
@@ -265,9 +268,9 @@ namespace TagTool.Cache.Gen3
             using (var definitionDataStream = new MemoryStream(resourceDefinitionData))
             using (var dataStream = new MemoryStream(primaryResourceData))
             using (var secondaryDataStream = new MemoryStream(secondaryResourceData))
-            using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.BigEndian))
-            using (var dataReader = new EndianReader(dataStream, EndianFormat.BigEndian))
-            using (var secondaryDataReader = new EndianReader(secondaryDataStream, EndianFormat.BigEndian))
+            using (var definitionDataReader = new EndianReader(definitionDataStream, Cache.Endianness))
+            using (var dataReader = new EndianReader(dataStream, Cache.Endianness))
+            using (var secondaryDataReader = new EndianReader(secondaryDataStream, Cache.Endianness))
             {
                 var context = new ResourceDefinitionSerializationContext(dataReader, secondaryDataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
                 var deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
@@ -392,7 +395,7 @@ namespace TagTool.Cache.Gen3
             var decompressed = new byte[page.UncompressedBlockSize];
 
             using (var cacheStream = cache.OpenCacheRead())
-            using (var reader = new EndianReader(cacheStream, EndianFormat.BigEndian))
+            using (var reader = new EndianReader(cacheStream, Cache.Endianness))
             {
                 var sectionTable = ((CacheFileHeaderGen3)cache.BaseMapFile.Header).SectionTable;
                 var blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, page.BlockAddress);
