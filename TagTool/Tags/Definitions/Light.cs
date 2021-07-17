@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,6 +10,7 @@ namespace TagTool.Tags.Definitions
 	{
         public LightFlags Flags;
 
+        [Flags]
         public enum LightFlags : int
         {
             None = 0,
@@ -28,7 +30,7 @@ namespace TagTool.Tags.Definitions
 
         public TypeValue Type;
         public short Unknown;
-        public float LightRange;
+        public float SphereLightRange;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float UnknownIntensity;
@@ -63,16 +65,16 @@ namespace TagTool.Tags.Definitions
 
         public StringId ColorChangeInputVariable;
         public StringId ColorChangeRangeVariable;
-        public ModifierEnum OutputModifier;
+        public ModifierEnum ColorChangeOutputModifier;
         public short Unknown6;
-        public StringId OutputModifierInput;
-        public TagFunction Function = new TagFunction { Data = new byte[0] };
-        public StringId FunctionName3;
-        public StringId FunctionName4;
-        public short Unknown8;
+        public StringId CcOutputModifierInput;
+        public TagFunction ColorChangeFunction = new TagFunction { Data = new byte[0] };
+        public StringId IntensityInputVariable;
+        public StringId IntensityRangeVariable;
+        public ModifierEnum IntensityOutputModifier;
         public short Unknown9;
-        public uint Unknown10;
-        public TagFunction Function2 = new TagFunction { Data = new byte[0] };
+        public StringId IntesityOutputModifierInput;
+        public TagFunction IntensityFunction = new TagFunction { Data = new byte[0] };
         public CachedTag GelMap;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
