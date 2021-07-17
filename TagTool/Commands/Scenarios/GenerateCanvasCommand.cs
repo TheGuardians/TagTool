@@ -5,6 +5,7 @@ using System.Linq;
 using TagTool.BlamFile;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Havok;
@@ -24,11 +25,11 @@ namespace TagTool.Commands.Scenarios
             base(true,
 
                 "GenerateCanvas",
-                "Generates a mostly empty scenario",
+                "Generates a mostly empty scenario.",
 
-                "GenerateCanvas",
+                "GenerateCanvas [default]",
 
-                "GenerateCanvas")
+                "Generates a mostly empty scenario for use with Forge. Use arg \"default\" to bypass input dialog.")
         {
             Cache = cache;
         }
@@ -55,6 +56,52 @@ namespace TagTool.Commands.Scenarios
                 WorldBounds = new RealRectangle3d(-1000, 1000, -1000, 1000, -1000, 1000)
             };
             // TODO: take input
+
+            switch (args.Count)
+            {
+                case 0:
+                    {
+                        Console.WriteLine(@"Enter desired scenario tagname (e.g. levels\eldewrito\canvas\canvas):");
+                        parameters.ScenarioPath = @Console.ReadLine();
+                        if (parameters.ScenarioPath.Length < 5)
+                            return new TagToolError(CommandError.CustomError, "Please put some effort into your scenario tagname.");
+
+                        Console.WriteLine("Enter the map display name (4-15 characters):");
+                        parameters.MapName = Console.ReadLine();
+                        if (parameters.MapName.Length > 15 || parameters.MapName.Length < 4)
+                            return new TagToolError(CommandError.CustomError, "Provided name must be between 4 and 15 characters.");
+
+                        Console.WriteLine("Enter the map description: (<128 characters)");
+                        parameters.MapDescription = Console.ReadLine();
+                        if (parameters.MapDescription.Length > 127)
+                            return new TagToolError(CommandError.CustomError, "Description exceeds 127 characters.");
+
+                        Console.WriteLine("Enter the map author (4-15 characters):");
+                        parameters.MapAuthor = Console.ReadLine();
+                        if (parameters.MapAuthor.Length > 15 || parameters.MapAuthor.Length < 4)
+                            return new TagToolError(CommandError.CustomError, "Author name must be between 4 and 15 characters.");
+
+                        Console.WriteLine("Enter a mapID (integer) between 7000 and 65535:");
+                        if (int.TryParse(Console.ReadLine(), out int result))
+                        {
+                            parameters.MapId = result;
+                            if (parameters.MapId < 7001 || parameters.MapId > 65534)
+                                return new TagToolError(CommandError.CustomError, "MapID must be between 7000 and 65535.");
+                        }
+                        else
+                            return new TagToolError(CommandError.CustomError, "MapID must be an integer.");
+
+                        break;
+                    }
+                case 1:
+                    if (args[0].ToLower() == "default")
+                        break;
+                    else
+                        return new TagToolError(CommandError.ArgInvalid);
+                default:
+                    return new TagToolError(CommandError.ArgCount);
+            }
+
             GenerateCanvas(parameters);
             return true;
         }
