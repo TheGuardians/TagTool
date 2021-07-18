@@ -297,14 +297,13 @@ namespace TagTool.Geometry
         [TagField(MinVersion = HaloReach)]
         public sbyte Unknown1; // specialized render?
 
-        [TagField(MinVersion = HaloReach)]
-        public sbyte Unknown2; // other flags?
-
         /// <summary>
         /// The flags of the mesh part.
         /// </summary>
-        [TagField(MinVersion = Halo3Beta, Downgrade = nameof(FlagsOld))]
+        [TagField(MinVersion = Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123, Downgrade = nameof(FlagsOld))]
         public PartFlagsNew FlagsNew;
+        [TagField(MinVersion = HaloReach)]
+        public short FlagsNew16;
 
         [TagField(MaxVersion = Halo2Vista)]
         public byte MaxNodesPerVertex;
@@ -385,18 +384,25 @@ namespace TagTool.Geometry
     /// <summary>
     /// A subpart of a mesh which can be rendered selectively.
     /// </summary>
-    [TagStructure(Size = 0x8)]
+    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class SubPart : TagStructure
     {
         /// <summary>
         /// The index of the first vertex in the subpart.
         /// </summary>
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public ushort FirstIndex;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint FirstIndex32;
 
         /// <summary>
         /// The number of indices in the subpart.
         /// </summary>
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public ushort IndexCount;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint IndexCount32;
 
         /// <summary>
         /// The index of the subpart visibility bounds.
@@ -418,6 +424,9 @@ namespace TagTool.Geometry
         /// </remarks>
         [TagField(MinVersion = Halo3Beta)]
         public ushort VertexCount;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint AnalyticalLightIndex;
     }
 
 }

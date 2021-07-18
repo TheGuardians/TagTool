@@ -382,6 +382,9 @@ namespace TagTool.Geometry
 
         private RenderGeometryApiResourceDefinition ConvertHaloReach(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
+            // TODO: Find out why this flag is ticked, or if it is a definition change.
+            geometry.RuntimeFlags &= ~RenderGeometryRuntimeFlags.DoNotUseCompressedVertexPositions;
+
             //
             // Update Mesh.Parts
             //
@@ -393,9 +396,22 @@ namespace TagTool.Geometry
                     part.FirstIndexOld = (ushort)part.FirstIndexNew;
                     part.IndexCountOld = (ushort)part.IndexCountNew;
 
+                    part.FlagsNew = (Part.PartFlagsNew)((part.FlagsNew16 & 0x7F) + (part.FlagsNew16 >> 13) & 1);
+
                     if(part.IndexCountNew > 0xFFFF || part.FirstIndexNew > 0xFFFF)
                     {
                         Console.WriteLine("Warning: downgrade from uint to ushort for index count/first index in Mesh.Part exceeded ushort range. Unexpected behavior.");
+                    }
+                }
+
+                foreach (var subPart in mesh.SubParts)
+                {
+                    subPart.FirstIndex = (ushort)subPart.FirstIndex32;
+                    subPart.IndexCount = (ushort)subPart.IndexCount32;
+
+                    if (subPart.FirstIndex32 > 0xFFFF || subPart.IndexCount32 > 0xFFFF)
+                    {
+                        Console.WriteLine("Warning: downgrade from uint to ushort for index count/first index in Mesh.SubPart exceeded ushort range. Unexpected behavior.");
                     }
                 }
             }
