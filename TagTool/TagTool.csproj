@@ -670,6 +670,7 @@
     <Compile Include="Serialization\ResourceDeserializer.cs" />
     <Compile Include="Serialization\ResourceSerializer.cs" />
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
+    <Compile Include="Shaders\CompiledShaderInfo.cs" />
     <Compile Include="Shaders\ExplicitShader.cs" />
     <Compile Include="Shaders\ParameterUsage.cs" />
     <Compile Include="Shaders\RenderMethodExtern.cs" />

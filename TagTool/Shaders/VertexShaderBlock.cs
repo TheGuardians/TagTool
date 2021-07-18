@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TagTool.Tags;
 
 namespace TagTool.Shaders
@@ -6,9 +7,9 @@ namespace TagTool.Shaders
     [TagStructure(Size = 0x50, MaxVersion = Cache.CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x58, MinVersion = Cache.CacheVersion.HaloReach)]
     public class VertexShaderBlock : TagStructure
-	{
+    {
         [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
-        public uint ContainsConstantData; // pixl only
+        public CompiledShaderFlags Flags;
 
         public byte[] XboxShaderBytecode;
         public byte[] PCShaderBytecode;
@@ -23,11 +24,18 @@ namespace TagTool.Shaders
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x3)]
         public byte[] Padding1;
 
-        public uint Unknown9;
+        public uint Gprs;
 
         [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
         public int GlobalCachePixelShaderIndex; // pixl only
 
         public VertexShaderReference XboxShaderReference;
+
+        [Flags]
+        public enum CompiledShaderFlags : uint
+        {
+            None = 0,
+            RequiresConstantTable = 1 << 0,
+        }
     }
 }

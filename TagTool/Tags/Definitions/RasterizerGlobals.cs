@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Common;
 using System;
 using System.Collections.Generic;
 
@@ -13,31 +14,35 @@ namespace TagTool.Tags.Definitions
         public List<DefaultRasterizerBitmap> DefaultRasterizerBitmaps;
         public CachedTag VertexShaderSimple;
         public CachedTag PixelShaderSimple;
-        public List<DefaultShader> DefaultShaders;
+        public List<ExplicitShader> DefaultShaders;
         public uint Unknown;
         public uint Unknown2;
         public uint Unknown3;
         public int Unknown4;
         public int Unknown5;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ActiveCamoDistortion;
         public CachedTag DefaultPerformanceTemplate;
         public CachedTag DefaultShieldImpact;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag CheapParticleTypeLibrary;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag EmblemLibrary;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag DefaultVisionMode;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-        public int Unknown6;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public int Unknown6HO; //6 
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public int Unknown6; //6 
 
-        public float Unknown7;
-        public float Unknown8;
-        public float Unknown9;
-        public float Unknown10;
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public MotionBlurParametersLegacyBlock MotionBlurParametersLegacy;
 
-        public float Unknown11;
-        public float Unknown12;
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public MotionBlurParametersBlock MotionBlurParameters;
 
         [TagStructure(Size = 0x14)]
         public class DefaultBitmap : TagStructure
@@ -116,11 +121,37 @@ namespace TagTool.Tags.Definitions
             public CachedTag Bitmap;
         }
 
-        [TagStructure(Size = 0x20)]
-        public class DefaultShader : TagStructure
+        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+        public class ExplicitShader : TagStructure
 		{
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId Name;
+
             public CachedTag VertexShader;
             public CachedTag PixelShader;
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class MotionBlurParametersLegacyBlock : TagStructure
+        {
+            public float MaxBlur;
+            public float Unknown;
+            public float BlurScale;
+            public float CenterFalloffX;
+            public float CenterFalloffY;
+            public float ExpectedTimePerTick;
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class MotionBlurParametersBlock : TagStructure
+        {
+            public float MaxBlur;
+            public float BlurScale;
+            public float CenterFalloffX;
+            public float CenterFalloffY;
+            public float ExpectedTimePerTick;
+            public float Unknown;
         }
     }
 }

@@ -43,11 +43,7 @@ namespace TagTool.Commands.Porting
         {
             if (BlamCache.Version == CacheVersion.Halo3ODST)
             {
-                rasg.Unknown6HO = 6;
-            }
-            else
-            {
-                rasg.Unknown6HO = rasg.Unknown6;
+                rasg.Unknown6 = 6;
             }
             return rasg;
         }
