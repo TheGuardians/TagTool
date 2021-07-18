@@ -26,6 +26,7 @@ namespace TagTool.Tags.Resources
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class BitmapTextureInteropDefinition
     {
         public short Width;
@@ -40,15 +41,19 @@ namespace TagTool.Tags.Resources
 
         public int D3DFormat;
 
+        [TagField(Platform = CachePlatform.MCC)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public BitmapFormat Format;
 
+        [TagField(Platform = CachePlatform.MCC)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public BitmapImageCurve Curve;
 
+        [TagField(Platform = CachePlatform.MCC)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public BitmapFlags Flags;
 
+        [TagField(Platform = CachePlatform.MCC)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public int Unknown1;
 

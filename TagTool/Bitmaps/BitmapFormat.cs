@@ -63,57 +63,65 @@ namespace TagTool.Bitmaps
         /// <returns></returns>
         public static int GetBitsPerPixel(BitmapFormat format)
         {
-            int bitsPerPixel = 0;
             switch (format)
             {
-                case BitmapFormat.A8:
-                case BitmapFormat.AY8:
-                case BitmapFormat.Y8:
+                case BitmapFormat.Unused4:
+                case BitmapFormat.Unused5:
+                case BitmapFormat.R6G5B5:
+                case BitmapFormat.UnusedC:
+                case BitmapFormat.UnusedD:
                 case BitmapFormat.P8:
-                    bitsPerPixel = 8;
-                    break;
-
+                    return 0;
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Unused1E:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Y16:
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                    return 4;
+                case BitmapFormat.A8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.AY8:
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
+                    return 8;
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A1R5G5B5:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.A4R4G4B4Font:
                 case BitmapFormat.V8U8:
-                case BitmapFormat.Y16:
-                    bitsPerPixel = 16;
-                    break;
-
-                case BitmapFormat.A8R8G8B8:
-                case BitmapFormat.A8R8G8B8_reach:
+                case BitmapFormat.G8B8:
+                    return 16;
                 case BitmapFormat.X8R8G8B8:
+                case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.Q8W8V8U8:
                 case BitmapFormat.A2R10G10B10:
                 case BitmapFormat.V16U16:
-                    bitsPerPixel = 32;
-                    break;
-
+                    return 32;
                 case BitmapFormat.RGBFP16:
-                    bitsPerPixel = 48;
-                    break;
-
+                    return 48;
                 case BitmapFormat.A16B16G16R16F:
-                    bitsPerPixel = 64;
-                    break;
-
+                case BitmapFormat.A8R8G8B8_reach:
+                    return 64;
                 case BitmapFormat.RGBFP32:
-                    bitsPerPixel = 96;
-                    break;
-
+                    return 96;
                 case BitmapFormat.ARGBFP32:
                 case BitmapFormat.A32B32G32R32F:
-                    bitsPerPixel = 128;
-                    break;
-
+                    return 128;
                 default:
                     throw new Exception($"Unsupported uncompressed format {format}");
             }
-
-            return bitsPerPixel;
         }
 
         /// <summary>

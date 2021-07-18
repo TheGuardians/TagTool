@@ -55,54 +55,23 @@ namespace TagTool.Bitmaps.Utils
                 return null;
 
             byte[] resultData;
-            if (cachePlatform == CachePlatform.MCC)
+ 
+            using (var result = new MemoryStream())
             {
-                // for now
-                resultData = primaryData;
-            }
-            else
-            {
+                int mipLevelCount = definition.MipmapCount;
+                int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
 
-                using (var result = new MemoryStream())
+                if (definition.BitmapType == BitmapType.Array && mipLevelCount > 1)
                 {
-                    int mipLevelCount = definition.MipmapCount;
-                    int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
+                    mipLevelCount = 1;
+                    definition.MipmapCount = 1;
+                    bitmap.Images[imageIndex].MipmapCount = 0;
+                }
 
-                    if (definition.BitmapType == BitmapType.Array && mipLevelCount > 1)
-                    {
-                        mipLevelCount = 1;
-                        definition.MipmapCount = 1;
-                        bitmap.Images[imageIndex].MipmapCount = 0;
-                    }
-
-                    if (!forDDS)
-                    {
-                        // order for d3d9, all faces first, then mipmaps
-                        for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
-                        {
-                            for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
-                            {
-                                if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
-                                {
-                                    if (layerIndex == 1)
-                                        layerIndex = 2;
-                                    else if (layerIndex == 2)
-                                        layerIndex = 1;
-                                }
-
-                                ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-
-                                if (definition.BitmapType == BitmapType.CubeMap)
-                                {
-                                    if (layerIndex == 2)
-                                        layerIndex = 1;
-                                    else if (layerIndex == 1)
-                                        layerIndex = 2;
-                                }
-                            }
-                        }
-                    }
-                    else
+                if (!forDDS)
+                {
+                    // order for d3d9, all faces first, then mipmaps
+                    for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
                     {
                         for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
                         {
@@ -114,10 +83,10 @@ namespace TagTool.Bitmaps.Utils
                                     layerIndex = 1;
                             }
 
-                            for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
-                            {
+                            if(cachePlatform == CachePlatform.MCC)
+                                ConvertGen3BitmapDataMCC(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
+                            else
                                 ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-                            }
 
                             if (definition.BitmapType == BitmapType.CubeMap)
                             {
@@ -128,10 +97,41 @@ namespace TagTool.Bitmaps.Utils
                             }
                         }
                     }
-
-                    resultData = result.ToArray();
                 }
+                else
+                {
+                    for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                    {
+                        if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
+                        {
+                            if (layerIndex == 1)
+                                layerIndex = 2;
+                            else if (layerIndex == 2)
+                                layerIndex = 1;
+                        }
+
+                        for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                        {
+                            if(cachePlatform == CachePlatform.MCC)
+                                ConvertGen3BitmapDataMCC(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
+                            else
+                                ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
+                            
+                        }
+
+                        if (definition.BitmapType == BitmapType.CubeMap)
+                        {
+                            if (layerIndex == 2)
+                                layerIndex = 1;
+                            else if (layerIndex == 1)
+                                layerIndex = 2;
+                        }
+                    }
+                }
+
+                resultData = result.ToArray();
             }
+            
 
             // fix enum from reach
             if (version == CacheVersion.HaloReach)
@@ -185,6 +185,26 @@ namespace TagTool.Bitmaps.Utils
                 resultBitmap.Type = BitmapType.Texture3D;
 
             return resultBitmap;     
+        }
+
+        private static void ConvertGen3BitmapDataMCC(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
+        {
+            var pixelDataOffset = BitmapUtilsPC.GetTextureOffset(bitmap.Images[imageIndex], level);
+            var pixelDataSize = BitmapUtilsPC.GetMipmapPixelDataSize(bitmap.Images[imageIndex], level);
+
+            byte[] pixelData = new byte[pixelDataSize];
+            if (level == 0 && definition.HighResInSecondaryResource > 0 || primaryData == null)
+            {
+                Array.Copy(secondaryData, pixelDataOffset, pixelData, 0, pixelData.Length);
+            }
+            else
+            {
+                if (secondaryData != null)
+                    pixelDataOffset -= secondaryData.Length;
+                Array.Copy(primaryData, pixelDataOffset, pixelData, 0, pixelDataSize);
+            }
+ 
+            resultStream.Write(pixelData, 0, pixelData.Length);
         }
 
         private static void ConvertGen3BitmapData(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)

@@ -202,7 +202,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public BitmapFlagsXbox XboxFlags;
 
-            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             public byte[] Unused1;
 
 
@@ -210,6 +210,9 @@ namespace TagTool.Tags.Definitions
             /// The type of the bitmap image. DO NOT CHANGE
             /// </summary>
             public BitmapType Type;
+
+            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+            public byte[] Unused2;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public byte UnknownFlags;
