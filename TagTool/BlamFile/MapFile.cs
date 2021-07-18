@@ -178,7 +178,7 @@ namespace TagTool.BlamFile
 
         public static MapFile GenerateMapFile(CacheVersion version, Scenario scnr, CachedTag scenarioTag, Blf mapInfo = null)
         {
-            if(version == CacheVersion.HaloOnlineED)
+            if(CacheVersionDetection.IsBetween(version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
             {
                 MapFile map = new MapFile();
                 var header = new CacheFileHeaderGenHaloOnline();
