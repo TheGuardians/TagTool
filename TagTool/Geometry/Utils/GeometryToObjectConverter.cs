@@ -645,7 +645,7 @@ namespace TagTool.Geometry.Utils
             var rigidVertices = new List<RigidVertex>();
             using (var stream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var vertexStream = VertexStreamFactory.Create(DestCache.Version, stream);
+                var vertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, stream);
                 for (int i = 0; i < vertexBuffer.Count; i++)
                 {
                     var vertex = vertexStream.ReadRigidVertex();
@@ -676,7 +676,7 @@ namespace TagTool.Geometry.Utils
             var compressor = new VertexCompressor(compression);
             using (var outStream = new MemoryStream())
             {
-                var outVertexStream = VertexStreamFactory.Create(DestCache.Version, outStream);
+                var outVertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, outStream);
                 foreach (var vertex in rigidVertices)
                 {
                     vertex.Position = compressor.CompressPosition(vertex.Position);

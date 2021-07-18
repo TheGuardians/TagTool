@@ -161,7 +161,7 @@ namespace TagTool.Geometry
             mesh.UVComponentCount[textureCoordinateIndex] = 2;
 
             // prepare vertex extraction
-            var meshReader = new MeshReader(CacheContext.Version, RenderModel.Geometry.Meshes[meshIndex]);
+            var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[meshIndex]);
             var vertexCompressor = new VertexCompressor(RenderModel.Geometry.Compression[0]);
 
             var geometryMesh = RenderModel.Geometry.Meshes[meshIndex];

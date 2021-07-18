@@ -16,15 +16,18 @@ namespace TagTool.Geometry
         private const int IndexBufferCount = 2;
 
         private readonly CacheVersion _version;
+        private readonly CachePlatform _platform;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshReader"/> class.
         /// </summary>
         /// <param name="version">The engine version to target.</param>
+        /// <param name="platform"></param>
         /// <param name="mesh">The mesh.</param>
-        public MeshReader(CacheVersion version, Mesh mesh)
+        public MeshReader(CacheVersion version, CachePlatform platform, Mesh mesh)
         {
             _version = version;
+            _platform = platform;
             Mesh = mesh;
             VertexStreams = new VertexBufferDefinition[StreamCount];
             IndexBuffers = new IndexBufferDefinition[IndexBufferCount];
@@ -60,7 +63,7 @@ namespace TagTool.Geometry
         public IVertexStream OpenVertexStream(VertexBufferDefinition definition)
         {
             var stream = new MemoryStream(definition.Data.Data);
-            return VertexStreamFactory.Create(_version, stream);
+            return VertexStreamFactory.Create(_version, _platform, stream);
         }
 
         /// <summary>

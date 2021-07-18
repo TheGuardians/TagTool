@@ -168,7 +168,7 @@ namespace TagTool.Commands.Models
                         for (var i = 0; i < meshCount; i++)
                         {
                             // Create a MeshReader for the mesh and pass it to the obj extractor
-                            var meshReader = new MeshReader(Cache.Version, renderModel.Geometry.Meshes[meshIndex + i]);
+                            var meshReader = new MeshReader(Cache.Version, Cache.Platform, renderModel.Geometry.Meshes[meshIndex + i]);
                             objExtractor.ExtractMesh(meshReader, vertexCompressor, String.Format("{0}:{1}", regionName, permutationName));
                         }
                     }
@@ -182,7 +182,7 @@ namespace TagTool.Commands.Models
                     foreach (var mesh in renderModel.Geometry.Meshes)
                     {
                         // Create a MeshReader for the mesh and pass it to the obj extractor
-                        var meshReader = new MeshReader(Cache.Version, mesh);
+                        var meshReader = new MeshReader(Cache.Version, Cache.Platform, mesh);
                         objExtractor.ExtractMesh(meshReader, vertexCompressor, String.Format("mesh_{0}", i));
                         i++;
                     }

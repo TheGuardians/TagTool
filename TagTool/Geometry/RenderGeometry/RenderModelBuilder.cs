@@ -491,7 +491,7 @@ namespace TagTool.Geometry
 
         private int SerializeVertexBuffer(MeshData mesh, Stream outStream)
         {
-            var vertexStream = VertexStreamFactory.Create(CacheContext.Version, outStream);
+            var vertexStream = VertexStreamFactory.Create(CacheContext.Version, CacheContext.Platform, outStream);
 
             if (mesh.RigidVertices != null)
             {

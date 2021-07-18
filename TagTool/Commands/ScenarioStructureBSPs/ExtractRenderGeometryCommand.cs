@@ -67,7 +67,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     var i = 0;
                     foreach (var cluster in Definition.Clusters)
                     {
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[cluster.MeshIndex]);
+                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, Definition.Geometry.Meshes[cluster.MeshIndex]);
                         objExtractor.ExtractMesh(meshReader, null, String.Format("cluster_{0}", i));
                         i++;
                     }
@@ -75,7 +75,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     foreach (var instance in Definition.InstancedGeometryInstances)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[instance.DefinitionIndex]);
+                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, Definition.Geometry.Meshes[instance.DefinitionIndex]);
                         objExtractor.ExtractMesh(meshReader, vertexCompressor, CacheContext.StringTable.GetString(instance.Name));
                     }
 

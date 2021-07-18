@@ -16,13 +16,13 @@ namespace TagTool.Geometry
                 writeVertex(readVertex(), i);
         }
 
-        public static void ConvertVertexBuffer(CacheVersion inVersion, CacheVersion outVersion, VertexBufferDefinition vertexBuffer)
+        public static void ConvertVertexBuffer(CacheVersion inVersion, CachePlatform inPlatform, CacheVersion outVersion, CachePlatform outPlatform, VertexBufferDefinition vertexBuffer)
         {
             using (var outputStream = new MemoryStream())
             using (var inputStream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var inVertexStream = VertexStreamFactory.Create(inVersion, inputStream);
-                var outVertexStream = VertexStreamFactory.Create(outVersion, outputStream);
+                var inVertexStream = VertexStreamFactory.Create(inVersion, inPlatform, inputStream);
+                var outVertexStream = VertexStreamFactory.Create(outVersion, outPlatform, outputStream);
 
                 VertexStreamReach reachVertexStream = null;
                 if (inVersion >= CacheVersion.HaloReach)

@@ -638,6 +638,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamInterop.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamReach.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamHalo3RetailMCC.cs" />
     <Compile Include="Geometry\Utils\GeometryToObjectConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />

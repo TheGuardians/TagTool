@@ -125,7 +125,7 @@ namespace TagTool.Geometry
                 var newVertexBuffer = new VertexBufferDefinition
                 {
                     Format = VertexBufferFormat.ParticleModel,
-                    VertexSize = (short)VertexStreamFactory.Create(DestCache.Version, null).GetVertexSize(VertexBufferFormat.ParticleModel),
+                    VertexSize = (short)VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, null).GetVertexSize(VertexBufferFormat.ParticleModel),
                     Data = new TagData
                     {
                         Data = new byte[32],
@@ -151,7 +151,7 @@ namespace TagTool.Geometry
                         if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
                             continue;
 
-                        VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, vertexBuffer);
+                        VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, vertexBuffer);
                     }
 
                     // convert water vertex buffers
@@ -183,25 +183,25 @@ namespace TagTool.Geometry
 
                         using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[0].Data.Data))
                         {
-                            var vertexStream = VertexStreamFactory.Create(DestCache.Version, stream);
+                            var vertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, stream);
                             for(int v = 0; v < mesh.ResourceVertexBuffers[0].Count; v++)
                                 worldVertices.Add(vertexStream.ReadWorldVertex());
                         }
                         using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[6].Data.Data))
                         {
-                            var vertexStream = VertexStreamFactory.Create(SourceCache.Version, stream);
+                            var vertexStream = VertexStreamFactory.Create(SourceCache.Version, SourceCache.Platform, stream);
                             for (int v = 0; v < mesh.ResourceVertexBuffers[6].Count; v++)
                                 h3WaterIndices.Add(vertexStream.ReadUnknown1A());
                         }
                         using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[7].Data.Data))
                         {
-                            var vertexStream = VertexStreamFactory.Create(SourceCache.Version, stream);
+                            var vertexStream = VertexStreamFactory.Create(SourceCache.Version, SourceCache.Platform, stream);
                             for (int v = 0; v < mesh.ResourceVertexBuffers[7].Count; v++)
                                 h3WaterParameters.Add(vertexStream.ReadUnknown1B());
                         }
                         using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[1].Data.Data))
                         {
-                            var vertexStream = VertexStreamFactory.Create(DestCache.Version, stream);
+                            var vertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, stream);
                             for (int v = 0; v < mesh.ResourceVertexBuffers[1].Count; v++)
                                 staticPerPixel.Add(vertexStream.ReadStaticPerPixelData());
                         }
@@ -228,8 +228,8 @@ namespace TagTool.Geometry
                         using (var outputWorldWaterStream = new MemoryStream())
                         using(var outputWaterParametersStream = new MemoryStream())
                         {
-                            var outWorldVertexStream = VertexStreamFactory.Create(DestCache.Version, outputWorldWaterStream);
-                            var outWaterParameterVertexStream = VertexStreamFactory.Create(DestCache.Version, outputWaterParametersStream);
+                            var outWorldVertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, outputWorldWaterStream);
+                            var outWaterParameterVertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, outputWaterParametersStream);
 
                             // fill vertex buffer to the right size HO expects, then write the vertex data at the actual proper position
                             VertexBufferConverter.DebugFill(outputWorldWaterStream, waterVertices.VertexSize * waterVertices.Count);
@@ -307,7 +307,7 @@ namespace TagTool.Geometry
             foreach (var perPixel in geometry.InstancedGeometryPerPixelLighting)
             {
                 if(perPixel.VertexBuffer != null)
-                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, perPixel.VertexBuffer);
+                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, perPixel.VertexBuffer);
             }
 
             return geometry.GetResourceDefinition();
@@ -477,7 +477,7 @@ namespace TagTool.Geometry
                 var newVertexBuffer = new VertexBufferDefinition
                 {
                     Format = VertexBufferFormat.ParticleModel,
-                    VertexSize = (short)VertexStreamFactory.Create(DestCache.Version, null).GetVertexSize(VertexBufferFormat.ParticleModel),
+                    VertexSize = (short)VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, null).GetVertexSize(VertexBufferFormat.ParticleModel),
                     Data = new TagData
                     {
                         Data = new byte[32],
@@ -515,7 +515,7 @@ namespace TagTool.Geometry
                             continue;
                         }
 
-                        VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, vertexBuffer);
+                        VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, vertexBuffer);
                     }
 
                     foreach (var indexBuffer in mesh.ResourceIndexBuffers)
@@ -545,7 +545,7 @@ namespace TagTool.Geometry
             foreach (var perPixel in geometry.InstancedGeometryPerPixelLighting)
             {
                 if (perPixel.VertexBuffer != null)
-                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, DestCache.Version, perPixel.VertexBuffer);
+                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, perPixel.VertexBuffer);
             }
 
             return geometry.GetResourceDefinition();

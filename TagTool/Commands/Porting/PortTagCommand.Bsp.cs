@@ -35,7 +35,7 @@ namespace TagTool.Commands.Porting
                     grid.Vertices = new List<TinyPositionVertex>();
                     using (var stream = new MemoryStream(buffer.Data.Data))
                     {
-                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, stream);
+                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
                         stream.Position = offset;
 
                         for(int i = 0; i < grid.Amount; i++)
@@ -60,7 +60,7 @@ namespace TagTool.Commands.Porting
             // convert all the decorator vertex buffers
             foreach(var d3dBuffer in blamDecoratorResourceDefinition.VertexBuffers)
             {
-                VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, CacheContext.Version, d3dBuffer.Definition);
+                VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, d3dBuffer.Definition);
                 decoratorGeometry.VertexBuffers.Add(d3dBuffer);
             }
 

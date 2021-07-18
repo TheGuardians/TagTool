@@ -375,13 +375,13 @@ namespace TagTool.Tools.Geometry
                 {
                     var vertexBuffer = mesh.ResourceVertexBuffers[0];
                     var vertexCompressor = new VertexCompressor(mode.Geometry.Compression[0]);
-                    geometryMesh.Vertices = ConvertGeometryVertices(vertexCompressor, vertexBuffer, cache.Version, vertexCount, mesh.RigidNodeIndex);
+                    geometryMesh.Vertices = ConvertGeometryVertices(vertexCompressor, vertexBuffer, cache.Version, cache.Platform, vertexCount, mesh.RigidNodeIndex);
                 }
 
                 if (mesh.ResourceVertexBuffers[3] != null)
                 {
                     var vertexBuffer = mesh.ResourceVertexBuffers[3];
-                    geometryMesh.PerVertexLighting = ConvertLightingVertices(vertexBuffer, cache.Version, vertexCount);
+                    geometryMesh.PerVertexLighting = ConvertLightingVertices(vertexBuffer, cache.Version, cache.Platform, vertexCount);
                 }
 
                 Meshes.Add(geometryMesh);
@@ -401,13 +401,13 @@ namespace TagTool.Tools.Geometry
             return stringId;
         }
 
-        private static List<BMFVertex> ConvertGeometryVertices(VertexCompressor vertexCompressor, VertexBufferDefinition vertexBuffer, CacheVersion version, int vertexCount, int rigidNodeIndex)
+        private static List<BMFVertex> ConvertGeometryVertices(VertexCompressor vertexCompressor, VertexBufferDefinition vertexBuffer, CacheVersion version, CachePlatform platform, int vertexCount, int rigidNodeIndex)
         {
             var vertices = new List<BMFVertex>();
 
             using (var vertexDataStream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var vertexStream = VertexStreamFactory.Create(version, vertexDataStream);
+                var vertexStream = VertexStreamFactory.Create(version, platform, vertexDataStream);
 
                 VertexStreamReach reachVertexStream = null;
                 if (version >= CacheVersion.HaloReach)
@@ -501,13 +501,13 @@ namespace TagTool.Tools.Geometry
             return vertices;
         }
 
-        private static List<BMFVertexLighting> ConvertLightingVertices(VertexBufferDefinition vertexBuffer, CacheVersion version, int vertexCount)
+        private static List<BMFVertexLighting> ConvertLightingVertices(VertexBufferDefinition vertexBuffer, CacheVersion version, CachePlatform platform, int vertexCount)
         {
             var vertices = new List<BMFVertexLighting>();
 
             using (var vertexDataStream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var vertexStream = VertexStreamFactory.Create(version, vertexDataStream);
+                var vertexStream = VertexStreamFactory.Create(version, platform, vertexDataStream);
 
                 for (int j = 0; j < vertexCount; j++)
                 {

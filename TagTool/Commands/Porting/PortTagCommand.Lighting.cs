@@ -201,7 +201,7 @@ namespace TagTool.Commands.Porting
                 if (staticPerVertexLighting.VertexBufferIndex != -1)
                 {
                     staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
-                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, CacheContext.Version, staticPerVertexLighting.VertexBuffer);
+                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, staticPerVertexLighting.VertexBuffer);
                     var d3dPointer = new D3DStructure<VertexBufferDefinition>();
                     d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
                     newLightmapResourceDefinition.VertexBuffers.Add(d3dPointer);
