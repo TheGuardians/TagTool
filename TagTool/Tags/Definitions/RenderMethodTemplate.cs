@@ -89,7 +89,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public byte ArgumentIndex;
 
-            public byte Unknown;
+            public byte Flags; // bitmap flag 1 = vertex sampler (register+16). also used as vector swizzle mask
         }
 
         [TagStructure(Size = 0x4)]
