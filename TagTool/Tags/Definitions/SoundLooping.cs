@@ -162,9 +162,23 @@ namespace TagTool.Tags.Definitions
         public class Track : TagStructure
 		{
             public StringId Name;
-            public uint Flags;
+            public LsndTrackFlags Flags;
             public float Gain;
             public float FadeInDuration;
+
+            [Flags]
+            public enum LsndTrackFlags : uint
+            {
+                None = 0,
+                FadeInAtStart = 1 << 0,
+                FadeOutAtStop = 1 << 1,
+                CrossfadeAlternateLoop = 1 << 2,
+                MasterSurroundSoundTrack = 1 << 3,
+                FadeOutAlternateStop = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7
+            }
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public SoundFadeMode FadeInMode;
