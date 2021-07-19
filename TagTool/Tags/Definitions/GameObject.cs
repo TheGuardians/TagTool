@@ -629,10 +629,10 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x2)]
     public class GameObjectType : TagStructure
 	{
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
         public GameObjectTypeHalo2 Halo2;
 
-        [TagField(Gen = CacheGeneration.Third)]
+        [TagField(Gen = CacheGeneration.Third, Platform = CachePlatform.Original)]
         public sbyte Unknown1;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
@@ -647,6 +647,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameObjectTypeHalo3Retail HaloReach;
 
+        [TagField(Platform = CachePlatform.MCC)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public sbyte Unknown2;
     }
