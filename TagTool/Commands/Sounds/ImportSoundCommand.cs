@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Audio;
 using System.Linq;
+using TagTool.Audio.Converter;
+using TagTool.IO;
 
 namespace TagTool.Commands.Sounds
 {
@@ -164,7 +166,6 @@ namespace TagTool.Commands.Sounds
                 {
                     string soundFile = "";
                     int sampleCount = -1;
-                    int sampleRate = 0;
                     int bitRate = 0;
 
                     if (argCount == 0) {
@@ -200,17 +201,14 @@ namespace TagTool.Commands.Sounds
                                     if (bits[18] == false && bits[19] == false && bits[11] == true && bits[12] == true) // 44100Hz, MPEG1
                                     {
                                         Definition.SampleRate.value = SampleRate.SampleRateValue._44khz;
-                                        sampleRate = 44100;
                                     }
                                     else if (bits[18] == false && bits[19] == true && bits[11] == true && bits[12] == true) // 32000Hz, MPEG1
                                     {
                                         Definition.SampleRate.value = SampleRate.SampleRateValue._32khz;
-                                        sampleRate = 32000;
                                     }
                                     else if (bits[18] == false && bits[19] == false && bits[11] == false && bits[12] == true) // 22050Hz, MPEG2
                                     {
                                         Definition.SampleRate.value = SampleRate.SampleRateValue._22khz;
-                                        sampleRate = 22050;
                                     }
                                     else
                                         return new TagToolError(CommandError.CustomError, $"Sample rate not supported! Use 44100, 32000, or 22050Hz mp3s.");
@@ -250,7 +248,7 @@ namespace TagTool.Commands.Sounds
                                         return new TagToolError(CommandError.CustomError, $"This mp3 bitrate is invalid or not supported.");
 
                                     // estimate sample count (this gets close but isn't exact which is likely gonna be a problem. but we'll see what happens)
-                                    var c = ((permutationData.Count() * 8) / (float)(bitRate * 1000)) * sampleRate;
+                                    var c = ((permutationData.Count() * 8) / (float)(bitRate * 1000)) * Definition.SampleRate.GetSampleRateHz();
                                     sampleCount = (int)c;
 
                                     break;
@@ -261,9 +259,34 @@ namespace TagTool.Commands.Sounds
                                 break;
                             case ".wav":
                                 Definition.PlatformCodec.Compression = Compression.PCM;
-                                Array.Copy(permutationData, header, 48);
+                                using(var reader = new EndianReader(new MemoryStream(permutationData)))
+                                {
+                                    var wavFile = new WAVFile(reader);
+                                    Definition.SampleRate.value = GetSoundSampleRate(wavFile.FMT.SampleRate);
+                                    Definition.PlatformCodec.Encoding = GetSoundEncoding(wavFile.FMT.Channels);
+                                    sampleCount = wavFile.Data.Data.Length / wavFile.FMT.BlockAlign;
+                                    bitRate = (int)(wavFile.FMT.SampleRate * wavFile.FMT.BlockAlign / 1000.0f);
+                                    permutationData = wavFile.Data.Data;
+                                }
                                 break;
                         }
+                    }
+
+                    if (Definition.PlatformCodec.Compression == Compression.PCM)
+                    {
+                        if (argCount == 0)
+                        {
+                            using (var reader = new EndianReader(new MemoryStream(permutationData)))
+                            {
+                                var wavFile = new WAVFile(reader);
+                                if (wavFile.RIFF.Size > 0)
+                                    permutationData = wavFile.Data.Data;
+                            }
+                        }
+
+                        // fmod wants 0x10 bytes of padding at the start and end
+                        var data = new byte[permutationData.Length + 0x20];
+                        Array.Copy(permutationData, 0, data, 0x10, permutationData.Length);
                     }
 
                     var perm = new Permutation
@@ -293,7 +316,7 @@ namespace TagTool.Commands.Sounds
 
 					if (argCount == 1)
 					{
-						Console.WriteLine($"Permutation {i}: \"{fileList[i].Name}\", {bitRate}kb/s at {sampleRate}Hz for ~{sampleCount} samples");
+						Console.WriteLine($"Permutation {i}: \"{fileList[i].Name}\", {bitRate}kb/s at {Definition.SampleRate.GetSampleRateHz()}Hz for ~{sampleCount} samples");
 					}
                 }
 
@@ -353,6 +376,24 @@ namespace TagTool.Commands.Sounds
             }
         }
 
+        private static EncodingValue GetSoundEncoding(int channelCount)
+        {
+            switch (channelCount)
+            {
+                case 1:
+                    return EncodingValue.Mono;
+                case 2:
+                    return EncodingValue.Stereo;
+                case 4:
+                    return EncodingValue.Surround;
+                case 6:
+                    return EncodingValue._51Surround;
+                default:
+                    Console.WriteLine("WARNING:\tInvalid channel count, using stereo.");
+                    return EncodingValue.Stereo;
+            }
+        }
+
         private static SampleRate.SampleRateValue GetSoundSampleRateUser()
         {
             int sampleRate = GetIntFromUser($"Enter the sample rate of the sound: (0: 22050 Hz, 1: 44100 Hz, 2: 32000 Hz): ");
@@ -363,6 +404,22 @@ namespace TagTool.Commands.Sounds
                 case 1:
                     return SampleRate.SampleRateValue._44khz;
                 case 2:
+                    return SampleRate.SampleRateValue._32khz;
+                default:
+                    Console.WriteLine("WARNING:\tInvalid sample rate, using 44100 Hz");
+                    return SampleRate.SampleRateValue._44khz;
+            }
+        }
+
+        private static SampleRate.SampleRateValue GetSoundSampleRate(int sampleRate)
+        {
+            switch (sampleRate)
+            {
+                case 22050:
+                    return SampleRate.SampleRateValue._22khz;
+                case 44000:
+                    return SampleRate.SampleRateValue._44khz;
+                case 32000:
                     return SampleRate.SampleRateValue._32khz;
                 default:
                     Console.WriteLine("WARNING:\tInvalid sample rate, using 44100 Hz");
