@@ -214,9 +214,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
-                Binormal = Stream.ReadDHen3N(),
+                Normal = Stream.ReadUShort4N().IJK,
+                Tangent = Stream.ReadUShort4N(),
+                Binormal = Stream.ReadUShort4N().IJK,
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
@@ -280,8 +280,8 @@ namespace TagTool.Geometry
         {
             return new WorldVertex
             {
-                Position = new RealQuaternion(Stream.ReadFloat3(), 0.0f),
-                Texcoord = Stream.ReadFloat2(),
+                Position = new RealQuaternion(Stream.ReadUShort4N().IJK, 0.0f),
+                Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
                 Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
                 Binormal = Stream.ReadDHen3N()
@@ -505,7 +505,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Rigid:
                     return 0x24;
                 case VertexBufferFormat.Skinned:
-                    return 0x20;
+                    return 0x2C;
                 case VertexBufferFormat.StaticPerPixel:
                     return 0x4;
                 case VertexBufferFormat.StaticPerVertex:
@@ -516,7 +516,7 @@ namespace TagTool.Geometry
                     return 0x10;
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
-                    return 0x20;
+                    return 0x18;
                 case VertexBufferFormat.Unknown1A:
                     return 0xC;
                 case VertexBufferFormat.Unknown1B:
