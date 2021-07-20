@@ -259,32 +259,60 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //convert lists
+            int listshapeindex = 0;
             foreach (var gen2list in gen2PhysicsModel.Lists)
             {
                 int childshapescount = gen2list.ChildShapesSize;
 
                 //convert list shapes
-                for (var i = 0; i < gen2list.ChildShapesSize; i++)
+                if(childshapescount > 4)
                 {
-                    var gen2listshape = gen2list.CollisionFilter[i];
-
-                    //remove any invalid shape types
-                    if((PhysicsModelGen2.ListsBlock.ShapeTypeValue.MultiSphere < gen2listshape.ShapeType) && (gen2listshape.ShapeType < PhysicsModelGen2.ListsBlock.ShapeTypeValue.List))
+                    for (var i = listshapeindex; i < gen2list.ChildShapesSize + listshapeindex; i++)
                     {
-                        childshapescount--;
-                        continue;
+                        var gen2listshape = gen2PhysicsModel.ListShapes[i];
+
+                        //remove any invalid shape types
+                        if ((PhysicsModelGen2.ListShapesBlock.ShapeTypeValue.MultiSphere < gen2listshape.ShapeType) && (gen2listshape.ShapeType < PhysicsModelGen2.ListShapesBlock.ShapeTypeValue.List))
+                        {
+                            childshapescount--;
+                            continue;
+                        }
+
+                        physicsModel.ListShapes.Add(new PhysicsModel.ListShape
+                        {
+                            ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
+                            ShapeIndex = gen2listshape.Shape,
+                            CollisionFilter = (uint)gen2listshape.CollisionFilter,
+                            NumChildShapes = (uint)gen2list.ChildShapesSize
+                        });
+                        //TODO: Shape Size?
                     }
-
-                    physicsModel.ListShapes.Add(new PhysicsModel.ListShape
-                    {
-                        ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
-                        ShapeIndex = gen2listshape.Shape,
-                        CollisionFilter = (uint)gen2listshape.CollisionFilter,
-                        NumChildShapes = (uint)gen2list.ChildShapesSize
-                    });
-                    //TODO: Shape Size?
+                    listshapeindex = gen2list.ChildShapesSize + listshapeindex;
                 }
+                else
+                {
+                    for (var i = 0; i < gen2list.ChildShapesSize; i++)
+                    {
+                        var gen2listshape = gen2list.CollisionFilter[i];
 
+                        //remove any invalid shape types
+                        if ((PhysicsModelGen2.ListsBlock.ShapeTypeValue.MultiSphere < gen2listshape.ShapeType) && (gen2listshape.ShapeType < PhysicsModelGen2.ListsBlock.ShapeTypeValue.List))
+                        {
+                            childshapescount--;
+                            continue;
+                        }
+
+                        physicsModel.ListShapes.Add(new PhysicsModel.ListShape
+                        {
+                            ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
+                            ShapeIndex = gen2listshape.Shape,
+                            CollisionFilter = (uint)gen2listshape.CollisionFilter,
+                            NumChildShapes = (uint)gen2list.ChildShapesSize
+                        });
+                        //TODO: Shape Size?
+                    }
+                }
+                
                 physicsModel.Lists.Add(new PhysicsModel.List
                 {
                     //FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
