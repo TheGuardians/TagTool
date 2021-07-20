@@ -6,8 +6,9 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x98, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x98, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.MCC)]
     public class LensFlare : TagStructure
 	{
         public Angle FalloffAngle;
@@ -20,6 +21,7 @@ namespace TagTool.Tags.Definitions
         //  Halo 3 lens tags always use their first reflection block element.
         //
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public int OcclusionReflectionIndex;
 
@@ -129,21 +131,28 @@ namespace TagTool.Tags.Definitions
             One
         }
 
-        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach, Platform =  CachePlatform.Original)]
+        [TagStructure(Size = 0x9C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public class Reflection : TagStructure
 		{
             public FlagsValue Flags;
             public short BitmapIndex;
 
+            [TagField(Platform = CachePlatform.MCC)]
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown2;
+
+            [TagField(Platform = CachePlatform.MCC)]
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public CachedTag BitmapOverride;
+
+            [TagField(Platform = CachePlatform.MCC)]
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public float RotationOffset_HO;
 
+            [TagField(Platform = CachePlatform.Original)]
             public float PositionFlareAxis;
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -151,6 +160,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float RotationOffset_Reach;
 
+            [TagField(Platform = CachePlatform.MCC)]
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<float> OffsetBounds;
 
@@ -163,15 +173,19 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public Bounds<float> BrightnessBoundsReach;
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public TagFunction RadiusCurveFunction = new TagFunction { Data = new byte[0] };
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            [TagField(Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
             public TagFunction ScaleCurveXFunction = new TagFunction { Data = new byte[0] };
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            [TagField(Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
             public TagFunction ScaleCurveYFunction = new TagFunction { Data = new byte[0] };
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public TagFunction BrightnessCurveFunction = new TagFunction { Data = new byte[0] };
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
