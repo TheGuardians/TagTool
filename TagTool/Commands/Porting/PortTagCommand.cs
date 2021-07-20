@@ -159,6 +159,9 @@ namespace TagTool.Commands.Porting
                 
                 if (blamTag.Group.Tag == "snd!")
                 {
+                    if (BlamCache.Platform == CachePlatform.MCC)
+                        return true;
+
                     Sound sound = BlamCache.Deserialize<Sound>(blamCacheStream, blamTag);
 
                     if (BlamSoundGestalt == null)
