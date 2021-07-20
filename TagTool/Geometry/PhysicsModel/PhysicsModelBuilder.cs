@@ -264,7 +264,7 @@ namespace TagTool.Geometry
             poly.ShapeBase.Size = 0;
 
             poly.ShapeBase.Count = 128; // uncertain as to what this does.
-            poly.ShapeBase.Offset = 32 + index * 128;
+            poly.ShapeBase.Offset = new Cache.PlatformUnsignedValue((uint)(32 + index * 128));
 
             //The axis-aligned fields are used to optimise collisions
             // with other physics objects. If they are set incorrectly,

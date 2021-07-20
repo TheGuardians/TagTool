@@ -19,6 +19,8 @@ namespace TagTool.Cache
 
         public uint Get32BitValue() => (uint)(Value);
         public ulong Get64BitValue() => Value;
+
+        public override string ToString() => $"0x{Value:X}";
     }
 
     /// <summary>
@@ -36,5 +38,7 @@ namespace TagTool.Cache
         // TODO: verify this cast actually works
         public int Get32BitValue() => (int)(Value);
         public long Get64BitValue() => Value;
+
+        public override string ToString() => $"{Value}";
     }
 }

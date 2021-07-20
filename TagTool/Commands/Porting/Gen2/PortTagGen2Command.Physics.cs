@@ -87,7 +87,7 @@ namespace TagTool.Commands.Porting.Gen2
                     ShapeIndex = gen2phantom.ShapeIndex,
                     ShapeBase = ConvertHavokShapeBaseNoRadius(gen2phantom.ShapeBase),
                     PhantomShape = ConvertHavokShapeBaseNoRadius(gen2phantom.PhantomShape),
-                    Unknown4 = gen2phantom.Unknown4
+                    Unknown4 = new PlatformUnsignedValue(gen2phantom.Unknown4)
                 };
                 //ConvertHavokShape(newPhantom, gen2phantom);
                 physicsModel.Phantoms.Add(newPhantom);
@@ -193,7 +193,7 @@ namespace TagTool.Commands.Porting.Gen2
                     FourVectorsSize = gen2poly.FourVectorsSize,
                     FourVectorsCapacity = (uint)gen2poly.FourVectorsSize | 0x80000000,
                     NumVertices = gen2poly.NumVertices,
-                    m_useSpuBuffer = gen2poly.Unknown,
+                    AnotherFieldPointerSkip = new PlatformUnsignedValue(gen2poly.Unknown),
                     PlaneEquationsSize = gen2poly.PlaneEquationsSize,
                     PlaneEquationsCapacity = (uint)gen2poly.PlaneEquationsSize | 0x80000000,
                     ProxyCollisionGroup = -1 //doesn't exist in H2
@@ -231,7 +231,7 @@ namespace TagTool.Commands.Porting.Gen2
                 ConvertHavokShape(newPoly, gen2poly);
 
                 //not sure what this is for, but just matching existing tags
-                newPoly.ShapeBase.Offset = 32 + 128 * polyhedra_index++;
+                newPoly.ShapeBase.Offset = new PlatformUnsignedValue((uint)(32 + 128 * polyhedra_index++));
 
                 physicsModel.Polyhedra.Add(newPoly);
             }
@@ -290,10 +290,10 @@ namespace TagTool.Commands.Porting.Gen2
                     //FieldPointerSkip = gen2list.ShapeBase.FieldPointerSkip,
                     Size = gen2list.ShapeBase.Size,
                     Count = gen2list.ShapeBase.Count,
-                    Offset = gen2list.ShapeBase.Offset,
+                    Offset = new PlatformUnsignedValue((uint)gen2list.ShapeBase.Offset),
                     ChildShapesSize = childshapescount,
                     ChildShapesCapacity = (uint)childshapescount | 0x80000000,
-                    UserData = 10 //seems to be a default value
+                    UserData = new PlatformUnsignedValue(10) //seems to be a default value
                     //TODO: Half Extents and Radius?
                 });
             }
