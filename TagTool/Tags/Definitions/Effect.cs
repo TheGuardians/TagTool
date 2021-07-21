@@ -202,7 +202,7 @@ namespace TagTool.Tags.Definitions
                     Bit10 = 1 << 10,
                     Bit11 = 1 << 11,
                     Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
+                    EnableCollision = 1 << 13,
                     Bit14 = 1 << 14,
                     Bit15 = 1 << 15,
                 }
@@ -366,10 +366,10 @@ namespace TagTool.Tags.Definitions
                     public enum FlagsValue : byte
                     {
                         None,
-                        VolumeEmitterParticleVelocitiesAreRandom = 1 << 0,
-                        ClampParticleVelocities = 1 << 1,
-                        ParticleEmittedInsideShape = 1 << 2,
-                        OverrideParticleDirection = 1 << 3
+                        VolumeEmitterParticleVelocitiesAreRandom = 1 << 0, // might be wrong
+                        IsCpu = 1 << 1,
+                        IsGpu = 1 << 2,
+                        BecomesGpuWhenAtRest = 1 << 3
                     }
 
                     [TagStructure(Size = 0x38)]

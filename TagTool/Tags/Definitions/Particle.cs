@@ -16,8 +16,12 @@ namespace TagTool.Tags.Definitions
         public FlagsValue Flags;
 
         public List<Attachment> Attachments;
-        //public AppearanceFlagsValue AppearanceFlags;
-        public int AppearanceFlags;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public AppearanceFlagsValue AppearanceFlags;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public AppearanceFlagsValueReach AppearanceFlagsReach;
+
         public ParticleBillboardStyleValue ParticleBillboardStyle;
         public short RuntimeMTextureArraySize;
         public short FirstSequenceIndex;
@@ -133,12 +137,36 @@ namespace TagTool.Tags.Definitions
             FadeWhenViewedEdgeOn = 1 << 7,
             MotionBlur = 1 << 8,
             DoubleSided = 1 << 9,
-            LowResolution = 1 << 10,
-            LowResolutionTighterMask = 1 << 11,
-            NeverKillVerticesOnGpu = 1 << 12,
-            ParticleVelocityRelativeToCamera = 1 << 13,
-            RenderWithWater = 1 << 14,
-            HasParticleModel = 1 << 15,
+            Fogged = 1 << 10,
+            LightmapLit = 1 << 11,
+            DepthFadeActive = 1 << 12,
+            DistortionActive = 1 << 13,
+            LdrOnly = 1 << 14,
+            IsParticleModel = 1 << 15,
+        }
+
+        [Flags]
+        public enum AppearanceFlagsValueReach : int
+        {
+            None = 0, //
+            RandomUMirror = 1 << 0,
+            RandomVMirror = 1 << 1,
+            RandomStartingRotation = 1 << 2,
+            TintFromLightmap = 1 << 3,
+            TintFromDiffuseTexture = 1 << 4,
+            BitmapAuthoredVertically = 1 << 5,
+            IntensityAffectsAlpha = 1 << 6,
+            FadeWhenViewedEdgeOn = 1 << 7,
+            MotionBlur = 1 << 8,
+            DoubleSided = 1 << 9,
+            Bit10 = 1 << 10,
+            Bit11 = 1 << 11,
+            Fogged = 1 << 12,
+            LightmapLit = 1 << 13,
+            DepthFadeActive = 1 << 14,
+            DistortionActive = 1 << 15,
+            LdrOnly = 1 << 16,
+            IsParticleModel = 1 << 17,
         }
 
         public enum ParticleBillboardStyleValue : short

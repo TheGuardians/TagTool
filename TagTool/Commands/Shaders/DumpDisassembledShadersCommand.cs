@@ -114,16 +114,17 @@ namespace TagTool.Commands.Shaders
                             var tagName = tag.Name;
                             var rmt2Tag = cache.TagCache.GetTag(tagName, "rmt2");
 
-                            foreach (var index in rmt2Tag.Name.Split('\\')[2].Remove(0, 1).Split('_'))
-                                CurrentOptionIndices.Add(Convert.ToByte(index));
-
                             CurrentRmt2 = cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
 
                             if (CurrentRmt2.PixelShader == null)
                             {
                                 new TagToolError(CommandError.CustomError, "Template pixel shader was null");
+                                CurrentRmt2 = null;
                                 continue;
                             }
+
+                            foreach (var index in rmt2Tag.Name.Split('\\')[2].Remove(0, 1).Split('_'))
+                                CurrentOptionIndices.Add(Convert.ToByte(index));
 
                             var pixl = cache.Deserialize<PixelShader>(stream, CurrentRmt2.PixelShader);
 
