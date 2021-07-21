@@ -397,8 +397,16 @@ namespace TagTool.Cache.Gen3
             using (var cacheStream = cache.OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, Cache.Endianness))
             {
-                var sectionTable = ((CacheFileHeaderGen3)cache.BaseMapFile.Header).SectionTable;
-                var blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, page.BlockAddress);
+                uint blockOffset = 0;
+                if (page.SharedCacheIndex < 0 || (ResourceLayoutTable.SharedFiles[page.SharedCacheIndex].Flags & 1) != 0)
+                {
+                    var sectionTable = ((CacheFileHeaderGen3)cache.BaseMapFile.Header).SectionTable;
+                    blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, page.BlockAddress);
+                }
+                else
+                {
+                    blockOffset = ResourceLayoutTable.SharedFiles[page.SharedCacheIndex].BlockOffset + page.BlockAddress;
+                }
 
                 reader.SeekTo(blockOffset);
                 var compressed = reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
@@ -407,7 +415,7 @@ namespace TagTool.Cache.Gen3
                     return compressed;
 
                 if (page.CompressionCodecIndex == -1)
-                    reader.BaseStream.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
+                    return compressed;
                 else
                     using (var readerDeflate = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
                         readerDeflate.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
