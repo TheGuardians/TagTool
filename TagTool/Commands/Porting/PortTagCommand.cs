@@ -725,10 +725,13 @@ namespace TagTool.Commands.Porting
                 case Model hlmt:
                     foreach (var target in hlmt.Targets)
                     {
-                        if (target.Flags.HasFlag(Model.Target.FlagsValue.LockedByHumanTracking))
-                            target.TargetFilter = CacheContext.StringTable.GetStringId("flying_vehicles");
-                        else if (target.Flags.HasFlag(Model.Target.FlagsValue.LockedByPlasmaTracking))
-                            target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                        if (BlamCache.Version <= CacheVersion.Halo3ODST)
+                        {
+                            if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetFlags.FlagsValue.LockedByHumanTracking))
+                                target.TargetFilter = CacheContext.StringTable.GetStringId("flying_vehicles");
+                            else if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetFlags.FlagsValue.LockedByPlasmaTracking))
+                                target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                        }
                     }
                     break;
               
@@ -1028,6 +1031,9 @@ namespace TagTool.Commands.Porting
 
                 case Vehicle.HavokVehiclePhysicsFlags havokVehicleFlags:
                     return ConvertHavokVehicleFlags(havokVehicleFlags);
+
+                case Model.Target.TargetFlags targetflags:
+                    return ConvertTargetFlags(targetflags);
 
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
 					if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
@@ -1410,6 +1416,15 @@ namespace TagTool.Commands.Porting
                 throw new NotSupportedException(barrelflags.Halo3.ToString());
 
             return barrelflags;
+        }
+
+        private object ConvertTargetFlags(Model.Target.TargetFlags target)
+        {
+            if (BlamCache.Version <= CacheVersion.Halo3ODST)
+                if (!Enum.TryParse(target.Flags.ToString(), out target.Flags_HO))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+            return target;
         }
 
         private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(string tagName, PhysicsModel.PhantomTypeFlags flags)
