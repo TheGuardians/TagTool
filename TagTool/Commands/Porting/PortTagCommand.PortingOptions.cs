@@ -72,11 +72,11 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Include 'Scripting.Script' tag-blocks.")]
 			Scripts = 1 << 8,
 
-			// <summary>
-			// TBD.
-			// </summary>
-			//[PortingFlagDescription("TBD.")]
-			//ShaderTest = 1 << 9,
+			/// <summary>
+			/// Include udlg tags and their referenced audio.
+			/// </summary>
+			[PortingFlagDescription("Port udlg tags and associated audio for bipeds.")]
+			Dialogue = 1 << 9,
 
 			/// <summary>
 			/// Attempt to match shaders to existing tags.
@@ -139,7 +139,7 @@ namespace TagTool.Commands.Porting
 			MPobject = 1 << 19,
 
 			// No [PortingFlagDescription] here means we'll flag names as the description.
-			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Print | Merge | GenerateShaders
+			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders | Rmhg
 		}
 
 		/// <summary>

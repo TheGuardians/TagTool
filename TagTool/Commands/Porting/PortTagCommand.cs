@@ -290,10 +290,7 @@ namespace TagTool.Commands.Porting
 
 			var groupTag = blamTag.Group.Tag;
 
-			//
-			// Handle tags that are not ready to be ported
-			//
-
+			// Handle tags that are undesired or not ready to be ported
 			switch (groupTag.ToString())
 			{
                 case "snd!":
@@ -301,6 +298,15 @@ namespace TagTool.Commands.Porting
                     {
                         PortingConstants.DefaultTagNames.TryGetValue(groupTag, out string defaultSoundName);
                         CacheContext.TagCache.TryGetTag($"{defaultSoundName}.{groupTag}", out CachedTag result);
+                        return result;
+                    }
+                    break;
+
+                case "udlg":
+                    if (!FlagIsSet(PortingFlags.Dialogue))
+                    {
+                        PortingConstants.DefaultTagNames.TryGetValue(groupTag, out string defaultUdlgName);
+                        CacheContext.TagCache.TryGetTag($"{defaultUdlgName}.{groupTag}", out CachedTag result);
                         return result;
                     }
                     break;
