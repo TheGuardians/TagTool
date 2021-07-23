@@ -40,6 +40,8 @@ namespace TagTool.Commands.Porting
         private DirectoryInfo TempDirectory { get; } = new DirectoryInfo(Path.GetTempPath());
         private BlockingCollection<Action> _deferredActions = new BlockingCollection<Action>();
 
+        string[] argParameters = new string[0];
+
 		private static readonly string[] DoNotReplaceGroups = new[]
 		{
 			"glps",
@@ -74,7 +76,8 @@ namespace TagTool.Commands.Porting
                 return new TagToolError(CommandError.ArgCount);
 
             var portingOptions = args.Take(args.Count - 1).ToList();
-			ParsePortingOptions(portingOptions);
+
+			argParameters = ParsePortingOptions(portingOptions);
 
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;
             /*
@@ -145,6 +148,8 @@ namespace TagTool.Commands.Porting
 
                 Matcher.DeInit();
             }
+
+			ProcessDeferredActions();
 
 			return true;
 		}
@@ -725,9 +730,28 @@ namespace TagTool.Commands.Porting
                         default:
                             break;
                     };
-                    if (FlagIsSet(PortingFlags.MPobject) && blamDefinition is GameObject obj && obj.MultiplayerObject.Count == 0)
-                        obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 30 });
+                    if (FlagIsSet(PortingFlags.MPobject) && blamDefinition is GameObject obj)
+                    {
+                        if (obj.MultiplayerObject.Count == 0)
+                        {
+                            obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 30 });
+                        }
 
+                        if (argParameters.Count() > 0)
+                        {
+                            int.TryParse(argParameters[0], out int paletteIndex);
+                            var objTagName = $"{edTag.Name}.{(edTag.Group as TagGroupGen3).Name}";
+
+                            var paletteItemName = edTag.Name.Split('.').First().Split('\\').Last();
+                            if (argParameters.Count() > 1)
+                                paletteItemName = argParameters[1].Replace('-', ' ');
+
+                            _deferredActions.Add(() =>
+                            {
+                                AddForgePaletteItem(cacheStream, objTagName, paletteIndex, paletteItemName);
+                            });
+                        }
+                    }
                     break;
 
 				case Globals matg:
@@ -939,6 +963,26 @@ namespace TagTool.Commands.Porting
 
 			return edTag;
 		}
+
+        private void AddForgePaletteItem(Stream cacheStream, string gameObjectName, int paletteCategory, string paletteItemName)
+        {
+            if (CacheContext.TagCache.TryGetCachedTag(@"multiplayer\forge_globals.forge_globals_definition", out CachedTag forge_globals))
+                if (CacheContext.TagCache.TryGetCachedTag(gameObjectName, out CachedTag objectTag))
+                {
+                    var forg = CacheContext.Deserialize<ForgeGlobalsDefinition>(cacheStream, forge_globals);
+                    forg.Palette.Add(new ForgeGlobalsDefinition.PaletteItem()
+                    {
+                        Name = paletteItemName,
+                        Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
+                        CategoryIndex = (short)paletteCategory,
+                        DescriptionIndex = -1,
+                        MaxAllowed = 0,
+                        Object = objectTag
+                    });
+
+                    CacheContext.Serialize(cacheStream, forge_globals, forg);
+                }
+        }
 
         private Effect FixupEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
         {

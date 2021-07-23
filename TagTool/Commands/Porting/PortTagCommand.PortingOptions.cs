@@ -180,16 +180,20 @@ namespace TagTool.Commands.Porting
 		/// Parses porting flag options from a <see cref="List{T}"/> of <see cref="string"/>.
 		/// </summary>
 		/// <param name="args"></param>
-		private void ParsePortingOptions(List<string> args)
+		private string[] ParsePortingOptions(List<string> args)
 		{
 			Flags = PortingFlags.Default;
 
 			var flagNames = Enum.GetNames(typeof(PortingFlags)).Select(name => name.ToLower());
 			var flagValues = Enum.GetValues(typeof(PortingFlags)) as PortingFlags[];
 
+			string[] argParameters = new string[0];
+
 			for (var a = 0; a < args.Count(); a++)
 			{
-				var arg = args[a].ToLower();
+				string[] argSegments = args[a].Split('[');
+
+				var arg = argSegments[0].ToLower();
 
 				// Support legacy arguments
 				arg = arg.Replace("single", $"!{nameof(PortingFlags.Recursive)}");
@@ -204,7 +208,7 @@ namespace TagTool.Commands.Porting
 				else if (!toggleOn && arg.StartsWith("no"))
 					arg = arg.Remove(0, 2);
 
-				// Throw exceptiosn at clumsy typers.
+				// Throw exceptions at clumsy typers.
 				if (!flagNames.Contains(arg))
 					throw new FormatException($"Invalid {typeof(PortingFlags).FullName}: {args[0]}");
 
@@ -216,7 +220,14 @@ namespace TagTool.Commands.Porting
 							SetFlags(flagValues[i]);
 						else
 							RemoveFlags(flagValues[i]);
+
+				// Get forge palette info if provided
+				if (arg == "mpobject" && argSegments.Count() > 1)
+				{
+					argParameters = argSegments[1].Split(']')[0].Split(',');
+				}
 			}
+			return argParameters;
 		}
 
 		/// <summary>
