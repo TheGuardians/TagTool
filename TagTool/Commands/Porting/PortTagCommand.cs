@@ -1008,7 +1008,7 @@ namespace TagTool.Commands.Porting
 					}
 
                 case TagHkpMoppCode hkpMoppCode:
-                    hkpMoppCode.Data.Elements = HavokConverter.ConvertMoppCodes(BlamCache.Version, CacheContext.Version, hkpMoppCode.Data.Elements);
+                    hkpMoppCode.Data.Elements = HavokConverter.ConvertMoppCodes(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, hkpMoppCode.Data.Elements);
                     return hkpMoppCode;
 
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
