@@ -97,49 +97,43 @@ namespace TagTool.Commands.Porting
 			Memory = 1 << 12,
 
 			/// <summary>
-			/// Include <see cref="ShaderHalogram"/> (rmhg) tags.
-			/// </summary>
-			[PortingFlagDescription("Include 'ShaderHalogram' (rmhg) tags.")]
-			Rmhg = 1 << 13,
-
-			/// <summary>
 			/// Allow using existing tags from Ms30.
 			/// </summary>
 			[PortingFlagDescription("Allow using existing tags from Ms30.")]
-			Ms30 = 1 << 14,
+			Ms30 = 1 << 13,
 
 			/// <summary>
 			/// Allow writing output to the console.
 			/// </summary>
 			[PortingFlagDescription("Allow writing output to the console.")]
-			Print = 1 << 15,
+			Print = 1 << 14,
 
             /// <summary>
             /// Merges new data if tags exist.
             /// </summary>
             [PortingFlagDescription("Merges new data if tags exist.")]
-            Merge = 1 << 16,
+            Merge = 1 << 15,
 
             /// <summary>
             /// Use a regular expression to determine target tags.
             /// </summary>
             [PortingFlagDescription("Use a regular expression to determine target tags")]
-            Regex = 1 << 17,
+            Regex = 1 << 16,
 
 			/// <summary>
 			/// Attempt to generate shaders.
 			/// </summary>
 			[PortingFlagDescription("Attempt to generate shaders.")]
-			GenerateShaders = 1 << 18,
+			GenerateShaders = 1 << 17,
 
 			/// <summary>
 			/// Add a multiplayerobject block for spawnable tag types.
 			/// </summary>
 			[PortingFlagDescription("Add a multiplayerobject block for spawnable tag types.")]
-			MPobject = 1 << 19,
+			MPobject = 1 << 18,
 
 			// No [PortingFlagDescription] here means we'll flag names as the description.
-			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders | Rmhg
+			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders
 		}
 
 		/// <summary>
