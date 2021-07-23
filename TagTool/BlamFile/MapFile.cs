@@ -208,12 +208,43 @@ namespace TagTool.BlamFile
                 }
                 header.SharedCacheType = CacheFileSharedType.None;
 
+                var scenarioName = scenarioTag.Name.Split('\\').Last();
+                var mapName = scenarioName;
+
                 header.MapId = scnr.MapId;
                 header.ScenarioTagIndex = scenarioTag.Index;
-                header.Name = scenarioTag.Name.Split('\\').Last();
+                header.Name = scenarioName;
                 header.ScenarioPath = scenarioTag.Name;
 
                 map.Header = header;
+
+                map.MapFileBlf = new Blf(version, CachePlatform.Original);
+                map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
+                map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
+                map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };
+
+                var scnrBlf = map.MapFileBlf.Scenario;
+                scnrBlf.MapId = scnr.MapId;
+                scnrBlf.Names = new NameUnicode32[12];
+                for (int i = 0; i < scnrBlf.Names.Length; i++)
+                    scnrBlf.Names[i] = new NameUnicode32() { Name = mapName };
+
+                scnrBlf.Descriptions = new NameUnicode128[12];
+                for (int i = 0; i < scnrBlf.Descriptions.Length; i++)
+                    scnrBlf.Descriptions[i] = new NameUnicode128() { Name = "" };
+
+                scnrBlf.Names[0] = new NameUnicode32() { Name = mapName };
+                scnrBlf.Descriptions[0] = new NameUnicode128() { Name = "" };
+
+                scnrBlf.MapName = scenarioName;
+                scnrBlf.ImageName = $"m_{scenarioName}";
+                scnrBlf.UnknownTeamCount1 = 2;
+                scnrBlf.UnknownTeamCount2 = 6;
+                scnrBlf.GameEngineTeamCounts = new byte[11] { 00, 02, 08, 08, 08, 08, 08, 08, 04, 02, 08 };
+
+                scnrBlf.MapFlags = BlfScenarioFlags.GeneratesFilm | BlfScenarioFlags.IsMainmenu | BlfScenarioFlags.IsDlc;
+
+                map.MapFileBlf.ContentFlags |= BlfFileContentFlags.StartOfFile | BlfFileContentFlags.Scenario | BlfFileContentFlags.EndOfFile;
 
                 header.FileLength = 0x3390;
 
