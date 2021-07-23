@@ -30,6 +30,7 @@ namespace TagTool.Commands.Porting
             //
 
             if (BlamCache.Version == CacheVersion.Halo3Retail &&
+                BlamCache.Platform != CachePlatform.MCC &&
                 scnr.MapType == ScenarioMapType.SinglePlayer &&
                 Flags.HasFlag(PortingFlags.Recursive))
             {
