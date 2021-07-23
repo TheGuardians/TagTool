@@ -20,7 +20,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public RealQuaternion AABB_Half_Extents;
         [TagField(Flags = TagFieldFlags.Short)] 
         public CachedTag Model;
-        public uint CollisionBspAddress; // runtime
+        public PlatformUnsignedValue CollisionBspAddress; // runtime
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public PlatformUnsignedValue LargeCollisionBspAddress; // runtime

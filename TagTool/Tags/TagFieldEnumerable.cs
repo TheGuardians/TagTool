@@ -77,10 +77,6 @@ namespace TagTool.Tags
 
                     if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version) && CacheVersionDetection.AttributeInPlatform(attr, Info.CachePlatform))
                     {
-						uint align = TagFieldInfo.GetFieldAlignment(type, attr, Info.Version, Info.CachePlatform);
-						if (align > 0)
-							offset = offset + (align - 1) & ~(align - 1);
-
 						CreateTagFieldInfo(field, attr, Info.Version, Info.CachePlatform, ref offset);
                     }
 				}
@@ -101,6 +97,10 @@ namespace TagTool.Tags
 
 			if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
 				throw new InvalidOperationException();
+
+			uint align = TagFieldInfo.GetFieldAlignment(field.FieldType, attribute, targetVersion, cachePlatform);
+			if (align > 0)
+				offset = offset + (align - 1) & ~(align - 1);
 
 			var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
 			TagFieldInfos.Add(tagFieldInfo);

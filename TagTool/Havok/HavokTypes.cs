@@ -104,6 +104,8 @@ namespace TagTool.Havok
         public PlatformUnsignedValue UserDataAddress;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Type;
+        [TagField(Length = 4, Platform = CachePlatform.MCC)]
+        public byte[] Padding1;
     }
 
     /// <summary>
@@ -117,6 +119,7 @@ namespace TagTool.Havok
         public HavokShapeReference Shape;
     }
 
+   
     [TagStructure(Size = 0x8, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x10, Platform = CachePlatform.MCC)]
     public class HkpShapeCollection : HkpShape
@@ -124,7 +127,10 @@ namespace TagTool.Havok
         public PlatformUnsignedValue VTableAddress;
         public bool DisableWelding;
         [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte[] Padding2;
+
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+        public byte[] Padding3;
     }
 
     [TagStructure(Size = 0xC, Platform = CachePlatform.Original)]

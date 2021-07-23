@@ -29,7 +29,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int ImportInfoChecksum;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         public int ImportVersion;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -82,7 +83,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<PlaneReference> Planes;
 
-        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
         public byte[] UnknownUnused1;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -478,8 +480,9 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xDC, MaxVersion = CacheVersion.HaloOnline106708)]
-        [TagStructure(Size = 0xE0, MinVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x118, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0xDC, MaxVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xE0, MinVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public class Cluster : TagStructure
         {
             public Bounds<float> BoundsX;
@@ -526,11 +529,14 @@ namespace TagTool.Tags.Definitions
                 public short PortalIndex;
             }
 
-            [TagStructure(Size = 0x3C)]
+            [TagStructure(Size = 0x60, Platform = CachePlatform.MCC)]
+            [TagStructure(Size = 0x3C, Platform = CachePlatform.Original)]
             public class InstancedGeometryPhysicsData : HkpShapeCollection
             {
                 public CachedTag StructureBsp;
                 public int ClusterIndex;
+                [TagField(Align = 4, Platform = CachePlatform.Original)]
+                [TagField(Align = 8, Platform = CachePlatform.MCC)]
                 public HkpMoppBvTreeShape Shape;
                 public List<TagHkpMoppCode> MoppCodes;
             }
