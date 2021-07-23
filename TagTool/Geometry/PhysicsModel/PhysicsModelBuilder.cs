@@ -147,7 +147,7 @@ namespace TagTool.Geometry
                     {
                         ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80 },
                         Type = 27,
-                        Child = new HkpSingleShapeContainer { Type = BlamShapeType.List, Index = 0 }
+                        Child = new HkpSingleShapeContainer { Shape = new HavokShapeReference { Type = BlamShapeType.List, Index = 0 } }
                     };
 
                     _phmo.MoppData = moppCodeBlockStream.ToArray();
