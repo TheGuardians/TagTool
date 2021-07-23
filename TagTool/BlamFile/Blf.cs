@@ -605,21 +605,21 @@ namespace TagTool.BlamFile
     [TagStructure(Size = 0x40, Align = 0x1)]
     public class NameUnicode32
     {
-        [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x20, Align = 0x1)]
+        [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x20, DataAlign = 0x1)]
         public string Name;
     }
 
     [TagStructure(Size = 0x100, Align = 0x1)]
     public class NameUnicode128
     {
-        [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x80, Align = 0x1)]
+        [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x80, DataAlign = 0x1)]
         public string Name;
     }
 
     [TagStructure(Size = 0x80, Align = 0x1)]
     public class CampaignNameUnicode32
     {
-        [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x40, Align = 0x1)]
+        [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x40, DataAlign = 0x1)]
         public string Name;
     }
 }

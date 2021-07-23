@@ -25,7 +25,7 @@ namespace TagTool.Tags.Resources
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public PackedDataSizesStructReach PackedDataSizesReach;
 
-            [TagField(Align = 0x10)]
+            [TagField(DataAlign = 0x10)]
             public TagData AnimationData; // this will point to an Animation object
 
             [TagStructure(Size = 0x44)]

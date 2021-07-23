@@ -77,7 +77,11 @@ namespace TagTool.Tags
 
                     if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version) && CacheVersionDetection.AttributeInPlatform(attr, Info.CachePlatform))
                     {
-                        CreateTagFieldInfo(field, attr, Info.Version, Info.CachePlatform, ref offset);
+						uint align = TagFieldInfo.GetFieldAlignment(type, attr, Info.Version, Info.CachePlatform);
+						if (align > 0)
+							offset = offset + (align - 1) & ~(align - 1);
+
+						CreateTagFieldInfo(field, attr, Info.Version, Info.CachePlatform, ref offset);
                     }
 				}
 			}

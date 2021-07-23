@@ -63,6 +63,11 @@ namespace TagTool.Tags
         /// The power of two to align the field's data to.
         /// Only applicable to fields which contain pointers.
         /// </summary>
+        public uint DataAlign { get; set; } = 0;
+
+        /// <summary>
+        /// The power of two to align the field to.
+        /// </summary>
         public uint Align { get; set; } = 0;
 
         /// <summary>

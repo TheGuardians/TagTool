@@ -97,7 +97,7 @@ namespace TagTool.Serialization
             if (data != null && data.Length > 0)
             {
                 // Ensure the block is aligned correctly
-                var align = Math.Max(DefaultResourceAlign, (valueInfo != null) ? valueInfo.Align : 0);
+                var align = Math.Max(DefaultResourceAlign, (valueInfo != null) ? valueInfo.DataAlign : 0);
                 StreamUtil.Align(dataStream, (int)align);
 
                 // Write its data

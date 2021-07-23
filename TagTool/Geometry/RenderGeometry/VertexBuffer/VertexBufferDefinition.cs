@@ -33,7 +33,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The reference to the the data for the vertex buffer.
         /// </summary>
-        [TagField(Align = 0x4)]
+        [TagField(DataAlign = 0x4)]
         public TagData Data;
 
         [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]

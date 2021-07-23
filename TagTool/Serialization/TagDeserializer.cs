@@ -99,6 +99,13 @@ namespace TagTool.Serialization
             if (attr.Flags.HasFlag(Runtime) || !isInVersion)
                 return;
 
+            uint align = TagFieldInfo.GetFieldAlignment(tagFieldInfo.FieldType, tagFieldInfo.Attribute, Version, CachePlatform);
+            if (align > 0)
+            {
+                var fieldOffset = (uint)(reader.BaseStream.Position - baseOffset);
+                reader.BaseStream.Position += -fieldOffset & (align - 1);
+            }
+
             if (tagFieldInfo.FieldType.IsArray && attr.Flags.HasFlag(Relative))
             {
                 var type = instance.GetType();

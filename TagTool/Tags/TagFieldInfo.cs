@@ -250,5 +250,22 @@ namespace TagTool.Tags
 					return TagStructure.GetTagStructureInfo(type, targetVersion, cachePlatform).TotalSize;
 			}
 		}
+
+		public static uint GetFieldAlignment(Type type, TagFieldAttribute attr, CacheVersion targetVersion, CachePlatform cachePlatform)
+        {
+			// We could do implicit alignment for all fields, however for now, for performance, and to reduce the chance of regression, 
+			// keeping it to platform speicfic types, or if alignment was explictly asked for with the Align TagFieldAttribute.
+
+			if (attr.Align > 0)
+				return attr.Align;
+
+			switch(Type.GetTypeCode(type))
+            {
+				case TypeCode.Object when type == typeof(PlatformUnsignedValue) || type == typeof(PlatformSignedValue):
+					return CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._64Bit ? 8u : 4u;
+				default:
+					return 0;
+            }
+        }
 	}
 }

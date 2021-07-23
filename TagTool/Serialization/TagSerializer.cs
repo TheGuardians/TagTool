@@ -101,6 +101,18 @@ namespace TagTool.Serialization
             if (tagFieldInfo.Attribute.Flags.HasFlag(Runtime))
                 return;
 
+            uint align = TagFieldInfo.GetFieldAlignment(tagFieldInfo.FieldType, tagFieldInfo.Attribute, Version, CachePlatform);
+            if (align > 0)
+            {
+                int fieldOffset = (int)(block.Stream.Position - baseOffset);
+                int padding = -fieldOffset & (int)(align - 1);
+                if (padding > 0)
+                {
+                    var paddingBytes = new byte[padding];
+                    block.Stream.Write(paddingBytes, 0, paddingBytes.Length);
+                }
+            }
+
             object objectValue = tagFieldInfo.GetValue(instance);
 
             // second condition is a hack to prevent exceptions when encountering cached tags
@@ -393,7 +405,7 @@ namespace TagTool.Serialization
             if (data != null && data.Length > 0)
             {
                 // Ensure the block is aligned correctly
-                var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
+                var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.DataAlign : 0);
                 StreamUtil.Align(tagStream, (int)align);
 
                 // Write its data
@@ -424,7 +436,7 @@ namespace TagTool.Serialization
             if (data != null && data.Length > 0)
             {
                 // Ensure the block is aligned correctly
-                var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
+                var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.DataAlign : 0);
                 StreamUtil.Align(tagStream, (int)align);
 
                 // Write its data
@@ -509,7 +521,7 @@ namespace TagTool.Serialization
                 SerializeValue(context, tagStream, tagBlock, val, null, elementType);
 
             // Ensure the block is aligned correctly
-            var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
+            var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.DataAlign : 0);
             StreamUtil.Align(tagStream, (int)align);
 
             // Finalize the block and write the tag block reference
@@ -555,7 +567,7 @@ namespace TagTool.Serialization
                 SerializeValue(context, tagStream, tagBlock, val, null, elementType);
 
             // Ensure the block is aligned correctly
-            var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
+            var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.DataAlign : 0);
             StreamUtil.Align(tagStream, (int)align);
 
             // Finalize the block and write the tag block reference
