@@ -156,11 +156,16 @@ namespace TagTool.Commands.Porting
             if (ResourceTagGroups.Contains(blamTag.Group.Tag))
             {
                 // there is only a few cases here -- if geometry\animation references a null resource its tag is still valid
-                
+
                 if (blamTag.Group.Tag == "snd!")
                 {
                     if (BlamCache.Platform == CachePlatform.MCC)
-                        return true;
+                    {
+                        Console.WriteLine($"WARNING: sound porting not supported yet, using default.");
+                        resultTag = DefaultTags["snd!"];
+                        return false;
+                    }
+                        
 
                     Sound sound = BlamCache.Deserialize<Sound>(blamCacheStream, blamTag);
 
@@ -197,6 +202,16 @@ namespace TagTool.Commands.Porting
 
                         if (bitmapResourceDefinition == null)
                             return false;
+
+                        if (BlamCache.Platform == CachePlatform.MCC)
+                        {
+                            if (image.Type != TagTool.Bitmaps.BitmapType.Texture2D)
+                            {
+                                Console.WriteLine($"WARNING: Bitmap type {image.Type} not supported yet, using default.");
+                                resultTag = DefaultTags["bitm"];
+                                return false;
+                            }
+                        }
                     }
                 }
                 else if (blamTag.Group.Tag == "Lbsp")
