@@ -12,6 +12,9 @@ namespace TagTool.Commands.Porting
     {
         private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp)
         {
+            if(BlamCache.Platform == CachePlatform.MCC)
+                return ConvertStructureBspCacheFileTagResourcesMCC(bsp);
+
             //
             // Set up ElDorado resource reference
             //
@@ -77,6 +80,13 @@ namespace TagTool.Commands.Porting
                 bsp.PathfindingData.Clear();
             }
 
+            return bsp.PathfindingResource;
+        }
+
+        private TagResourceReference ConvertStructureBspCacheFileTagResourcesMCC(ScenarioStructureBsp bsp)
+        {
+            var resourceDefinition = BlamCache.ResourceCache.GetStructureBspCacheFileTagResources(bsp.PathfindingResource);
+            bsp.PathfindingResource = CacheContext.ResourceCache.CreateStructureBspCacheFileResource(resourceDefinition);
             return bsp.PathfindingResource;
         }
     }

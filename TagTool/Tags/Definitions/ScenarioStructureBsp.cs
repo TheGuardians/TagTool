@@ -11,6 +11,7 @@ using TagTool.Pathfinding;
 
 namespace TagTool.Tags.Definitions
 {
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3A0, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x388, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
@@ -185,10 +186,11 @@ namespace TagTool.Tags.Definitions
 
         public TagResourceReference CollisionBspResource;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public int UnknownH3;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public TagResourceReference PathfindingResource;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
