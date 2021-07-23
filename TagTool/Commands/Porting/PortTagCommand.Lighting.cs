@@ -142,7 +142,7 @@ namespace TagTool.Commands.Porting
 
         public ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
-            if (BlamCache.Version > CacheVersion.Halo3Retail)
+            if (BlamCache.Version > CacheVersion.Halo3Retail || BlamCache.Platform == CachePlatform.MCC)
                 return scenarioLightmap;
 
             scenarioLightmap.LightmapDataReferences = new List<CachedTag>();
