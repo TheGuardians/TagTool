@@ -1460,8 +1460,9 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             public class TextWidget : TagStructure
 			{
                 [TagField(Flags = Label)]
@@ -1474,12 +1475,14 @@ namespace TagTool.Tags.Definitions
                 public List<AnimationDatum> AnimationData;
                 public List<RenderDatum> RenderData;
                 public int WidgetIndex;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public FlagsValue Flags;
-				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
+				[TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
 				public FlagsValue_H3 Flags_H3;
                 public FontValue Font;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public short Unknown4;
                 public StringId String;
 
