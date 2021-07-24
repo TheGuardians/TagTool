@@ -3,7 +3,7 @@ using TagTool.Cache;
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0x14)]
-    public class TagData
+    public class TagData : TagStructure
 	{
         public CacheAddressType AddressType = CacheAddressType.Data;
         public byte[] Data;
