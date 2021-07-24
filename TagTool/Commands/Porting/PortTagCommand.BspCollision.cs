@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
 
                     foreach(var mopps in instance.CollisionMoppCodes)
                     {
-                        mopps.Data.Elements = HavokConverter.ConvertMoppCodes(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, mopps.Data.Elements);
+                        mopps.Data.Elements = HavokConverter.ConvertMoppCodes(BlamCache.Version, CacheContext.Version, mopps.Data.Elements);
                     }
                 }
             }

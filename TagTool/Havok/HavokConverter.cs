@@ -67,7 +67,7 @@ namespace TagTool.Havok
             return result;
         }
 
-        public static List<byte> ConvertMoppCodes(CacheVersion sourceVerison, CachePlatform sourcePlatform, CacheVersion destVersion, CachePlatform destPlatform, List<byte> moppData)
+        public static List<byte> ConvertMoppCodes(CacheVersion sourceVerison, CacheVersion destVersion, List<byte> moppData)
         {
             if (moppData == null || moppData.Count == 0)
                 return moppData;
@@ -229,38 +229,27 @@ namespace TagTool.Havok
 
                     case 0x0B: // HK_MOPP_TERM_REOFFSET32
                     case 0x53: // HK_MOPP_TERM32
+                        int result = BitConverter.ToInt32(new byte[] { moppData[i + 4], moppData[i + 3], moppData[i + 2], moppData[i + 1] }, 0);
 
-                        int result;
-                        if (sourcePlatform == CachePlatform.MCC)
-                            result = BitConverter.ToInt32(new byte[] { moppData[i + 4], moppData[i + 3], moppData[i + 2], moppData[i + 1] }, 0);
-                        else
-                            result = BitConverter.ToInt32(new byte[] { moppData[i + 1], moppData[i + 2], moppData[i + 3], moppData[i + 4] }, 0);
-
-                        int type = (result >> 24) & 0xff;
-
-                        if (type == 0x20)
+                        if (moppData[i + 1] == 0x20)
                         {
                             result = ConvertMOPPWorldIndex(result);
                         }
-                        else if (type == 0x40)
+                        else if (moppData[i + 1] == 0x40)
                         {
                             result = ConvertMOPPInstancedGeometryIndex(result);
                         }
-                        else if (type == 0x00)
+                        else if (moppData[i + 1] == 0x00)
                         {
                             result = ConvertMOPPType00(result);
                         }
-                        else if (type == 0x60)
+                        else if (moppData[i + 1] == 0x60)
                         {
                             result = ConvertMOPPType11(result);
                         }
-                        else if (type == 0x34)
-                        {
-                            // TODO
-                        }
                         else
                         {
-                            throw new NotSupportedException($"Type of 0x{type:X2} {result:X8}");
+                            throw new NotSupportedException($"Type of 0x{moppData[i + 1]:X2} {result:X8}");
                         }
                         moppData[i + 1] = (byte)((result & 0x7F000000) >> 24);
                         moppData[i + 2] = (byte)((result & 0x00FF0000) >> 16);
@@ -351,7 +340,7 @@ namespace TagTool.Havok
                     }
                     inputReader.SeekTo(nextOffset);
 
-                    moppCodes = ConvertMoppCodes(sourceVersion, inCache, destVersion, outCache, moppCodes);
+                    moppCodes = ConvertMoppCodes(sourceVersion, destVersion, moppCodes);
 
                     serializer.Serialize(dataContext, header);
                     for (int j = 0; j < moppCodes.Count; j++)
