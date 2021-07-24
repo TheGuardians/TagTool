@@ -295,6 +295,9 @@ namespace TagTool.Shaders.ShaderMatching
                 rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
                 BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
                 (BaseCache as GameCacheHaloOnlineBase).SaveTagNames();
+
+                rmt2Desc = RebuildRmt2Options(rmt2Desc, BaseCacheStream, PortingCacheStream);
+                tagName = $"shaders\\{rmt2Desc.Type}_templates\\_{string.Join("_", rmt2Desc.Options)}";
             }
             else
             {

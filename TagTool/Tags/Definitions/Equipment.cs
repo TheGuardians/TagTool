@@ -22,7 +22,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<OptionalUnitCameraBlock> OverrideCamera;
 
-        public List<HealthPackBlock> HealthPack;
+        public List<SuperShieldBlock> SuperShield;
         public List<MultiplayerPowerupBlock> MultiplayerPowerup;
         public List<SpawnerBlock> Spawner;
         public List<ProximityMineBlock> ProximityMine;
@@ -37,7 +37,7 @@ namespace TagTool.Tags.Definitions
         public List<RegeneratorBlock> Regenerator;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<NewHealthPackBlock> NewHealthPack;
+        public List<HealthPackBlock> HealthPack;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<ForcedReloadBlock> ForcedReload;
@@ -164,14 +164,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class HealthPackBlock : TagStructure
+        public class SuperShieldBlock : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public float ShieldsGiven;
-            public CachedTag Unknown3;
-            public CachedTag Unknown4;
-            public CachedTag Unknown5;
+            public uint Unused1;
+            public uint Unused2;
+            public float ShieldVitality;
+            public CachedTag Unused3;
+            public CachedTag Unused4;
+            public CachedTag Unused5;
         }
 
         [TagStructure(Size = 0x4)]
@@ -265,7 +265,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class NewHealthPackBlock : TagStructure
+        public class HealthPackBlock : TagStructure
 		{
             public float HealthGiven;
             public float ShieldsGiven;
