@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TagTool.Audio;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -54,14 +55,19 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, CachedTag destTag, string blamTag_Name, Action<SoundConversionResult> callback)
+        private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream,
+            Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound,
+            CachedTag destTag, string blamTag_Name, Action<SoundConversionResult> callback)
         {
             if (BlamSoundGestalt == null)
                 BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
 
-            if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\towav.exe") || !File.Exists(@"Tools\xmadec.exe"))
+            if (!File.Exists($@"{Program.TagToolDirectory}\Tools\ffmpeg.exe")
+            || !File.Exists($@"{Program.TagToolDirectory}\Tools\towav.exe")
+            || !File.Exists($@"{Program.TagToolDirectory}\Tools\xmadec.exe"))
             {
-                Console.WriteLine("Failed to locate sound conversion tools, please install ffmpeg, towav and xmadec in the Tools folder");
+                new TagToolError(CommandError.CustomError,
+                    "Failed to locate sound conversion tools. Please install ffmpeg, towav and xmadec in the Tools folder.");
                 return null;
             }
 

@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using TagTool.Audio.Converter;
 using TagTool.Cache;
+using TagTool.Commands;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
@@ -282,7 +283,7 @@ namespace TagTool.Audio
 
         private static void RunTool(string executableName, string arguments)
         {
-            ProcessStartInfo info = new ProcessStartInfo($@"Tools\{executableName}")
+            ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\{executableName}")
             {
                 WorkingDirectory = IntermediateDirectory.FullName,
                 Arguments = arguments,

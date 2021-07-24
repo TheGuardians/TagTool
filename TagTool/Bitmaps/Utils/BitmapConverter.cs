@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.Commands;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
@@ -480,7 +481,7 @@ namespace TagTool.Bitmaps.Utils
 
             args += $"{tempBitmap} {tempBitmap}";
 
-            ProcessStartInfo info = new ProcessStartInfo(@"Tools\nvcompress.exe")
+            ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\nvcompress.exe")
             {
                 Arguments = args,
                 CreateNoWindow = true,

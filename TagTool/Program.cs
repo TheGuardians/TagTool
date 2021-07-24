@@ -13,6 +13,9 @@ namespace TagTool.Commands
 {
     public static class Program
     {
+        public static string TagToolDirectory = System.IO.Path.GetDirectoryName(
+            System.Reflection.Assembly.GetExecutingAssembly().Location);
+
         static void Main(string[] args)
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
