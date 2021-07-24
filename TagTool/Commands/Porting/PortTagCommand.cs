@@ -210,7 +210,7 @@ namespace TagTool.Commands.Porting
 
                         if (BlamCache.Platform == CachePlatform.MCC)
                         {
-                            if (image.Type != TagTool.Bitmaps.BitmapType.Texture2D)
+                            if (image.Type != TagTool.Bitmaps.BitmapType.Texture2D && image.Type != TagTool.Bitmaps.BitmapType.Array)
                             {
                                 Console.WriteLine($"WARNING: Bitmap type {image.Type} not supported yet, using default.");
                                 resultTag = DefaultTags["bitm"];
