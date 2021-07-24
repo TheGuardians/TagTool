@@ -6,6 +6,7 @@ using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Editing
 {
@@ -63,11 +64,15 @@ namespace TagTool.Commands.Editing
                     {
                         if (collection.Count > 0)
                         {
-                            if (fieldName.Contains("Function.Data"))
+                            if (fieldName.Contains("Unused") || fieldName.Contains("Padding"))   // skip fields containing "Unused" and "Padding"
                             {
-                                byte[] bytes = new byte[collection.Count];
-                                collection.CopyTo(bytes, 0);
-                                writer.WriteLine($"SetField {fieldName} {BitConverter.ToString(bytes).Replace("-", string.Empty)}");
+                                break;
+                            }
+                            else if (fieldName.Contains("Function.Data"))
+                            {
+                            	byte[] bytes = new byte[collection.Count];
+                            	collection.CopyTo(bytes, 0);
+                            	writer.WriteLine($"SetField {fieldName} {BitConverter.ToString(bytes).Replace("-", string.Empty)}");
                             }
                             else if (fieldName.Contains("].Data"))
                             {
@@ -76,9 +81,39 @@ namespace TagTool.Commands.Editing
                                     concat += collection[i].ToString() + " ";
                                 writer.WriteLine($"SetField {fieldName} {concat}");
                             }
-                            else if (fieldName.Contains("Unused"))
+                            else if (fieldName.EndsWith("].RealConstants"))
                             {
-                                writer.WriteLine($"#\tSkipping field containing keyword \"Unused\":\t{fieldName}");
+                            	writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
+                            
+                            	var templateName = (Structure as RenderMethod).ShaderProperties[0].Template;
+                            	var rmt2 = Cache.Deserialize<RenderMethodTemplate>(Cache.OpenCacheRead(), templateName);
+                            
+                            	for (int i = 0; i < collection.Count; i++)
+                            	{
+                            		var realParameterName = Cache.StringTable.GetString(rmt2.RealParameterNames[i].Name);
+                            		var realConstant = (RenderMethod.ShaderProperty.RealConstant)collection[i];
+                            		var concat = string.Join(" ", realConstant.Values);
+                            
+                            		writer.WriteLine($"SetArgument {realParameterName} {concat}");
+                            	}
+                            }
+                            else if (fieldName.EndsWith("].TextureConstants"))
+                            {
+                            	writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
+                            
+                            	var templateName = (Structure as RenderMethod).ShaderProperties[0].Template;
+                            	var rmt2 = Cache.Deserialize<RenderMethodTemplate>(Cache.OpenCacheRead(), templateName);
+                            
+                            	for (int i = 0; i < collection.Count; i++)
+                            	{
+                            		var textureParameterName = Cache.StringTable.GetString(rmt2.TextureParameterNames[i].Name);
+                            		var textureConstant = (RenderMethod.ShaderProperty.TextureConstant)collection[i];
+                            		var bitmapName = textureConstant.Bitmap.Name;
+                            
+                            		writer.WriteLine($"SetBitmap {textureParameterName} {bitmapName}.bitmap");
+                            
+                            		DumpCommands(writer, cache, collection[i], $"{fieldName}[{i}]");
+                            	}
                             }
                             else
                             {
@@ -97,6 +132,8 @@ namespace TagTool.Commands.Editing
                         flaglist = flaglist.Replace(" ", string.Empty);
                         writer.WriteLine($"SetField {fieldName} {flaglist}");
                     }
+                    else if (fieldName.Contains(".TextureConstants[") && fieldName.EndsWith("].Bitmap"))
+                    	break;
                     else
                         writer.WriteLine($"SetField {fieldName} {FormatValue(data)}");
                     break;
