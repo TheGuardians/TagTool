@@ -67,12 +67,12 @@ namespace TagTool.Havok
             return result;
         }
 
-        public static List<byte> ConvertMoppCodes(CacheVersion sourceVerison, CacheVersion destVersion, List<byte> moppData)
+        public static List<byte> ConvertMoppCodes(CacheVersion sourceVerison, CachePlatform sourcePlatform, CacheVersion destVersion, List<byte> moppData)
         {
             if (moppData == null || moppData.Count == 0)
                 return moppData;
             // Only halo 3 beta/retail mopp codes need to be update since they use more bits for addresses. A runtime patch is also required to fix the mopps just in time.
-            if (sourceVerison > CacheVersion.Halo3Retail)
+            if (sourceVerison > CacheVersion.Halo3Retail || sourcePlatform == CachePlatform.MCC)
                 return moppData;
 
             for (var i = 0; i < moppData.Count; i++)
@@ -340,7 +340,7 @@ namespace TagTool.Havok
                     }
                     inputReader.SeekTo(nextOffset);
 
-                    moppCodes = ConvertMoppCodes(sourceVersion, destVersion, moppCodes);
+                    moppCodes = ConvertMoppCodes(sourceVersion, inCache, destVersion, moppCodes);
 
                     serializer.Serialize(dataContext, header);
                     for (int j = 0; j < moppCodes.Count; j++)

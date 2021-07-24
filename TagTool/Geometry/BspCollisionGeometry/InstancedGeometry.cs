@@ -17,11 +17,6 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public TagBlock<CollisionGeometry> CollisionGeometries;
         public TagBlock<TagHkpMoppCode> CollisionMoppCodes;
         public TagBlock<BreakableSurfaceBits> BreakableSurfaces;
-        public TagBlock<SurfacesPlanes> SurfacePlanes;
-        public TagBlock<PlaneReference> Planes;
-        public short MeshIndex;
-        public short CompressionIndex;
-        public float Unknown4;
 
         [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown1;
@@ -29,6 +24,14 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public uint Unknown2;
         [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown3;
+
+        public TagBlock<SurfacesPlanes> SurfacePlanes;
+        public TagBlock<PlaneReference> Planes;
+
+
+        public short MeshIndex;
+        public short CompressionIndex;
+        public float GlobalLightmapResolutionScale;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public TagBlock<TagHkpMoppCode> UnknownBspPhysics;
