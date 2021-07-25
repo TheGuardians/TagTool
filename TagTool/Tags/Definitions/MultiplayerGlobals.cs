@@ -686,7 +686,8 @@ namespace TagTool.Tags.Definitions
                     LimitedLivesFinal,
                     PlayingWinningUnlimited,
                     PlayingTiedUnlimited,
-                    PlayingLosingUnlimited
+                    PlayingLosingUnlimited,
+                    StartingSoon
                 }
             }
         }
