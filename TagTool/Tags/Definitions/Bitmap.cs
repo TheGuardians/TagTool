@@ -102,6 +102,9 @@ namespace TagTool.Tags.Definitions
         public List<Image> XenonImages;
 
         public List<TagResourceReference> Resources;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<TagResourceReference> InterleavedResources;
 
 
