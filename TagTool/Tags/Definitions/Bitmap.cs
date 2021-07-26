@@ -103,7 +103,7 @@ namespace TagTool.Tags.Definitions
 
         public List<TagResourceReference> Resources;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<TagResourceReference> InterleavedResources;
 
