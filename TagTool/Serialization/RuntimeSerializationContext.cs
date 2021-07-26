@@ -16,6 +16,7 @@ namespace TagTool.Serialization
         private uint OriginalStructOffset;
         private uint HeaderSize;
         private uint OriginalSize;
+        private const int DefaultBlockAlign = 4;
 
         public RuntimeSerializationContext(GameCache cache, ProcessMemoryStream processStream, uint tagAddress, uint originalOffset, uint headerSize, uint originalSize)
         {
@@ -89,6 +90,7 @@ namespace TagTool.Serialization
             public EndianWriter Writer { get; private set; }
             private uint StartAddress;
             private uint HeaderSize;
+            private uint _align = DefaultBlockAlign;
 
             public DataBlock(uint startAddress, uint headerSize)
             {
@@ -110,12 +112,15 @@ namespace TagTool.Serialization
 
             public void SuggestAlignment(uint align)
             {
+                _align = Math.Max(_align, align);
             }
 
             public uint Finalize(Stream outStream)
             {
+                StreamUtil.Align(outStream, (int)_align);
                 var dataOffset = (uint)outStream.Position;
                 outStream.Write(Stream.GetBuffer(), 0, (int)Stream.Length);
+                StreamUtil.Align(outStream, DefaultBlockAlign);
 
                 Writer.Close();
                 Stream = null;
