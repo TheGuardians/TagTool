@@ -86,9 +86,8 @@ namespace TagTool.Geometry
 
                     var shapeElem = new PhysicsModel.ListShape
                     {
-                        ShapeType = typeAdded,
                         //assumes the shape added should be at the end of the respected list.
-                        ShapeIndex = (short)(GetNumberOfShapes(_phmo, typeAdded) - 1)
+                        Shape = new HavokShapeReference(typeAdded, (short)(GetNumberOfShapes(_phmo, typeAdded) - 1))
                     };
 
                     _phmo.ListShapes.Add(shapeElem);
@@ -264,7 +263,7 @@ namespace TagTool.Geometry
             poly.ShapeBase.Size = 0;
 
             poly.ShapeBase.Count = 128; // uncertain as to what this does.
-            poly.ShapeBase.Offset = new Cache.PlatformUnsignedValue((uint)(32 + index * 128));
+            poly.ShapeBase.Userdata = new Cache.PlatformUnsignedValue((uint)(32 + index * 128));
 
             //The axis-aligned fields are used to optimise collisions
             // with other physics objects. If they are set incorrectly,

@@ -603,10 +603,10 @@ namespace TagTool.Tags.Definitions
             public PlatformUnsignedValue FieldPointerSkip;
             public short Size;
             public short Count;
+            public PlatformUnsignedValue Userdata;
+            public int ShapeType;
             [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
             public byte[] Padding1;
-            public PlatformUnsignedValue Offset;
-            public int UserData;
             public float Radius;
         }
 
@@ -617,10 +617,10 @@ namespace TagTool.Tags.Definitions
             public PlatformUnsignedValue FieldPointerSkip;
             public short Size;
             public short Count;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue Userdata;
+            public int Type;
+            [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
             public byte[] Padding1;
-            public PlatformUnsignedValue Offset;
-            public PlatformUnsignedValue UserData;
         }
 
         [TagStructure(Size = 0x8)]
@@ -664,13 +664,9 @@ namespace TagTool.Tags.Definitions
         {
             // translate shape
             public HavokShapeBase ConvexBase;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
-            public byte[] Padding1;
-            // Child shape
             public PlatformUnsignedValue FieldPointerSkip;
             public HavokShapeReference ShapeReference;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
-            public byte[] Padding2;
+            [TagField(Align = 16)]
             public RealVector3d Translation;
             public float TranslationRadius;
         }
@@ -691,17 +687,11 @@ namespace TagTool.Tags.Definitions
             public RealVector3d HalfExtents;
             public float HalfExtentsRadius;
 
+            // transform shape
             public HavokShapeBase ConvexBase;
-
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x8, Platform = CachePlatform.MCC)]
-            public byte[] Padding1;
-
             public PlatformUnsignedValue FieldPointerSkip;
             public HavokShapeReference ShapeReference;
-
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
-            public byte[] Padding2;
-
+            [TagField(Align = 16)]
             public RealVector3d RotationI;
             public float RotationIRadius;
             public RealVector3d RotationJ;
@@ -739,14 +729,11 @@ namespace TagTool.Tags.Definitions
             public PlatformUnsignedValue FieldPointerSkip;
             public int FourVectorsSize;
             public uint FourVectorsCapacity;
+
             public int NumVertices;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int UseSpuBuffer;
-
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0xC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
-            public byte[] Pad1;
 
             public PlatformUnsignedValue AnotherFieldPointerSkip;
             public int PlaneEquationsSize;
@@ -777,15 +764,12 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x90, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class List : TagStructure
 		{
+            // hkShapeCollection
             public PlatformUnsignedValue FieldPointerSkip;
             public short Size;
             public short Count;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
-            public byte[] Padding1;
             public PlatformUnsignedValue Offset;
             public PlatformUnsignedValue UserData;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
-            public byte[] Padding2;
             public PlatformUnsignedValue FieldPointerSkip0;
             public byte DisableWelding;
             public byte CollectionType;
@@ -793,14 +777,13 @@ namespace TagTool.Tags.Definitions
             public byte[] Pad0 = new byte[0x2];
             [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
             public byte[] Padding3;
-            public int FieldPointerSkip1;
 
+            // Child info array (Points to "ListShapes" block at runtime)
+            public PlatformUnsignedValue FieldPointerSkip1;
             public int ChildShapesSize;
             public uint ChildShapesCapacity;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0xC, Platform = CachePlatform.Original)]
-            public byte[] nail_in_dick = new byte[0xC];
-
+            [TagField(Align = 16)]
             public RealVector3d AabbHalfExtents;
             public float AabbHalfExtentsRadius;
             public RealVector3d AabbCenter;
@@ -824,21 +807,16 @@ namespace TagTool.Tags.Definitions
             public int EnabledChildren7;
         }
 
-        [TagStructure(Size = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x20, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x10, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x20, Align = 0x10, Platform = CachePlatform.MCC)]
         public class ListShape : TagStructure
 		{
-            public BlamShapeType ShapeType;
-            public short ShapeIndex;
+            public Havok.HavokShapeReference Shape;
             public uint CollisionFilter;
             public uint ShapeSize;
             public uint NumChildShapes;
-            [TagField(Platform = CachePlatform.MCC)]
-            public uint Unknown1;
-            [TagField(Platform = CachePlatform.MCC)]
-            public uint Unknown2;
-            [TagField(Platform = CachePlatform.MCC)]
-            public uint Unknown3;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+            public byte[] Padding1;
         }
 
         [TagStructure(Size = 0x78, Align = 0x10)]

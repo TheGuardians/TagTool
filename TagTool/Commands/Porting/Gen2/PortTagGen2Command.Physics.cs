@@ -231,7 +231,7 @@ namespace TagTool.Commands.Porting.Gen2
                 ConvertHavokShape(newPoly, gen2poly);
 
                 //not sure what this is for, but just matching existing tags
-                newPoly.ShapeBase.Offset = new PlatformUnsignedValue((uint)(32 + 128 * polyhedra_index++));
+                newPoly.ShapeBase.Userdata = new PlatformUnsignedValue((uint)(32 + 128 * polyhedra_index++));
 
                 physicsModel.Polyhedra.Add(newPoly);
             }
@@ -280,8 +280,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                         physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                         {
-                            ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
-                            ShapeIndex = gen2listshape.Shape,
+                            Shape = new Havok.HavokShapeReference((Havok.BlamShapeType)gen2listshape.ShapeType, gen2listshape.Shape),
                             CollisionFilter = (uint)gen2listshape.CollisionFilter,
                             NumChildShapes = (uint)gen2list.ChildShapesSize
                         });
@@ -304,8 +303,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                         physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                         {
-                            ShapeType = (Havok.BlamShapeType)gen2listshape.ShapeType,
-                            ShapeIndex = gen2listshape.Shape,
+                            Shape = new Havok.HavokShapeReference((Havok.BlamShapeType)gen2listshape.ShapeType, gen2listshape.Shape),
                             CollisionFilter = (uint)gen2listshape.CollisionFilter,
                             NumChildShapes = (uint)gen2list.ChildShapesSize
                         });
