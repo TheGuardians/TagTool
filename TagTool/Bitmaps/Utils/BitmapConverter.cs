@@ -56,6 +56,7 @@ namespace TagTool.Bitmaps.Utils
                 return null;
 
             byte[] resultData;
+            bool swapCubemapFaces = cachePlatform != CachePlatform.MCC;
  
             using (var result = new MemoryStream())
             {
@@ -76,7 +77,7 @@ namespace TagTool.Bitmaps.Utils
                     {
                         for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
                         {
-                            if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
+                            if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces) // swap cubemap faces
                             {
                                 if (layerIndex == 1)
                                     layerIndex = 2;
@@ -89,7 +90,7 @@ namespace TagTool.Bitmaps.Utils
                             else
                                 ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
 
-                            if (definition.BitmapType == BitmapType.CubeMap)
+                            if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces)
                             {
                                 if (layerIndex == 2)
                                     layerIndex = 1;
@@ -103,7 +104,7 @@ namespace TagTool.Bitmaps.Utils
                 {
                     for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
                     {
-                        if (definition.BitmapType == BitmapType.CubeMap) // swap cubemap faces
+                        if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces) // swap cubemap faces
                         {
                             if (layerIndex == 1)
                                 layerIndex = 2;
@@ -117,10 +118,10 @@ namespace TagTool.Bitmaps.Utils
                                 ConvertGen3BitmapDataMCC(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
                             else
                                 ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-                            
+
                         }
 
-                        if (definition.BitmapType == BitmapType.CubeMap)
+                        if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces)
                         {
                             if (layerIndex == 2)
                                 layerIndex = 1;
