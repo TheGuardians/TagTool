@@ -325,16 +325,16 @@ namespace TagTool.Havok
             using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(destVersion, outCache) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
             {
                 var dataContext = new DataSerializationContext(inputReader, outputWriter);
-                var deserializer = new TagDeserializer(sourceVersion, CachePlatform.Original);
-                var serializer = new TagSerializer(destVersion, CachePlatform.Original);
+                var deserializer = new TagDeserializer(sourceVersion, inCache);
+                var serializer = new TagSerializer(destVersion, outCache);
                 while (!inputReader.EOF)
                 {
                     var header = deserializer.Deserialize<HkpMoppCode>(dataContext);
-                    var dataSize = header.ArrayBase.GetCapacity();
+                    var dataSize = header.ArrayBase.Size;
                     var alignedSize = dataSize + 0xf & ~0xf;
                     var nextOffset = inputReader.Position + alignedSize;
                     List<byte> moppCodes = new List<byte>();
-                    for (int j = 0; j < header.ArrayBase.GetCapacity(); j++)
+                    for (int j = 0; j < dataSize; j++)
                     {
                         moppCodes.Add(inputReader.ReadByte());
                     }
