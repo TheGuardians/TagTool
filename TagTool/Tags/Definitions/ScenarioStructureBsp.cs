@@ -549,8 +549,9 @@ namespace TagTool.Tags.Definitions
                 public sbyte SeamIndex;
             }
 
-            [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnlineED)]
+            [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
             public class DecoratorGrid : TagStructure
             {
                 public short Amount;
@@ -566,6 +567,9 @@ namespace TagTool.Tags.Definitions
                 public float Radius;
                 public RealPoint3d GridSize;
                 public RealPoint3d BoundingSphereOffset;
+
+                [TagField(Platform = CachePlatform.MCC)]
+                public List<short> Unknown1;
 
                 [TagField(Flags = Runtime)]
                 public List<TinyPositionVertex> Vertices;
