@@ -84,11 +84,14 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.StaticPerVertex:
                         ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
                         {
-                            v.Color1 = ConvertColorSpace(v.Color1);
-                            v.Color2 = ConvertColorSpace(v.Color2);
-                            v.Color3 = ConvertColorSpace(v.Color3);
-                            v.Color4 = ConvertColorSpace(v.Color4);
-                            v.Color5 = ConvertColorSpace(v.Color5);
+                            if (inPlatform != CachePlatform.MCC)
+                            {
+                                v.Color1 = ConvertColorSpace(v.Color1);
+                                v.Color2 = ConvertColorSpace(v.Color2);
+                                v.Color3 = ConvertColorSpace(v.Color3);
+                                v.Color4 = ConvertColorSpace(v.Color4);
+                                v.Color5 = ConvertColorSpace(v.Color5);
+                            }
                             outVertexStream.WriteStaticPerVertexData(v);
                         });
                         break;

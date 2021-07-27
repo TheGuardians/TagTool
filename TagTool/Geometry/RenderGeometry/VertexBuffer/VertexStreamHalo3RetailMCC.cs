@@ -1,7 +1,7 @@
-using TagTool.Common;
-using TagTool.IO;
 using System;
 using System.IO;
+using TagTool.Common;
+using TagTool.IO;
 
 namespace TagTool.Geometry
 {
@@ -18,7 +18,7 @@ namespace TagTool.Geometry
         {
             return new AmbientPrtData
             {
-                SHCoefficient = Stream.ReadFloat8_1()
+                SHCoefficient = Stream.ReadFloat1()
             };
         }
 
@@ -66,7 +66,7 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = new RealQuaternion(Stream.ReadDHen3N(), 1.0f)
+                Normal = Stream.ReadUShort4N()
             };
             return vertex;
         }
@@ -82,9 +82,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
-                Binormal = Stream.ReadDHen3N()
+                Normal = Stream.ReadShort4N().IJK,
+                Tangent = new RealQuaternion(Stream.ReadShort4N().IJK, 1.0f),
+                Binormal = Stream.ReadShort4N().IJK
             };
         }
 
@@ -94,9 +94,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
-                Binormal = Stream.ReadDHen3N(),
+                Normal = Stream.ReadShort4N().IJK,
+                Tangent = new RealQuaternion(Stream.ReadShort4N().IJK, 1.0f),
+                Binormal = Stream.ReadShort4N().IJK,
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
@@ -108,9 +108,9 @@ namespace TagTool.Geometry
             {
                 Position = new RealQuaternion(Stream.ReadFloat3(), 0.0f),
                 Texcoord = Stream.ReadFloat2(),
-                Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
-                Binormal = Stream.ReadDHen3N()
+                Normal = Stream.ReadUShort4N().IJK,
+                Tangent = new RealQuaternion(Stream.ReadUShort4N().IJK, 1.0f),
+                Binormal = Stream.ReadUShort4N().IJK
             };
         }
 
@@ -132,7 +132,7 @@ namespace TagTool.Geometry
         {
             return new LinearPrtData
             {
-                SHCoefficients = Stream.ReadSByte4N()
+                SHCoefficients = ReadTinyNormal()
             };
         }
 
@@ -142,7 +142,7 @@ namespace TagTool.Geometry
             {
                 Position = new RealVector3d(Stream.ReadUShort4N()),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHen3N()
+                Normal = Stream.ReadUShort4N().IJK
             };
         }
 
@@ -155,7 +155,8 @@ namespace TagTool.Geometry
         {
             return new PatchyFogVertex
             {
-                Position = Stream.ReadFloat4()
+                Position = Stream.ReadFloat4(),
+                Texcoord = Stream.ReadFloat2()
             };
         }
 
@@ -163,12 +164,12 @@ namespace TagTool.Geometry
         {
             return new QuadraticPrtData
             {
-                SHCoefficients1 = Stream.ReadDec3N(),
-                SHCoefficients2 = Stream.ReadDec3N(),
-                SHCoefficients3 = Stream.ReadDec3N()
+                SHCoefficients1 = Stream.ReadShort4N().IJK,
+                SHCoefficients2 = Stream.ReadShort4N().IJK,
+                SHCoefficients3 = Stream.ReadShort4N().IJK
             };
         }
-
+  
         public RigidVertex ReadRigidVertex()
         {
             var vertex = new RigidVertex
@@ -176,7 +177,7 @@ namespace TagTool.Geometry
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadUShort4N().IJK,
-                Tangent = Stream.ReadUShort4N(),
+                Tangent = new RealQuaternion(Stream.ReadUShort4N().IJK, 0.0f),
                 Binormal = Stream.ReadUShort4N().IJK
             };
             return vertex;
@@ -250,13 +251,26 @@ namespace TagTool.Geometry
             };
         }
 
+        private RealQuaternion ReadTinyNormal()
+        {
+            // Temporary hack so that the normal is in a format the VertexConverter expects
+            var bytes = Stream.ReadUByte4();
+            Array.Reverse(bytes);
+            return new RealQuaternion(
+                 bytes[0] / 127.0f - 1,
+                 bytes[1] / 127.0f - 1,
+                 bytes[2] / 127.0f - 1,
+                 bytes[3] / 127.0f - 1);
+        }
+
         public TinyPositionVertex ReadTinyPositionVertex()
         {
             return new TinyPositionVertex
-            {   
+            {
                 Position = Stream.ReadUShort3N(),
-                Variant = Stream.ReadUShort(),
-                Normal = Stream.ReadSByte4N(),
+                // most likely wrong given what the converter is doing
+                Variant = Stream.ReadUShort(), 
+                Normal = ReadTinyNormal(),
                 Color = Stream.ReadColor()
             };
         }
@@ -273,18 +287,36 @@ namespace TagTool.Geometry
 
         public WaterVertex ReadWaterVertex()
         {
-            throw new NotImplementedException();
+            return new WaterVertex()
+            {
+                Position = Stream.ReadFloat4(),
+                Position2 = Stream.ReadFloat4(),
+                Position3 = Stream.ReadFloat4(),
+                Position4 = Stream.ReadFloat4(),
+                Position5 = Stream.ReadFloat4(),
+                Position6 = Stream.ReadFloat4(),
+                Position7 = Stream.ReadFloat4(),
+                Position8 = Stream.ReadFloat4(),
+                Texcoord = new RealQuaternion(Stream.ReadFloat3(), 0),
+                Texcoord2 = Stream.ReadFloat3(),
+                Normal = Stream.ReadFloat4(),
+                Normal2 = Stream.ReadFloat4(),
+                Normal3 = Stream.ReadFloat4(),
+                Normal4 = Stream.ReadFloat4(),
+                Normal5 = Stream.ReadFloat2(),
+                Texcoord3 = Stream.ReadFloat3()
+            };
         }
 
         public WorldVertex ReadWorldVertex()
         {
             return new WorldVertex
             {
-                Position = new RealQuaternion(Stream.ReadUShort4N().IJK, 0.0f),
-                Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
-                Binormal = Stream.ReadDHen3N()
+                Position = new RealQuaternion(Stream.ReadFloat3(), 0.0f),
+                Texcoord = Stream.ReadFloat2(),
+                Normal = Stream.ReadUShort4N().IJK,
+                Tangent = Stream.ReadUShort4N(),
+                Binormal = Stream.ReadUShort4N().IJK
             };
         }
 
@@ -499,9 +531,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.QuadraticPrt:
                     return 0xC;
                 case VertexBufferFormat.Decorator:
-                    return 0x10;
+                    return 0x14;
                 case VertexBufferFormat.ParticleModel:
-                    return 0x10;
+                    return 0x14;
                 case VertexBufferFormat.Rigid:
                     return 0x24;
                 case VertexBufferFormat.Skinned:
@@ -513,10 +545,10 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.StaticPerVertexColor:
                     return 0xC;
                 case VertexBufferFormat.TinyPosition:
-                    return 0x10;
+                    return 0x8;
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
-                    return 0x18;
+                    return 0x2c;
                 case VertexBufferFormat.Unknown1A:
                     return 0xC;
                 case VertexBufferFormat.Unknown1B:
