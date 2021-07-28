@@ -41,6 +41,8 @@ namespace TagTool.Commands.Shaders
 
             if (shaderType == "explicit")
                 return GenerateExplicitShader(args[1].ToLower());
+            else if (shaderType == "chud")
+                return GenerateChudShader(args[1].ToLower());
             else if (shaderType == "glvs" || shaderType == "glps")
                 return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
 
@@ -203,7 +205,7 @@ namespace TagTool.Commands.Shaders
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString());
+                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default);
 
                 int pixelShaderIndex = 0; // TODO
 
@@ -216,6 +218,38 @@ namespace TagTool.Commands.Shaders
             }
 
             Console.WriteLine($"Generated explicit shader for {value}");
+            return true;
+        }
+
+        private object GenerateChudShader(string shader)
+        {
+            if (!Enum.TryParse(shader, out HaloShaderGenerator.Globals.ChudShader value))
+            {
+                if (!int.TryParse(shader, out int intValue))
+                    return new TagToolError(CommandError.ArgInvalid);
+                value = (HaloShaderGenerator.Globals.ChudShader)intValue;
+            }
+
+            // TODO: write register info to tag
+            // TODO: vtsh support
+            // TODO: entry point support
+            // TODO: failsafes
+
+            using (var stream = Cache.OpenCacheReadWrite())
+            {
+                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default, true);
+
+                int pixelShaderIndex = 0; // TODO
+
+                CachedTag pixlTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
+                var pixl = Cache.Deserialize<PixelShader>(stream, pixlTag);
+
+                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = result.Bytecode;
+
+                Cache.Serialize(stream, pixlTag, pixl);
+            }
+
+            Console.WriteLine($"Generated chud shader for {value}");
             return true;
         }
 
