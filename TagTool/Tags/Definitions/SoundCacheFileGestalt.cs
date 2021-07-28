@@ -139,6 +139,7 @@ namespace TagTool.Tags.Definitions
         /// Get the index of the first permutation in a pitch range block.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
         public int GetFirstPermutationIndex(int pitchRangeIndex, CachePlatform platform)
         {
@@ -157,6 +158,7 @@ namespace TagTool.Tags.Definitions
         /// Get the number of permutation in the pitch range block.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
         public int GetPermutationCount(int pitchRangeIndex, CachePlatform platform)
         {
@@ -195,6 +197,7 @@ namespace TagTool.Tags.Definitions
         /// Get the total number of audio samples in a pitch range block.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
         public uint GetSamplesPerPitchRange(int pitchRangeIndex, CachePlatform platform)
         {
@@ -214,6 +217,7 @@ namespace TagTool.Tags.Definitions
         /// Get the order of the permutations.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
         public int[] GetPermutationOrder(int pitchRangeIndex, CachePlatform platform)
         {
@@ -233,6 +237,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         /// <param name="basePitchRangeIndex"></param>
         /// <param name="pitchRangeCount"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
         public int GetFileSize(int basePitchRangeIndex, int pitchRangeCount, CachePlatform platform)
         {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
@@ -10,7 +11,7 @@ using static TagTool.Audio.FMOD;
 
 namespace TagTool.Audio
 {
-    public class FMODSoundCache : IDisposable
+    public class FMODSoundCache
     {
         private IntPtr System;
         private DirectoryInfo Directory;
@@ -53,18 +54,14 @@ namespace TagTool.Audio
             return null;
         }
 
-        public void Dispose()
-        {
-            FMOD_System_Release(System);
-        }
-
-        public class FMODSoundBank : IDisposable
+        public class FMODSoundBank
         {
             public IntPtr System;
             public FileInfo BankFile;
             public FileInfo IndexFile;
             public IntPtr MasterSound;
             private FMODSoundIndex Index;
+            private object Mutex = new object();
 
             public FMODSoundBank(IntPtr system, FileInfo bankFile)
             {
@@ -74,15 +71,12 @@ namespace TagTool.Audio
                 Load();
             }
 
-            public void Dispose()
-            {
-                FMOD_Sound_Release(MasterSound);
-            }
-
             private void Load()
             {
                 using (var stream = IndexFile.OpenRead())
+                {
                     Index = new FMODSoundIndex(stream);
+                }
 
                 FMOD_RESULT result = FMOD_System_CreateStream(System, BankFile.FullName, FMOD_MODE.FMOD_OPENONLY, IntPtr.Zero, out MasterSound);
                 if (result != FMOD_RESULT.FMOD_OK)
@@ -97,16 +91,33 @@ namespace TagTool.Audio
 
                 var fsbSound = Index[index];
 
-                if (FMOD_Sound_GetSubSound(MasterSound, index, out IntPtr fmodSubSound) != FMOD_RESULT.FMOD_OK)
-                    return null;
+                lock (Mutex)
+                {
+                    FMOD_RESULT result = FMOD_Sound_GetSubSound(MasterSound, index, out IntPtr fmodSubSound);
+                    if (result != FMOD_RESULT.FMOD_OK)
+                    {
+                        new TagToolError(CommandError.CustomError, $"FMOD_Sound_GetSubSound() failed. {result}");
+                        return null;
+                    }
 
-                FMOD_Sound_SeekData(fmodSubSound, (uint)(fsbSound.FirstSample / (fsbSound.ChannelCount * fsbSound.SampleSize)));
+                    result = FMOD_Sound_SeekData(fmodSubSound, (uint)(fsbSound.FirstSample / (fsbSound.ChannelCount * fsbSound.SampleSize)));
+                    result = FMOD_Sound_GetFormat(fmodSubSound, out var type, out var format, out int channels, out int bits);
+                    if (result != FMOD_RESULT.FMOD_OK)
+                    {
+                        new TagToolError(CommandError.CustomError, $"FMOD_Sound_GetFormat() failed. {result}");
+                        return null;
+                    }
 
-                byte[] buffer = new byte[(fsbSound.SampleCount - fsbSound.FirstSample) * (fsbSound.ChannelCount * fsbSound.SampleSize)];
-                if (FMOD_Sound_ReadData(fmodSubSound, buffer, (uint)buffer.Length, out uint read) != FMOD_RESULT.FMOD_OK)
-                    return null;
+                    byte[] buffer = new byte[(fsbSound.SampleCount - fsbSound.FirstSample) / (fsbSound.SampleSize * fsbSound.ChannelCount) * channels * bits / 8];
+                    result = FMOD_Sound_ReadData(fmodSubSound, buffer, (uint)buffer.Length, out uint read);
+                    if (result != FMOD_RESULT.FMOD_OK)
+                    {
+                        new TagToolError(CommandError.CustomError, $"FMOD_Sound_ReadData() failed. {result}");
+                        return null;
+                    }
 
-                return buffer;
+                    return buffer;
+                }
             }
         }
     }
@@ -114,19 +125,16 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x118)]
     public class FMODSoundInfo : TagStructure
     {
-        public uint Hash; // matches hash in the sound permutation definition
-        public uint SampleCount; // samples
+        public uint Hash;
+        public uint SampleCount;
         public int ChannelCount;
         public int SampleSize;
         public int FirstSample;
-        public uint Unknown6; //set for looping sounds. possibly the end sample?
+        public uint Unknown6; //set for looping sounds. needs to be looked into
         [TagField(Length = 256)]
         public string Filename;
 
-        public override string ToString()
-        {
-            return Filename;
-        }
+        public override string ToString() => Filename;
     }
 
     class FMODSoundIndex : IReadOnlyList<FMODSoundInfo>
@@ -156,6 +164,7 @@ namespace TagTool.Audio
             var reader = new EndianReader(stream);
             var dataContext = new DataSerializationContext(reader);
             var deserializer = new TagDeserializer(CacheVersion.Unknown, CachePlatform.MCC);
+
             int index = 0;
             while (!reader.EOF)
             {
@@ -166,14 +175,8 @@ namespace TagTool.Audio
             }
         }
 
-        public IEnumerator<FMODSoundInfo> GetEnumerator()
-        {
-            return Sounds.GetEnumerator();
-        }
+        public IEnumerator<FMODSoundInfo> GetEnumerator() => Sounds.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

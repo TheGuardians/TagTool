@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Audio;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen3;
 using TagTool.Cache.Resources;
@@ -16,10 +17,14 @@ namespace TagTool.Cache
         public MapFile BaseMapFile;
         public FileInfo CacheFile;
         public string NetworkKey;
-        
+       
+
         public StringTableGen3 StringTableGen3;
         public TagCacheGen3 TagCacheGen3;
         public ResourceCacheGen3 ResourceCacheGen3;
+
+        private Lazy<FMODSoundCache> _FMODSoundCache;
+        public FMODSoundCache FMODSoundCache => _FMODSoundCache.Value;
 
         public override TagCache TagCache => TagCacheGen3;
         public override StringTable StringTable => StringTableGen3;
@@ -77,7 +82,13 @@ namespace TagTool.Cache
                 TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3, Platform);
                 ResourceCacheGen3 = new ResourceCacheGen3(this);
 
-                if(TagCacheGen3.Instances.Count > 0)
+                if (Platform == CachePlatform.MCC)
+                {
+                    // TODO: re-think this
+                    _FMODSoundCache = new Lazy<FMODSoundCache>(() => new FMODSoundCache(new DirectoryInfo(Path.Combine(Directory.FullName, @"..\fmod\pc"))), true);
+                }            
+
+                if (TagCacheGen3.Instances.Count > 0)
                 {
                     if (Version == CacheVersion.Halo3Beta || headerGen3.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
                         LocaleTables = new List<LocaleTable>();

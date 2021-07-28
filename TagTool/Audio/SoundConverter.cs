@@ -187,7 +187,21 @@ namespace TagTool.Audio
 
             try
             {
-                BlamSound blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
+                BlamSound blamSound;
+                if (cache.Platform == CachePlatform.MCC)
+                {
+                    var gen3Cache = (GameCacheGen3)cache;
+                    blamSound = GetSoundBankData(cache, soundGestalt, gen3Cache.FMODSoundCache, sound, pitchRangeIndex, permutationIndex);
+                    var waveFile = new WAVFile(blamSound.Data, TagTool.Audio.Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz(), 32);
+                    waveFile.FMT.PCMLinearQuantization = 3;
+                    using (var output = new EndianWriter(File.Create(WAVFileName)))
+                        waveFile.Write(output);
+                }
+                else
+                {
+                    blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
+                }
+              
                 var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
                 var sampleRate = blamSound.SampleRate.GetSampleRateHz();
                 
@@ -199,7 +213,7 @@ namespace TagTool.Audio
                     cachedSoundExists = File.Exists(MP3FileName);
                 }
 
-                if (!cachedSoundExists)
+                if (!cachedSoundExists && blamSound.Compression == Compression.XMA)
                 {
                     WriteXMAFile(blamSound, XMAFileName);
 
@@ -248,6 +262,17 @@ namespace TagTool.Audio
                 if(!useSoundCache)
                     DeleteFile(MP3FileName);
             }
+        }
+
+        public static BlamSound GetSoundBankData(GameCache cache, SoundCacheFileGestalt soundGestalt, FMODSoundCache fmodSoundCache, Sound sound, int pitchRangeIndex, int permutationIndex)
+        {
+            int pitchRangeGestaltIndex = sound.SoundReference.PitchRangeIndex + pitchRangeIndex;
+            int permutationGestaltIndex = soundGestalt.GetFirstPermutationIndex(pitchRangeGestaltIndex, cache.Platform) + permutationIndex;
+            var permutation = soundGestalt.GetPermutation(permutationGestaltIndex);
+            byte[] permutationData = fmodSoundCache.ExtractSound(permutation.FsbSoundHash);
+            var blamSound = new BlamSound(sound, permutationGestaltIndex, permutationData, cache.Version, soundGestalt);
+            blamSound.UpdateFormat(Compression.PCM, permutationData);
+            return blamSound;
         }
 
         public static BlamSound GetXMA(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)

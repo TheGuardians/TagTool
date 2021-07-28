@@ -164,30 +164,25 @@ namespace TagTool.Commands.Porting
 
                 if (blamTag.Group.Tag == "snd!")
                 {
-                    if (BlamCache.Platform == CachePlatform.MCC)
-                    {
-                        Console.WriteLine($"WARNING: sound porting not supported yet, using default.");
-                        resultTag = DefaultTags["snd!"];
-                        return false;
-                    }
-                        
-
                     Sound sound = BlamCache.Deserialize<Sound>(blamCacheStream, blamTag);
 
                     if (BlamSoundGestalt == null)
                         BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
 
-                    var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount, BlamCache.Platform);
-                    if (xmaFileSize < 0)
-                        return false;
+                    if (BlamCache.Platform != CachePlatform.MCC)
+                    {
+                        var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount, BlamCache.Platform);
+                        if (xmaFileSize < 0)
+                            return false;
 
-                    var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
-                    if (soundResource == null)
-                        return false;
+                        var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+                        if (soundResource == null)
+                            return false;
 
-                    var xmaData = soundResource.Data.Data;
-                    if (xmaData == null)
-                        return false;
+                        var xmaData = soundResource.Data.Data;
+                        if (xmaData == null)
+                            return false;
+                    }
                 }
                 else if (blamTag.Group.Tag == "bitm")
                 {

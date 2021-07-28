@@ -249,9 +249,8 @@ namespace TagTool.Audio
         static FMOD()
         {
             string platformSuffix = IntPtr.Size == 8 ? "64" : "";
-            var modulePath = Path.Combine(Path.GetDirectoryName(typeof(FMOD).Assembly.Location), $@"tools\fmod{platformSuffix}.dll");
-            var module = LoadLibrary(modulePath);
-
+            var modulePath = new FileInfo($@"tools\fmod{platformSuffix}.dll");
+            var module = LoadLibrary(modulePath.FullName);
             FMOD_System_Create = Marshal.GetDelegateForFunctionPointer<fn_FMOD_System_Create>(GetProcAddress(module, nameof(FMOD_System_Create)));
             FMOD_System_Init = Marshal.GetDelegateForFunctionPointer<fn_FMOD_System_Init>(GetProcAddress(module, nameof(FMOD_System_Init)));
             FMOD_System_Release = Marshal.GetDelegateForFunctionPointer<fn_FMOD_System_Release>(GetProcAddress(module, nameof(FMOD_System_Release)));

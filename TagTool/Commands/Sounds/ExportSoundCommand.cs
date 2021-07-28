@@ -70,14 +70,18 @@ namespace TagTool.Commands.Sounds
             var resourceReference = Definition.Resource;
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(resourceReference);
 
-            if (resourceDefinition == null || resourceDefinition.Data == null)
+            byte[] soundData = null;
+            if (Cache.Platform != CachePlatform.MCC)
             {
-                Console.WriteLine("The sound resource contains no data");
-                return true;
-            }
+                if (resourceDefinition == null || resourceDefinition.Data == null)
+                {
+                    Console.WriteLine("The sound resource contains no data");
+                    return true;
+                }
 
-            var dataReference = resourceDefinition.Data;
-            byte[] soundData = dataReference.Data;
+                var dataReference = resourceDefinition.Data;
+                soundData = dataReference.Data;
+            }
 
             switch (Cache)
             {

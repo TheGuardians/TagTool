@@ -157,13 +157,13 @@ namespace TagTool.Commands.Porting
 
             var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
 
-            if (soundResource == null)
-                return null;
-
-            var xmaData = soundResource.Data.Data;
-
-            if (xmaData == null)
-                return null;
+            byte[] xmaData = null;
+            if (soundResource != null)
+            {
+                xmaData = soundResource.Data.Data;
+                if (xmaData == null)
+                    return null;
+            }
 
             sound.PitchRanges = new List<PitchRange>(sound.SoundReference.PitchRangeCount);
 
