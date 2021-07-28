@@ -105,7 +105,11 @@ namespace TagTool.Cache.HaloOnline
             var parentGroupTag = new Tag(reader.ReadInt32());      // 0x18 int32  parent group tag
             var grandparentGroupTag = new Tag(reader.ReadInt32()); // 0x1C int32  grandparent group tag
             var groupId = new StringId(reader.ReadUInt32());     // 0x20 uint32 group name stringid
-            Group = new TagGroupGen3(groupTag, parentGroupTag, grandparentGroupTag, stringTable.GetString(groupId));
+
+            if (stringTable.GetString(groupId) == "invalid")
+                Group = new TagGroupGen3(groupTag, parentGroupTag, grandparentGroupTag, "map_list");
+            else
+                Group = new TagGroupGen3(groupTag, parentGroupTag, grandparentGroupTag, stringTable.GetString(groupId));
 
             // Read dependencies
             var dependencies = new HashSet<int>();
