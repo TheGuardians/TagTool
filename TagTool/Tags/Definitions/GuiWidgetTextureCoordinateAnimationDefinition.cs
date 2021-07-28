@@ -1,6 +1,7 @@
-using TagTool.Cache;
 using System.Collections.Generic;
+using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,7 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "gui_widget_texture_coordinate_animation_definition", Tag = "wtuv", Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED)]
     public class GuiWidgetTextureCoordinateAnimationDefinition : TagStructure
 	{
-        public uint AnimationFlags;
+        public GuiAnimationFlags AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
         public TagFunction Function;
 

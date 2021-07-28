@@ -20,8 +20,8 @@ namespace TagTool.Tags.Definitions
         public CachedTag Unknown12;
         public CachedTag Unknown13;
         public CachedTag Unknown14;
-        public CachedTag Unknown15;
-        public CachedTag Unknown16;
+        public CachedTag Focus;
+        public CachedTag Unfocus;
         public CachedTag Unknown17;
         public CachedTag Unknown18;
         public CachedTag Unknown19;

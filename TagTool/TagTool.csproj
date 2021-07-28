@@ -642,6 +642,7 @@
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamHalo3RetailMCC.cs" />
     <Compile Include="Geometry\Utils\GeometryToObjectConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="GUI\GuiWidgets.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
     <Compile Include="IO\ModPackageStream.cs" />

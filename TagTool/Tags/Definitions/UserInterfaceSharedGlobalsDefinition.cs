@@ -21,20 +21,17 @@ namespace TagTool.Tags.Definitions
 
         public CachedTag MainMenuMusic;
         public int MusicFadeTime;
-        public RealArgbColor Color;
-        public RealArgbColor TextColor;
+        public RealArgbColor DefaultTextColor;
+        public RealArgbColor DefaultTextShadowColor;
         public List<TextColorBlock> TextColors;
         public List<PlayerColor> PlayerColors;
         public CachedTag UiSounds;
         public List<Alert> Alerts;
         public List<Dialog> Dialogs;
         public List<GlobalDataSource> GlobalDataSources;
-        public float WidescreenBitmapScaleX;
-        public float WidescreenBitmapScaleY;
-        public float StandardBitmapScaleX;
-        public float StandardBitmapScaleY;
-        public float MenuBlurX;
-        public float MenuBlurY;
+        public RealPoint2d WidescreenBitmapScale;
+        public RealPoint2d StandardBitmapScale;
+        public RealPoint2d MenuBlur;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<UiWidgetBiped> UiWidgetBipeds;
@@ -112,32 +109,31 @@ namespace TagTool.Tags.Definitions
         public int AttractVideoIdleWait;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction Unknown;
+        public TagFunction PdaWaypointScaleFunction;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown2;
+        public uint PdaWaypointJumpSpeed;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown3;
+        public uint PdaUnknownA;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown4;
+        public uint PdaOffscreenPlayerArrowRadius;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown5;
+        public uint PdaUnknownB;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown6;
+        public uint PdaAiWaypointRadius;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown7;      
+        public CachedTag PdaScreenEffect;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public RealArgbColor Unknown17;
+        public RealArgbColor PdaColorA;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public RealArgbColor Unknown18;
+        public RealArgbColor PdaColorB;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId Unknown19;
-
+        public StringId PdaPoiWaypointPrefix;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown20;
+        public StringId PdaPoiWaypointSuffix;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown21;
+        public uint PdaBriefOpenThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown22;
+        public uint UnknownC;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ARGBlock> ARG;

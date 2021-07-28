@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_widget_position_animation_definition", Tag = "wpos", Size = 0x24)]
     public class GuiWidgetPositionAnimationDefinition : TagStructure
 	{
-        public uint AnimationFlags;
+        public GuiAnimationFlags AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
         public TagFunction Function;
 

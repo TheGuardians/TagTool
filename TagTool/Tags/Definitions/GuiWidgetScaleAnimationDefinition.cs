@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using TagTool.Common;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_widget_scale_animation_definition", Tag = "wscl", Size = 0x24)]
     public class GuiWidgetScaleAnimationDefinition : TagStructure
 	{
-        public uint AnimationFlags;
+        public GuiAnimationFlags AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
         public TagFunction Function;
 
