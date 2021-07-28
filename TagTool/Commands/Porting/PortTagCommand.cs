@@ -177,7 +177,7 @@ namespace TagTool.Commands.Porting
                     if (BlamSoundGestalt == null)
                         BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
 
-                    var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
+                    var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount, BlamCache.Platform);
                     if (xmaFileSize < 0)
                         return false;
 

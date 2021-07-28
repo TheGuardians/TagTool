@@ -140,9 +140,17 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
         /// <returns></returns>
-        public int GetFirstPermutationIndex(int pitchRangeIndex)
+        public int GetFirstPermutationIndex(int pitchRangeIndex, CachePlatform platform)
         {
-            return PitchRanges[pitchRangeIndex].FirstPermutationIndex;
+            var pitchRange = PitchRanges[pitchRangeIndex];
+            if (platform == CachePlatform.MCC)
+            {
+                return (int)(pitchRange.EncodedPermutationInfoMCC << 12 >> 12);
+            }
+            else
+            {
+                return pitchRange.FirstPermutationIndex;
+            } 
         }
 
         /// <summary>
@@ -150,12 +158,17 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
         /// <returns></returns>
-        public int GetPermutationCount(int pitchRangeIndex)
+        public int GetPermutationCount(int pitchRangeIndex, CachePlatform platform)
         {
             var pitchRange = PitchRanges[pitchRangeIndex];
-            int permutationCount = pitchRange.EncodedPermutationCount;
-            permutationCount = (permutationCount >> 4) & 63;
-            return permutationCount;
+            if (platform == CachePlatform.MCC)
+            {
+                return (int)((pitchRange.EncodedPermutationInfoMCC >> 20) & 63);
+            }
+            else
+            {
+                return (pitchRange.EncodedPermutationCount >> 4) & 63;
+            } 
         }
 
         /// <summary>
@@ -183,13 +196,13 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
         /// <returns></returns>
-        public uint GetSamplesPerPitchRange(int pitchRangeIndex)
+        public uint GetSamplesPerPitchRange(int pitchRangeIndex, CachePlatform platform)
         {
             uint samples = 0;
-            var pitchRange = PitchRanges[pitchRangeIndex];
-            var firstPermutationIndex = GetFirstPermutationIndex(pitchRangeIndex);
 
-            for(int i = 0; i < GetPermutationCount(pitchRangeIndex); i++)
+            var firstPermutationIndex = GetFirstPermutationIndex(pitchRangeIndex, platform);
+
+            for(int i = 0; i < GetPermutationCount(pitchRangeIndex, platform); i++)
             {
                 samples += GetPermutationSamples(firstPermutationIndex + i);
             }
@@ -202,10 +215,10 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
         /// <returns></returns>
-        public int[] GetPermutationOrder(int pitchRangeIndex)
+        public int[] GetPermutationOrder(int pitchRangeIndex, CachePlatform platform)
         {
             var pitchRange = PitchRanges[pitchRangeIndex];
-            var permutationCount = GetPermutationCount(pitchRangeIndex);
+            var permutationCount = GetPermutationCount(pitchRangeIndex, platform);
             int[] permutationOrder = new int[permutationCount];
 
             for(int i = 0; i < permutationCount; i++)
@@ -221,7 +234,7 @@ namespace TagTool.Tags.Definitions
         /// <param name="basePitchRangeIndex"></param>
         /// <param name="pitchRangeCount"></param>
         /// <returns></returns>
-        public int GetFileSize(int basePitchRangeIndex, int pitchRangeCount)
+        public int GetFileSize(int basePitchRangeIndex, int pitchRangeCount, CachePlatform platform)
         {
             int fileSize = 0;
 
@@ -233,7 +246,7 @@ namespace TagTool.Tags.Definitions
             //Loop through all the permutation in all pitch ranges to get the largest offset, then use the maxIndex to get totalSize
             for(int i = basePitchRangeIndex; i < basePitchRangeIndex + pitchRangeCount; i++)
             {
-                for( int j = GetFirstPermutationIndex(i); j < GetFirstPermutationIndex(i)+GetPermutationCount(i); j++)
+                for( int j = GetFirstPermutationIndex(i, platform); j < GetFirstPermutationIndex(i, platform)+GetPermutationCount(i, platform); j++)
                 {
                     if (GetPermutationOffset(j) >= maxOffset)
                     {

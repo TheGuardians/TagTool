@@ -106,7 +106,7 @@ namespace TagTool.Commands.Sounds
             for (int pitchRangeIndex = Definition.SoundReference.PitchRangeIndex; pitchRangeIndex < Definition.SoundReference.PitchRangeIndex + Definition.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
                 var relativePitchRangeIndex = pitchRangeIndex - Definition.SoundReference.PitchRangeIndex;
-                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
+                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex, Cache.Platform);
 
                 if (targetFormat == null)
                     targetFormat = BlamSoundGestalt.PlatformCodecs[Definition.SoundReference.PlatformCodecIndex].Compression;

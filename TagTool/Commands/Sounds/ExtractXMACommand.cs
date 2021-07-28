@@ -79,7 +79,7 @@ namespace TagTool.Commands.Sounds
                 
 
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
-            var xmaFileSize = BlamSoundGestalt.GetFileSize(Sound.SoundReference.PitchRangeIndex, Sound.SoundReference.PitchRangeCount);
+            var xmaFileSize = BlamSoundGestalt.GetFileSize(Sound.SoundReference.PitchRangeIndex, Sound.SoundReference.PitchRangeCount, Cache.Platform);
             if (xmaFileSize < 0)
                 return;
 
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Sounds
             for (int pitchRangeIndex = Sound.SoundReference.PitchRangeIndex; pitchRangeIndex < Sound.SoundReference.PitchRangeIndex + Sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
                 var relativePitchRangeIndex = pitchRangeIndex - Sound.SoundReference.PitchRangeIndex;
-                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
+                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex, Cache.Platform);
 
                 for (int i = 0; i < permutationCount; i++)
                 {

@@ -150,7 +150,7 @@ namespace TagTool.Commands.Porting
             // Process all the pitch ranges
             //
 
-            var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
+            var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount, BlamCache.Platform);
 
             if (xmaFileSize < 0)
                 return null;
@@ -173,7 +173,7 @@ namespace TagTool.Commands.Porting
 
             for (int pitchRangeIndex = sound.SoundReference.PitchRangeIndex; pitchRangeIndex < sound.SoundReference.PitchRangeIndex + sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
-                totalSampleCount += BlamSoundGestalt.GetSamplesPerPitchRange(pitchRangeIndex);
+                totalSampleCount += BlamSoundGestalt.GetSamplesPerPitchRange(pitchRangeIndex, BlamCache.Platform);
 
                 //
                 // Convert Blam pitch range to ElDorado format
@@ -185,7 +185,7 @@ namespace TagTool.Commands.Porting
                 pitchRange.RuntimePermutationFlags = -1;
                 //I suspect this unknown7 to be a flag to tell if there is a Unknownblock in extrainfo. (See a sound in udlg for example)
                 pitchRange.RuntimeDiscardedPermutationIndex = -1;
-                pitchRange.PermutationCount = (byte)BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
+                pitchRange.PermutationCount = (byte)BlamSoundGestalt.GetPermutationCount(pitchRangeIndex, BlamCache.Platform);
                 pitchRange.RuntimeLastPermutationIndex = -1;
 
                 // Add pitch range to ED sound
@@ -208,8 +208,8 @@ namespace TagTool.Commands.Porting
                 var soundCachePath = useCache ? Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName : "";
 
 
-                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
-                var permutationOrder = BlamSoundGestalt.GetPermutationOrder(pitchRangeIndex);
+                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex, BlamCache.Platform);
+                var permutationOrder = BlamSoundGestalt.GetPermutationOrder(pitchRangeIndex, BlamCache.Platform);
                 var relativePitchRangeIndex = pitchRangeIndex - sound.SoundReference.PitchRangeIndex;
 
                 for (int i = 0; i < permutationCount; i++)
