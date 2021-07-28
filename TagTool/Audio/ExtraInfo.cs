@@ -103,9 +103,13 @@ namespace TagTool.Audio
                 public uint LipsyncDataLength;
             }
 
-            [TagStructure(Size = 0xC)]
+            [TagStructure(Size = 0xC, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x3C, Platform = CachePlatform.MCC)]
             public class FacialAnimationPermutation : TagStructure
 			{
+                [TagField(Platform = CachePlatform.MCC)]
+                public UnknownData Unknown1;
+
                 public List<FacialAnimationBlock> FacialAnimation;
 
                 [TagStructure(Size = 0x28)]
@@ -168,6 +172,23 @@ namespace TagTool.Audio
                             shout
                         }
                     }
+                }
+
+                [TagStructure(Size = 0x30, Platform = CachePlatform.MCC)]
+                public class UnknownData : TagStructure
+                {
+                    public uint Unknown1;
+                    public uint Unknown2;
+                    public uint Unknown3;
+                    public uint Unknown4;
+                    public uint Unknown5;
+                    public uint Unknown6;
+                    public uint Unknown7;
+                    public uint Unknown8;
+                    public uint Unknown9;
+                    public uint Unknown10;
+                    public uint Unknown11;
+                    public uint Unknown12;
                 }
             }
         }

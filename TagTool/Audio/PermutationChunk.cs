@@ -3,7 +3,8 @@ using TagTool.Cache;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Beta)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Beta, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3Beta, Platform = CachePlatform.MCC)]
     public class PermutationChunk : TagStructure
 	{
         public int Offset;
@@ -20,6 +21,11 @@ namespace TagTool.Audio
 
         public uint FirstSample;
         public uint LastSample;
+
+        [TagField(Platform = CachePlatform.MCC)]
+        public uint RuntimeFsbSoundHash;
+        [TagField(Platform = CachePlatform.MCC)]
+        public int RuntimeFsbSoundRuntimeStatus;
 
 
         public PermutationChunk()

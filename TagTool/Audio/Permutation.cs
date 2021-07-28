@@ -6,9 +6,10 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class Permutation : TagStructure
     {
         [TagField(Gen = CacheGeneration.Third)]
@@ -55,6 +56,9 @@ namespace TagTool.Audio
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint FirstSample;
+
+        [TagField(Platform = CachePlatform.MCC)]
+        public uint FsbSoundHash;
 
         [Flags]
         public enum PermutationFlagsHaloOnline : short

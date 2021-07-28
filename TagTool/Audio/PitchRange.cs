@@ -45,13 +45,15 @@ namespace TagTool.Audio
         public short EncodedPermutationDataIndex;
         [TagField(Gen = CacheGeneration.Third)]
         public short EncodedRuntimePermutationFlagIndex;
-        [TagField(Gen = CacheGeneration.Third)]
+        [TagField(Gen = CacheGeneration.Third, Platform = CachePlatform.Original)]
         public short EncodedPermutationCount;
-        [TagField(Gen = CacheGeneration.Third)]
+        [TagField(Gen = CacheGeneration.Third, Platform = CachePlatform.Original)]
         public ushort FirstPermutationIndex;
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public short PermutationCountH2;
 
+        [TagField(Platform = CachePlatform.MCC)]
+        public uint EncodedPermutationInfoMCC;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<Permutation> Permutations;
