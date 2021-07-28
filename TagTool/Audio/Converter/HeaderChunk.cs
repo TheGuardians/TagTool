@@ -267,8 +267,8 @@ namespace TagTool.Audio.Converter
             SubchunkSize = 0x10;
             Channels = (short)channels;
             SampleRate = sampleRate;
-            ByteRate = SampleRate * Channels * 2;
-            BlockAlign = (short)(Channels * 2);
+            ByteRate = SampleRate * Channels * PCMType / 8;
+            BlockAlign = (short)(Channels * PCMType / 8);
             BitsPerSample = (short)PCMType;
             ChunkSize = 0x18;
         }
