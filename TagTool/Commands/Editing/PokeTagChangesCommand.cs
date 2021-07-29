@@ -74,23 +74,72 @@ namespace TagTool.Commands.Editing
                 var address = GetTagAddress(processStream, Tag.Index);
                 if(address != 0)
                 {
-                    var runtimeContext = new RuntimeSerializationContext(Cache, processStream, address, Tag.Offset, Tag.CalculateHeaderSize(), Tag.TotalSize);
+                    //first get a raw copy of the tag in the cache
+                    byte[] tagcachedata;
+                    using (var stream = Cache.OpenCacheRead())
+                    using (var outstream = new MemoryStream())
+                    using (EndianWriter writer = new EndianWriter(outstream, EndianFormat.LittleEndian))
+                    {
+                        //deserialize the cache def then reserialize to a stream
+                        var cachedef = Cache.Deserialize(stream, Tag);
+                        var dataContext = new DataSerializationContext(writer);                     
+                        Cache.Serializer.Serialize(dataContext, cachedef);
+                        tagcachedata = outstream.ToArray();
+                    }
+                        
+                    //then serialize the current version of the tag in the editor
+                    byte[] editordata;
+                    using (MemoryStream stream = new MemoryStream())
+                    using (EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+                    {
+                        var dataContext = new DataSerializationContext(writer);
+                        Cache.Serializer.Serialize(dataContext, Value);
+                        editordata = stream.ToArray();
+                    }
+
+                    //length should make to make sure the serializer is consistent
+                    if(tagcachedata.Length != editordata.Length)
+                    {
+                        return new TagToolError(CommandError.OperationFailed, $"Error: tag size changed or the serializer failed!");
+                    }
 
                     //pause the process during poking to prevent race conditions
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
                     process.Suspend();
-                    Cache.Serializer.Serialize(runtimeContext, Value);
+
+                    //write diffed bytes only
+                    int patchedbytes = 0;
+                    int headersize = (int)Tag.CalculateHeaderSize();
+                    for(var i = 0; i < editordata.Length; i++)
+                    {
+                        if(editordata[i] != tagcachedata[i])
+                        {
+                            processStream.Seek(address + headersize + i, SeekOrigin.Begin);
+                            processStream.WriteByte(editordata[i]);
+                            patchedbytes++;
+                        }
+                    }
+                    processStream.Flush();
+
                     process.Resume();
                     stopWatch.Stop();
 
-                    Console.WriteLine($"Poked tag at 0x{address.ToString("X8")} in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
+                    Console.WriteLine($"Patched {patchedbytes} bytes in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
                 }
                 else
                     return new TagToolError(CommandError.OperationFailed, $"Tag 0x{Tag.Index:X} is not loaded in process 0x{process.Id:X}.");
             }
 
             return true;
+        }
+
+        public void DumpData(string filename, byte[] data)
+        {
+            using (var fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
+            {
+                fs.Write(data, 0, data.Length);
+            }
         }
 
         private static uint GetTagAddress(ProcessMemoryStream stream, int tagIndex)
