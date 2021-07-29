@@ -2484,8 +2484,9 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public class CutsceneFlag : TagStructure
 		{
             [TagField(Flags = Padding, Length = 4)]
@@ -2494,9 +2495,11 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public RealPoint3d Position;
             public RealEulerAngles2d Facing;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             public short EditorFolderIndex;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             public short SourceBspIndex;
         }
 
