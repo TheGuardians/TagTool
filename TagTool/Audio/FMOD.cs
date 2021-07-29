@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using TagTool.Commands;
 using static TagTool.Audio.FMOD;
 
 #pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments
@@ -249,7 +250,7 @@ namespace TagTool.Audio
         static FMOD()
         {
             string platformSuffix = IntPtr.Size == 8 ? "64" : "";
-            var modulePath = new FileInfo($@"tools\fmod{platformSuffix}.dll");
+            var modulePath = new FileInfo($@"{Program.TagToolDirectory}\Tools\fmod{platformSuffix}.dll");
             var module = LoadLibrary(modulePath.FullName);
             FMOD_System_Create = Marshal.GetDelegateForFunctionPointer<fn_FMOD_System_Create>(GetProcAddress(module, nameof(FMOD_System_Create)));
             FMOD_System_Init = Marshal.GetDelegateForFunctionPointer<fn_FMOD_System_Init>(GetProcAddress(module, nameof(FMOD_System_Init)));
