@@ -64,9 +64,9 @@ namespace TagTool.Commands.Porting
                     var portTagCommand = new PortTagGen1Command(hoCache, gen1cache);
                     context.AddCommand(portTagCommand);
                 }
-
-                context.AddCommand(new DiffTagCommand(currentCache, portingCache));
             }
+
+            context.AddCommand(new DiffTagCommand(currentCache, portingCache));
         }
     }
 }
