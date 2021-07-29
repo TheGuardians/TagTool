@@ -3447,12 +3447,13 @@ namespace TagTool.Tags.Definitions
 				{
                     public AreaType Type;
 
-                    [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3Retail)]
+                    [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                     public byte[] Unused = new byte[1];
 
                     public AreaFlags Flags;
 
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                    [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                     public byte CharacterFlags;
 
                     [TagField(MaxVersion = CacheVersion.Halo3Retail)]

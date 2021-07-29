@@ -1567,7 +1567,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x50, Align = 0x8, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public class LocaleGlobalsBlock : TagStructure
         {
             public PlatformUnsignedValue StringReferenceAddress;
@@ -1586,7 +1586,7 @@ namespace TagTool.Tags.Definitions
 
             public uint Unknown3;
 
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, Flags = TagFieldFlags.Padding, Length = 4)]
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, Length = 4)]
             public byte[] Padding;
         }
 
