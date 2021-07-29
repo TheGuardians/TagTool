@@ -14,6 +14,7 @@ namespace TagTool.Serialization
         public CacheAddressType AddressType { get; }
         public uint MainStructOffset;
         public int PointerOffset = 0x0;
+        private const int DefaultBlockAlign = 4;
 
         public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
         {
@@ -82,6 +83,7 @@ namespace TagTool.Serialization
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
             public int PointerOffset = 0x0;
+            private uint _align = DefaultBlockAlign;
 
             public GenericDataBlock(int offset)
             {
@@ -102,13 +104,17 @@ namespace TagTool.Serialization
 
             public void SuggestAlignment(uint align)
             {
+                _align = Math.Max(_align, align);
             }
 
             public uint Finalize(Stream outStream)
             {
+                // Write the data out, aligning the offset and size
+                StreamUtil.Align(outStream, (int)_align);
                 var dataOffset = (uint)outStream.Position;
                 outStream.Write(Stream.GetBuffer(), 0, (int)Stream.Length);
-                
+                StreamUtil.Align(outStream, DefaultBlockAlign);
+
                 Writer.Close();
                 Stream = null;
                 Writer = null;
