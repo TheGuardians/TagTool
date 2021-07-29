@@ -14,10 +14,13 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x834, MinVersion = CacheVersion.HaloOnline498295)]
     public class Scenario : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public byte MapTypePadding;
 
         public ScenarioMapType MapType;
+
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public byte MapTypePaddingMCC;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ScenarioMapSubType MapSubType;
