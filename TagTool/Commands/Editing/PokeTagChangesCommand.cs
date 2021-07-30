@@ -84,6 +84,7 @@ namespace TagTool.Commands.Editing
                         var cachedef = Cache.Deserialize(stream, Tag);
                         var dataContext = new DataSerializationContext(writer);                     
                         Cache.Serializer.Serialize(dataContext, cachedef);
+                        StreamUtil.Align(outstream, 0x10);
                         tagcachedata = outstream.ToArray();
                     }
                         
@@ -94,6 +95,7 @@ namespace TagTool.Commands.Editing
                     {
                         var dataContext = new DataSerializationContext(writer);
                         Cache.Serializer.Serialize(dataContext, Value);
+                        StreamUtil.Align(stream, 0x10);
                         editordata = stream.ToArray();
                     }
 
@@ -101,6 +103,12 @@ namespace TagTool.Commands.Editing
                     if(tagcachedata.Length != editordata.Length)
                     {
                         return new TagToolError(CommandError.OperationFailed, $"Error: tag size changed or the serializer failed!");
+                    }
+
+                    //some very rare tags have a size that doesn't match our serialized version, need to fix root cause
+                    if(tagcachedata.Length != Tag.TotalSize - Tag.CalculateHeaderSize())
+                    {
+                        return new TagToolError(CommandError.OperationFailed, $"Sorry can't poke this specific tag yet (only happens with very rare specific tags), go bug a dev");
                     }
 
                     //pause the process during poking to prevent race conditions
