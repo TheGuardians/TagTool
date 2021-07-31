@@ -444,6 +444,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.PortingOptions.cs" />
     <Compile Include="Commands\Editing\ExportCommandsCommand.cs" />
     <Compile Include="Commands\Bitmaps\GenerateBitmapCommand.cs" />
+    <Compile Include="Commands\Tags\FindValueCommand.cs" />
     <Compile Include="Commands\Tags\TestSerializerCommand.cs" />
     <Compile Include="Commands\Tags\ListDuplicateTagsCommand.cs" />
     <Compile Include="Commands\Tags\CreateTagCommand.cs" />
