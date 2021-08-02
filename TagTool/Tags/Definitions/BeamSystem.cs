@@ -21,15 +21,15 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public RenderMethod RenderMethod;
 
-            public uint Unknown1;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+            public float Unknown5;
+            public float Unknown6;
+            public float Unknown7;
+            public float Unknown8;
+            public float Unknown9;
 
             public TagMapping ShaderFunction1;
             public TagMapping ShaderFunction2;
