@@ -293,7 +293,7 @@ namespace TagTool.Commands.RenderModels
                     case VertexBufferFormat.Skinned:
                         if (mesh.SkinnedVertices.Length > ushort.MaxValue)
                         {
-                            return new TagToolError(CommandError.OperationFailed, "Number of vertices ({mesh.SkinnedVertices.Length}) exceeded the limit! (65535)");
+                            return new TagToolError(CommandError.OperationFailed, $"Number of vertices ({mesh.SkinnedVertices.Length}) exceeded the limit! (65535)");
                         }
                         break;
                     case VertexBufferFormat.Rigid:
