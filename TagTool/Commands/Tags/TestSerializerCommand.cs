@@ -17,7 +17,7 @@ namespace TagTool.Commands.Tags
     public class TestSerializerCommand : Command
     {
         private GameCacheHaloOnlineBase Cache { get; }
-        public TestSerializerCommand(GameCacheHaloOnlineBase cachecontext)
+        public TestSerializerCommand(GameCache cachecontext)
             : base(false,
 
                   "TestSerializer",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Tags
 
                   "")
         {
-            Cache = cachecontext;
+            Cache = (GameCacheHaloOnlineBase)cachecontext;
         }
 
         public override object Execute(List<string> args)
