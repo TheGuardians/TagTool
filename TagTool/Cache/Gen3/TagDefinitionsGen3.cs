@@ -93,6 +93,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("mulg", "multiplayer_globals"), typeof(MultiplayerGlobals) },
             { new TagGroupGen3("nclt", "new_cinematic_lighting"), typeof(NewCinematicLighting) },
             { new TagGroupGen3("obje", "object"), typeof(GameObject) },
+            { new TagGroupGen3("pact", "player_action_set"), typeof(PlayerActionSet) },
             { new TagGroupGen3("pecp", "particle_emitter_custom_points"), typeof(ParticleEmitterCustomPoints) },
             { new TagGroupGen3("pdm!", "podium_settings"), typeof(PodiumSettings) },
             { new TagGroupGen3("perf", "performance_throttles"), typeof(PerformanceThrottles) },

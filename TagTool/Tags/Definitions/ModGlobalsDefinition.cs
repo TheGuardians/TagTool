@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x9C)]
+        [TagStructure(Size = 0xAC)]
         public class PlayerCharacterCustomization : TagStructure
         {
             /// <summary>
@@ -58,6 +58,9 @@ namespace TagTool.Tags.Definitions
 
             [TagField(ValidTags = new[] { "vmdx" })]
             public CachedTag VisionGlobals;
+
+            [TagField(ValidTags = new[] { "pact" })]
+            public CachedTag ActionSet;
 
             public CharacterPositionInfo CharacterPositionData;
 
