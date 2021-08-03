@@ -31,6 +31,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>TagTool.ico</ApplicationIcon>
@@ -1605,4 +1607,15 @@ EXIT %25ERRORLEVEL%25</PostBuildEvent>
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="RemoveSatelliteAssemblies" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceSatellitePaths)" />
+    </ItemGroup>
+  </Target>
+  <Target Name="SetupDestinationSubDirectory" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Update="*" DestinationSubDirectory="bin/" />
+    </ItemGroup>
+  </Target>
+  
 </Project>
