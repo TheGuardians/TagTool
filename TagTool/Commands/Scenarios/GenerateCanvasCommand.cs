@@ -22,7 +22,7 @@ namespace TagTool.Commands.Scenarios
         private GameCacheHaloOnlineBase Cache;
 
         public GenerateCanvasCommand(GameCacheHaloOnlineBase cache) :
-            base(true,
+            base(false,
 
                 "GenerateCanvas",
                 "Generates a mostly empty scenario.",

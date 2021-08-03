@@ -86,8 +86,9 @@ namespace TagTool.Commands.Tags
 				// modding commands
 				context.AddCommand(new OpenModPackageCommand(contextStack, hoCache));
                 context.AddCommand(new CreateCharacterType(cache));
+                context.AddCommand(new GenerateCanvasCommand(hoCache));
 
-                
+
                 context.AddCommand(new UpdateMapFilesCommand(cache));
 
                 context.AddCommand(new RescaleGUICommand(cache));
@@ -107,7 +108,6 @@ namespace TagTool.Commands.Tags
                 var hoCache = cache as GameCacheHaloOnline;
                 context.AddCommand(new RebuildCacheFileCommand(hoCache));
                 context.AddCommand(new CreateModPackageCommand(contextStack, hoCache));
-                context.AddCommand(new GenerateCanvasCommand(hoCache));
             }
 
             if (cache is GameCacheModPackage)

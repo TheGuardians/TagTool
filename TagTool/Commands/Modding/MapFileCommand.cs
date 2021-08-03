@@ -129,7 +129,7 @@ namespace TagTool.Commands.Modding
                 mapStream.Position = 0;
 
                 var header = (CacheFileHeaderGenHaloOnline)mapFile.Header;
-                var mapVariant = mapFile.MapFileBlf?.MapVariant.MapVariant;
+                var mapVariant = mapFile.MapFileBlf?.MapVariant?.MapVariant;
 
                 Console.WriteLine(columnFormat, header.MapId, header.Name, header.ScenarioPath, mapVariant == null ? "None" : mapVariant.Metadata.Name);
             }
