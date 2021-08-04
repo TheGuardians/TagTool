@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 using HaloShaderGenerator.Shader;
@@ -406,19 +407,24 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                         }
 
+                        bool matchFound = false;
                         // get basecache option index
                         for (int k = 0; k < baseRmdfDefinition.Methods[i].ShaderOptions.Count; k++)
                         {
                             if (optionName == BaseCache.StringTable.GetString(baseRmdfDefinition.Methods[i].ShaderOptions[k].Type))
                             {
                                 option = (byte)k;
+                                matchFound = true;
                                 break;
                             }
                         }
 
+                        if (!matchFound)
+                        {
+                            new TagToolWarning($"Unrecognized rmop \"{optionName}\" for method \"{methodName}\"");
+                        }
                         break;
                     }
-
                     newOptions.Add(option);
                 }
 
