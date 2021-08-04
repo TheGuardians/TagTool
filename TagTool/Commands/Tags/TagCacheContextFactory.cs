@@ -31,7 +31,7 @@ namespace TagTool.Commands.Tags
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache cache)
         {
             context.AddCommand(new TestCommand(cache));
-            context.AddCommand(new TestSerializerCommand(cache));
+            
 
             context.AddCommand(new DumpLogCommand());
             context.AddCommand(new RunCommands(contextStack));
@@ -101,6 +101,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new Test2Command(hoCache));
 
                 context.AddCommand(new ImportAnimationCommand(hoCache));
+                context.AddCommand(new TestSerializerCommand(cache));
             }
 
             if(cache is GameCacheHaloOnline)
