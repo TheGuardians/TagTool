@@ -10,7 +10,8 @@ namespace TagTool.Tags.Definitions
     {
         public List<OptionBlock> Options;
 
-        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x4C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
@@ -34,6 +35,9 @@ namespace TagTool.Tags.Definitions
             public DefaultFilterModeValue DefaultFilterMode;
             public DefaultAddressModeValue DefaultAddressMode;
             public short AnisotropyAmount;
+
+            [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            public int UnknownMCC;
 
             public ArgbColor DefaultColor;
             public float DefaultBitmapScale;

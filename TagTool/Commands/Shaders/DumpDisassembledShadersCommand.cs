@@ -94,14 +94,17 @@ namespace TagTool.Commands.Shaders
                 {
                     CurrentRmdf = cache.Deserialize<RenderMethodDefinition>(stream, shaderTypes[shaderType]);
 
-                    var glvsTagName = $"shaders\\{shaderType}_shared_vertex_shaders.glvs";
-                    var glpsTagName = $"shaders\\{shaderType}_shared_pixel_shaders.glps";
+                    CachedTag glvsTag = CurrentRmdf.GlobalVertexShader;
+                    CachedTag glpsTag = CurrentRmdf.GlobalPixelShader;
 
-                    if (!cache.TagCache.TryGetTag(glvsTagName, out CachedTag glvsTag) || !cache.TagCache.TryGetTag(glpsTagName, out CachedTag glpsTag))
+                    if (glvsTag == null || glpsTag == null)
                     {
                         Console.WriteLine($"WARNING: Cache \"{cache.DisplayName}\" has invalid shader type \"{shaderType}\"");
                         continue;
                     }
+
+                    var glvsTagName = glvsTag.Name;
+                    var glpsTagName = glpsTag.Name;
 
                     var glvs = cache.Deserialize<GlobalVertexShader>(stream, glvsTag);
                     var glps = cache.Deserialize<GlobalPixelShader>(stream, glpsTag);

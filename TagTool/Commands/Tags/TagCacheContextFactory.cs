@@ -102,6 +102,7 @@ namespace TagTool.Commands.Tags
 
                 context.AddCommand(new ImportAnimationCommand(hoCache));
                 context.AddCommand(new TestSerializerCommand(cache));
+                context.AddCommand(new NameShaderTagsCommand(hoCache));
             }
 
             if(cache is GameCacheHaloOnline)
