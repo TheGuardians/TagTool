@@ -449,28 +449,36 @@ namespace TagTool.Bitmaps.Utils
         {
             string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
 
-            var ddsFile = new DDSFile(new DDSHeader((uint)width, (uint)height, 1, 1, BitmapFormat.A8R8G8B8, BitmapType.Texture2D), rgba);
-            using (var writer = new EndianWriter(File.Create(tempBitmap)))
-                ddsFile.Write(writer);
-
-            ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\nvcompress.exe")
+            try
             {
-                Arguments = $"-bc5 {(generateMips ? "" : "-nomips")} {tempBitmap} {tempBitmap}",
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false,
-                RedirectStandardInput = false
-            };
-            Process nvcompress = Process.Start(info);
-            nvcompress.WaitForExit();
+                var ddsFile = new DDSFile(new DDSHeader((uint)width, (uint)height, 1, 1, BitmapFormat.A8R8G8B8, BitmapType.Texture2D), rgba);
+                using (var writer = new EndianWriter(File.Create(tempBitmap)))
+                    ddsFile.Write(writer);
 
-            using (var reader = new EndianReader(File.OpenRead(tempBitmap)))
+                ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\nvcompress.exe")
+                {
+                    Arguments = $"-bc5 {(generateMips ? "" : "-nomips")} {tempBitmap} {tempBitmap}",
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process nvcompress = Process.Start(info);
+                nvcompress.WaitForExit();
+
+                using (var reader = new EndianReader(File.OpenRead(tempBitmap)))
+                {
+                    ddsFile = new DDSFile();
+                    ddsFile.Read(reader);
+                    return ddsFile.BitmapData;
+                }
+            }
+            finally
             {
-                ddsFile = new DDSFile();
-                ddsFile.Read(reader);
-                return ddsFile.BitmapData;
+                if(File.Exists(tempBitmap))
+                    File.Delete(tempBitmap);
             }
         }
 
