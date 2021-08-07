@@ -8,8 +8,8 @@ namespace TagTool.Cache
     public class StringIdResolverHalo3MCC : StringIdResolver
     {
         // These values were figured out through trial-and-error
-        private static readonly int[] SetOffsets = { 0xCD4, 0x4BB, 0xAC1, 0xB53, 0xBA9, 0xBBD, 0xC05, 0xC3E, 0xC52, 0xC5F, 0xC60 };
-        private const int SetMin = 0x4BB;   // Mininum index that goes in a set
+        private static readonly int[] SetOffsets = { 0xCDC, 0x4C3, 0xACA, 0xB5C, 0xBB2, 0xBC2, 0xC0E, 0xC47, 0xC5B, 0xC68, 0xC69 };
+        private const int SetMin = 0x4C3;   // Mininum index that goes in a set
         private const int SetMax = 0xFFFF; // Maximum index that goes in a set (Not in Halo 3?)
 
         public StringIdResolverHalo3MCC()
