@@ -43,11 +43,12 @@ namespace TagTool.Commands.Porting
 
             switch (BlamCache.Version)
             {
-                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
                     renderData.Input_HO = GetEquivalentValue(renderData.Input_HO, renderData.Input_H3);
                     renderData.RangeInput_HO = GetEquivalentValue(renderData.RangeInput_HO, renderData.RangeInput_H3);
                     break;
-                case CacheVersion.Halo3ODST:
+                case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                case CacheVersion.Halo3ODST when BlamCache.Platform == CachePlatform.Original:
                     renderData.Input_HO = GetEquivalentValue(renderData.Input_HO, renderData.Input_ODST);
                     renderData.RangeInput_HO = GetEquivalentValue(renderData.RangeInput_HO, renderData.RangeInput_ODST);
                     break;
@@ -68,7 +69,7 @@ namespace TagTool.Commands.Porting
         {
             switch (BlamCache.Version)
             {
-                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
                     textWidget.Flags = GetEquivalentFlags(textWidget.Flags, textWidget.Flags_H3);
                     break;
             }

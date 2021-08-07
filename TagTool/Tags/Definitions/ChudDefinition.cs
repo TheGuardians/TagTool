@@ -940,12 +940,14 @@ namespace TagTool.Tags.Definitions
                 public InputValue_HO Input_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public InputValue_HO RangeInput_HO;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public InputValue_H3 Input_H3;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public InputValue_H3 RangeInput_H3;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public InputValue_ODST Input_ODST;
+                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public InputValue_ODST RangeInput_ODST;
                 public ArgbColor LocalColorA;
