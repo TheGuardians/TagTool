@@ -205,7 +205,16 @@ namespace TagTool.Bitmaps.Utils
                     pixelDataOffset -= secondaryData.Length;
                 Array.Copy(primaryData, pixelDataOffset, pixelData, 0, pixelDataSize);
             }
- 
+            
+            if(bitmap.Images[0].Format == BitmapFormat.Dxn)
+            {
+                // convert bc5_snorm to ati2n_unorm
+                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[0], level);
+                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[0], level);
+                byte[] rgba = BitmapDecoder.DecodeDxnSigned(pixelData, width, height, true);
+                pixelData = EncodeDXN(rgba, width, height);
+            }
+            
             resultStream.Write(pixelData, 0, pixelData.Length);
         }
 
@@ -433,6 +442,35 @@ namespace TagTool.Bitmaps.Utils
                 default:
                     throw new Exception($"Unsupported format for mipmap generation {bitmap.Format}");
 
+            }
+        }
+
+        private static byte[] EncodeDXN(byte[] rgba, int width, int height, bool generateMips = false)
+        {
+            string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
+
+            var ddsFile = new DDSFile(new DDSHeader((uint)width, (uint)height, 1, 1, BitmapFormat.A8R8G8B8, BitmapType.Texture2D), rgba);
+            using (var writer = new EndianWriter(File.Create(tempBitmap)))
+                ddsFile.Write(writer);
+
+            ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\nvcompress.exe")
+            {
+                Arguments = $"-bc5 {(generateMips ? "" : "-nomips")} {tempBitmap} {tempBitmap}",
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardError = false,
+                RedirectStandardOutput = false,
+                RedirectStandardInput = false
+            };
+            Process nvcompress = Process.Start(info);
+            nvcompress.WaitForExit();
+
+            using (var reader = new EndianReader(File.OpenRead(tempBitmap)))
+            {
+                ddsFile = new DDSFile();
+                ddsFile.Read(reader);
+                return ddsFile.BitmapData;
             }
         }
 

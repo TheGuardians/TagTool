@@ -262,8 +262,138 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
+
+        public static byte[] DecodeDxnSigned(byte[] data, int width, int height, bool swapRG = false)
+        {
+            byte[] buffer = new byte[height * width * 4];
+            int chunks = width / 4;
+
+            if (chunks == 0)
+                chunks = 1;
+
+            for (int i = 0; i < (width * height); i += 16)
+            {
+                float rMin = DenormalizeSigned((sbyte)data[i + 0]);
+                float rMax = DenormalizeSigned((sbyte)data[i + 1]);
+
+                byte[] rIndices = new byte[16];
+                int temp = ((data[i + 4] << 16) | (data[i + 3] << 8)) | data[i + 2];
+                int indices = 0;
+                while (indices < 8)
+                {
+                    rIndices[indices] = (byte)(temp & 7);
+                    temp = temp >> 3;
+                    indices++;
+                }
+                temp = ((data[i + 7] << 16) | (data[i + 6] << 8)) | data[i + 5];
+                while (indices < 16)
+                {
+                    rIndices[indices] = (byte)(temp & 7);
+                    temp = temp >> 3;
+                    indices++;
+                }
+                float gMin = DenormalizeSigned((sbyte)data[i + 8]);
+                float gMax = DenormalizeSigned((sbyte)data[i + 9]);
+   
+                byte[] gIndices = new byte[16];
+                temp = ((data[i + 12] << 16) | (data[i + 11] << 8)) | data[i + 10];
+                indices = 0;
+                while (indices < 8)
+                {
+                    gIndices[indices] = (byte)(temp & 7);
+                    temp = temp >> 3;
+                    indices++;
+                }
+                temp = ((data[i + 15] << 16) | (data[i + 14] << 8)) | data[i + 13];
+                while (indices < 16)
+                {
+                    gIndices[indices] = (byte)(temp & 7);
+                    temp = temp >> 3;
+                    indices++;
+                }
+                float[] redTable = new float[8];
+                redTable[0] = rMin;
+                redTable[1] = rMax;
+                if (redTable[0] > redTable[1])
+                {
+                    redTable[2] = ((6 * redTable[0] + 1 * redTable[1]) / 7.0f);
+                    redTable[3] = ((5 * redTable[0] + 2 * redTable[1]) / 7.0f);
+                    redTable[4] = ((4 * redTable[0] + 3 * redTable[1]) / 7.0f);
+                    redTable[5] = ((3 * redTable[0] + 4 * redTable[1]) / 7.0f);
+                    redTable[6] = ((2 * redTable[0] + 5 * redTable[1]) / 7.0f);
+                    redTable[7] = ((1 * redTable[0] + 6 * redTable[1]) / 7.0f);
+                }
+                else
+                {
+                    redTable[2] = ((4 * redTable[0] + 1 * redTable[1]) / 5.0f);
+                    redTable[3] = ((3 * redTable[0] + 2 * redTable[1]) / 5.0f);
+                    redTable[4] = ((2 * redTable[0] + 3 * redTable[1]) / 5.0f);
+                    redTable[5] = ((1 * redTable[0] + 4 * redTable[1]) / 5.0f);
+                    redTable[6] = -1.0f;
+                    redTable[7] = 1.0f;
+                }
+                float[] grnTable = new float[8];
+                grnTable[0] = gMin;
+                grnTable[1] = gMax;
+                if (grnTable[0] > grnTable[1])
+                {
+                    grnTable[2] = ((6 * grnTable[0] + 1 * grnTable[1]) / 7.0f);
+                    grnTable[3] = ((5 * grnTable[0] + 2 * grnTable[1]) / 7.0f);
+                    grnTable[4] = ((4 * grnTable[0] + 3 * grnTable[1]) / 7.0f);
+                    grnTable[5] = ((3 * grnTable[0] + 4 * grnTable[1]) / 7.0f);
+                    grnTable[6] = ((2 * grnTable[0] + 5 * grnTable[1]) / 7.0f);
+                    grnTable[7] = ((1 * grnTable[0] + 6 * grnTable[1]) / 7.0f);
+                }
+                else
+                {
+                    grnTable[2] = ((4 * grnTable[0] + 1 * grnTable[1]) / 5.0f);
+                    grnTable[3] = ((3 * grnTable[0] + 2 * grnTable[1]) / 5.0f);
+                    grnTable[4] = ((2 * grnTable[0] + 3 * grnTable[1]) / 5.0f);
+                    grnTable[5] = ((1 * grnTable[0] + 4 * grnTable[1]) / 5.0f);
+                    grnTable[6] = -1;
+                    grnTable[7] = 1;
+                }
+                int chunkNum = i / 16;
+                int xPos = chunkNum % chunks;
+                int yPos = (chunkNum - xPos) / chunks;
+                int sizeh = (height < 4) ? height : 4;
+                int sizew = (width < 4) ? width : 4;
+                for (int j = 0; j < sizeh; j++)
+                {
+                    for (int k = 0; k < sizew; k++)
+                    {
+                        RGBAColor color;
+
+                        float x = redTable[rIndices[(j * sizeh) + k]];
+                        float y = grnTable[gIndices[(j * sizeh) + k]];
+                        float z = (float)Math.Sqrt(Math.Max(0f, Math.Min(1f, (1f - (x * x)) - (y * y))));
+                        color.R = (byte)((x + 1f) / 2f * 255f);
+                        color.G = (byte)((y + 1f) / 2f * 255f);
+                        color.B = (byte)((z + 1f) / 2f * 255f);
+                        color.A = 0xFF;
+
+                        temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
+                        buffer[temp] = (byte)color.B;
+                        buffer[temp + 1] = swapRG ? (byte)color.R : (byte)color.G;
+                        buffer[temp + 2] = swapRG ? (byte)color.G : (byte)color.R;
+                        buffer[temp + 3] = (byte)color.A;
+                    }
+                }
+            }
+
+            return buffer;
+        }
+
+        private static float DenormalizeSigned(sbyte value)
+        {
+            if (value == sbyte.MinValue)
+                return -1.0f;
+            else
+                return value / (float)sbyte.MaxValue;
+        }
+
         // TODO: fix/refactor
-        private static byte[] DecodeDxn(byte[] data, int width, int height)
+        public static byte[] DecodeDxn(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 4];
             int chunks = width / 4;
