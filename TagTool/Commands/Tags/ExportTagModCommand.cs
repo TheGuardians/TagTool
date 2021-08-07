@@ -494,6 +494,11 @@ namespace TagTool.Commands.Tags
                         }
                     }
                     break;
+                case StringId stringId:
+                    {
+                        writer.WriteLine($"SetField {fieldName} {Cache.StringTable.GetString(stringId)}");
+                    }
+                    break;
                 default:
                     var definitions = new TagDefinitionsGen3();
                     string fieldValue = $"{data}";
