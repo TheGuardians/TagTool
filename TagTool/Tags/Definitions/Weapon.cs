@@ -7,10 +7,11 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x354, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x358, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x384, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline449175)]
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x354, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x358, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x384, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline449175, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x50C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class Weapon : Item
     {
         public WeaponFlags WeaponFlags;
@@ -165,10 +166,10 @@ namespace TagTool.Tags.Definitions
         public float HammerAgePerUse;
         public uint UnknownSwordAgePerUse;
         public RealVector3d FirstPersonWeaponOffset;
-
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public RealVector3d CenteredFirstPersonWeaponOffset;
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public List<FirstPersonOffsetBlock> NewFirstPersonWeaponOffsets;
-
         public RealVector2d FirstPersonScopeSize;
         public Bounds<float> CameraPitchBounds3p;
         public float ZoomTransitionTime;

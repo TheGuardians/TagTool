@@ -4,8 +4,9 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x170, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
 	{
         public short IncTextUpdatePeriod;
@@ -16,7 +17,8 @@ namespace TagTool.Tags.Definitions
         public CachedTag GlobalStrings;
         public CachedTag DamageTypeStrings;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
         public CachedTag UnknownStrings;
 
         public CachedTag MainMenuMusic;
