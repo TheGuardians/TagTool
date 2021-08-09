@@ -388,6 +388,7 @@ namespace TagTool.Shaders.ShaderMatching
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
                         switch ($"{methodName}\\{optionName}")
                         {
+                            // Reach
                             case @"lighting\per_pixel_smooth":
                             case @"lighting\smoke_lighting":
                                 optionName = "per_pixel_ravi_order_3";
@@ -404,6 +405,9 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                             case @"albedo\patchy_emblem":
                                 optionName = "emblem_change_color";
+                                break;
+                            case @"misc\default":
+                                optionName = "first_person_sometimes";
                                 break;
                             // MCC rmsh //
                             case @"albedo\chameleon_albedo_masked":
