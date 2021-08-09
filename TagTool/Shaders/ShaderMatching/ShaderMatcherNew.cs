@@ -396,8 +396,10 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "specular_mask_from_texture";
                                 break;
                             case @"self_illumination\change_color":
+                                optionName = "self_illum_times_diffuse";
+                                break;
                             case @"self_illumination\change_color_detail":
-                                optionName = "simple_four_change_color";
+                                optionName = "illum_detail";
                                 break;
                             case @"misc\default":
                                 optionName = "first_person_sometimes";
