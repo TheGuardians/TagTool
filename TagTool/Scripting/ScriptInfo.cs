@@ -152,9 +152,9 @@ namespace TagTool.Scripting
             [HsType.HaloOnlineValue.SoundBudgetReference] = 4
         };
 
-        public static Dictionary<CacheVersion, Dictionary<int, string>> ValueTypes { get; } = new Dictionary<CacheVersion, Dictionary<int, string>>
+        public static Dictionary<(CacheVersion, CachePlatform), Dictionary<int, string>> ValueTypes { get; } = new Dictionary<(CacheVersion, CachePlatform), Dictionary<int, string>>
         {
-            [CacheVersion.Halo3Retail] = new Dictionary<int, string>
+            [(CacheVersion.Halo3Retail, CachePlatform.Original)] = new Dictionary<int, string>
             {
                 [0x00] = "unparsed",
                 [0x01] = "special_form",
@@ -240,7 +240,7 @@ namespace TagTool.Scripting
                 [0x51] = "looping_sound_budget_reference",
                 [0x52] = "sound_budget_reference"
             },
-            [CacheVersion.Halo3ODST] = new Dictionary<int, string>
+            [(CacheVersion.Halo3ODST, CachePlatform.Original)] = new Dictionary<int, string>
             {
                 [0x00] = "unparsed",
                 [0x01] = "special_form",
@@ -328,7 +328,7 @@ namespace TagTool.Scripting
                 [0x53] = "looping_sound_budget_reference",
                 [0x54] = "sound_budget_reference"
             },
-            [CacheVersion.HaloOnlineED] = new Dictionary<int, string>
+            [(CacheVersion.HaloOnlineED, CachePlatform.Original)] = new Dictionary<int, string>
             {
                 [0x00] = "unparsed",
                 [0x01] = "special_form",
@@ -417,9 +417,9 @@ namespace TagTool.Scripting
             }
         };
 
-        public static Dictionary<CacheVersion, Dictionary<int, string>> Globals = new Dictionary<CacheVersion, Dictionary<int, string>>
+        public static Dictionary<(CacheVersion, CachePlatform), Dictionary<int, string>> Globals = new Dictionary<(CacheVersion, CachePlatform), Dictionary<int, string>>
         {
-            [CacheVersion.Halo3Retail] = new Dictionary<int, string>
+            [(CacheVersion.Halo3Retail, CachePlatform.Original)] = new Dictionary<int, string>
             {
                 [0x28] = "game_speed",
                 [0xA3] = "render_lightmap_shadows",
@@ -457,7 +457,7 @@ namespace TagTool.Scripting
                 [0x401] = "cinematic_letterbox_style",
                 [0x413] = "global_playtest_mode"
             },
-            [CacheVersion.Halo3ODST] = new Dictionary<int, string>
+            [(CacheVersion.Halo3ODST, CachePlatform.Original)] = new Dictionary<int, string>
             {
                 [0x28] = "game_speed",
                 [0xB8] = "render_lightmap_shadows",
@@ -496,7 +496,7 @@ namespace TagTool.Scripting
                 [0x444] = "global_playtest_mode",
                 [0x522] = "survival_performance_mode"
             },
-            [CacheVersion.HaloOnlineED] = new Dictionary<int, string>
+            [(CacheVersion.HaloOnlineED, CachePlatform.Original)] = new Dictionary<int, string>
             {
                 [0x2A] = "game_speed",
                 [0xBE] = "render_lightmap_shadows",
@@ -537,9 +537,9 @@ namespace TagTool.Scripting
             }
         };
 
-        public static Dictionary<CacheVersion, Dictionary<int, ScriptInfo>> Scripts { get; } = new Dictionary<CacheVersion, Dictionary<int, ScriptInfo>>
+        public static Dictionary<(CacheVersion, CachePlatform), Dictionary<int, ScriptInfo>> Scripts { get; } = new Dictionary<(CacheVersion, CachePlatform), Dictionary<int, ScriptInfo>>
         {
-            [CacheVersion.Halo3Retail] = new Dictionary<int, ScriptInfo>
+            [(CacheVersion.Halo3Retail, CachePlatform.Original)] = new Dictionary<int, ScriptInfo>
             {
                 [0x000] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin"),
                 [0x001] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin_random"),
@@ -4949,7 +4949,7 @@ namespace TagTool.Scripting
                 [0x5B3] = new ScriptInfo(HsType.HaloOnlineValue.Void, "stop_bink_movie"),
                 [0x5B4] = new ScriptInfo(HsType.HaloOnlineValue.Void, "play_credits_unskippable")
             },
-            [CacheVersion.Halo3ODST] = new Dictionary<int, ScriptInfo>
+            [(CacheVersion.Halo3ODST, CachePlatform.Original)] = new Dictionary<int, ScriptInfo>
             {
                 [0x000] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin"),
                 [0x001] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin_random"),
@@ -9925,7 +9925,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
                 }
             },
-            [CacheVersion.HaloOnlineED] = new Dictionary<int, ScriptInfo>
+            [(CacheVersion.HaloOnlineED, CachePlatform.Original)] = new Dictionary<int, ScriptInfo>
             {
                 [0x000] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin"),
                 [0x001] = new ScriptInfo(HsType.HaloOnlineValue.Passthrough, "begin_random"),
@@ -14795,9 +14795,9 @@ namespace TagTool.Scripting
         static ScriptInfo()
         {
             // TODO: cleanup script versioning
-            ValueTypes[CacheVersion.HaloOnline106708] = ValueTypes[CacheVersion.HaloOnlineED];
-            Globals[CacheVersion.HaloOnline106708] = Globals[CacheVersion.HaloOnlineED];
-            Scripts[CacheVersion.HaloOnline106708] = Scripts[CacheVersion.HaloOnlineED];
+            ValueTypes[(CacheVersion.HaloOnline106708, CachePlatform.Original)] = ValueTypes[(CacheVersion.HaloOnlineED, CachePlatform.Original)];
+            Globals[(CacheVersion.HaloOnline106708, CachePlatform.Original)] = Globals[(CacheVersion.HaloOnlineED, CachePlatform.Original)];
+            Scripts[(CacheVersion.HaloOnline106708, CachePlatform.Original)] = Scripts[(CacheVersion.HaloOnlineED, CachePlatform.Original)];
         }
     }
 }

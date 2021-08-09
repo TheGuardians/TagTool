@@ -203,11 +203,11 @@ namespace TagTool.Commands.Scenarios
 
             string opcodeName = "";
 
-            if (ScriptExpressionIsValue(Definition.ScriptExpressions[index]) && ScriptInfo.ValueTypes[Cache.Version].ContainsKey(Definition.ScriptExpressions[index].Opcode))
-                opcodeName = $"{ScriptInfo.ValueTypes[Cache.Version][Definition.ScriptExpressions[index].Opcode]},value";
+            if (ScriptExpressionIsValue(Definition.ScriptExpressions[index]) && ScriptInfo.ValueTypes[(Cache.Version, Cache.Platform)].ContainsKey(Definition.ScriptExpressions[index].Opcode))
+                opcodeName = $"{ScriptInfo.ValueTypes[(Cache.Version, Cache.Platform)][Definition.ScriptExpressions[index].Opcode]},value";
 
-            else if (ScriptInfo.Scripts[Cache.Version].ContainsKey(Definition.ScriptExpressions[index].Opcode))
-                opcodeName = ScriptInfo.Scripts[Cache.Version][Definition.ScriptExpressions[index].Opcode].Name;
+            else if (ScriptInfo.Scripts[(Cache.Version, Cache.Platform)].ContainsKey(Definition.ScriptExpressions[index].Opcode))
+                opcodeName = ScriptInfo.Scripts[(Cache.Version, Cache.Platform)][Definition.ScriptExpressions[index].Opcode].Name;
 
             if ((Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.ScriptReference) || (index > 0 && Definition.ScriptExpressions[index - 1].Flags == HsSyntaxNodeFlags.ScriptReference))
                 opcodeName = $"call {Definition.Scripts[Definition.ScriptExpressions[index].Opcode].ScriptName}";

@@ -757,15 +757,15 @@ namespace TagTool.Commands.Porting
             }
 
             // Some script expressions use opcode as a script reference. Only continue if it is a reference
-            if (!ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
+            if (!ScriptInfo.ValueTypes[(BlamCache.Version, BlamCache.Platform)].ContainsKey(expr.Opcode))
             {
                 new TagToolError(CommandError.CustomError, $"not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
                 return;
             }
 
-            var blamValueTypeName = ScriptInfo.ValueTypes[BlamCache.Version][expr.Opcode];
+            var blamValueTypeName = ScriptInfo.ValueTypes[(BlamCache.Version, BlamCache.Platform)][expr.Opcode];
 
-            foreach (var valueType in ScriptInfo.ValueTypes[CacheContext.Version])
+            foreach (var valueType in ScriptInfo.ValueTypes[(CacheContext.Version, CacheContext.Platform)])
             {
                 if (valueType.Value == blamValueTypeName)
                 {
@@ -809,17 +809,17 @@ namespace TagTool.Commands.Porting
                     return;
             }
 
-            if (!ScriptInfo.Scripts[BlamCache.Version].ContainsKey(expr.Opcode))
+            if (!ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)].ContainsKey(expr.Opcode))
             {
                 new TagToolError(CommandError.CustomError, $"not in {BlamCache.Version} opcode table: 0x{expr.Opcode:X3}. (ConvertScriptExpressionOpcode)");
                 return;
             }
 
-            var blamScript = ScriptInfo.Scripts[BlamCache.Version][expr.Opcode];
+            var blamScript = ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)][expr.Opcode];
 
             bool match;
 
-            foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
+            foreach (var entry in ScriptInfo.Scripts[(CacheContext.Version, CacheContext.Platform)])
             {
                 var newOpcode = entry.Key;
                 var newScript = entry.Value;
@@ -852,7 +852,7 @@ namespace TagTool.Commands.Porting
             // If no match was found, the opcode is currently unsupported.
             //
 
-            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
+            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
 
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
@@ -968,8 +968,8 @@ namespace TagTool.Commands.Porting
                 if (expr.Data[2] == 0xFF && expr.Data[3] == 0xFF)
                 {
                     var opcode = BitConverter.ToUInt16(expr.Data, 0) & ~0x8000;
-                    var name = ScriptInfo.Globals[BlamCache.Version][opcode];
-                    opcode = ScriptInfo.Globals[CacheContext.Version].First(p => p.Value == name).Key | 0x8000;
+                    var name = ScriptInfo.Globals[(BlamCache.Version, BlamCache.Platform)][opcode];
+                    opcode = ScriptInfo.Globals[(CacheContext.Version, CacheContext.Platform)].First(p => p.Value == name).Key | 0x8000;
                     var bytes = BitConverter.GetBytes(opcode);
                     expr.Data[0] = bytes[0];
                     expr.Data[1] = bytes[1];
