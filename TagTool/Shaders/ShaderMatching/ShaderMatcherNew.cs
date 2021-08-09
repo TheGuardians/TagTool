@@ -388,7 +388,25 @@ namespace TagTool.Shaders.ShaderMatching
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
                         switch ($"{methodName}\\{optionName}")
                         {
-                            // Reach
+                            // Reach rmsh //
+                            case @"albedo\patchy_emblem":
+                                optionName = "emblem_change_color";
+                                break;
+                            case @"specular_mask_mult_diffuse":
+                                optionName = "specular_mask_from_texture";
+                                break;
+                            case @"self_illumination\change_color":
+                            case @"self_illumination\change_color_detail":
+                                optionName = "simple_four_change_color";
+                                break;
+                            case @"misc\default":
+                                optionName = "first_person_sometimes";
+                                break;
+                            // Reach rmhg //
+                            case @"self_illumination\palettized_depth_fade":
+                                optionName = "palettized_plasma";
+                                break;
+                            // Reach prt3 //
                             case @"lighting\per_pixel_smooth":
                             case @"lighting\smoke_lighting":
                                 optionName = "per_pixel_ravi_order_3";
@@ -399,15 +417,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"depth_fade\low_res":
                             case @"depth_fade\palette_shift":
                                 optionName = "on";
-                                break;
-                            case @"self_illumination\palettized_depth_fade":
-                                optionName = "palettized_plasma";
-                                break;
-                            case @"albedo\patchy_emblem":
-                                optionName = "emblem_change_color";
-                                break;
-                            case @"misc\default":
-                                optionName = "first_person_sometimes";
                                 break;
                             // MCC rmsh //
                             case @"albedo\chameleon_albedo_masked":
