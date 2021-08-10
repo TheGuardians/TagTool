@@ -118,7 +118,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case PlatformUnsignedValue _:
                     return data;
                 default:
-                    Console.WriteLine($"WARNING: Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");
+                    new TagToolWarning($"Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");
                     break;
             }
 

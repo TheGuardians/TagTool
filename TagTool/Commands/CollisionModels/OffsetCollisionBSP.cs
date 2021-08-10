@@ -239,7 +239,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
                 if (!verify_split_parameters(parameters))
                 {
                     if(debug)
-                        Console.WriteLine($"### WARNING: Plane {plane_index} new offset does not match original!");
+                        new TagToolWarning($"Plane {plane_index} new offset does not match original!");
                     planewarnings++;
                 }
             }
@@ -504,7 +504,7 @@ namespace TagTool.Commands.CollisionModels.OffsetCollisonBsp
             if (!verify_split_parameters(parameters))
             {
                 if (debug)
-                    Console.WriteLine($"### WARNING: Bsp2dNode {node_index} new offset does not match original!");
+                    new TagToolWarning($"Bsp2dNode {node_index} new offset does not match original!");
                 planewarnings++;
             }
 

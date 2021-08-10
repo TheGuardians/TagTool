@@ -553,8 +553,8 @@ namespace TagTool.Commands.CollisionModels
                     }
                     else
                     {
-                        Console.WriteLine($"###WARNING: This mesh contains open edges which may lead to collision errors!" +
-                            $" You have enabled the 'force' argument so import will proceed regardless!");
+                        new TagToolWarning("This mesh contains open edges which may lead to collision errors!" +
+                            " You have enabled the 'force' argument so import will proceed regardless!");
                         return true;
                     }
                 }

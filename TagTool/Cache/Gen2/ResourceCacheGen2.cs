@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
@@ -54,7 +54,7 @@ namespace TagTool.Cache.Gen2
                     sourceCache = Cache.ResourceCacheReferences[cacheName];
                 else
                 {
-                    Console.WriteLine($"Warning: failed to find cache for resource 0x{resourceAddress:X8}");
+                    new TagToolWarning($"Failed to find cache for resource 0x{resourceAddress:X8}");
                     return null;
                 }
             }

@@ -187,7 +187,7 @@ namespace TagTool.Commands.Tags
 
             if (!outFile.Directory.Exists)
             {
-                Console.Write("WARNING: Directory does not exist. Create it? [y/n]: ");
+                new TagToolWarning($"Directory does not exist. Create it? [y/n]: ");
 
                 switch (Console.ReadLine().ToLower())
                 {

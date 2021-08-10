@@ -163,7 +163,7 @@ namespace TagTool.Commands.Shaders
                 }
 
                 if (textureConstant.Bitmap == null)
-                    Console.WriteLine("WARNING: Texture constant has no default bitmap. This needs to be set or this shader can become corrupted ingame");
+                    new TagToolWarning("Texture constant has no default bitmap. This needs to be set or this shader can become corrupted ingame");
 
                 textureConstants.Add(textureConstant);
             }

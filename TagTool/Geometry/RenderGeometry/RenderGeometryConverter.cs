@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Commands.Porting;
+using TagTool.Commands.Common;
 using TagTool.Serialization;
 using TagTool.Havok;
 
@@ -400,7 +400,7 @@ namespace TagTool.Geometry
 
                     if(part.IndexCountNew > 0xFFFF || part.FirstIndexNew > 0xFFFF)
                     {
-                        Console.WriteLine("Warning: downgrade from uint to ushort for index count/first index in Mesh.Part exceeded ushort range. Unexpected behavior.");
+                        new TagToolWarning("Downgrade from uint to ushort for index count/first index in Mesh.Part exceeded ushort range. Unexpected behavior.");
                     }
                 }
 
@@ -411,7 +411,7 @@ namespace TagTool.Geometry
 
                     if (subPart.FirstIndex32 > 0xFFFF || subPart.IndexCount32 > 0xFFFF)
                     {
-                        Console.WriteLine("Warning: downgrade from uint to ushort for index count/first index in Mesh.SubPart exceeded ushort range. Unexpected behavior.");
+                        new TagToolWarning("Downgrade from uint to ushort for index count/first index in Mesh.SubPart exceeded ushort range. Unexpected behavior.");
                     }
                 }
             }

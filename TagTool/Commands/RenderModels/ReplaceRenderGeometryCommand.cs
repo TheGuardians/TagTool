@@ -154,7 +154,7 @@ namespace TagTool.Commands.RenderModels
                             }
 							catch
 							{
-								Console.WriteLine($"WARNING: Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
+                                new TagToolWarning($"Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
 								uv = new Vector3D();
 							}
 

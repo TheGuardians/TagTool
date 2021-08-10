@@ -53,7 +53,7 @@ namespace TagTool.Commands.RenderMethods
             var properties = Definition.ShaderProperties[0];
 
             if (functionIndex >= properties.Functions.Count)
-                Console.WriteLine($"WARNING: Function index \"{functionIndex}\" is invalid.");
+                new TagToolWarning($"Function index \"{functionIndex}\" is invalid.");
 
             using (var stream = Cache.OpenCacheRead())
             {
@@ -97,7 +97,7 @@ namespace TagTool.Commands.RenderMethods
                     functionType = properties.Functions[functionIndex].Type;
 
                 if (ShaderFunctionHelper.AnimatedParameterExists(animatedParameters, parameterName, parameterType, functionType))
-                    Console.WriteLine("WARNING: The specified parameter is already being animated.");
+                    new TagToolWarning("The specified parameter is already being animated.");
 
                 ShaderFunctionHelper.AnimatedParameter newParameter = new ShaderFunctionHelper.AnimatedParameter
                 {

@@ -434,7 +434,7 @@ namespace TagTool.Commands.Porting
                 foreach (var animation in definition.Animations)
                 {
                     if (animation.AnimationDataBlock.Count > 1)
-                        Console.WriteLine("###WARNING: Reach animation has >1 animation data block, whereas HO only supports 1");
+                        new TagToolWarning("Reach animation has >1 animation data block, whereas HO only supports 1");
                     animation.AnimationData = animation.AnimationDataBlock[0];
 
                     if (animation.AnimationData.AnimationTypeReach == ModelAnimationGraph.FrameTypeReach.None)
@@ -470,7 +470,7 @@ namespace TagTool.Commands.Porting
                         foreach (var weaponType in weaponClass.WeaponType)
                         {
                             if (weaponType.AnimationSetsReach.Count > 1)
-                                Console.WriteLine("###WARNING: Reach animation has >1 weapon type sets block, whereas HO only supports 1");
+                                new TagToolWarning("Reach animation has >1 weapon type sets block, whereas HO only supports 1");
                             weaponType.Set = weaponType.AnimationSetsReach[0];
                             //manually convert stringids from copied reach data
                             foreach(var action in weaponType.Set.Actions)

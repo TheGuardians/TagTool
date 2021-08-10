@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using TagTool.Cache;
-using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
@@ -73,7 +73,7 @@ namespace TagTool.Commands.Porting.Gen2
                             flags.Halo2 &= ~(PhysicsModel.PhantomTypeFlags.Halo2Bits)flag;
                 }
                 if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
-                    Console.WriteLine($"###WARNING: Some phantom type flags failed to convert!");
+                    new TagToolWarning($"Some phantom type flags failed to convert!");
 
                 physicsModel.PhantomTypes.Add(newPhantomType);
             }
@@ -368,7 +368,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             //throw a warning if there are mopps (rare, maybe never?), because they can't be converted
             if (gen2PhysicsModel.Mopps.Count > 0)
-                Console.WriteLine("###WARNING: Cannot convert Halo 2 mopps!");
+                new TagToolWarning("Cannot convert Halo 2 mopps!");
 
             return physicsModel;
         }

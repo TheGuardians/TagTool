@@ -147,7 +147,7 @@ namespace TagTool.Commands.Scenarios
                     return type.HaloOnline.ToString();
 
                 default:
-                    Console.WriteLine($"WARNING: No HsType found for cache \"{version}\". Defaulting to HaloOnline");
+                    new TagToolWarning($"No HsType found for cache \"{version}\". Defaulting to HaloOnline");
                     return type.HaloOnline.ToString();
             }
         }
@@ -167,7 +167,7 @@ namespace TagTool.Commands.Scenarios
                     return (int)type.HaloOnline;
 
                 default:
-                    Console.WriteLine($"WARNING: No HsType found for cache \"{version}\". Defaulting to HaloOnline");
+                    new TagToolWarning($"No HsType found for cache \"{version}\". Defaulting to HaloOnline");
                     return (int)type.HaloOnline;
             }
         }

@@ -99,7 +99,7 @@ namespace TagTool.Commands.Shaders
 
                     if (glvsTag == null || glpsTag == null)
                     {
-                        Console.WriteLine($"WARNING: Cache \"{cache.DisplayName}\" has invalid shader type \"{shaderType}\"");
+                        new TagToolWarning($"Cache \"{cache.DisplayName}\" has invalid shader type \"{shaderType}\"");
                         continue;
                     }
 

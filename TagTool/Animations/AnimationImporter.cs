@@ -201,7 +201,7 @@ namespace TagTool.Animations
                     maxtranslation.Y * 100.0f < 39.37f &&
                     maxtranslation.Z * 100.0f < 39.37f)
                 {
-                    Console.WriteLine("###WARNING: Maximum translation values were very small! (< 1 unit). If your animation does not appear correctly, try using the 'scalefix' argument!");
+                    new TagToolWarning("Maximum translation values were very small! (< 1 unit). If your animation does not appear correctly, try using the 'scalefix' argument!");
                 }
             }
             return true;

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
@@ -172,9 +173,9 @@ namespace TagTool.Cache
                 if(tag == null || tag.Name == null)
                 {
                     if (tag != null)
-                        Console.WriteLine($"Tag: 0x{tag.Index:X4} has no name, will crash ingame.");
+                        new TagToolWarning($"Tag: 0x{tag.Index:X4} has no name, will crash ingame!");
                     else
-                        Console.WriteLine($"Warning: null tag detected.");
+                        new TagToolWarning($"null tag detected.");
 
                     return false;
                 }

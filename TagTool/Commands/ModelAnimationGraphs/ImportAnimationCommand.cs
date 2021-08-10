@@ -107,11 +107,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                     case ".JMT":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw;
-                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
+                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     case ".JMZ":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw;
-                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
+                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
                         new TagToolError(CommandError.CustomError, $"Filetype {file_extension.ToUpper()} not recognized!");

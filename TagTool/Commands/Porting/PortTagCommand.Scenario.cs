@@ -324,7 +324,7 @@ namespace TagTool.Commands.Porting
                             {
                                 if (entry1.Item1 >= pathfindingBsps.Count || entry1.Item2 >= pathfindingBsps[entry1.Item1].PathfindingData[0].Sectors.Count)
                                 {
-                                    Console.WriteLine("WARNING: Invalid zone area sector data!");
+                                    new TagToolWarning("Invalid zone area sector data!");
                                     continue;
                                 }
 
@@ -852,7 +852,7 @@ namespace TagTool.Commands.Porting
             // If no match was found, the opcode is currently unsupported.
             //
 
-            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
+            new TagToolWarning($"No equivalent script op was found for '{ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
 
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
@@ -1245,7 +1245,7 @@ namespace TagTool.Commands.Porting
 
                         if(unitInstance.Index == -1)
                         {
-                            Console.WriteLine($"Warning: unit tag reference invalid in script in UpdateAiTestSeat! squads index {squadIndex} fireteam index {fireTeamIndex}");
+                            new TagToolWarning($"Unit tag reference invalid in script in UpdateAiTestSeat! squads index {squadIndex} fireteam index {fireTeamIndex}");
                             return;
                         }
 
@@ -1258,7 +1258,7 @@ namespace TagTool.Commands.Porting
 
                         if (unitDefinition.Model.Index == -1)
                         {
-                            Console.WriteLine($"Warning: unit model tag reference invalid in UpdateAiTestSeat! Unit {unitInstance.Name}");
+                            new TagToolWarning($"Unit model tag reference invalid in UpdateAiTestSeat! Unit {unitInstance.Name}");
                             return;
                         }
 

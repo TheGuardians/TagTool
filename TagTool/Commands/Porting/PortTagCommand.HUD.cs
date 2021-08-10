@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 
@@ -377,7 +378,7 @@ namespace TagTool.Commands.Porting
                 }
                 catch
                 {
-                    Console.WriteLine("WARNING: Motion sensor bitmap 'ui\\chud\\bitmaps\\sensor_blips' not found.");
+                    new TagToolWarning($"Motion sensor bitmap 'ui\\chud\\bitmaps\\sensor_blips' not found.");
                 }
             }
 

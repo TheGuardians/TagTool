@@ -260,7 +260,7 @@ namespace TagTool.Commands.Porting
                     result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
 
                     if (result == null)
-                        Console.WriteLine("WARNING: null tag allocated in cache");
+                    new TagToolWarning($"null tag allocated in cache");
 
                     Flags = oldFlags;
                 }
@@ -1131,7 +1131,7 @@ namespace TagTool.Commands.Porting
                     return data;
 
                 default:
-					Console.WriteLine($"WARNING: Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");
+                    new TagToolWarning($"Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");
 					break;
 			}
 
@@ -1485,7 +1485,7 @@ namespace TagTool.Commands.Porting
                 case CacheVersion.Halo2Xbox:
                     if (flags.Halo2.ToString().Contains("Unknown"))
                     {
-                        Console.WriteLine($"WARNING: Disabling unknown phantom type flags ({flags.Halo2.ToString()})");
+                        new TagToolWarning($"Disabling unknown phantom type flags ({flags.Halo2.ToString()})");
                         Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
 
                         foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo2Bits)))
@@ -1499,7 +1499,7 @@ namespace TagTool.Commands.Porting
                 case CacheVersion.Halo3Retail:
                     if (flags.Halo3Retail.ToString().Contains("Unknown"))
                     {
-                        Console.WriteLine($"WARNING: Found unknown phantom type flags ({flags.Halo3Retail.ToString()})");
+                        new TagToolWarning($"Found unknown phantom type flags ({flags.Halo3Retail.ToString()})");
                         Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
                         /*
                         foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)))
@@ -1582,7 +1582,7 @@ namespace TagTool.Commands.Porting
                     }
 
                     if (!wasSet)
-                        Console.WriteLine($"WARNING: Vehicle flag not found in gen3: {gen2}");
+                        new TagToolWarning($"Vehicle flag not found in gen3: {gen2}");
                 }
 
                 if (!flags.Gen2.HasFlag(Vehicle.VehicleFlagBits.Gen2Bits.KillsRidersAtTerminalVelocity))

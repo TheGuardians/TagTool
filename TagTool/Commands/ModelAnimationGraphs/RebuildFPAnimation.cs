@@ -122,11 +122,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                     case ".JMT":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw;
-                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
+                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     case ".JMZ":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw;
-                        Console.WriteLine("###WARNING: Advanced Movement data not currently supported, animation may not display properly!");
+                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
                         new TagToolError(CommandError.CustomError, $"Filetype {file_extension.ToUpper()} not recognized!");
@@ -151,7 +151,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
                 if(matchingindex == -1)
                 {
-                    Console.WriteLine($"###WARNING: No existing animation found for animation {file_name}!");
+                    new TagToolWarning($"No existing animation found for animation {file_name}!");
                     continue;
                 }
 
@@ -324,7 +324,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 int matching_index = importer.AnimationNodes.FindIndex(x => x.Name.Equals(nodeName));
                 if (matching_index == -1)
                 {
-                    Console.WriteLine($"###WARNING: No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
+                    new TagToolWarning($"No node matching '{nodeName}' found in imported file! Will proceed with blank data for missing node");
                     newAnimationNodes.Add(new AnimationImporter.AnimationNode() {Name = nodeName, FirstChildNode = skellynode.FirstChildNodeIndex, NextSiblingNode = skellynode.NextSiblingNodeIndex, ParentNode = skellynode.ParentNodeIndex});
                 }
                 else

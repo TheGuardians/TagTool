@@ -296,7 +296,7 @@ namespace TagTool.Cache
                 serializer.Serialize(dataContext, Header);
 
                 if (packageStream.Length > uint.MaxValue)
-                    Console.WriteLine($"WARNING: Mod package size exceeded 0x{uint.MaxValue.ToString("X8")} bytes, it will fail to load.");
+                    new TagToolWarning($"Mod package size exceeded 0x{uint.MaxValue.ToString("X8")} bytes, it will fail to load.");
 
             }
         }

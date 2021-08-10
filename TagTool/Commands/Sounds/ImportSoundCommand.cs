@@ -100,7 +100,7 @@ namespace TagTool.Commands.Sounds
             int maxPermutationSampleCount = 0;
 
             if (pitchRangeCount <= 0)
-                Console.WriteLine("WARNING: Pitch range count must be greater than 0! Proceeding with pitch range count of 1.");
+                new TagToolWarning("Pitch range count cannot be less than 1! Proceeding with SingleLayer import.");
             if (pitchRangeCount <= 1)
                 Definition.ImportType = ImportType.SingleLayer;
             else
@@ -371,7 +371,7 @@ namespace TagTool.Commands.Sounds
                 case 6:
                     return EncodingValue._51Surround;
                 default:
-                    Console.WriteLine("WARNING:\tInvalid channel count, using stereo.");
+                    new TagToolWarning("Invalid channel count, using stereo.");
                     return EncodingValue.Stereo;
             }
         }
@@ -389,7 +389,7 @@ namespace TagTool.Commands.Sounds
                 case 6:
                     return EncodingValue._51Surround;
                 default:
-                    Console.WriteLine("WARNING:\tInvalid channel count, using stereo.");
+                    new TagToolWarning("Invalid channel count, using stereo.");
                     return EncodingValue.Stereo;
             }
         }
@@ -406,7 +406,7 @@ namespace TagTool.Commands.Sounds
                 case 2:
                     return SampleRate.SampleRateValue._32khz;
                 default:
-                    Console.WriteLine("WARNING:\tInvalid sample rate, using 44100 Hz");
+                    new TagToolWarning($"Invalid sample rate, using 44100 Hz");
                     return SampleRate.SampleRateValue._44khz;
             }
         }
@@ -422,7 +422,7 @@ namespace TagTool.Commands.Sounds
                 case 32000:
                     return SampleRate.SampleRateValue._32khz;
                 default:
-                    Console.WriteLine("WARNING:\tInvalid sample rate, using 44100 Hz");
+                    new TagToolWarning("Invalid sample rate, using 44100 Hz");
                     return SampleRate.SampleRateValue._44khz;
             }
         }

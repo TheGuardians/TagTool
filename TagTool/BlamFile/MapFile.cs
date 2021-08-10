@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -56,7 +57,7 @@ namespace TagTool.BlamFile
 
             if (!Header.IsValid())
             {
-                Console.WriteLine("Warning: invalid map file header or footer detected. Verify definition");
+                new TagToolWarning($"Invalid map file header or footer detected. Verify definition");
             }
 
             // temporary code until map file format cleanup

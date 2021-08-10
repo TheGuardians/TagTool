@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Shaders;
@@ -132,7 +133,7 @@ namespace TagTool.Serialization
                 {
                     if (b != 0)
                     {
-                        Console.WriteLine($"WARNING: non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name} = {b}");
+                        new TagToolWarning($"Non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name} = {b}");
                         break;
                     }
                 }
@@ -507,7 +508,7 @@ namespace TagTool.Serialization
             if (result != null && valueInfo != null && valueInfo.ValidTags != null)
             {
                 if(!valueInfo.ValidTags.Any(x => result.IsInGroup(x)))
-                    Console.WriteLine($"WARNING: Invalid group for tag reference: {result.Group.Tag}");
+                    new TagToolWarning($"Invalid group for tag reference: {result.Group.Tag}");
             }
 
             return result;

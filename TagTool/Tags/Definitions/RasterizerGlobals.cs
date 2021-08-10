@@ -106,7 +106,7 @@ namespace TagTool.Tags.Definitions
                         rasterizerDefaultBitmap = RasterizerDefaultBitmap.ripple_pattern;
                         break;
                     default:
-                        //Console.WriteLine("WARNING: Could not parse default bitmap, using default_white.");
+                        //new TagToolWarning("Could not parse default bitmap, using default_white.");
                         rasterizerDefaultBitmap = RasterizerDefaultBitmap.default_white;
                         return false;
                 }

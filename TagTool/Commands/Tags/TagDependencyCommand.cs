@@ -133,7 +133,7 @@ namespace TagTool.Commands.Tags
             
             foreach (var instance in tag.Dependencies)
                 if (instance < 0 || instance >= Cache.TagCache.Count)
-                    Console.WriteLine($"WARNING: dependency is a non-existant tag: 0x{instance:X4}");
+                    new TagToolWarning($"Dependency is a nonexistent tag: 0x{instance:X4}");
                     
             return true;
         }

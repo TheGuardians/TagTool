@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 using System.Collections.Generic;
@@ -422,7 +423,7 @@ namespace TagTool.Commands.Porting
 
                 if (basePixl.EntryPointShaders.Count <= entryPoint || baseGlps.EntryPoints.Count <= entryPoint)
                 {
-                    Console.WriteLine($"WARNING: Pixel entrypoint does not match up with external ({((EntryPoint)entryPoint).ToString()})");
+                    new TagToolWarning($"Pixel entrypoint does not match up with external ({((EntryPoint)entryPoint).ToString()})");
                     break;
                 }
 
@@ -522,7 +523,7 @@ namespace TagTool.Commands.Porting
                         continue;
                     if (baseGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex == -1)
                     {
-                        Console.WriteLine($"WARNING: Invalid vertex shader index \"{((TagTool.Geometry.VertexType)validVertexType).ToString()}, {((EntryPoint)i).ToString()}\"");
+                        new TagToolWarning($"Invalid vertex shader index \"{((TagTool.Geometry.VertexType)validVertexType).ToString()}, {((EntryPoint)i).ToString()}\"");
                         continue;
                     }
 
@@ -1024,7 +1025,7 @@ namespace TagTool.Commands.Porting
             {
                 if (!methodNames.Contains(parameter))
                 {
-                    Console.WriteLine($"WARNING: No type found for {type} parameter \"{parameter}\"");
+                    new TagToolWarning($"No type found for {type} parameter \"{parameter}\"");
 
                     optionBlock = new RenderMethodOption.OptionBlock();
                 }
@@ -1040,7 +1041,7 @@ namespace TagTool.Commands.Porting
                 // TODO: verify, very rarely some arg names show up
                 if (!methodNames.Contains(parameter))
                 {
-                    Console.WriteLine($"WARNING: No type found for {type} parameter \"{parameter}\"");
+                    new TagToolWarning($"No type found for {type} parameter \"{parameter}\"");
 
                     optionBlock = new RenderMethodOption.OptionBlock
                     {
