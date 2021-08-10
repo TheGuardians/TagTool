@@ -961,7 +961,8 @@ namespace TagTool.Commands.Porting
             }
 #endif
 
-            Array.Reverse(expr.Data, 0, dataSize);
+            if(!CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                Array.Reverse(expr.Data, 0, dataSize);
 
             if (expr.Flags == HsSyntaxNodeFlags.GlobalsReference)
             {
@@ -1028,7 +1029,13 @@ namespace TagTool.Commands.Porting
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
 
-            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0)));
+            uint tagIndex;
+            if (CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                tagIndex = BitConverter.ToUInt32(expr.Data, 0);
+            else
+                tagIndex = BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
+
+            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(tagIndex));
 
             if (tag == null)
                 return;
@@ -1038,14 +1045,19 @@ namespace TagTool.Commands.Porting
 
         public void ConvertScriptStringIdExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
-            int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
-            var value = BlamCache.StringTable.GetString(new StringId((uint)blamStringId));
+            uint blamStringId;
+            if (CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                blamStringId = BitConverter.ToUInt32(expr.Data, 0);
+            else
+                blamStringId =  BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
+
+            var value = BlamCache.StringTable.GetString(new StringId(blamStringId));
 
             if (value == null)
                 return;
 
             if (!CacheContext.StringTable.Contains(value))
-                ConvertStringId(new StringId((uint)blamStringId));
+                ConvertStringId(new StringId(blamStringId));
 
             var edStringId = CacheContext.StringTable.GetStringId(value);
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
@@ -1054,6 +1066,17 @@ namespace TagTool.Commands.Porting
         public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
         {
             // Return false to convert normally.
+
+            if (BlamCache.Platform == CachePlatform.MCC)
+            {
+                if(expr.Opcode == 0x2D3)
+                {
+                    expr.Opcode = 0x2F5; // player_action_test_jump
+                    return true;
+                }
+
+                return false;
+            }        
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
