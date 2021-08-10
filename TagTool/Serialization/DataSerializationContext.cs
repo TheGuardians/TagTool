@@ -15,21 +15,23 @@ namespace TagTool.Serialization
         public uint MainStructOffset;
         public int PointerOffset = 0x0;
         private const int DefaultBlockAlign = 4;
+        public static bool UseAlignment = true;
 
-        public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
+        public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory, bool useAlignment = true)
         {
             Reader = reader;
             Writer = writer;
             AddressType = addressType;
+            UseAlignment = useAlignment;
         }
 
-        public DataSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory) :
-            this(reader, null, addressType)
+        public DataSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory, bool useAlignment = true) :
+            this(reader, null, addressType, useAlignment)
         {
         }
 
-        public DataSerializationContext(EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory) :
-            this(null, writer, addressType)
+        public DataSerializationContext(EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory, bool useAlignment = true) :
+            this(null, writer, addressType, useAlignment)
         {
         }
 
@@ -110,10 +112,12 @@ namespace TagTool.Serialization
             public uint Finalize(Stream outStream)
             {
                 // Write the data out, aligning the offset and size
-                StreamUtil.Align(outStream, (int)_align);
+                if(UseAlignment)
+                    StreamUtil.Align(outStream, (int)_align);
                 var dataOffset = (uint)outStream.Position;
                 outStream.Write(Stream.GetBuffer(), 0, (int)Stream.Length);
-                StreamUtil.Align(outStream, DefaultBlockAlign);
+                if (UseAlignment)
+                    StreamUtil.Align(outStream, DefaultBlockAlign);
 
                 Writer.Close();
                 Stream = null;

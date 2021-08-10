@@ -76,7 +76,7 @@ namespace TagTool.Commands.Porting
                     using (var destStream = new MemoryStream())
                     using (var destWriter = new EndianWriter(destStream, CacheVersionDetection.IsLittleEndian(CacheContext.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
                     {
-                        var dataContext = new DataSerializationContext(sourceReader, destWriter);
+                        var dataContext = new DataSerializationContext(sourceReader, destWriter, CacheAddressType.Memory, false);
 
                         ModelAnimationTagResource.GroupMember.Codec codec;
                         ModelAnimationTagResource.GroupMember.FrameInfo frameInfo;
