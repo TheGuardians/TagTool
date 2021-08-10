@@ -32,6 +32,24 @@ namespace TagTool.Commands.Porting
                     rigidbody.ShapeIndex = rigidbody.ShapeIndex_Reach;
                     rigidbody.Mass = rigidbody.Mass_Reach;
                 }
+
+                phmo.Mopps = new List<CMoppBvTreeShape>();
+                foreach(var reachmopp in phmo.ReachMopps)
+                {
+                    phmo.Mopps.Add(new CMoppBvTreeShape
+                    {
+                        ReferencedObject = new HkpReferencedObject(),
+                        Child = new HkpSingleShapeContainer
+                        {
+                            Shape = new HavokShapeReference
+                            {
+                                Type = (BlamShapeType)reachmopp.ChildshapePointer.ShapeType,
+                                Index = reachmopp.ChildshapePointer.Shape
+                            }
+                        },
+                        Scale = reachmopp.Scale,
+                    });
+                }
             }
             return phmo;
         }

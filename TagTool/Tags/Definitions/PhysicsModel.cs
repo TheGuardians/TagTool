@@ -58,7 +58,12 @@ namespace TagTool.Tags.Definitions
 
         public List<List> Lists;
         public List<ListShape> ListShapes;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CMoppBvTreeShape> Mopps;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Gen4.PhysicsModel.MoppsBlockStruct> ReachMopps;
+
         public byte[] MoppData;
         public List<HingeConstraint> HingeConstraints;
         public List<RagdollConstraint> RagdollConstraints;
