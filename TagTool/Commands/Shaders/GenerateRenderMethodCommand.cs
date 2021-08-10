@@ -112,7 +112,7 @@ namespace TagTool.Commands.Shaders
                 (Cache as GameCacheHaloOnlineBase).SaveTagNames();
             }
 
-            Console.WriteLine($"Generated {rmGroup} tag \"{rmTag.Name}\"");
+            Console.WriteLine($"Generated {rmGroup} tag: {rmTag.Name}.{rmTag.Group}");
             return true;
         }
 

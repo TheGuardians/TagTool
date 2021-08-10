@@ -246,7 +246,7 @@ namespace TagTool.Shaders.ShaderMatching
 
             if (canGenerate && TryGenerateTemplate(tagName, sourceRmt2Desc, out CachedTag generatedRmt2))
             {
-                Console.WriteLine($"Generated rmt2 \"{generatedRmt2.Name}\"");
+                Console.WriteLine($"Generated rmt2: {generatedRmt2.Name}.{generatedRmt2.Group}");
                 return generatedRmt2;
             }
 
