@@ -38,5 +38,21 @@ namespace TagTool.Shaders
             None = 0,
             RequiresConstantTable = 1 << 0,
         }
+
+        public ShaderConstantTable GetConstantTable(CacheVersion version, CachePlatform platform)
+        {
+            if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, version) || platform == CachePlatform.MCC)
+                return PCConstantTable;
+            else
+                return XBoxConstantTable;
+        }
+
+        public byte[] GetBytecode(CacheVersion version, CachePlatform platform)
+        {
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, version) || platform == CachePlatform.MCC)
+                return PCShaderBytecode;
+            else
+                return XboxShaderBytecode;
+        }
     }
 }
