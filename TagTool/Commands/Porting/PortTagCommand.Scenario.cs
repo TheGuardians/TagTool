@@ -30,7 +30,6 @@ namespace TagTool.Commands.Porting
             //
 
             if (BlamCache.Version == CacheVersion.Halo3Retail &&
-                BlamCache.Platform != CachePlatform.MCC &&
                 scnr.MapType == ScenarioMapType.SinglePlayer &&
                 Flags.HasFlag(PortingFlags.Recursive))
             {
@@ -1069,13 +1068,74 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Platform == CachePlatform.MCC)
             {
-                if(expr.Opcode == 0x2D3)
+                switch (expr.Opcode)
                 {
-                    expr.Opcode = 0x2F5; // player_action_test_jump
-                    return true;
-                }
+                    case 0x0FA: // vehicle_test_seat_list
+                        expr.Opcode = 0x114;
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        {
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
+                        }
+                        return true;
 
-                return false;
+                    case 0x0FB: // vehicle_test_seat
+                        expr.Opcode = 0x115; // -> vehicle_test_seat_unit
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        {
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
+                        }
+                        return true;
+
+                    case 0x1B8: // campaign_metagame_award_primary_skull
+                        expr.Opcode = 0x1E5; // ^
+                        return true;
+
+                    case 0x1B9: //campaign_metagame_award_secondary_skull
+                        expr.Opcode = 0x1E6; // ^
+                        return true;
+
+                    case 0x2D3: // player_action_test_cinematic_skip
+                        expr.Opcode = 0x2F5; // player_action_test_jump
+                        return true;
+
+                    case 0x33D: // cinematic_object_get_unit
+                    case 0x33E: // cinematic_object_get_scenery
+                    case 0x33F: // cinematic_object_get_effect_scenery
+                        expr.Opcode = 0x391; // -> cinematic_object_get
+                        return true;
+                    case 0x34B: // cinematic_scripting_create_object
+                        expr.Opcode = 0x6A2;
+                        return true;
+                    case 0x34D: // cinematic_scripting_start_animation
+                        expr.Opcode = 0x6A1;
+                        return true;
+                    case 0x34E: // cinematic_scripting_destroy_object
+                        expr.Opcode = 0x6A6;
+                        return true;
+                    case 0x353: // cinematic_scripting_create_and_animate_object
+                        expr.Opcode = 0x6A3;
+                        return true;
+                    case 0x354: // cinematic_scripting_create_and_animate_cinematic_object
+                        expr.Opcode = 0x6A5;
+                        return true;
+                    case 0x355: // cinematic_scripting_create_and_animate_object_no_animation
+                        expr.Opcode = 0x6A4;
+                        return true;
+                    case 0x3CE: // chud_show_weapon_stats
+                        expr.Opcode = 0x423; // -> chud_show_crosshair
+                        return true;
+                    case 0x44E: // objectives_secondary_show
+                        expr.Opcode = 0x4AE; // -> objectives_show
+                        return true;
+                    case 0x450: // objectives_secondary_unavailable
+                        expr.Opcode = 0x4B2; // -> objectives_show
+                        return true;
+
+                    default:
+                        return false;
+                }
             }        
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
@@ -1220,19 +1280,28 @@ namespace TagTool.Commands.Porting
             var vehicleExpr = scnr.ScriptExpressions[exprIndex]; // <vehicle> parameter
             var seatMappingExpr = scnr.ScriptExpressions[vehicleExpr.NextExpressionHandle.Index]; // <string_id> parameter
 
-            var seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
+            StringId seatMappingStringId;
+            if(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data, 0));
+            else
+                seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
+
             var seatMappingString = BlamCache.StringTable.GetString(seatMappingStringId);
             var seatMappingIndex = (int)-1;
 
             if (vehicleExpr.Flags == HsSyntaxNodeFlags.Group &&
                 seatMappingStringId != StringId.Invalid)
             {
-                if (vehicleExpr.Opcode == 0x193) // ai_vehicle_get_from_starting_location
+                if (vehicleExpr.Opcode == (BlamCache.Platform == CachePlatform.MCC ? 0x194 : 0x193)) // ai_vehicle_get_from_starting_location
                 {
                     var expr3 = scnr.ScriptExpressions[++exprIndex]; // function name
                     var expr4 = scnr.ScriptExpressions[expr3.NextExpressionHandle.Index]; // <ai> parameter
 
-                    var value = BitConverter.ToUInt32(expr4.Data.Reverse().ToArray(), 0);
+                    uint value;
+                    if(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                        value = BitConverter.ToUInt32(expr4.Data.ToArray(), 0);
+                    else
+                        value = BitConverter.ToUInt32(expr4.Data.Reverse().ToArray(), 0);
 
                     if (value != uint.MaxValue)
                     {
