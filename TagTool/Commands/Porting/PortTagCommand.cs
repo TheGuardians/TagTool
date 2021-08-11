@@ -183,6 +183,14 @@ namespace TagTool.Commands.Porting
                         if (xmaData == null)
                             return false;
                     }
+                    else
+                    {
+                        if(sound.Resource.Gen3ResourceID == DatumHandle.None)
+                        {
+                            new TagToolWarning($"Invalid resource for sound {blamTag.Name}");
+                            return false;
+                        }
+                    }
                 }
                 else if (blamTag.Group.Tag == "bitm")
                 {
