@@ -106,7 +106,7 @@ namespace TagTool.Bitmaps
             { BitmapFormat.Dxn,           new BitmapFormatDefinition { FourCc = DDSFourCC.FromString("ATI2") } },
             { BitmapFormat.A16B16G16R16F, new BitmapFormatDefinition { FourCc = 0x00000071} },
             { BitmapFormat.A32B32G32R32F, new BitmapFormatDefinition { FourCc = 0x00000074} },
-            { BitmapFormat.V8U8,          new BitmapFormatDefinition { BitsPerPixel=16 } },
+            { BitmapFormat.V8U8,          new BitmapFormatDefinition { BitsPerPixel=16 ,  RBitMask = 0xFF00, GBitMask = 0x00FF  } },
             { BitmapFormat.A2R10G10B10,   new BitmapFormatDefinition { BitsPerPixel = 32, ABitMask = 0xC0000000, RBitMask = 0x3FF00000, GBitMask = 0x000FFC00, BBitMask = 0x000003FF } }
         };
 

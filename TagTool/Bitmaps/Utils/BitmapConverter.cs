@@ -143,25 +143,36 @@ namespace TagTool.Bitmaps.Utils
             }
 
             BaseBitmap resultBitmap = new BaseBitmap(bitmap.Images[imageIndex]);
-            // fix slope_water bitmap conversion
-            if(bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
+
+            if (cachePlatform == CachePlatform.MCC)
             {
-                resultBitmap.MipMapCount = 0;
-                resultBitmap.Curve = BitmapImageCurve.Unknown;
+                if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
+                {
+                    resultBitmap.UpdateFormat(BitmapFormat.Dxn);
+                }
             }
-
-            var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
-            resultBitmap.UpdateFormat(newFormat);
-
-            if(BitmapUtils.RequiresDecompression(resultBitmap.Format, (uint)resultBitmap.Width, (uint)resultBitmap.Height))
-            {
-                resultBitmap.Format = BitmapFormat.A8R8G8B8;
-            }
-
-            if (!BitmapUtils.IsCompressedFormat(resultBitmap.Format))
-                resultBitmap.Flags &= ~BitmapFlags.Compressed;
             else
-                resultBitmap.Flags |= BitmapFlags.Compressed;
+            {
+                // fix slope_water bitmap conversion
+                if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
+                {
+                    resultBitmap.MipMapCount = 0;
+                    resultBitmap.Curve = BitmapImageCurve.Unknown;
+                }
+
+                var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
+                resultBitmap.UpdateFormat(newFormat);
+
+                if (BitmapUtils.RequiresDecompression(resultBitmap.Format, (uint)resultBitmap.Width, (uint)resultBitmap.Height))
+                {
+                    resultBitmap.Format = BitmapFormat.A8R8G8B8;
+                }
+
+                if (!BitmapUtils.IsCompressedFormat(resultBitmap.Format))
+                    resultBitmap.Flags &= ~BitmapFlags.Compressed;
+                else
+                    resultBitmap.Flags |= BitmapFlags.Compressed;
+            }
 
             //
             // Update resource definition/image, truncate DXN to level 4x4
@@ -214,7 +225,15 @@ namespace TagTool.Bitmaps.Utils
                 byte[] rgba = BitmapDecoder.DecodeDxnSigned(pixelData, width, height, true);
                 pixelData = EncodeDXN(rgba, width, height);
             }
-            
+            else if (bitmap.Images[0].Format == BitmapFormat.V8U8)
+            {
+                // convert R8G8_SNORM to ati2n_unorm
+                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[0], level);
+                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[0], level);
+                var rgba = BitmapDecoder.DecodeV8U8(pixelData, width, height, true);
+                pixelData = EncodeDXN(rgba, width, height);
+            }
+
             resultStream.Write(pixelData, 0, pixelData.Length);
         }
 

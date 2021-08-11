@@ -1294,14 +1294,17 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        private static byte[] DecodeV8U8(byte[] data, int width, int height)
+        public static byte[] DecodeV8U8(byte[] data, int width, int height, bool swapXY = false)
         {
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
+                byte X = (byte)(data[i + 1] + 127);
+                byte Y = (byte)(data[i + 0] + 127);
+
                 buffer[i * 2] = 0xFF;
-                buffer[(i * 2) + 1] = (byte)(data[i + 1] + 127);
-                buffer[(i * 2) + 2] = (byte)(data[i + 0] + 127);
+                buffer[(i * 2) + 1] = swapXY ? Y : X;
+                buffer[(i * 2) + 2] = swapXY ? X : Y;
                 buffer[(i * 2) + 3] = 0xFF;
             }
             return buffer;
