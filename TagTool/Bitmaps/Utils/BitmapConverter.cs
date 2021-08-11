@@ -217,19 +217,19 @@ namespace TagTool.Bitmaps.Utils
                 Array.Copy(primaryData, pixelDataOffset, pixelData, 0, pixelDataSize);
             }
             
-            if(bitmap.Images[0].Format == BitmapFormat.Dxn)
+            if(bitmap.Images[imageIndex].Format == BitmapFormat.Dxn)
             {
                 // convert bc5_snorm to ati2n_unorm
-                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[0], level);
-                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[0], level);
+                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
+                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 byte[] rgba = BitmapDecoder.DecodeDxnSigned(pixelData, width, height, true);
                 pixelData = EncodeDXN(rgba, width, height);
             }
-            else if (bitmap.Images[0].Format == BitmapFormat.V8U8)
+            else if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
             {
                 // convert R8G8_SNORM to ati2n_unorm
-                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[0], level);
-                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[0], level);
+                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
+                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV8U8(pixelData, width, height, true);
                 pixelData = EncodeDXN(rgba, width, height);
             }
