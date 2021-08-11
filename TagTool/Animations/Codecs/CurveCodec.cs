@@ -8,13 +8,13 @@ using TagTool.Cache;
 
 namespace TagTool.Animations.Codecs
 {
-    public class curve_codec : codec_base
+    public class CurveCodec : CodecBase
     {
         public uint PayloadDataOffset { get; set; }
 
         public uint TotalCompressedSize { get; set; }
 
-        public curve_codec(int framecount)
+        public CurveCodec(int framecount)
           : base(framecount)
         {
         }

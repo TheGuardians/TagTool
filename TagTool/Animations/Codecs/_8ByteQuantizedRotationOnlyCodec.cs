@@ -10,9 +10,9 @@ using TagTool.Serialization;
 
 namespace TagTool.Animations.Codecs
 {
-    public class _8byte_quantized_rotation_only : codec_base
+    public class _8ByteQuantizedRotationOnlyCodec : CodecBase
     {
-        public _8byte_quantized_rotation_only(int framecount)
+        public _8ByteQuantizedRotationOnlyCodec(int framecount)
           : base(framecount)
         {
         }
@@ -79,7 +79,7 @@ namespace TagTool.Animations.Codecs
             using (MemoryStream stream = new MemoryStream())
             using (EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
             {
-                var dataContext = new DataSerializationContext(writer);
+                var dataContext = new DataSerializationContext(writer, CacheAddressType.Memory, false);
 
                 var datastartoffset = stream.Position.DeepClone();
 

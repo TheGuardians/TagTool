@@ -155,7 +155,7 @@ namespace TagTool.Commands.Porting.Gen2
                         NodeCount = gen2anim.NodeCount,
                         FrameCount = gen2anim.FrameCount,
                         AnimationType = (ModelAnimationGraph.FrameType)gen2anim.Type,
-                        FrameInfoType = (Animations.AnimationMovementDataType)gen2anim.FrameInfoType,
+                        FrameInfoType = (Animations.FrameInfoType)gen2anim.FrameInfoType,
                         ProductionFlags = (ModelAnimationGraph.Animation.ProductionFlagsValue)gen2anim.ProductionFlags,
                         InternalFlags = (ModelAnimationGraph.Animation.InternalFlagsValue)gen2anim.InternalFlags,
                         NodeListChecksum = gen2anim.NodeListChecksum,

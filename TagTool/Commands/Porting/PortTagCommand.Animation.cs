@@ -282,11 +282,11 @@ namespace TagTool.Commands.Porting
                             //uses Bonobo code to read the type9 animation, and hybrid code to write a type3 codec in its place
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type9:
                                 sourceStream.Position = StaticDataSize;
-                                Animations.Codecs.curve_codec type9 = (Animations.Codecs.curve_codec)new Animations.Codecs.curve_codec(member.FrameCount);
+                                Animations.Codecs.CurveCodec type9 = (Animations.Codecs.CurveCodec)new Animations.Codecs.CurveCodec(member.FrameCount);
                                 type9.Read(sourceReader);
 
                                 //create a new type3 codec from the parsed type9 data
-                                Animations.Codecs._8byte_quantized_rotation_only type3 = new Animations.Codecs._8byte_quantized_rotation_only(member.FrameCount)
+                                Animations.Codecs._8ByteQuantizedRotationOnlyCodec type3 = new Animations.Codecs._8ByteQuantizedRotationOnlyCodec(member.FrameCount)
                                 {
                                     Rotations = type9.Rotations,
                                     Translations = type9.Translations,

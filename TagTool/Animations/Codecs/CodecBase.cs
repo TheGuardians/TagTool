@@ -10,11 +10,11 @@ using TagTool.Cache;
 
 namespace TagTool.Animations.Codecs
 {
-    public class codec_base
+    public class CodecBase
     {
         public int FrameCount { get; set; }
 
-        public Codec Codec { get; set; }
+        public AnimationCodecType Codec { get; set; }
 
         public byte RotatedNodeCount { get; set; }
 
@@ -50,15 +50,15 @@ namespace TagTool.Animations.Codecs
 
         public float[][] Scales { get; set; }
 
-        public codec_base()
+        public CodecBase()
         {
         }
 
-        public codec_base(int frameCount) => this.FrameCount = frameCount;
+        public CodecBase(int frameCount) => this.FrameCount = frameCount;
 
         public virtual void Read(EndianReader reader)
         {
-            this.Codec = (Codec)reader.ReadByte();
+            this.Codec = (AnimationCodecType)reader.ReadByte();
             this.RotatedNodeCount = reader.ReadByte();
             this.TranslatedNodeCount = reader.ReadByte();
             this.ScaledNodeCount = reader.ReadByte();
@@ -67,19 +67,5 @@ namespace TagTool.Animations.Codecs
         }
 
         public virtual byte[] Write(GameCacheHaloOnlineBase CacheContext) => throw new NotImplementedException();
-    }
-
-    public enum Codec
-    {
-        _no_compression_codec,
-        _uncompressed_static_data_codec,
-        _uncompressed_animated_data_codec,
-        _8byte_quantized_rotation_only_codec,
-        byte_keyframe_lightly_quantized,
-        word_keyframe_lightly_quantized,
-        reverse_byte_keyframe_lightly_quantized,
-        reverse_word_keyframe_lightly_quantized,
-        _blend_screen_codec,
-        _curve_codec,
     }
 }

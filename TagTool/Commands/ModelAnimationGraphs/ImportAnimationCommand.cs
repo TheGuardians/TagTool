@@ -192,7 +192,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     AnimationData = new ModelAnimationGraph.Animation.SharedAnimationData
                     {
                         AnimationType = AnimationType,
-                        FrameInfoType = (AnimationMovementDataType)FrameInfoType,
+                        FrameInfoType = (FrameInfoType)FrameInfoType,
                         BlendScreen = -1,
                         DesiredCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
                         CurrentCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,

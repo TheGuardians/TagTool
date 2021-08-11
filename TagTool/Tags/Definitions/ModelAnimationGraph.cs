@@ -287,7 +287,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public FrameTypeReach AnimationTypeReach;
 
-                public AnimationMovementDataType FrameInfoType;
+                public FrameInfoType FrameInfoType;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public CompressionValue DesiredCompressionReach;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
