@@ -66,10 +66,13 @@ namespace System
 				.Where(x => targetType.IsEnumDefined(x))
 				.ToArray();
 
+			if(members.Length == 0)
+				return Activator.CreateInstance(targetType);
+
 			return Enum.Parse(targetType, string.Join(", ", members));
 		}
 
-		public static U ConvertLexical<U>(this Enum value) where U : Enum
+        public static U ConvertLexical<U>(this Enum value) where U : Enum
 		{
 			return (U)ConvertLexical(value, typeof(U));
 		}
