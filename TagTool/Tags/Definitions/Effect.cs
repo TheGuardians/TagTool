@@ -10,7 +10,11 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x60, MinVersion = CacheVersion.HaloReach)]
     public class Effect : TagStructure
 	{
+        [TagField(Platform = CachePlatform.Original)]
         public EffectFlags Flags;
+        [TagField(Platform = CachePlatform.MCC)]
+        public EffectFlagsMCC FlagsMCC;
+
         public uint FixedRandomSeed;
         public float OverlapThreshold;
         public float ContinueIfWithin;
@@ -547,6 +551,33 @@ namespace TagTool.Tags.Definitions
         BypassMpThrottle = 1 << 18,
         RenderInNonFirstPersonPass = 1 << 19,
         UseAveragedLocationsForLods = 1 << 20
+    }
+
+    [Flags]
+    public enum EffectFlagsMCC : int
+    {
+        None,
+        DeletedWhenAttachmentDeactivates = 1 << 0,
+        RunEventsInParallel = 1 << 1,
+        DoNotReUsePartsWhenLooping = 1 << 2,
+        AgeCreatorSWeapon = 1 << 3,
+        UseParentPositionButWorldOrientation = 1 << 4,
+        CanPenetrateWalls = 1 << 5,
+        CannotBeRestarted = 1 << 6,
+        Unknown8 = 1 << 8,
+        ForceLooping = 1 << 9,
+        ObsoleteEffectOrdnanceIsGone = 1 << 10,
+        RenderInHologramPass = 1 << 11,
+        LightprobeOnlySampleAirprobes = 1 << 12,
+        PlayEffectEvenOutsideBsps = 1 << 13,
+        DrawLensFlaresWhenStopped = 1 << 14,
+        KillParticlesWhenStopped = 1 << 15,
+        PlayEvenOnHiddenObjects = 1 << 16,
+        DisableFirstPersonPartsInBlindSkull = 1 << 17,
+        HidesAssociatedObjectOnEffectDeletion = 1 << 18,
+        BypassMpThrottle = 1 << 19,
+        RenderInNonFirstPersonPass = 1 << 20,
+        UseAveragedLocationsForLods = 1 << 21
     }
 
     public enum EffectPriority : short

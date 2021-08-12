@@ -979,8 +979,19 @@ namespace TagTool.Commands.Porting
 
         private Effect FixupEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
         {
+            if (BlamCache.Platform == CachePlatform.MCC)
+            {
+                effe.Flags = effe.FlagsMCC.ConvertLexical<EffectFlags>();
+            }
+
             foreach (var effectEvent in effe.Events)
             {
+                if (BlamCache.Platform == CachePlatform.MCC)
+                {
+                    effectEvent.DurationBounds.Lower *= 2;
+                    effectEvent.DurationBounds.Upper *= 2;
+                }
+
                 foreach (var particleSystem in effectEvent.ParticleSystems)
                 {
                     if (BlamCache.Version < CacheVersion.Halo3ODST) //this value is inverted in ODST tags when compared to H3
