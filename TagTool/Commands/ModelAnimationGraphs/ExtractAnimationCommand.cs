@@ -117,17 +117,15 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public List<Node> GetNodeDefaultValues()
         {
             List<Node> NodeList = new List<Node>();
-            List<ModelAnimationGraph.SkeletonNode> PrimaryModelNodes = Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)).ToList();
-            List<ModelAnimationGraph.SkeletonNode> SecondaryModelNodes = Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)).ToList();
             List<RenderModel.Node> PrimaryRenderModelNodes = new List<RenderModel.Node>();
             List<RenderModel.Node> SecondaryRenderModelNodes = new List<RenderModel.Node>();
-            if (PrimaryModelNodes.Count > 0)
+            if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)))
             {
-                PrimaryRenderModelNodes = GetRenderModelNodes(CalculateNodeListChecksum(PrimaryModelNodes, 0));
+                PrimaryRenderModelNodes = GetRenderModelNodes(CalculateNodeListChecksum(Animation.SkeletonNodes, 0, true));
             }
-            if (SecondaryModelNodes.Count > 0)
+            if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)))
             {
-                SecondaryRenderModelNodes = GetRenderModelNodes(CalculateNodeListChecksum(SecondaryModelNodes, 0));
+                SecondaryRenderModelNodes = GetRenderModelNodes(CalculateNodeListChecksum(Animation.SkeletonNodes, 0, false));
             }
 
             foreach (var skellynode in Animation.SkeletonNodes)
@@ -137,7 +135,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 {
                     matchingnode = PrimaryRenderModelNodes.First(n => n.Name == skellynode.Name);
                 }
-                else if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel))
+                else if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel))
                 {
                     matchingnode = SecondaryRenderModelNodes.First(n => n.Name == skellynode.Name);
                 }
@@ -194,9 +192,35 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
         //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
         //later halo games also use this same format
+        public int CalculateNodeListChecksum(List<ModelAnimationGraph.SkeletonNode> Nodes, int nodeindex, bool isPrimary, int checksum = 0)
+        {
+            ModelAnimationGraph.SkeletonNode node = Nodes[nodeindex];
+
+            bool isValidNode = isPrimary ? node.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel) :
+                node.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel);
+
+            if (isValidNode)
+            {
+                checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
+                checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
+                checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
+            }
+
+            int nextnodeindex = node.FirstChildNodeIndex;
+            while (nextnodeindex != -1)
+            {
+                checksum = CalculateNodeListChecksum(Nodes, nextnodeindex, isPrimary, checksum);
+                nextnodeindex = Nodes[nextnodeindex].NextSiblingNodeIndex;
+            }
+
+            if (isValidNode)
+                checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
+            return checksum;
+        }
         public int CalculateNodeListChecksum(List<ModelAnimationGraph.SkeletonNode> Nodes, int nodeindex, int checksum = 0)
         {
             ModelAnimationGraph.SkeletonNode node = Nodes[nodeindex];
+
             checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
             checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
             checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
