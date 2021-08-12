@@ -150,12 +150,14 @@ namespace TagTool.Geometry
                         // skip conversion of water vertices, done right after the loop
                         if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
                             continue;
+                        if (SourceCache.Platform == CachePlatform.MCC && vertexBuffer.Format == VertexBufferFormat.Unknown1C)
+                            continue;
 
                         VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, vertexBuffer);
                     }
 
                     // convert water vertex buffers
-                    if(mesh.ResourceVertexBuffers[6] != null && mesh.ResourceVertexBuffers[7] != null)
+                    if(mesh.ResourceVertexBuffers[6] != null && mesh.ResourceVertexBuffers[7] != null && SourceCache.Platform == CachePlatform.Original)
                     {
                         // Get total amount of indices and prepare for water conversion
 
