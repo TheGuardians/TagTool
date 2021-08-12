@@ -21,7 +21,7 @@ namespace TagTool.Animations
 
         public Animation(
           List<Node> defaultNodes,
-          AnimationData animationData)
+          AnimationResourceData animationData)
         {
             this.NodeListChecksum = animationData.NodeListChecksum;
             this.Nodes = new Node[defaultNodes.Count];
@@ -43,9 +43,9 @@ namespace TagTool.Animations
             this.Process(animationData);
         }
 
-        public void Process(AnimationData animationData)
+        public void Process(AnimationResourceData animationData)
         {
-            List<List<Quaternion>> QuaternionListList = this.Process<Quaternion>(animationData.StaticRotatedNodeFlags, animationData.AnimatedRotatedNodeFlags, animationData.Static_Data.Rotations, animationData.Animation_Data.Rotations, animationData.Animation_Data.RotationKeyFrames);
+            List<List<Quaternion>> QuaternionListList = this.Process<Quaternion>(animationData.StaticRotatedNodeFlags, animationData.AnimatedRotatedNodeFlags, animationData.Static_Data?.Rotations, animationData.Animation_Data.Rotations, animationData.Animation_Data.RotationKeyFrames);
             List<List<RealPoint3d>> RealPoint3dListList = this.Process<RealPoint3d>(animationData.StaticTranslatedNodeFlags, animationData.AnimatedTranslatedNodeFlags, animationData.Static_Data?.Translations, animationData.Animation_Data.Translations, animationData.Animation_Data.TranslationKeyFrames);
             List<List<float>> realListList = this.Process<float>(animationData.StaticScaledNodeFlags, animationData.AnimatedScaledNodeFlags, animationData.Static_Data?.Scales, animationData.Animation_Data.Scales, animationData.Animation_Data.ScaleKeyFrames);
             if (animationData.FrameInfoType > FrameInfoType.None)

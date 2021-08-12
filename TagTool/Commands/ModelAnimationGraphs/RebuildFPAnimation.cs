@@ -206,7 +206,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 });
 
                 //serialize animation block values
-                Animation.Animations[matchingindex].AnimationData.NodeListChecksum = (int)(importer.CalculateNodeListChecksum(0));
+                Animation.Animations[matchingindex].AnimationData.NodeListChecksum = 0;
                 Animation.Animations[matchingindex].AnimationData.FrameCount = (short)importer.frameCount;
                 Animation.Animations[matchingindex].AnimationData.NodeCount = (sbyte)importer.AnimationNodes.Count;
                 Animation.Animations[matchingindex].AnimationData.ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1);

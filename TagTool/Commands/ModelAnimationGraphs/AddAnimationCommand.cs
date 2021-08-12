@@ -199,7 +199,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         CurrentCompression = ModelAnimationGraph.Animation.CompressionValue.BestAccuracy,
                         FrameCount = (short)importer.frameCount,
                         NodeCount = (sbyte)importer.AnimationNodes.Count,
-                        NodeListChecksum = (int)(importer.CalculateNodeListChecksum(0)),
+                        NodeListChecksum = 0,
                         Unknown2 = 5, //don't know what these do, but set usual values
                         Unknown3 = 6,
                         Heading = new RealVector3d(1, 0, 0),

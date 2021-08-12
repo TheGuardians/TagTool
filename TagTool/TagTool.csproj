@@ -239,7 +239,7 @@
     <Compile Include="Animations\Common\AnimationCodecHeader.cs" />
     <Compile Include="Animations\Common\Frame.cs" />
     <Compile Include="Animations\Common\Node.cs" />
-    <Compile Include="Animations\Data\AnimationData.cs" />
+    <Compile Include="Animations\Data\AnimationResourceData.cs" />
     <Compile Include="Animations\AnimationExtractor.cs" />
     <Compile Include="Animations\AnimationImporter.cs" />
     <Compile Include="Animations\Codecs\BlendScreenCodec.cs" />
@@ -382,6 +382,7 @@
     <Compile Include="Commands\Modding\CreateModPackageCommand.cs" />
     <Compile Include="Commands\Modding\ExtractFontsCommand.cs" />
     <Compile Include="Commands\Modding\SwitchTagCacheCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ExtractAnimationCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ImportAnimationCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\RebuildFPAnimation.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AddAnimationCommand.cs" />

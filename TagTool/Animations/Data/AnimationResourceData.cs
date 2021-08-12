@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace TagTool.Animations.Data
 {
-    public class AnimationData
+    public class AnimationResourceData
     {
         public int FrameCount { get; set; }
 
@@ -35,11 +35,11 @@ namespace TagTool.Animations.Data
 
         public BitArray AnimatedScaledNodeFlags { get; set; }
 
-        public AnimationData()
+        public AnimationResourceData()
         {
         }
 
-        public AnimationData(
+        public AnimationResourceData(
           int frameCount,
           int nodeCount,
           int nodeListChecksum,
