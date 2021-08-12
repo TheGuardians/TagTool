@@ -23,6 +23,8 @@ using TagTool.Commands.Scenarios;
 using TagTool.Cache.HaloOnline;
 using DefinitionsGen2 = TagTool.Tags.Definitions.Gen2;
 using CommandsGen2 = TagTool.Commands.Gen2;
+using DefinitionsGen4 = TagTool.Tags.Definitions.Gen4;
+using CommandsGen4 = TagTool.Commands.Gen4;
 using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Editing
@@ -149,6 +151,15 @@ namespace TagTool.Commands.Editing
                 {
                     case "sbsp":
                         CommandsGen2.ScenarioStructureBSPs.BSPContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ScenarioStructureBsp)definition);
+                        break;
+                }
+            }
+            if (CacheVersionDetection.IsInGen(CacheGeneration.Fourth, cache.Version))
+            {
+                switch (tag.Group.Tag.ToString())
+                {
+                    case "jmad":
+                        CommandsGen4.ModelAnimationGraphs.AnimationContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.ModelAnimationGraph)definition);
                         break;
                 }
             }

@@ -285,12 +285,12 @@ namespace TagTool.Animations
             }
         }
 
-        public string GetAnimationExtension(ModelAnimationGraph.FrameType type, FrameInfoType frameInfoType, bool worldRelative)
+        public string GetAnimationExtension(int type, int frameInfoType, bool worldRelative)
         {
-            switch (type)
+            switch ((ModelAnimationGraph.FrameType)type)
             {
                 case ModelAnimationGraph.FrameType.Base:
-                    switch (frameInfoType)
+                    switch ((FrameInfoType)frameInfoType)
                     {
                         case FrameInfoType.None:
                             return worldRelative ? "JMW" : "JMM";

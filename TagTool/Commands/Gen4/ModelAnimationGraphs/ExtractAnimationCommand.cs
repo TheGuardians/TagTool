@@ -5,7 +5,7 @@ using TagTool.Common;
 using System.IO;
 using TagTool.Cache;
 using TagTool.IO;
-using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Gen4;
 using TagTool.Tags;
 using System.Numerics;
 using TagTool.Commands.Common;
@@ -14,8 +14,10 @@ using TagTool.Animations.Data;
 using TagTool.Tags.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using static TagTool.Tags.Definitions.Gen4.ModelAnimationGraph;
+using static TagTool.Tags.Definitions.Gen4.ModelAnimationGraph.AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct.SharedModelAnimationBlock;
 
-namespace TagTool.Commands.ModelAnimationGraphs
+namespace TagTool.Commands.Gen4.ModelAnimationGraphs
 {
     public class ExtractAnimationCommand : Command
     {
@@ -47,7 +49,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<int> AnimationIndices = new List<int>();
             var index = argStack.Pop();
             if (index == "all")
-                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Animations.Count).ToList());
+                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Definitions.Animations.Count).ToList());
             else
                 AnimationIndices.Add(int.Parse(index));
             string directoryarg = argStack.Pop();
@@ -60,29 +62,30 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<Node> renderModelNodes = GetNodeDefaultValues();
             foreach (var animationindex in AnimationIndices)
             {
-                ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];            
+                AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct animationblock = Animation.Definitions.Animations[animationindex];
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
                 Animation animation = new Animation(renderModelNodes, animationData1);
-                bool worldRelative = animationblock.AnimationData.InternalFlags.HasFlag(ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative);
-                string animationExtension = animation.GetAnimationExtension((int)animationblock.AnimationData.AnimationType, (int)animationblock.AnimationData.FrameInfoType, worldRelative);
+                bool worldRelative = animationblock.SharedAnimationData[0].InternalFlags.HasFlag(InternalAnimationFlags.WorldRelative);
+                string animationExtension = animation.GetAnimationExtension((int)animationblock.SharedAnimationData[0].AnimationType, (int)animationblock.SharedAnimationData[0].FrameInfoType, worldRelative);
                 string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
                 string fileName = directoryarg + "\\" + str + "." + animationExtension;
-                if (animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Overlay || animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Replacement)
+                if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Overlay || 
+                    animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Replacement)
                 {
-                    ModelAnimationGraph.Animation baseAnimation1 = GetBaseAnimation(CacheContext.StringTable.GetString(animationblock.Name));
+                    AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct baseAnimation1 = GetBaseAnimation(CacheContext.StringTable.GetString(animationblock.Name));
                     if (baseAnimation1 != null)
                     {
                         AnimationResourceData animationData2 = BuildAnimationResourceData(baseAnimation1);
                         Animation baseAnimation2 = new Animation(renderModelNodes, animationData2);
-                        if (animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Overlay)
+                        if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Overlay)
                         {
                             animation.Overlay(baseAnimation2);
                             animation.InsertBaseFrame(baseAnimation2);
                         }
-                        else if (animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Replacement)
+                        else if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Replacement)
                             animation.Replace(baseAnimation2);
                     }
-                    else if (animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Overlay)
+                    else if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Overlay)
                     {
                         animation.Overlay();
                         animation.InsertBaseFrame();
@@ -94,16 +97,16 @@ namespace TagTool.Commands.ModelAnimationGraphs
             Console.WriteLine("Done!");
             return true;
         }
-        public AnimationResourceData BuildAnimationResourceData(ModelAnimationGraph.Animation animationblock)
+        public AnimationResourceData BuildAnimationResourceData(AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct animationblock)
         {
-            var resourceref = Animation.ResourceGroups[animationblock.AnimationData.ResourceGroupIndex].ResourceReference;
+            var resourceref = Animation.TagResourceGroups[animationblock.SharedAnimationData[0].ResourceGroup].TagResource;
             var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResource(resourceref);
-            var resourcemember = resourcedata.GroupMembers[animationblock.AnimationData.ResourceGroupMemberIndex];
-            AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount, 
-                resourcemember.NodeCount, CalculateNodeListChecksum(Animation.SkeletonNodes, 0), 
+            var resourcemember = resourcedata.GroupMembers[animationblock.SharedAnimationData[0].ResourceGroupMember];
+            AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount,
+                resourcemember.NodeCount, CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0),
                 (FrameInfoType)resourcemember.MovementDataType);
-            using(var stream = new MemoryStream(resourcemember.AnimationData.Data))
-            using(var reader = new EndianReader(stream, CacheContext.Endianness))
+            using (var stream = new MemoryStream(resourcemember.AnimationData.Data))
+            using (var reader = new EndianReader(stream, CacheContext.Endianness))
             {
                 data.Read(reader);
             }
@@ -113,39 +116,39 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public List<Node> GetNodeDefaultValues()
         {
             List<Node> NodeList = new List<Node>();
-            List<RenderModel.Node> PrimaryRenderModelNodes = new List<RenderModel.Node>();
-            List<RenderModel.Node> SecondaryRenderModelNodes = new List<RenderModel.Node>();
-            if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)))
+            List<RenderModel.RenderModelNodeBlock> PrimaryRenderModelNodes = new List<RenderModel.RenderModelNodeBlock>();
+            List<RenderModel.RenderModelNodeBlock> SecondaryRenderModelNodes = new List<RenderModel.RenderModelNodeBlock>();
+            if (Animation.Definitions.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)))
             {
                 PrimaryRenderModelNodes = GetRenderModelNodes(
-                    Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)).ToList(), 
-                    CalculateNodeListChecksum(Animation.SkeletonNodes, 0, true));
-                if(PrimaryRenderModelNodes.Count == 0)
+                    Animation.Definitions.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)).ToList(),
+                    CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0, true));
+                if (PrimaryRenderModelNodes.Count == 0)
                     new TagToolWarning($"Matching primary model not found!");
             }
-            if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)))
+            if (Animation.Definitions.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)))
             {
                 SecondaryRenderModelNodes = GetRenderModelNodes(
-                    Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)).ToList(),
-                    CalculateNodeListChecksum(Animation.SkeletonNodes, 0, false));
+                    Animation.Definitions.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)).ToList(),
+                    CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0, false));
                 if (SecondaryRenderModelNodes.Count == 0)
                     new TagToolWarning($"Matching secondary model not found!");
             }
 
-            foreach (var skellynode in Animation.SkeletonNodes)
+            foreach (var skellynode in Animation.Definitions.SkeletonNodes)
             {
-                RenderModel.Node matchingnode = new RenderModel.Node();
-                if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel))
+                RenderModel.RenderModelNodeBlock matchingnode = new RenderModel.RenderModelNodeBlock();
+                if (skellynode.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel))
                 {
                     matchingnode = PrimaryRenderModelNodes.FirstOrDefault(n => n.Name == skellynode.Name);
                 }
-                else if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel))
+                else if (skellynode.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel))
                 {
                     matchingnode = SecondaryRenderModelNodes.FirstOrDefault(n => n.Name == skellynode.Name);
                 }
-                
-                if(matchingnode == null)
-                     matchingnode = new RenderModel.Node();
+
+                if (matchingnode == null)
+                    matchingnode = new RenderModel.RenderModelNodeBlock();
 
                 NodeList.Add(new Node
                 {
@@ -155,16 +158,16 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     NextSiblingNode = skellynode.NextSiblingNodeIndex,
                     Translation = matchingnode.DefaultTranslation,
                     Rotation = new Quaternion(matchingnode.DefaultRotation.I, matchingnode.DefaultRotation.J, matchingnode.DefaultRotation.K, matchingnode.DefaultRotation.W),
-                    Scale = matchingnode.DefaultScale
+                    Scale = 1.0f
                 });
             }
-                
+
             return NodeList;
         }
 
-        public List<RenderModel.Node> GetRenderModelNodes(List<ModelAnimationGraph.SkeletonNode> jmadnodes, int nodelistchecksum)
+        public List<RenderModel.RenderModelNodeBlock> GetRenderModelNodes(List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> jmadnodes, int nodelistchecksum)
         {
-            List<RenderModel.Node> Nodes = new List<RenderModel.Node>();
+            List<RenderModel.RenderModelNodeBlock> Nodes = new List<RenderModel.RenderModelNodeBlock>();
             using (var stream = CacheContext.OpenCacheRead())
             {
                 foreach (CachedTag tag in CacheContext.TagCache.TagTable)
@@ -174,12 +177,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                     RenderModel modetag = CacheContext.Deserialize<RenderModel>(stream, tag);
                     int modenodechecksum = CalculateNodeListChecksum(modetag.Nodes, 0);
-                    if(modenodechecksum == nodelistchecksum)
+                    if (modenodechecksum == nodelistchecksum)
                     {
                         bool mismatch = false;
-                        foreach(var jmadnode in jmadnodes)
+                        foreach (var jmadnode in jmadnodes)
                         {
-                            if(!modetag.Nodes.Any(n => n.Name == jmadnode.Name))
+                            if (!modetag.Nodes.Any(n => n.Name == jmadnode.Name))
                             {
                                 mismatch = true;
                                 break;
@@ -194,9 +197,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
             }
             return Nodes;
         }
-        public ModelAnimationGraph.Animation GetBaseAnimation(string animationName)
+        public AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct GetBaseAnimation(string animationName)
         {
-            var baseanims = Animation.Animations.Where(q => q.AnimationData.AnimationType == 0 && q.AnimationData.FrameInfoType == 0);
+            var baseanims = Animation.Definitions.Animations.Where(q => q.SharedAnimationData[0].AnimationType == 0 && q.SharedAnimationData[0].FrameInfoType == 0);
             char separatorChar = ':';
             string[] strArray = animationName.Split(separatorChar);
             string baseAnimationPrefix = strArray.First();
@@ -209,12 +212,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
         //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
         //later halo games also use this same format
-        public int CalculateNodeListChecksum(List<ModelAnimationGraph.SkeletonNode> Nodes, int nodeindex, bool isPrimary, int checksum = 0)
+        public int CalculateNodeListChecksum(List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes, int nodeindex, bool isPrimary, int checksum = 0)
         {
-            ModelAnimationGraph.SkeletonNode node = Nodes[nodeindex];
+            AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock node = Nodes[nodeindex];
 
-            bool isValidNode = isPrimary ? node.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel) :
-                node.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel);
+            bool isValidNode = isPrimary ? node.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel) :
+                node.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel);
 
             if (isValidNode)
             {
@@ -234,9 +237,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
             return checksum;
         }
-        public int CalculateNodeListChecksum(List<ModelAnimationGraph.SkeletonNode> Nodes, int nodeindex, int checksum = 0)
+        public int CalculateNodeListChecksum(List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes, int nodeindex, int checksum = 0)
         {
-            ModelAnimationGraph.SkeletonNode node = Nodes[nodeindex];
+            AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock node = Nodes[nodeindex];
 
             checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
             checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
@@ -252,9 +255,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
             checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
             return checksum;
         }
-        public int CalculateNodeListChecksum(List<RenderModel.Node> Nodes, int nodeindex, int checksum = 0)
+        public int CalculateNodeListChecksum(List<RenderModel.RenderModelNodeBlock> Nodes, int nodeindex, int checksum = 0)
         {
-            RenderModel.Node node = Nodes[nodeindex];
+            RenderModel.RenderModelNodeBlock node = Nodes[nodeindex];
             checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
             checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
             checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
