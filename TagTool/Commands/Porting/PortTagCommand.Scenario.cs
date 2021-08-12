@@ -393,9 +393,73 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            AddPrematchCamera(cacheStream, scnr, tagName);
+
+            //
+            // Convert scripts
+            //
+
+            if (FlagIsSet(PortingFlags.Scripts))
+            {
+                foreach (var global in scnr.Globals)
+                {
+                    ConvertHsType(global.Type);
+                }
+
+                foreach (var script in scnr.Scripts)
+                {
+                    ConvertHsType(script.ReturnType);
+
+                    foreach (var parameter in script.Parameters)
+                        ConvertHsType(parameter.Type);
+                }
+
+                foreach (var expr in scnr.ScriptExpressions)
+                {
+                    ConvertScriptExpression(cacheStream, blamCacheStream, resourceStreams, scnr, expr);
+                }
+
+                AdjustScripts(scnr, tagName);
+            }
+            else
+            {
+                scnr.Globals = new List<HsGlobal>();
+                scnr.Scripts = new List<HsScript>();
+                scnr.ScriptExpressions = new List<HsSyntaxNode>();
+            }
+
+            //
+            // Remove functions from default screen fx
+            //
+
+            if (scnr.DefaultScreenFx != null)
+            {
+                var defaultSefc = CacheContext.Deserialize<AreaScreenEffect>(cacheStream, scnr.DefaultScreenFx);
+                foreach (var screenEffect in defaultSefc.ScreenEffects)
+                {
+                    screenEffect.AngleFalloffFunction.Data = DefaultScenarioFxFunction;
+                    screenEffect.DistanceFalloffFunction.Data = DefaultScenarioFxFunction;
+                    screenEffect.TimeEvolutionFunction.Data = DefaultScenarioFxFunction;
+                }
+                CacheContext.Serialize(cacheStream, scnr.DefaultScreenFx, defaultSefc);
+            }
+
+            return scnr;
+        }
+
+        private void AddPrematchCamera(Stream cacheStream, Scenario scnr, string tagName)
+        {
             //
             // Add prematch camera position
             //
+
+            var existingCameraPoint = scnr.CutsceneCameraPoints.FirstOrDefault(cameraPoint => cameraPoint.Name == "prematch_camera");
+            if (existingCameraPoint != null)
+            {
+                // if we already have one, just add the flag for HO
+                existingCameraPoint.Flags |= Scenario.CutsceneCameraPointFlags.PrematchCameraHack;
+                return;
+            }  
 
             var createPrematchCamera = false;
 
@@ -580,57 +644,6 @@ namespace TagTool.Commands.Porting
 
             if (createPrematchCamera)
                 scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
-
-            //
-            // Convert scripts
-            //
-
-            if (FlagIsSet(PortingFlags.Scripts))
-            {
-                foreach (var global in scnr.Globals)
-                {
-                    ConvertHsType(global.Type);
-                }
-
-                foreach (var script in scnr.Scripts)
-                {
-                    ConvertHsType(script.ReturnType);
-
-                    foreach (var parameter in script.Parameters)
-                        ConvertHsType(parameter.Type);
-                }
-
-                foreach (var expr in scnr.ScriptExpressions)
-                {
-                    ConvertScriptExpression(cacheStream, blamCacheStream, resourceStreams, scnr, expr);
-                }
-
-                AdjustScripts(scnr, tagName);
-            }
-            else
-            {
-                scnr.Globals = new List<HsGlobal>();
-                scnr.Scripts = new List<HsScript>();
-                scnr.ScriptExpressions = new List<HsSyntaxNode>();
-            }
-
-            //
-            // Remove functions from default screen fx
-            //
-
-            if (scnr.DefaultScreenFx != null)
-            {
-                var defaultSefc = CacheContext.Deserialize<AreaScreenEffect>(cacheStream, scnr.DefaultScreenFx);
-                foreach (var screenEffect in defaultSefc.ScreenEffects)
-                {
-                    screenEffect.AngleFalloffFunction.Data = DefaultScenarioFxFunction;
-                    screenEffect.DistanceFalloffFunction.Data = DefaultScenarioFxFunction;
-                    screenEffect.TimeEvolutionFunction.Data = DefaultScenarioFxFunction;
-                }
-                CacheContext.Serialize(cacheStream, scnr.DefaultScreenFx, defaultSefc);
-            }
-
-            return scnr;
         }
 
         /// <summary>
