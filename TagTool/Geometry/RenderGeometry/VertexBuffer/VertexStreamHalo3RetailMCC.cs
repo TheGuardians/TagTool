@@ -140,9 +140,9 @@ namespace TagTool.Geometry
         {
             return new ParticleModelVertex
             {
-                Position = new RealVector3d(Stream.ReadUShort4N()),
-                Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadUShort4N().IJK
+                Position = Stream.ReadFloat3(),
+                Texcoord = Stream.ReadFloat2(),
+                Normal = Stream.ReadFloat3(),
             };
         }
 
@@ -533,7 +533,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Decorator:
                     return 0x14;
                 case VertexBufferFormat.ParticleModel:
-                    return 0x14;
+                    return 0x20;
                 case VertexBufferFormat.Rigid:
                     return 0x24;
                 case VertexBufferFormat.Skinned:

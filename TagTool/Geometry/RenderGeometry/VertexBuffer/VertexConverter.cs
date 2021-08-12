@@ -132,7 +132,9 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.ParticleModel:
                         ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) =>
                         {
-                            v.Normal = ConvertVectorSpace(v.Normal);
+                            if (inPlatform != CachePlatform.MCC)
+                                v.Normal = ConvertVectorSpace(v.Normal);
+
                             outVertexStream.WriteParticleModelVertex(v);
                         });
                         break;
