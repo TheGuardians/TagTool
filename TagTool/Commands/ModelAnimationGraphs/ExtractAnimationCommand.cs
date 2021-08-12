@@ -99,13 +99,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var resourceref = Animation.ResourceGroups[animationblock.AnimationData.ResourceGroupIndex].ResourceReference;
             var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResource(resourceref);
             var resourcemember = resourcedata.GroupMembers[animationblock.AnimationData.ResourceGroupMemberIndex];
-            AnimationResourceData data = new AnimationResourceData
-            {
-                FrameCount = resourcemember.FrameCount,
-                NodeCount = resourcemember.NodeCount,
-                NodeListChecksum = CalculateNodeListChecksum(Animation.SkeletonNodes, 0),
-                FrameInfoType = (FrameInfoType)resourcemember.MovementDataType
-            };
+            AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount, 
+                resourcemember.NodeCount, CalculateNodeListChecksum(Animation.SkeletonNodes, 0), 
+                (FrameInfoType)resourcemember.MovementDataType);
             using(var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using(var reader = new EndianReader(stream, CacheContext.Endianness))
             {

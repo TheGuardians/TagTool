@@ -105,11 +105,11 @@ namespace TagTool.Animations
                         }
                         else
                         {
-                            int num1 = keyframes[index2].Last<int>((Func<int, bool>)(q => q < f));
-                            int num2 = keyframes[index2].First<int>((Func<int, bool>)(q => q > f));
+                            int num1 = keyframes[index2].Last(q => q < f);
+                            int num2 = keyframes[index2].First(q => q > f);
                             int index4 = keyframes[index2].IndexOf(num1);
                             int index5 = keyframes[index2].IndexOf(num2);
-                            float time = (float)(f - num1) / (float)(num2 - num1);
+                            float time = (f - num1) / (num2 - num1);
                             field2 = this.Interpolate<T>(animatedData[index2][index4], animatedData[index2][index5], time);
                         }
                     }
