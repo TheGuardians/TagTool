@@ -3,6 +3,7 @@ using TagTool.Common;
 using System.Collections.Generic;
 using System;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Havok;
 
 namespace TagTool.Tags.Definitions
 {
@@ -620,30 +621,11 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x330)]
+        [TagStructure(Size = 0x330, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x340, Align = 0x10, Platform = CachePlatform.MCC)]
         public class PhantomShape : TagStructure
         {
-            public int Unknown;
-            public short Size;
-            public short Count;
-            public int OverallShapeIndex;
-            public int Offset;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public int Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
-            public float Unknown17;
+            public HkListShape ListShape;
 
             public int MultisphereCount;
             public uint Flags;
@@ -654,190 +636,23 @@ namespace TagTool.Tags.Definitions
             public float Z0;
             public float Z1;
 
-            public int Unknown18;
-            public short Size2;
-            public short Count2;
-            public int OverallShapeIndex2;
-            public int Offset2;
-            public int NumberOfSpheres;
-            public float Unknown19;
-            public float Unknown20;
-            public float Unknown21;
-            public float Sphere0X;
-            public float Sphere0Y;
-            public float Sphere0Z;
-            public float Sphere0Radius;
-            public float Sphere1X;
-            public float Sphere1Y;
-            public float Sphere1Z;
-            public float Sphere1Radius;
-            public float Sphere2X;
-            public float Sphere2Y;
-            public float Sphere2Z;
-            public float Sphere2Radius;
-            public float Sphere3X;
-            public float Sphere3Y;
-            public float Sphere3Z;
-            public float Sphere3Radius;
-            public float Sphere4X;
-            public float Sphere4Y;
-            public float Sphere4Z;
-            public float Sphere4Radius;
-            public float Sphere5X;
-            public float Sphere5Y;
-            public float Sphere5Z;
-            public float Sphere5Radius;
-            public float Sphere6X;
-            public float Sphere6Y;
-            public float Sphere6Z;
-            public float Sphere6Radius;
-            public float Sphere7X;
-            public float Sphere7Y;
-            public float Sphere7Z;
-            public float Sphere7Radius;
+            [TagField(Length = 4, Align = 4, Platform = CachePlatform.Original)]
+            [TagField(Length = 4, Align = 8, Platform = CachePlatform.MCC)]
+            public HkMultiSphereShape[] Multispheres;
 
-            public int Unknown22;
-            public short Size3;
-            public short Count3;
-            public int OverallShapeIndex3;
-            public int Offset3;
-            public int NumberOfSpheres2;
-            public float Unknown23;
-            public float Unknown24;
-            public float Unknown25;
-            public float Sphere0X2;
-            public float Sphere0Y2;
-            public float Sphere0Z2;
-            public float Sphere0Radius2;
-            public float Sphere1X2;
-            public float Sphere1Y2;
-            public float Sphere1Z2;
-            public float Sphere1Radius2;
-            public float Sphere2X2;
-            public float Sphere2Y2;
-            public float Sphere2Z2;
-            public float Sphere2Radius2;
-            public float Sphere3X2;
-            public float Sphere3Y2;
-            public float Sphere3Z2;
-            public float Sphere3Radius2;
-            public float Sphere4X2;
-            public float Sphere4Y2;
-            public float Sphere4Z2;
-            public float Sphere4Radius2;
-            public float Sphere5X2;
-            public float Sphere5Y2;
-            public float Sphere5Z2;
-            public float Sphere5Radius2;
-            public float Sphere6X2;
-            public float Sphere6Y2;
-            public float Sphere6Z2;
-            public float Sphere6Radius2;
-            public float Sphere7X2;
-            public float Sphere7Y2;
-            public float Sphere7Z2;
-            public float Sphere7Radius2;
+            [TagField(Length = 4, Align = 4, Platform = CachePlatform.Original)]
+            [TagField(Length = 4, Align = 8, Platform = CachePlatform.MCC)]
+            public ChildInfo[] ChildShapes;
 
-            public int Unknown26;
-            public short Size4;
-            public short Count4;
-            public int OverallShapeIndex4;
-            public int Offset4;
-            public int NumberOfSpheres3;
-            public float Unknown27;
-            public float Unknown28;
-            public float Unknown29;
-            public float Sphere0X3;
-            public float Sphere0Y3;
-            public float Sphere0Z3;
-            public float Sphere0Radius3;
-            public float Sphere1X3;
-            public float Sphere1Y3;
-            public float Sphere1Z3;
-            public float Sphere1Radius3;
-            public float Sphere2X3;
-            public float Sphere2Y3;
-            public float Sphere2Z3;
-            public float Sphere2Radius3;
-            public float Sphere3X3;
-            public float Sphere3Y3;
-            public float Sphere3Z3;
-            public float Sphere3Radius3;
-            public float Sphere4X3;
-            public float Sphere4Y3;
-            public float Sphere4Z3;
-            public float Sphere4Radius3;
-            public float Sphere5X3;
-            public float Sphere5Y3;
-            public float Sphere5Z3;
-            public float Sphere5Radius3;
-            public float Sphere6X3;
-            public float Sphere6Y3;
-            public float Sphere6Z3;
-            public float Sphere6Radius3;
-            public float Sphere7X3;
-            public float Sphere7Y3;
-            public float Sphere7Z3;
-            public float Sphere7Radius3;
-
-            public int Unknown30;
-            public short Size5;
-            public short Count5;
-            public int OverallShapeIndex5;
-            public int Offset5;
-            public int NumberOfSpheres4;
-            public float Unknown31;
-            public float Unknown32;
-            public float Unknown33;
-            public float Sphere0X4;
-            public float Sphere0Y4;
-            public float Sphere0Z4;
-            public float Sphere0Radius4;
-            public float Sphere1X4;
-            public float Sphere1Y4;
-            public float Sphere1Z4;
-            public float Sphere1Radius4;
-            public float Sphere2X4;
-            public float Sphere2Y4;
-            public float Sphere2Z4;
-            public float Sphere2Radius4;
-            public float Sphere3X4;
-            public float Sphere3Y4;
-            public float Sphere3Z4;
-            public float Sphere3Radius4;
-            public float Sphere4X4;
-            public float Sphere4Y4;
-            public float Sphere4Z4;
-            public float Sphere4Radius4;
-            public float Sphere5X4;
-            public float Sphere5Y4;
-            public float Sphere5Z4;
-            public float Sphere5Radius4;
-            public float Sphere6X4;
-            public float Sphere6Y4;
-            public float Sphere6Z4;
-            public float Sphere6Radius4;
-            public float Sphere7X4;
-            public float Sphere7Y4;
-            public float Sphere7Z4;
-            public float Sphere7Radius4;
-
-            public float Unknown34;
-            public float Unknown35;
-            public float Unknown36;
-            public float Unknown37;
-            public float Unknown38;
-            public float Unknown39;
-            public float Unknown40;
-            public float Unknown41;
-            public float Unknown42;
-            public float Unknown43;
-            public float Unknown44;
-            public float Unknown45;
-            public float Unknown46;
-            public float Unknown47;
-            public float Unknown48;
-            public float Unknown49;
+            [TagStructure(Size = 0x10, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x18, Platform = CachePlatform.MCC)]
+            public class ChildInfo : TagStructure
+            {
+                public Havok.HavokShapeReference Shape;
+                public uint CollisionFilterInfo;
+                public int ChildShapeSize;
+                public int ChildShapeCount;
+            }
         }
 
         [TagStructure(Size = 0x44)]

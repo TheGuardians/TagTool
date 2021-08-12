@@ -170,6 +170,26 @@ namespace TagTool.Havok
         [TagField(Align = 16)]
         public RealQuaternion Offset; // actually vector4, refactor quaternion stuff later
     }   
+
+    [TagStructure(Size = 0x90, Align = 0x10)]
+    public class HkMultiSphereShape : HkpShape
+    {
+        public int NumSpheres;
+        [TagField(Length = 8, Align = 0x10)]
+        public RealQuaternion[] Spheres;
+    }
+
+    [TagStructure(Size = 0x38, Align = 0x10, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x30, Align = 0x10, Platform = CachePlatform.MCC)]
+    public class HkListShape : HkpShapeCollection
+    {
+        [TagField(Align = 0x4, Platform = CachePlatform.Original)]
+        [TagField(Align = 0x8, Platform = CachePlatform.MCC)]
+        public HkArrayBase ChildInfo;
+        [TagField(Align = 0x10)]
+        public RealQuaternion AabbHalfExtents;
+        public RealQuaternion AAbbCenter;
+    }
 }
 
 namespace TagTool.Havok.Gen2
