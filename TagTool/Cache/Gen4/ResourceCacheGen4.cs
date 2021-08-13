@@ -414,10 +414,10 @@ namespace TagTool.Cache.Gen4
                     reader.BaseStream.Read(decompressed, 0, page.FileSize);
                 else
                 {
-                    int decompressionContext = 0;
+                    IntPtr decompressionContext = IntPtr.Zero;
                     int outSize = decompressed.Length;
                     int inSize = compressed.Length;
-                    XCompress.XMemCreateDecompressionContext(XCompress.XMemCodecType.LZX, 0, 0, ref decompressionContext);
+                    XCompress.XMemCreateDecompressionContext(XCompress.XMemCodecType.LZX, IntPtr.Zero, 0, ref decompressionContext);
                     XCompress.XMemResetDecompressionContext(decompressionContext);           
                     XCompress.XMemDecompressStream(decompressionContext, decompressed, ref outSize, compressed, ref inSize);
                     XCompress.XMemDestroyDecompressionContext(decompressionContext);

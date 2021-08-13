@@ -18,7 +18,7 @@ namespace TagTool.IO
             LZX = 1
         }
 
-        public static int XMemCreateDecompressionContext(XMemCodecType codecType, int pCodecParams, int flags, ref int pContext)
+        public static int XMemCreateDecompressionContext(XMemCodecType codecType, IntPtr pCodecParams, int flags, ref IntPtr pContext)
         {
             if (Is64Bit)
                 return XMemCreateDecompressionContext64(codecType, pCodecParams, flags, ref pContext);
@@ -26,66 +26,56 @@ namespace TagTool.IO
                 return XMemCreateDecompressionContext32(codecType, pCodecParams, flags, ref pContext);
         }
 
-        public static void XMemDestroyDecompressionContext(int context)
+        public static void XMemDestroyDecompressionContext(IntPtr pContext)
         {
             if (Is64Bit)
-                XMemDestroyDecompressionContext64(context);
+                XMemDestroyDecompressionContext64(pContext);
             else
-                XMemDestroyDecompressionContext32(context);
+                XMemDestroyDecompressionContext32(pContext);
         }
 
-        public static int XMemResetDecompressionContext(int context)
+        public static int XMemResetDecompressionContext(IntPtr pContext)
         {
             if (Is64Bit)
-                return XMemResetDecompressionContext64(context);
+                return XMemResetDecompressionContext64(pContext);
             else
-                return XMemResetDecompressionContext32(context);
+                return XMemResetDecompressionContext32(pContext);
         }
 
-        public static int XMemDecompressStream(int context, byte[] pDestination, ref int pDestSize, byte[] pSource, ref int pSrcSize)
+        public static int XMemDecompressStream(IntPtr pContext, byte[] pDestination, ref int pDestSize, byte[] pSource, ref int pSrcSize)
         {
             if (Is64Bit)
-                return XMemDecompressStream64(context, pDestination, ref pDestSize, pSource, ref pSrcSize);
+                return XMemDecompressStream64(pContext, pDestination, ref pDestSize, pSource, ref pSrcSize);
             else
-                return XMemDecompressStream32(context, pDestination, ref pDestSize, pSource, ref pSrcSize);
+                return XMemDecompressStream32(pContext, pDestination, ref pDestSize, pSource, ref pSrcSize);
         }
 
         #region x86
         [DllImport("xcompress32.dll", EntryPoint = "XMemCreateDecompressionContext")]
-        private static extern int XMemCreateDecompressionContext32(
-            XMemCodecType codecType,
-            int pCodecParams,
-            int flags, ref int pContext);
+        private static extern int XMemCreateDecompressionContext32(XMemCodecType codecType, IntPtr pCodecParams, int flags, ref IntPtr pContext);
 
         [DllImport("xcompress32.dll", EntryPoint = "XMemDestroyDecompressionContext")]
-        private static extern void XMemDestroyDecompressionContext32(int context);
+        private static extern void XMemDestroyDecompressionContext32(IntPtr pContext);
 
         [DllImport("xcompress32.dll", EntryPoint = "XMemResetDecompressionContext")]
-        private static extern int XMemResetDecompressionContext32(int context);
+        private static extern int XMemResetDecompressionContext32(IntPtr pContext);
 
         [DllImport("xcompress32.dll", EntryPoint = "XMemDecompressStream")]
-        private static extern int XMemDecompressStream32(int context,
-            byte[] pDestination, ref int pDestSize,
-            byte[] pSource, ref int pSrcSize);
+        private static extern int XMemDecompressStream32(IntPtr pContext, byte[] pDestination, ref int pDestSize, byte[] pSource, ref int pSrcSize);
         #endregion
 
         #region x64
         [DllImport("xcompress64.dll", EntryPoint = "XMemCreateDecompressionContext")]
-        private static extern int XMemCreateDecompressionContext64(
-            XMemCodecType codecType,
-            int pCodecParams,
-            int flags, ref int pContext);
+        private static extern int XMemCreateDecompressionContext64(XMemCodecType codecType,IntPtr pCodecParams,int flags, ref IntPtr pContext);
 
         [DllImport("xcompress64.dll", EntryPoint = "XMemDestroyDecompressionContext")]
-        private static extern void XMemDestroyDecompressionContext64(int context);
+        private static extern void XMemDestroyDecompressionContext64(IntPtr pContext);
 
         [DllImport("xcompress64.dll", EntryPoint = "XMemResetDecompressionContext")]
-        private static extern int XMemResetDecompressionContext64(int context);
+        private static extern int XMemResetDecompressionContext64(IntPtr pContext);
 
         [DllImport("xcompress64.dll", EntryPoint = "XMemDecompressStream")]
-        private static extern int XMemDecompressStream64(int context,
-            byte[] pDestination, ref int pDestSize,
-            byte[] pSource, ref int pSrcSize);
+        private static extern int XMemDecompressStream64(IntPtr pContext, byte[] pDestination, ref int pDestSize, byte[] pSource, ref int pSrcSize);
         #endregion
     }
 }
