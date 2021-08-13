@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Porting.Gen2;
+using TagTool.Commands.Porting.gen4;
 using TagTool.Commands.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -53,6 +54,10 @@ namespace TagTool.Commands.Porting
                     context.AddCommand(new PortInstancedGeometryObjectCommand(hoCache, portingCache));
                     context.AddCommand(new PortClusterGeometryObjectCommand(hoCache, portingCache));
                     context.AddCommand(new DoNotReplaceGroupsCommand());
+                }
+                else if(portingCache is GameCacheGen4 gen4Cache)
+                {
+                    context.AddCommand(new PortTagGen4Command(hoCache, gen4Cache));
                 }
                 else if (portingCache is GameCacheGen2 gen2cache)
                 {

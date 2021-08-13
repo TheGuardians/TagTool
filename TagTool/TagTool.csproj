@@ -396,6 +396,7 @@
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Sound.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Physics.cs" />
+    <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
