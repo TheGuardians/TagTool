@@ -240,7 +240,6 @@
     <Compile Include="Animations\Common\Frame.cs" />
     <Compile Include="Animations\Common\Node.cs" />
     <Compile Include="Animations\Data\AnimationResourceData.cs" />
-    <Compile Include="Animations\AnimationExtractor.cs" />
     <Compile Include="Animations\AnimationImporter.cs" />
     <Compile Include="Animations\Codecs\BlendScreenCodec.cs" />
     <Compile Include="Animations\Codecs\CodecBase.cs" />

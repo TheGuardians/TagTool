@@ -65,15 +65,15 @@ namespace TagTool.Animations
                     QuaternionListList[0][index] = Quaternion.Conjugate(Quaternion.Conjugate(QuaternionListList[0][index]) * Quaternion.Conjugate(Quaternion.CreateFromYawPitchRoll(angles.Yaw.Degrees, angles.Pitch.Degrees, angles.Roll.Degrees)));
                 }
             }
-            for (int index1 = 0; index1 < this.Frames.Length; ++index1)
+            for (int frameindex = 0; frameindex < this.Frames.Length; ++frameindex)
             {
-                this.Frames[index1] = new Frame();
-                this.Frames[index1].Nodes = new Node[this.Nodes.Length];
-                for (int index2 = 0; index2 < this.Nodes.Length; ++index2)
+                this.Frames[frameindex] = new Frame();
+                this.Frames[frameindex].Nodes = new Node[this.Nodes.Length];
+                for (int nodeindex = 0; nodeindex < this.Nodes.Length; ++nodeindex)
                 {
-                    this.Frames[index1].Nodes[index2].Rotation = QuaternionListList[index2][index1];
-                    this.Frames[index1].Nodes[index2].Translation = RealPoint3dListList[index2][index1];
-                    this.Frames[index1].Nodes[index2].Scale = realListList[index2][index1];
+                    this.Frames[frameindex].Nodes[nodeindex].Rotation = QuaternionListList[nodeindex][frameindex];
+                    this.Frames[frameindex].Nodes[nodeindex].Translation = RealPoint3dListList[nodeindex][frameindex];
+                    this.Frames[frameindex].Nodes[nodeindex].Scale = realListList[nodeindex][frameindex];
                 }
             }
         }
@@ -86,41 +86,41 @@ namespace TagTool.Animations
           List<List<int>> keyframes)
         {
             List<List<T>> objListList = new List<List<T>>(this.Nodes.Length);
-            int index1 = 0;
-            int index2 = 0;
-            for (int index3 = 0; index3 < this.Nodes.Length; ++index3)
+            int staticnodeindex = 0;
+            int animatednodeindex = 0;
+            for (int nodeindex = 0; nodeindex < this.Nodes.Length; ++nodeindex)
             {
                 objListList.Add(new List<T>(this.Frames.Length));
-                for (int f = 0; f < this.Frames.Length; f++)
+                for (int frameindex = 0; frameindex < this.Frames.Length; frameindex++)
                 {
-                    object field2;
-                    if (staticFlags != null && staticFlags[index3])
-                        field2 = staticData[index1][0];
-                    else if (animatedFlags != null && animatedFlags[index3])
+                    object framevalue;
+                    if (staticFlags != null && staticFlags[nodeindex])
+                        framevalue = staticData[staticnodeindex][0];
+                    else if (animatedFlags != null && animatedFlags[nodeindex])
                     {
-                        if (keyframes[index2].Contains(f))
+                        if (keyframes[animatednodeindex].Contains(frameindex))
                         {
-                            int index4 = keyframes[index2].IndexOf(f);
-                            field2 = animatedData[index2][index4];
+                            int keyframeindex = keyframes[animatednodeindex].IndexOf(frameindex);
+                            framevalue = animatedData[animatednodeindex][keyframeindex];
                         }
                         else
                         {
-                            int num1 = keyframes[index2].Last(q => q < f);
-                            int num2 = keyframes[index2].First(q => q > f);
-                            int index4 = keyframes[index2].IndexOf(num1);
-                            int index5 = keyframes[index2].IndexOf(num2);
-                            float time = (f - num1) / (num2 - num1);
-                            field2 = this.Interpolate<T>(animatedData[index2][index4], animatedData[index2][index5], time);
+                            int previouskeyframe = keyframes[animatednodeindex].Last(q => q < frameindex);
+                            int nextkeyframe = keyframes[animatednodeindex].First(q => q > frameindex);
+                            int previouskeyframeindex = keyframes[animatednodeindex].IndexOf(previouskeyframe);
+                            int nextkeyframeindex = keyframes[animatednodeindex].IndexOf(nextkeyframe);
+                            float time = (float)(frameindex - previouskeyframe) / (float)(nextkeyframe - previouskeyframe);
+                            framevalue = Interpolate<T>(animatedData[animatednodeindex][previouskeyframeindex], animatedData[animatednodeindex][nextkeyframeindex], time);
                         }
                     }
                     else
-                        field2 = this.GetNodeDefaultValue<T>(index3);
-                    objListList[index3].Add((T)field2);
+                        framevalue = GetNodeDefaultValue<T>(nodeindex);
+                    objListList[nodeindex].Add((T)framevalue);
                 }
-                if (staticFlags != null && staticFlags[index3])
-                    ++index1;
-                if (animatedFlags != null && animatedFlags[index3])
-                    ++index2;
+                if (staticFlags != null && staticFlags[nodeindex])
+                    ++staticnodeindex;
+                if (animatedFlags != null && animatedFlags[nodeindex])
+                    ++animatednodeindex;
             }
             return objListList;
         }
