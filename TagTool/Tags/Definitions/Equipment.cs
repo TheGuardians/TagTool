@@ -275,7 +275,7 @@ namespace TagTool.Tags.Definitions
         public class ForcedReloadBlock : TagStructure
 		{
             public CachedTag Effect;
-            public uint Unknown;
+            public float AmmoPenalty;
         }
 
         [TagStructure(Size = 0x20)]
@@ -356,9 +356,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class AdrenalineBlock : TagStructure
 		{
-            public float Unknown;
+            public float SprintRestored;
             public CachedTag ActivationEffect;
-            public CachedTag Unknown3;
+            public CachedTag ActiveEffect;
         }
 
         [TagStructure(Size = 0x14)]
