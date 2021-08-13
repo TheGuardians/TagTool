@@ -250,7 +250,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public int ControlSize;
             public CacheFileResourceDataFlags Flags;
             public short Page;
-            public int RootFixup;
+            public CacheAddress RootFixup;
             public List<CacheFileResourceFixupLocationBlock> ControlFixups;
             public List<CacheFileResourceInteropLocationBlock> InteropLocations;
             public List<CacheFileResourcePriorityDataBlock> PriorityLevelData;
@@ -266,8 +266,8 @@ namespace TagTool.Tags.Definitions.Gen4
             [TagStructure(Size = 0x8)]
             public class CacheFileResourceFixupLocationBlock : TagStructure
             {
-                public int EncodedFixupLocation;
-                public int EncodedFixupValue;
+                public uint BlockOffset;
+                public CacheAddress Address;
             }
             
             [TagStructure(Size = 0x8)]

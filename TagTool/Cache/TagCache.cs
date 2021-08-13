@@ -203,6 +203,19 @@ namespace TagTool.Cache
                     }
                 }
             }
+            else if (TagDefinitions.GetType() == typeof(Gen4.TagDefinitionsGen4))
+            {
+                // kind of redundant, could just use TagGroupGen3...
+                foreach (var pair in TagDefinitions.Types)
+                {
+                    Gen4.TagGroupGen4 group = (Gen4.TagGroupGen4)pair.Key;
+                    if (group.Name == name)
+                    {
+                        result = group.Tag;
+                        return true;
+                    }
+                }
+            }
 
             while (name.Length < 4)
                 name += " "; // rmw, rmd, rm

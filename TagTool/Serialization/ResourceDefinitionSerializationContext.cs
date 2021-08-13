@@ -16,6 +16,7 @@ namespace TagTool.Serialization
         public EndianWriter DataWriter { get; }
         public EndianReader SecondaryDataReader { get; }
         public EndianWriter SecondaryDataWriter { get; }
+        public EndianReader TertiaryDataReader { get; }
         public EndianReader DefinitionReader { get; }
         public EndianWriter DefinitionWriter { get;  }
 
@@ -24,7 +25,7 @@ namespace TagTool.Serialization
         public List<ResourceFixupLocation> FixupLocations = new List<ResourceFixupLocation>();
         public List<ResourceInteropLocation> InteropLocations = new List<ResourceInteropLocation>();
 
-        public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianWriter dataWriter, EndianReader secondaryDataReader, EndianWriter secondaryDataWriter, EndianReader definitionReader, EndianWriter definitionWriter, CacheAddressType initialAddressType)
+        public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianWriter dataWriter, EndianReader secondaryDataReader,  EndianWriter secondaryDataWriter, EndianReader definitionReader, EndianWriter definitionWriter, CacheAddressType initialAddressType)
         {
             DataReader = dataReader;
             DataWriter = dataWriter;
@@ -50,6 +51,12 @@ namespace TagTool.Serialization
         {
         }
 
+        public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianReader secondaryDataReader, EndianReader tertiaryDataReader, EndianReader definitionReader, CacheAddressType initialAddressType) :
+            this(dataReader, null, secondaryDataReader,  null, definitionReader, null, initialAddressType)
+        {
+            TertiaryDataReader = tertiaryDataReader;
+        }
+
         public ResourceDefinitionSerializationContext(EndianWriter dataWriter, EndianWriter secondaryDataWriter, EndianWriter definitionWriter, CacheAddressType initialAddressType) :
             this(null, dataWriter, null, secondaryDataWriter, null, definitionWriter, initialAddressType)
         {
@@ -71,6 +78,8 @@ namespace TagTool.Serialization
                     return DefinitionReader;
                 case CacheAddressType.SecondaryData:
                     return SecondaryDataReader;
+                case CacheAddressType.TertiaryData:
+                    return TertiaryDataReader;
                 default:
                     return null;
             }

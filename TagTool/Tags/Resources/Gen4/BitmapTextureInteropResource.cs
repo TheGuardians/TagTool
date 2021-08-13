@@ -10,6 +10,6 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0xC)]
     public class BitmapTextureInteropResource : TagStructure
     {
-        public TagInterop TextureInterop;
+        public D3DStructure<RenderTextureInteropDefinition> TextureInterop;
     }
 }

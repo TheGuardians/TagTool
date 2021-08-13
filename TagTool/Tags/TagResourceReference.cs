@@ -14,7 +14,8 @@ namespace TagTool.Tags
         /// <summary>
         /// ID is an index in ResourceGestalt.TagResources
         /// </summary>
-        [TagField(Gen = CacheGeneration.Third)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public DatumHandle Gen3ResourceID;
 
         /// <summary>
