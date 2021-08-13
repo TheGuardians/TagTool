@@ -396,7 +396,7 @@ namespace TagTool.Cache.Gen4
                 }
             }
 
-            var decompressed = new byte[page.FileSize];
+            var decompressed = new byte[page.UncompressedSize];
             
             using (var cacheStream = cache.OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, EndianFormat.BigEndian))
@@ -405,20 +405,22 @@ namespace TagTool.Cache.Gen4
                 var blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, (uint)page.FileOffset);
             
                 reader.SeekTo(blockOffset);
-                var compressed = reader.ReadBytes(page.FileSize);
+                var compressed = reader.ReadBytes(page.CompressedSize);
             
                 if (resource.ResourceTypeIndex != -1 && GetResourceTypeName(resource) == "sound_resource_definition")
                     return compressed;
-            
-                if(page.Codec == -1)
-                    reader.BaseStream.Read(decompressed, 0, page.FileSize);
+
+                if (page.Codec == -1)
+                {
+                    return compressed;
+                }
                 else
                 {
                     IntPtr decompressionContext = IntPtr.Zero;
                     int outSize = decompressed.Length;
                     int inSize = compressed.Length;
                     XCompress.XMemCreateDecompressionContext(XCompress.XMemCodecType.LZX, IntPtr.Zero, 0, ref decompressionContext);
-                    XCompress.XMemResetDecompressionContext(decompressionContext);           
+                    XCompress.XMemResetDecompressionContext(decompressionContext);
                     XCompress.XMemDecompressStream(decompressionContext, decompressed, ref outSize, compressed, ref inSize);
                     XCompress.XMemDestroyDecompressionContext(decompressionContext);
                 }

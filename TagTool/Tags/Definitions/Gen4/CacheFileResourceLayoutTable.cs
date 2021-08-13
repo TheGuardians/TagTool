@@ -54,8 +54,8 @@ namespace TagTool.Tags.Definitions.Gen4
             public short SharedFile;
             public short SharedFileLocationIndex;
             public int FileOffset;
-            public int FileSize;
-            public int Size;
+            public int CompressedSize;
+            public int UncompressedSize;
             public ResourceChecksumStruct Checksum;
             public short ResourceReferenceCount;
             public short StreamingSubpageTable;
