@@ -14,6 +14,6 @@ namespace TagTool.Tags.Resources.Gen4
         public sbyte IsIndex32;
         [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
-        public byte[] IndexData;
+        public TagData IndexData;
     }
 }

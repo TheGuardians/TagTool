@@ -13,6 +13,6 @@ namespace TagTool.Tags.Resources.Gen4
         public int VertexCount;
         public short Declaration;
         public short Stride;
-        public byte[] Vertices;
+        public TagData Vertices;
     }
 }

@@ -11,7 +11,7 @@ namespace TagTool.Tags.Resources.Gen4
     public class FacialAnimationResourceDefinition : TagStructure
     {
         public List<FacialAnimationPermutationBlockStruct> FacialAnimationPermutations;
-        public byte[] CompressedFacialAnimationCurveData;
+        public TagData CompressedFacialAnimationCurveData;
         
         [TagStructure(Size = 0x1C)]
         public class FacialAnimationPermutationBlockStruct : TagStructure

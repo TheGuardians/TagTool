@@ -10,6 +10,6 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x14)]
     public class VectorartvertexBufferDescriptor : TagStructure
     {
-        public byte[] Vertices;
+        public TagData Vertices;
     }
 }

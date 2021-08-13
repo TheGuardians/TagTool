@@ -410,11 +410,18 @@ namespace TagTool.Cache.Gen4
                 if (resource.ResourceTypeIndex != -1 && GetResourceTypeName(resource) == "sound_resource_definition")
                     return compressed;
             
-                //if (page.Codec == -1)
+                if(page.Codec == -1)
                     reader.BaseStream.Read(decompressed, 0, page.FileSize);
-                //else
-                //    using (var readerDeflate = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
-                //        readerDeflate.Read(decompressed, 0, page.Size);
+                else
+                {
+                    int decompressionContext = 0;
+                    int outSize = decompressed.Length;
+                    int inSize = compressed.Length;
+                    XCompress.XMemCreateDecompressionContext(XCompress.XMemCodecType.LZX, 0, 0, ref decompressionContext);
+                    XCompress.XMemResetDecompressionContext(decompressionContext);           
+                    XCompress.XMemDecompressStream(decompressionContext, decompressed, ref outSize, compressed, ref inSize);
+                    XCompress.XMemDestroyDecompressionContext(decompressionContext);
+                }
             }
 
             return decompressed;

@@ -10,8 +10,8 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x50)]
     public class RenderTextureInterleavedInteropDefinition : TagStructure
     {
-        public byte[] PixelData;
-        public byte[] MediumResData;
+        public TagData PixelData;
+        public TagData MediumResData;
         [TagField(Length = 2)]
         public RenderTextureFormatDefinition[]  InterleavedTextures;
         

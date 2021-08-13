@@ -10,6 +10,6 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x14)]
     public class SoundResourceDefinition : TagStructure
     {
-        public byte[] SampleData;
+        public TagData SampleData;
     }
 }

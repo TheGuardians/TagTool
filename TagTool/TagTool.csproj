@@ -666,6 +666,7 @@
     <Compile Include="Havok\HavokDatum.cs" />
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
+    <Compile Include="IO\XCompress.cs" />
     <Compile Include="Pathfinding\PathfindingGeometry.cs" />
     <Compile Include="Pathfinding\Utils\PathfindingConverter.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />

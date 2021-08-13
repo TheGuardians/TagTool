@@ -10,9 +10,9 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x50)]
     public class RenderTextureInteropDefinition : TagStructure
     {
-        public byte[] PixelData;
-        public byte[] MediumResData;
-        public byte[] HighResData;
+        public TagData PixelData;
+        public TagData MediumResData;
+        public TagData HighResData;
         public short Width;
         public short Height;
         public sbyte Depth;

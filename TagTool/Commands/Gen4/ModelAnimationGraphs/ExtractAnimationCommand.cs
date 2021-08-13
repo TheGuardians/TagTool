@@ -105,7 +105,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount,
                 resourcemember.NodeCount, CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0),
                 (FrameInfoType)resourcemember.MovementDataType);
-            using (var stream = new MemoryStream(resourcemember.AnimationData))
+            using (var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using (var reader = new EndianReader(stream, CacheContext.Endianness))
             {
                 data.Read(reader);

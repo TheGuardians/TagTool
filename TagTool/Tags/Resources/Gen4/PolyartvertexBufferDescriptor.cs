@@ -10,7 +10,7 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x18)]
     public class PolyartvertexBufferDescriptor : TagStructure
     {
-        public byte[] Vertices;
+        public TagData Vertices;
         public int VertexType;
     }
 }

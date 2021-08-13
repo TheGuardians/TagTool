@@ -10,6 +10,6 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x14)]
     public class PolyartindexBufferDescriptor : TagStructure
     {
-        public byte[] IndexData;
+        public TagData IndexData;
     }
 }

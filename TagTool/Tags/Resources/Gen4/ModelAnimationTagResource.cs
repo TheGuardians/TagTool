@@ -21,7 +21,8 @@ namespace TagTool.Tags.Resources.Gen4
             public sbyte NodeCount;
             public FrameInfoTypeEnum MovementDataType;
             public PackedDataSizesStruct DataSizes;
-            public byte[] AnimationData;
+            [TagField(DataAlign = 0x10)]
+            public TagData AnimationData;
             
             public enum FrameInfoTypeEnum : sbyte
             {
