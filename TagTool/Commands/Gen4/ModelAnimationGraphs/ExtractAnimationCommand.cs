@@ -100,12 +100,12 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
         public AnimationResourceData BuildAnimationResourceData(AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct animationblock)
         {
             var resourceref = Animation.TagResourceGroups[animationblock.SharedAnimationData[0].ResourceGroup].TagResource;
-            var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResource(resourceref);
+            var resourcedata = ((GameCacheGen4)CacheContext).ResourceCacheGen4.GetModelAnimationTagResourceGen4(resourceref);
             var resourcemember = resourcedata.GroupMembers[animationblock.SharedAnimationData[0].ResourceGroupMember];
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount,
                 resourcemember.NodeCount, CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0),
                 (FrameInfoType)resourcemember.MovementDataType);
-            using (var stream = new MemoryStream(resourcemember.AnimationData.Data))
+            using (var stream = new MemoryStream(resourcemember.AnimationData))
             using (var reader = new EndianReader(stream, CacheContext.Endianness))
             {
                 data.Read(reader);
