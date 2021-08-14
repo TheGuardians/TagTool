@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen4;
 
@@ -10,7 +11,7 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0xC)]
     public class CollisionModelResource : TagStructure
     {
-        public List<CollisionModelBspStruct> Bsps;
+        public TagBlock<CollisionModelBspStruct> Bsps;
         
         [TagStructure(Size = 0x70)]
         public class CollisionModelBspStruct : TagStructure
@@ -18,22 +19,20 @@ namespace TagTool.Tags.Resources.Gen4
             public short NodeIndex;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
-            public GlobalCollisionBspStruct Bsp;
+            public CollisionGeometry Bsp;
             
             [TagStructure(Size = 0x6C)]
             public class GlobalCollisionBspStruct : TagStructure
             {
-                public List<Bsp3dNodesBlockStruct> Bsp3dNodes;
-                public List<Bsp3dKdSupdernodesBlock> Bsp3dSupernodes;
-                public List<PlanesBlock> Planes;
-                public List<CollisionLeafStruct> Leaves;
-                public List<Bsp2dReferencesBlock> Bsp2dReferences;
-                public List<Bsp2dNodesBlock> Bsp2dNodes;
-                public List<SurfacesBlockStruct> Surfaces;
-                public List<EdgesBlock> Edges;
-                public List<VerticesBlock> Vertices;
+                public TagBlock<Bsp3dNodesBlockStruct> Bsp3dNodes;
+                public TagBlock<Bsp3dKdSupdernodesBlock> Bsp3dSupernodes;
+                public TagBlock<PlanesBlock> Planes;
+                public TagBlock<CollisionLeafStruct> Leaves;
+                public TagBlock<Bsp2dReferencesBlock> Bsp2dReferences;
+                public TagBlock<Bsp2dNodesBlock> Bsp2dNodes;
+                public TagBlock<SurfacesBlockStruct> Surfaces;
+                public TagBlock<EdgesBlock> Edges;
+                public TagBlock<VerticesBlock> Vertices;
                 
                 [TagStructure(Size = 0x8)]
                 public class Bsp3dNodesBlockStruct : TagStructure
@@ -107,7 +106,7 @@ namespace TagTool.Tags.Resources.Gen4
                     public short Bsp2dNode;
                 }
                 
-                [TagStructure(Size = 0x10)]
+                [TagStructure(Size = 0xC)]
                 public class Bsp2dNodesBlock : TagStructure
                 {
                     public RealPlane2d Plane;

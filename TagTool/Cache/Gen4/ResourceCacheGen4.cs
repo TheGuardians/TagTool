@@ -143,6 +143,14 @@ namespace TagTool.Cache.Gen4
             return GetResourceDefinition<Tags.Resources.Gen4.ModelAnimationTagResource>(resourceReference);
         }
 
+        public Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "collision_model_resource")
+                return null;
+            return GetResourceDefinition<Tags.Resources.Gen4.CollisionModelResource>(resourceReference);
+        }
+
         public override BinkResource GetBinkResource(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();

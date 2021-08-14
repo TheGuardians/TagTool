@@ -7,8 +7,9 @@ using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
+using CollisionModelGen4 = TagTool.Tags.Definitions.Gen4.CollisionModel;
 
-namespace TagTool.Commands.Porting.gen4
+namespace TagTool.Commands.Porting.Gen4
 {
     partial class PortTagGen4Command : Command
     {
@@ -64,13 +65,16 @@ namespace TagTool.Commands.Porting.gen4
         {
             object definition = Gen4Cache.Deserialize(gen4CacheStream, gen4Tag);
             definition = ConvertData(cacheStream, gen4CacheStream, resourceStreams, definition, definition, gen4Tag.Name);
-
-            var tag = Cache.TagCache.AllocateTag(definition.GetType(), gen4Tag.Name);
+            var destType = Cache.TagCacheGenHO.TagDefinitions.GetTagDefinitionType(gen4Tag.Group.Tag);
+            var tag = Cache.TagCache.AllocateTag(destType, gen4Tag.Name);
 
             switch (definition)
             {
+                case CollisionModelGen4 collisionModel:
+                    definition = ConvertCollisionModel(tag, collisionModel);
+                    break;
                 default:
-                    throw new NotSupportedException($"{tag.Group} tags not supported");
+                    throw new NotSupportedException($"{tag.Group} not supported");
             }
 
             if (definition != null)

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Porting.Gen2;
-using TagTool.Commands.Porting.gen4;
+using TagTool.Commands.Porting.Gen4;
 using TagTool.Commands.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
