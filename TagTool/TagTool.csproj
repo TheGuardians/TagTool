@@ -1629,9 +1629,4 @@ EXIT %25ERRORLEVEL%25</PostBuildEvent>
       <ReferenceCopyLocalPaths Remove="@(ReferenceSatellitePaths)" />
     </ItemGroup>
   </Target>
-  <Target Name="SetupDestinationSubDirectory" AfterTargets="ResolveAssemblyReferences">
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Update="*" DestinationSubDirectory="bin/" />
-    </ItemGroup>
-  </Target>
 </Project>
