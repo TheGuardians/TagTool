@@ -10,7 +10,7 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0xC)]
     public class ModelAnimationTagResource : TagStructure
     {
-        public List<ModelAnimationTagResourceMember> GroupMembers;
+        public TagBlock<ModelAnimationTagResourceMember> GroupMembers;
         
         [TagStructure(Size = 0x68)]
         public class ModelAnimationTagResourceMember : TagStructure

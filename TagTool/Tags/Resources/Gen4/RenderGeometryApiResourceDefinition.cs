@@ -10,10 +10,10 @@ namespace TagTool.Tags.Resources.Gen4
     [TagStructure(Size = 0x30)]
     public class RenderGeometryApiResourceDefinition : TagStructure
     {
-        public List<VertexBuffersBlock> PcVertexBuffers;
-        public List<IndexBuffersBlock> PcIndexBuffers;
-        public List<RenderVertexBufferBlock> XenonVertexBuffers;
-        public List<RenderIndexBufferBlock> XenonIndexBuffers;
+        public TagBlock<VertexBuffersBlock> PcVertexBuffers;
+        public TagBlock<IndexBuffersBlock> PcIndexBuffers;
+        public TagBlock<RenderVertexBufferBlock> XenonVertexBuffers;
+        public TagBlock<RenderIndexBufferBlock> XenonIndexBuffers;
         
         [TagStructure(Size = 0xC)]
         public class VertexBuffersBlock : TagStructure

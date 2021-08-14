@@ -355,7 +355,7 @@ namespace TagTool.Cache.Gen4
             if (ResourceLayoutTable.FilePages[segment.FilePageIndexes[type].PageIndex].Checksum.Checksum == -1)
                 return null;
 
-            return ReadSegmentData(resource, segment.FilePageIndexes[type].PageIndex, /*segment.PageOffsets[type].Offset*/ 0, segment.SubpageTableIndexes[type].SubpageTableIndex);
+            return ReadSegmentData(resource, segment.FilePageIndexes[type].PageIndex, segment.PageOffsets[type].Offset, segment.SubpageTableIndexes[type].SubpageTableIndex);
         }
 
         private byte[] GetPrimaryResource(DatumHandle ID)
