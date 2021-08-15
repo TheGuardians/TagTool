@@ -125,6 +125,7 @@ namespace TagTool.Commands.Editing
             blockContext.AddCommand(new RemoveBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new CopyBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new PasteBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new MoveBlockElementCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new ForEachCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new ExportCommandsCommand(Cache, blockValue as TagStructure));
             blockContext.AddCommand(new ExitToCommand(ContextStack));
