@@ -287,6 +287,9 @@ namespace TagTool.Animations
 
         public string GetAnimationExtension(int type, int frameInfoType, bool worldRelative)
         {
+            if (type < 0)
+                type = 0;
+
             switch ((ModelAnimationGraph.FrameType)type)
             {
                 case ModelAnimationGraph.FrameType.Base:

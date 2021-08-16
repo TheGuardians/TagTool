@@ -11,6 +11,7 @@ using System.Numerics;
 using TagTool.Commands.Common;
 using TagTool.Animations;
 using TagTool.Animations.Data;
+using TagTool.Animations.Codecs;
 using TagTool.Tags.Resources;
 using System.Text;
 using System.Threading.Tasks;
@@ -66,7 +67,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
                 Animation animation = new Animation(renderModelNodes, animationData1);
                 bool worldRelative = animationblock.SharedAnimationData[0].InternalFlags.HasFlag(InternalAnimationFlags.WorldRelative);
-                string animationExtension = animation.GetAnimationExtension((int)animationblock.SharedAnimationData[0].AnimationType, (int)animationblock.SharedAnimationData[0].FrameInfoType, worldRelative);
+                string animationExtension = animation.GetAnimationExtension((int)animationblock.SharedAnimationData[0].AnimationType - 1, (int)animationblock.SharedAnimationData[0].FrameInfoType, worldRelative);
                 string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
                 string fileName = directoryarg + "\\" + str + "." + animationExtension;
                 if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Overlay || 
@@ -102,15 +103,39 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             var resourceref = Animation.TagResourceGroups[animationblock.SharedAnimationData[0].ResourceGroup].TagResource;
             var resourcedata = ((GameCacheGen4)CacheContext).ResourceCacheGen4.GetModelAnimationTagResourceGen4(resourceref);
             var resourcemember = resourcedata.GroupMembers[animationblock.SharedAnimationData[0].ResourceGroupMember];
+            var datasizes = resourcemember.DataSizes;
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount,
-                resourcemember.NodeCount, CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0),
-                (FrameInfoType)resourcemember.MovementDataType);
+                resourcemember.NodeCount, (int)resourcemember.AnimationChecksum,
+                (FrameInfoType)resourcemember.MovementDataType, datasizes.StaticNodeFlags, datasizes.AnimatedNodeFlags);
             using (var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using (var reader = new EndianReader(stream, CacheContext.Endianness))
             {
                 data.Read(reader);
+                if(datasizes.SharedStaticDataSize != 0)
+                {
+                    //shared static data is stored at the end of the stream
+                    reader.BaseStream.Position = resourcemember.AnimationData.Data.Length - datasizes.SharedStaticDataSize;
+                    var sharedstaticcodec = new SharedStaticDataCodec(resourcemember.FrameCount);
+                    sharedstaticcodec.SharedStaticData = Animation.CodecData.SharedStaticCodec;
+                    data.Static_Data = (CodecBase)sharedstaticcodec;
+                    data.Static_Data.Read(reader);
+                }
             }
             return data;
+        }
+
+        public void SetSecondaryModelFlags(ref List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes, int nodeindex)
+        {
+            AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock node = Nodes[nodeindex];
+            node.ModelFlags &= ~AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel;
+            node.ModelFlags |= AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel;
+
+            int nextnodeindex = node.FirstChildNodeIndex;
+            while (nextnodeindex != -1)
+            {
+                SetSecondaryModelFlags(ref Nodes, nextnodeindex);
+                nextnodeindex = Nodes[nextnodeindex].NextSiblingNodeIndex;
+            }           
         }
 
         public List<Node> GetNodeDefaultValues()
@@ -118,24 +143,32 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             List<Node> NodeList = new List<Node>();
             List<RenderModel.RenderModelNodeBlock> PrimaryRenderModelNodes = new List<RenderModel.RenderModelNodeBlock>();
             List<RenderModel.RenderModelNodeBlock> SecondaryRenderModelNodes = new List<RenderModel.RenderModelNodeBlock>();
-            if (Animation.Definitions.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)))
+            List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes = Animation.Definitions.SkeletonNodes;
+
+            if (Nodes.Any(n => CacheContext.StringTable.GetString(n.Name) == "b_gun"))
+            {
+                int nodeindex = Nodes.FindIndex(n => CacheContext.StringTable.GetString(n.Name) == "b_gun");
+                SetSecondaryModelFlags(ref Nodes, nodeindex);
+            }
+
+            if (Nodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)))
             {
                 PrimaryRenderModelNodes = GetRenderModelNodes(
-                    Animation.Definitions.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)).ToList(),
-                    CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0, true));
+                    Nodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)).ToList(),
+                    CalculateNodeListChecksum(Nodes, 0, true));
                 if (PrimaryRenderModelNodes.Count == 0)
                     new TagToolWarning($"Matching primary model not found!");
             }
-            if (Animation.Definitions.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)))
-            {
+            if (Nodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)))
+            { 
                 SecondaryRenderModelNodes = GetRenderModelNodes(
-                    Animation.Definitions.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)).ToList(),
-                    CalculateNodeListChecksum(Animation.Definitions.SkeletonNodes, 0, false));
+                    Nodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)).ToList(),
+                    CalculateNodeListChecksum(Nodes, 0, false));
                 if (SecondaryRenderModelNodes.Count == 0)
                     new TagToolWarning($"Matching secondary model not found!");
             }
 
-            foreach (var skellynode in Animation.Definitions.SkeletonNodes)
+            foreach (var skellynode in Nodes)
             {
                 RenderModel.RenderModelNodeBlock matchingnode = new RenderModel.RenderModelNodeBlock();
                 if (skellynode.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel))

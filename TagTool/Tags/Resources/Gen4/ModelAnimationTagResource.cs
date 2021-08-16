@@ -20,7 +20,7 @@ namespace TagTool.Tags.Resources.Gen4
             public short FrameCount;
             public sbyte NodeCount;
             public FrameInfoTypeEnum MovementDataType;
-            public PackedDataSizesStruct DataSizes;
+            public PackedDataSizesStructActual DataSizes;
             [TagField(DataAlign = 0x10)]
             public TagData AnimationData;
             
@@ -34,7 +34,24 @@ namespace TagTool.Tags.Resources.Gen4
                 XYZAbsolute,
                 Auto
             }
-            
+
+            [TagStructure(Size = 0x48)]
+            public class PackedDataSizesStructActual : TagStructure
+            {
+                public int StaticDataSize;
+                public int CompressedDataSize;
+                public int StaticNodeFlags;
+                public int AnimatedNodeFlags;
+                public int MovementData;
+
+                //These fields are only present in reach+, and seem to be the sizes for some additional animation data.
+                //The animation data uses the same codec layout as regular animation data, and is tacked on to the AnimationData after the nodeflags
+                [TagField(Length = 12)]
+                public int[] UnknownDataSizes;
+
+                public int SharedStaticDataSize;
+            }
+
             [TagStructure(Size = 0x48)]
             public class PackedDataSizesStruct : TagStructure
             {

@@ -13,8 +13,8 @@ namespace TagTool.Animations.Data
 
         public int NodeListChecksum { get; set; }
 
-        public int NodeFlagsSize { get; set; }
-
+        public int StaticFlagsSize { get; set; }
+        public int AnimatedFlagsSize { get; set; }
         public FrameInfoType FrameInfoType { get; set; }
 
         public CodecBase Static_Data { get; set; }
@@ -43,62 +43,65 @@ namespace TagTool.Animations.Data
           int frameCount,
           int nodeCount,
           int nodeListChecksum,
-          FrameInfoType frameInfoType)
+          FrameInfoType frameInfoType,
+          int staticflagssize,
+          int animatedflagssize)
         {
-            this.FrameCount = frameCount;
-            this.NodeCount = nodeCount;
-            this.NodeListChecksum = nodeListChecksum;
-            this.FrameInfoType = frameInfoType;
-            this.NodeFlagsSize = (int)Math.Ceiling((double)nodeCount / 32.0) * 32 / 8 * 3;
+            FrameCount = frameCount;
+            NodeCount = nodeCount;
+            NodeListChecksum = nodeListChecksum;
+            FrameInfoType = frameInfoType;
+            StaticFlagsSize = staticflagssize;
+            AnimatedFlagsSize = animatedflagssize;
         }
 
         public void Read(EndianReader reader)
         {
-            while (this.Animation_Data == null)
+            while (Animation_Data == null)
             {
                 AnimationCodecType codec = (AnimationCodecType)reader.ReadByte();
                 --reader.BaseStream.Position;
                 switch (codec)
                 {
                     case AnimationCodecType.UncompressedStatic:
-                        this.Static_Data = (CodecBase)new UncompressedStaticDataCodec(this.FrameCount);
-                        this.Static_Data.Read(reader);
+                        Static_Data = (CodecBase)new UncompressedStaticDataCodec(FrameCount);
+                        Static_Data.Read(reader);
                         continue;
                     case AnimationCodecType._8ByteQuantizedRotationOnly:
-                        this.Animation_Data = (CodecBase)new _8ByteQuantizedRotationOnlyCodec(this.FrameCount);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new _8ByteQuantizedRotationOnlyCodec(FrameCount);
+                        Animation_Data.Read(reader);
                         continue;
                     case AnimationCodecType.ByteKeyframeLightlyQuantized:
-                        this.Animation_Data = (CodecBase)new KeyframeLightlyQuantizedCodec(this.FrameCount, 1);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new KeyframeLightlyQuantizedCodec(FrameCount, 1);
+                        Animation_Data.Read(reader);
                         continue;
                     case AnimationCodecType.WordKeyframeLightlyQuantized:
-                        this.Animation_Data = (CodecBase)new KeyframeLightlyQuantizedCodec(this.FrameCount, 2);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new KeyframeLightlyQuantizedCodec(FrameCount, 2);
+                        Animation_Data.Read(reader);
                         continue;
                     case AnimationCodecType.ReverseByteKeyframeLightlyQuantized:
-                        this.Animation_Data = (CodecBase)new ReverseKeyframeLightlyQuantizedCodec(this.FrameCount, 1);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new ReverseKeyframeLightlyQuantizedCodec(FrameCount, 1);
+                        Animation_Data.Read(reader);
                         continue;
                     case AnimationCodecType.ReverseWordKeyframeLightlyQuantized:
-                        this.Animation_Data = (CodecBase)new ReverseKeyframeLightlyQuantizedCodec(this.FrameCount, 2);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new ReverseKeyframeLightlyQuantizedCodec(FrameCount, 2);
+                        Animation_Data.Read(reader);
                         continue;
                     case AnimationCodecType.BlendScreen:
-                        this.Animation_Data = (CodecBase)new BlendScreenCodec(this.FrameCount);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new BlendScreenCodec(FrameCount);
+                        Animation_Data.Read(reader);
                         continue;
                     case AnimationCodecType.Curve:
-                        this.Animation_Data = (CodecBase)new CurveCodec(this.FrameCount);
-                        this.Animation_Data.Read(reader);
+                        Animation_Data = (CodecBase)new CurveCodec(FrameCount);
+                        Animation_Data.Read(reader);
                         continue;
                     default:
                         throw new Exception("Animation codec not recognized or supported.");
                 }
             }
-            if (this.Static_Data != null)
+            if (StaticFlagsSize != 0)
             {
-                int length = this.NodeFlagsSize / 3 / 4;
+                int length = StaticFlagsSize / 3 / 4;
                 int[] values1 = new int[length];
                 int[] values2 = new int[length];
                 int[] values3 = new int[length];
@@ -108,16 +111,16 @@ namespace TagTool.Animations.Data
                     values2[index] = reader.ReadInt32();
                 for (int index = 0; index < length; ++index)
                     values3[index] = reader.ReadInt32();
-                this.StaticRotatedNodeFlags = new BitArray(values1);
-                this.StaticTranslatedNodeFlags = new BitArray(values2);
-                this.StaticScaledNodeFlags = new BitArray(values3);
-                this.StaticRotatedNodeFlags.Length = this.NodeCount;
-                this.StaticTranslatedNodeFlags.Length = this.NodeCount;
-                this.StaticScaledNodeFlags.Length = this.NodeCount;
+                StaticRotatedNodeFlags = new BitArray(values1);
+                StaticTranslatedNodeFlags = new BitArray(values2);
+                StaticScaledNodeFlags = new BitArray(values3);
+                StaticRotatedNodeFlags.Length = NodeCount;
+                StaticTranslatedNodeFlags.Length = NodeCount;
+                StaticScaledNodeFlags.Length = NodeCount;
             }
-            if (this.Animation_Data != null)
+            if (AnimatedFlagsSize != 0)
             {
-                int length = this.NodeFlagsSize / 3 / 4;
+                int length = AnimatedFlagsSize / 3 / 4;
                 int[] values1 = new int[length];
                 int[] values2 = new int[length];
                 int[] values3 = new int[length];
@@ -127,17 +130,17 @@ namespace TagTool.Animations.Data
                     values2[index] = reader.ReadInt32();
                 for (int index = 0; index < length; ++index)
                     values3[index] = reader.ReadInt32();
-                this.AnimatedRotatedNodeFlags = new BitArray(values1);
-                this.AnimatedTranslatedNodeFlags = new BitArray(values2);
-                this.AnimatedScaledNodeFlags = new BitArray(values3);
-                this.AnimatedRotatedNodeFlags.Length = this.NodeCount;
-                this.AnimatedTranslatedNodeFlags.Length = this.NodeCount;
-                this.AnimatedScaledNodeFlags.Length = this.NodeCount;
+                AnimatedRotatedNodeFlags = new BitArray(values1);
+                AnimatedTranslatedNodeFlags = new BitArray(values2);
+                AnimatedScaledNodeFlags = new BitArray(values3);
+                AnimatedRotatedNodeFlags.Length = NodeCount;
+                AnimatedTranslatedNodeFlags.Length = NodeCount;
+                AnimatedScaledNodeFlags.Length = NodeCount;
             }
-            if (this.FrameInfoType <= FrameInfoType.None)
+            if (FrameInfoType <= FrameInfoType.None)
                 return;
-            this.Movement_Data = new MovementData(this.FrameInfoType, this.FrameCount);
-            this.Movement_Data.Read(reader);
+            Movement_Data = new MovementData(FrameInfoType, FrameCount);
+            Movement_Data.Read(reader);
         }
 
         public void Write(EndianWriter writer) => throw new NotImplementedException();

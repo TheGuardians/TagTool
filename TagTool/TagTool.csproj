@@ -234,6 +234,7 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
+    <Compile Include="Animations\Codecs\SharedStaticDataCodec.cs" />
     <Compile Include="Animations\Common\AnimatedCodecHeader.cs" />
     <Compile Include="Animations\Animation.cs" />
     <Compile Include="Animations\Common\AnimationCodecHeader.cs" />

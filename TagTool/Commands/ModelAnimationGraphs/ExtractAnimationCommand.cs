@@ -99,9 +99,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var resourceref = Animation.ResourceGroups[animationblock.AnimationData.ResourceGroupIndex].ResourceReference;
             var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResource(resourceref);
             var resourcemember = resourcedata.GroupMembers[animationblock.AnimationData.ResourceGroupMemberIndex];
+            var staticflagssize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticNodeFlags : resourcemember.PackedDataSizes.StaticNodeFlags;
+            var animatedflagssize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.AnimatedNodeFlags : resourcemember.PackedDataSizes.AnimatedNodeFlags;
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount, 
                 resourcemember.NodeCount, CalculateNodeListChecksum(Animation.SkeletonNodes, 0), 
-                (FrameInfoType)resourcemember.MovementDataType);
+                (FrameInfoType)resourcemember.MovementDataType, staticflagssize, animatedflagssize);
             using(var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using(var reader = new EndianReader(stream, CacheContext.Endianness))
             {
