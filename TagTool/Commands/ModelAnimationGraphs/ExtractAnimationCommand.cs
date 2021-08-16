@@ -60,8 +60,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<Node> renderModelNodes = GetNodeDefaultValues();
             foreach (var animationindex in AnimationIndices)
             {
+                if (CacheContext.Version == CacheVersion.HaloReach)
+                    Animation.Animations[animationindex].AnimationData = Animation.Animations[animationindex].AnimationDataBlock[0];
                 ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];            
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
+                if (animationData1 == null)
+                    continue;
                 Animation animation = new Animation(renderModelNodes, animationData1);
                 bool worldRelative = animationblock.AnimationData.InternalFlags.HasFlag(ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative);
                 string animationExtension = animation.GetAnimationExtension((int)animationblock.AnimationData.AnimationType, (int)animationblock.AnimationData.FrameInfoType, worldRelative);
@@ -107,7 +111,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
             using(var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using(var reader = new EndianReader(stream, CacheContext.Endianness))
             {
-                data.Read(reader);
+                if (!data.Read(reader))
+                    return null;
             }
             return data;
         }

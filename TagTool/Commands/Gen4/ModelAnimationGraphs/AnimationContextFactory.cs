@@ -24,7 +24,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
 
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, ModelAnimationGraph jmad)
         {
-            commandContext.AddCommand(new ExtractAnimationCommand(cache, jmad));
+            commandContext.AddCommand(new ExtractAnimationCommand(cache, jmad, tag));
         }
     }
 }

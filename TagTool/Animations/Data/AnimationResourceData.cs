@@ -2,6 +2,7 @@
 using TagTool.IO;
 using System;
 using System.Collections;
+using TagTool.Commands.Common;
 
 namespace TagTool.Animations.Data
 {
@@ -55,7 +56,7 @@ namespace TagTool.Animations.Data
             AnimatedFlagsSize = animatedflagssize;
         }
 
-        public void Read(EndianReader reader)
+        public bool Read(EndianReader reader)
         {
             while (Animation_Data == null)
             {
@@ -96,7 +97,8 @@ namespace TagTool.Animations.Data
                         Animation_Data.Read(reader);
                         continue;
                     default:
-                        throw new Exception("Animation codec not recognized or supported.");
+                        new TagToolWarning($"Animation codec {codec} not recognized or supported.");
+                        return false;
                 }
             }
             if (StaticFlagsSize != 0)
@@ -138,9 +140,10 @@ namespace TagTool.Animations.Data
                 AnimatedScaledNodeFlags.Length = NodeCount;
             }
             if (FrameInfoType <= FrameInfoType.None)
-                return;
+                return true;
             Movement_Data = new MovementData(FrameInfoType, FrameCount);
             Movement_Data.Read(reader);
+            return true;
         }
 
         public void Write(EndianWriter writer) => throw new NotImplementedException();

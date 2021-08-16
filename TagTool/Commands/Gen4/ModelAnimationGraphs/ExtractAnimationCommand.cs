@@ -24,8 +24,9 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
     {
         private GameCache CacheContext { get; }
         private ModelAnimationGraph Animation { get; set; }
+        private CachedTag Tag { get; }
 
-        public ExtractAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation)
+        public ExtractAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag tag)
             : base(false,
 
                   "ExtractAnimation",
@@ -36,7 +37,8 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                   "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file. Use the index of the animation as the first argument or 'all' to extract all animations in this jmad.")
         {
             CacheContext = cachecontext;
-            Animation = animation;
+            Animation = animation.DeepClone();
+            Tag = tag;
         }
 
         public override object Execute(List<string> args)
@@ -62,9 +64,26 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
 
             List<Node> renderModelNodes = GetNodeDefaultValues();
             foreach (var animationindex in AnimationIndices)
-            {
+            {   
+                //some animations use data that is shared from other animations
+                if(Animation.Definitions.Animations[animationindex].SharedAnimationReference.GraphReference != null)
+                {
+                    if(Animation.Definitions.Animations[animationindex].SharedAnimationReference.GraphReference.Index == Tag.Index)
+                    {
+                        int sharedindex = Animation.Definitions.Animations[animationindex].SharedAnimationReference.SharedAnimationIndex;
+                        Animation.Definitions.Animations[animationindex].SharedAnimationData = Animation.Definitions.Animations[sharedindex].SharedAnimationData.DeepClone();
+                    }
+                    else
+                    {
+                        new TagToolWarning("Shared animation data from other jmad tags not supported!");
+                        continue;
+                    }
+                }
                 AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct animationblock = Animation.Definitions.Animations[animationindex];
+
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
+                if (animationData1 == null)
+                    continue;
                 Animation animation = new Animation(renderModelNodes, animationData1);
                 bool worldRelative = animationblock.SharedAnimationData[0].InternalFlags.HasFlag(InternalAnimationFlags.WorldRelative);
                 string animationExtension = animation.GetAnimationExtension((int)animationblock.SharedAnimationData[0].AnimationType - 1, (int)animationblock.SharedAnimationData[0].FrameInfoType, worldRelative);
@@ -77,6 +96,8 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                     if (baseAnimation1 != null)
                     {
                         AnimationResourceData animationData2 = BuildAnimationResourceData(baseAnimation1);
+                        if (animationData2 == null)
+                            continue;
                         Animation baseAnimation2 = new Animation(renderModelNodes, animationData2);
                         if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Overlay)
                         {
@@ -110,7 +131,8 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             using (var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using (var reader = new EndianReader(stream, CacheContext.Endianness))
             {
-                data.Read(reader);
+                if (!data.Read(reader))
+                    return null;
                 if(datasizes.SharedStaticDataSize != 0)
                 {
                     //shared static data is stored at the end of the stream
@@ -232,8 +254,26 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
         }
         public AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct GetBaseAnimation(string animationName)
         {
-            var baseanims = Animation.Definitions.Animations.Where(q => q.SharedAnimationData[0].AnimationType == 0 && q.SharedAnimationData[0].FrameInfoType == 0);
-            char separatorChar = ':';
+            List<AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct> baseanims = new List<AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct>();
+            foreach(var anim in Animation.Definitions.Animations)
+            {
+                //some animations use data that is shared from other animations
+                if (anim.SharedAnimationReference.GraphReference != null)
+                {
+                    if (anim.SharedAnimationReference.GraphReference.Index == Tag.Index)
+                    {
+                        int sharedindex = anim.SharedAnimationReference.SharedAnimationIndex;
+                        anim.SharedAnimationData = Animation.Definitions.Animations[sharedindex].SharedAnimationData.DeepClone();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                if (anim.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Base && anim.SharedAnimationData[0].FrameInfoType == FrameInfoTypeEnum.None)
+                    baseanims.Add(anim);
+            }
+             char separatorChar = ':';
             string[] strArray = animationName.Split(separatorChar);
             string baseAnimationPrefix = strArray.First();
             if (animationName.StartsWith("s_ping"))
