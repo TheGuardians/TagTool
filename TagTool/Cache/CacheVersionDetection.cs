@@ -158,7 +158,13 @@ namespace TagTool.Cache
                     version = CacheVersion.HaloReach;
                     cachePlatform = CachePlatform.Original;
                     break;
-                case "20810.12.09.22.1647.main":
+                case "21122.12.11.21.0101.main":
+                case "21165.12.12.12.0112.main":
+                case "21339.13.02.05.0117.main":
+                case "21391.13.03.13.1711.main":
+                case "21401.13.04.23.1849.main":
+                case "21501.13.08.06.2311.main":
+                case "21522.13.10.17.1936.main":
                     version = CacheVersion.Halo4;
                     cachePlatform = CachePlatform.Original;
                     break;
