@@ -23,13 +23,16 @@ namespace TagTool.Commands.Common
 
                 "CS - Start an interactive shell.\n" +
                 "CS <statement> - Executes the given statement.\n" +
-                "CS < \"path to .cs file\" - Executes the given file.\n\n" +
-               
+                "CS < \"path to .cs file\" [Arguments] - Executes the given file.\n" +
+                "CS ! - Clear the current state\n\n" +
+
                 "Globals:\n" +
+                "Args - The list of arguments that were passed to the script file.\n" +
                 "Cache - The current cache.\n" + 
                 "Definition - The current tag definition. (EditTag)\n" +
                 "Tag - The current tag. (EditTag)\n" +
-                "Element - The current block element. (EditBlock)\n")
+                "Element - The current block element. (EditBlock)\n"
+                )
         {
             Context.Cache = cache;
             Context.Definition = definition;
@@ -39,6 +42,8 @@ namespace TagTool.Commands.Common
 
         public override object Execute(List<string> args)
         {
+            Context.Args.Clear();
+
             if (args.Count == 0)
             {
                 // when no arguments are given, create an interactive shell
@@ -57,13 +62,13 @@ namespace TagTool.Commands.Common
                     if (line == ":x")
                         break;
 
-                    lines += line;
+                    lines += $"{line}\r\n";
                 }
 
                 if (!quit)
                     EvaluateScript(lines);
             }
-            else if (args.Count == 2 && args[0].Trim() == "<")
+            else if (args.Count > 1 && args[0].Trim() == "<")
             {
                 // pipe a script file e.g   cs << "path to script"
 
@@ -71,14 +76,17 @@ namespace TagTool.Commands.Common
                 if (!scriptFile.Exists)
                     return new TagToolError(CommandError.FileNotFound, scriptFile.FullName);
 
+                args.RemoveRange(0, 2);
+                Context.Args = args;
+
                 var input = File.ReadAllText(scriptFile.FullName);
                 EvaluateScript(input);
             }
-            else if (args.Count == 2 && args[0].Trim() == "!")
+            else if (args.Count == 1 && args[0].Trim() == "!")
             {
                 // clear the state
-
                 State = null;
+                Console.Write("State cleared.");
             }
             else
             {
@@ -207,6 +215,8 @@ namespace TagTool.Commands.Common
             private WeakReference<dynamic> _definition;
             private WeakReference<dynamic> _element;
             private WeakReference<CachedTag> _tag;
+
+            public List<string> Args = new List<string>();
 
             public GameCache Cache
             {
