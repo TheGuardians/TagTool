@@ -129,7 +129,7 @@ namespace TagTool.Commands.Editing
             blockContext.AddCommand(new ForEachCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new ExportCommandsCommand(Cache, blockValue as TagStructure));
             blockContext.AddCommand(new ExitToCommand(ContextStack));
-            blockContext.AddCommand(new ExecuteCSharpCommand(Cache, Owner, blockValue));
+            blockContext.AddCommand(new ExecuteCSharpCommand(Cache, Tag, Owner, blockValue));
             ContextStack.Push(blockContext);
 
             if (deferredNames.Count != 0)

@@ -13,7 +13,8 @@ namespace TagTool.Commands.Common
     {
         public CommandContextStack ContextStack;
         public bool EOF { get; private set; } = false;
-        public static string CommandLine;
+        [ThreadStatic] public static string CommandLine;
+        [ThreadStatic] public static CommandRunner Current;
 
         public CommandRunner(CommandContextStack contextStack)
         {
@@ -31,7 +32,7 @@ namespace TagTool.Commands.Common
             return commandLine;
         }
 
-        public void RunCommand(string commandLine, bool printInput)
+        public void RunCommand(string commandLine, bool printInput = false)
         {
             if (commandLine == null)
             {
@@ -39,6 +40,7 @@ namespace TagTool.Commands.Common
                 return;
             }
 
+            Current = this;
             CommandLine = commandLine = PreprocessCommandLine(commandLine);
             if (commandLine == null)
                 return;
