@@ -158,7 +158,8 @@ namespace TagTool.Cache
                     version = CacheVersion.HaloReach;
                     cachePlatform = CachePlatform.Original;
                     break;
-                case "15116.12.05.31.0300.e3": //E3 War Gamrd
+                case "20810.12.09.22.1647.main":
+                case "15116.12.05.31.0300.e3": //E3 War Games
                 case "15117.12.05.31.0300.e3": //E3 Spartan Ops
                 case "15119.12.05.31.0400.e3m60": //E3 Campaign
                 case "19057.12.08.19.0400.main": //Possible Other Names Include: "19057.12.08.19.0400.main__cache_debug"
