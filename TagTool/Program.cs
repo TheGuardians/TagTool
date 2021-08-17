@@ -103,7 +103,14 @@ namespace TagTool.Commands
             {
                 commandRunner.RunCommand(string.Join(" ", autoexecCommand), false);
                 goto end;
-            }           
+            }
+
+            var autoExecFile = new FileInfo(Path.Combine(TagToolDirectory, "autoexec.cmds"));
+            if(autoExecFile.Exists)
+            {
+                foreach (var line in File.ReadAllLines(autoExecFile.FullName))
+                    commandRunner.RunCommand(line);
+            }
 
             Console.WriteLine("Enter \"help\" to list available commands. Enter \"exit\" to quit.");
             while (!commandRunner.EOF)
