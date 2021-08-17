@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 
 namespace TagTool.Commands.Common
@@ -12,7 +13,7 @@ namespace TagTool.Commands.Common
         private static ScriptState<object> State;
         private static EvaluationContext Context = new EvaluationContext();
 
-        public ExecuteCSharpCommand(GameCache cache, object definition = null, object element = null) :
+        public ExecuteCSharpCommand(GameCache cache, CachedTag tag = null, object definition = null, object element = null) :
             base(false, 
 
                 "CS",
@@ -21,11 +22,19 @@ namespace TagTool.Commands.Common
                 "CS [code]",
 
                 "CS - Start an interactive shell.\n" +
-                "CS < \"path to .cs file\" - Executes the given file.\n")
+                "CS <statement> - Executes the given statement.\n" +
+                "CS < \"path to .cs file\" - Executes the given file.\n\n" +
+               
+                "Globals:\n" +
+                "Cache - The current cache.\n" + 
+                "Definition - The current tag definition. (EditTag)\n" +
+                "Tag - The current tag. (EditTag)\n" +
+                "Element - The current block element. (EditBlock)\n")
         {
             Context.Cache = cache;
             Context.Definition = definition;
             Context.Element = element;
+            Context.Tag = tag;
         }
 
         public override object Execute(List<string> args)
@@ -87,20 +96,28 @@ namespace TagTool.Commands.Common
         public static object EvaluateScript(string input, bool inline = false)
         {
             var scriptOptions = ScriptOptions.Default
+                .WithAllowUnsafe(true)
+                .WithOptimizationLevel(Microsoft.CodeAnalysis.OptimizationLevel.Debug)
                 .WithReferences(typeof(ExecuteCSharpCommand).Assembly)
-                .WithImports
-                (
+                .WithImports(
                     "System",
-                    "System.Text",
                     "System.IO",
-                    "System.Collections",
-                    "System.Collections.Generic",
+                    "System.Text",
                     "System.Linq",
+                    "System.Collections.Generic",
+                    "System.Collections",
                     "TagTool",
                     "TagTool.Common",
+                    "TagTool.IO",
+                    "TagTool.Serialization",
+                    "TagTool.Extensions",
                     "TagTool.Cache",
-                    "TagTool.Tags.Definitions"
-                );
+                    "TagTool.Tags",
+                    "TagTool.Tags.Definitions",
+                    "TagTool.Tags.Resources",
+                    "TagTool.Commands",
+                    "TagTool.Commands.Common");
+               
 
             try
             {
@@ -138,47 +155,6 @@ namespace TagTool.Commands.Common
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(valueStr);
             Console.ForegroundColor = previousColor;
-        }
-
-        public class EvaluationContext
-        {
-            // We want to use weak references as we don't own these objects and should not
-            // participate in their lifetime. If we didn't, we'd have to have code that
-            // sets them to null whenever a context is popped, or it would leak.
-            private WeakReference<GameCache> _cache;
-            private WeakReference<dynamic> _definition;
-            private WeakReference<dynamic> _element;
-
-            public GameCache Cache
-            {
-                get => GetValue(_cache);
-                set => SetValue(ref _cache, value);
-            }
-
-            public dynamic Definition
-            {
-                get => GetValue(_definition);
-                set => SetValue(ref _definition, value);
-            }
-
-            public dynamic Element
-            {
-                get => GetValue(_element);
-                set => SetValue(ref _element, value);
-            }
-
-            private void SetValue<T>(ref WeakReference<T> reference, T value) where T : class
-            {
-                reference = new WeakReference<T>(value);
-            }
-
-            private T GetValue<T>(WeakReference<T> reference) where T : class
-            {
-                if (reference.TryGetTarget(out var value))
-                    return value;
-                else
-                    return default(T);
-            }
         }
 
         public static string EvaluateInlineExpressions(string input, int offset = 0)
@@ -220,6 +196,54 @@ namespace TagTool.Commands.Common
             }
 
             return input;
+        }
+
+        public class EvaluationContext
+        {
+            // We want to use weak references as we don't own these objects and should not
+            // participate in their lifetime. If we didn't, we'd have to have code that
+            // sets them to null whenever a context is popped, or it would leak.
+            private WeakReference<GameCache> _cache;
+            private WeakReference<dynamic> _definition;
+            private WeakReference<dynamic> _element;
+            private WeakReference<CachedTag> _tag;
+
+            public GameCache Cache
+            {
+                get => GetValue(_cache);
+                set => SetValue(ref _cache, value);
+            }
+
+            public dynamic Definition
+            {
+                get => GetValue(_definition);
+                set => SetValue(ref _definition, value);
+            }
+
+            public dynamic Element
+            {
+                get => GetValue(_element);
+                set => SetValue(ref _element, value);
+            }
+
+            public dynamic Tag
+            {
+                get => GetValue(_tag);
+                set => SetValue(ref _tag, value);
+            }
+
+            private void SetValue<T>(ref WeakReference<T> reference, T value) where T : class
+            {
+                reference = new WeakReference<T>(value);
+            }
+
+            private T GetValue<T>(WeakReference<T> reference) where T : class
+            {
+                if (reference.TryGetTarget(out var value))
+                    return value;
+                else
+                    return default(T);
+            }
         }
     }
 }
