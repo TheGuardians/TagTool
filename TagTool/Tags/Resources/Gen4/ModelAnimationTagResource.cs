@@ -43,10 +43,11 @@ namespace TagTool.Tags.Resources.Gen4
                 public int StaticNodeFlags;
                 public int AnimatedNodeFlags;
                 public int MovementData;
+                public int PillOffsetData;
 
                 //These fields are only present in reach+, and seem to be the sizes for some additional animation data.
                 //The animation data uses the same codec layout as regular animation data, and is tacked on to the AnimationData after the nodeflags
-                [TagField(Length = 12)]
+                [TagField(Length = 11)]
                 public int[] UnknownDataSizes;
 
                 public int SharedStaticDataSize;

@@ -8,13 +8,13 @@ using TagTool.Cache;
 
 namespace TagTool.Animations.Codecs
 {
-    public class CurveCodec : CodecBase
+    public class RevisedCurveCodec : CodecBase
     {
         public uint PayloadDataOffset { get; set; }
 
         public uint TotalCompressedSize { get; set; }
 
-        public CurveCodec(int framecount)
+        public RevisedCurveCodec(int framecount)
           : base(framecount)
         {
         }
@@ -65,24 +65,24 @@ namespace TagTool.Animations.Codecs
                     Quaternion q;
                     if ((num3 & 1) == 1)
                     {
-                        q = DecompressQuat((float)reader.ReadInt16() / (float)short.MaxValue, (float)reader.ReadInt16() / (float)short.MaxValue, (float)reader.ReadInt16() / (float)short.MaxValue);
+                        q = DecompressRevisedQuat(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16());
                     }
                     else
                     {
                         if (intList[index2] == frameindex && frameindex < FrameCount - 1)
                         {
-                            float i1 = (float)reader.ReadInt16() / (float)short.MaxValue;
-                            float j1 = (float)reader.ReadInt16() / (float)short.MaxValue;
-                            float w1 = (float)reader.ReadInt16() / (float)short.MaxValue;
+                            short i1 = reader.ReadInt16();
+                            short j1 = reader.ReadInt16();
+                            short w1 = reader.ReadInt16();
                             num6 = reader.ReadByte();
                             num7 = reader.ReadByte();
                             num8 = reader.ReadByte();
                             num9 = reader.ReadByte();
-                            float i2 = (float)reader.ReadInt16() / (float)short.MaxValue;
-                            float j2 = (float)reader.ReadInt16() / (float)short.MaxValue;
-                            float w2 = (float)reader.ReadInt16() / (float)short.MaxValue;
-                            p1 = DecompressQuat(i1, j1, w1);
-                            p2 = DecompressQuat(i2, j2, w2);
+                            short i2 = reader.ReadInt16();
+                            short j2 = reader.ReadInt16();
+                            short w2 = reader.ReadInt16();
+                            p1 = DecompressRevisedQuat(i1, j1, w1);
+                            p2 = DecompressRevisedQuat(i2, j2, w2);
                             num10 = intList[index2];
                             num11 = intList[index2 + 1];
                             ++index2;
@@ -242,7 +242,7 @@ namespace TagTool.Animations.Codecs
             return keyframelist;
         }
 
-        protected Quaternion DecompressQuat(float i, float j, float w)
+        protected Quaternion DecompressQuatOld(float i, float j, float w)
         {
             float num = (float)Math.Sqrt((double)Math.Max((float)(1.0 - (double)i * (double)i - (double)j * (double)j), 0.0f));
             if ((double)w < 0.0)
@@ -252,6 +252,25 @@ namespace TagTool.Animations.Codecs
             j *= (float)Math.Sqrt(1.0 - (double)w * (double)w);
             float k = num * (float)Math.Sqrt(1.0 - (double)w * (double)w);
             return new Quaternion(i, j, k, w);
+        }
+
+        protected Quaternion DecompressRevisedQuat(short v3, short v4, short v5)
+        {
+            float v6 = (float)(((float)(v3 & 0xFFFE) / short.MaxValue) * 0.70710677);
+            float v7 = (float)(((float)(v4 & 0xFFFE) / short.MaxValue) * 0.70710677);
+            float v8 = (float)(((float)(v5 & 0xFFFE) / short.MaxValue) * 0.70710677);
+            float v9 = (float)Math.Sqrt(1.0f - (float)((float)((float)(v7 * v7) + (float)(v6 * v6)) + (float)(v8 * v8)));
+            if ((v3 & 1) != 0)
+                v9 = -v9;
+
+            byte v10 = (byte)(v5 & 1 | (2 * (v4 & 1)));
+            float[] output = new float[4];
+            output[(v10 + 1) & 3] = (float)v6;
+            output[(v10 - 2) & 3] = (float)v7;
+            output[(v10 - 1) & 3] = (float)v8;
+            output[v10] = (float)v9;
+
+            return new Quaternion(output[0], output[1], output[2], output[3]);
         }
 
         protected float CalculateTangent(int tanComponent, float p1, float p2) => (float)((double)Math.Abs((float)tanComponent / 7f) * ((double)tanComponent / 7.0 * 0.300000011920929) + ((double)p2 - (double)p1));

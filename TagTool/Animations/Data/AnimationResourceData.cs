@@ -96,6 +96,10 @@ namespace TagTool.Animations.Data
                         Animation_Data = (CodecBase)new CurveCodec(FrameCount);
                         Animation_Data.Read(reader);
                         continue;
+                    case AnimationCodecType.RevisedCurve:
+                        Animation_Data = (CodecBase)new RevisedCurveCodec(FrameCount);
+                        Animation_Data.Read(reader);
+                        continue;
                     default:
                         new TagToolWarning($"Animation codec {codec} not recognized or supported.");
                         return false;
