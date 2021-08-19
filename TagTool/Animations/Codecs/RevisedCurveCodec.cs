@@ -256,10 +256,10 @@ namespace TagTool.Animations.Codecs
 
         protected Quaternion DecompressRevisedQuat(short v3, short v4, short v5)
         {
-            float v6 = (float)(((float)(v3 & 0xFFFE) / short.MaxValue) * 0.70710677);
-            float v7 = (float)(((float)(v4 & 0xFFFE) / short.MaxValue) * 0.70710677);
-            float v8 = (float)(((float)(v5 & 0xFFFE) / short.MaxValue) * 0.70710677);
-            float v9 = (float)Math.Sqrt(1.0f - (float)((float)((float)(v7 * v7) + (float)(v6 * v6)) + (float)(v8 * v8)));
+            float v6 = (float)(((float)((short)(v3 & 0xFFFE)) / short.MaxValue) * 0.70710677);
+            float v7 = (float)(((float)((short)(v4 & 0xFFFE)) / short.MaxValue) * 0.70710677);
+            float v8 = (float)(((float)((short)(v5 & 0xFFFE)) / short.MaxValue) * 0.70710677);
+            float v9 = (float)Math.Sqrt(Math.Max(0.0f, 1.0f - (float)((float)((float)(v7 * v7) + (float)(v6 * v6)) + (float)(v8 * v8))));
             if ((v3 & 1) != 0)
                 v9 = -v9;
 

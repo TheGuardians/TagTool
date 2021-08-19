@@ -302,6 +302,7 @@ namespace TagTool.Animations
                         case FrameInfoType.DxDyDyaw:
                             return "JMT";
                         case FrameInfoType.DxDyDzDyaw:
+                        case FrameInfoType.DxDyDzDangleAxis:
                             return "JMZ";
                     }
                     break;
