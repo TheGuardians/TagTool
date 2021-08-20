@@ -80,7 +80,7 @@ namespace TagTool.Commands.Common
                 Context.Args = args;
 
                 var input = File.ReadAllText(scriptFile.FullName);
-                EvaluateScript(input);
+                EvaluateScript(input, inline: false, isolate: true);
             }
             else if (args.Count == 1 && args[0].Trim() == "!")
             {
@@ -108,7 +108,7 @@ namespace TagTool.Commands.Common
             return args.Count > 0 && args[0] == "<";
         }
 
-        public static object EvaluateScript(string input, bool inline = false)
+        public static object EvaluateScript(string input, bool inline = false, bool isolate = false)
         {
             var scriptOptions = ScriptOptions.Default
                 .WithAllowUnsafe(true)
@@ -131,21 +131,27 @@ namespace TagTool.Commands.Common
                     "TagTool.Tags.Definitions",
                     "TagTool.Tags.Resources",
                     "TagTool.Commands",
-                    "TagTool.Commands.Common");
-               
+                    "TagTool.Commands.Common"
+                 );
+
 
             try
             {
-                State = State == null ?
-                    CSharpScript.RunAsync(input, scriptOptions, Context).Result :
-                    State.ContinueWithAsync(input, scriptOptions).Result;
+                ScriptState<object> newState = null;
+                if(State == null || isolate)
+                    newState = CSharpScript.RunAsync(input, scriptOptions, Context).Result;
+                else
+                    newState = State.ContinueWithAsync(input, scriptOptions).Result;
 
-                if (State.ReturnValue != null)
+                if (!isolate)
+                    State = newState;
+
+                if (newState.ReturnValue != null)
                 {
                     if (!inline)
-                        PrintReplResult(State.ReturnValue);
+                        PrintReplResult(newState.ReturnValue);
 
-                    return State.ReturnValue;
+                    return newState.ReturnValue;
                 }
             }
             catch (Exception ex)
