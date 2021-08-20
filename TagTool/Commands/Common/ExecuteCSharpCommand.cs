@@ -101,6 +101,13 @@ namespace TagTool.Commands.Common
             return true;
         }
 
+        public static bool OutputIsRedirectable(List<string> args)
+        {
+            // allow piping output to a file iif the input is a piped file for now
+            // as we can't easily disambiguate usage of > in expressions
+            return args.Count > 0 && args[0] == "<";
+        }
+
         public static object EvaluateScript(string input, bool inline = false)
         {
             var scriptOptions = ScriptOptions.Default
@@ -143,7 +150,7 @@ namespace TagTool.Commands.Common
             }
             catch (Exception ex)
             {
-                // We generally just want to crash here as we don't have anything meanful to return.
+                // We generally just want to crash here as we don't have anything meaningful to return.
                 // null could continue on for a while without issue depending on the commands being executed.
                 if (inline)
                     throw;

@@ -52,9 +52,6 @@ namespace TagTool.Commands.Common
             if (commandArgs.Count == 0)
                 return;
 
-            if (commandArgs[0] == "cs")
-                redirectFile = null;
-
             switch (commandArgs[0].ToLower())
             {
                 case "quit":
@@ -66,6 +63,9 @@ namespace TagTool.Commands.Common
                     else
                         ContextStack.Pop();
                     return;
+                case "cs" when !ExecuteCSharpCommand.OutputIsRedirectable(commandArgs.Skip(1).ToList()):
+                    redirectFile = null;
+                    break;
             }
 
             if (commandArgs[0].StartsWith("#"))
