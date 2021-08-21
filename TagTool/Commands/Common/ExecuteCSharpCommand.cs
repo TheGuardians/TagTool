@@ -447,6 +447,11 @@ namespace TagTool.Commands.Common
                 CommandRunner.Current.RunCommand(command);
             }
 
+            public void Break(params object[] breakInspect)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+
             //
             // Internal
             //
