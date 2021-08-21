@@ -104,10 +104,21 @@ namespace TagTool.Commands.Common
                 return true;
 
             // Look up the command
-            var command = context.GetCommand(commandAndArgs[0]);
-            if (command == null)
-                if ((command = context.GetCommand(commandAndArgs[0].ToLower())) == null)
-                    return false;
+            Command command;
+            if ((command = context.GetCommand(commandAndArgs[0])) == null && (command = context.GetCommand(commandAndArgs[0].ToLower())) == null)
+            {
+                var tagGroup = Path.GetExtension(context.Name).Replace(".", "");
+                var fileName = commandAndArgs[0].ToLower() + ".cs";
+                var filePath = Path.Combine(Program.TagToolDirectory, "scripts", fileName);
+                var fileContextPath = Path.Combine(Program.TagToolDirectory, "scripts", tagGroup, fileName);
+                string validPath = File.Exists(fileContextPath) ? fileContextPath : File.Exists(filePath) ? filePath : "";
+                if (validPath != "")
+                {
+                    command = context.GetCommand("cs");
+                    commandAndArgs.InsertRange(1, new string[] { "<", validPath });
+                }
+                else return false;
+            }
 
             // Execute it
             commandAndArgs.RemoveAt(0);
