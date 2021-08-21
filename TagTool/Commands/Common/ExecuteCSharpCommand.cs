@@ -2,8 +2,10 @@
 using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using TagTool.Cache;
 
 namespace TagTool.Commands.Common
@@ -14,10 +16,10 @@ namespace TagTool.Commands.Common
         private static EvaluationContext Context = new EvaluationContext();
 
         public ExecuteCSharpCommand(GameCache cache, CachedTag tag = null, object definition = null, object element = null) :
-            base(false, 
+            base(false,
 
                 "CS",
-                "Compile and evaluate csharp code", 
+                "Compile and evaluate csharp code",
 
                 "CS [code]",
 
@@ -28,7 +30,7 @@ namespace TagTool.Commands.Common
 
                 "Globals:\n" +
                 "Args - The list of arguments that were passed to the script file.\n" +
-                "Cache - The current cache.\n" + 
+                "Cache - The current cache.\n" +
                 "Definition - The current tag definition. (EditTag)\n" +
                 "Tag - The current tag. (EditTag)\n" +
                 "Element - The current block element. (EditBlock)\n"
@@ -80,7 +82,7 @@ namespace TagTool.Commands.Common
                 Context.Args = args;
 
                 var input = File.ReadAllText(scriptFile.FullName);
-                EvaluateScript(input, inline: false, isolate: true);
+                EvaluateScript(input, inline: false, isolate: true, sourceDirectory: scriptFile.Directory);
             }
             else if (args.Count == 1 && args[0].Trim() == "!")
             {
@@ -108,12 +110,70 @@ namespace TagTool.Commands.Common
             return args.Count > 0 && args[0] == "<";
         }
 
-        public static object EvaluateScript(string input, bool inline = false, bool isolate = false)
+        private static ScriptPreprocessResult PreprocessScript(string script)
         {
+            var result = new ScriptPreprocessResult();
+
+            var lines = script.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None)
+                .Select(line => line.Trim())
+                .ToArray();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i];
+
+                if (line.StartsWith("#"))
+                {
+                    var directive = line.Substring(1, line.IndexOf(' ') - 1).Trim();
+                    switch (directive)
+                    {
+                        case "import":
+                            var importName = line.Substring(line.IndexOf(' ') + 1).Trim();
+                            result.Imports.Add(importName);
+                            // comment the line to keep the line numbers intact  
+                            line = $"// {line}";
+                            break;
+                    }
+
+                }
+
+                result.Source += $"{line}\n";
+            }
+
+            return result;
+        }
+
+        public static object EvaluateScript(string input, bool inline = false, DirectoryInfo sourceDirectory = null, bool isolate = false)
+        {
+            if (sourceDirectory == null)
+                sourceDirectory = new DirectoryInfo(Program.TagToolDirectory);
+
+            var preprocessResult = PreprocessScript(input);
+
+            var references = new List<Assembly>();
+            references.Add(typeof(ExecuteCSharpCommand).Assembly);
+
+            foreach (var importName in preprocessResult.Imports)
+            {
+                try
+                {
+                    var assemblyName = FindAssembly(sourceDirectory, importName);
+                    if (assemblyName == null)
+                        throw new FileNotFoundException("Failed to find assembly");
+
+                    var assembly = Assembly.Load(assemblyName);
+                    references.Add(assembly);
+                }
+                catch (Exception ex)
+                {
+                    new TagToolError(CommandError.CustomError, $"Failed to load assembly `{importName}`. {ex.Message}");
+                }
+            }
+
             var scriptOptions = ScriptOptions.Default
                 .WithAllowUnsafe(true)
                 .WithOptimizationLevel(Microsoft.CodeAnalysis.OptimizationLevel.Debug)
-                .WithReferences(typeof(ExecuteCSharpCommand).Assembly)
+                .WithReferences(references)
                 .WithImports(
                     "System",
                     "System.IO",
@@ -138,10 +198,10 @@ namespace TagTool.Commands.Common
             try
             {
                 ScriptState<object> newState = null;
-                if(State == null || isolate)
-                    newState = CSharpScript.RunAsync(input, scriptOptions, Context).Result;
+                if (State == null || isolate)
+                    newState = CSharpScript.RunAsync(preprocessResult.Source, scriptOptions, Context).Result;
                 else
-                    newState = State.ContinueWithAsync(input, scriptOptions).Result;
+                    newState = State.ContinueWithAsync(preprocessResult.Source, scriptOptions).Result;
 
                 if (!isolate)
                     State = newState;
@@ -202,7 +262,7 @@ namespace TagTool.Commands.Common
                         if (after == null)
                             return null;
 
-                        var expression = input.Substring(startIndex + 2, i - startIndex -2);
+                        var expression = input.Substring(startIndex + 2, i - startIndex - 2);
                         return before + EvaluateScript(expression, true) + after;
                     }
 
@@ -217,6 +277,108 @@ namespace TagTool.Commands.Common
             }
 
             return input;
+        }
+
+        static AssemblyName FindAssembly(DirectoryInfo sourceDirectory, string assemblyNameOrPath)
+        {
+            /*
+             * Examples:
+             * ./example/Assembly.dll - Relative to the source directory
+             * example/Assembly.dll - Relative to tagtool root directory
+             * AssmelyName - Partial name, latest version
+             * AssemblyName, Version=1.0.0.0 - Partial name, culture invariant 
+             * AssemblyName, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089 - full name
+             */
+
+            if (assemblyNameOrPath.Contains(".dll"))
+            {
+                string fullPath;
+                if (assemblyNameOrPath.StartsWith("./"))
+                    fullPath = Path.Combine(sourceDirectory.FullName, assemblyNameOrPath);
+                else
+                    fullPath = Path.Combine(Program.TagToolDirectory, assemblyNameOrPath);
+
+                if (!File.Exists(fullPath))
+                    return null;
+
+                return AssemblyName.GetAssemblyName(fullPath);
+            }
+
+            // first try to find an already loaded assembly in the current app domain
+            var an = new AssemblyName(assemblyNameOrPath);
+            an = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(a => a.GetName())
+                .Where(an2 => AssemblyNameCompatible(an, an2))
+                .OrderByDescending(a => a.Version)
+                .FirstOrDefault();
+            if (an != null)
+                return an;
+
+            // if that fails search the global assembly cache
+            return FindAssemblyInGAC(new AssemblyName(assemblyNameOrPath));
+        }
+
+        static AssemblyName FindAssemblyInGAC(AssemblyName assemblyName)
+        {
+            var searchPaths = new string[]
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "assembly", Environment.Is64BitProcess ? "GAC_64" : "GAC_32"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "assembly", "GAC_MSIL"),
+            };
+
+            foreach (var path in searchPaths)
+            {
+                var found = SearchAssemblyCache(new DirectoryInfo(path), assemblyName)
+                   .OrderByDescending(x => x.Version)
+                   .FirstOrDefault();
+
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
+
+        static IEnumerable<AssemblyName> SearchAssemblyCache(DirectoryInfo cacheDirectory, AssemblyName assemblyName)
+        {
+            var assemblyDirectory = new DirectoryInfo(Path.Combine(cacheDirectory.FullName, assemblyName.Name));
+            if (!assemblyDirectory.Exists)
+                yield break;
+
+            foreach (var directory in assemblyDirectory.GetDirectories())
+            {
+                foreach (var file in directory.GetFiles("*.dll", SearchOption.AllDirectories))
+                {
+                    var an = AssemblyName.GetAssemblyName(file.FullName);
+                    if (AssemblyNameCompatible(assemblyName, an))
+                        yield return an;
+                }
+            }
+        }
+
+        private static bool AssemblyNameCompatible(AssemblyName target, AssemblyName source)
+        {
+            if (target.Name != source.Name)
+                return false;
+
+            if (target.Version != null && source.Version != target.Version)
+                return false;
+
+            if (target.CultureInfo != null && !Equals(target.CultureInfo, CultureInfo.InvariantCulture) && target.CultureName != source.CultureName)
+                return false;
+            else if (!Equals(source.CultureInfo, CultureInfo.InvariantCulture))
+                return false;
+
+            if (!target.GetPublicKeyToken()?.SequenceEqual(target.GetPublicKeyToken()) ?? false)
+                return false;
+
+            return true;
+        }
+
+        class ScriptPreprocessResult
+        {
+            public string Source { get; set; }
+            public List<string> Imports { get; set; } = new List<string>();
         }
 
         public class EvaluationContext
