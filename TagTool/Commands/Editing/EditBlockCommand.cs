@@ -117,6 +117,8 @@ namespace TagTool.Commands.Editing
             var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType(), Cache.Version, Cache.Platform);
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
+            blockContext.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalElementKey, blockValue);
+
             blockContext.AddCommand(new ListFieldsCommand(Cache, blockStructure, blockValue));
             blockContext.AddCommand(new SetFieldCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             //blockContext.AddCommand(new ExtractResourceCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
@@ -129,7 +131,7 @@ namespace TagTool.Commands.Editing
             blockContext.AddCommand(new ForEachCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new ExportCommandsCommand(Cache, blockValue as TagStructure));
             blockContext.AddCommand(new ExitToCommand(ContextStack));
-            blockContext.AddCommand(new ExecuteCSharpCommand(Cache, Tag, Owner, blockValue));
+            blockContext.AddCommand(new ExecuteCSharpCommand(ContextStack));
             ContextStack.Push(blockContext);
 
             if (deferredNames.Count != 0)

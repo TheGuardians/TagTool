@@ -25,7 +25,7 @@ namespace TagTool.Commands.Common
         {
             // Evaluate c# expresisons
 
-            commandLine = ExecuteCSharpCommand.EvaluateInlineExpressions(commandLine);
+            commandLine = ExecuteCSharpCommand.EvaluateInlineExpressions(ContextStack, commandLine);
             if (commandLine == null)
                 return null;
 

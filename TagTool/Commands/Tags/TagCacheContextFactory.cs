@@ -30,13 +30,13 @@ namespace TagTool.Commands.Tags
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache cache)
         {
-            context.AddCommand(new TestCommand(cache));
-            
+            context.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalCacheKey, cache);
 
+            context.AddCommand(new TestCommand(cache));
             context.AddCommand(new DumpLogCommand());
             context.AddCommand(new RunCommands(contextStack));
             context.AddCommand(new ClearCommand());
-            context.AddCommand(new ExecuteCSharpCommand(cache));
+            context.AddCommand(new ExecuteCSharpCommand(contextStack));
             context.AddCommand(new EchoCommand());
             context.AddCommand(new HelpCommand(contextStack));
             context.AddCommand(new ListVariablesCommand(contextStack));

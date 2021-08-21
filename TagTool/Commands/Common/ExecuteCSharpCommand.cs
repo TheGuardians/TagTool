@@ -13,9 +13,15 @@ namespace TagTool.Commands.Common
     public class ExecuteCSharpCommand : Command
     {
         private static ScriptState<object> State;
-        private static EvaluationContext Context = new EvaluationContext();
+        private CommandContextStack ContextStack;
 
-        public ExecuteCSharpCommand(GameCache cache, CachedTag tag = null, object definition = null, object element = null) :
+        public static readonly object GlobalCacheKey = new object();
+        public static readonly object GlobalPortingCacheKey = new object();
+        public static readonly object GlobalTagKey = new object();
+        public static readonly object GlobalDefinitionKey = new object();
+        public static readonly object GlobalElementKey = new object();
+
+        public ExecuteCSharpCommand(CommandContextStack contextStack) :
             base(false,
 
                 "CS",
@@ -36,15 +42,12 @@ namespace TagTool.Commands.Common
                 "Element - The current block element. (EditBlock)\n"
                 )
         {
-            Context.Cache = cache;
-            Context.Definition = definition;
-            Context.Element = element;
-            Context.Tag = tag;
+            ContextStack = contextStack;
         }
 
         public override object Execute(List<string> args)
         {
-            Context.Args.Clear();
+            var evalContext = new EvaluationContext(ContextStack);
 
             if (args.Count == 0)
             {
@@ -68,7 +71,7 @@ namespace TagTool.Commands.Common
                 }
 
                 if (!quit)
-                    EvaluateScript(lines);
+                    EvaluateScript(evalContext, lines);
             }
             else if (args.Count > 1 && args[0].Trim() == "<")
             {
@@ -79,10 +82,11 @@ namespace TagTool.Commands.Common
                     return new TagToolError(CommandError.FileNotFound, scriptFile.FullName);
 
                 args.RemoveRange(0, 2);
-                Context.Args = args;
+                evalContext.Args = args;
+                evalContext.ScriptFile = scriptFile;
 
                 var input = File.ReadAllText(scriptFile.FullName);
-                EvaluateScript(input, inline: false, isolate: true, sourceDirectory: scriptFile.Directory);
+                EvaluateScript(evalContext, input, inline: false, isolate: true, sourceDirectory: scriptFile.Directory);
             }
             else if (args.Count == 1 && args[0].Trim() == "!")
             {
@@ -97,7 +101,7 @@ namespace TagTool.Commands.Common
                 var input = CommandRunner.CommandLine;
                 // remove command name from the input
                 input = input.Substring(input.IndexOf(' ') + 1);
-                EvaluateScript(input);
+                EvaluateScript(evalContext, input);
             }
 
             return true;
@@ -143,7 +147,7 @@ namespace TagTool.Commands.Common
             return result;
         }
 
-        public static object EvaluateScript(string input, bool inline = false, DirectoryInfo sourceDirectory = null, bool isolate = false)
+        public static object EvaluateScript(EvaluationContext evalContext, string input, bool inline = false, DirectoryInfo sourceDirectory = null, bool isolate = false)
         {
             if (sourceDirectory == null)
                 sourceDirectory = new DirectoryInfo(Program.TagToolDirectory);
@@ -174,6 +178,7 @@ namespace TagTool.Commands.Common
                 .WithAllowUnsafe(true)
                 .WithOptimizationLevel(Microsoft.CodeAnalysis.OptimizationLevel.Debug)
                 .WithReferences(references)
+                .WithEmitDebugInformation(true)
                 .WithImports(
                     "System",
                     "System.IO",
@@ -199,9 +204,9 @@ namespace TagTool.Commands.Common
             {
                 ScriptState<object> newState = null;
                 if (State == null || isolate)
-                    newState = CSharpScript.RunAsync(preprocessResult.Source, scriptOptions, Context).Result;
+                    newState = CSharpScript.RunAsync(preprocessResult.Source, scriptOptions, evalContext).GetAwaiter().GetResult();
                 else
-                    newState = State.ContinueWithAsync(preprocessResult.Source, scriptOptions).Result;
+                    newState = State.ContinueWithAsync(preprocessResult.Source, scriptOptions).GetAwaiter().GetResult();
 
                 if (!isolate)
                     State = newState;
@@ -238,8 +243,10 @@ namespace TagTool.Commands.Common
             Console.ForegroundColor = previousColor;
         }
 
-        public static string EvaluateInlineExpressions(string input, int offset = 0)
+        public static string EvaluateInlineExpressions(CommandContextStack contextStack, string input, int offset = 0)
         {
+            var evalContext = new EvaluationContext(contextStack);
+
             int startIndex = -1;
             var stack = new Stack<int>();
 
@@ -258,12 +265,12 @@ namespace TagTool.Commands.Common
                     if (startIndex == stack.Peek())
                     {
                         var before = input.Substring(0, startIndex);
-                        string after = EvaluateInlineExpressions(input.Substring(i + 1), offset + i + 1);
+                        string after = EvaluateInlineExpressions(contextStack, input.Substring(i + 1), offset + i + 1);
                         if (after == null)
                             return null;
 
                         var expression = input.Substring(startIndex + 2, i - startIndex - 2);
-                        return before + EvaluateScript(expression, true) + after;
+                        return before + EvaluateScript(evalContext, expression, true) + after;
                     }
 
                     stack.Pop();
@@ -383,51 +390,78 @@ namespace TagTool.Commands.Common
 
         public class EvaluationContext
         {
-            // We want to use weak references as we don't own these objects and should not
-            // participate in their lifetime. If we didn't, we'd have to have code that
-            // sets them to null whenever a context is popped, or it would leak.
-            private WeakReference<GameCache> _cache;
-            private WeakReference<dynamic> _definition;
-            private WeakReference<dynamic> _element;
-            private WeakReference<CachedTag> _tag;
+            private CommandContextStack ContextStack;
 
-            public List<string> Args = new List<string>();
+            public EvaluationContext(CommandContextStack stack) => ContextStack = stack;
 
-            public GameCache Cache
+            //
+            // Globals
+            //
+
+            public FileInfo ScriptFile { get; set; }
+
+            public List<string> Args { get; set; } = new List<string>();
+
+            public GameCache Cache => GetGlobal<GameCache>(GlobalCacheKey);
+
+            public GameCache PortingCache => GetGlobal<GameCache>(GlobalPortingCacheKey);
+
+            public CachedTag Tag => GetGlobal<CachedTag>(GlobalTagKey);
+
+            public dynamic Definition => GetGlobal<dynamic>(GlobalDefinitionKey);
+
+            public dynamic Element => GetGlobal<dynamic>(GlobalElementKey);
+            
+            //
+            // Methods
+            //
+
+            public void DumpGlobals()
             {
-                get => GetValue(_cache);
-                set => SetValue(ref _cache, value);
+                foreach (var property in typeof(EvaluationContext)
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                    .OrderBy(x => x.Name))
+                {
+                    var value = property.GetValue(this);
+                    if (value == null)
+                        continue;
+
+                    Console.WriteLine($"{property.Name} : {property.PropertyType} = {value}");
+                }
             }
 
-            public dynamic Definition
+            public void DumpVariables()
             {
-                get => GetValue(_definition);
-                set => SetValue(ref _definition, value);
+                foreach (var variable in State.Variables.OrderBy(x => x.Name))
+                {
+                    var value = variable.Value;
+                    if (value == null)
+                        continue;
+
+                    Console.WriteLine($"{variable.Name} : {variable.Type} = {value}");
+                }
             }
 
-            public dynamic Element
+            public void RunCommand(string command)
             {
-                get => GetValue(_element);
-                set => SetValue(ref _element, value);
+                CommandRunner.Current.RunCommand(command);
             }
 
-            public dynamic Tag
-            {
-                get => GetValue(_tag);
-                set => SetValue(ref _tag, value);
-            }
+            //
+            // Internal
+            //
 
-            private void SetValue<T>(ref WeakReference<T> reference, T value) where T : class
+            private T GetGlobal<T>(object key, T defaultVal = default(T))
             {
-                reference = new WeakReference<T>(value);
-            }
-
-            private T GetValue<T>(WeakReference<T> reference) where T : class
-            {
-                if (reference.TryGetTarget(out var value))
-                    return value;
-                else
-                    return default(T);
+                // walk up the context stack trying to find the global for given key
+                var context = ContextStack.Context;
+                while (context != null)
+                {
+                    if (context.ScriptGlobals.TryGetValue(key, out var val))
+                        return (T)val;
+                    context = context.Parent;
+                }
+                return defaultVal;
             }
         }
     }

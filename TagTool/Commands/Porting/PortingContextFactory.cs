@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Commands.Porting.Gen2;
 using TagTool.Commands.Porting.Gen4;
 using TagTool.Commands.Tags;
@@ -42,6 +43,8 @@ namespace TagTool.Commands.Porting
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)
         {
+            context.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalPortingCacheKey, portingCache);
+
             if (currentCache is GameCacheHaloOnlineBase hoCache)
             {
                 if (portingCache is GameCacheGen3)

@@ -44,7 +44,10 @@ namespace TagTool.Commands.Editing
             var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
-            commandContext.AddCommand(new ExecuteCSharpCommand(cache, tag, definition));
+            commandContext.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalTagKey, tag);
+            commandContext.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalDefinitionKey, definition);
+
+            commandContext.AddCommand(new ExecuteCSharpCommand(contextStack));
             if (CacheVersionDetection.IsInGen(CacheGeneration.Third, cache.Version) || CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, cache.Version))
             {
                 switch (tag.Group.Tag.ToString())
