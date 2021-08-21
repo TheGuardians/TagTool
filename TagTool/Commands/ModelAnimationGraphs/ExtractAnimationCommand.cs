@@ -124,19 +124,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<RenderModel.Node> SecondaryRenderModelNodes = new List<RenderModel.Node>();
             if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)))
             {
-                PrimaryRenderModelNodes = GetRenderModelNodes(
-                    Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)).ToList(), 
+                var primarynodes = Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)).ToList();
+                PrimaryRenderModelNodes = GetRenderModelNodes(primarynodes, 
                     CalculateNodeListChecksum(Animation.SkeletonNodes, 0, true));
-                if(PrimaryRenderModelNodes.Count == 0)
-                    new TagToolWarning($"Matching primary model not found!");
+                if(PrimaryRenderModelNodes.Count < primarynodes.Count)
+                    new TagToolWarning($"Matching primary model not found! Animation may not appear properly.");
             }
             if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)))
             {
-                SecondaryRenderModelNodes = GetRenderModelNodes(
-                    Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)).ToList(),
+                var secondarynodes = Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)).ToList();
+                SecondaryRenderModelNodes = GetRenderModelNodes(secondarynodes,
                     CalculateNodeListChecksum(Animation.SkeletonNodes, 0, false));
-                if (SecondaryRenderModelNodes.Count == 0)
-                    new TagToolWarning($"Matching secondary model not found!");
+                if (SecondaryRenderModelNodes.Count < secondarynodes.Count)
+                    new TagToolWarning($"Matching secondary model not found! Animation may not appear properly.");
             }
 
             foreach (var skellynode in Animation.SkeletonNodes)
@@ -150,9 +150,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 {
                     matchingnode = SecondaryRenderModelNodes.FirstOrDefault(n => n.Name == skellynode.Name);
                 }
-                
-                if(matchingnode == null)
-                     matchingnode = new RenderModel.Node();
+
+                if (matchingnode == null)
+                {
+                    matchingnode = new RenderModel.Node();
+                    new TagToolWarning($"No matching render model node found for {CacheContext.StringTable.GetString(skellynode.Name)}");
+                }
 
                 NodeList.Add(new Node
                 {
@@ -174,28 +177,28 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<RenderModel.Node> Nodes = new List<RenderModel.Node>();
             using (var stream = CacheContext.OpenCacheRead())
             {
+                List<StringId> jmadnodenames = jmadnodes.Select(n => n.Name).ToList();
+                int bestmatchcount = 0;
+
                 foreach (CachedTag tag in CacheContext.TagCache.TagTable)
                 {
                     if (!tag.IsInGroup(new Tag("mode")))
                         continue;
 
                     RenderModel modetag = CacheContext.Deserialize<RenderModel>(stream, tag);
-                    int modenodechecksum = CalculateNodeListChecksum(modetag.Nodes, 0);
-                    if(modenodechecksum == nodelistchecksum)
+
+                    int currentmatchcount = 0;
+                    var currentNodes = modetag.Nodes.Where(n => jmadnodenames.Contains(n.Name)).ToList();
+                    currentmatchcount = currentNodes.Count;
+                    if (currentmatchcount >= bestmatchcount)
                     {
-                        bool mismatch = false;
-                        foreach(var jmadnode in jmadnodes)
+                        bestmatchcount = currentmatchcount;
+                        Nodes = currentNodes.DeepClone();
+                        if (currentmatchcount == jmadnodes.Count &&
+                            CalculateNodeListChecksum(modetag.Nodes, 0) == nodelistchecksum)
                         {
-                            if(!modetag.Nodes.Any(n => n.Name == jmadnode.Name))
-                            {
-                                mismatch = true;
-                                break;
-                            }
+                            return Nodes;
                         }
-                        if (mismatch)
-                            continue;
-                        Nodes = modetag.Nodes.DeepClone();
-                        return Nodes;
                     }
                 }
             }

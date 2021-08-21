@@ -35,6 +35,11 @@ namespace TagTool.Commands.Tags
                 return new TagToolError(CommandError.ArgCount);
 
             var isConst = false;
+
+            //set const by default for other caches
+            if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, Cache.Version))
+                isConst = true;
+
             if (args[0].ToLower() == "const")
             {
                 args.RemoveAt(0);

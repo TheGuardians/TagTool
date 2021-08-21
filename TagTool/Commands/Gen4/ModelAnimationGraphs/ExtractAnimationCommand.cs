@@ -146,16 +146,32 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             return data;
         }
 
-        public void SetSecondaryModelFlags(ref List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes, int nodeindex)
+        List<string> SecondaryModelRoots = new List<string>
+            {
+                "b_gun",
+                "b_handle", //for sword
+                "b_hammer",
+                "b_skull",
+                "b_pole", //for flag
+            };
+
+        public void SetSecondaryModelFlags(ref List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes, int nodeindex, bool isSecondaryModel)
         {
             AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock node = Nodes[nodeindex];
-            node.ModelFlags &= ~AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel;
-            node.ModelFlags |= AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel;
+
+            if (SecondaryModelRoots.Contains(CacheContext.StringTable.GetString(node.Name)))
+                isSecondaryModel = true;
+
+            if (isSecondaryModel)
+            {
+                node.ModelFlags &= ~AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel;
+                node.ModelFlags |= AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel;
+            }
 
             int nextnodeindex = node.FirstChildNodeIndex;
             while (nextnodeindex != -1)
             {
-                SetSecondaryModelFlags(ref Nodes, nextnodeindex);
+                SetSecondaryModelFlags(ref Nodes, nextnodeindex, isSecondaryModel);
                 nextnodeindex = Nodes[nextnodeindex].NextSiblingNodeIndex;
             }           
         }
@@ -167,27 +183,23 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             List<RenderModel.RenderModelNodeBlock> SecondaryRenderModelNodes = new List<RenderModel.RenderModelNodeBlock>();
             List<AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock> Nodes = Animation.Definitions.SkeletonNodes;
 
-            if (Nodes.Any(n => CacheContext.StringTable.GetString(n.Name) == "b_gun"))
-            {
-                int nodeindex = Nodes.FindIndex(n => CacheContext.StringTable.GetString(n.Name) == "b_gun");
-                SetSecondaryModelFlags(ref Nodes, nodeindex);
-            }
+            SetSecondaryModelFlags(ref Nodes, 0, false);
 
             if (Nodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)))
             {
-                PrimaryRenderModelNodes = GetRenderModelNodes(
-                    Nodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)).ToList(),
+                var primarynodes = Nodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.PrimaryModel)).ToList();
+                PrimaryRenderModelNodes = GetRenderModelNodes(primarynodes,
                     CalculateNodeListChecksum(Nodes, 0, true));
-                if (PrimaryRenderModelNodes.Count == 0)
-                    new TagToolWarning($"Matching primary model not found!");
+                if (PrimaryRenderModelNodes.Count < primarynodes.Count)
+                    new TagToolWarning($"Matching primary model not found! Animation may not appear properly.");
             }
             if (Nodes.Any(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)))
-            { 
-                SecondaryRenderModelNodes = GetRenderModelNodes(
-                    Nodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)).ToList(),
+            {
+                var secondarynodes = Nodes.Where(n => n.ModelFlags.HasFlag(AnimationGraphDefinitionsStruct.AnimationGraphNodeBlock.AnimationNodeModelFlags.SecondaryModel)).ToList();
+                SecondaryRenderModelNodes = GetRenderModelNodes(secondarynodes,
                     CalculateNodeListChecksum(Nodes, 0, false));
-                if (SecondaryRenderModelNodes.Count == 0)
-                    new TagToolWarning($"Matching secondary model not found!");
+                if (SecondaryRenderModelNodes.Count < secondarynodes.Count)
+                    new TagToolWarning($"Matching secondary model not found! Animation may not appear properly.");
             }
 
             foreach (var skellynode in Nodes)
@@ -203,8 +215,11 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                 }
 
                 if (matchingnode == null)
+                {
                     matchingnode = new RenderModel.RenderModelNodeBlock();
-
+                    new TagToolWarning($"No matching render model node found for {CacheContext.StringTable.GetString(skellynode.Name)}");
+                }
+                    
                 NodeList.Add(new Node
                 {
                     Name = CacheContext.StringTable.GetString(skellynode.Name),
@@ -225,28 +240,28 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             List<RenderModel.RenderModelNodeBlock> Nodes = new List<RenderModel.RenderModelNodeBlock>();
             using (var stream = CacheContext.OpenCacheRead())
             {
+                List<StringId> jmadnodenames = jmadnodes.Select(n => n.Name).ToList();
+                int bestmatchcount = 0;
+
                 foreach (CachedTag tag in CacheContext.TagCache.TagTable)
                 {
                     if (!tag.IsInGroup(new Tag("mode")))
                         continue;
 
                     RenderModel modetag = CacheContext.Deserialize<RenderModel>(stream, tag);
-                    int modenodechecksum = CalculateNodeListChecksum(modetag.Nodes, 0);
-                    if (modenodechecksum == nodelistchecksum)
+
+                    int currentmatchcount = 0;
+                    var currentNodes = modetag.Nodes.Where(n => jmadnodenames.Contains(n.Name)).ToList();
+                    currentmatchcount = currentNodes.Count;
+                    if (currentmatchcount >= bestmatchcount)
                     {
-                        bool mismatch = false;
-                        foreach (var jmadnode in jmadnodes)
+                        bestmatchcount = currentmatchcount;
+                        Nodes = currentNodes.DeepClone();
+                        if (currentmatchcount == jmadnodes.Count &&
+                            CalculateNodeListChecksum(modetag.Nodes, 0) == nodelistchecksum)
                         {
-                            if (!modetag.Nodes.Any(n => n.Name == jmadnode.Name))
-                            {
-                                mismatch = true;
-                                break;
-                            }
+                            return Nodes;
                         }
-                        if (mismatch)
-                            continue;
-                        Nodes = modetag.Nodes.DeepClone();
-                        return Nodes;
                     }
                 }
             }
