@@ -18,7 +18,7 @@ namespace TagTool.Tags.Resources.Gen4
             public int AnimationIndex;
             public uint AnimationChecksum;
             public short FrameCount;
-            public sbyte NodeCount;
+            public byte NodeCount;
             public FrameInfoTypeEnum MovementDataType;
             public PackedDataSizesStructActual DataSizes;
             [TagField(DataAlign = 0x10)]

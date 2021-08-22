@@ -34,7 +34,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "RebuildFPAnimation",
                   "Rebuild a first person animation or animations in a ModelAnimationGraph tag",
 
-                  "RebuildFPAnimation [reachfix] <file or folder path>",
+                  "RebuildFPAnimation [reachfix] [scalefix] <file or folder path>",
 
                   "Rebuild a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
                   "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character\n" +
@@ -48,17 +48,28 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count < 1 || args.Count > 2)
+            if (args.Count < 1)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
-            if(argStack.Count == 2)
+            ScaleFix = false;
+            while (argStack.Count > 1)
             {
-                if (argStack.Pop().ToLower() == "reachfix")
-                    ReachFixup = true;
-                else
-                    return new TagToolError(CommandError.ArgInvalid);
+                var arg = argStack.Peek();
+                switch (arg.ToLower())
+                {
+                    case "reachfix":
+                        ReachFixup = true;
+                        argStack.Pop();
+                        break;
+                    case "scalefix":
+                        ScaleFix = true;
+                        argStack.Pop();
+                        break;
+                    default:
+                        return new TagToolError(CommandError.ArgInvalid);
+                }
             }
 
             List<FileInfo> fileList = new List<FileInfo>();
