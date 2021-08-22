@@ -62,14 +62,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
             {
                 if (CacheContext.Version == CacheVersion.HaloReach)
                     Animation.Animations[animationindex].AnimationData = Animation.Animations[animationindex].AnimationDataBlock[0];
-                ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];            
+                ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
+
+                string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
+
                 if (animationData1 == null)
+                {
+                    new TagToolWarning($"Failed to export {str} (invalid resource?)");
                     continue;
+                }
                 Animation animation = new Animation(renderModelNodes, animationData1);
                 bool worldRelative = animationblock.AnimationData.InternalFlags.HasFlag(ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative);
                 string animationExtension = animation.GetAnimationExtension((int)animationblock.AnimationData.AnimationType, (int)animationblock.AnimationData.FrameInfoType, worldRelative);
-                string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
                 string fileName = directoryarg + "\\" + str + "." + animationExtension;
                 if (animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Overlay || animationblock.AnimationData.AnimationType == ModelAnimationGraph.FrameType.Replacement)
                 {
@@ -102,6 +107,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
         {
             var resourceref = Animation.ResourceGroups[animationblock.AnimationData.ResourceGroupIndex].ResourceReference;
             var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResource(resourceref);
+            if (resourcedata == null)
+                return null;
             var resourcemember = resourcedata.GroupMembers[animationblock.AnimationData.ResourceGroupMemberIndex];
             var staticflagssize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticNodeFlags : resourcemember.PackedDataSizes.StaticNodeFlags;
             var animatedflagssize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.AnimatedNodeFlags : resourcemember.PackedDataSizes.AnimatedNodeFlags;

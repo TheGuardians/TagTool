@@ -81,13 +81,18 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                 }
                 AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct animationblock = Animation.Definitions.Animations[animationindex];
 
+                string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
+
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
                 if (animationData1 == null)
+                {
+                    new TagToolWarning($"Failed to export {str} (invalid resource?)");
                     continue;
+                }
+
                 Animation animation = new Animation(renderModelNodes, animationData1);
                 bool worldRelative = animationblock.SharedAnimationData[0].InternalFlags.HasFlag(InternalAnimationFlags.WorldRelative);
                 string animationExtension = animation.GetAnimationExtension((int)animationblock.SharedAnimationData[0].AnimationType - 1, (int)animationblock.SharedAnimationData[0].FrameInfoType, worldRelative);
-                string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
                 string fileName = directoryarg + "\\" + str + "." + animationExtension;
                 if (animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Overlay || 
                     animationblock.SharedAnimationData[0].AnimationType == AnimationTypeEnum.Replacement)
@@ -123,6 +128,8 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
         {
             var resourceref = Animation.TagResourceGroups[animationblock.SharedAnimationData[0].ResourceGroup].TagResource;
             var resourcedata = ((GameCacheGen4)CacheContext).ResourceCacheGen4.GetModelAnimationTagResourceGen4(resourceref);
+            if (resourcedata == null)
+                return null;
             var resourcemember = resourcedata.GroupMembers[animationblock.SharedAnimationData[0].ResourceGroupMember];
             var datasizes = resourcemember.DataSizes;
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount,
