@@ -371,8 +371,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
             {
                 Name = "camera_control",
                 Frames = new List<AnimationImporter.AnimationFrame>(),
-                hasStaticRotation = true,
-                hasStaticTranslation = true
             };
             for (int i = 0; i < importer.frameCount; i++)
             {
