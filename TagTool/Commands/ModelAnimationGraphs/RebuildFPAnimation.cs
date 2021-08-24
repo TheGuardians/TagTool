@@ -27,7 +27,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private CachedTag Jmad { get; set; }
         private bool ReachFixup = false;
         private bool ScaleFix = false;
-        private bool CameraFix = false;
 
         public RebuildFPAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -35,7 +34,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "RebuildFPAnimation",
                   "Rebuild a first person animation or animations in a ModelAnimationGraph tag",
 
-                  "RebuildFPAnimation [reachfix] [scalefix] [camerafix] <file or folder path>",
+                  "RebuildFPAnimation [reachfix] [scalefix] <file or folder path>",
 
                   "Rebuild a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
                   "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character\n" +
@@ -56,7 +55,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             ScaleFix = false;
             ReachFixup = false;
-            CameraFix = false;
             while (argStack.Count > 1)
             {
                 var arg = argStack.Peek();
@@ -68,10 +66,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                     case "scalefix":
                         ScaleFix = true;
-                        argStack.Pop();
-                        break;
-                    case "camerafix":
-                        CameraFix = true;
                         argStack.Pop();
                         break;
                     default:
@@ -189,10 +183,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 //fixup Reach FP animations
                 if (ReachFixup)
                     FixupReachFP(importer);
-
-                //Zero camera_control node position, or create a new camera_control node at position 0
-                if (CameraFix)
-                    FixCameraNode(importer);
 
                 //remove excess nodes and reorder to match the tag
                 AdjustImportedNodes(importer);
@@ -363,30 +353,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
             importer.AnimationNodes = newAnimationNodes;
         }
 
-        public void FixCameraNode(AnimationImporter importer)
-        {
-            var imported_nodes = importer.AnimationNodes;
-
-            AnimationImporter.AnimationNode newnode = new AnimationImporter.AnimationNode
-            {
-                Name = "camera_control",
-                Frames = new List<AnimationImporter.AnimationFrame>(),
-            };
-            for (int i = 0; i < importer.frameCount; i++)
-            {
-                newnode.Frames.Add(new AnimationImporter.AnimationFrame());
-            }
-
-            int camera_index = imported_nodes.FindIndex(x => x.Name.Equals("camera_control"));
-            if (camera_index != -1)
-            {
-                imported_nodes[camera_index] = newnode;
-                return;
-            }
-
-            importer.AnimationNodes.Add(newnode);
-        }
-
         public void FixupReachFP(AnimationImporter importer)
         {
             var imported_nodes = importer.AnimationNodes;
@@ -398,21 +364,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 foreach (var Frame in imported_nodes[basenode_index].Frames)
                 {
                     Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
+                    Frame.Translation = new RealPoint3d(0, 0, 0);
                 }
             }
-
-            //fix weapon IK marker
-            if(Animation.Modes.Count > 0)
-            {
-                if (Animation.Modes[0].WeaponClass.Count > 0)
-                {
-                    if(Animation.Modes[0].WeaponClass[0].WeaponIk.Count > 0)
-                    {
-                        Animation.Modes[0].WeaponClass[0].WeaponIk[0].AttachToMarker = CacheContext.StringTable.GetStringId("left_hand_spartan_fp");
-                    }
-                }
-            }
-
             /*
             List<string> BadNodes = new List<string>() { "pedestal", "aim_pitch", "aim_yaw", "l_humerus", "r_humerus", "l_radius", "r_radius", "l_handguard", "r_handguard" };           
             //var jmad_nodes = Animation.SkeletonNodes;
