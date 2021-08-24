@@ -58,16 +58,21 @@ namespace TagTool.Commands.ModelAnimationGraphs
             Console.WriteLine($"###Extracting {AnimationIndices.Count} animation(s)...");
 
             List<Node> renderModelNodes = GetNodeDefaultValues();
-            foreach (var animationindex in AnimationIndices)
+
+            //shift reach data into h3 fields
+            if (CacheContext.Version == CacheVersion.HaloReach)
             {
-                if (CacheContext.Version == CacheVersion.HaloReach)
+                foreach(var animation in Animation.Animations)
                 {
-                    Animation.Animations[animationindex].AnimationData = Animation.Animations[animationindex].AnimationDataBlock[0];
-                    var animationtypereach = Animation.Animations[animationindex].AnimationData.AnimationTypeReach;
-                    Animation.Animations[animationindex].AnimationData.AnimationType = animationtypereach == ModelAnimationGraph.FrameTypeReach.None ?
+                    animation.AnimationData = animation.AnimationDataBlock[0];
+                    var animationtypereach = animation.AnimationData.AnimationTypeReach;
+                    animation.AnimationData.AnimationType = animationtypereach == ModelAnimationGraph.FrameTypeReach.None ?
                         ModelAnimationGraph.FrameType.Base : (ModelAnimationGraph.FrameType)(animationtypereach - 1);
                 }
-                    
+            }
+
+            foreach (var animationindex in AnimationIndices)
+            {                  
                 ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
 

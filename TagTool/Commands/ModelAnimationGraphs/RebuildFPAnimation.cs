@@ -360,10 +360,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
             int basenode_index = imported_nodes.FindIndex(x => x.Name.Equals("base"));
             if (basenode_index != -1)
             {
-                //fixup rotated base node
+                //fixup rotated/translated base node
                 foreach (var Frame in imported_nodes[basenode_index].Frames)
                 {
                     Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
+                    Frame.Translation = new RealPoint3d(0, 0, 0);
                 }
             }
             /*
