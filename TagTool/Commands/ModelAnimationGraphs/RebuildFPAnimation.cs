@@ -364,7 +364,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 foreach (var Frame in imported_nodes[basenode_index].Frames)
                 {
                     Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
-                    Frame.Translation = new RealPoint3d(0, 0, 0);
                 }
             }
             /*
