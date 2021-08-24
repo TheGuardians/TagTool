@@ -61,7 +61,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
             foreach (var animationindex in AnimationIndices)
             {
                 if (CacheContext.Version == CacheVersion.HaloReach)
+                {
                     Animation.Animations[animationindex].AnimationData = Animation.Animations[animationindex].AnimationDataBlock[0];
+                    var animationtypereach = Animation.Animations[animationindex].AnimationData.AnimationTypeReach;
+                    Animation.Animations[animationindex].AnimationData.AnimationType = animationtypereach == ModelAnimationGraph.FrameTypeReach.None ?
+                        ModelAnimationGraph.FrameType.Base : (ModelAnimationGraph.FrameType)(animationtypereach - 1);
+                }
+                    
                 ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
 

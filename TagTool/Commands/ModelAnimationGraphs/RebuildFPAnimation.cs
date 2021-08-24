@@ -54,6 +54,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
             ScaleFix = false;
+            ReachFixup = false;
             while (argStack.Count > 1)
             {
                 var arg = argStack.Peek();
@@ -365,19 +366,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
                 }
             }
-
-            //fix weapon IK marker
-            if(Animation.Modes.Count > 0)
-            {
-                if (Animation.Modes[0].WeaponClass.Count > 0)
-                {
-                    if(Animation.Modes[0].WeaponClass[0].WeaponIk.Count > 0)
-                    {
-                        Animation.Modes[0].WeaponClass[0].WeaponIk[0].AttachToMarker = CacheContext.StringTable.GetStringId("left_hand_spartan_fp");
-                    }
-                }
-            }
-
             /*
             List<string> BadNodes = new List<string>() { "pedestal", "aim_pitch", "aim_yaw", "l_humerus", "r_humerus", "l_radius", "r_radius", "l_handguard", "r_handguard" };           
             //var jmad_nodes = Animation.SkeletonNodes;
