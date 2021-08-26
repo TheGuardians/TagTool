@@ -27,6 +27,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private CachedTag Jmad { get; set; }
         private bool ReachFixup = false;
         private bool ScaleFix = false;
+        private float[] customOffsets = new float[0];
 
         public RebuildFPAnimationCommand(GameCache cachecontext, ModelAnimationGraph animation, CachedTag jmad)
             : base(false,
@@ -34,11 +35,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "RebuildFPAnimation",
                   "Rebuild a first person animation or animations in a ModelAnimationGraph tag",
 
-                  "RebuildFPAnimation [reachfix] [scalefix] <file or folder path>",
+                  "RebuildFPAnimation [reachfix][x,y,z] [scalefix] <file or folder path>",
 
-                  "Rebuild a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format\n" +
-                  "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character\n" +
-                  "Specify a folder to replace multiple animations or a file to replace a single animation")
+                  "Rebuild a first person animation or animations in a ModelAnimationGraph tag from animations in JMA/JMM/JMO/JMR/JMW/JMZ/JMT format.\n" +
+                  "All animation files must be named the same as animations in the tag, with the space character in place of the ':' character.\n" +
+                  "Specify a folder to replace multiple animations or a file to replace a single animation.\n\n" +
+                  "If using the reachfix argument, a custom translation can be specified in brackets like so: reachfix[x,y,z]"
+                  )
         {
             CacheContext = (GameCacheHaloOnlineBase)cachecontext;
             Animation = animation;
@@ -58,7 +61,17 @@ namespace TagTool.Commands.ModelAnimationGraphs
             while (argStack.Count > 1)
             {
                 var arg = argStack.Peek();
-                switch (arg.ToLower())
+
+                if (arg.ToLower().StartsWith("reachfix"))
+                {
+                    if (arg.Contains('[') && arg.Contains(']'))
+                    {
+                        var offsets = arg.Split('[')[1].Split(']')[0].Split(',');
+                        customOffsets = Array.ConvertAll(offsets, float.Parse);
+                    }
+                }
+
+                switch (arg.ToLower().Split('[')[0])
                 {
                     case "reachfix":
                         ReachFixup = true;
@@ -364,7 +377,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 foreach (var Frame in imported_nodes[basenode_index].Frames)
                 {
                     Frame.Rotation = new RealQuaternion(0, 0, 0, 1);
-                    Frame.Translation = new RealPoint3d(0, 0, 0);
+                    if(customOffsets.Count() == 3)
+                    {
+                        Frame.Translation = new RealPoint3d(customOffsets[0], customOffsets[1], customOffsets[2]);
+                    }
+                    else
+                        Frame.Translation = new RealPoint3d(0, 0, 0);
                 }
             }
             /*
