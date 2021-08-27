@@ -290,8 +290,8 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId NewPlayerMaterial;
             public uint Unknown;
-            public float Unknown2;
-            public float Unknown3;
+            public float Duration;
+            public float DamageAbsorptionScale;
             public float Unknown4;
             public uint Unknown5;
             public CachedTag ActiveHud;
@@ -311,7 +311,7 @@ namespace TagTool.Tags.Definitions
 		{
             public float Unknown;
             public CachedTag ActiveEffect;
-            public CachedTag Unknown2;
+            public CachedTag HologramBipedEffect;
             public uint Unknown3;
             public uint Unknown4;
             public uint Unknown5;
