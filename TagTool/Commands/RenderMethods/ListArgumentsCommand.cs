@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text.RegularExpressions;
+
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using System.Text.RegularExpressions;
-using System.Text;
 
 namespace TagTool.Commands.RenderMethods
 {
@@ -93,9 +94,10 @@ namespace TagTool.Commands.RenderMethods
                 
                 using (var cacheStream = Cache.OpenCacheRead())
                     template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
-               
+
                 if (filter.ShowHead)
                     output.AppendLine(String.Format($"\n\n{Tag}\n  {property.Template}"));
+
 
                 if (template.BooleanParameterNames.Count > 0)
                 {
@@ -174,7 +176,7 @@ namespace TagTool.Commands.RenderMethods
             return true;
         }
         private bool WildcardMatch(string needle, string haystack) {
-            return Regex.IsMatch(haystack, "^" + Regex.Escape(needle).Replace("\\*", ".*") + "$");
+            return Regex.IsMatch(haystack.ToLower(), "^" + Regex.Escape(needle).Replace("\\*", ".*") + "$");
         }
     }
 }
