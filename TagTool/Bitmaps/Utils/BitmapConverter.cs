@@ -468,6 +468,9 @@ namespace TagTool.Bitmaps.Utils
         {
             string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
 
+            if (!Directory.Exists(@"Temp"))
+                Directory.CreateDirectory(@"Temp");
+
             try
             {
                 var ddsFile = new DDSFile(new DDSHeader((uint)width, (uint)height, 1, 1, BitmapFormat.A8R8G8B8, BitmapType.Texture2D), rgba);
