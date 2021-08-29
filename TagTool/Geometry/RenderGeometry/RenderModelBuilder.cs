@@ -40,6 +40,7 @@ namespace TagTool.Geometry
             _model.Geometry = new RenderGeometry
             {
                 Meshes = new List<Mesh>(),
+                PerMeshNodeMaps = new List<RenderGeometry.PerMeshNodeMap>(),
                 RuntimeFlags = (RenderGeometryRuntimeFlags)7 // TODO: Figure out what this does, if anything
             };
         }
@@ -205,8 +206,26 @@ namespace TagTool.Geometry
 
             Meshes.Add(_currentMesh);
             _model.Geometry.Meshes.Add(_currentMesh.Mesh);
+
+            if (_currentMesh.NodeIndices != null)
+            {
+                _model.Geometry.PerMeshNodeMaps.Add(new RenderGeometry.PerMeshNodeMap()
+                {
+                    NodeIndices = _currentMesh.NodeIndices.Select(x => new RenderGeometry.PerMeshNodeMap.NodeIndex { Node = x }).ToList()
+                });
+            }
+
             _currentPermutation.MeshCount++;
             _currentMesh = null;
+        }
+
+        /// <summary>
+        /// Maps the given node indices to the current mesh.
+        /// </summary>
+        /// <param name="nodeIndices">List of node indices to map.</param>
+        public void MapNodes(byte[] nodeIndices)
+        {
+            _currentMesh.NodeIndices = nodeIndices;
         }
 
         /// <summary>
@@ -543,6 +562,8 @@ namespace TagTool.Geometry
             public WorldVertex[] WorldVertices { get; set; }
 
             public ushort[] Indices { get; set; }
+
+            public byte[] NodeIndices { get; set; }
 
             public void UnbindVertices()
             {

@@ -132,6 +132,7 @@ namespace TagTool.Commands.RenderModels
 					var skinnedVertices = new List<SkinnedVertex>();
 
 					var indices = new List<ushort>();
+					var meshNodeIndices = new List<byte>();
 
 					var vertexType = Definition.Geometry.Meshes[permutation.MeshIndex].Type;
 					var rigidNode = Definition.Geometry.Meshes[permutation.MeshIndex].RigidNodeIndex;
@@ -196,7 +197,15 @@ namespace TagTool.Commands.RenderModels
                                                 return false;
                                             }
 
-											blendIndicesList.Add((byte)nodes[bonefix]);
+											byte nodeIndex = (byte)nodes[bonefix];
+											int meshNodeIndex = meshNodeIndices.IndexOf(nodeIndex);
+											if (meshNodeIndex == -1)
+                                            {
+												meshNodeIndex = meshNodeIndices.Count;
+												meshNodeIndices.Add(nodeIndex);
+											}
+												
+											blendIndicesList.Add((byte)meshNodeIndex);
 											blendWeightsList.Add(vertexInfo.Weight);
 										}
 									}
@@ -277,6 +286,8 @@ namespace TagTool.Commands.RenderModels
 						builder.BindRigidVertexBuffer(rigidVertices, rigidNode);
 
 					builder.BindIndexBuffer(indices, IndexBufferFormat.TriangleList);
+
+					builder.MapNodes(meshNodeIndices.ToArray());
 
 					builder.EndMesh();
 					builder.EndPermutation();

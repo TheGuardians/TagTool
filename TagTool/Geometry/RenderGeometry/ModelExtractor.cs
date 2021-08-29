@@ -230,6 +230,9 @@ namespace TagTool.Geometry
                     for (int j = 0; j < vertex.Indices.Length; j++)
                     {
                         var index = vertex.Indices[j];
+                        if(RenderModel.Geometry.PerMeshNodeMaps.Count > 0)
+                            index = RenderModel.Geometry.PerMeshNodeMaps[meshIndex].NodeIndices[index].Node;
+
                         var bone = mesh.Bones[index];
                         Matrix4x4 inverseTransform = Matrix4x4.Identity;
 
