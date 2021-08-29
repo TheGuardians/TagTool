@@ -56,7 +56,7 @@ namespace TagTool.Commands.CollisionModels
                             for (var i = 0; i < collisionBsp.Geometry.Vertices.Count; i++)
                             {
                                 var v = offset + collisionBsp.Geometry.Vertices[i].Point;
-                                writer.WriteLine($"v {v.X} {v.Z} {v.Y}");
+                                writer.WriteLine($"v {v.X} {v.Z} {-v.Y}");
                             }
 
                             writer.WriteLine($"g {regionName}:{permutationName}");

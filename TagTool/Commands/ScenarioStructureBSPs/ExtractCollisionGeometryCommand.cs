@@ -57,7 +57,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         for (var i = 0; i < bsp.Vertices.Count; i++)
                         {
                             var vertex = bsp.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {-vertex.Point.Y}");
                         }
 
                         writer.WriteLine($"g bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
@@ -103,7 +103,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         for (var i = 0; i < largeBsp.Vertices.Count; i++)
                         {
                             var vertex = largeBsp.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {-vertex.Point.Y}");
                         }
 
                         writer.WriteLine($"g large_bsp_surfaces_{resourceDefinition.LargeCollisionBsps.IndexOf(largeBsp)}");
@@ -166,7 +166,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                                     instanceDef.Matrix.m31, instanceDef.Matrix.m32, instanceDef.Matrix.m33, 0.0f,
                                     instanceDef.Matrix.m41, instanceDef.Matrix.m42, instanceDef.Matrix.m43, 0.0f));
 
-                            writer.WriteLine($"v {point.X} {point.Z} {point.Y}");
+                            writer.WriteLine($"v {point.X} {point.Z} {-point.Y}");
                         }
 
                         writer.WriteLine($"g {instanceName}_main_surfaces");
@@ -211,7 +211,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                             for (var i = 0; i < bsp.Vertices.Count; i++)
                             {
                                 var vertex = bsp.Vertices[i];
-                                writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                                writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {-vertex.Point.Y}");
                             }
 
                             writer.WriteLine($"g {instanceName}_bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
