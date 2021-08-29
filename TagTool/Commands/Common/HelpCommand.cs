@@ -83,17 +83,42 @@ namespace TagTool.Commands.Common
                 new TagToolError(CommandError.CustomError,$"Unable to find command \"{commandName}\"");
                 return;
             }
-            Console.WriteLine("{0}: {1}", command.Name, command.Description);
-            Console.WriteLine();
-            Console.WriteLine("Usage:");
-            Console.WriteLine("{0}", command.Usage);
-            Console.WriteLine();
-            Console.WriteLine(command.HelpMessage);
+			
+            // Print help info
+            ushort indent = 3;
+            Console.WriteLine(FormatPair(command.Name, command.Description, indent, wrap:80));
+            Console.WriteLine(FormatPair("Usage", command.Usage, indent));
+            if (command.Examples != "")
+                Console.WriteLine(FormatPair("Examples", command.Examples, indent));
+            if (command.HelpMessage != "")
+                Console.WriteLine(FormatPair("Notes", command.HelpMessage, indent, wrap:80));
         }
 
         private bool IsAvailable(CommandContext context, Command command)
         {
             return (command.Inherit || ContextStack.Context == context);
+        }
+		
+		private static string FormatPair(string head, string bodyArg, ushort indentArg = 0, int wrap = 0)
+        {
+            string body = "";
+            string lineBuild = "";
+            string indent = new string(' ', indentArg);
+            foreach (var line in bodyArg.Replace("\r", "").Split('\n'))
+            {
+                foreach (string word in line.Split(' ')) 
+                {
+                    if (wrap != 0 && lineBuild.Length > wrap)
+                    {
+                        body += $"\n{indent}{indent}{lineBuild}";
+                        lineBuild = (line.StartsWith("- ") ? "   " : " ") + word;
+                    }
+                    else lineBuild += $"{word} ";
+                }
+                body += $"\n{indent}{indent}{lineBuild}";
+                lineBuild = "";
+            }
+            return $"\n{indent}{head}:{body}";
         }
     }
 }
