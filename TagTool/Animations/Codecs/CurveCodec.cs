@@ -91,7 +91,7 @@ namespace TagTool.Animations.Codecs
                         }
                         Quaternion tangent1 = CalculateTangent(((int)num6 >> 4) - 7, ((int)num7 >> 4) - 7, ((int)num8 >> 4) - 7, ((int)num9 >> 4) - 7, p1, p2);
                         Quaternion tangent2 = CalculateTangent(((int)num6 & 15) - 7, ((int)num7 & 15) - 7, ((int)num8 & 15) - 7, ((int)num9 & 15) - 7, p1, p2);
-                        q = CalculateCurvePosition((float)Math.Round((double)(frameindex - num10) / (double)(num11 - num10), 2), tangent1, tangent2, p1, p2);
+                        q = CalculateCurvePosition((float)((double)(frameindex - num10) / (double)(num11 - num10)), tangent1, tangent2, p1, p2);
                     }
                     Rotations[rotatednodeindex][frameindex] = Quaternion.Normalize(q);
                 }
@@ -161,7 +161,7 @@ namespace TagTool.Animations.Codecs
                         }
                         RealPoint3d tangent1 = CalculateTangent(((int)num10 >> 4) - 7, ((int)num11 >> 4) - 7, ((int)num12 >> 4) - 7, p1, p2);
                         RealPoint3d tangent2 = CalculateTangent(((int)num10 & 15) - 7, ((int)num11 & 15) - 7, ((int)num12 & 15) - 7, p1, p2);
-                        RealPoint3d2 = CalculateCurvePosition((float)Math.Round((double)(index3 - num13) / (double)(num14 - num13), 2), tangent1, tangent2, p1, p2);
+                        RealPoint3d2 = CalculateCurvePosition((float)((double)(index3 - num13) / (double)(num14 - num13)), tangent1, tangent2, p1, p2);
                     }
                     RealPoint3d2.X = (float)(((double)num9 * (double)RealPoint3d2.X + (double)num6));
                     RealPoint3d2.Y = (float)(((double)num9 * (double)RealPoint3d2.Y + (double)num7));
@@ -217,7 +217,7 @@ namespace TagTool.Animations.Codecs
                         }
                         float tangent1 = CalculateTangent(((int)num8 >> 4) - 7, real1, real2);
                         float tangent2 = CalculateTangent(((int)num8 & 15) - 7, real1, real2);
-                        float time = (float)Math.Round((double)(index3 - num9) / (double)(num10 - num9), 2);
+                        float time = (float)((double)(index3 - num9) / (double)(num10 - num9));
                         real3 = CalculateCurvePosition(time, tangent1, tangent2, real1, real2);
                     }
                     real3 = real3 * num7 + num6;

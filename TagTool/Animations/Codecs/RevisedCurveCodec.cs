@@ -40,7 +40,7 @@ namespace TagTool.Animations.Codecs
                 rotationkeyframes[index] = reader.ReadUInt32();
             for (int rotatednodeindex = 0; rotatednodeindex < (int)RotatedNodeCount; ++rotatednodeindex)
             {
-                List<int> intList = new List<int>();
+                List<int> keyframeList = new List<int>();
                 reader.BaseStream.Position = (long)(position + PayloadDataOffset + rotationkeyframes[rotatednodeindex]);
                 int num2 = (int)reader.ReadUInt16();
                 int keyCount = (int)reader.ReadUInt16();
@@ -48,7 +48,7 @@ namespace TagTool.Animations.Codecs
                 int num4 = (int)reader.ReadByte();
                 int num5 = (int)reader.ReadInt16();
                 if ((num3 & 1) == 0)
-                    intList = ReadKeyFrameData(keyCount, reader);
+                    keyframeList = ReadKeyFrameData(keyCount, reader);
                 RotationKeyFrames.Add(Enumerable.Range(0, FrameCount).ToList<int>());
                 Rotations[rotatednodeindex] = new Quaternion[FrameCount];
                 Quaternion p1 = new Quaternion();
@@ -57,9 +57,9 @@ namespace TagTool.Animations.Codecs
                 byte num7 = 0;
                 byte num8 = 0;
                 byte num9 = 0;
-                int num10 = 0;
-                int index2 = 0;
-                int num11 = 0;
+                int currentKeyframe = 0;
+                int keyframeIndex = 0;
+                int nextKeyframe = 0;
                 for (int frameindex = 0; frameindex < FrameCount; ++frameindex)
                 {
                     Quaternion q;
@@ -69,7 +69,7 @@ namespace TagTool.Animations.Codecs
                     }
                     else
                     {
-                        if (intList[index2] == frameindex && frameindex < FrameCount - 1)
+                        if (keyframeList[keyframeIndex] == frameindex && frameindex < FrameCount - 1)
                         {
                             short i1 = reader.ReadInt16();
                             short j1 = reader.ReadInt16();
@@ -83,15 +83,15 @@ namespace TagTool.Animations.Codecs
                             short w2 = reader.ReadInt16();
                             p1 = DecompressRevisedQuat(i1, j1, w1);
                             p2 = DecompressRevisedQuat(i2, j2, w2);
-                            num10 = intList[index2];
-                            num11 = intList[index2 + 1];
-                            ++index2;
+                            currentKeyframe = keyframeList[keyframeIndex];
+                            nextKeyframe = keyframeList[keyframeIndex + 1];
+                            ++keyframeIndex;
                             //go back 6 bytes so you can read the values again
                             reader.BaseStream.Position -= 6L;
                         }
                         Quaternion tangent1 = CalculateTangent(((int)num6 >> 4) - 7, ((int)num7 >> 4) - 7, ((int)num8 >> 4) - 7, ((int)num9 >> 4) - 7, p1, p2);
                         Quaternion tangent2 = CalculateTangent(((int)num6 & 15) - 7, ((int)num7 & 15) - 7, ((int)num8 & 15) - 7, ((int)num9 & 15) - 7, p1, p2);
-                        q = CalculateCurvePosition((float)Math.Round((double)(frameindex - num10) / (double)(num11 - num10), 2), tangent1, tangent2, p1, p2);
+                        q = CalculateCurvePosition((float)((double)(frameindex - currentKeyframe) / (double)(nextKeyframe - currentKeyframe)), tangent1, tangent2, p1, p2);
                     }
                     Rotations[rotatednodeindex][frameindex] = Quaternion.Normalize(q);
                 }
@@ -161,7 +161,7 @@ namespace TagTool.Animations.Codecs
                         }
                         RealPoint3d tangent1 = CalculateTangent(((int)num10 >> 4) - 7, ((int)num11 >> 4) - 7, ((int)num12 >> 4) - 7, p1, p2);
                         RealPoint3d tangent2 = CalculateTangent(((int)num10 & 15) - 7, ((int)num11 & 15) - 7, ((int)num12 & 15) - 7, p1, p2);
-                        RealPoint3d2 = CalculateCurvePosition((float)Math.Round((double)(index3 - num13) / (double)(num14 - num13), 2), tangent1, tangent2, p1, p2);
+                        RealPoint3d2 = CalculateCurvePosition((float)((double)(index3 - num13) / (double)(num14 - num13)), tangent1, tangent2, p1, p2);
                     }
                     RealPoint3d2.X = (float)(((double)num9 * (double)RealPoint3d2.X + (double)num6));
                     RealPoint3d2.Y = (float)(((double)num9 * (double)RealPoint3d2.Y + (double)num7));
@@ -217,7 +217,7 @@ namespace TagTool.Animations.Codecs
                         }
                         float tangent1 = CalculateTangent(((int)num8 >> 4) - 7, real1, real2);
                         float tangent2 = CalculateTangent(((int)num8 & 15) - 7, real1, real2);
-                        float time = (float)Math.Round((double)(index3 - num9) / (double)(num10 - num9), 2);
+                        float time = (float)((double)(index3 - num9) / (double)(num10 - num9));
                         real3 = CalculateCurvePosition(time, tangent1, tangent2, real1, real2);
                     }
                     real3 = real3 * num7 + num6;
