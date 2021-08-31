@@ -21,15 +21,23 @@ namespace TagTool.Commands.RenderModels
 		public ReplaceRenderGeometryCommand(GameCache cache, CachedTag tag, RenderModel definition) :
 			base(false,
 
+				name:
 				"ReplaceRenderGeometry",
+				
+				description:
 				"Replaces the render_geometry of the current render_model tag.",
 
-				"ReplaceRenderGeometry <COLLADA Scene>",
+				usage:
+				"ReplaceRenderGeometry <COLLADA Scene> [IndexBufferFormat]",
 
-				"Replaces the render_geometry of the current render_model tag " +
-				"with geometry compiled from a COLLADA scene file (.DAE)\n" +
-                "Your DAE file must contain a single mesh for every permutation.\n" +
-                "Name your meshes as {region}:{permutation} (e.g. hull:base)\n")
+				examples:
+				"ReplaceRenderGeometry d:\\model.dae trianglestrip",
+
+				helpMessage:
+				"- Replaces the render_geometry of the current render_model tag with geometry compiled from a COLLADA scene file (.DAE).\n" +
+                "- Your DAE file must contain a single mesh for every permutation.\n" +
+                "- Name your meshes as {region}:{permutation} (e.g. hull:base).\n" +
+				"- IndexBufferFormat is TriangleList unless TriangleStrip specified.")
 		{
 			Cache = cache;
 			Tag = tag;
@@ -38,7 +46,9 @@ namespace TagTool.Commands.RenderModels
 
 		public override object Execute(List<string> args)
 		{
-			if (args.Count != 1)
+			Console.WriteLine();
+			
+			if (args.Count < 1 || args.Count > 2)
 				return new TagToolError(CommandError.ArgCount);
 
 			if (!Cache.TagCache.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
@@ -51,6 +61,9 @@ namespace TagTool.Commands.RenderModels
 
 			var sceneFile = new FileInfo(args[0]);
 
+			var indexBufferFormat = args.Count > 1 && args[1].ToLower() == "trianglestrip" ? IndexBufferFormat.TriangleStrip : IndexBufferFormat.TriangleList;
+			var showTriangleStripWarning = false;
+			
 			if (!sceneFile.Exists)
 				return new TagToolError(CommandError.FileNotFound);
 
@@ -143,6 +156,8 @@ namespace TagTool.Commands.RenderModels
 
 					foreach (var mesh in permMeshes)
 					{
+						Console.Write($"   [{(mesh.Name.Contains("FBXASC058") ? mesh.Name.Remove(mesh.Name.Length - 4).Replace("FBXASC058", ":") : mesh.Name)}]");
+
 						for (var i = 0; i < mesh.VertexCount; i++)
 						{
 							var position = mesh.Vertices[i];
@@ -257,8 +272,28 @@ namespace TagTool.Commands.RenderModels
 						}
 
 						// Build the index buffer
-						var meshIndices = mesh.GetIndices();
-						indices.AddRange(meshIndices.Select(i => (ushort)(i + partStartVertex)));
+						ushort[] meshIndices;
+						if (indexBufferFormat == IndexBufferFormat.TriangleStrip)
+						{
+							var indicesOG = mesh.GetIndices().Select(i => (uint)(i + partStartVertex)).ToArray();
+
+							var indicesOpt = new uint[indicesOG.Length];
+							MeshOptimizer.OptimizeVertexCacheStrip(indicesOpt, indicesOG, indicesOG.Count(), 65536);
+
+							var indicesStripped = new uint[MeshOptimizer.StripifyBound(indicesOpt.Length)];
+							uint newIndexCount = MeshOptimizer.Stripify(indicesStripped, indicesOpt, indicesOpt.Length, 65536, 0);
+							
+							meshIndices = indicesStripped.Take((int)newIndexCount).Select(i => (ushort)i).ToArray();
+
+							Console.WriteLine($" {mesh.GetIndices().Count()} -> {meshIndices.Count()} indices");
+						}
+						else
+						{
+							meshIndices = mesh.GetIndices().Select(i => (ushort)(i + partStartVertex)).ToArray();
+							Console.WriteLine($" {meshIndices.Count()} indices");
+						}
+						indices.AddRange(meshIndices);
+
 
 						// Define a material and part for this mesh
 						var meshMaterial = scene.Materials[mesh.MaterialIndex];
@@ -291,7 +326,7 @@ namespace TagTool.Commands.RenderModels
 					else
 						builder.BindRigidVertexBuffer(rigidVertices, rigidNode);
 
-					builder.BindIndexBuffer(indices, IndexBufferFormat.TriangleList);
+					builder.BindIndexBuffer(indices, indexBufferFormat);
 
 					if (usePerMeshNodeMapping)
 						builder.MapNodes(meshNodeIndices.ToArray());
@@ -327,7 +362,7 @@ namespace TagTool.Commands.RenderModels
                 }
             }
 
-            Console.Write("Building render_geometry...");
+            Console.Write("\n   Building render_geometry...");
 
             var newDefinition = builder.Build(Cache.Serializer);
             Definition.Regions = newDefinition.Regions;
@@ -341,7 +376,7 @@ namespace TagTool.Commands.RenderModels
             // TODO: Build the new render_model and update the original render_model here...
             //
 
-            Console.Write("Writing render_model tag data...");
+            Console.Write("   Writing render_model tag data...");
 
 			using (var cacheStream = Cache.OpenCacheReadWrite())
 				Cache.Serialize(cacheStream, Tag, Definition);
@@ -357,7 +392,10 @@ namespace TagTool.Commands.RenderModels
 				Console.WriteLine("done");
 			}
 
-			Console.WriteLine("Replaced render_geometry successfully.");
+			Console.WriteLine("   Replaced render_geometry successfully.\n");
+
+			if (showTriangleStripWarning)
+				return new TagToolWarning($"One or more meshes using TriangleStrips produced more indices than TriangleList would have.");
 
 			return true;
 		}
