@@ -73,6 +73,7 @@ namespace TagTool.Commands.RenderModels
 			var builder = new RenderModelBuilder(Cache);
 			var nodes = new Dictionary<string, sbyte>();
 			var materialIndices = new Dictionary<string, short>();
+			bool usePerMeshNodeMapping = true;
 
 			foreach (var oldNode in Definition.Nodes)
 			{
@@ -162,6 +163,29 @@ namespace TagTool.Commands.RenderModels
 							var tangent = mesh.Tangents.Count != 0 ? mesh.Tangents[i] : new Vector3D();
 							var bitangent = mesh.BiTangents.Count != 0 ? mesh.BiTangents[i] : new Vector3D();
 
+							if(usePerMeshNodeMapping)
+                            {
+								// generate the list of node indices used by this mesh
+								foreach (var bone in mesh.Bones)
+								{
+									string bonefix = FixBoneName(bone.Name);
+
+									if (!nodes.ContainsKey(bonefix))
+									{
+										new TagToolError(CommandError.CustomError, $"There is no node {bonefix} to match bone {bone.Name}");
+										return false;
+									}
+
+									byte nodeIndex = (byte)nodes[bonefix];
+									int meshNodeIndex = meshNodeIndices.IndexOf(nodeIndex);
+									if (meshNodeIndex == -1)
+									{
+										meshNodeIndex = meshNodeIndices.Count;
+										meshNodeIndices.Add(nodeIndex);
+									}
+								}
+							}
+
 							if (vertexType == VertexType.Skinned)
 							{
 								var blendIndicesList = new List<byte>();
@@ -172,24 +196,8 @@ namespace TagTool.Commands.RenderModels
 									foreach (var vertexInfo in bone.VertexWeights)
 									{
 										if (vertexInfo.VertexID == i)
-										{
-											// HAX BELOW
-											//if (bone.Name.StartsWith("_"))
-											//bone.Name = bone.Name.Substring(4);
-											//if (bone.Name.EndsWith("2"))
-											//bone.Name = bone.Name.Replace("2", "_tip");
-											//else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
-											//bone.Name = bone.Name.Replace("1", "_low");
-											var bonefix = bone.Name;
-
-                                            if(Regex.IsMatch(bone.Name, @"Armature_\d\d\d_.*"))
-                                            {
-                                                bonefix = Regex.Match(bone.Name, @"Armature_\d\d\d_(.*)").Groups[1].Value;
-                                            }
-                                            else if (Regex.IsMatch(bone.Name, @"Armature_.*"))
-                                            {
-                                                bonefix = Regex.Match(bone.Name, @"Armature_(.*)").Groups[1].Value;
-                                            }
+                                        {
+                                            string bonefix = FixBoneName(bone.Name);
 
                                             if (!nodes.ContainsKey(bonefix))
                                             {
@@ -197,18 +205,16 @@ namespace TagTool.Commands.RenderModels
                                                 return false;
                                             }
 
-											byte nodeIndex = (byte)nodes[bonefix];
-											int meshNodeIndex = meshNodeIndices.IndexOf(nodeIndex);
-											if (meshNodeIndex == -1)
-                                            {
-												meshNodeIndex = meshNodeIndices.Count;
-												meshNodeIndices.Add(nodeIndex);
-											}
-												
-											blendIndicesList.Add((byte)meshNodeIndex);
-											blendWeightsList.Add(vertexInfo.Weight);
-										}
-									}
+                                            byte nodeIndex = (byte)nodes[bonefix];
+
+                                            if (usePerMeshNodeMapping)
+                                                blendIndicesList.Add((byte)meshNodeIndices.IndexOf(nodeIndex));
+                                            else
+                                                blendIndicesList.Add((byte)nodeIndex);
+
+                                            blendWeightsList.Add(vertexInfo.Weight);
+                                        }
+                                    }
 								}
 
 								var blendIndices = new byte[4];
@@ -287,7 +293,8 @@ namespace TagTool.Commands.RenderModels
 
 					builder.BindIndexBuffer(indices, IndexBufferFormat.TriangleList);
 
-					builder.MapNodes(meshNodeIndices.ToArray());
+					if (usePerMeshNodeMapping)
+						builder.MapNodes(meshNodeIndices.ToArray());
 
 					builder.EndMesh();
 					builder.EndPermutation();
@@ -354,5 +361,27 @@ namespace TagTool.Commands.RenderModels
 
 			return true;
 		}
-	}
+
+        private static string FixBoneName(string name)
+        {
+			// HAX BELOW
+			//if (bone.Name.StartsWith("_"))
+			//bone.Name = bone.Name.Substring(4);
+			//if (bone.Name.EndsWith("2"))
+			//bone.Name = bone.Name.Replace("2", "_tip");
+			//else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
+			//bone.Name = bone.Name.Replace("1", "_low");
+
+			if (Regex.IsMatch(name, @"Armature_\d\d\d_.*"))
+            {
+                return Regex.Match(name, @"Armature_\d\d\d_(.*)").Groups[1].Value;
+            }
+            else if (Regex.IsMatch(name, @"Armature_.*"))
+            {
+                return Regex.Match(name, @"Armature_(.*)").Groups[1].Value;
+            }
+
+			return name;
+        }
+    }
 }
