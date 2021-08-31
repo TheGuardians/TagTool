@@ -286,6 +286,8 @@ namespace TagTool.Commands.RenderModels
 							meshIndices = indicesStripped.Take((int)newIndexCount).Select(i => (ushort)i).ToArray();
 
 							Console.WriteLine($" {mesh.GetIndices().Count()} -> {meshIndices.Count()} indices");
+							
+							if (mesh.GetIndices().Count() < meshIndices.Count()) showTriangleStripWarning = true;
 						}
 						else
 						{
