@@ -81,7 +81,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Gen4.ScenarioStructureBsp.StructureSuperNodeTraversalGeometryBlock> SuperNodeTraversalGeometry;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public Gen4.ScenarioStructureBsp.CollisionKdHierarchyStaticStruct InstanceKdHierarchy;
+        public CollisionKdHierarchyStatic InstanceKdHierarchy;
 
         public Bounds<float> WorldBoundsX;
         public Bounds<float> WorldBoundsY;

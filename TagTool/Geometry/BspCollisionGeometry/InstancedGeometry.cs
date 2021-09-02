@@ -1,7 +1,10 @@
-﻿using TagTool.Cache;
+﻿using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Geometry.BspCollisionGeometry
 {
@@ -121,6 +124,58 @@ namespace TagTool.Geometry.BspCollisionGeometry
             public uint Unknown2;
             public uint Unknown3;
             public uint Unknown4;
+        }
+    }
+
+    [TagStructure(Size = 0x9C)]
+    public class InstancedGeometryInstanceReach : TagStructure
+    {
+        public float Scale;
+        public RealMatrix4x3 Matrix;
+        public short DefinitionIndex;
+        public FlagsValue Flags;
+        public short LodDataIndex;
+        public short CompressionIndex;
+        [TagField(Length = 4)]
+        public uint[] SeamBitVector;
+        public RealRectangle3d Bounds;
+        public RealPoint3d WorldBoundingSphereCenter;
+        public Bounds<float> BoundingSphereRadiusBounds;
+        public uint Checksum;
+        public sbyte PathfindingPolicy;
+        public sbyte LightmappingPolicy;
+        public sbyte ImposterPolicy;
+        public sbyte StreamingPriority;
+        public float LightmapResolutionScale;
+        public uint Unknown4;
+        public uint Unknown5;
+        public uint Unknown6;
+        public uint Unknown7;
+        public uint Unknown8;
+        public uint Unknown9;
+        public float Unknown10;
+        public RealVector3d Unknown11;
+
+        [Flags]
+        public enum FlagsValue : ushort
+        {
+            None,
+            ContainsSplitLightingParts = 1 << 0,
+            RenderOnly = 1 << 1,
+            DoesNotBlockAoeDamage = 1 << 2,
+            Collidable = 1 << 3,
+            ContainsDecalParts = 1 << 4,
+            ContainsWaterParts = 1 << 5,
+            NegativeScale = 1 << 6,
+            OutsideMap = 1 << 7,
+            SeamColliding = 1 << 8,
+            ContainsDeferredReflections = 1 << 9,
+            RemoveFromShadowGeometry = 1 << 10,
+            CinemaOnly = 1 << 11,
+            ExcludeFromCinema = 1 << 12,
+            DisableFX = 1 << 13,
+            DisablePlayCollision = 1 << 14,
+            DisableBulletCollision = 1 << 15
         }
     }
 }

@@ -648,6 +648,7 @@
     <Compile Include="Geometry\BspCollisionGeometry\CollisionBspPhysics.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\CollisionGeometryShape.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\InstancedGeometry.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\CollisionKdHierarchy.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\LargeCollisionGeometry.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Surface.cs" />
     <Compile Include="Geometry\Jms\JmsFormat.cs" />
