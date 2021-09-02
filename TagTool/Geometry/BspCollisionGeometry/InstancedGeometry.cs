@@ -47,31 +47,29 @@ namespace TagTool.Geometry.BspCollisionGeometry
     public class InstancedGeometryBlockReach : TagStructure
     {
         public int Checksum;
-        public uint Unknown1;
-        public CollisionGeometry CollisionInfo;
-        public LargeCollisionBspBlock LargeCollisionInfo;
-        public TagBlock<CollisionGeometry> CollisionGeometries;
-        public TagBlock<Unknown2Block> Unknown2;
+        public InstancedGeometryDefinitionFlags Flags; // Taken from h4, might not be correct
+        public CollisionGeometry CollisionInfo; // type 0
+        public CollisionGeometry Unused1; // type 2 - unused
+        public TagBlock<CollisionGeometry> CollisionGeometries; // type 1 - unused
         public TagBlock<TagHkpMoppCode> CollisionMoppCodes;
         public TagBlock<BreakableSurfaceBits> BreakableSurfaces;
         public TagBlock<PolyhedronBlock> Polyhedra;
         public TagBlock<PolyhedronFourVector> PolyhedraFourVectors;
         public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
         public TagBlock<SurfacesPlanes> SurfacePlanes;
-        public TagBlock<PlaneReferenceReach> Planes;
+        public TagBlock<PlaneReference> Planes;
         public short MeshIndex;
         public short CompressionIndex;
 
-        [TagStructure(Size = 0x0)]
-        public class UnknownBlock : TagStructure
+        [Flags]
+        public enum InstancedGeometryDefinitionFlags : uint
         {
-            // TODO
-        }
-
-        [TagStructure(Size = 0x4)] // might not be the correct size
-        public class Unknown2Block : TagStructure
-        {
-            public uint Unknown1;
+            MiscoloredBsp = 1 << 0,
+            ErrorFree = 1 << 1,
+            SurfaceToTriangleRemapped = 1 << 2,
+            ExternalReferenceMesh = 1 << 3,
+            NoPhysics = 1 << 4,
+            StitchedPhysics = 1 << 5
         }
 
         [TagStructure(Size = 0x80)]
@@ -114,16 +112,6 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public class PolyhedronPlaneEquation : TagStructure
         {
             public RealPlane3d PlaneEquation;
-        }
-
-        [TagStructure(Size = 0x10)]
-        public class PlaneReferenceReach : TagStructure
-        {
-            // maybe kd hash data?
-            public uint Unknown1;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
         }
     }
 
