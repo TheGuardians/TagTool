@@ -8,7 +8,8 @@ using TagTool.Tags.Resources;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1B4, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1E4, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1E4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x15C, MinVersion = CacheVersion.HaloReach)]
     public class ScenarioLightmapBspData : TagStructure
 	{
         public short Unknown;
@@ -18,31 +19,62 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// When sampling from the lightmap coefficient map, the resuling rgb SH coefficients are multiplied by this luminance scale.
         /// </summary>
-        [TagField(Length = 9)]
+        [TagField(Length = 9, MaxVersion = CacheVersion.HaloOnline700123)]
         public LuminanceScale[] CoefficientsMapScale;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Unknown1;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Brightness;
 
         public CachedTag LightmapSHCoefficientsBitmap;
         public CachedTag LightmapDominantLightDirectionBitmap;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<StaticPerVertexLighting> StaticPerVertexLightingBuffers;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<ClusterStaticPerVertexLighting> ClusterStaticPerVertexLightingBuffers;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<InstancedGeometryLighting> InstancedGeometry;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<HalfRGBLightProbe> InstancedGeometryLightProbes;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown2;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown3;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown4;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown5;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown6;
+
         public RenderGeometry Geometry;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Airprobe> Airprobes;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SceneryLightProbe> SceneryLightProbes;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<MachineLightProbes> MachineLightProbes;
-
         /// <summary>
         /// Actually unused in all games. Probably intended for another object type.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<int> Unused;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown8;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown9;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown11;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown12;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown13;
+
 
         [TagStructure(Size = 0x10)]
         public class StaticPerVertexLighting : TagStructure
@@ -68,6 +100,11 @@ namespace TagTool.Tags.Definitions
             public short StaticPerVertexLightingIndex;
             public short InstancedGeometryLightProbesIndex;
             public short Padding;
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class NullBlock : TagStructure
+        {
         }
     }
 
