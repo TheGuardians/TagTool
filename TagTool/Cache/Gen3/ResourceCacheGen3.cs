@@ -17,11 +17,13 @@ namespace TagTool.Cache.Gen3
         public ResourceGestalt ResourceGestalt;
         public ResourceLayoutTable ResourceLayoutTable;
         public GameCacheGen3 Cache;
+        public ResourcePageLruvCache ResourcePageCache;
 
         public ResourceCacheGen3(GameCacheGen3 cache, bool load = false)
         {
             isLoaded = false;
             Cache = cache;
+            ResourcePageCache = new ResourcePageLruvCache(2L * 1024 * 1024 * 1024); // 2GB;
 
             if (load)
                 LoadResourceCache();
@@ -282,7 +284,17 @@ namespace TagTool.Cache.Gen3
         private byte[] ReadSegmentData(ResourceData resource, int pageIndex, int offset, int sizeIndex)
         {
             var page = ResourceLayoutTable.Pages[pageIndex];
-            var decompressed = ReadPageData(resource, page);
+
+            byte[] decompressed;
+            if(!ResourcePageCache.TryGetPage(pageIndex, out decompressed))
+            {
+                decompressed = ReadPageData(resource, page);
+                ResourcePageCache.AddPage(pageIndex, decompressed);
+            }
+            else
+            {
+                Console.WriteLine("Cache hit");
+            }
 
             int length;
             if (sizeIndex != -1)

@@ -325,6 +325,7 @@
     <Compile Include="Cache\LocaleTable.cs" />
     <Compile Include="Cache\ModPackages\ResourceCachesModPackage.cs" />
     <Compile Include="Cache\Resources\ResourceCache.cs" />
+    <Compile Include="Cache\Resources\ResourcePageLruvCache.cs" />
     <Compile Include="Cache\Resources\ResourceSection.cs" />
     <Compile Include="Cache\Resources\ResourceSharedFile.cs" />
     <Compile Include="Cache\Resources\ResourceSubpage.cs" />
