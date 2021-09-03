@@ -279,6 +279,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown131;
         public uint Unknown132;
 
+        [TagField(Platform = CachePlatform.Original)]
         public List<SimulationDefinitionTableBlock> SimulationDefinitionTable;
         public CachedTag DefaultCameraFx;
         public CachedTag DefaultScreenFx;

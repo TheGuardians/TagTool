@@ -1,4 +1,5 @@
-﻿using TagTool.Common;
+﻿using TagTool.Cache.MCC;
+using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
@@ -15,11 +16,36 @@ namespace TagTool.Cache
                 return false;
         }
 
-        public static CacheFileHeader Read(CacheVersion version, CachePlatform cachePlatform, EndianReader reader)
+        public static CacheFileHeader Read(CacheFileVersion fileVersion, CacheVersion version, CachePlatform cachePlatform, EndianReader reader)
         {
             var deserializer = new TagDeserializer(version, cachePlatform);
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
+
+            if (fileVersion == CacheFileVersion.HaloMCCUniversal)
+            {
+                // TODO: cleanup
+                // adapt the header for gen3 for now
+                var header = deserializer.Deserialize<CacheFileHeaderMCC>(dataContext);
+                var adapter = new CacheFileHeaderGen3()
+                {
+                    HeaderSignature = header.HeaderSignature,
+                    FileVersion = header.FileVersion,
+                    TagTableHeaderOffset = header.TagTableHeaderOffset,
+                    TagMemoryHeader = header.TagMemoryHeader,
+                    SourceFile = header.SourceFile,
+                    Build = header.Build,
+                    CacheType = header.CacheType,
+                    SharedCacheType = header.SharedCacheType,
+                    StringIdsHeader = header.GetStringIDHeader(),
+                    TagNamesHeader = header.TagNamesHeader,
+                    VirtualBaseAddress = header.VirtualBaseAddress,
+                    Partitions = header.Partitions,
+                    SectionTable = header.SectionTable,
+                    FooterSignature = header.FooterSiganture
+                };
+                return adapter;
+            }
 
             switch (version)
             {

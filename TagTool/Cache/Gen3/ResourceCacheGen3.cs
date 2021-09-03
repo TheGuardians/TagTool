@@ -42,7 +42,7 @@ namespace TagTool.Cache.Gen3
                 using (var cacheStream = Cache.OpenCacheRead())
                 {
                     ResourceGestalt = Cache.Deserialize<ResourceGestalt>(cacheStream, Cache.TagCacheGen3.GlobalInstances["zone"]);
-                    if(Cache.Platform == CachePlatform.MCC)
+                    if(Cache.Platform == CachePlatform.MCC && Cache.BaseMapFile.MapVersion != CacheFileVersion.HaloMCCUniversal)
                         ResourceLayoutTable = ResourceGestalt.LayoutTable;
                     else
                         ResourceLayoutTable = Cache.Deserialize<ResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);

@@ -181,6 +181,7 @@ namespace TagTool.Cache
                 case "Nov 24 2020 15:47:48":
                 case "Feb 19 2021 11:19:43":
                 case "Jun  9 2021 09:25:41":
+                case "Aug 25 2021 03:43:53":
                     version = CacheVersion.Halo3Retail;
                     cachePlatform = CachePlatform.MCC;
                     break;
@@ -204,7 +205,7 @@ namespace TagTool.Cache
                 switch (version)
                 {
                     case CacheVersion.Halo3Retail:
-                        return "Nov 24 2020 15:47:48";
+                        return "Aug 25 2021 03:43:53";
                     default:
                         return version.ToString();
                 }
