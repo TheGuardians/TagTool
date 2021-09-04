@@ -32,7 +32,6 @@ namespace TagTool.Commands
                 Console.WriteLine();
                 Console.WriteLine("Please report any bugs and/or feature requests at");
                 Console.WriteLine("<https://github.com/TheGuardians-CI/TagTool/issues>.");
-                Console.WriteLine();
             }
 
             start:
@@ -41,9 +40,12 @@ namespace TagTool.Commands
             // legacy from older cache system where only HO caches could be loaded
             var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
 
+            if (args.Length > 0 && !fileInfo.Exists)
+                new TagToolError(CommandError.CustomError, "Invalid path to a tag cache!");
+
             while (!fileInfo.Exists)
             {
-                Console.WriteLine("Enter the path to a Halo cache file (.map or tags.dat)':");
+                Console.WriteLine("\nEnter the path to a Halo cache file (.map or tags.dat)':");
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
 
@@ -69,8 +71,6 @@ namespace TagTool.Commands
 					fileInfo = new FileInfo(tagCacheFile);
 				else
 					new TagToolError(CommandError.CustomError,"Invalid path to a tag cache!");
-
-                Console.WriteLine();
             }
 
             GameCache gameCache = null;
@@ -112,7 +112,7 @@ namespace TagTool.Commands
                     commandRunner.RunCommand(line);
             }
 
-            Console.WriteLine("Enter \"help\" to list available commands. Enter \"exit\" to quit.");
+            Console.WriteLine("\nEnter \"help\" to list available commands. Enter \"exit\" to quit.");
             while (!commandRunner.EOF)
             {
                 // Read and parse a command
