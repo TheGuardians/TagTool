@@ -32,7 +32,7 @@ namespace TagTool.Commands.Common
             return commandLine;
         }
 
-        public void RunCommand(string commandLine, bool printInput = false)
+        public void RunCommand(string commandLine, bool printInput = false, bool printOutput = true)
         {
             if (commandLine == null)
             {
@@ -74,9 +74,9 @@ namespace TagTool.Commands.Common
             // Handle redirection
             var oldOut = Console.Out;
             StreamWriter redirectWriter = null;
-            if (redirectFile != null)
+            if (redirectFile != null || !printOutput)
             {
-                redirectWriter = new StreamWriter(File.Open(redirectFile, FileMode.Create, FileAccess.Write));
+                redirectWriter = !printOutput ? StreamWriter.Null : new StreamWriter(File.Open(redirectFile, FileMode.Create, FileAccess.Write));
                 Console.SetOut(redirectWriter);
             }
 
@@ -88,11 +88,12 @@ namespace TagTool.Commands.Common
             }
 
             // Undo redirection
-            if (redirectFile != null)
+            if (redirectFile != null || !printOutput)
             {
                 Console.SetOut(oldOut);
                 redirectWriter.Dispose();
-                Console.WriteLine("Wrote output to {0}.", redirectFile);
+                if (redirectFile != null)
+                    Console.WriteLine("Wrote output to {0}.", redirectFile);
             }
         }
 
