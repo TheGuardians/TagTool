@@ -307,6 +307,7 @@
     <Compile Include="Cache\Gen4\TagDefinitionsGen4.cs" />
     <Compile Include="Cache\Gen4\TagGroupGen4.cs" />
     <Compile Include="Cache\Interops\InteropDefinition.cs" />
+    <Compile Include="Cache\MCC\CacheFileHeaderMCC.cs" />
     <Compile Include="Cache\Resources\CharacterUsage.cs" />
     <Compile Include="Cache\Resources\ModelVariantUsage.cs" />
     <Compile Include="Cache\Resources\PredictionAtom.cs" />
