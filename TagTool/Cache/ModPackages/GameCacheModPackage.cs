@@ -85,41 +85,43 @@ namespace TagTool.Cache
         public override object Deserialize(Stream stream, CachedTag instance)
         {
             var definitionType = TagCache.TagDefinitions.GetTagDefinitionType(instance.Group);
-            var modCachedTag = TagCache.GetTag(instance.Index) as CachedTagHaloOnline;
-            // deserialization can happen in the base cache if the tag in the mod pack is only a reference
+
+            var modCachedTag = (CachedTagHaloOnline)TagCache.GetTag(instance.Index);
             if (modCachedTag.IsEmpty())
             {
+                // deserialization can happen in the base cache if the tag in the mod pack is only a reference
                 var baseInstance = BaseCacheReference.TagCache.GetTag(instance.Index);
-                return BaseCacheReference.Deserialize(BaseCacheStream, baseInstance);
-            }
+                return BaseCacheReference.Deserialize(CreateTagSerializationContext(BaseCacheReference, BaseCacheStream, baseInstance), definitionType);
+            }    
             else
             {
-                var context = CreateTagSerializationContext(stream, instance);
-                return Deserializer.Deserialize(context, definitionType);
-            }
+                return Deserializer.Deserialize(CreateTagSerializationContext(this, stream, modCachedTag), definitionType);
+            }   
         }
 
         public override T Deserialize<T>(Stream stream, CachedTag instance)
         {
-            var modCachedTag = TagCache.GetTag(instance.Index) as CachedTagHaloOnline;
+            var modCachedTag = (CachedTagHaloOnline)TagCache.GetTag(instance.ToString());
             if (modCachedTag.IsEmpty())
             {
                 var baseInstance = BaseCacheReference.TagCache.GetTag(instance.Index);
-                return BaseCacheReference.Deserialize<T>(BaseCacheStream, baseInstance);
+                return BaseCacheReference.Deserialize<T>(CreateTagSerializationContext(BaseCacheReference, BaseCacheStream, baseInstance));
             }
             else
-                return Deserializer.Deserialize<T>(CreateTagSerializationContext(stream, instance));
+            {
+                return Deserializer.Deserialize<T>(CreateTagSerializationContext(this, stream, modCachedTag));
+            }
         }
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
             definition = ConvertResources(definition);
-            Serializer.Serialize(CreateTagSerializationContext(stream, instance), definition);
+            Serializer.Serialize(CreateTagSerializationContext(this, stream, instance), definition);
         }
 
-        private ISerializationContext CreateTagSerializationContext(Stream stream, CachedTag instance)
+        private ISerializationContext CreateTagSerializationContext(GameCacheHaloOnlineBase context, Stream stream, CachedTag instance)
         {
-            return new ModPackageTagSerializationContext(stream, this, (CachedTagHaloOnline)instance);
+            return new ModPackageTagSerializationContext(stream, this, context, (CachedTagHaloOnline)instance);
         }
 
         public override Stream OpenCacheRead() => BaseModPackage.TagCachesStreams[CurrentTagCacheIndex];
