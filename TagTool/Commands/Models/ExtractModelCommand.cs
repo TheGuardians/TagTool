@@ -82,6 +82,7 @@ namespace TagTool.Commands.Models
                 else if (input.Key != ConsoleKey.Enter) goto AwaitInput;
                 
                 Console.SetOut(outBackup);
+				Console.WriteLine($"\n   Ripping: {(modelVariant is null ? "All variants" : Cache.StringTable.GetString(modelVariant.Name))}..."); 
             }
 
 
@@ -98,33 +99,30 @@ namespace TagTool.Commands.Models
             var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderModel.Geometry.Resource);
             renderModel.Geometry.SetResourceBuffers(definition);
 
-            using (var resourceStream = new MemoryStream())
-            {
-                var modelFile = new FileInfo(filePath);
-                
-                if (args.Count > 1 && args[1].ToLower() == "dds")
-                    extractBitmapsPath = modelFile.FullName.Substring(0, modelFile.FullName.Length - modelFile.Extension.Length);
-                
-                if (!modelFile.Directory.Exists)
-                    modelFile.Directory.Create();
+			var modelFile = new FileInfo(filePath);
+			
+			if (args.Count > 1 && args[1].ToLower() == "dds")
+				extractBitmapsPath = modelFile.FullName.Substring(0, modelFile.FullName.Length - modelFile.Extension.Length);
+			
+			if (!modelFile.Directory.Exists)
+				modelFile.Directory.Create();
 
-                switch (fileType)
-                {
-                    case ".obj":
-                        ExtractObj(modelFile, renderModel, modelVariant);
-                        break;
+			switch (fileType)
+			{
+				case ".obj":
+					ExtractObj(modelFile, renderModel, modelVariant);
+					break;
 
-                    case ".amf":
-                        ExtractAmf(modelFile, renderModel, modelVariant, scale: 100, extractBitmapsPath);
-                        break;
+				case ".amf":
+					ExtractAmf(modelFile, renderModel, modelVariant, scale: 100, extractBitmapsPath);
+					break;
 
-                    case ".dae":
-                        ModelExtractor extractor = new ModelExtractor(Cache, renderModel);
-                        extractor.ExtractRenderModel();
-                        extractor.ExportCollada(modelFile);
-                        break;
-                }
-            }
+				case ".dae":
+					ModelExtractor extractor = new ModelExtractor(Cache, renderModel);
+					extractor.ExtractRenderModel();
+					extractor.ExportCollada(modelFile);
+					break;
+			}
 
             Console.WriteLine($"\n   Model extracted to {filePath}");
             if (extractBitmapsPath != "")
@@ -149,7 +147,7 @@ namespace TagTool.Commands.Models
 				.SelectMany(x => x.Permutations, (x, y) => x.RenderModelRegionIndex+":"+y.RenderModelPermutationIndex).ToList();
                 
 				var validRegions = renderModel.Regions
-                                .Select((r,ri) => new { Name = r.Name, RegionsIdx = ri, Permutations = r.Permutations.Where((p,pi) => (modelVariant == null || variantRPs.Contains(ri+":"+pi)) && p.MeshCount > 0 && renderModel.Geometry.Meshes.ElementAtOrDefault(p.MeshIndex).Parts.Count > 0).ToList() })
+                                .Select((r,ri) => new { Name = r.Name, RegionsIdx = ri, Permutations = r.Permutations.Where((p,pi) => (modelVariant == null || variantRPs.Contains(ri+":"+pi)) && p.MeshIndex > -1 && p.MeshCount > 0 && renderModel.Geometry.Meshes.ElementAtOrDefault(p.MeshIndex).Parts.Count > 0).ToList() })
                                 .Where(r => r.Permutations.Count > 0)
                                 .ToList();
 
@@ -328,7 +326,7 @@ namespace TagTool.Commands.Models
                             amfWriter.Write(vert.Normal.J);
                             amfWriter.Write(vert.Normal.K);
                             amfWriter.Write(vert.TexCoords.I);
-                            amfWriter.Write(vert.TexCoords.J - 1);
+                            amfWriter.Write(1 - vert.TexCoords.J);
 
                             if (part.Type == VertexType.Rigid)
                             {
@@ -722,7 +720,7 @@ namespace TagTool.Commands.Models
             foreach (var vertex in vertices)
             {
                 vertex.Position = ToVector3D(compressor.DecompressPosition(new RealQuaternion(vertex.Position.I, vertex.Position.J, vertex.Position.K, 1)));
-                vertex.TexCoords = ToVector3D(compressor.DecompressUv(new RealVector2d(vertex.TexCoords.I, 1.0f - vertex.TexCoords.J)));
+                vertex.TexCoords = ToVector3D(compressor.DecompressUv(new RealVector2d(vertex.TexCoords.I, vertex.TexCoords.J)));
             }
         }
         /// <summary>
