@@ -20,6 +20,8 @@ namespace TagTool.Cache.ModPackages
 
         private ResourceCacheHaloOnline ResourceCache;
 
+        private GameCacheModPackage ModCache => (GameCacheModPackage)Cache;
+
         public ResourceCachesModPackage(GameCacheModPackage cache, ModPackage package)
         {
             Package = package;
@@ -28,13 +30,37 @@ namespace TagTool.Cache.ModPackages
             ResourceCache = new ResourceCacheHaloOnline(package.PackageVersion, package.PackagePlatform, package.ResourcesStream);
         }
 
-        public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location) => ResourceCache;
+        public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location)
+        {
+            if (location == ResourceLocation.Mods)
+                return ResourceCache;
+            else
+                return ModCache.BaseCacheReference.ResourceCaches.GetResourceCache(location);
+        }
 
-        public override Stream OpenCacheRead(ResourceLocation location) =>  Package.ResourcesStream;
+        public override Stream OpenCacheRead(ResourceLocation location)
+        {
+            if (location == ResourceLocation.Mods)
+                return Package.ResourcesStream;
+            else
+                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheRead(location);
+        }
 
-        public override Stream OpenCacheReadWrite(ResourceLocation location) => Package.ResourcesStream;
+        public override Stream OpenCacheReadWrite(ResourceLocation location)
+        {
+            if (location == ResourceLocation.Mods)
+                return Package.ResourcesStream;
+            else
+                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheReadWrite(location);
+        }
 
-        public override Stream OpenCacheWrite(ResourceLocation location) => Package.ResourcesStream;
+        public override Stream OpenCacheWrite(ResourceLocation location)
+        {
+            if (location == ResourceLocation.Mods)
+                return Package.ResourcesStream;
+            else
+                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheWrite(location);
+        }
 
         public void RebuildResourceDictionary()
         {
