@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
@@ -40,7 +41,7 @@ namespace TagTool.Commands.Shaders
             string shaderType = args[0].ToLower();
 
             if (shaderType == "explicit")
-                return GenerateExplicitShader(args[1].ToLower());
+                return GenerateExplicitShader(args[1].ToLower(), args.Count > 2 ? args[2].ToLower() : "default", args.Count > 3 ? args[3].ToLower() : "");
             else if (shaderType == "chud")
                 return GenerateChudShader(args[1].ToLower());
             else if (shaderType == "glvs" || shaderType == "glps")
@@ -189,7 +190,30 @@ namespace TagTool.Commands.Shaders
             return rmdfTag;
         }
 
-        private object GenerateExplicitShader(string shader)
+        public ShaderConstantTable BuildConstantTable(HaloShaderGenerator.ShaderGeneratorResult generatorResult, GameCache cache, bool pixelShader)
+        {
+            ShaderConstantTable result = new ShaderConstantTable
+            {
+                ShaderType = pixelShader ? ShaderType.PixelShader : ShaderType.VertexShader,
+                Constants = new List<ShaderParameter>()
+            };
+
+            foreach (var register in generatorResult.Registers)
+            {
+                var nameId = cache.StringTable.GetStringId(register.Name);
+                if (nameId == TagTool.Common.StringId.Invalid)
+                    nameId = cache.StringTable.AddString(register.Name);
+
+                ShaderParameter.RType rType = (ShaderParameter.RType)Enum.Parse(typeof(ShaderParameter.RType), register.registerType.ToString());
+
+                var parameterBlock = new ShaderParameter { ParameterName = nameId, RegisterCount = (byte)register.Size, RegisterIndex = (ushort)register.Register, RegisterType = rType };
+                result.Constants.Add(parameterBlock);
+            }
+
+            return result;
+        }
+
+        private object GenerateExplicitShader(string shader, string entry, string vertexType)
         {
             if (!Enum.TryParse(shader, out ExplicitShader value))
             {
@@ -198,21 +222,59 @@ namespace TagTool.Commands.Shaders
                 value = (ExplicitShader)intValue;
             }
 
-            // TODO: write register info to tag
-            // TODO: vtsh support
-            // TODO: entry point support
-            // TODO: failsafes
-
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default);
-
-                int pixelShaderIndex = 0; // TODO
-
                 CachedTag pixlTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
                 var pixl = Cache.Deserialize<PixelShader>(stream, pixlTag);
+                CachedTag vtshTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.vtsh");
+                var vtsh = Cache.Deserialize<VertexShader>(stream, vtshTag);
 
-                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = result.Bytecode;
+                List<string> shaderStages = Enum.GetNames(typeof(HaloShaderGenerator.Globals.ShaderStage)).Select(s => s.ToLower()).ToList();
+                int entryIndex = shaderStages.IndexOf(entry);
+                if (entryIndex == -1)
+                    return new TagToolError(CommandError.ArgInvalid, "Entry point not found.");
+
+                while (entryIndex >= pixl.EntryPointShaders.Count)
+                    pixl.EntryPointShaders.Add(new ShortOffsetCountBlock());
+
+                if (pixl.EntryPointShaders[entryIndex].Count <= 0)
+                {
+                    pixl.EntryPointShaders[entryIndex].Offset = (byte)pixl.Shaders.Count;
+                    pixl.EntryPointShaders[entryIndex].Count = 1;
+                    pixl.Shaders.Add(new PixelShaderBlock());
+                }
+
+                int pixelShaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
+
+                var pixelResult = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), entry);
+                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = pixelResult.Bytecode;
+                pixl.Shaders[pixelShaderIndex].PCConstantTable = BuildConstantTable(pixelResult, Cache, true);
+
+                List<string> vertexTypes = Enum.GetNames(typeof(TagTool.Geometry.VertexType)).Select(s => s.ToLower()).ToList();
+                int vertexIndex = vertexTypes.IndexOf(vertexType.Replace("_", ""));
+
+                if (vertexIndex != -1)
+                {
+                    while (entryIndex >= vtsh.EntryPoints.Count)
+                        vtsh.EntryPoints.Add(new VertexShader.VertexShaderEntryPoint { SupportedVertexTypes = new List<ShortOffsetCountBlock>() });
+                    while (vertexIndex >= vtsh.EntryPoints[entryIndex].SupportedVertexTypes.Count)
+                        vtsh.EntryPoints[entryIndex].SupportedVertexTypes.Add(new ShortOffsetCountBlock());
+
+                    if (vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Count <= 0)
+                    {
+                        vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Offset = (byte)vtsh.Shaders.Count;
+                        vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Count = 1;
+                        vtsh.Shaders.Add(new VertexShaderBlock());
+                    }
+
+                    int vertexShaderIndex = vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Offset;
+
+                    var vertexResult = GenericVertexShaderGenerator.GenerateVertexShader(value.ToString(), entry);
+                    vtsh.Shaders[vertexShaderIndex].PCShaderBytecode = vertexResult.Bytecode;
+                    vtsh.Shaders[vertexShaderIndex].PCConstantTable = BuildConstantTable(vertexResult, Cache, false);
+
+                    Cache.Serialize(stream, vtshTag, vtsh);
+                }
 
                 Cache.Serialize(stream, pixlTag, pixl);
             }
@@ -237,7 +299,7 @@ namespace TagTool.Commands.Shaders
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default, true);
+                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default.ToString().ToLower(), true);
 
                 int pixelShaderIndex = 0; // TODO
 
@@ -292,7 +354,7 @@ namespace TagTool.Commands.Shaders
             Blend_Mode blendMode = (Blend_Mode)options[7];
             Parallax parallax = (Parallax)options[8];
             Misc misc = (Misc)options[9];
-            Distortion distortion = (Distortion)options[10];
+            HaloShaderGenerator.Shared.Distortion distortion = (HaloShaderGenerator.Shared.Distortion)options[10];
 
             var generator = new ShaderGenerator(albedo, bumpMapping, alphaTest, specularMask, materialModel, environmentMapping, selfIllumination, blendMode, parallax, misc, distortion);
 
