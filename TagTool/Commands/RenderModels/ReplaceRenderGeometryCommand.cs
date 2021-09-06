@@ -187,16 +187,17 @@ namespace TagTool.Commands.RenderModels
 
 									if (!nodes.ContainsKey(bonefix))
 									{
-										new TagToolError(CommandError.CustomError, $"There is no node {bonefix} to match bone {bone.Name}");
-										return false;
+										new TagToolWarning($"There is no node {bonefix} to match bone {bone.Name}");
 									}
-
-									byte nodeIndex = (byte)nodes[bonefix];
-									int meshNodeIndex = meshNodeIndices.IndexOf(nodeIndex);
-									if (meshNodeIndex == -1)
+									else
 									{
-										meshNodeIndex = meshNodeIndices.Count;
-										meshNodeIndices.Add(nodeIndex);
+										byte nodeIndex = (byte)nodes[bonefix];
+										int meshNodeIndex = meshNodeIndices.IndexOf(nodeIndex);
+										if (meshNodeIndex == -1)
+										{
+											meshNodeIndex = meshNodeIndices.Count;
+											meshNodeIndices.Add(nodeIndex);
+										}
 									}
 								}
 							}
