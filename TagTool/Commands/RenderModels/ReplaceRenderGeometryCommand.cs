@@ -112,28 +112,28 @@ namespace TagTool.Commands.RenderModels
 
 					var permName = Cache.StringTable.GetString(permutation.Name);
 
-                    var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
+					var permMeshes = scene.Meshes.Where(i => i.Name == $"{regionName}FBXASC058{permName}Mesh").ToList();
 					foreach (string entry in altconventions)
 					{
-					    //var tempMeshesA = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
-                        var tempMeshes = scene.Meshes.Where(i => i.Name.Contains($"{regionName}{entry}{permName}")).ToList();
-                        //permMeshes.AddRange(tempMeshesA);
-                        permMeshes.AddRange(tempMeshes);
-                    }
+						//var tempMeshesA = scene.Meshes.Where(i => i.Name == $"{regionName}{entry}{permName}Mesh").ToList();
+						var tempMeshes = scene.Meshes.Where(i => i.Name.Contains($"{regionName}{entry}{permName}")).ToList();
+						//permMeshes.AddRange(tempMeshesA);
+						permMeshes.AddRange(tempMeshes);
+					}
 
-                    if (permMeshes.Count == 0)
-                    {
-                        //quick fix to allow simple import of single mesh objects
-                        if (scene.Meshes.Count == 1 && Definition.Regions.Count == 1 && Definition.Regions[0].Permutations.Count == 1)
-                        {
-                            Console.WriteLine($"Importing single mesh for {regionName}|{permName}...");
-                            permMeshes.Add(scene.Meshes[0]);
-                        }
-                        else
-                        {
-                            return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
-                        }
-                    }
+					if (permMeshes.Count == 0)
+					{
+						//quick fix to allow simple import of single mesh objects
+						if (scene.Meshes.Count == 1 && Definition.Regions.Count == 1 && Definition.Regions[0].Permutations.Count == 1)
+						{
+							Console.WriteLine($"Importing single mesh for {regionName}|{permName}...\n");
+							permMeshes.Add(scene.Meshes[0]);
+						}
+						else
+						{
+							return new TagToolError(CommandError.CustomError, $"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+						}
+					}
 
 					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
 
@@ -154,34 +154,35 @@ namespace TagTool.Commands.RenderModels
 					builder.BeginPermutation(permutation.Name);
 					builder.BeginMesh();
 
-					foreach (var mesh in permMeshes)
+					var MeshIndexCountOG = 0;
+					var MeshIndexCountNew = 0;
+					Console.Write($"   [{regionName}:{permName}]({permMeshes.Count()}) ");
+					foreach (var part in permMeshes)
 					{
-						Console.Write($"   [{(mesh.Name.Contains("FBXASC058") ? mesh.Name.Remove(mesh.Name.Length - 4).Replace("FBXASC058", ":") : mesh.Name)}]");
-
-						for (var i = 0; i < mesh.VertexCount; i++)
+						for (var i = 0; i < part.VertexCount; i++)
 						{
-							var position = mesh.Vertices[i];
-							var normal = mesh.Normals[i];
+							var position = part.Vertices[i];
+							var normal = part.Normals[i];
 
 							Vector3D uv;
 
 							try
 							{
-								uv = mesh.TextureCoordinateChannels[0][i];
-                            }
+								uv = part.TextureCoordinateChannels[0][i];
+							}
 							catch
 							{
-                                new TagToolWarning($"Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
+								new TagToolWarning($"Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
 								uv = new Vector3D();
 							}
 
-							var tangent = mesh.Tangents.Count != 0 ? mesh.Tangents[i] : new Vector3D();
-							var bitangent = mesh.BiTangents.Count != 0 ? mesh.BiTangents[i] : new Vector3D();
+							var tangent = part.Tangents.Count != 0 ? part.Tangents[i] : new Vector3D();
+							var bitangent = part.BiTangents.Count != 0 ? part.BiTangents[i] : new Vector3D();
 
-							if(usePerMeshNodeMapping)
-                            {
+							if (usePerMeshNodeMapping)
+							{
 								// generate the list of node indices used by this mesh
-								foreach (var bone in mesh.Bones)
+								foreach (var bone in part.Bones)
 								{
 									string bonefix = FixBoneName(bone.Name);
 
@@ -207,30 +208,30 @@ namespace TagTool.Commands.RenderModels
 								var blendIndicesList = new List<byte>();
 								var blendWeightsList = new List<float>();
 
-								foreach (var bone in mesh.Bones)
+								foreach (var bone in part.Bones)
 								{
 									foreach (var vertexInfo in bone.VertexWeights)
 									{
 										if (vertexInfo.VertexID == i)
-                                        {
-                                            string bonefix = FixBoneName(bone.Name);
+										{
+											string bonefix = FixBoneName(bone.Name);
 
-                                            if (!nodes.ContainsKey(bonefix))
-                                            {
-                                                new TagToolError(CommandError.CustomError, $"There is no node {bonefix} to match bone {bone.Name}");
-                                                return false;
-                                            }
+											if (!nodes.ContainsKey(bonefix))
+											{
+												new TagToolError(CommandError.CustomError, $"There is no node {bonefix} to match bone {bone.Name}");
+												return false;
+											}
 
-                                            byte nodeIndex = (byte)nodes[bonefix];
+											byte nodeIndex = (byte)nodes[bonefix];
 
-                                            if (usePerMeshNodeMapping)
-                                                blendIndicesList.Add((byte)meshNodeIndices.IndexOf(nodeIndex));
-                                            else
-                                                blendIndicesList.Add((byte)nodeIndex);
+											if (usePerMeshNodeMapping)
+												blendIndicesList.Add((byte)meshNodeIndices.IndexOf(nodeIndex));
+											else
+												blendIndicesList.Add((byte)nodeIndex);
 
-                                            blendWeightsList.Add(vertexInfo.Weight);
-                                        }
-                                    }
+											blendWeightsList.Add(vertexInfo.Weight);
+										}
+									}
 								}
 
 								var blendIndices = new byte[4];
@@ -273,53 +274,57 @@ namespace TagTool.Commands.RenderModels
 						}
 
 						// Build the index buffer
-						ushort[] meshIndices;
-						if (indexBufferFormat == IndexBufferFormat.TriangleStrip)
+						ushort[] meshIndices = part.GetIndices().Select(i => (ushort)(i + partStartVertex)).ToArray();
+						MeshIndexCountOG += meshIndices.Count();
+						if (indexBufferFormat == IndexBufferFormat.TriangleList)
 						{
-							var indicesOG = mesh.GetIndices().Select(i => (uint)(i + partStartVertex)).ToArray();
-
-							var indicesOpt = new uint[indicesOG.Length];
-							MeshOptimizer.OptimizeVertexCacheStrip(indicesOpt, indicesOG, indicesOG.Count(), 65536);
-
-							var indicesStripped = new uint[MeshOptimizer.StripifyBound(indicesOpt.Length)];
-							uint newIndexCount = MeshOptimizer.Stripify(indicesStripped, indicesOpt, indicesOpt.Length, 65536, 0);
-							
-							meshIndices = indicesStripped.Take((int)newIndexCount).Select(i => (ushort)i).ToArray();
-
-							Console.WriteLine($" {mesh.GetIndices().Count()} -> {meshIndices.Count()} indices");
-							
-							if (mesh.GetIndices().Count() < meshIndices.Count()) showTriangleStripWarning = true;
+							Console.ForegroundColor = ConsoleColor.DarkGray;
+							Console.Write($"{meshIndices.Count()} ");
+							Console.ResetColor();
 						}
 						else
 						{
-							meshIndices = mesh.GetIndices().Select(i => (ushort)(i + partStartVertex)).ToArray();
-							Console.WriteLine($" {meshIndices.Count()} indices");
+							// Optimize and stripify indices 
+							var indicesUint = meshIndices.Select(i => (uint)i).ToArray();
+							var indicesOptimized = new uint[indicesUint.Length];
+							MeshOptimizer.OptimizeVertexCacheStrip(indicesOptimized, indicesUint, indicesUint.Count(), 65536);
+							var indicesStripped = new uint[MeshOptimizer.StripifyBound(indicesOptimized.Length)];
+							uint indicesStrippedCount = MeshOptimizer.Stripify(indicesStripped, indicesOptimized, indicesOptimized.Length, 65536, 0);
+							meshIndices = indicesStripped.Take((int)indicesStrippedCount).Select(i => (ushort)i).ToArray();
+							
+							bool badResult = indicesStrippedCount > indicesUint.Count();
+
+							Console.ForegroundColor = badResult ? ConsoleColor.DarkYellow : ConsoleColor.DarkGray;
+							Console.Write($"{indicesStrippedCount} ");
+							Console.ResetColor();
+
+							if (badResult) showTriangleStripWarning = true;
 						}
 						indices.AddRange(meshIndices);
-
+						MeshIndexCountNew += meshIndices.Count();
 
 						// Define a material and part for this mesh
-						var meshMaterial = scene.Materials[mesh.MaterialIndex];
+						var meshMaterial = scene.Materials[part.MaterialIndex];
 
 						short materialIndex = 0;
 
 						if (materialIndices.ContainsKey(meshMaterial.Name))
 							materialIndex = materialIndices[meshMaterial.Name];
-                        else
-                        {
-                            materialIndices.Add(meshMaterial.Name, builder.AddMaterial(new RenderMaterial
-                            {
-                                RenderMethod = defaultShaderTag,
-                            }));
-                            materialIndex = materialIndices[meshMaterial.Name];
-                        }
+						else
+						{
+							materialIndices.Add(meshMaterial.Name, builder.AddMaterial(new RenderMaterial
+							{
+								RenderMethod = defaultShaderTag,
+							}));
+							materialIndex = materialIndices[meshMaterial.Name];
+						}
 
-						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
-						builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
+						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)part.VertexCount);
+						builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)part.VertexCount);
 						builder.EndPart();
 
 						// Move to the next part
-						partStartVertex += (ushort)mesh.VertexCount;
+						partStartVertex += (ushort)part.VertexCount;
 						partStartIndex += (ushort)meshIndices.Length;
 					}
 
@@ -329,6 +334,13 @@ namespace TagTool.Commands.RenderModels
 					else
 						builder.BindRigidVertexBuffer(rigidVertices, rigidNode);
 
+
+					if (MeshIndexCountNew > ushort.MaxValue) Console.ForegroundColor = ConsoleColor.Red;
+					else if (MeshIndexCountNew > MeshIndexCountOG) Console.ForegroundColor = ConsoleColor.DarkYellow;
+					Console.WriteLine(indexBufferFormat == IndexBufferFormat.TriangleList ?
+						MeshIndexCountOG.ToString() : $"{MeshIndexCountOG} > {MeshIndexCountNew}");
+					Console.ResetColor();
+
 					builder.BindIndexBuffer(indices, indexBufferFormat);
 
 					if (usePerMeshNodeMapping)
@@ -337,14 +349,13 @@ namespace TagTool.Commands.RenderModels
 					builder.EndMesh();
 					builder.EndPermutation();
 				}
-
 				builder.EndRegion();
 			}
 
             //check vertex and index buffer counts for each mesh to ensure that they fit within the limits for the resource
             foreach (var mesh in builder.Meshes)
             {
-                switch (mesh.VertexFormat)
+				switch (mesh.VertexFormat)
                 {
                     case VertexBufferFormat.Skinned:
                         if (mesh.SkinnedVertices.Length > ushort.MaxValue)
