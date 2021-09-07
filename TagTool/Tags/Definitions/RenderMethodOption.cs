@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
         {
             public StringId Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown;
+            public StringId UiNameOverride;
             public OptionDataType Type;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]

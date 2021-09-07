@@ -42,12 +42,22 @@ namespace TagTool.Commands.Editing
             if (args.Count > 0 && !ParseExportFlags(args, out flags))
                 return new TagToolError(CommandError.ArgInvalid, $"Unknown option specified '{args[0]}'");
 
-            Flags = flags;
-            DumpCommands(Console.Out, Cache, Structure);
+            var strings = new HashSet<string>();
+            var commands = new List<string>();
+            DumpCommands(strings, commands, Cache, Structure);
+
+            foreach (var str in strings)
+                Console.WriteLine($"stringid add {str}");
+
+            Console.WriteLine();
+
+            foreach(var cmd in commands)
+                Console.WriteLine(cmd);
+
             return true;
         }
 
-        private void DumpCommands(TextWriter writer, GameCache cache, object data, string fieldName = null)
+        private void DumpCommands(HashSet<string> strings, List<string> commands, GameCache cache, object data, string fieldName = null)
         {
             if (Flags.HasFlag(ExportFlags.NoDefault) && IsDefaultValue(data))
                 return;
@@ -57,7 +67,7 @@ namespace TagTool.Commands.Editing
                 case TagStructure tagStruct:
                     {
                         foreach (var field in tagStruct.GetTagFieldEnumerable(cache.Version, cache.Platform))
-                            DumpCommands(writer, cache, field.GetValue(data), fieldName != null ? $"{fieldName}.{field.Name}" : field.Name);
+                            DumpCommands(strings, commands, cache, field.GetValue(data), fieldName != null ? $"{fieldName}.{field.Name}" : field.Name);
                     }
                     break;
                 case IList collection:
@@ -72,18 +82,18 @@ namespace TagTool.Commands.Editing
                             {
                             	byte[] bytes = new byte[collection.Count];
                             	collection.CopyTo(bytes, 0);
-                            	writer.WriteLine($"SetField {fieldName} {BitConverter.ToString(bytes).Replace("-", string.Empty)}");
+                                commands.Add($"SetField {fieldName} {BitConverter.ToString(bytes).Replace("-", string.Empty)}");
                             }
                             else if (fieldName.Contains("].Data"))
                             {
                                 string concat = "";
                                 for (int i = 0; i < collection.Count; i++)
                                     concat += collection[i].ToString() + " ";
-                                writer.WriteLine($"SetField {fieldName} {concat}");
+                                commands.Add($"SetField {fieldName} {concat}");
                             }
                             else if (fieldName.EndsWith("].RealConstants"))
                             {
-                            	writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
+                                commands.Add($"AddBlockElements {fieldName} {collection.Count}");
                             
                             	var templateName = (Structure as RenderMethod).ShaderProperties[0].Template;
                             	var rmt2 = Cache.Deserialize<RenderMethodTemplate>(Cache.OpenCacheRead(), templateName);
@@ -93,13 +103,13 @@ namespace TagTool.Commands.Editing
                             		var realParameterName = Cache.StringTable.GetString(rmt2.RealParameterNames[i].Name);
                             		var realConstant = (RenderMethod.ShaderProperty.RealConstant)collection[i];
                             		var concat = string.Join(" ", realConstant.Values);
-                            
-                            		writer.WriteLine($"SetArgument {realParameterName} {concat}");
+
+                                    commands.Add($"SetArgument {realParameterName} {concat}");
                             	}
                             }
                             else if (fieldName.EndsWith("].TextureConstants"))
                             {
-                            	writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
+                                commands.Add($"AddBlockElements {fieldName} {collection.Count}");
                             
                             	var templateName = (Structure as RenderMethod).ShaderProperties[0].Template;
                             	var rmt2 = Cache.Deserialize<RenderMethodTemplate>(Cache.OpenCacheRead(), templateName);
@@ -109,33 +119,39 @@ namespace TagTool.Commands.Editing
                             		var textureParameterName = Cache.StringTable.GetString(rmt2.TextureParameterNames[i].Name);
                             		var textureConstant = (RenderMethod.ShaderProperty.TextureConstant)collection[i];
                             		var bitmapName = textureConstant.Bitmap.Name;
+
+                                    commands.Add($"SetBitmap {textureParameterName} {bitmapName}.bitmap");
                             
-                            		writer.WriteLine($"SetBitmap {textureParameterName} {bitmapName}.bitmap");
-                            
-                            		DumpCommands(writer, cache, collection[i], $"{fieldName}[{i}]");
+                            		DumpCommands(strings, commands, cache, collection[i], $"{fieldName}[{i}]");
                             	}
                             }
                             else
                             {
-                                writer.WriteLine($"AddBlockElements {fieldName} {collection.Count}");
+                                commands.Add($"AddBlockElements {fieldName} {collection.Count}");
                                 for (int i = 0; i < collection.Count; i++)
-                                    DumpCommands(writer, cache, collection[i], $"{fieldName}[{i}]");
+                                    DumpCommands(strings, commands, cache, collection[i], $"{fieldName}[{i}]");
                             }
                         }
                     }
                     break;
+                case StringId stringId when stringId != StringId.Invalid:
+                    {
+                        var str = Cache.StringTable.GetString(stringId);
+                        strings.Add(str);
+                        goto default;
+                    }
                 default:
                     //if (data != null && data.ToString().Contains("|"))
                     if (fieldName.Contains("Flags"))
                     {
                         string flaglist = data.ToString();
                         flaglist = flaglist.Replace(" ", string.Empty);
-                        writer.WriteLine($"SetField {fieldName} {flaglist}");
+                        commands.Add($"SetField {fieldName} {flaglist}");
                     }
                     else if (fieldName.Contains(".TextureConstants[") && fieldName.EndsWith("].Bitmap"))
                     	break;
                     else
-                        writer.WriteLine($"SetField {fieldName} {FormatValue(data)}");
+                        commands.Add($"SetField {fieldName} {FormatValue(data)}");
                     break;
             }
         }

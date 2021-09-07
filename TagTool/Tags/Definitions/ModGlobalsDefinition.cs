@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xAC)]
+        [TagStructure(Size = 0xC4)]
         public class PlayerCharacterCustomization : TagStructure
         {
             /// <summary>
@@ -62,9 +62,25 @@ namespace TagTool.Tags.Definitions
             [TagField(ValidTags = new[] { "pact" })]
             public CachedTag ActionSet;
 
+            public List<PlayerCharacterRegionScript> RegionCameraScripts;
+
             public CharacterPositionInfo CharacterPositionData;
 
             public PlayerCharacterColors CharacterColors;
+
+            [TagStructure(Size = 0x6C)]
+            public class PlayerCharacterRegionScript : TagStructure
+            {
+                public int unused;
+                [TagField(Length = 32)]
+                public string RegionName;
+                [TagField(Length = 32)]
+                public string ScriptNameWidescreen;
+                [TagField(Length = 32)]
+                public string ScriptNameStandard;
+                public float BipedRotation;
+                public float RotationDuration;
+            };
 
             [TagStructure(Size = 0x40)]
             public class PlayerCharacterColors : TagStructure
@@ -78,6 +94,7 @@ namespace TagTool.Tags.Definitions
                 [Flags]
                 public enum ChangeColorFlagsValue : byte
                 {
+                    None = 0,
                     PrimaryColor = 1 << 0,
                     SecondaryColor = 1 << 1,
                     TertiaryColor = 1 << 2,
@@ -94,7 +111,7 @@ namespace TagTool.Tags.Definitions
                 }
             };
 
-            [TagStructure(Size = 0x30)]
+            [TagStructure(Size = 0x3C)]
             public class CharacterPositionInfo : TagStructure
             {
                 /// <summary>
@@ -130,7 +147,9 @@ namespace TagTool.Tags.Definitions
                 /// <summary>
                 /// RealVector3D to point to the exact position of the biped in the customization screen with the relative flag not set
                 /// </summary>
-                public RealPoint3d BipedPosition;
+                public RealPoint3d BipedPositionWidescreen;
+
+                public RealPoint3d BipedPositionStandard;
 
                 /// <summary>
                 /// float to point to the exact rotation of the biped with the relative flag not set
@@ -140,9 +159,11 @@ namespace TagTool.Tags.Definitions
                 [Flags]
                 public enum FlagsValue : int
                 {
+                    None = 0,
                     PlaceBipedRelativeToCamera = 1 << 0,
                     CanRotateOnMainMenu = 1 << 1,
-                    HasPlatform = 1 << 2
+                    HasPlatform = 1 << 2,
+                    RotateInCustomization = 1 << 3
                 }
             };
         }
