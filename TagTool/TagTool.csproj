@@ -1610,6 +1610,14 @@
 xcopy "$(SolutionDir)Physics" "$(ProjectDir)$(OutDir)Physics" /e /i /h /Y
 xcopy "$(SolutionDir)Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y
 
+IF "$(PlatformName)" == "x64" (
+    del $(ProjectDir)$(OutDir)Tools\meshoptimizer32.dll
+    ren $(ProjectDir)$(OutDir)Tools\meshoptimizer64.dll meshoptimizer.dll
+) ELSE (
+    del $(ProjectDir)$(OutDir)Tools\meshoptimizer64.dll
+    ren $(ProjectDir)$(OutDir)Tools\meshoptimizer32.dll meshoptimizer.dll
+)
+
 if ERRORLEVEL == 0 (
     xcopy "$(SolutionDir)Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
     SET ERRORLEVEL=0
