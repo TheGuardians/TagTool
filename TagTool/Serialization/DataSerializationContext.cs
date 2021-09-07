@@ -4,6 +4,8 @@ using System;
 using System.IO;
 using TagTool.Tags;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TagTool.Serialization
 {
@@ -16,6 +18,7 @@ namespace TagTool.Serialization
         public int PointerOffset = 0x0;
         private const int DefaultBlockAlign = 4;
         public static bool UseAlignment = true;
+        public List<uint> PointerOffsets { get; private set; }
 
         public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory, bool useAlignment = true)
         {
@@ -23,6 +26,7 @@ namespace TagTool.Serialization
             Writer = writer;
             AddressType = addressType;
             UseAlignment = useAlignment;
+            PointerOffsets = new List<uint>();
         }
 
         public DataSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory, bool useAlignment = true) :
@@ -52,7 +56,7 @@ namespace TagTool.Serialization
 
         public IDataBlock CreateBlock()
         {
-            return new GenericDataBlock(PointerOffset);
+            return new GenericDataBlock(this, PointerOffset);
         }
 
         public void EndDeserialize(TagStructureInfo info, object obj)
@@ -82,20 +86,25 @@ namespace TagTool.Serialization
 
         private class GenericDataBlock : IDataBlock
         {
+            private DataSerializationContext Context;
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
             public int PointerOffset = 0x0;
+            private readonly List<uint> _pointerOffsets;
             private uint _align = DefaultBlockAlign;
 
-            public GenericDataBlock(int offset)
+            public GenericDataBlock(DataSerializationContext context, int offset)
             {
+                Context = context;
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
                 PointerOffset = offset;
+                _pointerOffsets = new List<uint>();
             }
 
             public void WritePointer(uint targetOffset, Type type)
             {
+                _pointerOffsets.Add((uint)Stream.Position);
                 Writer.Write((int)(targetOffset + PointerOffset));
             }
 
@@ -118,6 +127,8 @@ namespace TagTool.Serialization
                 outStream.Write(Stream.GetBuffer(), 0, (int)Stream.Length);
                 if (UseAlignment)
                     StreamUtil.Align(outStream, DefaultBlockAlign);
+
+                Context.PointerOffsets.AddRange(_pointerOffsets.Select(o => o + dataOffset));
 
                 Writer.Close();
                 Stream = null;
