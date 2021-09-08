@@ -900,11 +900,14 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x24)]
+        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
         public class ObjectName : TagStructure
 		{
-            [TagField(Flags = Label, Length = 32)]
+            [TagField(Flags = Label, Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
             public string Name;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId NameReach;
             public GameObjectType ObjectType;
             public short PlacementIndex;
         }
