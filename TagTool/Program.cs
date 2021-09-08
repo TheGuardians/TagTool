@@ -21,6 +21,8 @@ namespace TagTool.Commands
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
+            Console.SetWindowSize(150, 40);
+
             // If there are extra arguments, use them to automatically execute a command
             List<string> autoexecCommand = null;
             if (args.Length > 1)
@@ -28,10 +30,10 @@ namespace TagTool.Commands
 
             if (autoexecCommand == null)
             {
-                Console.WriteLine($"Tag Tool [{Assembly.GetExecutingAssembly().GetName().Version}]");
+                Console.WriteLine($"TagTool [{Assembly.GetExecutingAssembly().GetName().Version}]");
                 Console.WriteLine();
-                Console.WriteLine("Please report any bugs and/or feature requests at");
-                Console.WriteLine("<https://github.com/TheGuardians-CI/TagTool/issues>.");
+                Console.WriteLine("Please report any bugs and/or feature requests:");
+                Console.WriteLine("https://github.com/TheGuardians-CI/TagTool/issues");
             }
 
             start:
@@ -45,7 +47,7 @@ namespace TagTool.Commands
 
             while (!fileInfo.Exists)
             {
-                Console.WriteLine("\nEnter the path to a Halo cache file (.map or tags.dat)':");
+                Console.WriteLine("\nEnter the path to a Halo cache file (.map or tags.dat):");
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
 
