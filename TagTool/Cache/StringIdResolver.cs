@@ -45,6 +45,24 @@ namespace TagTool.Cache
             return (int)((stringId.Value >> (IndexBits + SetBits)) & lengthMask);
         }
 
+        private StringId MakeStringId(int length, int set, int index)
+        {
+            var shiftedLength = (length & CreateMask(LengthBits)) << (IndexBits + SetBits);
+            var shiftedSet = (set & CreateMask(SetBits)) << IndexBits;
+            var shiftedIndex = index & CreateMask(IndexBits);
+            return new StringId((uint)(shiftedLength | shiftedSet | shiftedIndex));
+        }
+
+        private StringId MakeStringId(int set, int index)
+        {
+            return MakeStringId(0, set, index);
+        }
+
+        private static uint CreateMask(int size)
+        {
+            return (1u << size) - 1;
+        }
+
         /// <summary>
         /// Converts a stringID value to a string list index.
         /// </summary>
@@ -92,7 +110,7 @@ namespace TagTool.Cache
 
             // If the value is outside of a set, just return it
             if (index < setMin || index > setMax)
-                return new StringId(0, index);
+                return MakeStringId(0, index);
 
             // Find the set which the index is closest to
             var set = 0;
@@ -112,7 +130,7 @@ namespace TagTool.Cache
             var idIndex = index - setOffsets[set];
             if (set == 0)
                 idIndex += setMin;
-            return new StringId(set, idIndex);
+            return MakeStringId(set, idIndex);
         }
     }
 }
