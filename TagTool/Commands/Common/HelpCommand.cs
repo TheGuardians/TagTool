@@ -86,12 +86,12 @@ namespace TagTool.Commands.Common
 			
             // Print help info
             ushort indent = 3;
-            Console.WriteLine(FormatPair(command.Name, command.Description, indent, wrap:80));
+            Console.WriteLine(FormatPair(command.Name, command.Description, indent));
             Console.WriteLine(FormatPair("Usage", command.Usage, indent));
             if (command.Examples != "")
                 Console.WriteLine(FormatPair("Examples", command.Examples, indent));
             if (command.HelpMessage != "")
-                Console.WriteLine(FormatPair("Notes", command.HelpMessage, indent, wrap:80));
+                Console.WriteLine(FormatPair("Notes", command.HelpMessage, indent));
         }
 
         private bool IsAvailable(CommandContext context, Command command)
