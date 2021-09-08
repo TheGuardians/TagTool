@@ -237,7 +237,7 @@ namespace TagTool.Commands.Scenarios
             scnr.MapType = ScenarioMapType.Multiplayer;
             scnr.CampaignId = -1;
             scnr.MapId = mapId;
-            scnr.CollisionUnknown = new List<CollisionUnknownBlock>() { new CollisionUnknownBlock() { Unknown1 = 0 } };
+            scnr.SoftSurfaces = new List<SoftSurfaceBlock>() { new SoftSurfaceBlock() { Unknown1 = 0 } };
             scnr.ZoneSets = new List<ZoneSet>() {
                         new ZoneSet() {
                         Name = Cache.StringTable.GetStringId("default"),

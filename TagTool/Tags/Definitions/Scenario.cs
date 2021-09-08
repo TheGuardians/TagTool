@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using static TagTool.Tags.Definitions.GameObject;
+using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions
 {
@@ -26,11 +27,42 @@ namespace TagTool.Tags.Definitions
         public ScenarioMapSubType MapSubType;
 
         public ScenarioFlags Flags;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ScenarioRuntimeTriggerVolumeFlags RuntimeTriggerVolumeFlags;
+
         public int CampaignId;
         public int MapId;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId MapName;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short SoundPermutationMissionId;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Padding1;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int MinimumStructureBspImporterVersion;
+
         public Angle LocalNorth;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float LocalSeaLevel; // wu
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float AltitudeCap; // wu
+        // forge coordinates are relative to this point
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealPoint3d SandboxOriginPoint;
+
         public float SandboxBudget;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId DefaultVehicleSet;
+        [TagField(ValidTags = new[] { "gptd" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag GamePerformanceThrottles;
+
         public List<StructureBspBlock> StructureBsps;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioDesignReferenceBlock> StructureDesigns;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public CachedTag ScenarioPDA;
@@ -43,13 +75,21 @@ namespace TagTool.Tags.Definitions
         public uint Unknown2;
 
         public CachedTag Unknown;
+
+        [TagField(ValidTags = new[] { "stse" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag LocalStructureSeams;
+
         public List<SkyReference> SkyReferences;
         public List<ZoneSetPvsBlock> ZoneSetPvs;
         public List<ZoneSetAudibilityBlock> ZoneSetAudibility;
         public List<ZoneSet> ZoneSets;
-        public List<BspAtlasBlock> BspAtlas;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<LightingZoneSetBlock> LightingZoneSets;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public List<BspAtlasBlock> BspAtlas;
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CampaignPlayer> CampaignPlayers;
 
         public uint Unknown9;
@@ -83,10 +123,10 @@ namespace TagTool.Tags.Definitions
         public List<TerminalInstance> Terminals;
         public List<ScenarioPaletteEntry> TerminalPalette;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<AlternateRealityDeviceInstance> AlternateRealityDevices;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<ScenarioPaletteEntry> AlternateRealityDevicePalette;
 
         public List<ControlInstance> Controls;
@@ -99,19 +139,55 @@ namespace TagTool.Tags.Definitions
         public List<ScenarioPaletteEntry> EffectSceneryPalette;
         public List<LightVolumeInstance> LightVolumes;
         public List<ScenarioPaletteEntry> LightVolumePalette;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxVehicles;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxWeapons;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxEquipment;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxScenery;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxTeleporters;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxGoalObjects;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SandboxObject> SandboxSpawning;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<MapVariantPaletteBlock> MapVariantPalettes;
+
+        [TagField(ValidTags = new[] { "motl" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag MultiplayerObjectTypes;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown200;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown201;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown202;
+
         public List<SoftCeiling> SoftCeilings;
         public List<PlayerStartingProfileBlock> PlayerStartingProfile;
         public List<PlayerStartingLocation> PlayerStartingLocations;
         public List<TriggerVolume> TriggerVolumes;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioAcousticSectorBlockStruct> AcousticSectors;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> AcousticTransitions;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> AtmosphereDumplings;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> WeatherDumplings;
+
         public List<RecordedAnimation> RecordedAnimations;
         public List<ZoneSetSwitchTriggerVolume> ZonesetSwitchTriggerVolumes;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioNamedLocationVolumeBlock> NamedLocationVolumes;
+
+        [TagField(ValidTags = new[] { "ssdf" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag SpawnSettings;
 
         public List<UnknownBlock> Unknown32;
         public List<UnknownBlock> Unknown33;
@@ -139,32 +215,53 @@ namespace TagTool.Tags.Definitions
         public uint Unknown58;
         public uint Unknown59;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown60;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown61;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown62;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown63;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown64;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown65;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown66;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown67;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown68;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown69;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown70;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown71;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown72;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown73;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown74;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown75;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown76;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown77;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown78;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown79;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown80;
 
         public List<Decal> Decals;
@@ -177,6 +274,13 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<SquadPatrol> SquadPatrols;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> ActualCues; // TODO
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> FullCues; // TODO
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> QuickCues; // TODO
 
         public List<MissionScene> MissionScenes;
         public List<TagReferenceBlock> CharacterPalette;
@@ -203,13 +307,29 @@ namespace TagTool.Tags.Definitions
         public CachedTag CustomObjectNameStrings;
         public CachedTag ChapterTitleStrings;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag Unknown156;
 
         public List<ScenarioResource> ScenarioResources;
         public List<UnitSeatsMappingBlock> UnitSeatsMapping;
         public List<ScenarioKillTrigger> ScenarioKillTriggers;
         public List<ScenarioSafeTrigger> ScenarioSafeTriggers;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<TriggerVolumeMoppCodeBlock> ScenarioTriggerVolumesMoppCode;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown210;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown211;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown212;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown213;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown214;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown215;
+
         public List<HsSyntaxNode> ScriptExpressions;
 
         public uint Unknown97;
@@ -222,34 +342,57 @@ namespace TagTool.Tags.Definitions
 
         public List<ScenarioStructureBsp.BackgroundSoundEnvironmentPaletteBlock> BackgroundSoundEnvironmentPalette;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown103;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown104;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown105;
-
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown106;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown107;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown108;
-
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock3> Unknown109;
         public List<FogBlock> Fog;
         public List<CameraFxBlock> CameraFx;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioWeatherPaletteBlock> WeatherPalette;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown110;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown111;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown112;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown113;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown114;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown115;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown116;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown117;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown118;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<ScenarioClusterDatum> ScenarioClusterData;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Gen4.Scenario.ScenarioClusterDataBlock> ScenarioClusterDataReach; // ugh
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown119;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown120;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown121;
 
         [TagField(Length = 32)]
@@ -263,23 +406,34 @@ namespace TagTool.Tags.Definitions
         public CachedTag SubtitleStrings;
         public List<CreatureInstance> Creatures;
         public List<ScenarioPaletteEntry> CreaturePalette;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioPaletteEntry> BigBattleCreaturePalette;
         public List<EditorFolder> EditorFolders;
         public CachedTag TerritoryLocationNameStrings;
         public uint Unknown125;
         public uint Unknown126;
         public List<TagReferenceBlock> MissionDialogue;
         public CachedTag ObjectiveStrings;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag InterpolatorsReach;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Interpolator> Interpolators;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown127;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown128;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown129;
 
         public uint Unknown130;
         public uint Unknown131;
         public uint Unknown132;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public List<SimulationDefinitionTableBlock> SimulationDefinitionTable;
+
         public CachedTag DefaultCameraFx;
         public CachedTag DefaultScreenFx;
 
@@ -287,6 +441,10 @@ namespace TagTool.Tags.Definitions
         public CachedTag Unknown133;
 
         public CachedTag SkyParameters;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag FogParameters;
+
         public CachedTag GlobalLighting;
         public CachedTag Lightmap;
         public CachedTag PerformanceThrottles;
@@ -300,7 +458,12 @@ namespace TagTool.Tags.Definitions
         public uint Unknown137;
         public uint Unknown138;
 
-        public List<TagReferenceBlock> Cinematics;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<TagReferenceBlock> NeuticlePalette;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioCheapParticleSystemsBlock> Neuticles;
+
+        public List<CinematicsBlock> Cinematics;
         public List<CinematicLightingBlock> CinematicLighting;
 
         public uint Unknown139;
@@ -308,9 +471,16 @@ namespace TagTool.Tags.Definitions
         public uint Unknown141;
 
         public List<ScenarioMetagameBlock> ScenarioMetagame;
-        public List<CollisionUnknownBlock> CollisionUnknown;
+        public List<SoftSurfaceBlock> SoftSurfaces;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ScenarioCubemapBlock> Cubemaps;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock7> Unknown143;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<TagReferenceBlock> CortanaEffects;
+
         public List<LightmapAirprobe> LightmapAirprobes;
 
         [TagField(Flags = Padding, Length = 12)]
@@ -407,6 +577,15 @@ namespace TagTool.Tags.Definitions
             public int Unknown9;
         }
 
+        [TagStructure(Size = 0x20)]
+        public class ScenarioDesignReferenceBlock : TagStructure
+        {
+            [TagField(ValidTags = new[] { "sddt" })]
+            public CachedTag StructureDesign;
+            [TagField(ValidTags = new[] { "sddt" })]
+            public CachedTag LocalStructureDesign;
+        }
+
         [TagStructure(Size = 0x14)]
         public class SkyReference : TagStructure
 		{
@@ -431,13 +610,16 @@ namespace TagTool.Tags.Definitions
                 public uint Checksum;
             }
 
-            [TagStructure(Size = 0x54)]
+            [TagStructure(Size = 0x54, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach)]
             public class StructureBspPotentiallyVisibleSet : TagStructure
 			{
                 public List<Cluster> Clusters;
                 public List<Cluster> ClustersDoorsClosed;
                 public List<Sky> ClusterSkies;
                 public List<Sky> ClusterVisibleSkies;
+                // TODO: might not be the right block
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<UnknownBlock> Unknown;
                 public List<UnknownBlock> Unknown2;
                 public List<BspSeamClusterMapping> ClusterMappings;
@@ -655,12 +837,17 @@ namespace TagTool.Tags.Definitions
             Set31 = 1 << 31
         }
 
-        [TagStructure(Size = 0x24)]
+        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x13C, MinVersion = CacheVersion.HaloReach)]
         public class ZoneSet : TagStructure
 		{
             [TagField(Flags = Label)]
             public StringId Name;
+            [TagField(Length = 256, MinVersion = CacheVersion.HaloReach)]
+            public string NameString;
             public int PotentiallyVisibleSetIndex;
+
+            // TODO fix for reach
             public int ImportLoadedBsps;
             public BspFlags LoadedBsps;
             public ZoneSetFlags LoadedDesignerZoneSets;
@@ -668,6 +855,14 @@ namespace TagTool.Tags.Definitions
             public ZoneSetFlags LoadedCinematicZoneSets;
             public int BspAtlasIndex;
             public int ScenarioBspAudibilityIndex;
+        }
+
+        [TagStructure(Size = 0xC)]
+        public class LightingZoneSetBlock : TagStructure
+        {
+            public StringId Name;
+            public uint RenderedBspFlags;
+            public uint ExtraBspFlags;
         }
 
         [TagStructure(Size = 0xC)]
@@ -756,7 +951,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x54)]
+        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach)]
         public class ScenarioInstance : TagStructure
 		{
             public short PaletteIndex;
@@ -768,21 +964,34 @@ namespace TagTool.Tags.Definitions
             public float Scale;
             public List<ObjectNodeOrientation> NodeOrientations;
             public short Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte Unknown21;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public BspPolicyValue BspPolicyReach;
+
             public ushort OldManualBspFlagsNowZoneSets;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ObjectTransformFlags TransformFlags;
+
             public StringId UniqueName;
             public DatumHandle UniqueHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public SourceValue Source; // sbyte
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public BspPolicyValue BspPolicy; // sbyte
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte Unknown3;
             public short EditorFolderIndex;
             public short Unknown4;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short Unknown5;
             public short ParentNameIndex;
             public StringId ChildName;
-            public StringId Unknown5;
+            public StringId Unknown6;
             public ushort AllowedZoneSets;
-            public short Unknown6;
+            public short Unknown61;
 
             public enum SourceValue : sbyte
             {
@@ -798,6 +1007,12 @@ namespace TagTool.Tags.Definitions
                 AlwaysPlaced,
                 ManualBspIndex,
             }
+
+            [Flags]
+            public enum ObjectTransformFlags : ushort
+            {
+                Mirrored = 1 << 0
+            }
         }
 
         public interface IMultiplayerInstance
@@ -805,31 +1020,80 @@ namespace TagTool.Tags.Definitions
             MultiplayerObjectProperties Multiplayer { get; set; }
         }
 
-        [TagStructure(Size = 0x34)]
+        [TagStructure(Size = 0x34, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach)]
         public class MultiplayerObjectProperties : TagStructure
         {
+            [TagField(Length = 32, MinVersion = CacheVersion.HaloReach)]
+            public string MegaloLabel;
             public SymmetryValue Symmetry;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public ushort EngineFlags;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public byte EngineFlagsReach;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public TeamValue Team;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public sbyte TeamReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ushort Unknown;
             public sbyte SpawnSequence;
             public sbyte RuntimeMinimum;
             public sbyte RuntimeMaximum;
             public byte MultiplayerFlags;
             public short SpawnTime;
             public short AbandonTime;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float WidthRadiusReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float DepthReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float TopReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BottomReach;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte TeleporterFlags;
             public ShapeValue Shape;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectRemappingPolicy RemappingPolicy;
+
             public sbyte TeleporterChannel;
+
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public sbyte TeleporterFlagsReach;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId LocationName;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public sbyte Unknown14;
+
             public short Unknown15;
             public short AttachedNameIndex;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId ParentMarker;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId ConnectionMarker;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown16;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown17;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float WidthRadius;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Depth;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Top;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Bottom;
-            public uint Unknown18;
+
+            public float RespawnWeight;
 
             public enum SymmetryValue : int
             {
@@ -858,48 +1122,66 @@ namespace TagTool.Tags.Definitions
                 Cylinder,
                 Box,
             }
+
+            public enum MultiplayerObjectRemappingPolicy : sbyte
+            {
+                NormalDefault,
+                DoNotReplace,
+                OnlyReplace
+            }
         }
 
         [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
         public class PermutationInstance : ScenarioInstance
         {
             public StringId Variant;
             public byte ActiveChangeColors;
-            public sbyte Unknown7;
             public sbyte Unknown8;
             public sbyte Unknown9;
+            public sbyte Unknown10;
             public ArgbColor PrimaryColor;
             public ArgbColor SecondaryColor;
             public ArgbColor TertiaryColor;
             public ArgbColor QuaternaryColor;
-
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public uint Unknown10;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public uint QuinaryColor;
         }
 
-        [TagStructure(Size = 0x30)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class ScenarioPaletteEntry : TagStructure
 		{
             public CachedTag Object;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown2;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown3;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown4;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown5;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown6;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown7;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown8;
         }
 
-        [TagStructure(Size = 0x48)]
+        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x6C, MinVersion = CacheVersion.HaloReach)]
         public class SceneryInstance : PermutationInstance, IMultiplayerInstance
         {
             public PathfindingPolicyValue PathfindingPolicy;
             public LightmappingPolicyValue LightmappingPolicy;
             public List<PathfindingReference> PathfindingReferences;
-            public short Unknown11;
-            public short Unknown12;
+            public short HavokMoppIndex;
+            public short AiSpawningSquad;
             public MultiplayerObjectProperties Multiplayer;
 
             MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
@@ -912,7 +1194,8 @@ namespace TagTool.Tags.Definitions
             public uint Flags;
         }
 
-        [TagStructure(Size = 0x3C)]
+        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class VehicleInstance : PermutationInstance, IMultiplayerInstance
         {
             public float BodyVitalityPercentage;
@@ -945,7 +1228,8 @@ namespace TagTool.Tags.Definitions
             public short PathfindingObjectIndex;
         }
 
-        [TagStructure(Size = 0x38)]
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x5C, MinVersion = CacheVersion.HaloReach)]
         public class EquipmentInstance : ScenarioInstance, IMultiplayerInstance
         {
             public uint EquipmentFlags;
@@ -954,7 +1238,8 @@ namespace TagTool.Tags.Definitions
             MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
 
-        [TagStructure(Size = 0x3C)]
+        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class WeaponInstance : PermutationInstance, IMultiplayerInstance
         {
             public short RoundsLeft;
@@ -1010,7 +1295,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloReach)]
         public class MachineInstance : ScenarioInstance
         {
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -1031,10 +1317,8 @@ namespace TagTool.Tags.Definitions
             public ArgbColor TertiaryColor;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public ArgbColor QuaternaryColor;
-
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public uint Unknown10;
-
 
             public short PowerGroup;
             public short PositionGroup;
@@ -1043,6 +1327,9 @@ namespace TagTool.Tags.Definitions
             public List<PathfindingReference> PathfindingReferences;
             public PathfindingPolicyValue PathfindingPolicy;
             public short Unknown11;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectProperties Multiplayer;
 
             [Flags]
             public enum ScenarioMachineFlags : int
@@ -1066,7 +1353,7 @@ namespace TagTool.Tags.Definitions
                 Bit15 = 1 << 15
             }
 
-            [TagStructure]
+            [TagStructure(Size = 0x4)]
             public class PathfindingReference : TagStructure
 			{
                 public short BspIndex;
@@ -1083,37 +1370,13 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x24, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnlineED)]
-        public class TerminalInstance : ScenarioInstance
+        [TagStructure(Size = 0xC)]
+        public class TerminalInstance : PermutationInstance
         {
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public StringId Variant;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public byte ActiveChangeColors;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public sbyte Unknown7;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public sbyte Unknown8;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public sbyte Unknown9;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public ArgbColor PrimaryColor;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public ArgbColor SecondaryColor;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public ArgbColor TertiaryColor;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public ArgbColor QuaternaryColor;
-
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public uint Unknown10;
-
             public short PowerGroup;
             public short PositionGroup;
             public uint DeviceFlags;
-            public uint MachineFlags;
+            public uint MachineFlags; // PahPah?
         }
 
         [TagStructure(Size = 0x4C)]
@@ -1132,7 +1395,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x84, MinVersion = CacheVersion.HaloReach)]
         public class ControlInstance : ScenarioInstance
         {
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -1153,7 +1417,6 @@ namespace TagTool.Tags.Definitions
             public ArgbColor TertiaryColor;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public ArgbColor QuaternaryColor;
-
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public uint Unknown10;
 
@@ -1163,6 +1426,12 @@ namespace TagTool.Tags.Definitions
             public ScenarioControlFlags ControlFlags;
             public short Unknown11;
             public short Unknown12;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ScenarioControlCharacterTypes AllowedPlayers;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectProperties Multiplayer;
 
             [Flags]
             public enum ScenarioControlFlags : int
@@ -1177,16 +1446,27 @@ namespace TagTool.Tags.Definitions
                 Bit6 = 1 << 6,
                 Bit7 = 1 << 7
             }
+
+            public enum ScenarioControlCharacterTypes : short
+            {
+                Any,
+                Spartan,
+                Elite
+            }
         }
 
-        [TagStructure(Size = 0x1C)]
+        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloReach)]
         public class SoundSceneryInstance : ScenarioInstance
         {
             public int VolumeType;
             public float Height;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<float> OverrideDistance;
             public Bounds<Angle> OverrideConeAngle;
             public float OverrideOuterConeGain;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public SoundDistanceParameters DistanceParameters;
         }
 
         [TagStructure(Size = 0x18)]
@@ -1206,9 +1486,12 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x0)]
+        [TagStructure(Size = 0x0, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach)]
         public class EffectSceneryInstance : ScenarioInstance
         {
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectProperties Multiplayer;
         }
 
         [TagStructure(Size = 0x38)]
@@ -1260,6 +1543,67 @@ namespace TagTool.Tags.Definitions
             public uint Unknown3;
             public uint Unknown4;
             public uint Unknown5;
+        }
+
+        [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
+        public class MapVariantPaletteBlock : TagStructure
+        {
+            public StringId Name;
+            public MapVariantPaletteFlags Flags;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public List<MapVariantPaletteEntryBlock> Entries;
+
+            [Flags]
+            public enum MapVariantPaletteFlags : byte
+            {
+                // this palette is only visible in superforge, and objects within it are only editable in superforge
+                Hidden = 1 << 0
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class MapVariantPaletteEntryBlock : TagStructure
+            {
+                public StringId Name;
+                public List<MapVariantObjectVariantBlock> Variants;
+                // if this is <= 0, these are 'unlimited' (up to a reasonable code-defined maximum)
+                public int MaximumAllowed;
+                public int PricePerInstance;
+
+                [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+                [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo4)]
+                public class MapVariantObjectVariantBlock : TagStructure
+                {
+                    public StringId DisplayName;
+                    [TagField(ValidTags = new[] { "obje" })]
+                    public CachedTag Object;
+                    public StringId VariantName;
+
+                    [TagField(MinVersion = CacheVersion.Halo4)]
+                    public MapvariantResourceManifest ResourceDependencies;
+
+                    [TagStructure(Size = 0x30)]
+                    public class MapvariantResourceManifest : TagStructure
+                    {
+                        public List<MapvariantPaletteDependencyBlock> AttachedresourceOwners;
+                        public List<MapvariantPaletteDependencyBlock> ToplevelResourceOwners;
+                        public List<ResourcehandleBlock> Attachedresources;
+                        public List<ResourcehandleBlock> Orphanedresources;
+
+                        [TagStructure(Size = 0x4)]
+                        public class MapvariantPaletteDependencyBlock : TagStructure
+                        {
+                            public Tag Tag;
+                        }
+
+                        [TagStructure(Size = 0x4)]
+                        public class ResourcehandleBlock : TagStructure
+                        {
+                            public int Resourcehandle;
+                        }
+                    }
+                }
+            }
         }
 
         [Flags]
@@ -1447,6 +1791,35 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo4)]
+        public class ScenarioAcousticSectorBlockStruct : TagStructure
+        {
+            public List<AcousticSectorPointBlock> Points;
+            public RealPlane3d TopPlane;
+            public RealPlane3d BottomPlane;
+            [TagField(MinVersion = CacheVersion.Halo4)]
+            public AcousticpaletteFlags Flags; 
+            public float OcclusionValue;
+            public short Acoustics;
+            public short EditorFolder;
+            public float Height;
+            public float Sink;
+
+            [Flags]
+            public enum AcousticpaletteFlags : uint
+            {
+                OccludeIfAbove = 1 << 0,
+                OccludeIfBelow = 1 << 1
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class AcousticSectorPointBlock : TagStructure
+            {
+                public RealPoint3d Position;
+            }
+        }
+
         [TagStructure(Size = 0x40)]
         public class RecordedAnimation : TagStructure
 		{
@@ -1487,6 +1860,22 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x18)]
+        public class ScenarioNamedLocationVolumeBlock : TagStructure
+        {
+            public List<NamedLocationVolumePointBlock> Points;
+            public float Height;
+            public float Sink;
+            public StringId LocationName;
+
+            [TagStructure(Size = 0x14)]
+            public class NamedLocationVolumePointBlock : TagStructure
+            {
+                public RealPoint3d Position;
+                public RealEulerAngles2d Normal;
+            }
+        }
+
         [TagStructure(Size = 0x14)]
         public class UnknownBlock : TagStructure
 		{
@@ -1497,18 +1886,19 @@ namespace TagTool.Tags.Definitions
             public uint Unknown5;
         }
 
-        [TagStructure(Size = 0x24)]
+        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloReach)]
         public class Decal : TagStructure
 		{
             public short DecalPaletteIndex;
             public FlagBits Flags;
-
-            [TagField(Flags = Padding, Length = 1)]
-            public byte[] Unused = new byte[1];
-
+            public byte Unknown1;
             public RealQuaternion Rotation;
             public RealPoint3d Position;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Scale;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public Bounds<float> ScaleReach;
 
             [Flags]
             public enum FlagBits : byte
@@ -1621,7 +2011,8 @@ namespace TagTool.Tags.Definitions
             SingleUse = 1 << 0
         }
 
-        [TagStructure(Size = 0x38)]
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
         public class SquadPoint : TagStructure
 		{
             public short PointIndex;
@@ -1631,8 +2022,12 @@ namespace TagTool.Tags.Definitions
             public StringId ActivityName;
             public SquadActivity Activity;
             public short ActivityVariant;
-            [TagField(Length = 32)]
+
+            [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
             public string CommandScriptName;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId CommandScriptNameReach;
+
             public short CommandScriptIndex;
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused;
@@ -1684,7 +2079,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x68, MinVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x68, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloReach)]
         public class Squad : TagStructure
 		{
             /// <summary>
@@ -1738,6 +2134,10 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.Halo3Retail)]
             public byte[] Unused2 = new byte[2];
 
+            // Filter which squads in Firefight waves can be spawned into this squad
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public WavePlacementFilterEnum WavePlacementFilter;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public StringId ModuleId;
 
@@ -1750,8 +2150,21 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public List<Fireteam> TemplatedFireteams;
 
+            public enum WavePlacementFilterEnum : int
+            {
+                None,
+                HeavyInfantry,
+                BossInfantry,
+                LightVehicle,
+                HeavyVehicle,
+                FlyingInfantry,
+                FlyingVehicle,
+                Bonus
+            }
+
             [TagStructure(Size = 0x60, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x84, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x84, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x6C, MinVersion = CacheVersion.HaloReach)]
             public class Fireteam : TagStructure
             {
                 [TagField(Flags = Label, MinVersion = CacheVersion.Halo3ODST)]
@@ -1788,14 +2201,21 @@ namespace TagTool.Tags.Definitions
                 public short VehicleTypeIndex;
                 public StringId VehicleVariant;
 
-                [TagField(Length = 32)]
+                [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string CommandScriptName;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId CommandScriptNameReach;
+
                 public short CommandScriptIndex;
 
                 [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused1 = new byte[2];
 
                 public StringId ActivityName;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId MovementSet;
 
                 [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.Halo3Retail)]
                 public byte[] Unused2 = new byte[2];
@@ -1828,20 +2248,28 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x6C)]
+            [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
             public class SpawnFormation : TagStructure
 			{
                 public AiConditions SpawnConditions;
                 [TagField(Flags = Label)]
                 public StringId Name;
+
                 public AiPoint3d Point;
+
                 public StringId FormationType;
                 public uint InitialMovementDistance;
                 public SquadMovementMode InitialMovementMode;
                 public short PlacementScriptIndex;
-                [TagField(Length = 32)]
+
+                [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string PlacementScriptName;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId PlacementScriptNameReach;
                 public StringId InitialState;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId MovementSet;
                 public short PointSetIndex;
                 public SquadPatrolMode PatrolMode;
                 public List<SquadPoint> PatrolPoints;
@@ -1862,7 +2290,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x88, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x90, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x90, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x7C, MinVersion = CacheVersion.HaloReach)]
             public class SpawnPoint : TagStructure
 			{
                 public AiConditions Condition;
@@ -1902,7 +2331,10 @@ namespace TagTool.Tags.Definitions
 
                 public StringId ActorVariant;
                 public StringId VehicleVariant;
-                
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId VoiceDesignator;
+
                 public float InitialMovementDistance;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -1915,8 +2347,10 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public SquadMovementMode InitialMovementModeOld;
 
-                [TagField(Length = 32)]
+                [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string PlacementScriptName;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId PlacementScriptNameReach;
 
                 public short PlacementScriptIndex;
 
@@ -1927,6 +2361,8 @@ namespace TagTool.Tags.Definitions
                 public byte[] Unused4 = new byte[2];
 
                 public StringId ActivityName;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId MovementSet;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public int Unknown; // ???
@@ -1939,7 +2375,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
         public class Zone : TagStructure
 		{
             [TagField(Flags = Label, Length = 32)]
@@ -2219,7 +2656,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x6C)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x84, MinVersion = CacheVersion.HaloReach)]
         public class AiPathfindingDatum : TagStructure
 		{
             public List<LineSegment> LineSegments;
@@ -2228,9 +2666,25 @@ namespace TagTool.Tags.Definitions
             public List<ClimbHint> ClimbHints;
             public List<WellHint> WellHints;
             public List<FlightHint> FlightHints;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<TriggerVolume> CookieCutters;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<UnknownBlock8> Unknown8;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<UnknownBlock9> Unknown9;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GNullBlock> Unknown10;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GNullBlock> Unknown11;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GNullBlock> Unknown12;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GNullBlock> Unknown13;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GNullBlock> Unknown14;
+
 
             [Flags]
             public enum UserHintShortFlags : short
@@ -2571,12 +3025,26 @@ namespace TagTool.Tags.Definitions
             SubtitleFont
         }
 
-        [TagStructure(Size = 0x28)]
+        [TagStructure(Size = 0x28, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
         public class CutsceneTitle : TagStructure
 		{
             [TagField(Flags = Label)]
             public StringId Name;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Rectangle2d TextBounds;
+
+            // TODO: RealRectangle2d
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float TextBoundsReachX0;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float TextBoundsReachX1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float TextBoundsReachY0;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float TextBoundsReachY1;
+
             public CutsceneTitleHorizontalJustification HorizontalJustification;
             public CutsceneTitleVerticalJustification VerticalJustification;
             public CutsceneTitleFont Font;
@@ -2598,14 +3066,15 @@ namespace TagTool.Tags.Definitions
             public List<Reference> References;
 
             [TagStructure(Size = 0x130, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x16C, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x16C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x150, MinVersion = CacheVersion.HaloReach)]
             public class Reference : TagStructure
 			{
                 public CachedTag SceneryResource;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<TagReferenceBlock> OtherScenery;
                 public CachedTag BipedsResource;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<TagReferenceBlock> OtherBipeds;
                 public CachedTag VehiclesResource;
                 public CachedTag EquipmentResource;
@@ -2613,11 +3082,11 @@ namespace TagTool.Tags.Definitions
                 public CachedTag SoundSceneryResource;
                 public CachedTag LightsResource;
                 public CachedTag DevicesResource;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<TagReferenceBlock> OtherDevices;
                 public CachedTag EffectSceneryResource;
                 public CachedTag DecalsResource;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<TagReferenceBlock> OtherDecals;
                 public CachedTag CinematicsResource;
                 public CachedTag TriggerVolumesResource;
@@ -2626,10 +3095,14 @@ namespace TagTool.Tags.Definitions
                 public CachedTag CreatureResource;
                 public CachedTag StructureLightingResource;
                 public CachedTag DecoratorsResource;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<TagReferenceBlock> OtherDecorators;
                 public CachedTag SkyReferencesResource;
                 public CachedTag CubemapResource;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public CachedTag PerformancesResource;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public CachedTag DumplingsResource;
             }
         }
 
@@ -2692,6 +3165,44 @@ namespace TagTool.Tags.Definitions
             public short TriggerVolume;
         }
 
+        [TagStructure(Size = 0x10)]
+        public class TriggerVolumeMoppCodeBlock : TagStructure
+        {
+            public int TriggerVolumeChecksum;
+            public List<MoppCodeDefinitionBlock> MoppCode;
+
+            [TagStructure(Size = 0x40)]
+            public class MoppCodeDefinitionBlock : TagStructure
+            {
+                public int FieldPointerSkip;
+                public short Size;
+                public short Count;
+                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                public float VI;
+                public float VJ;
+                public float VK;
+                public float VW;
+                public int MDataPointer;
+                public int IntMSize;
+                public int IntMCapacityandFlags;
+                public sbyte Int8MBuildtype;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
+                public List<MoppCodeDataDefinitionBlock> MoppDataBlock;
+                // they say it only matters for ps3
+                public sbyte MoppBuildType;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding2;
+
+                [TagStructure(Size = 0x1)]
+                public class MoppCodeDataDefinitionBlock : TagStructure
+                {
+                    public byte MoppData;
+                }
+            }
+        }
+
         [TagStructure(Size = 0x78)]
         public class UnknownBlock3 : TagStructure
 		{
@@ -2721,13 +3232,16 @@ namespace TagTool.Tags.Definitions
             public uint Unknown22;
         }
 
-        [TagStructure(Size = 0x8)]
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
         public class FogBlock : TagStructure
 		{
             [TagField(Flags = Label)]
             public StringId Name;
             public short Unknown;
             public short Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public CachedTag Fog;
         }
 
         [TagStructure(Size = 0x30)]
@@ -2746,6 +3260,15 @@ namespace TagTool.Tags.Definitions
             public float Unknown8;
             public uint Unknown9;
             public uint Unknown10;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class ScenarioWeatherPaletteBlock : TagStructure
+        {
+            [TagField(Flags = TagFieldFlags.Label)]
+            public StringId Name;
+            [TagField(ValidTags = new[] { "rain" })]
+            public CachedTag Rain;
         }
 
         [TagStructure(Size = 0x68, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -2821,28 +3344,50 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x6C)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class SpawnDatum : TagStructure
 		{
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<float> DynamicSpawnHeightBounds;
+
             public float GameObjectResetHeight;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown2;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown3;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown4;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown5;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown6;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown7;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown8;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown9;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown10;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown11;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown12;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown13;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown14;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown15;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<DynamicSpawnOverload> DynamicSpawnOverloads;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<SpawnZone> StaticRespawnZones;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<SpawnZone> StaticInitialSpawnZones;
 
             [TagStructure(Size = 0x10)]
@@ -2885,7 +3430,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x44)]
+        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloReach)]
         public class CrateInstance : PermutationInstance, IMultiplayerInstance
         {
             public PathfindingPolicyValue PathfindingPolicy;
@@ -2902,7 +3448,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x48)]
+        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
         public class Flock : TagStructure
 		{
             [TagField(Flags = Label)]
@@ -2910,17 +3457,41 @@ namespace TagTool.Tags.Definitions
             public short FlockPaletteIndex;
             public short BspIndex;
             public short BoundingTriggerVolume;
-            public ushort Flags;
+            public FlockFlags Flags;
             public float EcologyMargin;
             public List<Source> Sources;
             public List<Sink> Sinks;
             public Bounds<float> ProductionFrequencyBounds;
             public Bounds<float> ScaleBounds;
+            // Distance from a source at which the creature scales to full size
             public float SourceScaleto0;
+            // Distance from a sink at which the creature begins to scale to zero
             public float SinkScaleto0;
+            // The number of seconds it takes to kill all units in the flock if it gets destroyed
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FlockDestroyDuration; // sec
             public short CreaturePaletteIndex;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short BigBattleCreaturePaletteIndex;
             public Bounds<short> BoidCountBounds;
             public short EnemyFlockIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float EnemyFlockMaxTargetDistance;
+
+            [Flags]
+            public enum FlockFlags : ushort
+            {
+                NotInitiallyCreated = 1 << 0,
+                HardBoundariesOnVolume = 1 << 1,
+                FlockInitiallyStopped = 1 << 2,
+                FlockInitiallyPerched = 1 << 3,
+                OneCreaturePerSource = 1 << 4,
+                ScaredByAi = 1 << 5,
+                CreaturesRespectKillVolumes = 1 << 6,
+                BigBattleSquad = 1 << 7
+            }
 
             [TagStructure(Size = 0x24)]
             public class Source : TagStructure
@@ -3052,17 +3623,18 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloReach)]
             public class Task : TagStructure
 			{
                 public TaskFlags Flags;
 
                 public TaskInhibitGroups InhibitGroups;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public uint Unknown1;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public uint Unknown2;
 
                 public SquadDifficultyFlags InhibitOnDifficulty;
@@ -3093,12 +3665,22 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float ExhaustionDelay;
 
-                [TagField(Length = 32)]
+                [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+                public uint Unknown23;
+
+                [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string EntryScriptName;
-                [TagField(Length = 32)]
+                [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string CommandScriptName;
-                [TagField(Length = 32)]
+                [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string ExhaustionScriptName;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId EntryScriptNameReach;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId CommandScriptNameReach;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId ExhaustionScriptNameReach;
 
                 public short EntryScriptIndex;
                 public short CommandScriptIndex;
@@ -3113,10 +3695,11 @@ namespace TagTool.Tags.Definitions
 
                 public RuntimeFlagsValue RuntimeFlags;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public List<PureformDistributionBlock> PureformDistribution;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown20;
+                public short Unknown20; // kungfu count lol?
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown21;
 
@@ -3272,11 +3855,14 @@ namespace TagTool.Tags.Definitions
                     public byte[] Unused = new byte[2];
                 }
 
-                [TagStructure(Size = 0x124)]
+                [TagStructure(Size = 0x124, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagStructure(Size = 0x108, MinVersion = CacheVersion.HaloReach)]
                 public class ActivationScriptBlock : TagStructure
 				{
-                    [TagField(Flags = Label, Length = 32)]
+                    [TagField(Flags = Label, Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                     public string ScriptName;
+                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    public StringId ScriptNameReach;
 
                     [TagField(Length = 256)]
                     public string ScriptSource;
@@ -3445,7 +4031,8 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0xA, MaxVersion = CacheVersion.Halo3Retail)]
-                [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST)]
+                [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
                 public class Area : TagStructure
 				{
                     public AreaType Type;
@@ -3468,8 +4055,9 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public Angle Yaw;
 
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public int ConnectivityBitVector;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Length = 1)]
+                    [TagField(MinVersion = CacheVersion.HaloReach, Length = 4)]
+                    public int[] ConnectivityBitVector;
                 }
 
                 [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3Retail)]
@@ -3535,6 +4123,15 @@ namespace TagTool.Tags.Definitions
             public short Unknown2;
         }
 
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
+        public class CinematicsBlock : TagStructure
+        {
+            [TagField(Flags = Label, MinVersion = CacheVersion.HaloReach)]
+            public StringId Name;
+            public CachedTag Cinematic;
+        }
+
         [TagStructure(Size = 0x14)]
         public class CinematicLightingBlock : TagStructure
 		{
@@ -3544,13 +4141,16 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class ScenarioMetagameBlock : TagStructure
 		{
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<TimeMultiplier> TimeMultipliers;
             public float ParScore;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<TimeMultiplier> TimeMultipliersReach;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<SurvivalBlock> Survival;
 
             [TagStructure(Size = 0x8)]
@@ -3570,7 +4170,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class CollisionUnknownBlock : TagStructure
+        public class SoftSurfaceBlock : TagStructure
 		{
             public float Unknown1;
             public float Unknown2;
@@ -3587,7 +4187,51 @@ namespace TagTool.Tags.Definitions
             public short Unknown4;
             public short Unknown5;
         }
-        
+
+        [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo4)]
+        public class ScenarioCubemapBlock : TagStructure
+        {
+            public StringId Name;
+            public RealPoint3d CubemapPosition;
+            public CubemapResolutionEnum CubemapResolution;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(MinVersion = CacheVersion.Halo4)]
+            public ManualbspFlagsReferences ManualBspFlags;
+            public List<CubemapReferencePointsBlock> ReferencePoints;
+
+            public enum CubemapResolutionEnum : short
+            {
+                _16,
+                _32,
+                _64,
+                _128,
+                _256
+            }
+
+            [TagStructure(Size = 0x10)]
+            public class ManualbspFlagsReferences : TagStructure
+            {
+                public List<ScenariobspReferenceBlock> ReferencesBlock;
+                public int Flags;
+
+                [TagStructure(Size = 0x10)]
+                public class ScenariobspReferenceBlock : TagStructure
+                {
+                    [TagField(ValidTags = new[] { "sbsp" })]
+                    public CachedTag StructureDesign;
+                }
+            }
+
+            [TagStructure(Size = 0x10)]
+            public class CubemapReferencePointsBlock : TagStructure
+            {
+                public RealPoint3d ReferencePoint;
+                public int PointIndex;
+            }
+        }
+
         [TagStructure(Size = 0x14)]
         public class LightmapAirprobe : TagStructure
 		{
@@ -3595,6 +4239,21 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public short Unknown5;
             public short Unknown6;
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class GNullBlock : TagStructure
+        {
+        }
+
+        [TagStructure(Size = 0x1C)]
+        public class ScenarioCheapParticleSystemsBlock : TagStructure
+        {
+            public short PaletteIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            public RealPoint3d Position;
+            public RealEulerAngles3d Rotation;
         }
     }
 
@@ -3624,5 +4283,12 @@ namespace TagTool.Tags.Definitions
         Bit3 = 1 << 3,
         Bit4 = 1 << 4,
         CharactersUsePreviousMissionWeapons = 1 << 5,
+    }
+
+    [Flags]
+    public enum ScenarioRuntimeTriggerVolumeFlags : uint
+    {
+        HasHardSafeVolume = 1 << 0,
+        HasSoftSafeVolume = 1 << 1
     }
 }

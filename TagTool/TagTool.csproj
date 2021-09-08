@@ -266,6 +266,7 @@
     <Compile Include="Audio\FMOD.cs" />
     <Compile Include="Audio\FMODSoundCache.cs" />
     <Compile Include="Audio\SoundConverter.cs" />
+    <Compile Include="Audio\SoundDistanceParameters.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\Utils\BitmapUtilsPC.cs" />
