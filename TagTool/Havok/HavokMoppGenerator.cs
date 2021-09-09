@@ -86,7 +86,8 @@ namespace TagTool.Havok
                         FileName = Path.GetFullPath(Path.Combine(Program.TagToolDirectory, "Tools", "mopp.exe")),
                         Arguments = $"\"{inputFile.FullName}\" \"{outputFile.FullName}\"",
                         UseShellExecute = false,
-                        CreateNoWindow = true
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
                     }
                 };
                 process.Start();
