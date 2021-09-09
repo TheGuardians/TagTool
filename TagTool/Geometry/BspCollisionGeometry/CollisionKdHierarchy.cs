@@ -46,7 +46,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
                 public short InstanceIndex;
                 public int InstanceIndexDwordMask;
                 public short BspIndex;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                [TagField(Length = 0x2)]
                 public byte[] Padding;
                 public int BspMask;
 
@@ -76,7 +76,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
             {
                 [TagField(Length = 31)]
                 public SuperNodeMappingIndexArray[] Indices;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                [TagField(Length = 0x2)]
                 public byte[] Padding;
 
                 [TagStructure(Size = 0x2)]

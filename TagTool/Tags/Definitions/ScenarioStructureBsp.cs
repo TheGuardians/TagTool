@@ -865,9 +865,10 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 4, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class InstancedGeometryInstanceName : TagStructure
         {
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
         }
 
