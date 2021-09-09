@@ -160,8 +160,8 @@ namespace TagTool.Commands.Scenarios
                         StructureBsp = sbspTag,
                         Cubemap = cubemapsTag,
                         Wind = windTag,
-                        Unknown5 = 32,
-                        Unknown6 = -1
+                        Flags = 32,
+                        DefaultSkyIndex = -1
                     }
                 };
 
