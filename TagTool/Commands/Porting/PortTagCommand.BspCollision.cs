@@ -11,6 +11,8 @@ using TagTool.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
+using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Commands.Porting
 {
@@ -41,9 +43,53 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                //
+                // Convert collision geometry
+                //
+
+                for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
+                    resourceDefinition.CollisionBsps[i] = ConvertCollisionGeometry(resourceDefinition.CollisionBsps[i]);
+
+                foreach (var instancedGeometry in resourceDefinition.InstancedGeometry)
+                {
+                    instancedGeometry.CollisionInfo = ConvertCollisionGeometry(instancedGeometry.CollisionInfo);
+                    if (instancedGeometry.CollisionGeometries != null)
+                    {
+                        for (int i = 0; i < instancedGeometry.CollisionGeometries.Count; i++)
+                            instancedGeometry.CollisionGeometries[i] = ConvertCollisionGeometry(instancedGeometry.CollisionGeometries[i]);
+                    }
+                }
+            }
+
             bsp.CollisionBspResource = CacheContext.ResourceCache.CreateStructureBspResource(resourceDefinition);
 
             return bsp.CollisionBspResource;
+        }
+
+        private CollisionGeometry ConvertCollisionGeometry(CollisionGeometry geometry)
+        {
+            if(geometry.Bsp3dSupernodes.Count > 0)
+            {
+                var coll = new CollisionModel();
+                coll.Regions = new List<CollisionModel.Region>() {
+                    new CollisionModel.Region() {
+                        Permutations = new List<CollisionModel.Region.Permutation>() {
+                            new CollisionModel.Region.Permutation() {
+                                Bsps = new List<CollisionModel.Region.Permutation.Bsp>() {
+                                    new CollisionModel.Region.Permutation.Bsp() { Geometry = geometry }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                var generator = new GenerateCollisionBSPCommand(ref coll);
+                generator.Execute(new List<string>());
+            }
+
+            return geometry;
         }
     }
 }

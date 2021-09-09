@@ -19,6 +19,7 @@ using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
 using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
+using TagTool.Geometry.BspCollisionGeometry;
 
 namespace TagTool.Commands.Porting
 {
@@ -294,7 +295,77 @@ namespace TagTool.Commands.Porting
             }
         }
 
-		public CachedTag ConvertTagInternal(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag blamTag)
+        private void PreConvertReachDefinition(object definition)
+        {
+            if(definition is ScenarioStructureBsp sbsp)
+            {
+                sbsp.Decorators.Clear();
+                foreach(var cluster in sbsp.Clusters)
+                {
+                    cluster.DecoratorGrids.Clear();
+                }
+            }
+
+            if(definition is Scenario scenario)
+            {
+                scenario.Bipeds.Clear();
+                scenario.BipedPalette.Clear();
+                scenario.Vehicles.Clear();
+                scenario.VehiclePalette.Clear();
+                scenario.Weapons.Clear();
+                scenario.WeaponPalette.Clear();
+                scenario.Equipment.Clear();
+                scenario.EquipmentPalette.Clear();
+                scenario.Scenery.Clear();
+                scenario.SceneryPalette.Clear();
+                scenario.Terminals.Clear();
+                scenario.TerminalPalette.Clear();
+                scenario.Machines.Clear();
+                scenario.MachinePalette.Clear();
+                scenario.Controls.Clear();
+                scenario.ControlPalette.Clear();
+                scenario.Crates.Clear();
+                scenario.CratePalette.Clear();
+                scenario.Giants.Clear();
+                scenario.GiantPalette.Clear();
+                scenario.EffectScenery.Clear();
+                scenario.EffectSceneryPalette.Clear();
+                scenario.SoundScenery.Clear();
+                scenario.SoundSceneryPalette.Clear();
+
+                scenario.Flocks.Clear();
+                scenario.FlockPalette.Clear();
+                scenario.Creatures.Clear();
+                scenario.CreaturePalette.Clear();
+
+                scenario.LightVolumes.Clear();
+                scenario.LightVolumePalette.Clear();
+
+                scenario.DecalPalette.Clear();
+                scenario.Decals.Clear();
+
+                scenario.Squads.Clear();
+                scenario.SquadPatrols.Clear();
+                scenario.SquadGroups.Clear();
+                scenario.AiObjectives.Clear();
+                scenario.AiPathfindingData.Clear();
+
+                scenario.LightmapAirprobes.Clear();
+
+                scenario.Fog.Clear();
+                scenario.CameraFx.Clear();
+
+                scenario.DefaultCameraFx = null;
+                scenario.DefaultScreenFx = null;
+                scenario.GlobalLighting = null;
+                scenario.Lightmap = null;
+                scenario.PerformanceThrottles = null;
+                scenario.GamePerformanceThrottles = null;
+            }
+        }
+
+
+        public CachedTag ConvertTagInternal(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag blamTag)
 		{
             ProcessDeferredActions();
 
@@ -472,6 +543,11 @@ namespace TagTool.Commands.Porting
 			// Perform pre-conversion fixups to the Blam tag definition
 			//
 
+            if(BlamCache.Version == CacheVersion.HaloReach)
+            {
+                PreConvertReachDefinition(blamDefinition);
+            }
+
 			switch (blamDefinition)
 			{
 				case RenderModel mode when BlamCache.Version < CacheVersion.Halo3Retail:
@@ -494,9 +570,17 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case ScenarioStructureBsp bsp: // named instanced geometry instances, useless unless we decompile bsp's
-					foreach (var instance in bsp.InstancedGeometryInstances)
-						instance.Name = StringId.Invalid;
-					break;
+                    if (bsp.InstancedGeometryInstances != null)
+                    {
+                        foreach (var instance in bsp.InstancedGeometryInstances)
+                            instance.Name = StringId.Invalid;
+                    }
+                    if (bsp.InstancedGeometryInstanceNames != null)
+                    {
+                        foreach (var instance in bsp.InstancedGeometryInstanceNames)
+                            instance.Name = StringId.Invalid;
+                    }
+                    break;
 			}
 
             ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
@@ -587,15 +671,6 @@ namespace TagTool.Commands.Porting
                         }
                     }
                     break;
-
-                case CollisionModel coll:
-                    if (BlamCache.Version == CacheVersion.HaloReach)
-                    {
-                        GenerateCollisionBSPCommand bspgeneration = new GenerateCollisionBSPCommand(ref coll);
-                        bspgeneration.Execute(new List<string>());
-                    }
-                    break;
-
                 case CortanaEffectDefinition crte:
                     foreach (var gravemindblock in crte.Gravemind)
                     {
@@ -1122,6 +1197,9 @@ namespace TagTool.Commands.Porting
 				case IList _: // All arrays and List<T> implement IList, so we should just use that
 					data = ConvertCollection(cacheStream, blamCacheStream, resourceStreams, data as IList, definition, blamTagName);
 					return data;
+
+                case CollisionGeometry collisionGeometry:
+                    return ConvertCollisionGeometry(collisionGeometry);
 
 				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
 					renderGeometry = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderGeometry, definition, blamTagName);

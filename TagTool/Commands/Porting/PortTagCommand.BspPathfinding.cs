@@ -5,6 +5,9 @@ using TagTool.Tags.Resources;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Pathfinding;
 using TagTool.Pathfinding.Utils;
+using TagTool.Common;
+using TagTool.Commands.Common;
+using System.Linq;
 
 namespace TagTool.Commands.Porting
 {
@@ -67,6 +70,23 @@ namespace TagTool.Commands.Porting
                 {
                     surfacePlane.PlaneCountNew = surfacePlane.PlaneCountOld;
                     surfacePlane.PlaneIndexNew = surfacePlane.PlaneIndexOld;
+                }
+            }
+
+            //
+            // Convert reach instanced geometry instances
+            //
+
+            if(BlamCache.Version == CacheVersion.HaloReach)
+            {
+                bsp.InstancedGeometryInstances = new System.Collections.Generic.List<InstancedGeometryInstance>();
+                bsp.InstancedGeometryInstances.AddRange(resourceDefinition.InstancedGeometryInstances);
+                foreach(var instance in bsp.InstancedGeometryInstances)
+                {
+                    if(instance.SeamBitVector.Skip(1).Any(x => x != 0))
+                        new TagToolWarning("Instanced seam bit vector truncated!");
+
+                    instance.SeamBitVector = new uint[] { instance.SeamBitVector[0] };
                 }
             }
 
