@@ -430,9 +430,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"material_model\cook_torrance_pbr_maps":
                                 optionName = "cook_torrance";
                                 break;
-                            case @"self_illumination\illum_change_color":
-                                optionName = "simple_four_change_color";
-                                break;
                             // MCC rmtr //
                             case @"material_1\diffuse_plus_specular_plus_self_illum":
                                 optionName = "diffuse_plus_specular";
