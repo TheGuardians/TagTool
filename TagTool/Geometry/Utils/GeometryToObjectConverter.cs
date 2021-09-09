@@ -480,7 +480,7 @@ namespace TagTool.Geometry.Utils
             else
                 HasValidCollisions = true;
 
-            if(SourceCache.Version >= CacheVersion.HaloReach)
+            if(SourceCache.Version >= CacheVersion.HaloReach && HasValidCollisions == true)
             {
                 new GenerateCollisionBSPCommand(ref collisionModel).Execute(new List<string>());
                 var moppBuilt = (bool)new GenerateBspPhysicsCommand(ref collisionModel).Execute(new List<string>());
