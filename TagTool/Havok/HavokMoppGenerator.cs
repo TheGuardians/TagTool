@@ -33,10 +33,7 @@ namespace TagTool.Havok
             input.IndexMask = uint.MaxValue;
 
             foreach (Vertex vertex in bsp.Vertices)
-            {
-                float sink = vertex.Sink / short.MaxValue * 2;
-                input.Vertices.Add(new RealPoint3d(vertex.Point.X, vertex.Point.Y, vertex.Point.Z - sink));
-            }
+                input.Vertices.Add(vertex.Point);
 
             for (int surfaceIndex = 0; surfaceIndex < bsp.Surfaces.Count; surfaceIndex++)
             {
@@ -60,7 +57,8 @@ namespace TagTool.Havok
                         indices.Add(edge.StartVertex);
                     }
 
-                } while (edgeIndex != surface.FirstEdge);
+                } 
+                while (edgeIndex != surface.FirstEdge);
 
                 input.Faces.Add(new MoppGeneratorInput.Face(indices.ToArray(), (uint)surfaceIndex));
             }
