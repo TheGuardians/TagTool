@@ -15,6 +15,7 @@ using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Commands.CollisionModels.OffsetCollisonBsp;
+using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Geometry.Utils
 {
@@ -30,6 +31,7 @@ namespace TagTool.Geometry.Utils
         private ScenarioLightmap sLdT;
         private ScenarioLightmapBspData Lbsp;
         private StructureBspTagResources StructureBspResources;
+        private StructureBspCacheFileTagResources StructureBspCacheFileResources;
         private Dictionary<short, short> CollisionMaterialMapping;
         private RealPoint3d GeometryOffset;
         private RenderGeometryCompression OriginalCompression;
@@ -86,6 +88,7 @@ namespace TagTool.Geometry.Utils
             Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
 
             StructureBspResources = SourceCache.ResourceCache.GetStructureBspTagResources(StructureBsp.CollisionBspResource);
+            StructureBspCacheFileResources = SourceCache.ResourceCache.GetStructureBspCacheFileTagResources(StructureBsp.PathfindingResource);
         }
 
         public CachedTag ConvertGeometry(int geometryIndex, string desiredTagName = null, bool iscluster = false, bool centergeometry = true)
@@ -96,7 +99,12 @@ namespace TagTool.Geometry.Utils
 
             var scenarioFolder = Path.GetDirectoryName(Scenario.StructureBsps[StructureBspIndex].StructureBsp.Name);
             string bspindex = Scenario.StructureBsps.Count() > 1 ? $"{StructureBspIndex}" + "_" : "";
-            StringId geoID = StructureBsp.InstancedGeometryInstances[geometryIndex].Name;
+            StringId geoID = StringId.Invalid;
+            if (SourceCache.Version >= CacheVersion.HaloReach)
+                geoID = StructureBsp.InstancedGeometryInstanceNames[geometryIndex].Name;
+            else
+                geoID = StructureBsp.InstancedGeometryInstances[geometryIndex].Name;
+
             string geoname = SourceCache.StringTable.GetString(geoID);
 
             var tagName = $"objects\\{scenarioFolder}\\instanced\\{bspindex}{geometryIndex}_{geoname}";
@@ -374,22 +382,32 @@ namespace TagTool.Geometry.Utils
             if (!iscluster)
             {
                 //bsp physics
-                var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[geometryIndex];
-                var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.DefinitionIndex];
-
-                foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
+                if(SourceCache.Version < CacheVersion.HaloReach)
                 {
-                    permutation.BspPhysics.Add(ConvertData(bspPhysics));
-                }
+                    var instancedGeometryInstance = StructureBsp.InstancedGeometryInstances[geometryIndex];
+                    var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.DefinitionIndex];
 
-                //mopps
-                foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
+                    foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
+                    {
+                        permutation.BspPhysics.Add(ConvertData(bspPhysics));
+                    }
+
+                    //mopps
+                    foreach (var mopp in instancedGeometryDef.CollisionMoppCodes)
+                    {
+                        permutation.BspMoppCodes.Add(ConvertData(mopp));
+                    }
+
+                    //collision geometry
+                    newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
+                }
+                else
                 {
-                    permutation.BspMoppCodes.Add(ConvertData(mopp));
+                    var instancedGeometryInstance = StructureBspCacheFileResources.InstancedGeometryInstances[geometryIndex];
+                    var instancedGeometryDef = StructureBspResources.InstancedGeometryReach[instancedGeometryInstance.DefinitionIndex];
+                    //collision geometry
+                    newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
                 }
-
-                //collision geometry
-                newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
             }
 
             //cluster geometry
@@ -461,6 +479,13 @@ namespace TagTool.Geometry.Utils
                 HasValidCollisions = false;
             else
                 HasValidCollisions = true;
+
+            if(SourceCache.Version >= CacheVersion.HaloReach)
+            {
+                new GenerateCollisionBSPCommand(ref collisionModel).Execute(new List<string>());
+                new GenerateBspPhysicsCommand(ref collisionModel).Execute(new List<string>());
+                collisionModel.Regions[0].Permutations[0].BspPhysics[0].GeometryShape.Model = modelTag;
+            }
 
             return collisionModel;
         }
@@ -555,25 +580,8 @@ namespace TagTool.Geometry.Utils
             return renderModel;
         }
 
-        private RenderGeometry ConvertInstanceRenderGeometry(int geometryIndex, bool iscluster)
+        private RenderGeometry ConvertRenderGeometry(int meshindex, int compressionindex)
         {
-            int meshindex = 0;
-            int compressionindex = 0;
-            int loddataindex = -1;
-            if (!iscluster)
-            {
-                var instance = StructureBsp.InstancedGeometryInstances[geometryIndex];
-                var instanceDef = StructureBspResources.InstancedGeometry[instance.DefinitionIndex];
-                meshindex = instanceDef.MeshIndex;
-                compressionindex = instanceDef.CompressionIndex;
-                loddataindex = instance.LodDataIndex;
-            }
-            if (iscluster)
-            {
-                var cluster = StructureBsp.Clusters[geometryIndex];
-                meshindex = cluster.MeshIndex;
-            }
-
             var resourceDefinition = GetSingleMeshResourceDefinition(Lbsp.Geometry, meshindex, out Mesh mesh);
 
             var renderGeometry = new RenderGeometry();
@@ -589,18 +597,18 @@ namespace TagTool.Geometry.Utils
                 renderGeometry.MeshClusterVisibility.Add(Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone());
 
             //instanced geo has a compression index
-            if (!iscluster)
+            if (compressionindex != -1)
             {
                 renderGeometry.Compression = new List<RenderGeometryCompression>();
                 if (compressionindex != -1 && compressionindex < Lbsp.Geometry.Compression.Count)
                     renderGeometry.Compression.Add(Lbsp.Geometry.Compression[compressionindex].DeepClone());
             }
-            
+
             renderGeometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
 
-            if (loddataindex != -1 && loddataindex < Lbsp.Geometry.InstancedGeometryPerPixelLighting.Count)
+            if (meshindex < Lbsp.Geometry.InstancedGeometryPerPixelLighting.Count)
                 renderGeometry.InstancedGeometryPerPixelLighting.Add(
-                    Lbsp.Geometry.InstancedGeometryPerPixelLighting[loddataindex].DeepClone());
+                    Lbsp.Geometry.InstancedGeometryPerPixelLighting[meshindex].DeepClone());
 
             if (SourceCache.Version != DestCache.Version)
             {
@@ -621,6 +629,37 @@ namespace TagTool.Geometry.Utils
             renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
 
             return renderGeometry;
+        }
+
+        private RenderGeometry ConvertInstanceRenderGeometry(int geometryIndex, bool iscluster)
+        {
+            int meshindex;
+            int compressionindex;
+
+            if (!iscluster)
+            {
+                if (SourceCache.Version >= CacheVersion.HaloReach)
+                {
+                    var instance = StructureBspCacheFileResources.InstancedGeometryInstances[geometryIndex];
+                    var instanceDef = StructureBspResources.InstancedGeometryReach[instance.DefinitionIndex];
+                    meshindex = instanceDef.MeshIndex;
+                    compressionindex = instanceDef.CompressionIndex;
+                }
+                else
+                {
+                    var instance = StructureBsp.InstancedGeometryInstances[geometryIndex];
+                    var instanceDef = StructureBspResources.InstancedGeometry[instance.DefinitionIndex];
+                    meshindex = instanceDef.MeshIndex;
+                    compressionindex = instanceDef.CompressionIndex;
+                }
+            }
+            else
+            {
+                meshindex = StructureBsp.Clusters[geometryIndex].MeshIndex;
+                compressionindex = -1;
+            }
+
+            return ConvertRenderGeometry(meshindex, compressionindex);
         }
 
         private T ConvertData<T>(T data)

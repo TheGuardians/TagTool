@@ -107,7 +107,12 @@ namespace TagTool.Commands.Porting
                         desiredName = argStack.Pop();
                     }
 
-                    var index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
+                    int index;
+                    if (blamSbsp.InstancedGeometryInstanceNames != null && blamSbsp.InstancedGeometryInstanceNames.Count > 0)
+                        index = FindBlockIndex(blamSbsp.InstancedGeometryInstanceNames, identifier);
+                    else
+                        index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
+
                     desiredInstances.Add(index, desiredName);
                 }
                 else if (allunique)
@@ -178,7 +183,13 @@ namespace TagTool.Commands.Porting
 
                         var tagname = parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : null;
 
-                        var index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
+
+                        int index;
+                        if (blamSbsp.InstancedGeometryInstanceNames != null && blamSbsp.InstancedGeometryInstanceNames.Count > 0)
+                            index = FindBlockIndex(blamSbsp.InstancedGeometryInstanceNames, identifier);
+                        else
+                            index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
+
                         if (index == -1)
                             return new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
 
@@ -215,7 +226,6 @@ namespace TagTool.Commands.Porting
                 {
                     try
                     {
-                        var instance = blamSbsp.InstancedGeometryInstances[kv.Key];
                         var tag = converter.ConvertGeometry(kv.Key, kv.Value, false, centergeometry);
 
                         foreach (var item in forgeItems)
