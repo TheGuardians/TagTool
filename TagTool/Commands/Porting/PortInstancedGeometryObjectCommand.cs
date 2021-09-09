@@ -117,34 +117,48 @@ namespace TagTool.Commands.Porting
                 }
                 else if (allunique)
                 {
-                    for (int i = 0; i < blamSbsp.Geometry.Meshes.Count(); i++)
+                    var visitedNames = new HashSet<string>();
+                    var visitedDefinitions = new HashSet<short>();
+                    var uniqueInstances = new List<(int Index, string Name)>();
+
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
                     {
-                        var meshFound = false;
-
-                        for (int j = 0; j < blamSbsp.InstancedGeometryInstances.Count(); j++)
+                        var sbspCacheResources = BlamCache.ResourceCache.GetStructureBspCacheFileTagResources(blamSbsp.PathfindingResource);
+                        for (int i = 0; i < blamSbsp.InstancedGeometryInstanceNames.Count; i++)
                         {
-                            if (meshFound == true)
-                                break;
-                            else if (blamSbsp.InstancedGeometryInstances[j].DefinitionIndex == i)
-                            {
-                                // hack to not port waterfall merged geo. nuke this
-                                if (BlamCache.StringTable.GetString(blamSbsp.InstancedGeometryInstances[j].Name).Contains("merged"))
-                                    break;
-
-                                desiredInstances.Add(j, string.Empty);
-                                meshFound = true;
-
-                                forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()
-                                {
-                                    Name = BlamCache.StringTable.GetString(blamSbsp.InstancedGeometryInstances[j].Name),
-                                    Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
-                                    CategoryIndex = -1,
-                                    DescriptionIndex = -1,
-                                    MaxAllowed = (ushort)j,
-                                    Object = null
-                                });
-                            }
+                            var instance = sbspCacheResources.InstancedGeometryInstances[i];
+                            var name = BlamCache.StringTable.GetString(blamSbsp.InstancedGeometryInstanceNames[i].Name);
+                            if (visitedNames.Add(name) && visitedDefinitions.Add(instance.DefinitionIndex))
+                                uniqueInstances.Add((i, name));
                         }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < blamSbsp.InstancedGeometryInstances.Count; i++)
+                        {
+                            var instance = blamSbsp.InstancedGeometryInstances[i];
+                            var name = BlamCache.StringTable.GetString(instance.Name);
+                            if (visitedNames.Add(name) && visitedDefinitions.Add(instance.DefinitionIndex))
+                                uniqueInstances.Add((i, name));
+                        }
+                    }
+
+                    foreach(var (index, name) in uniqueInstances)
+                    {
+                        if (BlamCache.Platform == CachePlatform.MCC && name.Contains("merged"))
+                            break;
+
+                        desiredInstances.Add(index, string.Empty);
+
+                        forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()
+                        {
+                            Name = name,
+                            Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
+                            CategoryIndex = -1,
+                            DescriptionIndex = -1,
+                            MaxAllowed = (ushort)index,
+                            Object = null
+                        });
                     }
                 }
                 else

@@ -483,8 +483,9 @@ namespace TagTool.Geometry.Utils
             if(SourceCache.Version >= CacheVersion.HaloReach)
             {
                 new GenerateCollisionBSPCommand(ref collisionModel).Execute(new List<string>());
-                new GenerateBspPhysicsCommand(ref collisionModel).Execute(new List<string>());
-                collisionModel.Regions[0].Permutations[0].BspPhysics[0].GeometryShape.Model = modelTag;
+                var moppBuilt = (bool)new GenerateBspPhysicsCommand(ref collisionModel).Execute(new List<string>());
+                if(moppBuilt)
+                    collisionModel.Regions[0].Permutations[0].BspPhysics[0].GeometryShape.Model = modelTag;
             }
 
             return collisionModel;
