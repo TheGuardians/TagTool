@@ -10,6 +10,7 @@ using TagTool.Tags;
 using TagTool.Geometry.BspCollisionGeometry;
 using Assimp;
 using TagTool.Tags.Definitions;
+using TagTool.Geometry.BspCollisionGeometry.Utils;
 using TagTool.Commands.CollisionModels;
 
 namespace TagTool.Commands.CollisionModels
@@ -25,7 +26,6 @@ namespace TagTool.Commands.CollisionModels
         private bool forceimport = false;
         private int max_surface_edges = 8;
         private bool buildmopp = false;
-        private bool nophantom = false;
         private Vector3D MaxBounds = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
         private Vector3D MinBounds = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
         //error geometry 
@@ -37,7 +37,7 @@ namespace TagTool.Commands.CollisionModels
                   "ImportCollisionGeometry",
                   "Collision geometry import command",
 
-                  "ImportCollisionGeometry [mopp] [force] [debug] [nophantom] <filepath> <tagname>",
+                  "ImportCollisionGeometry [mopp] [force] [debug] <filepath> <tagname>",
                   
                   "Import an obj file as a collision model tag. Use the mopp argument for mopp generation" +
                   ", and use the force argument to force import the collision geometry even if it has open edges")
@@ -73,10 +73,6 @@ namespace TagTool.Commands.CollisionModels
                         break;
                     case "debug":
                         debug = true;
-                        argStack.Pop();
-                        break;
-                    case "nophantom":
-                        nophantom = true;
                         argStack.Pop();
                         break;
                     default:
@@ -238,12 +234,9 @@ namespace TagTool.Commands.CollisionModels
             }
 
             //build the collision bsp
-            GenerateCollisionBSPCommand bsp_builder = new GenerateCollisionBSPCommand(ref collisionModel);
+            var bsp_builder = new CollisionBSPBuilder();
 
-            if (nophantom)
-                bsp_builder.NoPhantom = true;
-
-            if (!bsp_builder.generate_bsp(0, 0, 0, debug))
+            if (!bsp_builder.generate_bsp(ref collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry, debug))
                 return false;
 
             if (buildmopp)

@@ -347,7 +347,7 @@
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
-    <Compile Include="Commands\CollisionModels\ErrorGeometry.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\Utils\ErrorGeometry.cs" />
     <Compile Include="Commands\CollisionModels\ImportCollisionGeometryCommand.cs" />
     <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
     <Compile Include="Commands\CollisionModels\MoppDataCommand.cs" />
@@ -654,6 +654,7 @@
     <Compile Include="Geometry\BspCollisionGeometry\CollisionKdHierarchy.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\LargeCollisionGeometry.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Surface.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionBSPBuilder.cs" />
     <Compile Include="Geometry\Jms\JmsFormat.cs" />
     <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\MeshReader.cs" />
@@ -1320,7 +1321,7 @@
     <Compile Include="Geometry\PhysicsModel\BlenderPhmoMoppUtil.cs" />
     <Compile Include="Geometry\PhysicsModel\BlenderPhmoReader.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\CollisionGeometry.cs" />
-    <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionGeometryBuilder.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\Utils\LegacyCollisionGeometryConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferFormat.cs" />
     <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferStream.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\IVertexStream.cs" />

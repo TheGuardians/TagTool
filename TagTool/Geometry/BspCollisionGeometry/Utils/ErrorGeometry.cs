@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TagTool.Common;
 using System.IO;
 
-namespace TagTool.Commands.CollisionModels
+namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
     class ErrorGeometryBuilder
     {

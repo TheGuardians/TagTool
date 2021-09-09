@@ -60,7 +60,7 @@ namespace TagTool.Commands.CollisionModels
             bool b_singleFile = Path.GetExtension(filepath).Equals(".model_collision_geometry")
                 && !Directory.Exists(filepath);
 
-            var modelbuilder = new CollisionGeometryBuilder();
+            var modelbuilder = new LegacyCollisionGeometryConverter();
             int n_objects = 1;
 
             if (!b_singleFile)

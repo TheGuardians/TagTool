@@ -11,7 +11,7 @@ using TagTool.Tags;
 
 namespace TagTool.Geometry
 {
-    public class CollisionGeometryBuilder
+    public class LegacyCollisionGeometryConverter
     {
         /// <summary>
         /// Offset and Size values for H1CE tagblock structs
@@ -49,7 +49,7 @@ namespace TagTool.Geometry
 
         private CollisionModel Definition;
 
-        public CollisionGeometryBuilder() { }
+        public LegacyCollisionGeometryConverter() { }
 
         /// <summary>
         /// Stub for now, creates n materials, which are named 0 to (n-1)
