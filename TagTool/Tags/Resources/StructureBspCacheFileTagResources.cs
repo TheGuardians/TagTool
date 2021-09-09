@@ -20,7 +20,7 @@ namespace TagTool.Tags.Resources
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public TagBlock<TagHkpMoppCode> InstanceGroupMoppCode;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public TagBlock<InstancedGeometryInstanceReach> InstancedGeometryInstances;
+        public TagBlock<InstancedGeometryInstance> InstancedGeometryInstances;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public TagBlock<SuperNodeParentMappingBlock> ParentSuperNodeMapping;
         [TagField(MinVersion = CacheVersion.HaloReach)]

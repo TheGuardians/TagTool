@@ -654,7 +654,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
             public class DecoratorGrid : TagStructure
             {
                 public short Amount;
@@ -870,57 +871,6 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
-        }
-
-        [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnlineED)]
-        public class InstancedGeometryInstance : TagStructure
-        {
-            public float Scale;
-            public RealMatrix4x3 Matrix;
-            public short DefinitionIndex;
-            public FlagsValue Flags;
-            public short LodDataIndex;
-            public short CompressionIndex;
-            public uint SeamBitVector;
-            public RealPoint3d WorldBoundingSphereCenter;
-            public Bounds<float> BoundingSphereRadiusBounds;
-            [TagField(Flags = Label)]
-            public StringId Name;
-            public Scenery.PathfindingPolicyValue PathfindingPolicy;
-            public Scenery.LightmappingPolicyValue LightmappingPolicy;
-            public float LightmapResolutionScale;
-            public List<CollisionBspPhysicsDefinition> BspPhysics;
-            public short GroupIndex;
-            public short GroupListIndex;
-            public MeshFlags MeshOverrideFlags;
-
-            public short Unknown7;
-
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown8;
-
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                None,
-                ContainsSplitLightingParts = 1 << 0,
-                RenderOnly = 1 << 1,
-                DoesNotBlockAoeDamage = 1 << 2,
-                Collidable = 1 << 3,
-                ContainsDecalParts = 1 << 4,
-                ContainsWaterParts = 1 << 5,
-                NegativeScale = 1 << 6,
-                OutsideMap = 1 << 7,
-                SeamColliding = 1 << 8,
-                ContainsDeferredReflections = 1 << 9,
-                RemoveFromShadowGeometry = 1 << 10,
-                CinemaOnly = 1 << 11,
-                ExcludeFromCinema = 1 << 12,
-                DisableFX = 1 << 13,
-                DisablePlayCollision = 1 << 14,
-                DisableBulletCollision = 1 << 15
-            }
         }
 
         [TagStructure(Size = 0x1C)]

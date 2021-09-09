@@ -10,16 +10,34 @@ namespace TagTool.Geometry.BspCollisionGeometry
 {
     [TagStructure(Size = 0xC4, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Size = 0xB8, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-    [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x144, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
     public class InstancedGeometryBlock : TagStructure
     {
         public int Checksum;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public InstancedGeometryDefinitionFlags Flags; // Taken from h4, might not be correct
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public RealPoint3d BoundingSphereOffset;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float BoundingSphereRadius;
+
         public CollisionGeometry CollisionInfo;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CollisionGeometry Unused1; // type 2 - unused
         public TagBlock<CollisionGeometry> CollisionGeometries;
+
         public TagBlock<TagHkpMoppCode> CollisionMoppCodes;
         public TagBlock<BreakableSurfaceBits> BreakableSurfaces;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public TagBlock<PolyhedronBlock> Polyhedra;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public TagBlock<PolyhedronFourVector> PolyhedraFourVectors;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
 
         [TagField(Platform = CachePlatform.MCC)]
         public uint Unknown1;
@@ -31,35 +49,16 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public TagBlock<SurfacesPlanes> SurfacePlanes;
         public TagBlock<PlaneReference> Planes;
 
-
         public short MeshIndex;
         public short CompressionIndex;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float GlobalLightmapResolutionScale;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public TagBlock<TagHkpMoppCode> UnknownBspPhysics;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint RuntimePointer;
-    }
-
-    // TODO: maybe merge into the above class when all fields are known
-    [TagStructure(Size = 0x144, MinVersion = CacheVersion.HaloReach)]
-    public class InstancedGeometryBlockReach : TagStructure
-    {
-        public int Checksum;
-        public InstancedGeometryDefinitionFlags Flags; // Taken from h4, might not be correct
-        public CollisionGeometry CollisionInfo; // type 0
-        public CollisionGeometry Unused1; // type 2 - unused
-        public TagBlock<CollisionGeometry> CollisionGeometries; // type 1 - unused
-        public TagBlock<TagHkpMoppCode> CollisionMoppCodes;
-        public TagBlock<BreakableSurfaceBits> BreakableSurfaces;
-        public TagBlock<PolyhedronBlock> Polyhedra;
-        public TagBlock<PolyhedronFourVector> PolyhedraFourVectors;
-        public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
-        public TagBlock<SurfacesPlanes> SurfacePlanes;
-        public TagBlock<PlaneReference> Planes;
-        public short MeshIndex;
-        public short CompressionIndex;
 
         [Flags]
         public enum InstancedGeometryDefinitionFlags : uint
@@ -115,8 +114,10 @@ namespace TagTool.Geometry.BspCollisionGeometry
         }
     }
 
-    [TagStructure(Size = 0x9C)]
-    public class InstancedGeometryInstanceReach : TagStructure
+    [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloReach)]
+    public class InstancedGeometryInstance : TagStructure
     {
         public float Scale;
         public RealMatrix4x3 Matrix;
@@ -124,25 +125,67 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public FlagsValue Flags;
         public short LodDataIndex;
         public short CompressionIndex;
-        [TagField(Length = 4)]
+        [TagField(Length = 1, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Length = 4, MinVersion = CacheVersion.HaloReach)]
         public uint[] SeamBitVector;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public RealRectangle3d Bounds;
+
         public RealPoint3d WorldBoundingSphereCenter;
         public Bounds<float> BoundingSphereRadiusBounds;
-        public uint Checksum;
-        public sbyte PathfindingPolicy;
-        public sbyte LightmappingPolicy;
-        public sbyte ImposterPolicy;
-        public sbyte StreamingPriority;
+
+        [TagField(Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.HaloOnline700123)]
+        public StringId Name;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint ChecksumReach;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public Scenery.PathfindingPolicyValue PathfindingPolicy;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public Scenery.LightmappingPolicyValue LightmappingPolicy;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown9;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown10;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown11;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown12;
+
         public float LightmapResolutionScale;
-        public uint Unknown4;
-        public uint Unknown5;
-        public uint Unknown6;
-        public uint Unknown7;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public List<CollisionBspPhysicsDefinition> BspPhysics;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public short GroupIndex;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public short GroupListIndex;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public MeshFlags MeshOverrideFlags;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public short Unknown7;
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown8;
-        public uint Unknown9;
-        public float Unknown10;
-        public RealVector3d Unknown11;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown13;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown14;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown15;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown16;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown17;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown18;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown19;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealVector3d Unknown20;
 
         [Flags]
         public enum FlagsValue : ushort

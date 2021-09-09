@@ -404,7 +404,7 @@ namespace TagTool.Geometry.Utils
                 else
                 {
                     var instancedGeometryInstance = StructureBspCacheFileResources.InstancedGeometryInstances[geometryIndex];
-                    var instancedGeometryDef = StructureBspResources.InstancedGeometryReach[instancedGeometryInstance.DefinitionIndex];
+                    var instancedGeometryDef = StructureBspResources.InstancedGeometry[instancedGeometryInstance.DefinitionIndex];
                     //collision geometry
                     newCollisionGeometry = instancedGeometryDef.CollisionInfo.DeepClone();
                 }
@@ -642,7 +642,7 @@ namespace TagTool.Geometry.Utils
                 if (SourceCache.Version >= CacheVersion.HaloReach)
                 {
                     var instance = StructureBspCacheFileResources.InstancedGeometryInstances[geometryIndex];
-                    var instanceDef = StructureBspResources.InstancedGeometryReach[instance.DefinitionIndex];
+                    var instanceDef = StructureBspResources.InstancedGeometry[instance.DefinitionIndex];
                     meshindex = instanceDef.MeshIndex;
                     compressionindex = instanceDef.CompressionIndex;
                 }

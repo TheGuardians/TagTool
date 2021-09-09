@@ -16,10 +16,7 @@ namespace TagTool.Tags.Resources
         [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public TagBlock<LargeCollisionBspBlock> LargeCollisionBsps;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public TagBlock<InstancedGeometryBlock> InstancedGeometry;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public TagBlock<InstancedGeometryBlockReach> InstancedGeometryReach;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
