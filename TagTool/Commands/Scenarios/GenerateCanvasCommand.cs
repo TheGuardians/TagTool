@@ -152,7 +152,7 @@ namespace TagTool.Commands.Scenarios
             lbsp.BspIndex = 0;
 
             var sldt = new ScenarioLightmap();
-            sldt.LightmapDataReferences = new List<CachedTag>() { lbspTag };
+            sldt.LightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>() { new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = lbspTag } };
 
             scnr.Lightmap = sldtTag;
             scnr.StructureBsps = new List<StructureBspBlock>() {

@@ -145,7 +145,7 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version > CacheVersion.Halo3Retail || BlamCache.Platform == CachePlatform.MCC)
                 return scenarioLightmap;
 
-            scenarioLightmap.LightmapDataReferences = new List<CachedTag>();
+            scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
 
             for(int i = 0; i< scenarioLightmap.Lightmaps.Count; i++)
             {
@@ -173,7 +173,7 @@ namespace TagTool.Commands.Porting
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 
-                scenarioLightmap.LightmapDataReferences.Add(edTag);
+                scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = edTag });
             }
             
 
@@ -196,17 +196,20 @@ namespace TagTool.Commands.Porting
             // convert vertex buffers and add them to the new resource
             //
 
-            foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)
+            if (Lbsp.StaticPerVertexLightingBuffers != null)
             {
-                if (staticPerVertexLighting.VertexBufferIndex != -1)
+                foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)
                 {
-                    staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
-                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, staticPerVertexLighting.VertexBuffer);
-                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
-                    d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
-                    newLightmapResourceDefinition.VertexBuffers.Add(d3dPointer);
-                    // set the new buffer index
-                    staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
+                    if (staticPerVertexLighting.VertexBufferIndex != -1)
+                    {
+                        staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
+                        VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, staticPerVertexLighting.VertexBuffer);
+                        var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                        d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
+                        newLightmapResourceDefinition.VertexBuffers.Add(d3dPointer);
+                        // set the new buffer index
+                        staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
+                    }
                 }
             }
 

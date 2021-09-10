@@ -639,9 +639,9 @@ namespace TagTool.Commands.Porting
         {
             for (short i = 0; i < sldt.LightmapDataReferences.Count; i++)
             {
-                var lbsp = destCache.Deserialize<ScenarioLightmapBspData>(destStream, sldt.LightmapDataReferences[i]);
+                var lbsp = destCache.Deserialize<ScenarioLightmapBspData>(destStream, sldt.LightmapDataReferences[i].LightmapBspData);
                 lbsp.BspIndex = i;
-                destCache.Serialize(destStream, sldt.LightmapDataReferences[i], lbsp);
+                destCache.Serialize(destStream, sldt.LightmapDataReferences[i].LightmapBspData, lbsp);
             }
         }
 
@@ -649,12 +649,12 @@ namespace TagTool.Commands.Porting
         {
             if (version >= CacheVersion.Halo3ODST)
             {
-                var newLightmapDataReference = new List<CachedTag>();
+                var newLightmapDataReference = new List<ScenarioLightmap.DataReferenceBlock>();
                 for (int test_index = 0; test_index < 32; test_index++)
                 {
                     if ((includeBspMask & (1 << test_index)) > 0)
                     {
-                        foreach (var lbspTag in lightmap.LightmapDataReferences)
+                        foreach (var lbspTag in lightmap.LightmapDataReferences.Select(r => r.LightmapBspData))
                         {
                             if (lbspTag == null)
                                 continue;
@@ -662,7 +662,7 @@ namespace TagTool.Commands.Porting
 
                             if (test_index == test_lbsp.BspIndex)
                             {
-                                newLightmapDataReference.Add(lbspTag);
+                                newLightmapDataReference.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = lbspTag });
                                 break;
                             }
                         }

@@ -41,8 +41,14 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0x4)]
     public class PlaneReference : TagStructure
     {
-        public short Unknown1;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public ushort StripIndex;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public short ClusterIndex;
+
+        // reach uses 12 bits for the cluster index, and 20 bits for the strip index
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint PackedReference; 
     }
 
     [TagStructure(Size = 0x8)]

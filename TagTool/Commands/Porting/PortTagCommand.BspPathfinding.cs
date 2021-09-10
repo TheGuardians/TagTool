@@ -88,6 +88,10 @@ namespace TagTool.Commands.Porting
 
                     instance.SeamBitVector = new uint[] { instance.SeamBitVector[0] };
                 }
+                
+                // Convert surface references
+                foreach(var surfaceReference in resourceDefinition.Planes)
+                    ConvertReachSurfaceReference(surfaceReference);
             }
 
             bsp.PathfindingResource = CacheContext.ResourceCache.CreateStructureBspCacheFileResource(resourceDefinition);

@@ -59,7 +59,7 @@ namespace TagTool.Geometry.Utils
 
             if (SourceCache.Version >= CacheVersion.Halo3ODST || (SourceCache.Version >= CacheVersion.Halo3Retail && SourceCache.Platform == CachePlatform.MCC))
             {
-                foreach (var lbspTag in sLdT.LightmapDataReferences)
+                foreach (var lbspTag in sLdT.LightmapDataReferences.Select(r => r.LightmapBspData))
                 {
                     if (lbspTag == null)
                         continue;

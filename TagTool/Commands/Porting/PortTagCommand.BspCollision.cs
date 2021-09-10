@@ -13,6 +13,7 @@ using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.CollisionModels;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -61,6 +62,11 @@ namespace TagTool.Commands.Porting
                             instancedGeometry.CollisionGeometries[i] = ConvertCollisionGeometry(instancedGeometry.CollisionGeometries[i]);
                     }
                 }
+
+                // convert instance sbsp surface references
+                foreach (var instance in resourceDefinition.InstancedGeometry)
+                    foreach (var surfaceReference in instance.Planes)
+                        ConvertReachSurfaceReference(surfaceReference);
             }
 
             bsp.CollisionBspResource = CacheContext.ResourceCache.CreateStructureBspResource(resourceDefinition);
@@ -68,8 +74,25 @@ namespace TagTool.Commands.Porting
             return bsp.CollisionBspResource;
         }
 
+        private static void ConvertReachSurfaceReference(PlaneReference surfaceReference)
+        {
+            // reach uses 12 bits for the cluster index and 20 bits for the strip index
+            short clusterIndex = (short)(surfaceReference.PackedReference & 0xFFF);
+            uint stripIndex = surfaceReference.PackedReference >> 12;
+            if (stripIndex > ushort.MaxValue)
+            {
+                new TagToolWarning("sbsp surface reference strip index truncated!!!");
+                stripIndex = stripIndex & 0xFFFF;
+            }
+
+            surfaceReference.ClusterIndex = clusterIndex;
+            surfaceReference.StripIndex = (ushort)stripIndex;
+        }
+
         private CollisionGeometry ConvertCollisionGeometry(CollisionGeometry geometry)
         {
+            return geometry;
+
             if(geometry.Bsp3dSupernodes.Count > 0)
             {
                 var coll = new CollisionModel();

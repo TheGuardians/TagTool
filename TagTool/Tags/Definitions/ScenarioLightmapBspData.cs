@@ -30,23 +30,16 @@ namespace TagTool.Tags.Definitions
         public CachedTag LightmapSHCoefficientsBitmap;
         public CachedTag LightmapDominantLightDirectionBitmap;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<NullBlock> Unknown3;
+
         public List<StaticPerVertexLighting> StaticPerVertexLightingBuffers;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<ClusterStaticPerVertexLighting> ClusterStaticPerVertexLightingBuffers;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<InstancedGeometryLighting> InstancedGeometry;
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<HalfRGBLightProbe> InstancedGeometryLightProbes;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> Unknown2;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> Unknown3;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> Unknown4;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> Unknown5;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<NullBlock> Unknown6;
 
@@ -76,11 +69,19 @@ namespace TagTool.Tags.Definitions
         public List<NullBlock> Unknown13;
 
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class StaticPerVertexLighting : TagStructure
 		{
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<int> UnusedVertexBuffer;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public int VertexBufferIndex;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public short VertexBufferIndexReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ushort VertexBufferOffsetReach;
 
             [TagField(Flags = Runtime)]
             public VertexBufferDefinition VertexBuffer;
@@ -93,13 +94,16 @@ namespace TagTool.Tags.Definitions
             public short StaticPerVertexLightingIndex;
         }
 
-        [TagStructure(Size = 0x8)]
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloReach)]
         public class InstancedGeometryLighting : TagStructure
 		{
             public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
             public short InstancedGeometryLightProbesIndex;
-            public short Padding;
+            public short Unknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint Unknown2;
         }
 
         [TagStructure(Size = 0x0)]

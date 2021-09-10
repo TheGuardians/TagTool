@@ -304,6 +304,12 @@ namespace TagTool.Commands.Porting
                 {
                     cluster.DecoratorGrids.Clear();
                 }
+
+                foreach(var cluster in sbsp.Clusters)
+                {
+                    cluster.RuntimeDecalEntryCount = 0;
+                    cluster.RuntimeDecalStartIndex = -1;
+                }
             }
 
             if(definition is Scenario scenario)
@@ -358,7 +364,6 @@ namespace TagTool.Commands.Porting
                 scenario.DefaultCameraFx = null;
                 scenario.DefaultScreenFx = null;
                 scenario.GlobalLighting = null;
-                scenario.Lightmap = null;
                 scenario.PerformanceThrottles = null;
                 scenario.GamePerformanceThrottles = null;
             }
