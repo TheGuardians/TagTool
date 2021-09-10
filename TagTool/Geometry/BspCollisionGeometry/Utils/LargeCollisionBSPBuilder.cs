@@ -44,7 +44,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 if (Bsp.Surfaces[i].Flags.HasFlag(SurfaceFlags.PlaneNegated))
                 {
                     //negate the plane index and remove the surface flag to match H3 standard
-                    Bsp.Surfaces[i].Plane |= 0x8000;
+                    Bsp.Surfaces[i].Plane = (int)(Bsp.Surfaces[i].Plane | 0x80000000);
                     Bsp.Surfaces[i].Flags &= ~SurfaceFlags.PlaneNegated;
                 }
 
@@ -446,14 +446,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         Console.WriteLine("###ERROR Failed to split surface!");
                         return false;
                     }
-                    Bsp.Bsp3dNodes.Add(new Bsp3dNode { FrontChild = -1, BackChild = -1 });
+                    Bsp.Bsp3dNodes.Add(new LargeBsp3dNode { FrontChild = -1, BackChild = -1 });
                     int current_bsp3dnode_index = Bsp.Bsp3dNodes.Count - 1;
                     int back_child_node_index = -1;
                     int front_child_node_index = -1;
-
-                    //check whether geometry fits within appropriate limits
-                    if (!collision_bsp_check_counts())
-                        return false;
 
                     //this function is recursive, and continues branching until no more 3d nodes can be made
                     if (build_bsp_tree_main(back_surface_array, ref back_child_node_index) && build_bsp_tree_main(front_surface_array, ref front_child_node_index))
@@ -510,60 +506,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     Console.WriteLine("###ERROR couldn't decide what to build.");
                     return false;
             }
-        }
-
-        public bool collision_bsp_check_counts()
-        {
-            int max_surfaces = 32767;
-            int max_edges = 65535;
-            int max_vertices = 65535;
-            int max_2drefs = 65535;
-            int max_2dnodes = 32767;
-            int max_3dnodes = 32767;
-            int max_planes = 65535;
-            int max_leaves = 32767;
-
-            if (Bsp.Surfaces.Count > max_surfaces)
-            {
-                Console.WriteLine($"###ERROR: Number of surfaces ({Bsp.Surfaces.Count}) exceeded the maximum allowable ({max_surfaces})");
-                return false;
-            }
-            if (Bsp.Vertices.Count > max_vertices)
-            {
-                Console.WriteLine($"###ERROR: Number of vertices ({Bsp.Vertices.Count}) exceeded the maximum allowable ({max_vertices})");
-                return false;
-            }
-            if (Bsp.Edges.Count > max_edges)
-            {
-                Console.WriteLine($"###ERROR: Number of edges ({Bsp.Edges.Count}) exceeded the maximum allowable ({max_edges})");
-                return false;
-            }
-            if (Bsp.Bsp2dReferences.Count > max_2drefs)
-            {
-                Console.WriteLine($"###ERROR: Number of bsp2dreferences ({Bsp.Bsp2dReferences.Count}) exceeded the maximum allowable ({max_2drefs})");
-                return false;
-            }
-            if (Bsp.Bsp2dNodes.Count > max_2dnodes)
-            {
-                Console.WriteLine($"###ERROR: Number of bsp2dnodes ({Bsp.Bsp2dNodes.Count}) exceeded the maximum allowable ({max_2dnodes})");
-                return false;
-            }
-            if (Bsp.Bsp3dNodes.Count > max_3dnodes)
-            {
-                Console.WriteLine($"###ERROR: Number of bsp3dnodes ({Bsp.Bsp3dNodes.Count}) exceeded the maximum allowable ({max_3dnodes})");
-                return false;
-            }
-            if (Bsp.Planes.Count > max_planes)
-            {
-                Console.WriteLine($"###ERROR: Number of planes ({Bsp.Planes.Count}) exceeded the maximum allowable ({max_planes})");
-                return false;
-            }
-            if (Bsp.Leaves.Count > max_leaves)
-            {
-                Console.WriteLine($"###ERROR: Number of leaves ({Bsp.Leaves.Count}) exceeded the maximum allowable ({max_leaves})");
-                return false;
-            }
-            return true;
         }
 
         public int surfaces_reset_for_leaf_building(ref surface_array_definition surface_array)
@@ -867,7 +809,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     surface_array_definition plane_matched_surface_array = collect_plane_matching_surfaces(ref surface_array, plane_index);
                     if (plane_matched_surface_array.surface_array.Count > 0)
                     {
-                        Bsp.Bsp2dReferences.Add(new Bsp2dReference());
+                        Bsp.Bsp2dReferences.Add(new LargeBsp2dReference());
                         int bsp2drefindex = Bsp.Bsp2dReferences.Count - 1;
                         Plane plane_block = Bsp.Planes[plane_index & 0x7FFFFFFF];
                         int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
@@ -956,17 +898,17 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 if (edge_plane_relationship.HasFlag(Plane_Relationship.BothSidesofPlane))
                 {
                     //allocate new edges and vertex
-                    Bsp.Vertices.Add(new Vertex());
+                    Bsp.Vertices.Add(new LargeVertex());
                     int new_vertex_index_A = Bsp.Vertices.Count - 1;
-                    Bsp.Edges.Add(new Edge());
-                    Bsp.Edges.Add(new Edge());
+                    Bsp.Edges.Add(new LargeEdge());
+                    Bsp.Edges.Add(new LargeEdge());
                     int new_edge_index_A = Bsp.Edges.Count - 2;
                     int new_edge_index_B = Bsp.Edges.Count - 1;
 
                     if (dividing_edge_index == -1)
                     {
                         //allocate new dividing edge
-                        Bsp.Edges.Add(new Edge());
+                        Bsp.Edges.Add(new LargeEdge());
                         dividing_edge_index = Bsp.Edges.Count - 1;
 
                         //new edge C will be the edge that separates the two new surfaces
@@ -1047,7 +989,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 else if (vertex_plane_relationship_A != Plane_Relationship.OnPlane || vertex_plane_relationship_B == Plane_Relationship.OnPlane)
                 {
                     //allocate new edge
-                    Bsp.Edges.Add(new Edge());
+                    Bsp.Edges.Add(new LargeEdge());
                     int new_edge_index_D = Bsp.Edges.Count - 1;
 
                     Bsp.Edges[new_edge_index_D].StartVertex = edge_vertex_A_index;
@@ -1072,13 +1014,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 else
                 {
                     //allocate new edge
-                    Bsp.Edges.Add(new Edge());
+                    Bsp.Edges.Add(new LargeEdge());
                     int new_edge_index_E = Bsp.Edges.Count - 1;
 
                     if (dividing_edge_index == -1)
                     {
                         //allocate new dividing edge
-                        Bsp.Edges.Add(new Edge());
+                        Bsp.Edges.Add(new LargeEdge());
                         dividing_edge_index = Bsp.Edges.Count - 1;
 
                         Bsp.Edges[dividing_edge_index].StartVertex = edge_vertex_A_index;
@@ -1250,8 +1192,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         case Plane_Relationship.BothSidesofPlane: //surface is both in front of and behind plane
                             split_plane_count++;
 
-                            Bsp.Surfaces.Add(new Surface());
-                            Bsp.Surfaces.Add(new Surface());
+                            Bsp.Surfaces.Add(new LargeSurface());
+                            Bsp.Surfaces.Add(new LargeSurface());
                             int new_surface_A_index = Bsp.Surfaces.Count - 2;
                             int new_surface_B_index = Bsp.Surfaces.Count - 1;
 
@@ -1986,28 +1928,28 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             for (var i = 0; i < Bsp.Bsp3dNodes.Count; i++)
             {
                 LargeBsp3dNode node = Bsp.Bsp3dNodes[i];
-                if (node.Plane < 0 || node.Plane > Bsp.Planes.Count)
+                if (node.Plane < 0 || node.Plane >= Bsp.Planes.Count)
                 {
                     Console.WriteLine($"###ERROR: Bsp3dnode {i} has a bad plane index!");
                     return false;
                 }
-                if (node.BackChild != 0x00FFFFFF)
+                if (node.BackChild != -1)
                 {
                     bool back_child_is_leaf = (node.BackChild & 0x80000000) > 0;
                     int backmaxcount = back_child_is_leaf ? Bsp.Leaves.Count : Bsp.Bsp3dNodes.Count;
                     int backchildindex = node.BackChild & 0x7FFFFFFF;
-                    if (backchildindex < 0 || backchildindex > backmaxcount)
+                    if (backchildindex < 0 || backchildindex >= backmaxcount)
                     {
                         Console.WriteLine($"###ERROR: Bsp3dnode {i} has a bad back child index!");
                         return false;
                     }
                 }
-                if (node.FrontChild != 0x00FFFFFF)
+                if (node.FrontChild != -1)
                 {
                     bool front_child_is_leaf = (node.FrontChild & 0x80000000) > 0;
                     int frontmaxcount = front_child_is_leaf ? Bsp.Leaves.Count : Bsp.Bsp3dNodes.Count;
                     int frontchildindex = node.FrontChild & 0x7FFFFFFF;
-                    if (frontchildindex < 0 || frontchildindex > frontmaxcount)
+                    if (frontchildindex < 0 || frontchildindex >= frontmaxcount)
                     {
                         Console.WriteLine($"###ERROR: Bsp3dnode {i} has a bad front child index!");
                         return false;
@@ -2018,7 +1960,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             for (var j = 0; j < Bsp.Leaves.Count; j++)
             {
                 var leaf = Bsp.Leaves[j];
-                if (leaf.FirstBsp2dReference < 0 || leaf.FirstBsp2dReference > Bsp.Bsp2dReferences.Count)
+                if (leaf.FirstBsp2dReference < 0 || leaf.FirstBsp2dReference >= Bsp.Bsp2dReferences.Count)
                 {
                     Console.WriteLine($"###ERROR leaf {j} has a bad bsp2d reference index {leaf.FirstBsp2dReference}");
                     return false;
@@ -2038,14 +1980,14 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             for (var k = 0; k < Bsp.Bsp2dReferences.Count; k++)
             {
                 var ref2d = Bsp.Bsp2dReferences[k];
-                if ((ref2d.PlaneIndex & 0x7FFFFFFF) < 0 || (ref2d.PlaneIndex & 0x7FFFFFFF) > Bsp.Planes.Count)
+                if ((ref2d.PlaneIndex & 0x7FFFFFFF) < 0 || (ref2d.PlaneIndex & 0x7FFFFFFF) >= Bsp.Planes.Count)
                 {
                     Console.WriteLine($"###ERROR Bsp2dref {k} has a bad plane index {ref2d.PlaneIndex}");
                     return false;
                 }
                 int root_node_index = ref2d.Bsp2dNodeIndex & 0x7FFFFFFF;
                 int count = (ref2d.Bsp2dNodeIndex & 0x80000000) > 0 ? Bsp.Surfaces.Count : Bsp.Bsp2dNodes.Count;
-                if (root_node_index < 0 || root_node_index > count)
+                if (root_node_index < 0 || root_node_index >= count)
                 {
                     Console.WriteLine($"###ERROR Bsp2dref {k} has a bad root index {ref2d.Bsp2dNodeIndex}");
                     return false;
