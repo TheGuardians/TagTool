@@ -4,6 +4,7 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -70,6 +71,9 @@ namespace TagTool.Commands.Porting
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
             sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp);
 
+            if(BlamCache.Version == CacheVersion.HaloReach)
+                FixupReachInstancedGeometryInstances(sbsp);
+
             sbsp.Unknown86 = 1;
 
             //
@@ -87,6 +91,37 @@ namespace TagTool.Commands.Porting
             sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
             
             return sbsp;
+        }
+
+        void FixupReachInstancedGeometryInstances(ScenarioStructureBsp sbsp)
+        {
+            sbsp.InstancedGeometryInstanceNames.Clear();
+            for(int i = 0; i < sbsp.InstancedGeometryInstances.Count; i++)
+            {
+                var instance = sbsp.InstancedGeometryInstances[i];
+
+                RealQuaternion halfExtents = new RealQuaternion((instance.Bounds.X1 - instance.Bounds.X0) / 2, (instance.Bounds.Y1 - instance.Bounds.Y0) / 2, (instance.Bounds.Z1 - instance.Bounds.Z0) / 2);
+                RealQuaternion center = new RealQuaternion(instance.Bounds.X1 - halfExtents.I, instance.Bounds.Y1 - halfExtents.J, instance.Bounds.Z1 - halfExtents.K);
+
+                var bspPhysics = new CollisionBspPhysicsDefinition();
+                bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
+                {
+                    ReferencedObject = new Havok.HkpReferencedObject(),
+                    Type = 27
+                };
+
+                bspPhysics.GeometryShape = new CollisionGeometryShape()
+                {
+                    AABB_Center = center,
+                    AABB_Half_Extents = halfExtents,
+                    BspIndex = 0, // TODO
+                    CollisionGeometryShapeType = 2,
+                    CollisionGeometryShapeKey = (ushort)i,
+                    ReferencedObject = new Havok.HkpReferencedObject()
+                };
+
+                instance.BspPhysics = new List<CollisionBspPhysicsDefinition>() { bspPhysics };
+            }
         }
 
         List<ScenarioStructureBsp.Cluster.DecoratorGrid> ConvertDecoratorGrid(List<TinyPositionVertex> vertices, ScenarioStructureBsp.Cluster.DecoratorGrid grid)

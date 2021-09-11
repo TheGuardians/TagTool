@@ -14,6 +14,7 @@ using TagTool.Tags.Resources;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Common;
+using TagTool.Geometry.BspCollisionGeometry.Utils;
 
 namespace TagTool.Commands.Porting
 {
@@ -53,6 +54,9 @@ namespace TagTool.Commands.Porting
                 for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
                     resourceDefinition.CollisionBsps[i] = ConvertCollisionGeometry(resourceDefinition.CollisionBsps[i]);
 
+                for (int i = 0; i < resourceDefinition.LargeCollisionBsps.Count; i++)
+                    resourceDefinition.LargeCollisionBsps[i] = ConvertLargeCollisionBsp(resourceDefinition.LargeCollisionBsps[i]);
+
                 foreach (var instancedGeometry in resourceDefinition.InstancedGeometry)
                 {
                     instancedGeometry.CollisionInfo = ConvertCollisionGeometry(instancedGeometry.CollisionInfo);
@@ -60,6 +64,14 @@ namespace TagTool.Commands.Porting
                     {
                         for (int i = 0; i < instancedGeometry.CollisionGeometries.Count; i++)
                             instancedGeometry.CollisionGeometries[i] = ConvertCollisionGeometry(instancedGeometry.CollisionGeometries[i]);
+                    }
+
+                    if(instancedGeometry.CollisionMoppCodes == null)
+                    {
+                        var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
+                        moppCode.Data.AddressType = CacheAddressType.Data;
+                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Data);
+                        instancedGeometry.CollisionMoppCodes.Add(moppCode);
                     }
                 }
 
@@ -89,30 +101,24 @@ namespace TagTool.Commands.Porting
             surfaceReference.StripIndex = (ushort)stripIndex;
         }
 
-        private CollisionGeometry ConvertCollisionGeometry(CollisionGeometry geometry)
+        private CollisionGeometry ConvertCollisionGeometry(CollisionGeometry bsp)
         {
-            return geometry;
-
-            if(geometry.Bsp3dSupernodes.Count > 0)
+            if (bsp.Bsp3dSupernodes.Count > 0)
             {
-                var coll = new CollisionModel();
-                coll.Regions = new List<CollisionModel.Region>() {
-                    new CollisionModel.Region() {
-                        Permutations = new List<CollisionModel.Region.Permutation>() {
-                            new CollisionModel.Region.Permutation() {
-                                Bsps = new List<CollisionModel.Region.Permutation.Bsp>() {
-                                    new CollisionModel.Region.Permutation.Bsp() { Geometry = geometry }
-                                }
-                            }
-                        }
-                    }
-                };
-
-                var generator = new GenerateCollisionBSPCommand(ref coll);
-                generator.Execute(new List<string>());
+                if (!new CollisionBSPBuilder().generate_bsp(ref bsp, true))
+                    new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
             }
+            return bsp;
+        }
 
-            return geometry;
+        private LargeCollisionBspBlock ConvertLargeCollisionBsp(LargeCollisionBspBlock bsp)
+        {
+            if (bsp.Bsp3dSupernodes.Count > 0)
+            {
+                if (!new LargeCollisionBSPBuilder().generate_bsp(ref bsp, true))
+                    new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
+            }
+            return bsp;
         }
     }
 }
