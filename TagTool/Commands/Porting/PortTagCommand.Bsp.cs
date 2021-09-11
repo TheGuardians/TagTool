@@ -96,6 +96,10 @@ namespace TagTool.Commands.Porting
         void FixupReachInstancedGeometryInstances(ScenarioStructureBsp sbsp)
         {
             sbsp.InstancedGeometryInstanceNames.Clear();
+
+            if (sbsp.InstancedGeometryInstances == null)
+                return;
+
             for(int i = 0; i < sbsp.InstancedGeometryInstances.Count; i++)
             {
                 var instance = sbsp.InstancedGeometryInstances[i];

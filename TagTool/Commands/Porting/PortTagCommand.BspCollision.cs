@@ -52,18 +52,18 @@ namespace TagTool.Commands.Porting
                 //
 
                 for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
-                    resourceDefinition.CollisionBsps[i] = ConvertCollisionGeometry(resourceDefinition.CollisionBsps[i]);
+                    resourceDefinition.CollisionBsps[i] = ConvertCollisionBsp(resourceDefinition.CollisionBsps[i]);
 
                 for (int i = 0; i < resourceDefinition.LargeCollisionBsps.Count; i++)
                     resourceDefinition.LargeCollisionBsps[i] = ConvertLargeCollisionBsp(resourceDefinition.LargeCollisionBsps[i]);
 
                 foreach (var instancedGeometry in resourceDefinition.InstancedGeometry)
                 {
-                    instancedGeometry.CollisionInfo = ConvertCollisionGeometry(instancedGeometry.CollisionInfo);
+                    instancedGeometry.CollisionInfo = ConvertCollisionBsp(instancedGeometry.CollisionInfo);
                     if (instancedGeometry.CollisionGeometries != null)
                     {
                         for (int i = 0; i < instancedGeometry.CollisionGeometries.Count; i++)
-                            instancedGeometry.CollisionGeometries[i] = ConvertCollisionGeometry(instancedGeometry.CollisionGeometries[i]);
+                            instancedGeometry.CollisionGeometries[i] = ConvertCollisionBsp(instancedGeometry.CollisionGeometries[i]);
                     }
 
                     if(instancedGeometry.CollisionMoppCodes == null)
@@ -101,13 +101,22 @@ namespace TagTool.Commands.Porting
             surfaceReference.StripIndex = (ushort)stripIndex;
         }
 
-        private CollisionGeometry ConvertCollisionGeometry(CollisionGeometry bsp)
+        private CollisionGeometry ConvertCollisionBsp(CollisionGeometry bsp)
         {
             if (bsp.Bsp3dSupernodes.Count > 0)
             {
                 if (!new CollisionBSPBuilder().generate_bsp(ref bsp, true))
                     new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
             }
+
+            bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
+            bsp.Planes.AddressType = CacheAddressType.Data;
+            bsp.Leaves.AddressType = CacheAddressType.Data;
+            bsp.Bsp2dReferences.AddressType = CacheAddressType.Data;
+            bsp.Bsp2dNodes.AddressType = CacheAddressType.Data;
+            bsp.Surfaces.AddressType = CacheAddressType.Data;
+            bsp.Edges.AddressType = CacheAddressType.Data;
+            bsp.Vertices.AddressType = CacheAddressType.Data;
             return bsp;
         }
 
@@ -118,6 +127,15 @@ namespace TagTool.Commands.Porting
                 if (!new LargeCollisionBSPBuilder().generate_bsp(ref bsp, true))
                     new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
             }
+
+            bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
+            bsp.Planes.AddressType = CacheAddressType.Data;
+            bsp.Leaves.AddressType = CacheAddressType.Data;
+            bsp.Bsp2dReferences.AddressType = CacheAddressType.Data;
+            bsp.Bsp2dNodes.AddressType = CacheAddressType.Data;
+            bsp.Surfaces.AddressType = CacheAddressType.Data;
+            bsp.Edges.AddressType = CacheAddressType.Data;
+            bsp.Vertices.AddressType = CacheAddressType.Data;
             return bsp;
         }
     }

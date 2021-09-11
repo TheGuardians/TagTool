@@ -1204,7 +1204,7 @@ namespace TagTool.Commands.Porting
 					return data;
 
                 case CollisionGeometry collisionGeometry:
-                    return ConvertCollisionGeometry(collisionGeometry);
+                    return ConvertCollisionBsp(collisionGeometry);
 
 				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
 					renderGeometry = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderGeometry, definition, blamTagName);
