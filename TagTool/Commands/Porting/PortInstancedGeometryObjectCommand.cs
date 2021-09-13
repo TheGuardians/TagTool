@@ -66,6 +66,9 @@ namespace TagTool.Commands.Porting
                     else if (!int.TryParse(argStack.Pop(), out sbspIndex))
                         return new TagToolError(CommandError.ArgInvalid, "Invalid bsp index");
                 }
+                else if (int.TryParse(argStack.Peek(), out var discard))
+                    argStack.Pop();
+
                 var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, blamScnr.StructureBsps[sbspIndex].StructureBsp);
 
                 if (argStack.Count > 0 && argStack.Peek().ToLower() == "nocenter")
