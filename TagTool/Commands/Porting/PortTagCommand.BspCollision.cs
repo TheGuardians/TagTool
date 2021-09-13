@@ -105,7 +105,7 @@ namespace TagTool.Commands.Porting
         {
             if (bsp.Bsp3dSupernodes.Count > 0)
             {
-                if (!new CollisionBSPBuilder().generate_bsp(ref bsp, true))
+                if (!new CollisionBSPBuilder().generate_bsp(ref bsp, false))
                     new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
             }
 

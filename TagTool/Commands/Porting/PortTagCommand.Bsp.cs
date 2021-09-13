@@ -104,9 +104,12 @@ namespace TagTool.Commands.Porting
             {
                 var instance = sbsp.InstancedGeometryInstances[i];
 
+                instance.BspPhysics = instance.BspPhysicsReach;
+
+                /*
                 RealQuaternion halfExtents = new RealQuaternion((instance.Bounds.X1 - instance.Bounds.X0) / 2, (instance.Bounds.Y1 - instance.Bounds.Y0) / 2, (instance.Bounds.Z1 - instance.Bounds.Z0) / 2);
                 RealQuaternion center = new RealQuaternion(instance.Bounds.X1 - halfExtents.I, instance.Bounds.Y1 - halfExtents.J, instance.Bounds.Z1 - halfExtents.K);
-
+           
                 var bspPhysics = new CollisionBspPhysicsDefinition();
                 bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
                 {
@@ -123,8 +126,7 @@ namespace TagTool.Commands.Porting
                     CollisionGeometryShapeKey = (ushort)i,
                     ReferencedObject = new Havok.HkpReferencedObject()
                 };
-
-                instance.BspPhysics = new List<CollisionBspPhysicsDefinition>() { bspPhysics };
+                */               
             }
         }
 

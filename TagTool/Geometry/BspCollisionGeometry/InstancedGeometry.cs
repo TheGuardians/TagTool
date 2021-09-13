@@ -151,8 +151,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public byte LightmappingPolicyReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public byte ImposterPolicy;
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 1)]
-        public byte[] pad = new byte[1];
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown1;
 
         public float LightmapResolutionScale;
 
@@ -171,11 +171,17 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public uint Unknown8;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown13;
+        public float Unknown13;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<CollisionBspPhysicsDefinition> BspPhysicsReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown17;
+        public byte Unknown17a;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown17b;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown17c;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Unknown17d;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short Unknown18a;
         [TagField(MinVersion = CacheVersion.HaloReach)]

@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.IO;
 using System.IO;
 using TagTool.Tags;
+using TagTool.Commands.Common;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
@@ -86,7 +87,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 Console.WriteLine($"###Failed to prune node tree!");
                 return false;
             }
-            if (hasErrors)
+            if (hasErrors && debug)
                 Errors.WriteOBJ();
 
             bsp = Bsp.DeepClone();
@@ -369,9 +370,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         RealPoint3d Point1 = new RealPoint3d();
                         if (surfaces_check_if_intersecting_internal(surface_index, second_surface_index, ref Point0, ref Point1))
                         {
-                            if (!warning_posted)
+                            if (!warning_posted && debug)
                             {
-                                Console.WriteLine("### ERROR found intersecting surfaces");
+                                new TagToolWarning("found intersecting surfaces!");
                                 warning_posted = true;
                             }
                             //Error geometry output
@@ -713,9 +714,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
                 else
                 {
-                    if (!warning_posted)
+                    if (!warning_posted && debug)
                     {
-                        Console.WriteLine("###ERROR Overlapping surfaces found!");
+                        new TagToolWarning("Overlapping surfaces found!");
                         foreach (int surface_index in plane_matched_surface_array.surface_array)
                         {
                             int abs_surface_index = surface_index & 0x7FFFFFFF;
