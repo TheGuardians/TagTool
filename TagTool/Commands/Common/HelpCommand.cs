@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.Common
 {
@@ -69,7 +70,7 @@ namespace TagTool.Commands.Common
             Console.WriteLine();
             foreach (var command in commands)
             {
-                Console.WriteLine(format, command.Name, command.Description);
+                Console.WriteLine(format, command.Name, Wrap(command.Description, wrap:Console.BufferWidth - (width + 4), padLeft: width + 3));
                 ignore.Add(command.Name);
             }
             Console.WriteLine();
@@ -86,12 +87,12 @@ namespace TagTool.Commands.Common
 			
             // Print help info
             ushort indent = 3;
-            Console.WriteLine(FormatPair(command.Name, command.Description, indent));
-            Console.WriteLine(FormatPair("Usage", command.Usage, indent));
+            Console.WriteLine(FormatHelpInfo(command.Name, command.Description, indent, wrap:110));
+            Console.WriteLine(FormatHelpInfo("Usage", command.Usage, indent));
             if (command.Examples != "")
-                Console.WriteLine(FormatPair("Examples", command.Examples, indent));
+                Console.WriteLine(FormatHelpInfo("Examples", command.Examples, indent));
             if (command.HelpMessage != "")
-                Console.WriteLine(FormatPair("Notes", command.HelpMessage, indent));
+                Console.WriteLine(FormatHelpInfo("Notes", command.HelpMessage, indent, wrap:110));
         }
 
         private bool IsAvailable(CommandContext context, Command command)
@@ -99,26 +100,17 @@ namespace TagTool.Commands.Common
             return (command.Inherit || ContextStack.Context == context);
         }
 		
-		private static string FormatPair(string head, string bodyArg, ushort indentArg = 0, int wrap = 0)
+        private static string FormatHelpInfo(string head, string body, ushort indent = 0, int wrap = int.MaxValue)
         {
-            string body = "";
-            string lineBuild = "";
-            string indent = new string(' ', indentArg);
-            foreach (var line in bodyArg.Replace("\r", "").Split('\n'))
-            {
-                foreach (string word in line.Split(' ')) 
-                {
-                    if (wrap != 0 && lineBuild.Length > wrap)
-                    {
-                        body += $"\n{indent}{indent}{lineBuild}";
-                        lineBuild = (line.StartsWith("- ") ? "   " : " ") + word;
-                    }
-                    else lineBuild += $"{word} ";
-                }
-                body += $"\n{indent}{indent}{lineBuild}";
-                lineBuild = "";
-            }
-            return $"\n{indent}{head}:{body}";
+            string indentStr = new string(' ', indent);
+            string Indent(string line) { return (line.StartsWith("- ") ? $"\n{indentStr}" : $"\n{indentStr}  ") + line; }
+            return $"\n{indentStr}{head}:" + String.Join("", body.Split('\n').Select(x => Indent(Wrap(x, wrap, indent + (x.StartsWith("- ") ? 4 : 2)))));          
+        }   
+        
+        private static string Wrap(string strIn, int wrap, int padLeft)
+        {
+            return String.Join("\n".PadRight(padLeft),
+               Regex.Matches(strIn, @"(.{1," + (wrap) + @"})(?:\s|$)").Cast<Match>());
         }
     }
 }
