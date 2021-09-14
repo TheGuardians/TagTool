@@ -1,5 +1,6 @@
-﻿using TagTool.Cache;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using TagTool.Cache;
 using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Modding
@@ -14,21 +15,28 @@ namespace TagTool.Commands.Modding
                 "SwitchTagCache",
                 "Change the the current tag cache to the specified index.",
 
-                "SwitchTagCache <index>",
+                "SwitchTagCache [index]",
 
-                "Change the the current tag cache to the specified index.")
+                "If no cache index is specified, a list will be presented to choose from.")
         {
             Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            int tagCacheIndex;
+
+            if (args.Count > 1)
                 return new TagToolError(CommandError.ArgCount);
+            
+            else if (args.Count == 0)
+                tagCacheIndex = new TagToolChoicePrompt(Cache.BaseModPackage.CacheNames, indent: 3).Prompt();             
 
-            if (!int.TryParse(args[0],System.Globalization.NumberStyles.Integer, null, out int tagCacheIndex))
-                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+            else if(!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");              
 
+
+            System.Console.WriteLine();
             Cache.SetActiveTagCache(tagCacheIndex);
 
             return true;
