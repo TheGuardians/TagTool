@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public List<Node> Nodes;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public StringId UnknownStringId;
+        public uint Unknown;
 
         [TagStructure(Size = 0x4)]
         public class Material : TagStructure

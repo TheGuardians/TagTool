@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp)
+        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, CachedTag instance)
         {
             if(BlamCache.Platform == CachePlatform.MCC)
                 return ConvertStructureBspCacheFileTagResourcesMCC(bsp);
@@ -81,12 +81,28 @@ namespace TagTool.Commands.Porting
             {
                 bsp.InstancedGeometryInstances = new System.Collections.Generic.List<InstancedGeometryInstance>();
                 bsp.InstancedGeometryInstances.AddRange(resourceDefinition.InstancedGeometryInstances);
-                foreach(var instance in bsp.InstancedGeometryInstances)
+                foreach(var instancedgeo in bsp.InstancedGeometryInstances)
                 {
-                    if(instance.SeamBitVector.Skip(1).Any(x => x != 0))
+                    if(instancedgeo.SeamBitVector.Skip(1).Any(x => x != 0))
                         new TagToolWarning("Instanced seam bit vector truncated!");
 
-                    instance.SeamBitVector = new uint[] { instance.SeamBitVector[0] };
+                    instancedgeo.SeamBitVector = new uint[] { instancedgeo.SeamBitVector[0] };
+                }
+
+                //convert cluster instanced geometry physics
+                for(var i = 0; i < bsp.Clusters.Count; i++)
+                {
+                    bsp.Clusters[i].InstancedGeometryPhysics = new ScenarioStructureBsp.Cluster.InstancedGeometryPhysicsData
+                    {
+                        Type = 2,
+                        StructureBsp = instance,
+                        Shape = new Havok.HkpMoppBvTreeShape(),
+                        ClusterIndex = i,
+                        MoppCodes = new System.Collections.Generic.List<Havok.TagHkpMoppCode>
+                        {
+                            resourceDefinition.ClusterMoppCode[i]
+                        }
+                    };
                 }
                 
                 // Convert surface references

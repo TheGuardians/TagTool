@@ -69,7 +69,7 @@ namespace TagTool.Commands.Porting
             sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
 
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
-            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp);
+            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, instance);
 
             if(BlamCache.Version == CacheVersion.HaloReach)
                 FixupReachInstancedGeometryInstances(sbsp);
