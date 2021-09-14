@@ -62,9 +62,9 @@ namespace TagTool.Commands.Common
                 {
                     Console.Write($"> ");
                     var line = Console.ReadLine();
-                    if (quit = line == ":q")
+                    if (quit = line.TrimEnd() == ":q")
                         break;
-                    if (line == ":x")
+                    if (line.TrimEnd() == ":x")
                         break;
 
                     lines += $"{line}\r\n";
