@@ -607,19 +607,18 @@ namespace TagTool.Tags.Definitions
 
             public short RuntimeDecalStartIndex;
             public short RuntimeDecalEntryCount;
-            public short Flags;
+            public ClusterFlags Flags;
             
             [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 
-            public uint Unknown8; // predicted resources block
-            public uint Unknown9;
-            public uint Unknown10;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] PredictedResourcesPadding = new byte[0xC]; // predicted resources block
             public List<Portal> Portals;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public InstancedGeometryPhysicsData InstancedGeometryPhysics;
             public short MeshIndex;
-            public short Unknown20;
+            public short InstanceImposterClusterMoppIndex;
             public List<Seam> Seams;
             public List<DecoratorGrid> DecoratorGrids;
             public uint Unknown21; // cheap light marker refs block?
@@ -632,6 +631,17 @@ namespace TagTool.Tags.Definitions
             public class Portal : TagStructure
             {
                 public short PortalIndex;
+            }
+
+            [Flags]
+            public enum ClusterFlags : short
+            {
+                None = 0,
+                OneWayPortal = 1 << 0,
+                DoorPortal = 1 << 1,
+                PostProcessedGeometry = 1 << 2,
+                IsTheSky = 1 << 3,
+                DecoratorsAreLit = 1 << 4
             }
 
             [TagStructure(Size = 0x60, Platform = CachePlatform.MCC)]

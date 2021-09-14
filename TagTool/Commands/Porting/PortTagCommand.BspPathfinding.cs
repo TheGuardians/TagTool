@@ -92,17 +92,20 @@ namespace TagTool.Commands.Porting
                 //convert cluster instanced geometry physics
                 for(var i = 0; i < bsp.Clusters.Count; i++)
                 {
-                    bsp.Clusters[i].InstancedGeometryPhysics = new ScenarioStructureBsp.Cluster.InstancedGeometryPhysicsData
+                    if(bsp.Clusters[i].InstanceImposterClusterMoppIndex != -1)
                     {
-                        Type = 2,
-                        StructureBsp = instance,
-                        Shape = new Havok.HkpMoppBvTreeShape(),
-                        ClusterIndex = i,
-                        MoppCodes = new System.Collections.Generic.List<Havok.TagHkpMoppCode>
+                        bsp.Clusters[i].InstancedGeometryPhysics = new ScenarioStructureBsp.Cluster.InstancedGeometryPhysicsData
                         {
-                            resourceDefinition.ClusterMoppCode[i]
+                            Type = 2,
+                            StructureBsp = instance,
+                            Shape = new Havok.HkpMoppBvTreeShape(),
+                            ClusterIndex = i,
+                            MoppCodes = new System.Collections.Generic.List<Havok.TagHkpMoppCode>
+                        {
+                            resourceDefinition.ClusterMoppCode[bsp.Clusters[i].InstanceImposterClusterMoppIndex]
                         }
-                    };
+                        };
+                    }
                 }
                 
                 // Convert surface references
