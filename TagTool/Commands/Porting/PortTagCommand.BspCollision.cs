@@ -103,7 +103,7 @@ namespace TagTool.Commands.Porting
 
         private CollisionGeometry ConvertCollisionBsp(CollisionGeometry bsp)
         {
-            if (bsp.Bsp3dSupernodes.Count > 0)
+            if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
                 if (!new CollisionBSPBuilder().generate_bsp(ref bsp, false))
                     new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
@@ -122,7 +122,7 @@ namespace TagTool.Commands.Porting
 
         private LargeCollisionBspBlock ConvertLargeCollisionBsp(LargeCollisionBspBlock bsp)
         {
-            if (bsp.Bsp3dSupernodes.Count > 0)
+            if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
                 if (!new LargeCollisionBSPBuilder().generate_bsp(ref bsp, true))
                     new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
