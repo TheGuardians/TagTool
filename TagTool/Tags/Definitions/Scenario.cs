@@ -3274,16 +3274,33 @@ namespace TagTool.Tags.Definitions
             public UnitSeatFlags Seats2;
         }
 
-        [TagStructure(Size = 0x2)]
+        [TagStructure(Size = 0x2, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class ScenarioKillTrigger : TagStructure
 		{
             public short TriggerVolume;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public KillVolumeFlags Flags;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding;
         }
 
-        [TagStructure(Size = 0x2)]
+        [TagStructure(Size = 0x2, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class ScenarioSafeTrigger : TagStructure
 		{
             public short TriggerVolume;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public KillVolumeFlags Flags;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding;
+        }
+
+        [Flags]
+        public enum KillVolumeFlags : byte
+        {
+            DontKillImmediately = 1 << 0,
+            OnlyKillPlayers = 1 << 1
         }
 
         [TagStructure(Size = 0x10)]
