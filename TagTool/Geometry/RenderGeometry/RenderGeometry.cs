@@ -31,7 +31,7 @@ namespace TagTool.Geometry
         /// </summary>
         public List<BoundingSphere> BoundingSpheres;
 
-        public List<UnknownBlock> Unknown2;
+        public List<UserDataBlock> UserData;
 
         public List<GeometryTagResource> GeometryTagResources; 
 
@@ -47,20 +47,36 @@ namespace TagTool.Geometry
         /// </summary>
         public List<PerMeshSubpartVisibilityBlock> PerMeshSubpartVisibility;
 
-        // TODO: review reach definitions
 
-        public uint Unknown7;
-        public uint Unknown8;
-        public uint Unknown9;
+        public List<PerMeshPrtDataBlock> PerMeshPrtData;
+
+        // TODO: review reach definitions
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown10;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown11;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown12;
 
         public List<StaticPerPixelLighting> InstancedGeometryPerPixelLighting;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<short> Unknown10;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<WaterBoundingBox> WaterBoundingBoxes;
 
         public TagResourceReference Resource;
+
+        [TagStructure(Size = 0x20)]
+        public class PerMeshPrtDataBlock : TagStructure
+        {
+            public byte[] MeshPcaData;
+            public List<PerInstancePrtDataBlock> PerInstancePrtData;
+
+            [TagStructure(Size = 0x14)]
+            public class PerInstancePrtDataBlock : TagStructure
+            {
+                public byte[] MeshPcaData;
+            }
+        }
 
         [TagStructure(Size = 0x30)]
         public class BoundingSphere : TagStructure
@@ -77,16 +93,20 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x18)]
-        public class UnknownBlock : TagStructure
-		{
-            public byte UnknownByte1;
-            public byte UnknownByte2;
-            public short Unknown2;
+        public class UserDataBlock : TagStructure
+        {
+            public RenderGeometryUserDataType DataType;
+            public sbyte DataCount;
+            public ushort DataSize;
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public byte[] Unknown3;
-            // having an actual byte[] here crashes, not sure what it should be.
+            public byte[] Data;
             [TagField(MaxVersion = CacheVersion.Halo3Beta, Length = 0x14)]
-            public byte[] UnknownBeta;
+            public byte[] DataBeta;
+
+            public enum RenderGeometryUserDataType : sbyte
+            {
+                PrtInfo
+            }
         }
 
         [TagStructure(Size = 0x20)]
@@ -123,15 +143,17 @@ namespace TagTool.Geometry
             public RealPoint3d PositionBoundUpper;
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloReach)]
         public class StaticPerPixelLighting : TagStructure
 		{
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public List<int> UnusedVertexBuffer;
 
             public short VertexBufferIndex;
 
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public short Unknown1;
 
             [TagField(Flags = Runtime)]
             public VertexBufferDefinition VertexBuffer;

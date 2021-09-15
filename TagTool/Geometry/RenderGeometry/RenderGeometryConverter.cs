@@ -48,12 +48,12 @@ namespace TagTool.Geometry
         private RenderGeometryApiResourceDefinition ConvertHalo3(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
             //
-            // Convert byte[] of UnknownBlock
+            // Convert Userdata
             //
 
-            foreach (var block in geometry.Unknown2)
+            foreach (var block in geometry.UserData)
             {
-                var data = block.Unknown3;
+                var data = block.Data;
                 if (data != null || data.Length != 0)
                 {
                     var result = new byte[data.Length];
@@ -64,7 +64,7 @@ namespace TagTool.Geometry
                         while (!inputReader.EOF)
                             outputWriter.Write(inputReader.ReadUInt32());
 
-                        block.Unknown3 = result;
+                        block.Data = result;
                     }
                 }
             }
@@ -423,9 +423,9 @@ namespace TagTool.Geometry
             // Convert byte[] of UnknownBlock
             //
 
-            foreach (var block in geometry.Unknown2)
+            foreach (var block in geometry.UserData)
             {
-                var data = block.Unknown3;
+                var data = block.Data;
                 if (data != null || data.Length != 0)
                 {
                     var result = new byte[data.Length];
@@ -436,7 +436,7 @@ namespace TagTool.Geometry
                         while (!inputReader.EOF)
                             outputWriter.Write(inputReader.ReadUInt32());
 
-                        block.Unknown3 = result;
+                        block.Data = result;
                     }
                 }
             }

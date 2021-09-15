@@ -587,7 +587,7 @@ namespace TagTool.Geometry.Utils
 
             var renderGeometry = new RenderGeometry();
 
-            renderGeometry.Unknown2 = new List<RenderGeometry.UnknownBlock>();
+            renderGeometry.UserData = new List<RenderGeometry.UserDataBlock>();
             renderGeometry.Meshes = new List<Mesh>()
             {
                 mesh

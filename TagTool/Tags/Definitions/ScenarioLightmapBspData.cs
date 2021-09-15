@@ -81,7 +81,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short VertexBufferIndexReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public ushort VertexBufferOffsetReach;
+            public short Coefficient; // half - shader constant
 
             [TagField(Flags = Runtime)]
             public VertexBufferDefinition VertexBuffer;
@@ -101,7 +101,8 @@ namespace TagTool.Tags.Definitions
             public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
             public short InstancedGeometryLightProbesIndex;
-            public short Unknown1;
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public uint Unknown2;
         }

@@ -88,25 +88,15 @@ namespace TagTool.Common
     [TagStructure(Size = 0x50)]
     public class SceneryLightProbe : TagStructure
     {
-        public int Unknown1;
-        public short Unknown2;
-        public byte Unknown3;
-        public byte Unknown4;
+        public ObjectIdentifier ObjectId;
         public HalfRGBLightProbe LightProbe;
     }
 
     [TagStructure(Size = 0x2C)]
     public class MachineLightProbes : TagStructure
     {
-        public uint Unknown;
-        public short Unknown2;
-        public short Unknown3;
-        public float Unknown4;
-        public float Unknown5;
-        public float Unknown6;
-        public float Unknown7;
-        public float Unknown8;
-        public float Unknown9;
+        public ObjectIdentifier ObjectId;
+        public RealRectangle3d Bounds;
         public List<MachineLightProbe> LightProbes;
 
         [TagStructure(Size = 0x54)]

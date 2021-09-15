@@ -295,7 +295,7 @@ namespace TagTool.Geometry
         public PartTypeNew TypeNew;
 
         [TagField(MinVersion = HaloReach)]
-        public sbyte Unknown1; // specialized render?
+        public SpecializedRenderType SpecializedRender; // specialized render?
 
         /// <summary>
         /// The flags of the mesh part.
@@ -303,7 +303,7 @@ namespace TagTool.Geometry
         [TagField(MinVersion = Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123, Downgrade = nameof(FlagsOld))]
         public PartFlagsNew FlagsNew;
         [TagField(MinVersion = HaloReach)]
-        public short FlagsNew16;
+        public ushort FlagsNew16;
 
         [TagField(MaxVersion = Halo2Vista)]
         public byte MaxNodesPerVertex;
@@ -317,8 +317,8 @@ namespace TagTool.Geometry
         [TagField(MinVersion = Halo3Beta)]
         public ushort VertexCount;
 
-        [TagField(Flags = Padding, Length = 2, MinVersion = HaloReach)]
-        public byte[] Unused1 = new byte[2];
+        [TagField(MinVersion = HaloReach)]
+        public ushort Unknown1; // Tessellation?
 
         [TagField(MaxVersion = Halo2Vista)]
         public RealPoint3d Position;
@@ -378,6 +378,19 @@ namespace TagTool.Geometry
             DrawCullDistanceClose = 1 << 5,
             DrawCullRenderingShields = 1 << 6,
             DrawCullRenderingActiveCamo = 1 << 7
+        }
+
+        public enum SpecializedRenderType : sbyte
+        {
+            None,
+            Fail,
+            Fur,
+            FurStencil,
+            Decal,
+            Shield,
+            Water,
+            LightmapOnly,
+            Hologram
         }
     }
 

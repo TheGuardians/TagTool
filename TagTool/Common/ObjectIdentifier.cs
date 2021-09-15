@@ -4,7 +4,7 @@ using TagTool.Tags.Definitions;
 namespace TagTool.Common
 {
     [TagStructure(Size = 0x8)]
-    public class ObjectIdentifier
+    public class ObjectIdentifier : TagStructure
     {
         public DatumHandle UniqueHandle;
         public short OriginBspIndex;
