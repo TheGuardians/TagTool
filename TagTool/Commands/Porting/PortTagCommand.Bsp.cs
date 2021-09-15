@@ -83,6 +83,9 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version == CacheVersion.Halo3Retail || BlamCache.Version == CacheVersion.Halo3Beta)
                 sbsp.CompatibilityFlags |= ScenarioStructureBsp.StructureBspCompatibilityValue.UseMoppIndexPatch;
 
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+                sbsp.CompatibilityFlags |= ScenarioStructureBsp.StructureBspCompatibilityValue.Reach;
+
             //
             // Temporary Fixes:
             //

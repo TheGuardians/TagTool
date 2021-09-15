@@ -319,7 +319,8 @@ namespace TagTool.Tags.Definitions
         public enum StructureBspCompatibilityValue : ushort
         {
             None = 0,
-            UseMoppIndexPatch  = 1 << 0
+            UseMoppIndexPatch  = 1 << 0,
+            Reach = 1 << 1
         }
 
         [TagStructure(Size = 0x28)]
