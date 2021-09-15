@@ -5,6 +5,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
@@ -412,6 +413,44 @@ namespace TagTool.Commands.Porting
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             }
         };
+
+        public int ConvertReachMaterial(GameCacheHaloOnlineBase basecache, Stream cacheStream, GameCache blamcache, Stream blamStream, ref string name, int globalmaterialindex)
+        {            
+            int matching_index = -1;
+            var baseglobals = basecache.Deserialize<Globals>(cacheStream, basecache.TagCache.FindFirstInGroup("matg"));
+            var blamglobals = blamcache.Deserialize<Globals>(blamStream, blamcache.TagCache.FindFirstInGroup("matg"));
+
+            if (globalmaterialindex < blamglobals.Materials.Count && globalmaterialindex != -1)
+                name = blamcache.StringTable.GetString(blamglobals.Materials[globalmaterialindex].Name);
+
+            string debugname = name.DeepClone();
+
+            while (matching_index == -1)
+            {
+                var localstringid = basecache.StringTable.GetStringId(name);
+                if (localstringid != StringId.Invalid)
+                {
+                    matching_index = baseglobals.Materials.FindIndex(m => m.Name == localstringid);
+                }
+                if (matching_index == -1)
+                {
+                    string[] pieces = name.Split('_');
+                    if (pieces.Length == 1)
+                        break;
+
+                    pieces = pieces.Take(pieces.Length - 1).ToArray();
+                    name = string.Join("_", pieces);
+                }
+            }
+            if (matching_index == -1)
+            {
+                name = "default_material";
+                new TagToolWarning($"Failed to convert material {debugname}!");
+                return 0;
+            }
+
+            return matching_index;
+        }
 
         private RealQuaternion ReadVertexElement(VertexElementStream stream, VertexDeclarationType type)
         {

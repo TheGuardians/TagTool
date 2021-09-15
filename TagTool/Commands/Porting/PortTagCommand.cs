@@ -851,6 +851,15 @@ namespace TagTool.Commands.Porting
                                 target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
                         }
                     }
+                    if(BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        foreach(var material in hlmt.Materials)
+                        {
+                            string name = CacheContext.StringTable.GetString(material.MaterialName);
+                            material.GlobalMaterialIndex = (short)ConvertReachMaterial(CacheContext, cacheStream, BlamCache, blamCacheStream, ref name, material.GlobalMaterialIndex);
+                            material.MaterialName = CacheContext.StringTable.GetStringId(name);
+                        }
+                    }
                     break;
               
 				case ModelAnimationGraph jmad:
@@ -921,7 +930,15 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case ScenarioStructureBsp sbsp:
-					blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag, resourceStreams);
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        foreach (var material in sbsp.CollisionMaterials)
+                        {
+                            string name = "default_material";
+                            material.RuntimeGlobalMaterialIndex = (short)ConvertReachMaterial(CacheContext, cacheStream, BlamCache, blamCacheStream, ref name, material.RuntimeGlobalMaterialIndex);
+                        }
+                    }
+                    blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag, resourceStreams);
 					break;
 
                 case Sound sound:
