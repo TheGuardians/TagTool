@@ -701,6 +701,8 @@ namespace TagTool.Tags.Definitions
                 public List<Cluster> ClustersDoorsClosed;
                 public List<Sky> ClusterSkies;
                 public List<Sky> ClusterVisibleSkies;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public List<UnknownBlock> Unknown;
                 public List<UnknownBlock> Unknown2;
                 public List<BspSeamClusterMapping> ClusterMappings;
 
@@ -780,8 +782,11 @@ namespace TagTool.Tags.Definitions
                     public List<ClusterReference> RootClusters;
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public List<ClusterReference> AttachedClusters;
+                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    public List<ClusterReference> ConnectedClusters;
 
-                    public List<ClusterReference> Clusters; // ConnectedClusters
+                    [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                    public List<ClusterReference> Clusters;
 
                     [TagStructure(Size = 0x1, MaxVersion = CacheVersion.HaloOnline700123)]
                     [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloReach)]
