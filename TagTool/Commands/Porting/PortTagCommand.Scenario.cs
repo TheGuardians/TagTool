@@ -461,6 +461,9 @@ namespace TagTool.Commands.Porting
 
                 foreach(var LbspReference in lightmap.LightmapDataReferences)
                 {
+                    if (LbspReference.LightmapBspData == null)
+                        continue;
+
                     var LbspTag = LbspReference.LightmapBspData;
                     var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, LbspReference.LightmapBspData);
                     var sbspTag = scnr.StructureBsps[Lbsp.BspIndex].StructureBsp;
