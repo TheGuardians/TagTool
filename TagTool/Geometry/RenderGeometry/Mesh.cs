@@ -199,7 +199,7 @@ namespace TagTool.Geometry
         public byte[] Unused4;
 
         [TagField(MinVersion = Halo3Beta)]
-        public List<InstancedGeometryBlock> InstancedGeometry;
+        public List<InstancedBucketBlock> InstanceBuckets;
 
         [TagField(MinVersion = Halo3Beta)]
         public List<WaterBlock> Water;
@@ -210,16 +210,16 @@ namespace TagTool.Geometry
         public RealPoint3d RuntimeBoundingOffset;
 
         [TagStructure(Size = 0x10)]
-        public class InstancedGeometryBlock : TagStructure
+        public class InstancedBucketBlock : TagStructure
 		{
-            public short Section1;
-            public short Section2;
-            public List<ContentsBlock> Contents;
+            public short MeshIndex;
+            public short DefinitionIndex;
+            public List<InstanceIndexBlock> Instances;
 
             [TagStructure(Size = 0x2)]
-			public class ContentsBlock : TagStructure
+			public class InstanceIndexBlock : TagStructure
 			{
-                public short Value;
+                public short InstanceIndex;
             }
         }
 
