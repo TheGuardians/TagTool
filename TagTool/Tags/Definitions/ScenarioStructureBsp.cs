@@ -24,31 +24,33 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StructureBuildIdentifier BuildIdentifier;
-
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StructureBuildIdentifier ParentBuildIdentifier;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public int ImportInfoChecksum;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public int ImportVersion;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public FlagsValue Flags;
+        [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
+        public byte[] Unused4;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
+        public StructureBspCompatibilityValue CompatibilityFlags; 
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 4, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagField(Length = 4, Flags = Padding, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public byte[] Unused5;
+        [TagField(Length = 4, Flags = Padding, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Unused6;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public FlagsValueReach FlagsReach;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public ContentPolicyFlagsValue ContentPolicyFlags;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public ContentPolicyFlagsValue FailedContentPolicyFlags;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public StructureBspCompatibilityValue CompatibilityFlags;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown3;
+        [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Padding1;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<SeamIdentifier> SeamIdentifiers;
@@ -296,7 +298,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum FlagsValue : ushort
+        public enum FlagsValueReach : ushort
         {
             None = 0,
             HasInstanceGroups = 1 << 0,
