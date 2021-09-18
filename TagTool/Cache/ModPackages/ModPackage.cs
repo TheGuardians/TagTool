@@ -97,10 +97,10 @@ namespace TagTool.Cache
 
         public void AddMap(Stream mapStream, int mapId, int cacheIndex)
         {
+            mapStream.Position = 0;
             var mapFileIndex = MapIds.IndexOf(mapId);
             if (mapFileIndex != -1)
             {
-                mapStream.Position = 0;
                 MapFileStreams[mapFileIndex] = mapStream;
             }
             else
@@ -647,20 +647,28 @@ namespace TagTool.Cache
                 var tableEntry = new CacheMapTableEntry(reader);
 
                 reader.BaseStream.Position = tableEntry.Offset + section.Offset;
+                try
+                {
+                    int size = tableEntry.Size;
+                    var stream = new MemoryStream();
+                    byte[] data = new byte[size];
+                    reader.Read(data, 0, size);
+                    stream.Write(data, 0, size);
+                    
+                    var mapReader = new EndianReader(stream, true, EndianFormat.LittleEndian);
+                    MapFile mapFile = new MapFile();
+                    mapReader.BaseStream.Position = 0;
+                    mapFile.Read(mapReader);
 
-                MapToCacheMapping.Add(i, tableEntry.CacheIndex);
-                int size = tableEntry.Size;
-                var stream = new MemoryStream();
-                byte[] data = new byte[size];
-                reader.Read(data, 0, size);
-                stream.Write(data, 0, size);
-                MapFileStreams.Add(stream);
-
-                var mapReader = new EndianReader(stream, true, EndianFormat.LittleEndian);
-                MapFile mapFile = new MapFile();
-                mapReader.BaseStream.Position = 0;
-                mapFile.Read(mapReader);
-                MapIds.Add(((CacheFileHeaderGenHaloOnline)mapFile.Header).MapId);
+                    stream.Position = 0;
+                    MapFileStreams.Add(stream);
+                    MapIds.Add(((CacheFileHeaderGenHaloOnline)mapFile.Header).MapId);
+                    MapToCacheMapping.Add(i, tableEntry.CacheIndex);
+                }
+                catch
+                {
+                    new TagToolError(CommandError.CustomError, $"Failed to read map file for map id {tableEntry.MapId}");
+                }
             }
         }
 

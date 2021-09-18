@@ -128,8 +128,12 @@ namespace TagTool.Commands.Files
                 Console.WriteLine("Done!");
                 return true;
             }
-            else if(Cache is GameCacheModPackage)
+            else if(Cache is GameCacheModPackage modPackCache)
             {
+                modPackCache.BaseModPackage.MapFileStreams.Clear();
+                modPackCache.BaseModPackage.MapIds.Clear();
+                modPackCache.BaseModPackage.MapToCacheMapping.Clear();
+
                 // Generate / update the map files
                 foreach (var scenario in Cache.TagCache.FindAllInGroup("scnr"))
                 {
@@ -182,7 +186,6 @@ namespace TagTool.Commands.Files
                     var writer = new EndianWriter(mapStream, leaveOpen: true);
                     map.Write(writer);
 
-                    var modPackCache = Cache as GameCacheModPackage;
                     var header = (CacheFileHeaderGenHaloOnline)map.Header;
                     modPackCache.AddMapFile(mapStream, header.MapId);
 
