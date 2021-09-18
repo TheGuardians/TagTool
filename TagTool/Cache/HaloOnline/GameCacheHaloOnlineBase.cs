@@ -52,12 +52,6 @@ namespace TagTool.Cache
         public override object Deserialize(Stream stream, CachedTag instance) =>
             Deserialize(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
-        private T Deserialize<T>(Stream stream, CachedTagHaloOnline instance) =>
-            Deserialize<T>(new HaloOnlineSerializationContext(stream, this, instance));
-
-        private object Deserialize(Stream stream, CachedTagHaloOnline instance) =>
-            Deserialize(new HaloOnlineSerializationContext(stream, this, instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
-
         #endregion
 
         public void SignalModifiedTag(int index) { ModifiedTags.Add(index); }

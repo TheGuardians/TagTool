@@ -84,7 +84,7 @@ namespace TagTool.Commands.Bitmaps
 
                 var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
 
-                if (ddsFile == null)
+                if (ddsFile == null || ddsFile.BitmapData is null)
                     return new TagToolError(CommandError.OperationFailed, "Invalid bitmap data");
 
                 using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
