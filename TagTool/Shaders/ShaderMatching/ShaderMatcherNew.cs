@@ -392,7 +392,13 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"albedo\patchy_emblem":
                                 optionName = "emblem_change_color";
                                 break;
-                            case @"specular_mask_mult_diffuse":
+                            case @"bump_mapping\detail_blend":
+                                optionName = "detail";
+                                break;
+                            case @"bump_mapping\three_detail_blend":
+                                optionName = "detail";
+                                break;
+                            case @"specular_mask\specular_mask_mult_diffuse":
                                 optionName = "specular_mask_from_texture";
                                 break;
                             case @"self_illumination\change_color":
@@ -400,6 +406,12 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                             case @"self_illumination\change_color_detail":
                                 optionName = "illum_detail";
+                                break;
+                            case @"self_illumination\multilayer_additive":
+                                optionName = "simple";
+                                break;
+                            case @"self_illumination\palettized_plasma":
+                                optionName = "plasma";
                                 break;
                             case @"misc\default":
                                 optionName = "first_person_sometimes";
