@@ -40,10 +40,10 @@ namespace TagTool.Cache
             Serializer.Serialize(new HaloOnlineSerializationContext(stream, this, instance), definition);
         }
 
-        public T Deserialize<T>(ISerializationContext context) =>
+        private T Deserialize<T>(ISerializationContext context) =>
             Deserializer.Deserialize<T>(context);
 
-        public object Deserialize(ISerializationContext context, Type type) =>
+        private object Deserialize(ISerializationContext context, Type type) =>
             Deserializer.Deserialize(context, type);
 
         public override T Deserialize<T>(Stream stream, CachedTag instance) =>
@@ -52,10 +52,10 @@ namespace TagTool.Cache
         public override object Deserialize(Stream stream, CachedTag instance) =>
             Deserialize(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
-        private T Deserialize<T>(Stream stream, CachedTagHaloOnline instance) =>
+        public T Deserialize<T>(Stream stream, CachedTagHaloOnline instance) =>
             Deserialize<T>(new HaloOnlineSerializationContext(stream, this, instance));
 
-        private object Deserialize(Stream stream, CachedTagHaloOnline instance) =>
+        public object Deserialize(Stream stream, CachedTagHaloOnline instance) =>
             Deserialize(new HaloOnlineSerializationContext(stream, this, instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         #endregion
