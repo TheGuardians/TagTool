@@ -31,7 +31,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "zonly", "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
+        static readonly List<string> SupportedShaderTypes = new List<string> { "zonly", "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram", "water" };
 
         public override object Execute(List<string> args)
         {
@@ -120,6 +120,7 @@ namespace TagTool.Commands.Shaders
                     case "custom":          GenerateCustom(stream, options, rmt2TagName, rmdf); break;
                     case "screen":          GenerateScreen(stream, options, rmt2TagName, rmdf); break;
                     case "zonly":           GenerateZOnly(stream, options, rmt2TagName, rmdf); break;
+                    case "water":           GenerateWater(stream, options, rmt2TagName, rmdf); break;
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
@@ -146,7 +147,7 @@ namespace TagTool.Commands.Shaders
                 case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(options, applyFixes);
                 case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(options, applyFixes);
                 //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(options, applyFixes);
-                //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(options, applyFixes);
+                case "water":           return new HaloShaderGenerator.Water.WaterGenerator(options, applyFixes);
                 case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(options, applyFixes);
             }
             return null;
@@ -170,7 +171,7 @@ namespace TagTool.Commands.Shaders
                 case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(applyFixes);
                 case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(applyFixes);
                 case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(applyFixes);
-                //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
+                case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
                 case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(applyFixes);
             }
             return null;
@@ -586,6 +587,23 @@ namespace TagTool.Commands.Shaders
             HaloShaderGenerator.ZOnly.Test test = (HaloShaderGenerator.ZOnly.Test)options[0];
 
             var generator = new HaloShaderGenerator.ZOnly.ZOnlyGenerator(test);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateWater(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Water.WaterGenerator(options.Select(x => (byte)x).ToArray(), true);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
