@@ -92,7 +92,7 @@ namespace TagTool.Commands.Modding
             }
         
             modTagCache.UpdateTagOffsets(writer);
-            referenceStream.Position = 0;
+           
 
             Console.WriteLine("Done!");
 
@@ -112,7 +112,18 @@ namespace TagTool.Commands.Modding
                 foreach (var tag in Cache.TagCache.NonNull())
                     tagNames[tag.Index] = tag.Name;
 
-                modCache.BaseModPackage.TagCachesStreams.Add(new ModPackageStream(referenceStream));
+
+
+                referenceStream.Position = 0;
+                var ms = referenceStream;
+                if (i > 0)
+                {
+                    ms = new MemoryStream();
+                    referenceStream.CopyTo(ms);
+                    ms.Position = 0;
+                }
+
+                modCache.BaseModPackage.TagCachesStreams.Add(new ModPackageStream(ms));
                 modCache.BaseModPackage.CacheNames.Add(name);
                 modCache.BaseModPackage.TagCacheNames.Add(tagNames);
             }
