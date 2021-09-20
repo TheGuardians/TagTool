@@ -397,7 +397,7 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                             // ODST prt3 //
                             case @"albedo\diffuse_modulated":
-                                optionName = "diffuse_only"
+                                optionName = "diffuse_only";
                                 break;
                             // Reach rmsh //
                             case @"albedo\patchy_emblem":
