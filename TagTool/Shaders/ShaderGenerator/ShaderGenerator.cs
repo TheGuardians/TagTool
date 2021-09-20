@@ -317,7 +317,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     break;
 
                 case ParameterUsage.Texture:
-                    shaderParameters = parameters.GetSamplerPixelParameters();
+                    shaderParameters = parameters.GetSamplerParameters();
                     break;
                 default:
                     shaderParameters = new List<HaloShaderGenerator.Globals.ShaderParameter>();
@@ -325,12 +325,14 @@ namespace TagTool.Shaders.ShaderGenerator
             }
             foreach (var parameter in shaderParameters)
             {
+                bool vertex = (usage == ParameterUsage.Texture || usage == ParameterUsage.TextureExtern) && parameter.Flags.HasFlag(ShaderParameterFlags.IsVertexShader);
                 var argumentMapping = new RenderMethodTemplate.ParameterMapping();
-                var registerName = parameter.RegisterName;
+                var registerName = vertex ? parameter.RegisterName + "_VERTEX_" : parameter.RegisterName;
                 if (shaderRegisterMapping.ContainsKey(registerName))
                 {
                     argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
                     argumentMapping.ArgumentIndex = (byte)GetArgumentIndex(cache, parameter.ParameterName, parameterNames);
+                    argumentMapping.Flags = (byte)(vertex ? 1 : 0);
                 }
                 else
                 {
@@ -410,15 +412,13 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             return GenerateRenderMethodTemplate(cache, cacheStream, rmdf, glps, glvs, generator, shaderName, out PixelShader pixl, out VertexShader vtsh);
         }
-
+    
         public static RenderMethodTemplate GenerateRenderMethodTemplate(GameCache cache, Stream cacheStream, RenderMethodDefinition rmdf, GlobalPixelShader glps, GlobalVertexShader glvs, IShaderGenerator generator, string shaderName, out PixelShader pixl, out VertexShader vtsh)
         {
-
             var rmt2 = new RenderMethodTemplate();
 
             pixl = GeneratePixelShader(cache, generator);
             vtsh = GenerateVertexShader(cache, generator);
-
 
             if (!cache.TagCache.TryGetTag(shaderName + ".pixl", out var pixlTag))
                 pixlTag = cache.TagCache.AllocateTag<PixelShader>(shaderName);
@@ -430,12 +430,9 @@ namespace TagTool.Shaders.ShaderGenerator
             cache.Serialize(cacheStream, vtshTag, vtsh);
             rmt2.VertexShader = vtshTag;
 
-
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
                 if (generator.IsEntryPointSupported(mode))
                     rmt2.ValidEntryPoints |= (EntryPointBitMask)(1 << (int)mode);
-
-            #region build parameter names block using the generator
 
             rmt2.RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
             rmt2.IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>();
@@ -446,29 +443,47 @@ namespace TagTool.Shaders.ShaderGenerator
             var vertexShaderParameters = generator.GetVertexShaderParameters();
             var globalShaderParameters = generator.GetGlobalParameters();
 
-            
-            foreach (var realParam in pixelShaderParameters.GetRealPixelParameters())
-                rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
+            List<string> realParameterNames = new List<string>();
+            List<string> intParameterNames = new List<string>();
+            List<string> boolParameterNames = new List<string>();
+            List<string> textureParameterNames = new List<string>();
 
-            foreach (var realParam in vertexShaderParameters.GetRealVertexParameters())
-                rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, realParam.ParameterName) });
+            foreach (var p in pixelShaderParameters.GetRealPixelParameters())
+                if (!realParameterNames.Contains(p.ParameterName))
+                    realParameterNames.Add(p.ParameterName);
+            foreach (var p in vertexShaderParameters.GetRealVertexParameters())
+                if (!realParameterNames.Contains(p.ParameterName))
+                    realParameterNames.Add(p.ParameterName);
 
-            foreach (var boolParam in pixelShaderParameters.GetBooleanPixelParameters())
-                rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, boolParam.ParameterName) });
+            foreach (var p in pixelShaderParameters.GetIntegerPixelParameters())
+                if (!intParameterNames.Contains(p.ParameterName))
+                    intParameterNames.Add(p.ParameterName);
+            foreach (var p in vertexShaderParameters.GetIntegerVertexParameters())
+                if (!intParameterNames.Contains(p.ParameterName))
+                    intParameterNames.Add(p.ParameterName);
 
-            foreach (var boolParam in vertexShaderParameters.GetBooleanVertexParameters())
-                rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, boolParam.ParameterName) });
+            foreach (var p in pixelShaderParameters.GetBooleanPixelParameters())
+                if (!boolParameterNames.Contains(p.ParameterName))
+                    boolParameterNames.Add(p.ParameterName);
+            foreach (var p in vertexShaderParameters.GetBooleanVertexParameters())
+                if (!boolParameterNames.Contains(p.ParameterName))
+                    boolParameterNames.Add(p.ParameterName);
 
-            foreach (var intParam in pixelShaderParameters.GetIntegerPixelParameters())
-                rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, intParam.ParameterName) });
+            foreach (var p in pixelShaderParameters.GetSamplerPixelParameters())
+                if (!textureParameterNames.Contains(p.ParameterName))
+                    textureParameterNames.Add(p.ParameterName);
+            foreach (var p in vertexShaderParameters.GetSamplerVertexParameters())
+                if (!textureParameterNames.Contains(p.ParameterName))
+                    textureParameterNames.Add(p.ParameterName);
 
-            foreach (var intParam in vertexShaderParameters.GetIntegerVertexParameters())
-                rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, intParam.ParameterName) });
-
-            foreach (var samplerParam in pixelShaderParameters.GetSamplerPixelParameters())
-                rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, samplerParam.ParameterName) });
-
-            #endregion
+            foreach (var p in realParameterNames)
+                rmt2.RealParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, p) });
+            foreach (var p in intParameterNames)
+                rmt2.IntegerParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, p) });
+            foreach (var p in boolParameterNames)
+                rmt2.BooleanParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, p) });
+            foreach (var p in textureParameterNames)
+                rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, p) });
 
             rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
             rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
@@ -476,30 +491,28 @@ namespace TagTool.Shaders.ShaderGenerator
 
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
-                var rmt2Drawmode = new RenderMethodTemplate.TagBlockIndex();
+                var entryPoint = new RenderMethodTemplate.TagBlockIndex();
 
-                if(generator.IsEntryPointSupported(mode))
+                if (generator.IsEntryPointSupported(mode))
                 {
-                    while (rmt2.EntryPoints.Count < (int)mode) // makeup count, this is to prevent all entry points being added
+                    while (rmt2.EntryPoints.Count < (int)mode)
                         rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
 
-                    rmt2.EntryPoints.Add(rmt2Drawmode);
-                    rmt2Drawmode.Offset = (ushort)rmt2.ParameterTables.Count();
-                    rmt2Drawmode.Count = 1;
+                    entryPoint.Offset = (ushort)rmt2.ParameterTables.Count();
+                    entryPoint.Count = 1;
+                    rmt2.EntryPoints.Add(entryPoint);
 
+                    var parameterTable = new RenderMethodTemplate.ParameterTable();
 
-                    var registerOffsets = new RenderMethodTemplate.ParameterTable();
+                    for (int i = 0; i < parameterTable.Values.Length; i++)
+                        parameterTable.Values[i] = new RenderMethodTemplate.TagBlockIndex();
 
-                    for (int i = 0; i < registerOffsets.Values.Length; i++)
-                        registerOffsets.Values[i] = new RenderMethodTemplate.TagBlockIndex();
-
-                    rmt2.ParameterTables.Add(registerOffsets);
+                    rmt2.ParameterTables.Add(parameterTable);
 
                     // find pixel shader and vertex shader block loaded by this entry point
 
                     PixelShaderBlock pixelShader;
                     VertexShaderBlock vertexShader;
-
 
                     if (generator.IsVertexShaderShared(mode))
                         vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[(int)mode].ShaderIndex];
@@ -508,7 +521,7 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     if (generator.IsPixelShaderShared(mode))
                     {
-                        if(glps.EntryPoints[(int)mode].ShaderIndex == -1)
+                        if (glps.EntryPoints[(int)mode].ShaderIndex == -1)
                         {
                             // assumes shared pixel shader are only used for a single method, otherwise unknown procedure to obtain one or more pixel shader block
                             var optionValue = generator.GetMethodOptionValue(glps.EntryPoints[(int)mode].Option[0].RenderMethodOptionIndex);
@@ -520,7 +533,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     else
                         pixelShader = pixl.Shaders[pixl.EntryPointShaders[(int)mode].Offset];
 
-                    
+
 
                     // build dictionary register name to register index, speeds lookup time
                     // needs to be built for each usage type to avoid name conflicts
@@ -529,7 +542,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     Dictionary<string, int> pixelShaderVectorMapping = new Dictionary<string, int>();
                     Dictionary<string, int> pixelShaderIntegerMapping = new Dictionary<string, int>();
                     Dictionary<string, int> pixelShaderBooleanMapping = new Dictionary<string, int>();
-                    
+
                     foreach (var reg in pixelShader.PCConstantTable.Constants)
                     {
                         switch (reg.RegisterType)
@@ -559,7 +572,8 @@ namespace TagTool.Shaders.ShaderGenerator
                         switch (reg.RegisterType)
                         {
                             case ShaderParameter.RType.Sampler:
-                                vertexShaderSamplerMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                //vertexShaderSamplerMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
+                                pixelShaderSamplerMapping[cache.StringTable.GetString(reg.ParameterName) + "_VERTEX_"] = reg.RegisterIndex; // quick fix instead of rewriting all
                                 break;
                             case ShaderParameter.RType.Vector:
                                 vertexShaderVectorMapping[cache.StringTable.GetString(reg.ParameterName)] = reg.RegisterIndex;
@@ -582,65 +596,68 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     currentUsage = ParameterUsage.TextureExtern;
                     mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderSamplerMapping);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.Texture;
-                    mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderSamplerMapping, rmt2.TextureParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    ShaderParameters newTextureParameters = new ShaderParameters();
+                    newTextureParameters.Parameters.AddRange(pixelShaderParameters.GetSamplerPixelParameters());
+                    newTextureParameters.Parameters.AddRange(vertexShaderParameters.GetSamplerVertexParameters());
+                    mappings = MapParameters(cache, currentUsage, newTextureParameters, pixelShaderSamplerMapping, rmt2.TextureParameterNames);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     // ps
 
                     currentUsage = ParameterUsage.PS_Real;
                     mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderVectorMapping, rmt2.RealParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.PS_Integer;
                     mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderIntegerMapping, rmt2.IntegerParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.PS_Boolean;
                     mappings = MapParameters(cache, currentUsage, pixelShaderParameters, pixelShaderBooleanMapping, rmt2.BooleanParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     // vs
 
                     currentUsage = ParameterUsage.VS_Real;
                     mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderVectorMapping, rmt2.RealParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.VS_Integer;
                     mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderIntegerMapping, rmt2.IntegerParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.VS_Boolean;
                     mappings = MapParameters(cache, currentUsage, vertexShaderParameters, vertexShaderBooleanMapping, rmt2.BooleanParameterNames);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     // ps extern
 
                     currentUsage = ParameterUsage.PS_RealExtern;
                     mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderVectorMapping);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.PS_IntegerExtern;
                     mappings = MapExternParameters(currentUsage, pixelShaderParameters, globalShaderParameters, pixelShaderIntegerMapping);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     // vs extern
 
                     currentUsage = ParameterUsage.VS_RealExtern;
                     mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderVectorMapping);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
 
                     currentUsage = ParameterUsage.VS_IntegerExtern;
                     mappings = MapExternParameters(currentUsage, vertexShaderParameters, globalShaderParameters, vertexShaderIntegerMapping);
-                    AddMapping(currentUsage, rmt2, registerOffsets, mappings);
+                    AddMapping(currentUsage, rmt2, parameterTable, mappings);
                 }
             }
-            
+
             return rmt2;
         }
-    
+
         /// <summary>
         /// Returns a list of ShaderMethods based on input shader type.
         /// </summary>

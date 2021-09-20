@@ -50,7 +50,7 @@ namespace TagTool.BlamFile
 
             while (!reader.EOF)
             {
-                var dataContext = new DataSerializationContext(reader);
+                var dataContext = new DataSerializationContext(reader, useAlignment: false);
                 var chunkHeaderPosition = reader.Position;
 
                 var header = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
@@ -159,7 +159,7 @@ namespace TagTool.BlamFile
 
             TagSerializer serializer = new TagSerializer(Version, CachePlatform, Format);
             writer.Format = Format;
-            var dataContext = new DataSerializationContext(writer);
+            var dataContext = new DataSerializationContext(writer, useAlignment: false);
             
             serializer.Serialize(dataContext, StartOfFile);
 
@@ -241,7 +241,7 @@ namespace TagTool.BlamFile
             }
 
             var deserializer = new TagDeserializer(Version, CachePlatform);
-            var dataContext = new DataSerializationContext(reader);
+            var dataContext = new DataSerializationContext(reader, useAlignment: false);
 
             var header = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
             reader.SeekTo(position);
@@ -289,7 +289,8 @@ namespace TagTool.BlamFile
         /// Convert to specified Cache Version.
         /// </summary>
         /// <param name="targetVersion"></param>
-        public void ConvertBlf(CacheVersion targetVersion)
+        /// <param name="platform"></param>
+        public void ConvertBlf(CacheVersion targetVersion, CachePlatform platform = CachePlatform.Original)
         {
             switch (Version)
             {
@@ -302,7 +303,7 @@ namespace TagTool.BlamFile
                         case CacheVersion.HaloOnline106708:
                             ConvertHalo3ToODSTScenarioChunk();
                             Version = targetVersion;
-                            if (targetVersion == CacheVersion.HaloOnlineED)
+                            if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
                                 Format = EndianFormat.LittleEndian;
                             break;
                         default:
@@ -313,7 +314,7 @@ namespace TagTool.BlamFile
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
-                    if (targetVersion == CacheVersion.HaloOnlineED)
+                    if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
                         Format = EndianFormat.LittleEndian;
                     return;
 

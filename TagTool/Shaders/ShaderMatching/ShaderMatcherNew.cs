@@ -597,7 +597,7 @@ namespace TagTool.Shaders.ShaderMatching
                         case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(Options, applyFixes);
                         case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(Options, applyFixes);
                         //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(Options, applyFixes);
-                        //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(Options, applyFixes);
+                        case "water":           return new HaloShaderGenerator.Water.WaterGenerator(Options, applyFixes);
                         case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(Options, applyFixes);
                     }
 
