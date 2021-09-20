@@ -557,8 +557,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
             if (Bsp.Surfaces.Count > max_surfaces)
             {
-                Console.WriteLine($"###ERROR: Number of surfaces ({Bsp.Surfaces.Count}) exceeded the maximum allowable ({max_surfaces})");
-                return false;
+                new TagToolWarning($"Number of surfaces ({Bsp.Surfaces.Count}) exceeded the maximum allowable ({max_surfaces})");
             }
             if (Bsp.Vertices.Count > max_vertices)
             {
