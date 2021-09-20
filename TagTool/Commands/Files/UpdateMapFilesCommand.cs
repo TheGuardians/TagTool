@@ -130,10 +130,6 @@ namespace TagTool.Commands.Files
             }
             else if(Cache is GameCacheModPackage modPackCache)
             {
-                modPackCache.BaseModPackage.MapFileStreams.Clear();
-                modPackCache.BaseModPackage.MapIds.Clear();
-                modPackCache.BaseModPackage.MapToCacheMapping.Clear();
-
                 // Generate / update the map files
                 foreach (var scenario in Cache.TagCache.FindAllInGroup("scnr"))
                 {
