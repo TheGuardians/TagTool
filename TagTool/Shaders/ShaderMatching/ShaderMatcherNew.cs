@@ -388,6 +388,17 @@ namespace TagTool.Shaders.ShaderMatching
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
                         switch ($"{methodName}\\{optionName}")
                         {
+                            // ODST rmcs //
+                            case @"material_model\custom_specular":
+                                optionName = "two_lobe_phong";
+                                break;
+                            case @"environment_mapping\per_pixel_mip":
+                                optionName = "per_pixel";
+                                break;
+                            // ODST prt3 //
+                            case @"albedo\diffuse_modulated":
+                                optionName = "diffuse_only"
+                                break;
                             // Reach rmsh //
                             case @"albedo\patchy_emblem":
                                 optionName = "emblem_change_color";
