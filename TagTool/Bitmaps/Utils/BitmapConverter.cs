@@ -161,6 +161,10 @@ namespace TagTool.Bitmaps.Utils
                 }
 
                 var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
+
+                if (bitmap.Images[imageIndex].Format == BitmapFormat.Ctx1 && bitmap.Images[imageIndex].Type == BitmapType.Array)
+                    newFormat = BitmapFormat.A8R8G8B8;
+
                 resultBitmap.UpdateFormat(newFormat);
 
                 if (BitmapUtils.RequiresDecompression(resultBitmap.Format, (uint)resultBitmap.Width, (uint)resultBitmap.Height))
@@ -427,7 +431,7 @@ namespace TagTool.Bitmaps.Utils
             if (actualHeight < 1)
                 actualHeight = 1;
             bool requireDecompression = BitmapUtils.RequiresDecompression(BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format), (uint)definition.Width, (uint)definition.Height);
-            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, requireDecompression, version);
+            finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, bitmap.Images[imageIndex].Type, requireDecompression, version);
 
             resultStream.Write(finalData, 0, finalData.Length);
         }
