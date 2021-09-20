@@ -136,6 +136,11 @@ namespace TagTool.BlamFile
                         JpegImage = reader.ReadBytes(MapImage.JpegSize);
                         break;
 
+                    case "":
+                        if (Version == CacheVersion.HaloReach && Scenario != null)
+                            reader.SeekTo(reader.Position + 13272);
+                        break;
+
                     case "scnd":
                     case "scnc":
                     case "flmh":
@@ -145,7 +150,7 @@ namespace TagTool.BlamFile
                     case "mps2":
                     case "chrt":
                     default:
-                        throw new NotImplementedException($"BLF chunk type {header.Signature.ToString()} not implemented!");
+                        throw new NotImplementedException($"BLF chunk type {header.Signature} not implemented!");
                 }
             }
 
@@ -307,7 +312,7 @@ namespace TagTool.BlamFile
                                 Format = EndianFormat.LittleEndian;
                             break;
                         default:
-                            throw new NotImplementedException($"Conversion from Halo 3 to {targetVersion.ToString()} not supported");
+                            throw new NotImplementedException($"Conversion from Halo 3 to {targetVersion} not supported");
                     }
                     break;
 
@@ -318,8 +323,24 @@ namespace TagTool.BlamFile
                         Format = EndianFormat.LittleEndian;
                     return;
 
+                case CacheVersion.HaloReach:
+                    switch (targetVersion)
+                    {
+                        case CacheVersion.Halo3ODST:
+                        case CacheVersion.HaloOnlineED:
+                        case CacheVersion.HaloOnline106708:
+                            ConvertReachToODSTScenarioChunk();
+                            Version = targetVersion;
+                            if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
+                                Format = EndianFormat.LittleEndian;
+                            break;
+                        default:
+                            throw new NotImplementedException($"Conversion from {Version} to {targetVersion} not supported");
+                    }
+                    break;
+
                 default:
-                    throw new NotImplementedException($"Conversion from {Version.ToString()} to {targetVersion.ToString()} not supported");
+                    throw new NotImplementedException($"Conversion from {Version} to {targetVersion} not supported");
             }
         }
 
@@ -335,7 +356,7 @@ namespace TagTool.BlamFile
 
             for(int i = 0; i < 9; i++)
             {
-                BlfScenarioInsertion ins = null;
+                BlfScenarioInsertion ins;
                 if( i < 4)
                     ins = Scenario.InsertionsH3[i];
                 else
@@ -345,6 +366,33 @@ namespace TagTool.BlamFile
                 Scenario.InsertionsODST[i] = ins;
             }
             Scenario.Length = 0x98C0; 
+        }
+
+        private void ConvertReachToODSTScenarioChunk()
+        {
+            if (!ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
+                return;
+
+            Scenario.InsertionsODST = new BlfScenarioInsertion[9];
+
+            for (int i = 0; i < 9; i++)
+            {
+                BlfScenarioInsertion ins;
+                if (i < 9)
+                    ins = Scenario.InsertionsReach[i];
+                else
+                    ins = new BlfScenarioInsertion();
+
+                Scenario.InsertionsODST[i] = ins;
+            }
+            Scenario.Length = 0x98C0;
+            Scenario.MajorVersion = 3;
+            Scenario.MinorVersion = 1;
+            Scenario.InsertionsReach = null;
+            Scenario.Pad = 0;
+            // shift one to match ODST MapFlags
+            int mapFlagShift = (int)Scenario.MapFlags;
+            Scenario.MapFlags = (BlfScenarioFlags)(mapFlagShift >> 1);
         }
     }
 
@@ -442,6 +490,7 @@ namespace TagTool.BlamFile
 
     [TagStructure(Size = 0x4D44, Align = 0x1, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x98B4, Align = 0x1, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0xCC98, Align = 0x1, MinVersion = CacheVersion.HaloReach)]
     public class BlfScenario : BlfChunkHeader
     {
         public int MapId;
@@ -475,12 +524,16 @@ namespace TagTool.BlamFile
         [TagField(Length = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         public BlfScenarioInsertion[] InsertionsH3;
 
-        [TagField(Length = 0x9, MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 0x9, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public BlfScenarioInsertion[] InsertionsODST;
+
+        [TagField(Length = 0xC, MinVersion = CacheVersion.HaloReach)]
+        public BlfScenarioInsertion[] InsertionsReach;
     }
 
     [TagStructure(Size = 0xF08, Align = 0x1, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0xF10, Align = 0x1, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0xF88, Align = 0x1, MinVersion = CacheVersion.HaloReach)]
     public class BlfScenarioInsertion
     {
         public byte Visible;

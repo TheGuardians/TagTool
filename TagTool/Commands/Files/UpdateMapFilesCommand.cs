@@ -76,6 +76,9 @@ namespace TagTool.Commands.Files
                                     case 0x9A01:
                                         version = CacheVersion.Halo3ODST;
                                         break;
+                                    case 0xCDD9:
+                                        version = CacheVersion.HaloReach;
+                                        break;
                                     default:
                                         throw new Exception("Unexpected map info file size");
                                 }
@@ -164,6 +167,9 @@ namespace TagTool.Commands.Files
                                         break;
                                     case 0x9A01:
                                         version = CacheVersion.Halo3ODST;
+                                        break;
+                                    case 0xCDD9:
+                                        version = CacheVersion.HaloReach;
                                         break;
                                     default:
                                         throw new Exception("Unexpected map info file size");
