@@ -724,9 +724,6 @@ namespace TagTool.Bitmaps
         {
             switch (format)
             {
-                case BitmapFormat.Ctx1:
-                    return BitmapFormat.Dxn;
-
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.ReachDxnMonoAlpha:
                 case BitmapFormat.Dxt5a:
@@ -745,7 +742,8 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.ReachDxt5aMono:
                 case BitmapFormat.Y16:
                     return BitmapFormat.Y8;
-
+            
+                case BitmapFormat.Ctx1:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.V8U8:
@@ -780,8 +778,9 @@ namespace TagTool.Bitmaps
 
             if(format == BitmapFormat.Ctx1)
             {
-                data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
-                format = BitmapFormat.Dxn;
+                data = ConvertNonMultipleBlockSizeBitmap(data, width, height, format);
+                data = BitmapDecoder.EncodeBitmap(data, destinationFormat, (int)width, (int)height);
+                format = destinationFormat;
             }
             else if(format != destinationFormat)
             {
