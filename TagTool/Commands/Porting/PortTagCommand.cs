@@ -923,7 +923,17 @@ namespace TagTool.Commands.Porting
 
 				case ScenarioLightmap sLdT:
 					blamDefinition = ConvertScenarioLightmap(cacheStream, blamCacheStream, resourceStreams, blamTag.Name, sLdT);
-					break;
+                    //fixup lightmap bsp references
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        for (short i = 0; i < sLdT.LightmapDataReferences.Count; i++)
+                        {
+                            var lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData);
+                            lbsp.BspIndex = i;
+                            CacheContext.Serialize(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData, lbsp);
+                        }
+                    }
+                    break;
 
 				case ScenarioLightmapBspData Lbsp:
 					blamDefinition = ConvertScenarioLightmapBspData(Lbsp);
