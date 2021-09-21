@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
@@ -20,7 +21,8 @@ namespace TagTool.Commands.RenderMethods
                  "SetArgument",
                  "Sets the value(s) of the specified argument in the render_method.",
 
-                 "SetArgument <Name> [Arg1 Arg2 Arg3 Arg4]",
+                 "SetArgument <Name> [Arg1 Arg2 Arg3 Arg4]\n"+
+				 "SetArgument Booleans flag,flag,flag,flag...",
 
                  "Sets the value(s) of the specified argument in the render_method.")
         {
@@ -121,6 +123,43 @@ namespace TagTool.Commands.RenderMethods
 
             var argumentName = args[0];
             var values = new List<float>();
+            var properties = Definition.ShaderProperties[0];
+
+            using (var cacheStream = Cache.OpenCacheRead())
+                template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
+
+
+            if (argumentName.ToLower() == "booleans")
+            {
+                Console.WriteLine();
+                var names = args[1].ToLower().Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries).ToList();
+                var accumulator = 0;
+                for (int i = 0; i < template.BooleanParameterNames.Count; i++)
+                {
+                    var nameStr = Cache.StringTable.GetString(template.BooleanParameterNames[i].Name);
+                    var namesIdx = names.IndexOf(nameStr.ToLower());
+                    
+                    if (namesIdx > -1)
+                    {
+                        accumulator += 1 << i;
+                        names.RemoveAt(namesIdx);
+                        Console.Write("   [X] ");
+                    }
+                    else Console.Write("   [ ] ");
+                    Console.WriteLine(nameStr);
+                }
+
+                if (names.Count > 0)
+                {
+                    Console.WriteLine();
+                    new TagToolWarning($"Flag(s) not found: {String.Join(", ", names)}");
+                }
+
+                properties.BooleanConstants = (uint)accumulator;
+
+                return true;
+            }
+
 
             while (args.Count > 1)
             {
@@ -130,11 +169,6 @@ namespace TagTool.Commands.RenderMethods
                 values.Add(value);
                 args.RemoveAt(1);
             }
-
-            var properties = Definition.ShaderProperties[0];
-
-            using (var cacheStream = Cache.OpenCacheRead())
-                template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
 
             var argumentIndex = -1;
 
