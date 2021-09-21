@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using TagTool.Commands.Bitmaps;
 using TagTool.Commands.Bipeds;
+using TagTool.Commands.Decorators;
 using TagTool.Commands.Video;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.CollisionModels;
@@ -68,6 +69,10 @@ namespace TagTool.Commands.Editing
                         CollisionModelContextFactory.Populate(commandContext, cache, tag, (CollisionModel)definition);
                         break;
 
+                    case "dctr":
+                        DecoratorSetContextFactory.Populate(commandContext, cache, tag, (DecoratorSet)definition);
+                        break;
+                        
                     case "forg":
                         ForgeContextFactory.Populate(commandContext, cache, tag, (ForgeGlobalsDefinition)definition);
                         break;
