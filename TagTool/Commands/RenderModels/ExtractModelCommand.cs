@@ -72,7 +72,7 @@ namespace TagTool.Commands.RenderModels
 
             // Extract model and bitmaps (if requested)
             ModelExtractor extractor = new ModelExtractor(Cache, Definition);
-            if (!extractor.Export(exportFileFormat, exportFilePath, exportBitmapsFolder, filterVariant))
+            if (!extractor.Export(exportFileFormat, exportFilePath, exportBitmapsFolder, modelVariant))
                 return new TagToolError(CommandError.OperationFailed, "Export failed");
 
             return true;
