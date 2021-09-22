@@ -928,9 +928,12 @@ namespace TagTool.Commands.Porting
                     {
                         for (short i = 0; i < sLdT.LightmapDataReferences.Count; i++)
                         {
-                            var lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData);
-                            lbsp.BspIndex = i;
-                            CacheContext.Serialize(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData, lbsp);
+                            if(sLdT.LightmapDataReferences[i].LightmapBspData != null)
+                            {
+                                var lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData);
+                                lbsp.BspIndex = i;
+                                CacheContext.Serialize(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData, lbsp);
+                            }
                         }
                     }
                     break;
