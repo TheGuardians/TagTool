@@ -1203,7 +1203,7 @@ namespace TagTool.Commands.Porting
                         }
                 }
             }
-            if (OptionChanged("terrain", "material_3", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf))
+            if (OptionChanged("terrain", "material_3", out optionIndex, blamRmt2Descriptor, edRmt2Descriptor, rmdf) && BlamCache.Version < CacheVersion.HaloReach)
             {
                 // if the fourth material is new, set its bitmaps to be that of the first
                 if (blamRmt2Descriptor.Options[optionIndex] == 0 && edRmt2Descriptor.Options[optionIndex] != 0)
