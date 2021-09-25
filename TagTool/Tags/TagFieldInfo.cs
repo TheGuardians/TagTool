@@ -189,7 +189,6 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(CachedTag) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Beta, CacheVersion.Halo2Vista):
 				case TypeCode.Object when attr.Length == 0 && type == typeof(byte[]) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Beta, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(Rectangle2d):
-                case TypeCode.Object when type == typeof(RealRectangle3d):
                 case TypeCode.Object when type == typeof(RealEulerAngles2d):
 				case TypeCode.Object when type == typeof(RealPoint2d):
 				case TypeCode.Object when type == typeof(RealVector2d):
@@ -223,7 +222,8 @@ namespace TagTool.Tags
 					return 0x14;
 
                 case TypeCode.Object when type == typeof(RealBoundingBox):
-                    return 0x18;
+				case TypeCode.Object when type == typeof(RealRectangle3d):
+					return 0x18;
 
 				case TypeCode.Object when type == typeof(RealMatrix4x3):
 					return 0x30;
