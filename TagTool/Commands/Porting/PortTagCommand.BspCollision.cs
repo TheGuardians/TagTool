@@ -60,18 +60,21 @@ namespace TagTool.Commands.Porting
                 foreach (var instancedGeometry in resourceDefinition.InstancedGeometry)
                 {
                     instancedGeometry.CollisionInfo = ConvertCollisionBsp(instancedGeometry.CollisionInfo);
-                    if (instancedGeometry.CollisionGeometries != null)
+                    if (instancedGeometry.CollisionGeometries != null || instancedGeometry.CollisionGeometries.Count == 0)
                     {
                         for (int i = 0; i < instancedGeometry.CollisionGeometries.Count; i++)
                             instancedGeometry.CollisionGeometries[i] = ConvertCollisionBsp(instancedGeometry.CollisionGeometries[i]);
                     }
 
-                    if(instancedGeometry.CollisionMoppCodes == null)
+                    if(instancedGeometry.CollisionMoppCodes == null || instancedGeometry.CollisionMoppCodes.Count == 0)
                     {
-                        var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
-                        moppCode.Data.AddressType = CacheAddressType.Data;
-                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Data);
-                        instancedGeometry.CollisionMoppCodes.Add(moppCode);
+                        if (instancedGeometry.CollisionInfo.Surfaces.Count > 0)
+                        {
+                            var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
+                            moppCode.Data.AddressType = CacheAddressType.Data;
+                            instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
+                            instancedGeometry.CollisionMoppCodes.Add(moppCode);
+                        }
                     }
                 }
 

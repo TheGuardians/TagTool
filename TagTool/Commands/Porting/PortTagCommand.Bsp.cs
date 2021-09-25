@@ -96,6 +96,24 @@ namespace TagTool.Commands.Porting
             return sbsp;
         }
 
+        public CollisionBspPhysicsDefinition ConvertCollisionBspPhysicsReach(CollisionBspPhysicsReach bspPhysicsReach)
+        {
+            var bspPhysics = new CollisionBspPhysicsDefinition();
+            bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
+            {
+                ReferencedObject = new Havok.HkpReferencedObject(),
+                Type = 27,
+                Scale = bspPhysicsReach.MoppBvTreeShape.MoppScale,
+            };
+
+            if (bspPhysicsReach.GeometryShape.Count > 0)
+                bspPhysics.GeometryShape = bspPhysicsReach.GeometryShape[0];
+            else if (bspPhysicsReach.TransformedGeometryShape.Count > 0)
+                bspPhysics.GeometryShape = bspPhysicsReach.TransformedGeometryShape[0].GeometryShape;
+
+            return bspPhysics;
+        }
+
         void FixupReachInstancedGeometryInstances(ScenarioStructureBsp sbsp)
         {
             sbsp.InstancedGeometryInstanceNames.Clear();
@@ -106,30 +124,13 @@ namespace TagTool.Commands.Porting
             for(int i = 0; i < sbsp.InstancedGeometryInstances.Count; i++)
             {
                 var instance = sbsp.InstancedGeometryInstances[i];
-
-                instance.BspPhysics = instance.BspPhysicsReach;
-
-                /*
-                RealQuaternion halfExtents = new RealQuaternion((instance.Bounds.X1 - instance.Bounds.X0) / 2, (instance.Bounds.Y1 - instance.Bounds.Y0) / 2, (instance.Bounds.Z1 - instance.Bounds.Z0) / 2);
-                RealQuaternion center = new RealQuaternion(instance.Bounds.X1 - halfExtents.I, instance.Bounds.Y1 - halfExtents.J, instance.Bounds.Z1 - halfExtents.K);
-           
-                var bspPhysics = new CollisionBspPhysicsDefinition();
-                bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
+                if (instance.BspPhysicsReach.Count > 0)
                 {
-                    ReferencedObject = new Havok.HkpReferencedObject(),
-                    Type = 27
-                };
-
-                bspPhysics.GeometryShape = new CollisionGeometryShape()
-                {
-                    AABB_Center = center,
-                    AABB_Half_Extents = halfExtents,
-                    BspIndex = 0, // TODO
-                    CollisionGeometryShapeType = 2,
-                    CollisionGeometryShapeKey = (ushort)i,
-                    ReferencedObject = new Havok.HkpReferencedObject()
-                };
-                */               
+                    instance.BspPhysics = new List<CollisionBspPhysicsDefinition>()
+                    {
+                        ConvertCollisionBspPhysicsReach(instance.BspPhysicsReach[0])
+                    };
+                }
             }
 
             // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision

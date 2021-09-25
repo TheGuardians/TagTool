@@ -136,11 +136,14 @@ namespace TagTool.Havok
     {
         public PlatformUnsignedValue VTableAddress;
         public bool DisableWelding;
-        [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public sbyte CollectionType;
+        [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Padding2;
-
-        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding3;
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+        public byte[] Padding4;
     }
 
     [TagStructure(Size = 0xC, Platform = CachePlatform.Original)]

@@ -173,7 +173,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown13;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<CollisionBspPhysicsDefinition> BspPhysicsReach;
+        public List<CollisionBspPhysicsReach> BspPhysicsReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public byte Unknown17a;
         [TagField(MinVersion = CacheVersion.HaloReach)]

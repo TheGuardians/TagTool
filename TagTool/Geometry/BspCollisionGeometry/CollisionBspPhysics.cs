@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Havok;
 using TagTool.Tags;
 
@@ -13,6 +14,60 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public CollisionGeometryShape GeometryShape;
         [TagField(Align = 16)]
         public CMoppBvTreeShape MoppBvTreeShape;
+    }
+
+    [TagStructure(Size = 0x70, Align = 16)]
+    public class CollisionBspPhysicsReach : TagStructure
+    {
+        public MoppBvTreeShapeStruct MoppBvTreeShape;
+        public TagBlock<CollisionGeometryShape> GeometryShape;
+        public TagBlock<TransformedCollisionGeometryShape> TransformedGeometryShape;
+        [TagField(Length = 8, Flags = TagFieldFlags.Padding)]
+        public byte Padding1;
+
+        [TagStructure(Size = 0x50)]
+        public class MoppBvTreeShapeStruct : TagStructure
+        {
+            public HavokShapeStruct20102 MoppBvTreeShape;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public int MoppCodePointer;
+            public int MoppDataSkip;
+            public int MoppDataSize;
+            public RealVector3d CodeInfoCopy;
+            public float HavokWCodeInfoCopy;
+            public int ChildShapeVtable;
+            public int ChildShapePointer;
+            public int ChildSize;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+            public float MoppScale;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
+
+            [TagStructure(Size = 0x10)]
+            public class HavokShapeStruct20102 : TagStructure
+            {
+                public int FieldPointerSkip;
+                public short Size;
+                public short Count;
+                public int UserData;
+                public int Type;
+            }
+        }
+
+        [TagStructure(Size = 0x90)]
+        public class TransformedCollisionGeometryShape : HkpShapeCollection
+        {
+            // transposed transform hkRotation + hkVector4
+            [TagField(Align = 16)]
+            public RealQuaternion TransposedTransformX;
+            public RealQuaternion TransposedTransformY;
+            public RealQuaternion TransposedTransformZ;
+            public CollisionGeometryShape GeometryShape;
+        }
     }
 
     [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo2Vista)]

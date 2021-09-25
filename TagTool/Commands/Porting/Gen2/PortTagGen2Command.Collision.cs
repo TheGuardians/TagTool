@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry.BspCollisionGeometry;
@@ -50,7 +51,7 @@ namespace TagTool.Commands.Porting.Gen2
 					// Convert Bsp Physics
 					for (int i = 0; i < gen2Permutation.BspPhysics.Count; i++)
 					{
-						permutation.BspMoppCodes.Add(ConvertTagMoppCode(gen2Permutation.BspPhysics[i].MoppCodes));
+						permutation.BspMoppCodes.Add(ConvertTagMoppCode(gen2Permutation.BspPhysics[i].MoppCodes.ToList()));
 						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(tag, gen2Permutation.BspPhysics[0]));
 					}
 
