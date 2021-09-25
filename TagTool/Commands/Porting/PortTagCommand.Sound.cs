@@ -27,6 +27,9 @@ namespace TagTool.Commands.Porting
         {
             public Sound Definition;
             public byte[] Data;
+            // a list of functions that will be run after conversion
+            // used for operations like string id conversion which cannot be done concurrently
+            public List<Action> PostConversionOperations = new List<Action>();
         }
 
         private void WaitForPendingSoundConversion()
@@ -43,8 +46,9 @@ namespace TagTool.Commands.Porting
             {
                 var sound = result.Definition;
                 var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(result.Data);
-                var resourceReference = CacheContext.ResourceCache.CreateSoundResource(resourceDefinition);
-                sound.Resource = resourceReference;
+                sound.Resource = CacheContext.ResourceCache.CreateSoundResource(resourceDefinition);
+                // do post conversion operations
+                result.PostConversionOperations.ForEach(op => op());
                 return sound;
             }
             else
@@ -82,7 +86,7 @@ namespace TagTool.Commands.Porting
                 finally
                 {
                     ConcurrencyLimiter.Release();
-                }        
+                }
             }));
 
             return sound;
@@ -90,6 +94,9 @@ namespace TagTool.Commands.Porting
 
         private SoundConversionResult ConvertSoundInternal(Sound sound, string blamTag_Name)
         {
+            var result = new SoundConversionResult();
+            result.Definition = sound;
+
             //
             // Convert Sound Tag Data
             //
@@ -180,7 +187,8 @@ namespace TagTool.Commands.Porting
                 //
 
                 var pitchRange = BlamSoundGestalt.PitchRanges[pitchRangeIndex];
-                pitchRange.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name);
+
+                result.PostConversionOperations.Add(() => pitchRange.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name));
                 pitchRange.PitchRangeParameters = BlamSoundGestalt.PitchRangeParameters[pitchRange.PitchRangeParametersIndex];
                 pitchRange.RuntimePermutationFlags = -1;
                 //I suspect this unknown7 to be a flag to tell if there is a Unknownblock in extrainfo. (See a sound in udlg for example)
@@ -218,7 +226,7 @@ namespace TagTool.Commands.Porting
 
                     var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
-                    permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
+                    result.PostConversionOperations.Add(() => permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name));
                     permutation.SkipFraction = permutation.EncodedSkipFraction / 32767.0f;
                     permutation.GainHO = (float)permutation.Gain;
                     permutation.PermutationChunks = new List<PermutationChunk>();
@@ -366,11 +374,8 @@ namespace TagTool.Commands.Porting
 
             sound.Unknown12 = 0;
 
-            return new SoundConversionResult()
-            {
-                Data = soundDataAggregate.ToArray(),
-                Definition = sound,
-            };
+            result.Data = soundDataAggregate.ToArray();
+            return result;
         }
 
         private SoundLooping ConvertSoundLooping(SoundLooping soundLooping)

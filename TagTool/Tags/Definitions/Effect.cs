@@ -246,10 +246,15 @@ namespace TagTool.Tags.Definitions
 
                     public EmissionShapeValue EmissionShape;
                     public FlagsValue EmitterFlags;
-                    public short Unknown1;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]
-                    public float Unknown2;
+                    public byte Flags;
+
+                    public ParticleModelAxis ModelAxis;
+                    public ParticleReferenceAxis ReferenceAxis;
+
+                    [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x3, Flags = Padding)]
+                    public byte[] Padding0;
 
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public CachedTag CustomShape;
@@ -364,6 +369,21 @@ namespace TagTool.Tags.Definitions
                         PlanarOrbit,
                         SphereOrbit,
                         PlaneSpray
+                    }
+
+                    public enum ParticleModelAxis : byte
+                    {
+                        Constant,
+                        Cone,
+                        Disc,
+                        Globe
+                    }
+
+                    public enum ParticleReferenceAxis : byte
+                    {
+                        X,
+                        Y,
+                        Z
                     }
 
                     [Flags]

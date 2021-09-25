@@ -20,7 +20,7 @@ namespace TagTool.Commands.Models
         public static void Populate(CommandContext context, GameCache cache, CachedTag tag, Model model)
         {
             context.AddCommand(new ListVariantsCommand(cache, model));
-            context.AddCommand(new ExtractModelCommand(cache, model));
+            context.AddCommand(new ExtractModelCommand(cache, tag, model));
             context.AddCommand(new ExtractBitmapsCommand(cache, tag, model));
         }
     }

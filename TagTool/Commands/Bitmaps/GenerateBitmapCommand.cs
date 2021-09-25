@@ -38,6 +38,7 @@ namespace TagTool.Commands.Tags
 				return new TagToolError(CommandError.ArgCount);
 
 			var imagePath = args[1];
+            bool folder = false;
 
             List<FileInfo> fileList = new List<FileInfo>();
 
@@ -46,6 +47,7 @@ namespace TagTool.Commands.Tags
                 foreach (var file in Directory.GetFiles(imagePath, "*.dds"))
                 {
                     fileList.Add(new FileInfo(file));
+                    folder = true;
                 }
             }
             else if (File.Exists(imagePath))
@@ -64,12 +66,12 @@ namespace TagTool.Commands.Tags
 
                 var tagname = args[0];
 
-                if (fileList.Count > 1)
+                if (folder)
                 {
                     if (!tagname.EndsWith("\\"))
                         tagname += "\\";
 
-                    tagname += file.Name.Substring(0,file.Name.Length-4);
+                    tagname += file.Name.Split('.')[0];
                 }
 
                 using (var stream = Cache.OpenCacheReadWrite())

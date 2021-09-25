@@ -14,7 +14,7 @@ namespace TagTool.Tags
         public TagFunction Function = new TagFunction { Data = new byte[0] };
 
         public float RuntimeMConstantValue;
-        public byte RuntimeMFlags;
+        public EditablePropertiesFlags RuntimeMFlags;
 
         [TagField(Flags = Padding, Length = 3)]
         public byte[] Unused = new byte[3];
@@ -50,7 +50,21 @@ namespace TagTool.Tags
             None,
             Plus,
             Times
-        } 
+        }
+
+        [Flags]
+        public enum EditablePropertiesFlags : byte
+        {
+            None = 0,
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3,
+            Bit4 = 1 << 4,
+            IsConstant = 1 << 5,
+            Bit6 = 1 << 6,
+            ConstantOverTime = 1 << 7
+        }
 
         [Flags]
         public enum ForceFlagsValue : byte

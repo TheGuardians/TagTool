@@ -30,7 +30,7 @@ namespace TagTool.Commands.Modding
                 return new TagToolError(CommandError.ArgCount);
             
             else if (args.Count == 0)
-                tagCacheIndex = new TagToolChoicePrompt(Cache.BaseModPackage.CacheNames, indent: 3).Prompt();             
+                tagCacheIndex = new TagToolChoicePrompt.Single(Cache.BaseModPackage.CacheNames, indent: 3).Prompt();             
 
             else if(!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");              

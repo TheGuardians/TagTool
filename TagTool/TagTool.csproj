@@ -364,6 +364,8 @@
     <Compile Include="Commands\Common\ListVariablesCommand.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
     <Compile Include="Commands\Common\SetVariableCommand.cs" />
+    <Compile Include="Commands\Decorators\ExtractModelCommand.cs" />
+    <Compile Include="Commands\Decorators\DecoratorSetContextFactory.cs" />
     <Compile Include="Commands\Editing\SwapBlockElementCommand.cs" />
     <Compile Include="Commands\Editing\MoveBlockElementCommand.cs" />
     <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
