@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TagTool.Animations;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Damage;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -403,7 +404,6 @@ namespace TagTool.Tags.Definitions
                 BestSmallKeyframe,
                 BestLargeKeyframe
             }
-
             public enum FrameEventType : short
             {
                 PrimaryKeyframe,
@@ -416,29 +416,27 @@ namespace TagTool.Tags.Definitions
                 TransitionC,
                 TransitionD,
                 BothFeetShuffle,
+                BodyImpact               
+            }
+
+            public enum FrameEventTypeHO : short
+            {
+                PrimaryKeyframe,
+                SecondaryKeyframe,
+                TertiaryKeyframe,
+                LeftFoot,
+                RightFoot,
+                AllowInterruption,
+                TransitionA,
+                TransitionB,
+                TransitionC,
+                TransitionD,
+                BothFeetShuffle,
                 BodyImpact,
-                LeftFootLock,
-                LeftFootUnlock,
-                RightFootLock,
-                RightFootUnlock,
-                BlendRangeMarker,
-                StrideExpansion,
-                StrideContraction,
+                Unknown12,
+                Unknown13,
                 RagdollKeyframe,
-                DropWeaponKeyframe,
-                MatchA,
-                MatchB,
-                MatchC,
-                MatchD,
-                JetpackClosed,
-                JetpackOpen,
-                SoundEvent,
-                EffectEvent,
-                LeftHand,
-                RightHand,
-                StartBAMF,
-                EndBAMF,
-                Hide
+                DropWeaponKeyframe
             }
 
             public enum FrameEventTypeReach : short
@@ -475,8 +473,10 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class FrameEvent : TagStructure
 			{
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FrameEventType Type;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+                public FrameEventTypeHO TypeHO;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public FrameEventTypeReach ReachType;
                 public short Frame;
@@ -498,9 +498,9 @@ namespace TagTool.Tags.Definitions
                 public short Frame;
                 public StringId MarkerName;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public byte DamageEffectReportingType;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = TagFieldFlags.Padding, Length = 3)]
-                public byte[] Pad = new byte[3];
+                public DamageReportingType DamageEffectReportingType;
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 3)]
+                public byte[] Unknown = new byte[3];
             }
 
             public enum DialogueEventType : short

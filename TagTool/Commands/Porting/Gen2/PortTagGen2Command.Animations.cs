@@ -123,7 +123,7 @@ namespace TagTool.Commands.Porting.Gen2
                 foreach (var gen2frame in gen2anim.FrameEventsAbcdcc)
                     Frames.Add(new ModelAnimationGraph.Animation.FrameEvent()
                     {
-                        Type = (ModelAnimationGraph.Animation.FrameEventType)gen2frame.Type,
+                        TypeHO = (ModelAnimationGraph.Animation.FrameEventTypeHO)gen2frame.Type,
                         Frame = gen2frame.Frame
                     });
 
