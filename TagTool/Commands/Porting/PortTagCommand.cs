@@ -269,7 +269,7 @@ namespace TagTool.Commands.Porting
                     result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
 
                     if (result == null)
-                    new TagToolWarning($"null tag allocated in cache");
+                    new TagToolWarning($"null tag allocated for reference \"{blamTag.Name}.{blamTag.Group}\"");
 
                     Flags = oldFlags;
                 }

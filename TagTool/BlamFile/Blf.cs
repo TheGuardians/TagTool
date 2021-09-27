@@ -365,7 +365,7 @@ namespace TagTool.BlamFile
                 }
                 Scenario.InsertionsODST[i] = ins;
             }
-            Scenario.Length = 0x98C0; 
+            Scenario.Length = 0x98C0;
         }
 
         private void ConvertReachToODSTScenarioChunk()
@@ -385,14 +385,13 @@ namespace TagTool.BlamFile
 
                 Scenario.InsertionsODST[i] = ins;
             }
-            Scenario.Length = 0x98C0;
+            //int mapFlagShift = (int)Scenario.MapFlags;
+            //Scenario.MapFlags = (BlfScenarioFlags)(mapFlagShift >> 1);
             Scenario.MajorVersion = 3;
             Scenario.MinorVersion = 1;
             Scenario.InsertionsReach = null;
             Scenario.Pad = 0;
-            // shift one to match ODST MapFlags
-            int mapFlagShift = (int)Scenario.MapFlags;
-            Scenario.MapFlags = (BlfScenarioFlags)(mapFlagShift >> 1);
+            Scenario.Length = 0x98C0;
         }
     }
 
@@ -417,20 +416,21 @@ namespace TagTool.BlamFile
     {
         Unknown0 = 0,
         Unknown1 = 1 << 0,
-        Visible = 1 << 1,
-        GeneratesFilm = 1 << 2,
-        IsMainmenu = 1 << 3,
-        IsCampaign = 1 << 4,
-        IsMultiplayer = 1 << 5,
-        IsDlc = 1 << 6,
-        Unknown8 = 1 << 7,
-        Unknown9 = 1 << 8,
-        IsFirefight = 1 << 9,
-        IsCinematic = 1 << 10,
-        IsForgeOnly = 1 << 11,
-        Unknown13 = 1 << 12,
-        Unknown14 = 1 << 13,
-        Unknown15 = 1 << 14
+        Unknown2 = 1 << 1,
+        Visible = 1 << 2,
+        GeneratesFilm = 1 << 3,
+        IsMainmenu = 1 << 4,
+        IsCampaign = 1 << 5,
+        IsMultiplayer = 1 << 6,
+        IsDlc = 1 << 7,
+        Unknown8 = 1 << 8,
+        Unknown9 = 1 << 9,
+        IsFirefight = 1 << 10,
+        IsCinematic = 1 << 11,
+        IsForgeOnly = 1 << 12,
+        Unknown13 = 1 << 13,
+        Unknown14 = 1 << 14,
+        Unknown15 = 1 << 15
     }
 
     public enum BlfAuthenticationType : byte
@@ -589,9 +589,11 @@ namespace TagTool.BlamFile
         public BlfModPackageReference(BlfModPackageReferenceV1 v1) : this()
         {
             Hash = v1.Hash;
-            Metadata = new ModPackageMetadata();
-            Metadata.Name = v1.Name;
-            Metadata.Author = v1.Author;
+            Metadata = new ModPackageMetadata
+            {
+                Name = v1.Name,
+                Author = v1.Author
+            };
         }
     }
 

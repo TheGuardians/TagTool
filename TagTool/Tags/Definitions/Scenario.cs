@@ -18,12 +18,15 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public byte MapTypePadding;
 
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        public byte MapTypePaddingReach;
+
         public ScenarioMapType MapType;
 
         [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public byte MapTypePaddingMCC;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public ScenarioMapSubType MapSubType;
 
         public ScenarioFlags Flags;
@@ -4333,10 +4336,13 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public RealPoint3d CubemapPosition;
             public CubemapResolutionEnum CubemapResolution;
+
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
+
             [TagField(MinVersion = CacheVersion.Halo4)]
             public ManualbspFlagsReferences ManualBspFlags;
+
             public List<CubemapReferencePointsBlock> ReferencePoints;
 
             public enum CubemapResolutionEnum : short

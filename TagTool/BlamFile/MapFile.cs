@@ -184,7 +184,6 @@ namespace TagTool.BlamFile
                 MapFile map = new MapFile();
                 var header = new CacheFileHeaderGenHaloOnline();
 
-
                 map.Version = version;
                 map.EndianFormat = EndianFormat.LittleEndian;
                 map.MapVersion = CacheFileVersion.HaloOnline;
@@ -219,10 +218,12 @@ namespace TagTool.BlamFile
 
                 map.Header = header;
 
-                map.MapFileBlf = new Blf(version, CachePlatform.Original);
-                map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
-                map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
-                map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };
+                map.MapFileBlf = new Blf(version, CachePlatform.Original)
+                {
+                    StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, },
+                    Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 },
+                    EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 }
+                };
 
                 var scnrBlf = map.MapFileBlf.Scenario;
                 scnrBlf.MapId = scnr.MapId;
