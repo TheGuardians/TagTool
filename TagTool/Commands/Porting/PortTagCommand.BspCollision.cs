@@ -108,8 +108,15 @@ namespace TagTool.Commands.Porting
         {
             if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
-                if (!new CollisionBSPBuilder().generate_bsp(ref bsp, false))
+                var largebuilder = new LargeCollisionBSPBuilder();
+                var resizer = new ResizeCollisionBSP();
+
+                var largebsp = resizer.GrowCollisionBsp(bsp);
+
+                if(!largebuilder.generate_bsp(ref largebsp, false) || !resizer.collision_bsp_check_counts(largebsp))
                     new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
+
+                bsp = resizer.ShrinkCollisionBsp(largebsp);
             }
 
             bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;

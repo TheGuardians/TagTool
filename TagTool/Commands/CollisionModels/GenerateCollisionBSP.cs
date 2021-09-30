@@ -34,8 +34,16 @@ namespace TagTool.Commands.CollisionModels
                 {
                     for(int bsp_index = 0; bsp_index < Definition.Regions[region_index].Permutations[permutation_index].Bsps.Count; bsp_index++)
                     {
-                        var builder = new CollisionBSPBuilder();
-                        builder.generate_bsp(ref Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry, debug);
+                        var largebuilder = new LargeCollisionBSPBuilder();
+                        var resizer = new ResizeCollisionBSP();
+
+                        var bsp = Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry;
+                        var largebsp = resizer.GrowCollisionBsp(bsp);
+
+                        
+                        if (!largebuilder.generate_bsp(ref largebsp, debug) || !resizer.collision_bsp_check_counts(largebsp))
+                            continue;
+                        Definition.Regions[region_index].Permutations[permutation_index].Bsps[bsp_index].Geometry = resizer.ShrinkCollisionBsp(largebsp);
                     }
                 }
             }

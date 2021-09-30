@@ -2047,7 +2047,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             int pruned_nodes_count = 0;
             foreach (var node in Nodelist)
             {
-                if (node.FrontChild != 0xFFFFFFFF || node.BackChild != 0xFFFFFFFF)
+                if (node.FrontChild != -1 || node.BackChild != -1)
                 {
                     valid_node_array.Add(node_count++);
                 }
@@ -2112,7 +2112,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             Nodelist[absolute_node_index].BackChild = back_child_node_index;
 
             //if either of this node's children are not -1, return this node index, otherwise return -1
-            if (front_child_node_index != 0xFFFFFFFF || back_child_node_index != 0xFFFFFFFF)
+            if (front_child_node_index != -1 || back_child_node_index != -1)
                 return node_index;
             return back_child_node_index;
         }

@@ -234,10 +234,15 @@ namespace TagTool.Commands.CollisionModels
             }
 
             //build the collision bsp
-            var bsp_builder = new CollisionBSPBuilder();
+            var largebuilder = new LargeCollisionBSPBuilder();
+            var resizer = new ResizeCollisionBSP();
 
-            if (!bsp_builder.generate_bsp(ref collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry, debug))
+            var largebsp = resizer.GrowCollisionBsp(collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry);
+
+            if (!largebuilder.generate_bsp(ref largebsp, debug) || !resizer.collision_bsp_check_counts(largebsp))
                 return false;
+
+            collisionModel.Regions[0].Permutations[0].Bsps[0].Geometry = resizer.ShrinkCollisionBsp(largebsp);
 
             if (buildmopp)
             {

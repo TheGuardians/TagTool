@@ -63,13 +63,13 @@ namespace TagTool.Geometry.BspCollisionGeometry
             set => Value |= ((ulong)value & 0xffff);
         }
 
-        public int FrontChild
+        public int BackChild
         {
             get => (int)((Value >> 16) & 0xffffff);
             set => Value = (Value & 0xffffff000000ffffUL) | (((ulong)value & 0xffffff) << 16);
         }
 
-        public int BackChild
+        public int FrontChild
         {
             get => (int)((Value >> 40) & 0xffffff);
             set => Value = (Value & 0xffffffffffUL) | (((ulong)value & 0xffffff) << 40);

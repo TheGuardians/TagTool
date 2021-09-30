@@ -452,10 +452,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     int back_child_node_index = -1;
                     int front_child_node_index = -1;
 
-                    //check whether geometry fits within appropriate limits
-                    if (!collision_bsp_check_counts())
-                        return false;
-
                     //this function is recursive, and continues branching until no more 3d nodes can be made
                     if (build_bsp_tree_main(back_surface_array, ref back_child_node_index) && build_bsp_tree_main(front_surface_array, ref front_child_node_index))
                     {
@@ -542,59 +538,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     Console.WriteLine("###ERROR couldn't decide what to build.");
                     return false;
             }
-        }
-
-        public bool collision_bsp_check_counts()
-        {
-            int max_surfaces = 32767;
-            int max_edges = 65535;
-            int max_vertices = 65535;
-            int max_2drefs = 65535;
-            int max_2dnodes = 32767;
-            int max_3dnodes = 32767;
-            int max_planes = 65535;
-            int max_leaves = 32767;
-
-            if (Bsp.Surfaces.Count > max_surfaces)
-            {
-                new TagToolWarning($"Number of surfaces ({Bsp.Surfaces.Count}) exceeded the maximum allowable ({max_surfaces})");
-            }
-            if (Bsp.Vertices.Count > max_vertices)
-            {
-                Console.WriteLine($"###ERROR: Number of vertices ({Bsp.Vertices.Count}) exceeded the maximum allowable ({max_vertices})");
-                return false;
-            }
-            if (Bsp.Edges.Count > max_edges)
-            {
-                Console.WriteLine($"###ERROR: Number of edges ({Bsp.Edges.Count}) exceeded the maximum allowable ({max_edges})");
-                return false;
-            }
-            if (Bsp.Bsp2dReferences.Count > max_2drefs)
-            {
-                Console.WriteLine($"###ERROR: Number of bsp2dreferences ({Bsp.Bsp2dReferences.Count}) exceeded the maximum allowable ({max_2drefs})");
-                return false;
-            }
-            if (Bsp.Bsp2dNodes.Count > max_2dnodes)
-            {
-                Console.WriteLine($"###ERROR: Number of bsp2dnodes ({Bsp.Bsp2dNodes.Count}) exceeded the maximum allowable ({max_2dnodes})");
-                return false;
-            }
-            if (Bsp.Bsp3dNodes.Count > max_3dnodes)
-            {
-                Console.WriteLine($"###ERROR: Number of bsp3dnodes ({Bsp.Bsp3dNodes.Count}) exceeded the maximum allowable ({max_3dnodes})");
-                return false;
-            }
-            if (Bsp.Planes.Count > max_planes)
-            {
-                Console.WriteLine($"###ERROR: Number of planes ({Bsp.Planes.Count}) exceeded the maximum allowable ({max_planes})");
-                return false;
-            }
-            if (Bsp.Leaves.Count > max_leaves)
-            {
-                Console.WriteLine($"###ERROR: Number of leaves ({Bsp.Leaves.Count}) exceeded the maximum allowable ({max_leaves})");
-                return false;
-            }
-            return true;
         }
 
         public int surfaces_reset_for_leaf_building(ref surface_array_definition surface_array)
