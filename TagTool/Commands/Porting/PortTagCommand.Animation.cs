@@ -428,6 +428,17 @@ namespace TagTool.Commands.Porting
         {
             definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, blamCacheStream, resourceStreams, definition.ResourceGroups);
             
+            if(BlamCache.Version <= CacheVersion.Halo3ODST)
+            {
+                foreach (var animation in definition.Animations)
+                {
+                    foreach (var frameevent in animation.AnimationData.FrameEvents)
+                    {
+                        Enum.TryParse(frameevent.Type.ToString(), out frameevent.TypeHO);
+                    };
+                }
+            }
+
             if (BlamCache.Version == CacheVersion.HaloReach)
             {
                 //convert animations
@@ -457,7 +468,7 @@ namespace TagTool.Commands.Porting
                         effectevent.MarkerName = ConvertStringId(effectevent.MarkerName);
                     foreach(var frameevent in animation.AnimationData.FrameEvents)
                     {
-                        Enum.TryParse(frameevent.ReachType.ToString(), out frameevent.Type);
+                        Enum.TryParse(frameevent.ReachType.ToString(), out frameevent.TypeHO);
                     };
 
                 }

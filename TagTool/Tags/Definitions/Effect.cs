@@ -497,7 +497,7 @@ namespace TagTool.Tags.Definitions
 					{
                         public int ConstantPerParticleProperties;
                         public int ConstantOverTimeProperties;
-                        public int UsedParticleStates;
+                        public TagMapping.ParticleStatesFlags UsedParticleStates;
                         public List<Property> Properties;
                         public List<Function> Functions;
                         public List<Color> Colors;
