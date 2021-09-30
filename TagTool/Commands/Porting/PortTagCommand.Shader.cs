@@ -875,13 +875,16 @@ namespace TagTool.Commands.Porting
 
             foreach (EntryPoint entryPoint in Enum.GetValues(typeof(EntryPoint)))
             {
-                //EntryPointReach entryPointReach;
-                if ((((int)edRmt2.ValidEntryPoints >> (int)entryPoint) & 1) == 0/* || !Enum.TryParse(entryPoint.ToString(), out entryPointReach)*/)
+                if ((((int)edRmt2.ValidEntryPoints >> (int)entryPoint) & 1) == 0)
                     continue;
 
                 var table = new ParameterTable();
 
                 int entryIndex = (int)entryPoint;
+
+                if (entryIndex >= pixl.EntryPointShaders.Count)
+                    break; // prob in glps, todo
+
                 int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
                 int shaderCount = pixl.EntryPointShaders[entryIndex].Count;
                 int vertexShaderIndex = glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[entryIndex].ShaderIndex;
