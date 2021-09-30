@@ -1297,8 +1297,19 @@ namespace TagTool.Commands.Porting
 
         private T UpgradeStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
         {
-            if (BlamCache.Version >= CacheVersion.Halo3Retail)
+            if (BlamCache.Version >= CacheVersion.Halo3Retail && BlamCache.Version <= CacheVersion.HaloOnline700123)
                 return data;
+            else if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                switch (data)
+                {
+                    case SkyAtmParameters.AtmosphereProperty atmProperty:
+                        atmProperty.Name = ConvertStringId(atmProperty.ReachName);
+                        atmProperty.UnknownFlags = 65536;
+                        break;
+                }
+                return data;
+            }
 
             switch (data)
             {
