@@ -21,7 +21,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
     {
         public MoppBvTreeShapeStruct MoppBvTreeShape;
         public TagBlock<CollisionGeometryShape> GeometryShape;
-        public TagBlock<TransformedCollisionGeometryShape> TransformedGeometryShape;
+        public TagBlock<DecomposedPoopShape> PoopShape;
         [TagField(Length = 8, Flags = TagFieldFlags.Padding)]
         public byte Padding1;
 
@@ -58,14 +58,15 @@ namespace TagTool.Geometry.BspCollisionGeometry
             }
         }
 
+        // A collection of scaled hkpConvexVerticesShape (polyhedra in instanced geometry definition)
         [TagStructure(Size = 0x90)]
-        public class TransformedCollisionGeometryShape : HkpShapeCollection
+        public class DecomposedPoopShape : HkpShapeCollection
         {
-            // transposed transform hkRotation + hkVector4
             [TagField(Align = 16)]
-            public RealQuaternion TransposedTransformX;
-            public RealQuaternion TransposedTransformY;
-            public RealQuaternion TransposedTransformZ;
+            public RealQuaternion AabbCenter;
+            public RealQuaternion AabbHalfExtents;
+            public float Scale;
+            [TagField(Align = 16)]
             public CollisionGeometryShape GeometryShape;
         }
     }

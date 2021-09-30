@@ -68,7 +68,7 @@ namespace TagTool.Commands.Porting
 
                     if(instancedGeometry.CollisionMoppCodes == null || instancedGeometry.CollisionMoppCodes.Count == 0)
                     {
-                        if (instancedGeometry.CollisionInfo.Surfaces.Count > 0)
+                        if (instancedGeometry.CollisionInfo.Surfaces.Count > 0 && instancedGeometry.Polyhedra.Count > 0)
                         {
                             var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
                             moppCode.Data.AddressType = CacheAddressType.Data;
