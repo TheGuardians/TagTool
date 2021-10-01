@@ -413,9 +413,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"self_illumination\palettized_plasma":
                                 optionName = "plasma";
                                 break;
-                            case @"misc\default":
-                                optionName = "first_person_sometimes";
-                                break;
                             // Reach rmhg //
                             case @"self_illumination\palettized_depth_fade":
                                 optionName = "palettized_plasma";
