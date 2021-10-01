@@ -1134,7 +1134,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public TeamValue Team;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public sbyte TeamReach;
+            public TeamValueReach TeamReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ushort Unknown;
             public sbyte SpawnSequence;
@@ -1161,7 +1161,6 @@ namespace TagTool.Tags.Definitions
             public MultiplayerObjectRemappingPolicy RemappingPolicy;
 
             public sbyte TeleporterChannel;
-
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public sbyte TeleporterFlagsReach;
@@ -1199,7 +1198,7 @@ namespace TagTool.Tags.Definitions
             {
                 Both,
                 Symmetric,
-                Asymmetric,
+                Asymmetric
             }
 
             public enum TeamValue : short
@@ -1212,7 +1211,20 @@ namespace TagTool.Tags.Definitions
                 Yellow,
                 Brown,
                 Pink,
-                Neutral,
+                Neutral
+            }
+
+            public enum TeamValueReach : sbyte
+            {
+                Red,
+                Blue,
+                Green,
+                Orange,
+                Purple,
+                Yellow,
+                Brown,
+                Pink,
+                Neutral
             }
 
             public enum ShapeValue : sbyte
@@ -1220,7 +1232,7 @@ namespace TagTool.Tags.Definitions
                 None,
                 Sphere,
                 Cylinder,
-                Box,
+                Box
             }
 
             public enum MultiplayerObjectRemappingPolicy : sbyte

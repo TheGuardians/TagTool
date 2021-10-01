@@ -316,22 +316,22 @@ namespace TagTool.Commands.Porting
             {
                 scenario.Bipeds.Clear();
                 scenario.BipedPalette.Clear();
-                scenario.Vehicles.Clear();
-                scenario.VehiclePalette.Clear();
-                scenario.Weapons.Clear();
-                scenario.WeaponPalette.Clear();
-                scenario.Equipment.Clear();
-                scenario.EquipmentPalette.Clear();
-                scenario.Scenery.Clear();
-                scenario.SceneryPalette.Clear();
+                //scenario.Vehicles.Clear();
+                //scenario.VehiclePalette.Clear();
+                //scenario.Weapons.Clear();
+                //scenario.WeaponPalette.Clear();
+                //scenario.Equipment.Clear();
+                //scenario.EquipmentPalette.Clear();
+                //scenario.Scenery.Clear();
+                //scenario.SceneryPalette.Clear();
                 scenario.Terminals.Clear();
                 scenario.TerminalPalette.Clear();
                 scenario.Machines.Clear();
                 scenario.MachinePalette.Clear();
                 scenario.Controls.Clear();
                 scenario.ControlPalette.Clear();
-                scenario.Crates.Clear();
-                scenario.CratePalette.Clear();
+                //scenario.Crates.Clear();
+                //scenario.CratePalette.Clear();
                 scenario.Giants.Clear();
                 scenario.GiantPalette.Clear();
                 scenario.EffectScenery.Clear();
@@ -366,6 +366,52 @@ namespace TagTool.Commands.Porting
                 scenario.GlobalLighting = null;
                 scenario.PerformanceThrottles = null;
                 scenario.GamePerformanceThrottles = null;
+
+                scenario.ScenarioKillTriggers.Clear();
+
+                Dictionary<string, string> reachObjectives = new Dictionary<string, string>()
+                {
+                    {"objects\\multi\\models\\mp_hill_beacon\\mp_hill_beacon", "objects\\multi\\koth\\koth_hill_static"},
+                    {"objects\\multi\\models\\mp_flag_base\\mp_flag_base", "objects\\multi\\ctf\\ctf_flag_spawn_point"},
+                    {"objects\\multi\\models\\mp_circle\\mp_circle", "objects\\multi\\oddball\\oddball_ball_spawn_point"},
+                    {"objects\\multi\\archive\\vip\\vip_boundary", "objects\\multi\\vip\\vip_destination_static"}
+                };
+
+                if (scenario.VehiclePalette.Count() > 0)
+                    foreach (Scenario.ScenarioPaletteEntry block in scenario.VehiclePalette)
+                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
+                            block.Object = null;
+                if (scenario.WeaponPalette.Count() > 0)
+                    foreach (Scenario.ScenarioPaletteEntry block in scenario.WeaponPalette)
+                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
+                            block.Object = null;
+                if (scenario.EquipmentPalette.Count() > 0)
+                    foreach (Scenario.ScenarioPaletteEntry block in scenario.EquipmentPalette)
+                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
+                            block.Object = null;
+                if (scenario.SceneryPalette.Count() > 0)
+                    foreach (Scenario.ScenarioPaletteEntry block in scenario.SceneryPalette)
+                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
+                            block.Object = null;
+                if (scenario.CratePalette.Count() > 0)
+                    foreach (Scenario.ScenarioPaletteEntry block in scenario.CratePalette)
+                        if (block.Object != null)
+                        {
+                            if (reachObjectives.TryGetValue(block.Object.Name, out string result))
+                                block.Object.Name = result;
+
+                            if (!CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
+                                block.Object = null;
+                        };
+            }
+
+            if (definition is SkyAtmParameters skya)
+            {
+                foreach (SkyAtmParameters.AtmosphereProperty atmProperty in skya.AtmosphereProperties)
+                {
+                    atmProperty.Name = ConvertStringId(atmProperty.ReachName);
+                    atmProperty.UnknownFlags = 65536;
+                }
             }
         }
 
@@ -1225,7 +1271,18 @@ namespace TagTool.Commands.Porting
 				case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);
 
-				case SoundClass soundClass:
+                case Scenario.MultiplayerObjectProperties scnrObj:
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        scnrObj.Team = (Scenario.MultiplayerObjectProperties.TeamValue)(scnrObj.TeamReach);
+                        scnrObj.WidthRadius = scnrObj.WidthRadiusReach;
+                        scnrObj.Depth = scnrObj.DepthReach;
+                        scnrObj.Top = scnrObj.TopReach;
+                        scnrObj.Bottom = scnrObj.BottomReach;
+                    }
+                    return data;
+
+                case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
 
 				case Array _:
@@ -1297,19 +1354,8 @@ namespace TagTool.Commands.Porting
 
         private T UpgradeStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
         {
-            if (BlamCache.Version >= CacheVersion.Halo3Retail && BlamCache.Version <= CacheVersion.HaloOnline700123)
+            if (BlamCache.Version >= CacheVersion.Halo3Retail)
                 return data;
-            else if (BlamCache.Version >= CacheVersion.HaloReach)
-            {
-                switch (data)
-                {
-                    case SkyAtmParameters.AtmosphereProperty atmProperty:
-                        atmProperty.Name = ConvertStringId(atmProperty.ReachName);
-                        atmProperty.UnknownFlags = 65536;
-                        break;
-                }
-                return data;
-            }
 
             switch (data)
             {
@@ -1777,7 +1823,11 @@ namespace TagTool.Commands.Porting
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
-			return objectType;
+            if (BlamCache.Version == CacheVersion.HaloReach)
+                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+            return objectType;
 		}
 
 		private StringId ConvertStringId(StringId stringId)

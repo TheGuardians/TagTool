@@ -625,6 +625,25 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
+    public enum GameObjectTypeHaloReach : sbyte
+    {
+        None = -1,
+        Biped,
+        Vehicle,
+        Weapon,
+        Equipment,
+        Terminal,
+        Projectile,
+        Scenery,
+        Machine,
+        Control,
+        SoundScenery,
+        Crate,
+        Creature,
+        Giant,
+        EffectScenery
+    }
+
     // todo: properly fix
     [TagStructure(Size = 0x2)]
     public class GameObjectType : TagStructure
@@ -762,8 +781,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
         public GameObjectTypeHalo3ODST Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public GameObjectTypeHaloOnline HaloOnline;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public GameObjectTypeHaloReach HaloReach;
     }
 
     [Flags]
