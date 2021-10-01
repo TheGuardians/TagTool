@@ -368,6 +368,7 @@ namespace TagTool.Commands.Porting
                 scenario.GamePerformanceThrottles = null;
 
                 scenario.ScenarioKillTriggers.Clear();
+                scenario.ScenarioSafeTriggers.Clear();
 
                 Dictionary<string, string> reachObjectives = new Dictionary<string, string>()
                 {
@@ -410,7 +411,11 @@ namespace TagTool.Commands.Porting
                 foreach (SkyAtmParameters.AtmosphereProperty atmProperty in skya.AtmosphereProperties)
                 {
                     atmProperty.Name = ConvertStringId(atmProperty.ReachName);
-                    atmProperty.UnknownFlags = 65536;
+                    atmProperty.FogColor = atmProperty.FogColorReach;
+                    atmProperty.UnknownFlags = 0;
+                    atmProperty.FogIntensityCyan = 1;
+                    atmProperty.FogIntensityMagenta = 1;
+                    atmProperty.FogIntensityYellow = 1;
                 }
             }
         }
