@@ -378,32 +378,11 @@ namespace TagTool.Commands.Porting
                     {"objects\\multi\\archive\\vip\\vip_boundary", "objects\\multi\\vip\\vip_destination_static"}
                 };
 
-                if (scenario.VehiclePalette.Count() > 0)
-                    foreach (Scenario.ScenarioPaletteEntry block in scenario.VehiclePalette)
-                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
-                            block.Object = null;
-                if (scenario.WeaponPalette.Count() > 0)
-                    foreach (Scenario.ScenarioPaletteEntry block in scenario.WeaponPalette)
-                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
-                            block.Object = null;
-                if (scenario.EquipmentPalette.Count() > 0)
-                    foreach (Scenario.ScenarioPaletteEntry block in scenario.EquipmentPalette)
-                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
-                            block.Object = null;
-                if (scenario.SceneryPalette.Count() > 0)
-                    foreach (Scenario.ScenarioPaletteEntry block in scenario.SceneryPalette)
-                        if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
-                            block.Object = null;
-                if (scenario.CratePalette.Count() > 0)
-                    foreach (Scenario.ScenarioPaletteEntry block in scenario.CratePalette)
-                        if (block.Object != null)
-                        {
-                            if (reachObjectives.TryGetValue(block.Object.Name, out string result))
-                                block.Object.Name = result;
-
-                            if (!CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
-                                block.Object = null;
-                        };
+                CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
+                CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
+                CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
+                CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
+                CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
             }
 
             if (definition is SkyAtmParameters skya)
@@ -420,6 +399,34 @@ namespace TagTool.Commands.Porting
             }
         }
 
+        public void CullNewObjects<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList, Dictionary<string,string> replacements)
+        {
+            if (palette.Count() > 0)
+            {
+                List<int> indices = new List<int>();
+                foreach (Scenario.ScenarioPaletteEntry block in palette)
+                {
+                    if (block.Object != null && replacements.TryGetValue(block.Object.Name, out string result))
+                        block.Object.Name = result;
+
+                    if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
+                    {
+                        block.Object = null;
+                        foreach (var instance in instanceList)
+                        {
+                            var cast = instance as Scenario.PermutationInstance;
+
+                            if (cast.PaletteIndex == palette.IndexOf(block))
+                                indices.Add(instanceList.IndexOf(instance));
+                        }
+                    }
+                }
+                indices.Sort();
+                indices.Reverse();
+                for (int i = 0; i < indices.Count; i++)
+                    instanceList.RemoveAt(indices[i]);
+            }
+        }
 
         public CachedTag ConvertTagInternal(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag blamTag)
 		{
