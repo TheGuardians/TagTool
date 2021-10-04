@@ -29,14 +29,14 @@ namespace TagTool.Commands.Porting
                 "PortInstancedGeometryObject",
                 "Converts one or more instanced geometry instances to objects.",
 
-                "PortInstancedGeometryObject [PortingFlags] [allunique] [forgepalette] [BspIndex] [nocenter] [<Instance index or name> [New Tagname]]",
-                "Converts one or more instanced geometry instances to objects. Enter just the bsp index for a wizard."
-                + "\nWhen the cache file scenario has only one BSP, BspIndex is assumed to be 0."
-                + "\n\nUse the \"allunique\" arg to port one of each unique instance in the chosen BSP."
-                + "\n\nUse the \"forgepalette\" arg to automatically add your ported instanced to the forge palette."
+                "PortInstancedGeometryObject [PortingFlags] [BspIndex] [nocenter] [forgepalette] [allunique] [<Instance index or name> [New Tagname]]",
+                "When porting multiple, provide each on a new line after arguments."
+                + "\nWhen the cache file scenario has only one BSP (most MP levels), providing a BspIndex is unnecessary."
+                + "\n\nUse \"forgepalette\" to add your ported instances to the forge palette."
                 + "\n\t- forgepalette by itself will add instances to a new category with the cache file display name."
                 + "\n\t- forgepalette:<categoryname> will add instances to a new category with your the specified name."
-                + "\n\t- forgepalette:<categoryindex> will add instances to a preexisting category at the specified index.")
+                + "\n\t- forgepalette:<categoryindex> will add instances to a preexisting category at the specified index."
+                + "\n\nUse \"allunique\" to port one of each unique instance in the chosen BSP.")
         {
             HoCache = cache;
             BlamCache = blamCache;
