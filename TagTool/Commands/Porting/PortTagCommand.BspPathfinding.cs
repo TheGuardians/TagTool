@@ -107,10 +107,6 @@ namespace TagTool.Commands.Porting
                         };
                     }
                 }
-                
-                // Convert surface references
-                foreach(var surfaceReference in resourceDefinition.Planes)
-                    ConvertReachSurfaceReference(surfaceReference);
             }
 
             bsp.PathfindingResource = CacheContext.ResourceCache.CreateStructureBspCacheFileResource(resourceDefinition);

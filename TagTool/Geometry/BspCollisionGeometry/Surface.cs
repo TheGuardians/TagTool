@@ -38,17 +38,16 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public short SeamIdentifierIndexEdgeMappingIndex;
     }
 
-    [TagStructure(Size = 0x4)]
-    public class PlaneReference : TagStructure
+    public struct PlaneReference
     {
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public ushort StripIndex;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public short ClusterIndex;
+        public int TriangleIndex;
+        public int ClusterIndex;
 
-        // reach uses 12 bits for the cluster index, and 20 bits for the strip index
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint PackedReference; 
+        public PlaneReference(int triangleIndex = -1, int clusterIndex = -1)
+        {
+            TriangleIndex = triangleIndex;
+            ClusterIndex = clusterIndex;
+        }
     }
 
     [TagStructure(Size = 0x8)]

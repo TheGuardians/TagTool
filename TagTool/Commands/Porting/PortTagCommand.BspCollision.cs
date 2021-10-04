@@ -78,30 +78,11 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                // convert instance sbsp surface references
-                foreach (var instance in resourceDefinition.InstancedGeometry)
-                    foreach (var surfaceReference in instance.Planes)
-                        ConvertReachSurfaceReference(surfaceReference);
             }
 
             bsp.CollisionBspResource = CacheContext.ResourceCache.CreateStructureBspResource(resourceDefinition);
 
             return bsp.CollisionBspResource;
-        }
-
-        private static void ConvertReachSurfaceReference(PlaneReference surfaceReference)
-        {
-            // reach uses 12 bits for the cluster index and 20 bits for the strip index
-            short clusterIndex = (short)(surfaceReference.PackedReference & 0xFFF);
-            uint stripIndex = surfaceReference.PackedReference >> 12;
-            if (stripIndex > ushort.MaxValue)
-            {
-                new TagToolWarning("sbsp surface reference strip index truncated!!!");
-                stripIndex = stripIndex & 0xFFFF;
-            }
-
-            surfaceReference.ClusterIndex = clusterIndex;
-            surfaceReference.StripIndex = (ushort)stripIndex;
         }
 
         private CollisionGeometry ConvertCollisionBsp(CollisionGeometry bsp)

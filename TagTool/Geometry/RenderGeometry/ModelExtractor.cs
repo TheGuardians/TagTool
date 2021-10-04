@@ -56,7 +56,7 @@ namespace TagTool.Geometry
                     mesh.Flags &= ~MeshFlags.MeshIsUnindexed;
 
                     foreach (var part in mesh.Parts)
-                        mesh.ResourceIndexBuffers[0] = IndexBufferConverter.CreateIndexBuffer(part.IndexCountOld);
+                        mesh.ResourceIndexBuffers[0] = IndexBufferConverter.CreateIndexBuffer(part.IndexCount);
                 }
             }
 
@@ -877,9 +877,9 @@ namespace TagTool.Geometry
                 mesh.ResourceVertexBuffers[0].Data.Data = mesh.ResourceVertexBuffers[0].Data.Data
                     .Skip(indexOffset * 32).Take(mesh.SubParts[i].IndexCount * 32).ToArray();
                 
-                mesh.Parts[0].FirstIndexOld = 0;
+                mesh.Parts[0].FirstIndex = 0;
                 mesh.Parts[0].MaterialIndex = 0;
-                indexOffset += mesh.ResourceVertexBuffers[0].Count = mesh.Parts[0].VertexCount = mesh.Parts[0].IndexCountOld = mesh.SubParts[i].IndexCount;
+                indexOffset += mesh.ResourceVertexBuffers[0].Count = mesh.Parts[0].IndexCount = mesh.SubParts[i].IndexCount;
             }
             renderModel.Materials.Add(new RenderMaterial() { RenderMethod = CacheContext.TagCache.GetTag(@"shaders\invalid.rmsh") });
         }
@@ -1100,13 +1100,13 @@ namespace TagTool.Geometry
 
             // Read the indices
             var indexStream = reader.OpenIndexBufferStream(indexBuffer);
-            indexStream.Position = part.FirstIndexOld;
+            indexStream.Position = part.FirstIndex;
             switch (indexBuffer.Format)
             {
                 case IndexBufferFormat.TriangleList:
-                    return indexStream.ReadIndices(part.IndexCountOld);
+                    return indexStream.ReadIndices(part.IndexCount);
                 case IndexBufferFormat.TriangleStrip:
-                    return indexStream.ReadTriangleStrip(part.IndexCountOld);
+                    return indexStream.ReadTriangleStrip(part.IndexCount);
                 default:
                     throw new InvalidOperationException("Unsupported index buffer type: " + indexBuffer.Format);
             }

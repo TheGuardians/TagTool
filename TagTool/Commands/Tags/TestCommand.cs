@@ -18,6 +18,8 @@ using TagTool.Audio.Converter;
 using TagTool.Audio;
 using TagTool.Cache.Gen2;
 using TagTool.BlamFile;
+using TagTool.Cache.ModPackages;
+using System.Linq;
 
 namespace TagTool.Commands
 {
@@ -72,8 +74,68 @@ namespace TagTool.Commands
             return data;
         }
 
+        private void SetCacheVersion(GameCacheHaloOnline cache, CacheVersion version)
+        {
+            cache.Version = version;
+            cache.TagCacheGenHO.Version = version;
+            cache.TagCacheGenHO.Header.CreationTime = CacheVersionDetection.GetTimestamp(version);
+            cache.StringTableHaloOnline.Version = version;
+            cache.Serializer = new TagSerializer(version, CachePlatform.Original);
+            cache.Deserializer = new TagDeserializer(version, CachePlatform.Original);
+            cache.ResourceCaches = new ResourceCachesHaloOnline(cache);
+        }
+
+        private void UpgradeCacheForReach(GameCacheHaloOnline cache)
+        {
+            Console.WriteLine("Upgrading to reach cache...");
+
+            SetCacheVersion(cache, CacheVersion.HaloOnline106708);
+
+            using (var stream = cache.OpenCacheReadWrite())
+            {
+                var tasks = new List<Action>();
+
+                var renderGeometryTags = new HashSet<Tag>() { "mode", "pmdf", "Lbsp" };
+                foreach (var tag in cache.TagCache.NonNull().Where(x => renderGeometryTags.Contains(x.Group.Tag)))
+                {
+                    var definition = cache.Deserialize(stream, tag);
+                    tasks.Add(() =>
+                    {
+                        Console.WriteLine($"Upgrading {tag}...");
+                        cache.Serialize(stream, tag, definition);
+                    });
+                }
+
+                foreach (var tag in cache.TagCache.FindAllInGroup("sbsp"))
+                {
+                    var sbsp = cache.Deserialize<TagTool.Tags.Definitions.ScenarioStructureBsp>(stream, tag);
+                    var sbspTagResources = cache.ResourceCache.GetStructureBspTagResources(sbsp.CollisionBspResource);
+                    var sbspCacheFileTagResources = cache.ResourceCache.GetStructureBspCacheFileTagResources(sbsp.PathfindingResource);
+                    tasks.Add(() =>
+                    {
+                        Console.WriteLine($"Upgrading {tag}...");
+                        if (sbspTagResources != null)
+                            cache.ResourceCaches.ReplaceResource(sbsp.CollisionBspResource.HaloOnlinePageableResource, sbspTagResources);
+                        if (sbspCacheFileTagResources != null)
+                            cache.ResourceCaches.ReplaceResource(sbsp.PathfindingResource.HaloOnlinePageableResource, sbspCacheFileTagResources);
+
+                        cache.Serialize(stream, tag, sbsp);
+                    });
+                }
+
+                SetCacheVersion(cache, CacheVersion.HaloOnlineED);
+
+                foreach (var task in tasks)
+                    task();
+
+                Console.WriteLine("Done.");
+            }
+        }
+
         private void UpgradeM23Cache(GameCacheHaloOnline cache)
         {
+            Console.WriteLine("Upgrading ms23 cache...");
+
             var targetVersion = CacheVersion.HaloOnlineED;
 
             // tags.dat
@@ -145,8 +207,10 @@ namespace TagTool.Commands
         }
 
         public override object Execute(List<string> args)
-        {
+        {    
             UpgradeM23Cache((GameCacheHaloOnline)Cache);
+            UpgradeCacheForReach((GameCacheHaloOnline)Cache);
+
             return true;
 
             if (args.Count > 0)

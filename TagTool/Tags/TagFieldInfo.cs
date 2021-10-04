@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Shaders;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -163,6 +164,7 @@ namespace TagTool.Tags
 				case TypeCode.Char:
 				case TypeCode.Int16:
 				case TypeCode.UInt16:
+				case TypeCode.Object when type == typeof(IndexBufferIndex) && targetVersion <= CacheVersion.Halo3ODST || (targetVersion >= CacheVersion.HaloOnline106708 && targetVersion < CacheVersion.HaloReach):
 					return 0x02;
 
 				case TypeCode.Single:
@@ -181,6 +183,8 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(PixelShaderReference):
 				case TypeCode.Object when type == typeof(PlatformUnsignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
 				case TypeCode.Object when type == typeof(PlatformSignedValue) && CacheVersionDetection.GetPlatformType(cachePlatform) == PlatformType._32Bit:
+				case TypeCode.Object when type == typeof(IndexBufferIndex) && targetVersion >= CacheVersion.HaloReach || targetVersion == CacheVersion.HaloOnlineED:
+				case TypeCode.Object when type == typeof(PlaneReference):
 					return 0x04;
 
 				case TypeCode.Double:

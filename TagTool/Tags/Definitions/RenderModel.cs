@@ -45,7 +45,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<short> NodeMapMapping;
         [TagField(MinVersion = CacheVersion.Halo3Beta)]
-        public List<TagBlock17> UnknownE8;
+        public List<SkygenLight> LightgenLights; // first index is sun
 
         [TagField(Length = 16, MinVersion = CacheVersion.Halo3Beta)]
         public float[] SHRed = new float[SphericalHarmonics.Order3Count];
@@ -350,15 +350,11 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class TagBlock17 : TagStructure
+        public class SkygenLight : TagStructure
 		{
-            public float Unknown0;
-            public float Unknown4;
-            public float Unknown8;
-            public float UnknownC;
-            public float Unknown10;
-            public float Unknown14;
-            public float Unknown18;
+            public RealVector3d Direction;
+            public RealRgbColor Color;
+            public float Magnitude;
         }
 
         [TagStructure(Size = 0x150)]
