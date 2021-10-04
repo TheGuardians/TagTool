@@ -482,7 +482,7 @@ namespace TagTool.Commands.Porting
 				case "rmct":
                     return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
 				case "rmgl":
-					return CacheContext.TagCache.GetTag<Shader>(@"levels\dlc\sidewinder\shaders\side_hall_glass03");
+					return CacheContext.TagCache.GetTag<Shader>(@"levels\multi\s3d_avalanche\materials\s3d_avalanche_collision_material_55");
 				case "rmt2":
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
