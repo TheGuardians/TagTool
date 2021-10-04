@@ -301,7 +301,7 @@ namespace TagTool.Geometry
         /// <param name="indexCount">The index count.</param>
         /// <param name="vertexCount">The vertex count.</param>
         /// <exception cref="System.InvalidOperationException">Cannot define a part if no mesh is active</exception>
-        public void BeginPart(short materialIndex, ushort firstIndex, ushort indexCount, ushort vertexCount)
+        public void BeginPart(short materialIndex, int firstIndex, int indexCount, ushort vertexCount)
         {
             if (_currentMesh == null)
                 throw new InvalidOperationException("Cannot define a part if no mesh is active");
@@ -310,8 +310,8 @@ namespace TagTool.Geometry
             {
                 MaterialIndex = materialIndex,
                 TransparentSortingIndex = -1,
-                FirstIndexOld = firstIndex,
-                IndexCountOld = indexCount,
+                FirstIndex = firstIndex,
+                IndexCount = indexCount,
                 FirstSubPartIndex = (short)(_currentMesh.Mesh.SubParts.Count - 1),
                 SubPartCount = 0,
                 // TODO: Unknown values here

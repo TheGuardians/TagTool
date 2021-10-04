@@ -353,7 +353,7 @@
     <Compile Include="Commands\CollisionModels\GenerateBspPhysics.cs" />
     <Compile Include="Commands\CollisionModels\OffsetCollisionBSP.cs" />
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
-	<Compile Include="Commands\Common\TagToolChoicePrompt.cs" />
+    <Compile Include="Commands\Common\TagToolChoicePrompt.cs" />
     <Compile Include="Commands\Common\TagToolWarning.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\ExecuteCSharpCommand.cs" />
@@ -489,6 +489,7 @@
     <Compile Include="Commands\Tags\RebuildCacheFileCommand.cs" />
     <Compile Include="Commands\Tags\Test2Command.cs" />
     <Compile Include="Commands\Video\ImportBinkFileCommand.cs" />
+    <Compile Include="Common\IndexBufferIndex.cs" />
     <Compile Include="Common\RSAUtil.cs" />
     <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Types.cs" />

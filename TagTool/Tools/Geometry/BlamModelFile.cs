@@ -337,17 +337,17 @@ namespace TagTool.Tools.Geometry
 
                         foreach (var part in mesh.Parts)
                         {
-                            indexStream.Position = part.FirstIndexOld;
+                            indexStream.Position = part.FirstIndex;
                             ushort[] indices = new ushort[0];
                             vertexCount += part.VertexCount;
 
                             switch (indexBuffer.Format)
                             {
                                 case IndexBufferFormat.TriangleList:
-                                    indices = indexStream.ReadIndices(part.IndexCountOld);
+                                    indices = indexStream.ReadIndices(part.IndexCount);
                                     break;
                                 case IndexBufferFormat.TriangleStrip:
-                                    indices = indexStream.ReadTriangleStrip(part.IndexCountOld);
+                                    indices = indexStream.ReadTriangleStrip(part.IndexCount);
                                     break;
                                 default:
                                     throw new InvalidOperationException("Unsupported index buffer type: " + indexBuffer.Format);
