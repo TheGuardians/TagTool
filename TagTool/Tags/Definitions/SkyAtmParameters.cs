@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -34,7 +35,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xA4)]
         public class AtmosphereProperty : TagStructure
 		{
-            public short Unknown1;
+            public AtmosphereFlags Flags;
             public short Unknown2;
             public StringId Name;
             public float LightSourceY;
@@ -47,8 +48,8 @@ namespace TagTool.Tags.Definitions
             public float Unknown3;
             public float Unknown4;
             public float LightSourceSpread;
-            public uint Unknown5;
-            public float FogIntensity;
+            public float Unknown5;
+            public float BackgroundFogIntensity;
             public float Unknown6;
             public float TintCyan;
             public float TintMagenta;
@@ -62,7 +63,7 @@ namespace TagTool.Tags.Definitions
             public float TintRed;
             public float Tint2Green;
             public float Tint2Blue;
-            public float FogIntensity2;
+            public float PatchyFogIntensity;
             public float StartDistance;
             public float EndDistance;
             public float FogVelocityX;
@@ -71,6 +72,15 @@ namespace TagTool.Tags.Definitions
             public CachedTag WeatherEffect;
             public uint Unknown7;
             public uint Unknown8;
+
+            [Flags]
+            public enum AtmosphereFlags : short
+            {
+                SkyFogEnabled = 1 << 0,
+                UseFogColor = 1 << 1,
+                PatchyFogEnabled = 1 << 2,
+                Bit3 = 1 << 3,
+            }
         }
 
         [TagStructure(Size = 0x14)]
