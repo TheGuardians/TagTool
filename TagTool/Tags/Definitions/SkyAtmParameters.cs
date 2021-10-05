@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         public class AtmosphereProperty : TagStructure
 		{
             public AtmosphereFlags Flags;
-            public short Unknown2;
+            public short Unused;
             public StringId Name;
             public float LightSourceY;
             public float LightSourceX;
@@ -57,18 +57,12 @@ namespace TagTool.Tags.Definitions
             public float FogIntensityCyan;
             public float FogIntensityMagenta;
             public float FogIntensityYellow;
-            public float BackgroundColorRed;
-            public float BackgroundColorGreen;
-            public float BackgroundColorBlue;
-            public float TintRed;
-            public float Tint2Green;
-            public float Tint2Blue;
+            public RealRgbColor BackgroundColor;
+            public RealRgbColor Tint;
             public float PatchyFogIntensity;
             public float StartDistance;
             public float EndDistance;
-            public float FogVelocityX;
-            public float FogVelocityY;
-            public float FogVelocityZ;
+            public RealVector3d FogVelocity;
             public CachedTag WeatherEffect;
             public uint Unknown7;
             public uint Unknown8;
