@@ -356,6 +356,9 @@ namespace TagTool.Commands.Porting
                 scenario.AiObjectives.Clear();
                 scenario.AiPathfindingData.Clear();
 
+                scenario.CharacterPalette.Clear();
+                scenario.UnitSeatsMapping.Clear();
+
                 scenario.LightmapAirprobes.Clear();
 
                 scenario.Fog.Clear();
@@ -414,9 +417,7 @@ namespace TagTool.Commands.Porting
                         block.Object = null;
                         foreach (var instance in instanceList)
                         {
-                            var cast = instance as Scenario.PermutationInstance;
-
-                            if (cast.PaletteIndex == palette.IndexOf(block))
+                            if (!(instance is Scenario.EquipmentInstance) && (instance as Scenario.PermutationInstance).PaletteIndex == palette.IndexOf(block))
                                 indices.Add(instanceList.IndexOf(instance));
                         }
                     }
