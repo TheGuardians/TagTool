@@ -358,11 +358,13 @@ namespace TagTool.Commands.Porting
 
                 scenario.CharacterPalette.Clear();
                 scenario.UnitSeatsMapping.Clear();
+                scenario.MissionScenes.Clear();
 
                 scenario.LightmapAirprobes.Clear();
 
                 scenario.Fog.Clear();
                 scenario.CameraFx.Clear();
+                scenario.SkyParameters = null;
 
                 scenario.DefaultCameraFx = null;
                 scenario.DefaultScreenFx = null;
