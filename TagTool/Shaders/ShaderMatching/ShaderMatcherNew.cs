@@ -417,6 +417,24 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"self_illumination\palettized_depth_fade":
                                 optionName = "palettized_plasma";
                                 break;
+                            // Reach rmtr  //
+                            case @"blending\distance_blend_base":
+                                optionName = "morph";
+                                break;
+                            // Reach rmw  //
+                            case @"bankalpha\from_shape_texture_alpha":
+                                optionName = "none";
+                                break;
+                            // Reach rmfl //
+                            case @"albedo\simple":
+                                optionName = "default";
+                                break;
+                            case @"alpha_test\from_albedo_alpha":
+                                optionName = "simple";
+                                break;
+                            case @"material_model\flat":
+                                optionName = "default";
+                                break;
                             // Reach prt3 //
                             case @"lighting\per_pixel_smooth":
                             case @"lighting\smoke_lighting":
@@ -459,7 +477,7 @@ namespace TagTool.Shaders.ShaderMatching
 
                         if (!matchFound)
                         {
-                            new TagToolWarning($"Unrecognized rmop \"{optionName}\" for method \"{methodName}\"");
+                            new TagToolWarning($"Unrecognized {srcRmt2Descriptor.Type} method option \"{methodName}\\{optionName}\"");
                         }
                         break;
                     }
