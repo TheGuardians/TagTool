@@ -217,6 +217,9 @@ namespace TagTool.Commands.Porting
 
         void ConvertReachEnvironmentMopp(ScenarioStructureBsp sbsp)
         {
+            if (sbsp.InstancedGeometryInstances == null)
+                return;
+
             if (sbsp.CollisionMoppCodes.Count == 0)
                 return;
 

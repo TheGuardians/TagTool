@@ -239,11 +239,14 @@ namespace TagTool.Geometry
                     h3WaterParameters.Add(vertexStream.ReadUnknown1B());
             }
 
-            using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[1].Data.Data))
+            if (mesh.ResourceVertexBuffers[1] != null)
             {
-                var vertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, stream);
-                for (int v = 0; v < mesh.ResourceVertexBuffers[1].Count; v++)
-                    staticPerPixel.Add(vertexStream.ReadStaticPerPixelData());
+                using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[1].Data.Data))
+                {
+                    var vertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, stream);
+                    for (int v = 0; v < mesh.ResourceVertexBuffers[1].Count; v++)
+                        staticPerPixel.Add(vertexStream.ReadStaticPerPixelData());
+                }
             }
 
             // create vertex buffer for Unknown1A -> World
@@ -292,7 +295,7 @@ namespace TagTool.Geometry
                         {
                             var worldVertex = worldVertices[unknown1A.Vertices[j]];
                             var unknown1B = h3WaterParameters[unknown1A.Indices[j]];
-                            var spp = staticPerPixel[unknown1A.Vertices[j]];
+                            var spp = staticPerPixel.Count > 0 ? staticPerPixel[unknown1A.Vertices[j]] : new StaticPerPixelData() { Texcoord = new RealVector2d(0, 0) };
 
                             var worldWaterVertex = new WorldWaterVertex()
                             {
