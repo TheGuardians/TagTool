@@ -179,7 +179,7 @@ namespace TagTool.Commands.RenderModels
 							var tangent = part.Tangents.Count != 0 ? part.Tangents[i] : new Vector3D();
 							var bitangent = part.BiTangents.Count != 0 ? part.BiTangents[i] : new Vector3D();
 
-							if (usePerMeshNodeMapping)
+							if (usePerMeshNodeMapping && part.Bones.Count > 0)
 							{
 								// generate the list of node indices used by this mesh
 								foreach (var bone in part.Bones)
@@ -224,7 +224,7 @@ namespace TagTool.Commands.RenderModels
 
 											byte nodeIndex = (byte)nodes[bonefix];
 
-											if (usePerMeshNodeMapping)
+											if (usePerMeshNodeMapping && part.Bones.Count > 0)
 												blendIndicesList.Add((byte)meshNodeIndices.IndexOf(nodeIndex));
 											else
 												blendIndicesList.Add((byte)nodeIndex);
@@ -343,7 +343,7 @@ namespace TagTool.Commands.RenderModels
 
 					builder.BindIndexBuffer(indices, indexBufferFormat);
 
-					if (usePerMeshNodeMapping)
+					if (usePerMeshNodeMapping && meshNodeIndices.Count > 0)
 						builder.MapNodes(meshNodeIndices.ToArray());
 
 					builder.EndMesh();
