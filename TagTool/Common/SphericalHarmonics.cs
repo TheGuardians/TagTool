@@ -47,21 +47,6 @@ namespace TagTool.Common
         Quadratic
     }
 
-    [TagStructure(Size = 0x5C)]
-    public class Airprobe : TagStructure
-    {
-        public RealPoint3d Position;
-        public StringId Name;
-        public AirprobeFlags Flags;
-        public HalfRGBLightProbe LightProbe;
-    }
-
-    [Flags]
-    public enum AirprobeFlags : int
-    {
-        None = 0
-    }
-
     [TagStructure(Size = 0x48)]
     public class HalfRGBLightProbe : TagStructure
     {
@@ -83,28 +68,6 @@ namespace TagTool.Common
         public short[] SHBlue = new short[SphericalHarmonics.Order2Count];
 
         public short Padding3;
-    }
-
-    [TagStructure(Size = 0x50)]
-    public class SceneryLightProbe : TagStructure
-    {
-        public ObjectIdentifier ObjectId;
-        public HalfRGBLightProbe LightProbe;
-    }
-
-    [TagStructure(Size = 0x2C)]
-    public class MachineLightProbes : TagStructure
-    {
-        public ObjectIdentifier ObjectId;
-        public RealRectangle3d Bounds;
-        public List<MachineLightProbe> LightProbes;
-
-        [TagStructure(Size = 0x54)]
-        public class MachineLightProbe : TagStructure
-        {
-            public RealPoint3d Position;
-            public HalfRGBLightProbe LightProbe;
-        }
     }
 
     [TagStructure(Size = 0x18)]
