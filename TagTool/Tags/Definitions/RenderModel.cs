@@ -53,9 +53,21 @@ namespace TagTool.Tags.Definitions
         public float[] SHGreen = new float[SphericalHarmonics.Order3Count];
         [TagField(Length = 16, MinVersion = CacheVersion.Halo3Beta)]
         public float[] SHBlue = new float[SphericalHarmonics.Order3Count];
+        [TagField(Length = 16, MinVersion = CacheVersion.HaloReach)]
+        public float[] VmfLightProbe;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealVector3d AnalyticalLightDirection;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealRgbColor AnalyticalLightColor;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown10;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown11;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown12;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown13;
 
-        [TagField(Length = 26, MinVersion = CacheVersion.HaloReach)]
-        public float[] Unknown19;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<UnknownSHProbe> UnknownSHProbes;
