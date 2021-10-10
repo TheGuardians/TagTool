@@ -26,7 +26,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			if(index > 14) //is a child
             {
 				int child = Bsp.Bsp3dSupernodes[supernode_index].ChildIndices[index - 15];
-				if (child == -1)
+				if (child == 0)
 					return -1;
 				else if ((child & 0xC0000000) != 0)
 					return buildnode((int)(child & 0xBFFFFFFF), nodelist);

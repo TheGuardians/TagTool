@@ -64,7 +64,6 @@ namespace TagTool.Commands.CollisionModels
                 {
                     case "mopp":
                         buildmopp = true;
-                        max_surface_edges = 3;
                         argStack.Pop();
                         break;
                     case "force":
