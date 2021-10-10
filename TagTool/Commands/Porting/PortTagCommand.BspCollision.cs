@@ -95,10 +95,10 @@ namespace TagTool.Commands.Porting
 
                 var largebsp = resizer.GrowCollisionBsp(bsp);
 
-                largebsp = supernodeconverter.Convert(largebsp);
+                //largebsp = supernodeconverter.Convert(largebsp);
 
-                //if(!largebuilder.generate_bsp(ref largebsp, false) || !resizer.collision_bsp_check_counts(largebsp))
-                //    new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
+                if(!largebuilder.generate_bsp(ref largebsp, false) || !resizer.collision_bsp_check_counts(largebsp))
+                    new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
 
                 bsp = resizer.ShrinkCollisionBsp(largebsp);
             }
@@ -119,10 +119,10 @@ namespace TagTool.Commands.Porting
             if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
                 var supernodeconverter = new SupernodeToNodeConverter();
-                bsp = supernodeconverter.Convert(bsp);
+                //bsp = supernodeconverter.Convert(bsp);
 
-                //if (!new LargeCollisionBSPBuilder().generate_bsp(ref bsp, true))
-                //    new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
+                if (!new LargeCollisionBSPBuilder().generate_bsp(ref bsp, true))
+                    new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
             }
 
             bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
