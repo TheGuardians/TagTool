@@ -7,8 +7,9 @@ namespace TagTool.Commands.Modding
     class UpdateDescriptionCommand : Command
     {
         private GameCacheModPackage Cache;
+        private CommandContextStack ContextStack { get; }
 
-        public UpdateDescriptionCommand(GameCacheModPackage cache) :
+        public UpdateDescriptionCommand(CommandContextStack contextStack, GameCacheModPackage cache) :
             base(true,
 
                 "UpdateDescription",
@@ -16,6 +17,7 @@ namespace TagTool.Commands.Modding
                 "UpdateDescription",
                 "Update description of mod package.\n")
         {
+            ContextStack = contextStack;
             Cache = cache;
         }
 
@@ -24,7 +26,7 @@ namespace TagTool.Commands.Modding
             if (args.Count > 0)
                 return new TagToolError(CommandError.ArgCount);
 
-            Cache.BaseModPackage.CreateDescription();
+            Cache.BaseModPackage.CreateDescription(ContextStack, IgnoreArgumentVariables);
 
             return true;
 
