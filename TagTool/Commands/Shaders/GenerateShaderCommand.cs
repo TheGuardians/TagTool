@@ -31,7 +31,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "zonly", "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram", "water" };
+        static readonly List<string> UnsupportedShaderTypes = new List<string> { "glass", "cortana" };
 
         public override object Execute(List<string> args)
         {
@@ -47,7 +47,7 @@ namespace TagTool.Commands.Shaders
             else if (shaderType == "glvs" || shaderType == "glps")
                 return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
 
-            if (!SupportedShaderTypes.Contains(shaderType))
+            if (UnsupportedShaderTypes.Contains(shaderType))
                 return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
 
             args.RemoveAt(0); // we should only have options from this point
@@ -121,6 +121,8 @@ namespace TagTool.Commands.Shaders
                     case "screen":          GenerateScreen(stream, options, rmt2TagName, rmdf); break;
                     case "zonly":           GenerateZOnly(stream, options, rmt2TagName, rmdf); break;
                     case "water":           GenerateWater(stream, options, rmt2TagName, rmdf); break;
+                    case "terrain":         GenerateTerrain(stream, options, rmt2TagName, rmdf); break;
+                    case "foliage":         GenerateFoliage(stream, options, rmt2TagName, rmdf); break;
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
@@ -139,14 +141,14 @@ namespace TagTool.Commands.Shaders
                 //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(options, applyFixes);
                 case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(options, applyFixes);
                 case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(options, applyFixes);
-                //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(options, applyFixes);
+                case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(options, applyFixes);
                 //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(options, applyFixes);
                 case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(options, applyFixes);
                 case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(options, applyFixes);
                 case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(options, applyFixes);
                 case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(options, applyFixes);
                 case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(options, applyFixes);
-                //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(options, applyFixes);
+                case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(options, applyFixes);
                 case "water":           return new HaloShaderGenerator.Water.WaterGenerator(options, applyFixes);
                 case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(options, applyFixes);
             }
@@ -163,7 +165,7 @@ namespace TagTool.Commands.Shaders
                 //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(applyFixes);
                 case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(applyFixes);
                 case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(applyFixes);
-                //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
+                case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
                 //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(applyFixes);
                 case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(applyFixes);
                 case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(applyFixes);
@@ -604,6 +606,40 @@ namespace TagTool.Commands.Shaders
         private void GenerateWater(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
         {
             var generator = new HaloShaderGenerator.Water.WaterGenerator(options.Select(x => (byte)x).ToArray(), true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateFoliage(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Foliage.FoliageGenerator(options.Select(x => (byte)x).ToArray(), true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateTerrain(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Terrain.TerrainGenerator(options.Select(x => (byte)x).ToArray(), true);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);

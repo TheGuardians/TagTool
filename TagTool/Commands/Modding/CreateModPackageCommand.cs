@@ -51,7 +51,7 @@ namespace TagTool.Commands.Modding
             GameCacheModPackage modCache = new GameCacheModPackage(Cache, useLargeStreams);
 
             // create metadata here
-            modCache.BaseModPackage.CreateDescription();
+            modCache.BaseModPackage.CreateDescription(ContextStack, IgnoreArgumentVariables);
 
             // initialze mod package with current HO cache
             Console.WriteLine($"Building initial tag cache from reference...");
