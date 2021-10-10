@@ -25,6 +25,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
 
             //these are unchanged
+            newbsp.Bsp3dSupernodes = bsp.Bsp3dSupernodes.DeepClone();
             newbsp.Planes = bsp.Planes.DeepClone();
             newbsp.Leaves = bsp.Leaves.DeepClone();
 
@@ -106,6 +107,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
 
             //these are unchanged
+            newbsp.Bsp3dSupernodes = bsp.Bsp3dSupernodes.DeepClone();
             newbsp.Planes = bsp.Planes.DeepClone();
             newbsp.Leaves = bsp.Leaves.DeepClone();
 

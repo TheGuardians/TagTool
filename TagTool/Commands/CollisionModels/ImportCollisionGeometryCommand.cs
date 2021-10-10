@@ -187,7 +187,11 @@ namespace TagTool.Commands.CollisionModels
                 if(debug)
                     Console.WriteLine($"Mesh {currentmesh.Name} has {Faces.Count} Faces!");
 
-                add_triangles(0);
+                if (!add_triangles(0))
+                {
+                    new TagToolError(CommandError.CustomError, "Failed to import collision geometry!");
+                    return false;
+                }
 
                 //get object bounds
                 foreach(var vert in Vertices)
@@ -312,7 +316,7 @@ namespace TagTool.Commands.CollisionModels
                     List<int> ErrorIndices = new List<int>();
                     foreach(var index in indices)
                     {
-                        RealPoint3d tempvertex = new RealPoint3d(Vertices[index].X, Vertices[index].Y, Vertices[index].Z);
+                        RealPoint3d tempvertex = new RealPoint3d((float)(Vertices[index].X * 0.01), (float)(Vertices[index].Y * 0.01), (float)(Vertices[index].Z * 0.01));
                         Errors.Vertices.Add(tempvertex);
                         ErrorIndices.Add(Errors.Vertices.Count);
                     }

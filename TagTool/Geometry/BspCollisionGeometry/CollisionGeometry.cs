@@ -116,10 +116,10 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(Length = 15)]
         public float[] PlaneValues = new float[15];
 
-        public int PlaneDimensions;
-
         [TagField(Length = 16)]
         public int[] ChildIndices = new int[16];
+
+        public int PlaneDimensions;
     }
 
     [TagStructure(Size = 0x10)]

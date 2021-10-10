@@ -412,17 +412,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return plane_equation;
         }
 
-        public struct coll_bsp3dnode
-        {
-            public int Plane;
-            public byte BackChildLower;
-            public byte BackChildMid;
-            public byte BackChildUpper;
-            public byte FrontChildLower;
-            public byte FrontChildMid;
-            public byte FrontChildUpper;
-        }
-
         public bool build_bsp_tree_main(surface_array_definition surface_array, ref int bsp3dnode_index)
         {
             int switch_arg = 3;

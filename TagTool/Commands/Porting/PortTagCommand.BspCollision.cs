@@ -90,9 +90,12 @@ namespace TagTool.Commands.Porting
             if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
                 var largebuilder = new LargeCollisionBSPBuilder();
+                var supernodeconverter = new SupernodeToNodeConverter();
                 var resizer = new ResizeCollisionBSP();
 
                 var largebsp = resizer.GrowCollisionBsp(bsp);
+
+                //largebsp = supernodeconverter.Convert(largebsp);
 
                 if(!largebuilder.generate_bsp(ref largebsp, false) || !resizer.collision_bsp_check_counts(largebsp))
                     new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
