@@ -25,7 +25,7 @@ namespace TagTool.Commands.Common
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || args.Count > 2)
+            if (args.Count < 1)
                 return new TagToolError(CommandError.ArgCount);
 
             string variableName = args[0];
@@ -35,10 +35,11 @@ namespace TagTool.Commands.Common
                 ContextStack.ArgumentVariables.Clear();
                 Console.WriteLine("All variables cleared.");
             }
-            else if (args.Count == 2)
+            else if (args.Count > 1)
             {
-                ContextStack.ArgumentVariables[variableName] = args[1];
-                Console.WriteLine($"Variable \"{variableName}\" set to \"{args[1]}\".");
+                args.RemoveAt(0);
+                ContextStack.ArgumentVariables[variableName] = string.Join(" ", args);
+                Console.WriteLine($"Variable \"{variableName}\" set to \"{ContextStack.ArgumentVariables[variableName]}\".");
             }
             else
             {
