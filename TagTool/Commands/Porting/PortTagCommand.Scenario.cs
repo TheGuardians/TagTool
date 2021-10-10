@@ -478,6 +478,10 @@ namespace TagTool.Commands.Porting
                             sbsp.InstancedGeometryInstances[i].LodDataIndex = (short)newPerPixelLighting.Count;
                             newPerPixelLighting.Add(lightingElement);
                         }
+                        else
+                        {
+                            sbsp.InstancedGeometryInstances[i].LodDataIndex = -1;
+                        }
                     }
 
                     Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;

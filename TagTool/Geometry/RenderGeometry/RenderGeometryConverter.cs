@@ -512,19 +512,26 @@ namespace TagTool.Geometry
                         if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt || vertexBuffer.Format == VertexBufferFormat.LinearPrt || vertexBuffer.Format == VertexBufferFormat.QuadraticPrt)
                         {
                             mesh.ResourceVertexBuffers[i] = null;
+                            mesh.VertexBufferIndices[i] = -1;
                             continue;
                         }
 
                         // Skip all lightmap related buffers due to VMF incompability with SH. StaticPerVertexColor is fine though.
-                        //if(vertexBuffer.Format == VertexBufferFormat.StaticPerPixel || vertexBuffer.Format == VertexBufferFormat.StaticPerVertex)
-                        //{
-                        //    mesh.ResourceVertexBuffers[i] = null;
-                        //    continue;
-                        //}
+                        if(vertexBuffer.Format == VertexBufferFormat.StaticPerPixel || vertexBuffer.Format == VertexBufferFormat.StaticPerVertex)
+                        {
+                            mesh.ResourceVertexBuffers[i] = null;
+                            mesh.VertexBufferIndices[i] = -1;
+                            continue;
+                        }
 
                         // skip conversion of water vertices, done right after the loop
                         if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
+                        {
+                            mesh.ResourceVertexBuffers[i] = null;
+                            mesh.VertexBufferIndices[i] = -1;
                             continue;
+                        }
+                           
                         if (SourceCache.Platform == CachePlatform.MCC && vertexBuffer.Format == VertexBufferFormat.Unknown1C)
                             continue;
 

@@ -196,6 +196,16 @@ namespace TagTool.Commands.Porting
             // convert vertex buffers and add them to the new resource
             //
 
+            if(BlamCache.Version == CacheVersion.HaloReach)
+            {
+                foreach(var elem in Lbsp.InstancedGeometry)
+                    elem.StaticPerVertexLightingIndex = -1;
+                foreach (var elem in Lbsp.ClusterStaticPerVertexLightingBuffers)
+                    elem.StaticPerVertexLightingIndex = -1;
+
+                Lbsp.StaticPerVertexLightingBuffers.Clear();
+            }
+
             if (Lbsp.StaticPerVertexLightingBuffers != null)
             {
                 foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)

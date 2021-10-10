@@ -65,7 +65,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public int VertexBufferIndex;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.HaloReach, Downgrade = nameof(VertexBufferIndex))]
             public short VertexBufferIndexReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short Coefficient; // half - shader constant
