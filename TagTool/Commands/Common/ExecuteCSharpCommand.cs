@@ -39,7 +39,8 @@ namespace TagTool.Commands.Common
                 "Cache - The current cache.\n" +
                 "Definition - The current tag definition. (EditTag)\n" +
                 "Tag - The current tag. (EditTag)\n" +
-                "Element - The current block element. (EditBlock)\n"
+                "Element - The current block element. (EditBlock)\n" +
+                "UserVars - Access vars set using SetVariable e.g. UserVars[\"my_var_name\"]\n"
                 )
         {
             ContextStack = contextStack;
@@ -401,6 +402,8 @@ namespace TagTool.Commands.Common
             public FileInfo ScriptFile { get; set; }
 
             public List<string> Args { get; set; } = new List<string>();
+
+            public IReadOnlyDictionary<string, string> UserVars => ContextStack.ArgumentVariables;
 
             public GameCache Cache => GetGlobal<GameCache>(GlobalCacheKey);
 
