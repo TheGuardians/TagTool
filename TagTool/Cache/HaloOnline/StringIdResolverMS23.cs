@@ -1,3 +1,6 @@
+using System;
+using TagTool.Common;
+
 namespace TagTool.Cache
 {
     /// <summary>
@@ -30,6 +33,54 @@ namespace TagTool.Cache
         public override int[] GetSetOffsets()
         {
             return SetOffsets;
+        }
+
+        public bool IsExtendedStringId(StringId stringId)
+        {
+            return (stringId.Value >> 31) == 1;
+        }
+
+        public override int GetIndex(StringId stringId)
+        {
+            if (IsExtendedStringId(stringId))
+                return (int)(stringId.Value & 0x7FFFFFFF);
+            else
+                return (int)(stringId.Value & 0xFFFF);
+        }
+
+        public override int GetSet(StringId stringId)
+        {
+            if (IsExtendedStringId(stringId))
+                return 0;
+            else
+                return (int)(stringId.Value >> 16) & 0xF;
+        }
+
+        public override int GetLength(StringId stringId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override StringId MakeStringId(int length, int set, int index)
+        {
+            if(index > ushort.MaxValue)
+            {
+                if (set != 0)
+                    throw new ArgumentOutOfRangeException(nameof(set));
+                if (index < 0 || index >= (1 << 30))
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                
+                return new StringId((uint)((1u << 31) | index));
+            }
+            else
+            {
+                if (set < 0 || set >= 256)
+                    throw new ArgumentOutOfRangeException(nameof(set));
+                if (index < 0 || index >= (1 << 16))
+                    throw new ArgumentOutOfRangeException(nameof(index));
+
+                return new StringId((uint)((set << 16) | index));
+            }
         }
     }
 }
