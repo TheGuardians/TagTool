@@ -811,7 +811,7 @@ namespace TagTool.Serialization
             }
             else
             {
-                if (val.ClusterIndex > short.MaxValue || val.TriangleIndex > short.MaxValue)
+                if (val.ClusterIndex > ushort.MaxValue || val.TriangleIndex > ushort.MaxValue)
                     new TagToolWarning("Downgrade from int to short for plane reference. Unexpected behavior.");
 
                 block.Writer.Write((ushort)val.TriangleIndex);
