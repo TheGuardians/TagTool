@@ -131,12 +131,6 @@ namespace TagTool.Shaders.ShaderMatching
 
             string tagName = $"shaders\\{sourceRmt2Desc.Type}_templates\\_{string.Join("_", sourceRmt2Desc.Options)}";
 
-            if (ShaderCache.ExportTemplate(BaseCacheStream, BaseCache, tagName, out CachedTag cachedRmt2Tag))
-            {
-                Console.WriteLine($"Found cached rmt2: {tagName}");
-                return cachedRmt2Tag;
-            }
-
             var relevantRmt2s = new List<Rmt2Pairing>();
 
             Dictionary<CachedTag, long> ShaderTemplateValues = new Dictionary<CachedTag, long>();
@@ -237,6 +231,12 @@ namespace TagTool.Shaders.ShaderMatching
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(waterTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
                 }
+            }
+
+            if (ShaderCache.ExportTemplate(BaseCacheStream, BaseCache, tagName, out CachedTag cachedRmt2Tag))
+            {
+                Console.WriteLine($"Found cached rmt2: {tagName}");
+                return cachedRmt2Tag;
             }
 
             // if we've reached here, we haven't found an extract match.
