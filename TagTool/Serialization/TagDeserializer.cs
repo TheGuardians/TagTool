@@ -663,8 +663,8 @@ namespace TagTool.Serialization
             }
             else
             {
-                var triangleIndex = reader.ReadInt16();
-                var clusterIndex = reader.ReadInt16();
+                ushort triangleIndex = reader.ReadUInt16();
+                ushort clusterIndex = reader.ReadUInt16();
                 return new PlaneReference(triangleIndex, clusterIndex);
             }
         }
