@@ -18,6 +18,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			TagBlock<LargeBsp3dNode> nodelist = new TagBlock<LargeBsp3dNode>();
 			buildsupernode(0, 0, nodelist);
 			Bsp.Bsp3dNodes = nodelist;
+            prune_node_tree();
 			return Bsp;
 		}
 
@@ -37,25 +38,34 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			Plane newplane = generate_new_node_plane(Bsp.Bsp3dSupernodes[supernode_index], index);
 			Bsp.Planes.Add(newplane);
 			newnode.Plane = Bsp.Planes.Count - 1;
-			newnode.FrontChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
-			newnode.BackChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
 			nodelist.Add(newnode);
-			return nodelist.Count - 1;
+			int newnode_index = nodelist.Count - 1;
+			nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
+			nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
+			return newnode_index;
 		}
 
 		public int buildnode(int index, TagBlock<LargeBsp3dNode> nodelist)
         {
 			//make sure this isn't actually a leaf
-			if ((index & 0x80000000) > 0)
+			if (BSP_TEST_FLAG(index))
 				return index;
 			var node = Bsp.Bsp3dNodes[index].DeepClone();
-			if((node.FrontChild & 0x80000000) == 0)
-				node.FrontChild = buildnode(node.FrontChild, nodelist);
-			if ((node.BackChild & 0x80000000) == 0)
-				node.BackChild = buildnode(node.BackChild, nodelist);
-			nodelist.Add(node);
-			return nodelist.Count - 1;			
+            nodelist.Add(node);
+            int newnode_index = nodelist.Count - 1;
+            if (!BSP_TEST_FLAG(node.FrontChild))
+				nodelist[newnode_index].FrontChild = buildnode(node.FrontChild, nodelist);
+			if (!BSP_TEST_FLAG(node.BackChild))
+                nodelist[newnode_index].BackChild = buildnode(node.BackChild, nodelist);
+			return newnode_index;			
 		}
+
+		public bool BSP_TEST_FLAG(int index)
+        {
+			if (((index >> 31) & 1) == 1)
+				return true;
+			return false;
+        }
 
 		public Plane generate_new_node_plane(Bsp3dSupernode supernode, int plane_index)
 		{
@@ -84,5 +94,85 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			plane.Value = planevalue;
 			return plane;
 		}
-	}
+
+        public bool prune_node_tree()
+        {
+            //first collapse the node children, shifting -1 up through any unnecessary nodes
+            List<int> valid_node_array = new List<int>();
+            TagBlock<LargeBsp3dNode> Nodelist = Bsp.Bsp3dNodes.DeepClone();
+            Nodelist[0].FrontChild = collapse_node_children(Nodelist, Nodelist[0].FrontChild);
+            Nodelist[0].BackChild = collapse_node_children(Nodelist, Nodelist[0].BackChild);
+
+            //this function now does an inline replacement of the nodes block, removing nodes that only have -1 as children
+            int node_count = 0;
+            int pruned_nodes_count = 0;
+            foreach (var node in Nodelist)
+            {
+                if (node.FrontChild != -1 || node.BackChild != -1)
+                {
+                    valid_node_array.Add(node_count++);
+                }
+                else
+                {
+                    valid_node_array.Add(-1);
+                    pruned_nodes_count++;
+                }
+            }
+
+            //adjust node children to match new node list
+            for (var i = 0; i < Nodelist.Count; i++)
+            {
+                if ((Nodelist[i].FrontChild & 0x80000000) == 0) //child is another node, not a leaf or -1
+                {
+                    Nodelist[i].FrontChild = valid_node_array[Nodelist[i].FrontChild];
+                }
+                if ((Nodelist[i].BackChild & 0x80000000) == 0) //child is another node, not a leaf or -1
+                {
+                    Nodelist[i].BackChild = valid_node_array[Nodelist[i].BackChild];
+                }
+            }
+
+            //now complete the inline replacement of the node list
+            for (var n = 0; n < Nodelist.Count; n++)
+            {
+                if (valid_node_array[n] > n)
+                {
+                    Console.WriteLine("###ERROR: node_table[node_index]>node_index");
+                    return false;
+                }
+
+                if (valid_node_array[n] != -1)
+                {
+                    Nodelist[valid_node_array[n]] = Nodelist[n].DeepClone();
+                }
+            }
+
+            //remove extra nodes from the end of the tree
+            while (Nodelist.Count > node_count)
+                Nodelist.RemoveAt(Nodelist.Count - 1);
+
+            //write nodes out to main BSP
+            Bsp.Bsp3dNodes = Nodelist.DeepClone();
+            return true;
+        }
+
+        public int collapse_node_children(TagBlock<LargeBsp3dNode> Nodelist, int node_index)
+        {
+            int absolute_node_index = node_index & 0x7FFFFFFF;
+
+            if ((node_index & 0x80000000) != 0) //if this child is a leaf or -1, just return it
+                return node_index;
+
+            //call this function again for both children of this node
+            int front_child_node_index = collapse_node_children(Nodelist, Nodelist[absolute_node_index].FrontChild);
+            int back_child_node_index = collapse_node_children(Nodelist, Nodelist[absolute_node_index].BackChild);
+            Nodelist[absolute_node_index].FrontChild = front_child_node_index;
+            Nodelist[absolute_node_index].BackChild = back_child_node_index;
+
+            //if either of this node's children are not -1, return this node index, otherwise return -1
+            if (front_child_node_index != -1 || back_child_node_index != -1)
+                return node_index;
+            return back_child_node_index;
+        }
+    }
 }
