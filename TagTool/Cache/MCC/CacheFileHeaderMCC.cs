@@ -15,8 +15,7 @@ namespace TagTool.Cache.MCC
         public TagMemoryHeader TagMemoryHeader;
         public CacheFileType CacheType;
         public CacheFileSharedType SharedCacheType;
-        public byte UnknownFlags;
-        [TagField(Align = 4)]
+        public uint CacheFlags;
         public TagNameHeader TagNamesHeader;
         public StringIDHeaderMCC StringIdsHeader;
         public uint Unknown17;
@@ -41,15 +40,23 @@ namespace TagTool.Cache.MCC
         public string ScenarioPath;
         public PlatformUnsignedValue VirtualBaseAddress;
         public PlatformUnsignedValue TagTableHeaderOffset;
-        [TagField(Length = (int)CacheFilePartitionType.Count + 1)]
-        public CacheFilePartition[] Partitions = new CacheFilePartition[(int)CacheFilePartitionType.Count + 1];
         public uint Unknown28;
         public uint Unknown29;
-        [TagField(Length = 0x144)]
-        public byte[] Unknown30;
+        public uint Unknown30;
+        public uint Unknown31;
+        [TagField(Length = (int)CacheFilePartitionType.Count)]
+        public CacheFilePartition[] Partitions = new CacheFilePartition[(int)CacheFilePartitionType.Count];
+        public uint Unknown32;
+        public uint Unknown33;
+        [TagField(Length = 0x44)]
+        public byte[] Unknown34;
+        [TagField(Length = 0x20)]
+        public byte[] Unknown35;
+        [TagField(Length = 0x100)]
+        public byte[] Unknown36;
         public CacheFileSectionTable SectionTable;
-        [TagField(Length = 0x3B20)]
-        public byte[] Unknown31;
+        [TagField(Length = 0x3B00)]
+        public byte[] Unknown37;
         public Tag FooterSiganture;
 
         public override string GetBuild() => Build;
