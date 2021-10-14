@@ -344,7 +344,7 @@ namespace TagTool.Commands.RenderModels
 					builder.BindIndexBuffer(indices, indexBufferFormat);
 
 					if (usePerMeshNodeMapping)
-						builder.MapNodes(meshNodeIndices.ToArray());
+						builder.MapNodes(meshNodeIndices.Count == 0 ? new byte[] { 0 } : meshNodeIndices.ToArray());
 
 					builder.EndMesh();
 					builder.EndPermutation();
