@@ -326,10 +326,10 @@ namespace TagTool.Commands.Porting
                 //scenario.SceneryPalette.Clear();
                 scenario.Terminals.Clear();
                 scenario.TerminalPalette.Clear();
-                scenario.Machines.Clear();
-                scenario.MachinePalette.Clear();
-                scenario.Controls.Clear();
-                scenario.ControlPalette.Clear();
+                //scenario.Machines.Clear();
+                //scenario.MachinePalette.Clear();
+                //scenario.Controls.Clear();
+                //scenario.ControlPalette.Clear();
                 //scenario.Crates.Clear();
                 //scenario.CratePalette.Clear();
                 scenario.Giants.Clear();
@@ -375,6 +375,16 @@ namespace TagTool.Commands.Porting
                 scenario.ScenarioKillTriggers.Clear();
                 scenario.ScenarioSafeTriggers.Clear();
 
+                scenario.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
+                    new Scenario.PlayerStartingProfileBlock() {
+                        Name = "start_assault",
+                        PrimaryWeapon = CacheContext.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap"),
+                        PrimaryRoundsLoaded = 32,
+                        PrimaryRoundsTotal = 108,
+                        StartingFragGrenadeCount = 2
+                    }
+                };
+
                 Dictionary<string, string> reachObjectives = new Dictionary<string, string>()
                 {
                     {"objects\\multi\\models\\mp_hill_beacon\\mp_hill_beacon", "objects\\multi\\koth\\koth_hill_static"},
@@ -386,8 +396,12 @@ namespace TagTool.Commands.Porting
                 CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
                 CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
                 CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
-                CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
-                CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
+
+                foreach (Scenario.ScenarioPaletteEntry block in scenario.SceneryPalette)
+                    ReplaceObjects(block, reachObjectives);
+
+                foreach (Scenario.ScenarioPaletteEntry block in scenario.CratePalette)
+                    ReplaceObjects(block, reachObjectives);
             }
 
             if (definition is SkyAtmParameters skya)
@@ -402,6 +416,23 @@ namespace TagTool.Commands.Porting
                     atmProperty.FogIntensityYellow = 1;
                 }
             }
+
+            if (definition is Model hlmt)
+            {
+                foreach (var variant in hlmt.Variants)
+                    foreach (var item in variant.Objects)
+                        if (item.ChildObject != null)
+                        {
+                            switch ((item.ChildObject.Group as TagGroupGen3).Name)
+                            {
+                                case "weapon":
+                                case "equipment":
+                                case "vehicle":
+                                    item.ChildObject = null;
+                                    break;
+                            }
+                        }
+            }
         }
 
         public void CullNewObjects<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList, Dictionary<string,string> replacements)
@@ -411,8 +442,7 @@ namespace TagTool.Commands.Porting
                 List<int> indices = new List<int>();
                 foreach (Scenario.ScenarioPaletteEntry block in palette)
                 {
-                    if (block.Object != null && replacements.TryGetValue(block.Object.Name, out string result))
-                        block.Object.Name = result;
+                    ReplaceObjects(block, replacements);
 
                     if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
                     {
@@ -428,6 +458,17 @@ namespace TagTool.Commands.Porting
                 indices.Reverse();
                 for (int i = 0; i < indices.Count; i++)
                     instanceList.RemoveAt(indices[i]);
+            }
+        }
+
+        public void ReplaceObjects(Scenario.ScenarioPaletteEntry block, Dictionary<string, string> replacements)
+        {
+            if (block.Object != null)
+            {
+                if (replacements.TryGetValue(block.Object.Name, out string result))
+                    block.Object.Name = result;
+                else if (block.Object.Name.Contains("initial_spawn_point") || block.Object.Name.Contains("respawn_zone"))
+                    block.Object = null;
             }
         }
 
