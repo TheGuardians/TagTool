@@ -293,7 +293,7 @@ namespace TagTool.Cache.Gen3
             }
             else
             {
-                Console.WriteLine("Cache hit");
+                //Console.WriteLine("Cache hit");
             }
 
             int length;
