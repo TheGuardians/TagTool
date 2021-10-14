@@ -398,12 +398,11 @@ namespace TagTool.Commands.Porting
                 CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
                 CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
                 CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
-
-                foreach (Scenario.ScenarioPaletteEntry block in scenario.SceneryPalette)
-                    ReplaceObjects(block, reachObjectives);
-
-                foreach (Scenario.ScenarioPaletteEntry block in scenario.CratePalette)
-                    ReplaceObjects(block, reachObjectives);
+                
+                ReplaceObjects(scenario.SceneryPalette, reachObjectives);
+                ReplaceObjects(scenario.CratePalette, reachObjectives);
+                RemoveNullPlacements(scenario.SceneryPalette, scenario.Scenery);
+                RemoveNullPlacements(scenario.CratePalette, scenario.Crates);
             }
 
             if (definition is SkyAtmParameters skya)
@@ -424,7 +423,6 @@ namespace TagTool.Commands.Porting
                 foreach (var variant in hlmt.Variants)
                     foreach (var item in variant.Objects)
                         if (item.ChildObject != null)
-                        {
                             switch ((item.ChildObject.Group as TagGroupGen3).Name)
                             {
                                 case "weapon":
@@ -433,7 +431,31 @@ namespace TagTool.Commands.Porting
                                     item.ChildObject = null;
                                     break;
                             }
+            }
+
+            if (definition is GameObject obj) {
+                foreach (var block in obj.MultiplayerObject)
+                    if (block.SpawnedObject != null)
+                        switch ((block.SpawnedObject.Group as TagGroupGen3).Name) {
+                            case "weapon":
+                            case "equipment":
+                            case "vehicle":
+                                block.SpawnedObject = null;
+                                break;
                         }
+            }
+
+            if (definition is Effect effe) {
+                foreach (var block in effe.Events)
+                    foreach (var part in block.Parts)
+                    {
+                        string name = ((TagGroupGen3)part.Type.Group).Name;
+
+                        if (name == "beam_system" || name == "projectile")
+                            part.Type = DefaultTags[part.Type.Group.Tag];
+                        else if (name == "cheap_particle_emitter")
+                            part.Type = null;
+                    }
             }
         }
 
@@ -441,36 +463,46 @@ namespace TagTool.Commands.Porting
         {
             if (palette.Count() > 0)
             {
-                List<int> indices = new List<int>();
-                foreach (Scenario.ScenarioPaletteEntry block in palette)
-                {
-                    ReplaceObjects(block, replacements);
+                ReplaceObjects(palette, replacements);
 
+                foreach (Scenario.ScenarioPaletteEntry block in palette)
                     if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
-                    {
                         block.Object = null;
+
+                RemoveNullPlacements(palette, instanceList);
+            }
+        }
+
+        public void ReplaceObjects(List<Scenario.ScenarioPaletteEntry> palette, Dictionary<string, string> replacements)
+        {
+            foreach (var block in palette)
+                if (block.Object != null)
+                {
+                    if (replacements.TryGetValue(block.Object.Name, out string result))
+                        block.Object.Name = result;
+                    else if (block.Object.Name.Contains("initial_spawn_point") || block.Object.Name.Contains("respawn_zone"))
+                        block.Object = null;
+                }
+        }
+
+        public void RemoveNullPlacements<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList)
+        {
+            if (palette.Count() > 0)
+            {
+                List<int> indices = new List<int>();
+
+                foreach (Scenario.ScenarioPaletteEntry block in palette)
+                    if (block.Object == null)
                         foreach (var instance in instanceList)
                         {
                             if (!(instance is Scenario.EquipmentInstance) && (instance as Scenario.PermutationInstance).PaletteIndex == palette.IndexOf(block))
                                 indices.Add(instanceList.IndexOf(instance));
                         }
-                    }
-                }
+
                 indices.Sort();
                 indices.Reverse();
                 for (int i = 0; i < indices.Count; i++)
                     instanceList.RemoveAt(indices[i]);
-            }
-        }
-
-        public void ReplaceObjects(Scenario.ScenarioPaletteEntry block, Dictionary<string, string> replacements)
-        {
-            if (block.Object != null)
-            {
-                if (replacements.TryGetValue(block.Object.Name, out string result))
-                    block.Object.Name = result;
-                else if (block.Object.Name.Contains("initial_spawn_point") || block.Object.Name.Contains("respawn_zone"))
-                    block.Object = null;
             }
         }
 
