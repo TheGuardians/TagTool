@@ -10,6 +10,7 @@
         Halo3 = 0xB,
         HaloReach = 0xC,
         HaloOnline = 0x12,
+        HaloMCCUniversal = 0xD,
         HaloCustomEdition = 0x261
     }
 }

@@ -70,6 +70,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("gpix", "global_cache_file_pixel_shaders"), typeof(GlobalCacheFilePixelShaders) },
             { new TagGroupGen3("grup", "gui_group_widget_definition"), typeof(GuiGroupWidgetDefinition) },
             { new TagGroupGen3("hlmt", "model"), typeof(Model) },
+            { new TagGroupGen3("hlsl", "hlsl_include"), typeof(HlslInclude) },
             { new TagGroupGen3("inpg", "input_globals"), typeof(InputGlobals) },
             { new TagGroupGen3("item", "obje", "item"), typeof(Item) },
             { new TagGroupGen3("jmad", "model_animation_graph"), typeof(ModelAnimationGraph) },

@@ -7,9 +7,6 @@ namespace TagTool.Cache.MCC
     [TagStructure(Size = 0x4000)]
     public class CacheFileHeaderMCC : CacheFileHeader
     {
-        [TagField(Flags = TagFieldFlags.Runtime)]
-        public const ulong VirtualBaseAddress = 0x150000000;
-
         public Tag HeaderSignature;
         public CacheFileVersion FileVersion;
         public uint FileLength;
@@ -18,22 +15,21 @@ namespace TagTool.Cache.MCC
         public TagMemoryHeader TagMemoryHeader;
         public CacheFileType CacheType;
         public CacheFileSharedType SharedCacheType;
-        public byte UnknownFlags;
-        [TagField(Align = 4)]
+        public uint CacheFlags;
         public TagNameHeader TagNamesHeader;
         public StringIDHeaderMCC StringIdsHeader;
-        public int Unknown17;
+        public uint Unknown17;
         public uint Unknown18;
-        public int Unknown19;
-        public int Unknown20;
+        public uint Unknown19;
+        public uint Unknown20;
         [TagField(Length = 7)]
         public ulong[] Timestamps;
-        public int Unknown22;
-        public int Unknown23;
-        public int Unknown24;
-        public int Unknown25;
-        public int Unknown26;
-        public int Unknown27;
+        public uint Unknown22;
+        public uint Unknown23;
+        public uint Unknown24;
+        public uint Unknown25;
+        public uint Unknown26;
+        public uint Unknown27;
         [TagField(Length = 32)]
         public string Build;
         [TagField(Length = 32)]
@@ -42,17 +38,25 @@ namespace TagTool.Cache.MCC
         public string SourceFile;
         [TagField(Length = 256)]
         public string ScenarioPath;
-        public PlatformUnsignedValue UnknownAddress;
-        public PlatformUnsignedValue TagsHeaderAddress;
-        [TagField(Length = (int)CacheFilePartitionType.Count + 1)]
-        public CacheFilePartition[] Partitions = new CacheFilePartition[(int)CacheFilePartitionType.Count + 1];
+        public PlatformUnsignedValue VirtualBaseAddress;
+        public PlatformUnsignedValue TagTableHeaderOffset;
         public uint Unknown28;
         public uint Unknown29;
-        [TagField(Length = 0x144)]
-        public byte[] Unknown30;
+        public uint Unknown30;
+        public uint Unknown31;
+        [TagField(Length = (int)CacheFilePartitionType.Count)]
+        public CacheFilePartition[] Partitions = new CacheFilePartition[(int)CacheFilePartitionType.Count];
+        public uint Unknown32;
+        public uint Unknown33;
+        [TagField(Length = 0x44)]
+        public byte[] Unknown34;
+        [TagField(Length = 0x20)]
+        public byte[] Unknown35;
+        [TagField(Length = 0x100)]
+        public byte[] Unknown36;
         public CacheFileSectionTable SectionTable;
-        [TagField(Length = 0x3B20)]
-        public byte[] Unknown31;
+        [TagField(Length = 0x3B00)]
+        public byte[] Unknown37;
         public Tag FooterSiganture;
 
         public override string GetBuild() => Build;

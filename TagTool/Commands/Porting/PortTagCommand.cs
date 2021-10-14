@@ -113,6 +113,8 @@ namespace TagTool.Commands.Porting
 
                     WaitForPendingSoundConversion();
                     ProcessDeferredActions();
+                    if (BlamCache is GameCacheGen3 gen3Cache)
+                        gen3Cache.ResourceCacheGen3.ResourcePageCache.Clear();
 
                     if (FlagIsSet(PortingFlags.Memory))
                         using (var cacheFileStream = CacheContext.OpenCacheReadWrite())
