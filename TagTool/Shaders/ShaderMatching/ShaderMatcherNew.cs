@@ -418,7 +418,7 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                             // Reach rmhg //
                             case @"self_illumination\palettized_depth_fade":
-                                optionName = "palettized_plasma";
+                                optionName = "plasma";
                                 break;
                             // Reach rmtr  //
                             case @"blending\distance_blend_base":
@@ -435,7 +435,16 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"alpha_test\from_albedo_alpha":
                                 optionName = "simple";
                                 break;
+                            case @"alpha_test\from_texture":
+                                optionName = "simple";
+                                break;
                             case @"material_model\flat":
+                                optionName = "default";
+                                break;
+                            case @"material_model\specular":
+                                optionName = "default";
+                                break;
+                            case @"material_model\translucent":
                                 optionName = "default";
                                 break;
                             // Reach prt3 //
