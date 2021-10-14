@@ -393,8 +393,6 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "emblem_change_color";
                                 break;
                             case @"bump_mapping\detail_blend":
-                                optionName = "detail";
-                                break;
                             case @"bump_mapping\three_detail_blend":
                                 optionName = "detail";
                                 break;
@@ -418,6 +416,7 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                             // Reach rmhg //
                             case @"self_illumination\palettized_depth_fade":
+                            case @"self_illumination\palettized_plasma_change_color":
                                 optionName = "plasma";
                                 break;
                             // Reach rmtr  //
@@ -433,17 +432,11 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "default";
                                 break;
                             case @"alpha_test\from_albedo_alpha":
-                                optionName = "simple";
-                                break;
                             case @"alpha_test\from_texture":
                                 optionName = "simple";
                                 break;
                             case @"material_model\flat":
-                                optionName = "default";
-                                break;
                             case @"material_model\specular":
-                                optionName = "default";
-                                break;
                             case @"material_model\translucent":
                                 optionName = "default";
                                 break;
@@ -459,13 +452,21 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"depth_fade\palette_shift":
                                 optionName = "on";
                                 break;
+                            case @"albedo\diffuse_modulated":
+                                optionName = "diffuse_only";
+                                break;
+                            case @"albedo\palettized_2d_plasma":
+                                optionName = "palettized";
+                                break;
+                            // Reach ltvl //
+                            case @"albedo\circular":
+                                optionName = "diffuse_only";
+                                break;
                             // MCC rmsh //
                             case @"albedo\chameleon_albedo_masked":
                                 optionName = "chameleon_masked";
                                 break;
                             case @"material_model\cook_torrance_rim_fresnel":
-                                optionName = "cook_torrance";
-                                break;
                             case @"material_model\cook_torrance_pbr_maps":
                                 optionName = "cook_torrance";
                                 break;
