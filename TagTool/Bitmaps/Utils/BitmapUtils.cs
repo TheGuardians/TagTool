@@ -745,7 +745,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.ReachDxt5aMono:
                 case BitmapFormat.Y16:
                     return BitmapFormat.Y8;
-
+            
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.V8U8:
@@ -758,7 +758,7 @@ namespace TagTool.Bitmaps
         }
         public static bool RequiresDecompression(BitmapFormat format, uint width, uint height) => IsCompressedFormat(format) && (width % 4 != 0 || height % 4 != 0);
 
-        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, bool requireDecompression, CacheVersion version)
+        public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, BitmapType type, bool requireDecompression, CacheVersion version)
         {
             // fix enum from reach
             if (version == CacheVersion.HaloReach) 
@@ -780,8 +780,20 @@ namespace TagTool.Bitmaps
 
             if(format == BitmapFormat.Ctx1)
             {
-                data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
-                format = BitmapFormat.Dxn;
+                if (type == BitmapType.Array) //DXN array unsupported
+                {
+                    destinationFormat = BitmapFormat.A8R8G8B8;
+                    requireDecompression = false;
+
+                    data = ConvertNonMultipleBlockSizeBitmap(data, width, height, format);
+                    data = BitmapDecoder.EncodeBitmap(data, destinationFormat, (int)width, (int)height);
+                    format = destinationFormat;
+                }
+                else
+                {
+                    data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
+                    format = BitmapFormat.Dxn;
+                }
             }
             else if(format != destinationFormat)
             {

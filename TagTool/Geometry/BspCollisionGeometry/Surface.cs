@@ -38,11 +38,16 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public short SeamIdentifierIndexEdgeMappingIndex;
     }
 
-    [TagStructure(Size = 0x4)]
-    public class PlaneReference : TagStructure
+    public struct PlaneReference
     {
-        public short Unknown1;
-        public short ClusterIndex;
+        public int TriangleIndex;
+        public int ClusterIndex;
+
+        public PlaneReference(int triangleIndex = -1, int clusterIndex = -1)
+        {
+            TriangleIndex = triangleIndex;
+            ClusterIndex = clusterIndex;
+        }
     }
 
     [TagStructure(Size = 0x8)]

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
+using System.Text.RegularExpressions;
 using System.Linq;
 using TagTool.Cache.Gen3;
 using TagTool.Common;
@@ -188,7 +188,13 @@ namespace TagTool.Cache
             result = null;
             return false;
         }
-
+		
+        /// <summary>
+        /// Returns a matching group Tag if found. Tag result resolves to the 4 letter representation of the group or ???? if null as a string.
+        /// </summary>
+        /// <param name="name">Group name in long or short representation.</param>
+        /// <param name="result">Will be set to a matching group Tag if found else Tag.Null</param>
+        /// <returns>True if group was found or (input name is "none" or "null" and tag is null) else false.</returns>
         public bool TryParseGroupTag(string name, out Tag result)
         {
             if(TagDefinitions.GetType() == typeof(TagDefinitionsGen3))
@@ -205,7 +211,6 @@ namespace TagTool.Cache
             }
             else if (TagDefinitions.GetType() == typeof(Gen4.TagDefinitionsGen4))
             {
-                // kind of redundant, could just use TagGroupGen3...
                 foreach (var pair in TagDefinitions.Types)
                 {
                     Gen4.TagGroupGen4 group = (Gen4.TagGroupGen4)pair.Key;
@@ -217,8 +222,7 @@ namespace TagTool.Cache
                 }
             }
 
-            while (name.Length < 4)
-                name += " "; // rmw, rmd, rm
+            name = name.PadRight(4); // rmw, rmd, rm
 
             var type = TagDefinitions.GetTagDefinitionType(name);
 
@@ -364,6 +368,50 @@ namespace TagTool.Cache
             else
                 return result;
         }
-    }
+		
+        /// <summary>
+        /// Checks that tag path contains valid characters only and that tag group is valid.
+        /// </summary>
+        /// <param name="path">Tag path including long or short tag group name.</param>
+        /// <returns>True if valid else false</returns>
+        public bool IsTagPathValid(string path)
+        {
+            if (path is null)
+                return false;
 
+            if (!Regex.Match(path, @"^(?:[a-z0-9_]+\\{0,1})+[a-z0-9_]\.[a-z0-9_]+$").Success)
+                return false;
+
+            if (!TryParseGroupTag(path.Split('.')[1], out _))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if tag path exists in TagTable.
+        /// </summary>
+        /// <param name="path">Tag path including long or short tag group name.</param>
+        /// <returns>True if exists else false</returns>
+        public bool TagExists(string path)
+        {
+            if (path is null)
+                return false;
+
+            if (!TagTable.Any(x => path == $"{x.Name}.{x.Group.Tag}" || path == $"{x.Name}.{x.Group}"))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks that tag path/group are not malformed and that tag does not already exist.
+        /// </summary>
+        /// <param name="path">Tag path including long or short tag group name.</param>
+        /// <returns>True if valid and available else false</returns>
+        public bool IsTagPathValidAndAvailable(string path)
+        {
+            return IsTagPathValid(path) && !TagExists(path);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
@@ -30,7 +31,7 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> SupportedShaderTypes = new List<string> { "zonly", "screen", "custom", "shader", "particle", "contrail", "beam", "light_volume", "decal", "black", "halogram" };
+        static readonly List<string> UnsupportedShaderTypes = new List<string> { "glass", "cortana" };
 
         public override object Execute(List<string> args)
         {
@@ -40,13 +41,13 @@ namespace TagTool.Commands.Shaders
             string shaderType = args[0].ToLower();
 
             if (shaderType == "explicit")
-                return GenerateExplicitShader(args[1].ToLower());
+                return GenerateExplicitShader(args[1].ToLower(), args.Count > 2 ? args[2].ToLower() : "default", args.Count > 3 ? args[3].ToLower() : "");
             else if (shaderType == "chud")
                 return GenerateChudShader(args[1].ToLower());
             else if (shaderType == "glvs" || shaderType == "glps")
                 return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
 
-            if (!SupportedShaderTypes.Contains(shaderType))
+            if (UnsupportedShaderTypes.Contains(shaderType))
                 return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
 
             args.RemoveAt(0); // we should only have options from this point
@@ -119,6 +120,9 @@ namespace TagTool.Commands.Shaders
                     case "custom":          GenerateCustom(stream, options, rmt2TagName, rmdf); break;
                     case "screen":          GenerateScreen(stream, options, rmt2TagName, rmdf); break;
                     case "zonly":           GenerateZOnly(stream, options, rmt2TagName, rmdf); break;
+                    case "water":           GenerateWater(stream, options, rmt2TagName, rmdf); break;
+                    case "terrain":         GenerateTerrain(stream, options, rmt2TagName, rmdf); break;
+                    case "foliage":         GenerateFoliage(stream, options, rmt2TagName, rmdf); break;
                 }
 
                 Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
@@ -137,15 +141,15 @@ namespace TagTool.Commands.Shaders
                 //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(options, applyFixes);
                 case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(options, applyFixes);
                 case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(options, applyFixes);
-                //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(options, applyFixes);
+                case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(options, applyFixes);
                 //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(options, applyFixes);
                 case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(options, applyFixes);
                 case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(options, applyFixes);
                 case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(options, applyFixes);
                 case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(options, applyFixes);
                 case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(options, applyFixes);
-                //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(options, applyFixes);
-                //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(options, applyFixes);
+                case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(options, applyFixes);
+                case "water":           return new HaloShaderGenerator.Water.WaterGenerator(options, applyFixes);
                 case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(options, applyFixes);
             }
             return null;
@@ -161,7 +165,7 @@ namespace TagTool.Commands.Shaders
                 //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(applyFixes);
                 case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(applyFixes);
                 case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(applyFixes);
-                //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
+                case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
                 //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(applyFixes);
                 case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(applyFixes);
                 case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(applyFixes);
@@ -169,7 +173,7 @@ namespace TagTool.Commands.Shaders
                 case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(applyFixes);
                 case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(applyFixes);
                 case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(applyFixes);
-                //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
+                case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
                 case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(applyFixes);
             }
             return null;
@@ -189,7 +193,30 @@ namespace TagTool.Commands.Shaders
             return rmdfTag;
         }
 
-        private object GenerateExplicitShader(string shader)
+        public ShaderConstantTable BuildConstantTable(HaloShaderGenerator.ShaderGeneratorResult generatorResult, GameCache cache, bool pixelShader)
+        {
+            ShaderConstantTable result = new ShaderConstantTable
+            {
+                ShaderType = pixelShader ? ShaderType.PixelShader : ShaderType.VertexShader,
+                Constants = new List<ShaderParameter>()
+            };
+
+            foreach (var register in generatorResult.Registers)
+            {
+                var nameId = cache.StringTable.GetStringId(register.Name);
+                if (nameId == TagTool.Common.StringId.Invalid)
+                    nameId = cache.StringTable.AddString(register.Name);
+
+                ShaderParameter.RType rType = (ShaderParameter.RType)Enum.Parse(typeof(ShaderParameter.RType), register.registerType.ToString());
+
+                var parameterBlock = new ShaderParameter { ParameterName = nameId, RegisterCount = (byte)register.Size, RegisterIndex = (ushort)register.Register, RegisterType = rType };
+                result.Constants.Add(parameterBlock);
+            }
+
+            return result;
+        }
+
+        private object GenerateExplicitShader(string shader, string entry, string vertexType)
         {
             if (!Enum.TryParse(shader, out ExplicitShader value))
             {
@@ -198,21 +225,59 @@ namespace TagTool.Commands.Shaders
                 value = (ExplicitShader)intValue;
             }
 
-            // TODO: write register info to tag
-            // TODO: vtsh support
-            // TODO: entry point support
-            // TODO: failsafes
-
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default);
-
-                int pixelShaderIndex = 0; // TODO
-
                 CachedTag pixlTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
                 var pixl = Cache.Deserialize<PixelShader>(stream, pixlTag);
+                CachedTag vtshTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.vtsh");
+                var vtsh = Cache.Deserialize<VertexShader>(stream, vtshTag);
 
-                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = result.Bytecode;
+                List<string> shaderStages = Enum.GetNames(typeof(HaloShaderGenerator.Globals.ShaderStage)).Select(s => s.ToLower()).ToList();
+                int entryIndex = shaderStages.IndexOf(entry);
+                if (entryIndex == -1)
+                    return new TagToolError(CommandError.ArgInvalid, "Entry point not found.");
+
+                while (entryIndex >= pixl.EntryPointShaders.Count)
+                    pixl.EntryPointShaders.Add(new ShortOffsetCountBlock());
+
+                if (pixl.EntryPointShaders[entryIndex].Count <= 0)
+                {
+                    pixl.EntryPointShaders[entryIndex].Offset = (byte)pixl.Shaders.Count;
+                    pixl.EntryPointShaders[entryIndex].Count = 1;
+                    pixl.Shaders.Add(new PixelShaderBlock());
+                }
+
+                int pixelShaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
+
+                var pixelResult = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), entry);
+                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = pixelResult.Bytecode;
+                pixl.Shaders[pixelShaderIndex].PCConstantTable = BuildConstantTable(pixelResult, Cache, true);
+
+                List<string> vertexTypes = Enum.GetNames(typeof(TagTool.Geometry.VertexType)).Select(s => s.ToLower()).ToList();
+                int vertexIndex = vertexTypes.IndexOf(vertexType.Replace("_", ""));
+
+                if (vertexIndex != -1)
+                {
+                    while (entryIndex >= vtsh.EntryPoints.Count)
+                        vtsh.EntryPoints.Add(new VertexShader.VertexShaderEntryPoint { SupportedVertexTypes = new List<ShortOffsetCountBlock>() });
+                    while (vertexIndex >= vtsh.EntryPoints[entryIndex].SupportedVertexTypes.Count)
+                        vtsh.EntryPoints[entryIndex].SupportedVertexTypes.Add(new ShortOffsetCountBlock());
+
+                    if (vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Count <= 0)
+                    {
+                        vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Offset = (byte)vtsh.Shaders.Count;
+                        vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Count = 1;
+                        vtsh.Shaders.Add(new VertexShaderBlock());
+                    }
+
+                    int vertexShaderIndex = vtsh.EntryPoints[entryIndex].SupportedVertexTypes[vertexIndex].Offset;
+
+                    var vertexResult = GenericVertexShaderGenerator.GenerateVertexShader(value.ToString(), entry);
+                    vtsh.Shaders[vertexShaderIndex].PCShaderBytecode = vertexResult.Bytecode;
+                    vtsh.Shaders[vertexShaderIndex].PCConstantTable = BuildConstantTable(vertexResult, Cache, false);
+
+                    Cache.Serialize(stream, vtshTag, vtsh);
+                }
 
                 Cache.Serialize(stream, pixlTag, pixl);
             }
@@ -237,7 +302,7 @@ namespace TagTool.Commands.Shaders
 
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default, true);
+                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default.ToString().ToLower(), true);
 
                 int pixelShaderIndex = 0; // TODO
 
@@ -292,7 +357,7 @@ namespace TagTool.Commands.Shaders
             Blend_Mode blendMode = (Blend_Mode)options[7];
             Parallax parallax = (Parallax)options[8];
             Misc misc = (Misc)options[9];
-            Distortion distortion = (Distortion)options[10];
+            HaloShaderGenerator.Shared.Distortion distortion = (HaloShaderGenerator.Shared.Distortion)options[10];
 
             var generator = new ShaderGenerator(albedo, bumpMapping, alphaTest, specularMask, materialModel, environmentMapping, selfIllumination, blendMode, parallax, misc, distortion);
 
@@ -524,6 +589,57 @@ namespace TagTool.Commands.Shaders
             HaloShaderGenerator.ZOnly.Test test = (HaloShaderGenerator.ZOnly.Test)options[0];
 
             var generator = new HaloShaderGenerator.ZOnly.ZOnlyGenerator(test);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateWater(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Water.WaterGenerator(options.Select(x => (byte)x).ToArray(), true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateFoliage(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Foliage.FoliageGenerator(options.Select(x => (byte)x).ToArray(), true);
+
+            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+
+            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+
+            Cache.Serialize(stream, rmt2Tag, rmt2);
+            Cache.SaveStrings();
+            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+        }
+
+        private void GenerateTerrain(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        {
+            var generator = new HaloShaderGenerator.Terrain.TerrainGenerator(options.Select(x => (byte)x).ToArray(), true);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);

@@ -256,6 +256,9 @@ namespace TagTool.BlamFile
                 {
                     if (mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.StartOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.EndOfFile) && mapInfo.ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
                     {
+                        mapInfo.Format = map.EndianFormat;
+                        mapInfo.Version = map.Version;
+                        mapInfo.CachePlatform = map.CachePlatform;
                         map.MapFileBlf = mapInfo;
                     }
                 }

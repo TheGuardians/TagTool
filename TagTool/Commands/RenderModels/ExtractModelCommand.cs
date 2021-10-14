@@ -1,10 +1,11 @@
-﻿using TagTool.Cache;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace TagTool.Commands.RenderModels
 {
@@ -16,14 +17,27 @@ namespace TagTool.Commands.RenderModels
 
         public ExtractModelCommand(GameCache cacheContext, CachedTag tag, RenderModel model)
             : base(true,
-
+                  
+                  name:
                   "ExtractModel",
-                  "Extracts the current render model definition. (supported filetypes: obj, dae)",
+                  
+                  description:
+                  "Extracts the current render model definition as AMF, DAE or OBJ",
 
-                  "ExtractModel [variant name] <filename>",
+                  usage:
+                  "ExtractModel <path> [variant] [dds]",
 
-                  "Extracts a variant of the render model to a file. \n" +
-                  "If no extension is found, a dae named for the tag will be extracted to the folder that ends the path.")
+                  examples:
+                  "extractmodel d:\\banshee major\n" +
+                  "extractmodel d:\\*\\model.amf ?\n" +
+                  "foreach mode has:smg extractmodel d:\\rips\\*.dae dds",
+
+                  helpMessage:
+                  "- [variant] Specify perm name, ? prompts with a list of names, default * extacts all.\n" +
+                  "- [dds] Will extract used bitmaps in dds format to subfolders within <path> folder.\n" +
+                  "- Format will be chosen based on extension given for output file, AMF if folder only.\n" +
+                  "- All occurrence of * in <path>, will be replaced with the model name/index.\n" +
+                  "- If <path> is a folder only, an auto-named AMF file will be extracted there.")
         {
             Cache = cacheContext;
             Tag = tag;
@@ -32,75 +46,34 @@ namespace TagTool.Commands.RenderModels
         
         public override object Execute(List<string> args)
         {
-            string variantName = "*";
-            string fileType = "dae";
-            string modelFileName = "";
+            if (args.Count < 1 || args.Count > 3)
+                return new TagToolError(CommandError.ArgCount);
 
-            switch (args.Count)
-            {
-                case (1):
-                    modelFileName = args[0];
-                    if (args[0].Contains("."))
-                        fileType = modelFileName.Substring(modelFileName.LastIndexOf('.') + 1).ToLower();
-                    break;
+            var variants = Definition.Regions.SelectMany(
+                r => r.Permutations.Select(p => Cache.StringTable.GetString(p.Name)) ).Distinct().OrderBy(v => v).ToList();
 
-                case (2):
-                    variantName = args[0];
-                    modelFileName = args[1];
-                    break;
+            var exportFilePath = args[0];
+            var exportFileFormat = args[0].Contains(".") ? Path.GetExtension(args[0]).Replace(".", "") : "amf";
+            var filterArg = args.Count > 1 && (variants.Contains(args[1].ToLower()) || args[1] == "?" || args[1] == "*") ? args[1] : "*";
+            var extractBitmaps = (args.Count == 2 && filterArg != "dds" && args[1] == "dds") || (args.Count == 3 && args[2] == "dds");
 
-                default:
-                    return new TagToolError(CommandError.ArgCount);
-            }
+            var modelName = Path.GetFileNameWithoutExtension(Tag.Name is null ? Tag.Index.ToString("X8") : Tag.Name);
+            if (!exportFilePath.Contains(".")) exportFilePath = Path.Combine(exportFilePath, $"{modelName}.{exportFileFormat}");
+            exportFilePath = exportFilePath.Replace("*", modelName);
 
-            if (!modelFileName.Contains("."))
-            {
-                if (Tag.Name != null)
-                {
-                    var split = Tag.Name.Split('\\');
-                    modelFileName += "\\" + split[split.Length - 1];
-                }
-                else
-                    modelFileName += "\\" + Tag.Index.ToString("X8");
+            var exportBitmapsFolder = extractBitmaps ? Path.GetDirectoryName(exportFilePath) : null;
 
-                modelFileName += "." + fileType;
-            }
 
-            if (Definition.Geometry.Resource == null)
-            {
-                new TagToolError(CommandError.CustomError, "Render model does not have a resource associated with it!");
-                return true;
-            }
+            // Prompt for variants if requested
+            string[] modelVariant =
+                (filterArg == "*") ? null :
+                (filterArg == "?") ? new TagToolChoicePrompt.Multiple(variants).Prompt().Where(x => x.Value == true).Select(x => x.Key).ToArray() :
+                new string[] { filterArg };
 
-            // Deserialize the resource definition
-
-            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-            Definition.Geometry.SetResourceBuffers(definition);
-
-            using (var resourceStream = new MemoryStream())
-            {
-                var modelFile = new FileInfo(modelFileName);
-
-                if (!modelFile.Directory.Exists)
-                    modelFile.Directory.Create();
-
-                ModelExtractor extractor = new ModelExtractor(Cache, Definition);
-                extractor.ExtractRenderModel(variantName);
-
-                switch (fileType)
-                {
-                    case "obj":
-                        extractor.ExportObject(modelFile);
-                        break;
-                    case "dae":
-                        extractor.ExportCollada(modelFile);
-                        break;
-                    default:
-                        return new TagToolError(CommandError.ArgInvalid, $"Unsupported file type \"{fileType}\"");
-                }
-
-                Console.WriteLine($"Model successfully extracted to \"{modelFileName}\"");
-            }
+            // Extract model and bitmaps (if requested)
+            ModelExtractor extractor = new ModelExtractor(Cache, Definition);
+            if (!extractor.Export(exportFileFormat, exportFilePath, exportBitmapsFolder, modelVariant))
+                return new TagToolError(CommandError.OperationFailed, "Export failed");
 
             return true;
         }

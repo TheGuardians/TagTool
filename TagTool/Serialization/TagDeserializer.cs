@@ -11,6 +11,7 @@ using static TagTool.Tags.TagFieldFlags;
 using BindingFlags = System.Reflection.BindingFlags;
 using System.IO;
 using System.Linq;
+using TagTool.Geometry.BspCollisionGeometry;
 
 namespace TagTool.Serialization
 {
@@ -348,6 +349,12 @@ namespace TagTool.Serialization
             if (valueType == typeof(PlatformSignedValue))
                 return DeserializePlatfornSignedValue(reader);
 
+            if (valueType == typeof(IndexBufferIndex))
+                return DeserializeIndexBufferIndex(reader);
+
+            if (valueType == typeof(PlaneReference))
+                return DeserializePlaneReference(reader);
+
             // Assume the value is a structure
             return DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform));
         }
@@ -637,6 +644,29 @@ namespace TagTool.Serialization
             var min = DeserializeValue(reader, context, null, boundsType);
             var max = DeserializeValue(reader, context, null, boundsType);
             return Activator.CreateInstance(rangeType, min, max);
+        }
+
+        public IndexBufferIndex DeserializeIndexBufferIndex(EndianReader reader)
+        {
+            if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
+                return new IndexBufferIndex(reader.ReadInt32());
+            else
+                return new IndexBufferIndex(reader.ReadUInt16());
+        }
+
+        public object DeserializePlaneReference(EndianReader reader)
+        {
+            if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
+            {
+                var value = reader.ReadUInt32();
+                return new PlaneReference((int)(value >> 12), (int)(value & 0xFFF));
+            }
+            else
+            {
+                ushort triangleIndex = reader.ReadUInt16();
+                ushort clusterIndex = reader.ReadUInt16();
+                return new PlaneReference(triangleIndex, clusterIndex);
+            }
         }
 
         public PlatformUnsignedValue DeserializePlatfornUnsignedValue(EndianReader reader)

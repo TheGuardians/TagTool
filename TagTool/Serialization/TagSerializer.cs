@@ -9,6 +9,8 @@ using System.Text;
 using TagTool.Tags;
 using static System.Runtime.InteropServices.CharSet;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Commands.Common;
+using TagTool.Geometry.BspCollisionGeometry;
 
 namespace TagTool.Serialization
 {
@@ -299,6 +301,10 @@ namespace TagTool.Serialization
                 SerializePlatformUnsignedValue(block, (PlatformUnsignedValue)value);
             else if (valueType == typeof(PlatformSignedValue))
                 SerializePlatformSignedValue(block, (PlatformSignedValue)value);
+            else if (valueType == typeof(IndexBufferIndex))
+                SerializeIndexBufferIndex(block, (IndexBufferIndex)value);
+            else if (valueType == typeof(PlaneReference))
+                SerializePlaneReference(block, (PlaneReference)value);
             else
             {
                 if (value == null)
@@ -779,6 +785,38 @@ namespace TagTool.Serialization
             var upper = type.GetProperty("Upper").GetValue(val);
             SerializeValue(context, tagStream, block, lower, null, boundsType);
             SerializeValue(context, tagStream, block, upper, null, boundsType);
+        }
+
+        private void SerializeIndexBufferIndex(IDataBlock block, IndexBufferIndex val)
+        {
+            if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
+            {
+                block.Writer.Write(val.Value);
+            }
+            else
+            {
+                if (val > ushort.MaxValue)
+                    new TagToolWarning("Downgrade from uint to ushort for index buffer index. Unexpected behavior.");
+
+                block.Writer.Write((ushort)val.Value);
+            }
+        }
+
+        private void SerializePlaneReference(IDataBlock block, PlaneReference val)
+        {
+            if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
+            {
+                uint value = ((uint)val.TriangleIndex << 12) | ((uint)val.ClusterIndex & 0xFFF);
+                block.Writer.Write(value);
+            }
+            else
+            {
+                if (val.ClusterIndex > ushort.MaxValue || val.TriangleIndex > ushort.MaxValue)
+                    new TagToolWarning("Downgrade from int to short for plane reference. Unexpected behavior.");
+
+                block.Writer.Write((ushort)val.TriangleIndex);
+                block.Writer.Write((ushort)val.ClusterIndex);
+            }
         }
     }
 }

@@ -131,12 +131,6 @@ namespace TagTool.Shaders.ShaderMatching
 
             string tagName = $"shaders\\{sourceRmt2Desc.Type}_templates\\_{string.Join("_", sourceRmt2Desc.Options)}";
 
-            if (ShaderCache.ExportTemplate(BaseCacheStream, BaseCache, tagName, out CachedTag cachedRmt2Tag))
-            {
-                Console.WriteLine($"Found cached rmt2: {tagName}");
-                return cachedRmt2Tag;
-            }
-
             var relevantRmt2s = new List<Rmt2Pairing>();
 
             Dictionary<CachedTag, long> ShaderTemplateValues = new Dictionary<CachedTag, long>();
@@ -237,6 +231,12 @@ namespace TagTool.Shaders.ShaderMatching
                         ShaderTemplateValues.Add(rmt2Tag, Sorter.GetValue(waterTemplateSorter, Sorter.GetTemplateOptions(rmt2Tag.Name)));
                         break;
                 }
+            }
+
+            if (ShaderCache.ExportTemplate(BaseCacheStream, BaseCache, tagName, out CachedTag cachedRmt2Tag))
+            {
+                Console.WriteLine($"Found cached rmt2: {tagName}");
+                return cachedRmt2Tag;
             }
 
             // if we've reached here, we haven't found an extract match.
@@ -430,9 +430,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"material_model\cook_torrance_pbr_maps":
                                 optionName = "cook_torrance";
                                 break;
-                            case @"self_illumination\illum_change_color":
-                                optionName = "simple_four_change_color";
-                                break;
                             // MCC rmtr //
                             case @"material_1\diffuse_plus_specular_plus_self_illum":
                                 optionName = "diffuse_plus_specular";
@@ -580,15 +577,15 @@ namespace TagTool.Shaders.ShaderMatching
                         //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(Options, applyFixes);
                         case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(Options, applyFixes);
                         case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(Options, applyFixes);
-                        //case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(Options, applyFixes);
+                        case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(Options, applyFixes);
                         //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(Options, applyFixes);
                         case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(Options, applyFixes);
                         case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(Options, applyFixes);
                         case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(Options, applyFixes);
                         case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(Options, applyFixes);
                         case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(Options, applyFixes);
-                        //case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(Options, applyFixes);
-                        //case "water":           return new HaloShaderGenerator.Water.WaterGenerator(Options, applyFixes);
+                        case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(Options, applyFixes);
+                        case "water":           return new HaloShaderGenerator.Water.WaterGenerator(Options, applyFixes);
                         case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(Options, applyFixes);
                     }
 

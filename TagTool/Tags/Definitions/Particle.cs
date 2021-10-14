@@ -111,8 +111,8 @@ namespace TagTool.Tags.Definitions
             public CachedTag Type;
             public TriggerValue Trigger;
             public byte SkipFraction;
-            public TagMapping.VariableTypeValue PrimaryScale;
-            public TagMapping.VariableTypeValue SecondaryScale;
+            public TagMapping.ParticleStates PrimaryScale;
+            public TagMapping.ParticleStates SecondaryScale;
 
             public enum TriggerValue : sbyte
             {

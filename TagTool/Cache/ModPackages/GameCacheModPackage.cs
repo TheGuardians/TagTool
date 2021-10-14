@@ -94,7 +94,7 @@ namespace TagTool.Cache
             }
             else
             {
-                var context = CreateTagSerializationContext(stream, instance);
+                var context = CreateTagSerializationContext(stream, modCachedTag);
                 return Deserializer.Deserialize(context, definitionType);
             }
         }
@@ -108,7 +108,7 @@ namespace TagTool.Cache
                 return BaseCacheReference.Deserialize<T>(BaseCacheStream, baseInstance);
             }
             else
-                return Deserializer.Deserialize<T>(CreateTagSerializationContext(stream, instance));
+                return Deserializer.Deserialize<T>(CreateTagSerializationContext(stream, modCachedTag));
         }
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)

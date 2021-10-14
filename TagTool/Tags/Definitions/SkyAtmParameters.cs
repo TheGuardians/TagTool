@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -34,8 +35,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xA4)]
         public class AtmosphereProperty : TagStructure
 		{
-            public short Unknown1;
-            public short Unknown2;
+            public AtmosphereFlags Flags;
+            public short Unused;
             public StringId Name;
             public float LightSourceY;
             public float LightSourceX;
@@ -47,8 +48,8 @@ namespace TagTool.Tags.Definitions
             public float Unknown3;
             public float Unknown4;
             public float LightSourceSpread;
-            public uint Unknown5;
-            public float FogIntensity;
+            public float Unknown5;
+            public float BackgroundFogIntensity;
             public float Unknown6;
             public float TintCyan;
             public float TintMagenta;
@@ -56,21 +57,24 @@ namespace TagTool.Tags.Definitions
             public float FogIntensityCyan;
             public float FogIntensityMagenta;
             public float FogIntensityYellow;
-            public float BackgroundColorRed;
-            public float BackgroundColorGreen;
-            public float BackgroundColorBlue;
-            public float TintRed;
-            public float Tint2Green;
-            public float Tint2Blue;
-            public float FogIntensity2;
+            public RealRgbColor BackgroundColor;
+            public RealRgbColor Tint;
+            public float PatchyFogIntensity;
             public float StartDistance;
             public float EndDistance;
-            public float FogVelocityX;
-            public float FogVelocityY;
-            public float FogVelocityZ;
+            public RealVector3d FogVelocity;
             public CachedTag WeatherEffect;
             public uint Unknown7;
             public uint Unknown8;
+
+            [Flags]
+            public enum AtmosphereFlags : short
+            {
+                SkyFogEnabled = 1 << 0,
+                UseFogColor = 1 << 1,
+                PatchyFogEnabled = 1 << 2,
+                Bit3 = 1 << 3,
+            }
         }
 
         [TagStructure(Size = 0x14)]

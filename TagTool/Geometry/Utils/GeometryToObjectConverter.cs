@@ -55,7 +55,7 @@ namespace TagTool.Geometry.Utils
 
 
 
-            if (SourceCache.Version >= CacheVersion.Halo3ODST || SourceCache.Platform == CachePlatform.MCC)
+            if (SourceCache.Version >= CacheVersion.Halo3ODST || (SourceCache.Version >= CacheVersion.Halo3Retail && SourceCache.Platform == CachePlatform.MCC))
             {
                 foreach (var lbspTag in sLdT.LightmapDataReferences)
                 {
@@ -95,16 +95,18 @@ namespace TagTool.Geometry.Utils
                 return null;
 
             var scenarioFolder = Path.GetDirectoryName(Scenario.StructureBsps[StructureBspIndex].StructureBsp.Name);
-            var bspName = Path.GetFileName(Scenario.StructureBsps[StructureBspIndex].StructureBsp.Name);
+            string bspindex = Scenario.StructureBsps.Count() > 1 ? $"{StructureBspIndex}" + "_" : "";
+            StringId geoID = StructureBsp.InstancedGeometryInstances[geometryIndex].Name;
+            string geoname = SourceCache.StringTable.GetString(geoID);
 
-            var tagName = $"objects\\{scenarioFolder}\\instanced\\instance_{StructureBspIndex}_{geometryIndex}";
+            var tagName = $"objects\\{scenarioFolder}\\instanced\\{bspindex}{geometryIndex}_{geoname}";
 
             if (iscluster)
             {
-                tagName = $"objects\\{scenarioFolder}\\clusters\\cluster_{StructureBspIndex}_{geometryIndex}";
+                tagName = $"objects\\{scenarioFolder}\\clusters\\{bspindex}{geometryIndex}";
             }
                       
-            if (desiredTagName != null)
+            if (desiredTagName != null && desiredTagName != string.Empty)
                 tagName = desiredTagName;
 
             // reset state

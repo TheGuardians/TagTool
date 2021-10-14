@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using System.Text.RegularExpressions;
+using TagTool.Commands;
 
 namespace TagTool.Cache
 {
@@ -97,10 +98,10 @@ namespace TagTool.Cache
 
         public void AddMap(Stream mapStream, int mapId, int cacheIndex)
         {
+            mapStream.Position = 0;
             var mapFileIndex = MapIds.IndexOf(mapId);
             if (mapFileIndex != -1)
             {
-                mapStream.Position = 0;
                 MapFileStreams[mapFileIndex] = mapStream;
             }
             else
@@ -647,20 +648,28 @@ namespace TagTool.Cache
                 var tableEntry = new CacheMapTableEntry(reader);
 
                 reader.BaseStream.Position = tableEntry.Offset + section.Offset;
+                try
+                {
+                    int size = tableEntry.Size;
+                    var stream = new MemoryStream();
+                    byte[] data = new byte[size];
+                    reader.Read(data, 0, size);
+                    stream.Write(data, 0, size);
+                    
+                    var mapReader = new EndianReader(stream, true, EndianFormat.LittleEndian);
+                    MapFile mapFile = new MapFile();
+                    mapReader.BaseStream.Position = 0;
+                    mapFile.Read(mapReader);
 
-                MapToCacheMapping.Add(i, tableEntry.CacheIndex);
-                int size = tableEntry.Size;
-                var stream = new MemoryStream();
-                byte[] data = new byte[size];
-                reader.Read(data, 0, size);
-                stream.Write(data, 0, size);
-                MapFileStreams.Add(stream);
-
-                var mapReader = new EndianReader(stream, true, EndianFormat.LittleEndian);
-                MapFile mapFile = new MapFile();
-                mapReader.BaseStream.Position = 0;
-                mapFile.Read(mapReader);
-                MapIds.Add(((CacheFileHeaderGenHaloOnline)mapFile.Header).MapId);
+                    stream.Position = 0;
+                    MapFileStreams.Add(stream);
+                    MapIds.Add(((CacheFileHeaderGenHaloOnline)mapFile.Header).MapId);
+                    MapToCacheMapping.Add(i, tableEntry.CacheIndex);
+                }
+                catch
+                {
+                    new TagToolError(CommandError.CustomError, $"Failed to read map file for map id {tableEntry.MapId}");
+                }
             }
         }
 
@@ -762,27 +771,27 @@ namespace TagTool.Cache
 
         // IO stuff
 
-        public void CreateDescription()
+        public void CreateDescription(CommandContextStack contextStack, bool ignoreArgumentVariables)
         {
             Metadata = new ModPackageMetadata();
 
             Console.WriteLine("Enter the display name of the mod package (32 chars max):");
-            Metadata.Name = Console.ReadLine().Trim();
-
+            Metadata.Name = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
+            
             Console.WriteLine();
             Console.WriteLine("Enter the description of the mod package (512 chars max):");
-            Metadata.Description = Console.ReadLine().Trim();
+            Metadata.Description = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
 
             Console.WriteLine();
             Console.WriteLine("Enter the author of the mod package (32 chars max):");
-            Metadata.Author = Console.ReadLine().Trim();
+            Metadata.Author = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
 
             Console.WriteLine();
             Console.WriteLine("Enter the version of the mod package: (major.minor)");
 
             try
             {
-                var version = Version.Parse(Console.ReadLine());
+                var version = Version.Parse(ReplaceArgumentVariables(Console.ReadLine(), ignoreArgumentVariables, contextStack));
                 Metadata.VersionMajor = (short)version.Major;
                 Metadata.VersionMinor = (short)version.Minor;
                 if (version.Major == 0 && version.Minor == 0)
@@ -798,7 +807,7 @@ namespace TagTool.Cache
 
             Console.WriteLine();
             Console.WriteLine("Please enter the types of the mod package. Separated by a space [MainMenu Multiplayer Campaign Firefight Character]");
-            string response = Console.ReadLine().Trim();
+            string response = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
 
             Header.ModifierFlags = Header.ModifierFlags & ModifierFlags.SignedBit;
 
@@ -818,5 +827,20 @@ namespace TagTool.Cache
             Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
         }
 
+        private string ReplaceArgumentVariables(string input, bool ignoreArgumentVariables, CommandContextStack contextStack)
+        {            
+            if (!ignoreArgumentVariables)
+            {
+                for (int i = 0; i < contextStack.ArgumentVariables.Count; i++)
+                {
+                    foreach (var variable in contextStack.ArgumentVariables)
+                    {
+                        input = input.Replace(variable.Key, variable.Value);
+                    }
+                }
+            }
+
+            return input;
+        }
     }
 }

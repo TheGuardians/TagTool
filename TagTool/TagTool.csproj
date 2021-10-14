@@ -354,12 +354,16 @@
     <Compile Include="Commands\CollisionModels\GenerateBspPhysics.cs" />
     <Compile Include="Commands\CollisionModels\OffsetCollisionBSP.cs" />
     <Compile Include="Commands\CollisionModels\GenerateCollisionBSP.cs" />
+    <Compile Include="Commands\Common\TagToolChoicePrompt.cs" />
     <Compile Include="Commands\Common\TagToolWarning.cs" />
     <Compile Include="Commands\Common\CommandRunner.cs" />
     <Compile Include="Commands\Common\ExecuteCSharpCommand.cs" />
     <Compile Include="Commands\Common\ListVariablesCommand.cs" />
     <Compile Include="Commands\Common\RunCommands.cs" />
     <Compile Include="Commands\Common\SetVariableCommand.cs" />
+    <Compile Include="Commands\Decorators\ExtractModelCommand.cs" />
+    <Compile Include="Commands\Decorators\DecoratorSetContextFactory.cs" />
+    <Compile Include="Commands\Editing\SwapBlockElementCommand.cs" />
     <Compile Include="Commands\Editing\MoveBlockElementCommand.cs" />
     <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
     <Compile Include="Commands\Files\ExtractBlfImageCommand.cs" />
@@ -486,6 +490,7 @@
     <Compile Include="Commands\Tags\RebuildCacheFileCommand.cs" />
     <Compile Include="Commands\Tags\Test2Command.cs" />
     <Compile Include="Commands\Video\ImportBinkFileCommand.cs" />
+    <Compile Include="Common\IndexBufferIndex.cs" />
     <Compile Include="Common\RSAUtil.cs" />
     <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Types.cs" />
@@ -672,6 +677,7 @@
     <Compile Include="GUI\GuiWidgets.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
+    <Compile Include="Havok\HavokMoppGenerator.cs" />
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
     <Compile Include="IO\XCompress.cs" />
@@ -1608,11 +1614,19 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd $(ProjectDir)
-xcopy "$(SolutionDir)Physics" "$(ProjectDir)$(OutDir)Physics" /e /i /h /Y
-xcopy "$(SolutionDir)Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y
+xcopy "$(ProjectDir)..\Physics" "$(ProjectDir)$(OutDir)Physics" /e /i /h /Y
+xcopy "$(ProjectDir)..\Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y
+
+IF "$(PlatformName)" == "x64" (
+    del "$(ProjectDir)$(OutDir)Tools\meshoptimizer32.dll"
+    ren "$(ProjectDir)$(OutDir)Tools\meshoptimizer64.dll" meshoptimizer.dll
+) ELSE (
+    del "$(ProjectDir)$(OutDir)Tools\meshoptimizer64.dll"
+    ren "$(ProjectDir)$(OutDir)Tools\meshoptimizer32.dll" meshoptimizer.dll
+)
 
 if ERRORLEVEL == 0 (
-    xcopy "$(SolutionDir)Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
+    xcopy "$(ProjectDir)..\Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
     SET ERRORLEVEL=0
 )
 EXIT %25ERRORLEVEL%25</PostBuildEvent>

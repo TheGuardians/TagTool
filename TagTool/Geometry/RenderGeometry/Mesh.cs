@@ -233,8 +233,10 @@ namespace TagTool.Geometry
     /// Associates geometry with a specific material.
     /// </summary>
     [TagStructure(Size = 0x48, MaxVersion = Halo2Vista)]
-    [TagStructure(Size = 0x10, MaxVersion = HaloOnline700123)]
-    [TagStructure(Size = 0x18, MinVersion = HaloReach)]
+    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
     public class Part : TagStructure
     {
         [TagField(MaxVersion = Halo2Vista, Upgrade = nameof(TypeNew))]
@@ -257,26 +259,12 @@ namespace TagTool.Geometry
         /// <summary>
         /// The index of the first vertex in the index buffer.
         /// </summary>
-        [TagField(MaxVersion = HaloOnline700123, Upgrade = nameof(FirstIndexNew))]
-        public ushort FirstIndexOld;
-
-        /// <summary>
-        /// The index of the first vertex in the index buffer.
-        /// </summary>
-        [TagField(MinVersion = HaloReach, Downgrade = nameof(FirstIndexOld))]
-        public uint FirstIndexNew;
+        public IndexBufferIndex FirstIndex;
 
         /// <summary>
         /// The number of indices in the part.
         /// </summary>
-        [TagField(MaxVersion = HaloOnline700123, Upgrade = nameof(IndexCountNew))]
-        public ushort IndexCountOld;
-
-        /// <summary>
-        /// The number of indices in the part.
-        /// </summary>
-        [TagField(MinVersion = HaloReach, Downgrade = nameof(IndexCountOld))]
-        public uint IndexCountNew;
+        public IndexBufferIndex IndexCount;
 
         /// <summary>
         /// The index of the first subpart that makes up this part.
@@ -384,25 +372,21 @@ namespace TagTool.Geometry
     /// <summary>
     /// A subpart of a mesh which can be rendered selectively.
     /// </summary>
-    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class SubPart : TagStructure
     {
         /// <summary>
         /// The index of the first vertex in the subpart.
         /// </summary>
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public ushort FirstIndex;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint FirstIndex32;
+        public IndexBufferIndex FirstIndex;
 
         /// <summary>
         /// The number of indices in the subpart.
         /// </summary>
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public ushort IndexCount;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint IndexCount32;
+        public IndexBufferIndex IndexCount;
 
         /// <summary>
         /// The index of the subpart visibility bounds.

@@ -134,7 +134,7 @@ namespace TagTool.Cache.HaloOnline
         /// </summary>
         /// <param name="writer">The stream to write to.</param>
         /// <param name="stringTable">Reference to the Halo Online String Table</param>
-        internal void WriteHeader(BinaryWriter writer, StringTable stringTable)
+        public void WriteHeader(BinaryWriter writer, StringTable stringTable)
         {
             writer.Write(Checksum);
             writer.Write((uint)TotalSize);

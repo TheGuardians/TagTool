@@ -52,15 +52,12 @@ namespace TagTool.Shaders
 
         private void ReorderParameter(List<ShaderParameter> newParameters, ShaderParameter.RType rType, int rMax)
         {
-            Dictionary<int, int> tempMapping = new Dictionary<int, int>();
-
-            for (int i = 0; i < Parameters.Count; i++)
-                if (Parameters[i].RegisterType == rType)
-                    tempMapping.Add(Parameters[i].RegisterIndex, i);
+            var tempParams = Parameters.Where(x => x.RegisterType == rType);
 
             for (int i = 0; i <= rMax; i++)
-                if (tempMapping.ContainsKey(i))
-                    newParameters.Add(Parameters[tempMapping[i]]);
+                foreach (var param in tempParams)
+                    if (param.RegisterIndex == i)
+                        newParameters.Add(param);
         }
 
         public List<ShaderParameter> ReorderParameters()

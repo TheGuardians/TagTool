@@ -18,30 +18,6 @@ namespace TagTool.Commands.CollisionModels
         public CollisionGeometry Bsp { get; set; }
         public CollisionModel Definition { get; set; }
 
-        //Mopp generation DLL sourced from the excellent work of the NifTools team, which can be found here:
-        //github.com/figment/nifmopp
-        //NifTools License included in the Tools folder alongside the dll
-
-        [DllImport("kernel32.dll", EntryPoint = "LoadLibrary")]
-        static extern int LoadLibrary(
-            [MarshalAs(UnmanagedType.LPStr)] string lpLibFileName);
-        [DllImport("kernel32.dll", EntryPoint = "GetProcAddress")]
-        static extern IntPtr GetProcAddress(int hModule,
-            [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
-        [DllImport("kernel32.dll", EntryPoint = "FreeLibrary")]
-        static extern bool FreeLibrary(int hModule);
-
-        public string dllpath = $@"{Program.TagToolDirectory}\Tools\NifMopp.dll";
-
-        //[DllImport(dllpath, CharSet = CharSet.Auto)]
-        //public unsafe static extern int fnGenerateMoppCode(int nVerts, [MarshalAs(UnmanagedType.LPArray)] Vector3[] verts, int nTris, [MarshalAs(UnmanagedType.LPArray)] Triangle[] tris);
-        //[DllImport(dllpath, CharSet = CharSet.Auto)]
-        //public unsafe static extern int fnRetrieveMoppCode(int nBuffer, [MarshalAs(UnmanagedType.LPArray)] byte[] code);
-        //[DllImport(dllpath, CharSet = CharSet.Auto)]
-        //public unsafe static extern int fnRetrieveMoppScale(float* value);
-        //[DllImport(dllpath, CharSet = CharSet.Auto)]
-        //public unsafe static extern int fnRetrieveMoppOrigin(Vector3* value);
-
         public GenerateBspPhysicsCommand(ref CollisionModel definition) :
             base(true,
 
@@ -73,105 +49,26 @@ namespace TagTool.Commands.CollisionModels
             return true;
         }
 
-        public struct Vector3
-        {
-            public float a;
-            public float b;
-            public float c;
-        }
-        public struct Triangle
-        {
-            public short a;
-            public short b;
-            public short c;
-        }
-
-        public unsafe delegate int fnGenerateMoppCode(int nVerts, [MarshalAs(UnmanagedType.LPArray)] Vector3[] verts, int nTris, [MarshalAs(UnmanagedType.LPArray)] Triangle[] tris);
-        public unsafe delegate int fnRetrieveMoppCode(int nBuffer, [MarshalAs(UnmanagedType.LPArray)] byte[] code);
-        public unsafe delegate int fnRetrieveMoppScale(float* value);
-        public unsafe delegate int fnRetrieveMoppOrigin(Vector3* value);
-
         unsafe public bool generate_mopp_codes(ref CollisionModel.Region.Permutation Permutation)
         {
-            if(IntPtr.Size == 8)
-            {
-                new TagToolError(CommandError.CustomError, "Mopp generation can only be performed with x86 Tagtool!!");
-                return false;
-            }
-
-            int hModule = LoadLibrary(dllpath);
-            if (hModule == 0) 
-            {
-                new TagToolError(CommandError.CustomError, "Could not load NifMopp.dll!");
-                return false;
-            }
-
-            IntPtr GenerateMoppCode = GetProcAddress(hModule, "GenerateMoppCode");
-            IntPtr RetrieveMoppCode = GetProcAddress(hModule, "RetrieveMoppCode");
-            IntPtr RetrieveMoppScale = GetProcAddress(hModule, "RetrieveMoppScale");
-            IntPtr RetrieveMoppOrigin = GetProcAddress(hModule, "RetrieveMoppOrigin");
-
-            if (GenerateMoppCode == null || RetrieveMoppCode == null || RetrieveMoppScale == null || RetrieveMoppOrigin == null)
-                return false;
-
-            fnGenerateMoppCode fnGenerateMoppCode_delegate = (fnGenerateMoppCode)Marshal.GetDelegateForFunctionPointer(GenerateMoppCode, typeof(fnGenerateMoppCode));
-            fnRetrieveMoppCode fnRetrieveMoppCode_delegate = (fnRetrieveMoppCode)Marshal.GetDelegateForFunctionPointer(RetrieveMoppCode, typeof(fnRetrieveMoppCode));
-            fnRetrieveMoppScale fnRetrieveMoppScale_delegate = (fnRetrieveMoppScale)Marshal.GetDelegateForFunctionPointer(RetrieveMoppScale, typeof(fnRetrieveMoppScale));
-            fnRetrieveMoppOrigin fnRetrieveMoppOrigin_delegate = (fnRetrieveMoppOrigin)Marshal.GetDelegateForFunctionPointer(RetrieveMoppOrigin, typeof(fnRetrieveMoppOrigin));
-
-            int nv = Bsp.Vertices.Count;
-            Vector3[] v = new Vector3[nv];
-            int nt = Bsp.Surfaces.Count;
-            Triangle[] t = new Triangle[nt];
-
-            for(int vertex_index = 0; vertex_index < Bsp.Vertices.Count; vertex_index++)
-            {
-                v[vertex_index] = new Vector3 { a = Bsp.Vertices[vertex_index].Point.X, b = Bsp.Vertices[vertex_index].Point.Y, c = Bsp.Vertices[vertex_index].Point.Z };
-            }
-
-            for(int surface_index = 0; surface_index < Bsp.Surfaces.Count; surface_index++)
-            {
-                List<int> vertex_indices = surface_collect_vertices(surface_index);
-                if (vertex_indices.Count > 3)
-                {
-                    new TagToolError(CommandError.CustomError, "Mopp generation only accepts triangles!!");
-                    return false;
-                }
-                t[surface_index] = new Triangle { a = (short)vertex_indices[0], b = (short)vertex_indices[1], c = (short)vertex_indices[2] };                
-            }
-
-            int len = fnGenerateMoppCode_delegate(nv, v, nt, t);
-            float scale = 0.0f;
-            Vector3 origin = new Vector3();
-            byte[] code = new byte[0];
-            if (len > 0)
-            {
-                code = new byte[len];
-                if (0 != fnRetrieveMoppCode_delegate(len, code))
-                {
-                    fnRetrieveMoppScale_delegate(&scale);
-                    fnRetrieveMoppOrigin_delegate(&origin);
-                }
-            }
-            else
+            var moppCodes = Havok.HavokMoppGenerator.GenerateMoppCode(Bsp);
+            if(moppCodes == null)
             {
                 Console.WriteLine("No moppcodes produced!");
                 return false;
             }
 
-            FreeLibrary(hModule);
-
             //populate fields with the appropriate values
             Permutation.BspMoppCodes = new List<Havok.TagHkpMoppCode> { new Havok.TagHkpMoppCode { Data = new TagBlock<byte>() } };
             Permutation.BspPhysics = new List<CollisionBspPhysicsDefinition> { new CollisionBspPhysicsDefinition() };
 
-            foreach(byte moppcode in code)
+            foreach(byte moppcode in moppCodes.Data)
             {
                 Permutation.BspMoppCodes[0].Data.Add(moppcode);
             }
 
-            Permutation.BspMoppCodes[0].Info = new Havok.CodeInfo { Offset = new RealQuaternion(origin.a, origin.b, origin.c, scale) };
-            Permutation.BspMoppCodes[0].ArrayBase = new Havok.HkArrayBase { Size = (uint)len, CapacityAndFlags = (uint)(len | 0x80000000)};
+            Permutation.BspMoppCodes[0].Info = moppCodes.Info;
+            Permutation.BspMoppCodes[0].ArrayBase = new Havok.HkArrayBase { Size = (uint)moppCodes.Data.Count, CapacityAndFlags = (uint)(moppCodes.Data.Count | 0x80000000)};
             Permutation.BspMoppCodes[0].ReferencedObject = new Havok.HkpReferencedObject { ReferenceCount = 128 };
 
             Permutation.BspPhysics[0].MoppBvTreeShape = new Havok.CMoppBvTreeShape

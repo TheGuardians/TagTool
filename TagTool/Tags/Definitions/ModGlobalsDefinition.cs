@@ -94,6 +94,7 @@ namespace TagTool.Tags.Definitions
                 [Flags]
                 public enum ChangeColorFlagsValue : byte
                 {
+                    None = 0,
                     PrimaryColor = 1 << 0,
                     SecondaryColor = 1 << 1,
                     TertiaryColor = 1 << 2,
@@ -158,6 +159,7 @@ namespace TagTool.Tags.Definitions
                 [Flags]
                 public enum FlagsValue : int
                 {
+                    None = 0,
                     PlaceBipedRelativeToCamera = 1 << 0,
                     CanRotateOnMainMenu = 1 << 1,
                     HasPlatform = 1 << 2,

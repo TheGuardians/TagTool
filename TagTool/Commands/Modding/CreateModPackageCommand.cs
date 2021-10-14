@@ -7,6 +7,7 @@ using TagTool.Commands.Tags;
 using System.IO;
 using TagTool.Cache.Gen3;
 using TagTool.IO;
+using System.Threading;
 
 namespace TagTool.Commands.Modding
 {
@@ -50,7 +51,7 @@ namespace TagTool.Commands.Modding
             GameCacheModPackage modCache = new GameCacheModPackage(Cache, useLargeStreams);
 
             // create metadata here
-            modCache.BaseModPackage.CreateDescription();
+            modCache.BaseModPackage.CreateDescription(ContextStack, IgnoreArgumentVariables);
 
             // initialze mod package with current HO cache
             Console.WriteLine($"Building initial tag cache from reference...");
@@ -59,9 +60,11 @@ namespace TagTool.Commands.Modding
             modCache.BaseModPackage.TagCachesStreams = new List<ModPackageStream>();
             modCache.BaseModPackage.TagCacheNames = new List<Dictionary<int, string>>();
 
-
             var referenceStream = new MemoryStream(); // will be reused by all base caches
+            var writer = new EndianWriter(referenceStream, false);
             var modTagCache = new TagCacheHaloOnline(Cache.Version, referenceStream, modCache.BaseModPackage.StringTable);
+
+            referenceStream.Seek(0, SeekOrigin.End);
             for (var tagIndex = 0; tagIndex < Cache.TagCache.Count; tagIndex++)
             {
                 var srcTag = Cache.TagCache.GetTag(tagIndex);
@@ -72,18 +75,25 @@ namespace TagTool.Commands.Modding
                     continue;
                 }
 
-                var emptyTag = modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
+                var emptyTag = (CachedTagHaloOnline)modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
                 var cachedTagData = new CachedTagData
                 {
                     Data = new byte[0],
-                    Group = (TagGroupGen3)emptyTag.Group
+                    Group = (TagGroupGen3)emptyTag.Group,
                 };
-                modTagCache.SetTagData(referenceStream, (CachedTagHaloOnline)emptyTag, cachedTagData);
-                if (!((CachedTagHaloOnline)emptyTag).IsEmpty())
-                {
-                    return new TagToolError(CommandError.OperationFailed, "A tag in the base cache was empty");
-                }
+
+                var headerSize = CachedTagHaloOnline.CalculateHeaderSize(cachedTagData);
+                var alignedHeaderSize = (uint)((headerSize + 0xF) & ~0xF);
+                emptyTag.HeaderOffset = referenceStream.Position;
+                emptyTag.Offset = alignedHeaderSize;
+                emptyTag.TotalSize = alignedHeaderSize;
+                emptyTag.WriteHeader(writer, modTagCache.StringTableReference);
+                StreamUtil.Fill(referenceStream, 0, (int)(alignedHeaderSize - headerSize));
             }
+        
+            modTagCache.UpdateTagOffsets(writer);
+           
+
             Console.WriteLine("Done!");
 
             for (int i = 0; i < tagCacheCount; i++)
@@ -96,17 +106,24 @@ namespace TagTool.Commands.Modding
                     name = name.Length <= 32 ? name : name.Substring(0, 32);
                 }
 
-                var newTagCacheStream = new MemoryStream();
-                referenceStream.Position = 0;
-                referenceStream.CopyTo(newTagCacheStream);
-
                 Dictionary<int, string> tagNames = new Dictionary<int, string>();
 
 
                 foreach (var tag in Cache.TagCache.NonNull())
                     tagNames[tag.Index] = tag.Name;
 
-                modCache.BaseModPackage.TagCachesStreams.Add(new ModPackageStream(newTagCacheStream));
+
+
+                referenceStream.Position = 0;
+                var ms = referenceStream;
+                if (i > 0)
+                {
+                    ms = new MemoryStream();
+                    referenceStream.CopyTo(ms);
+                    ms.Position = 0;
+                }
+
+                modCache.BaseModPackage.TagCachesStreams.Add(new ModPackageStream(ms));
                 modCache.BaseModPackage.CacheNames.Add(name);
                 modCache.BaseModPackage.TagCacheNames.Add(tagNames);
             }

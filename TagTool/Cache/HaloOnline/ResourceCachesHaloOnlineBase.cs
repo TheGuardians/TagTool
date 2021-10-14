@@ -130,6 +130,42 @@ namespace TagTool.Cache.HaloOnline
         }
 
         /// <summary>
+        /// Replaces a resource
+        /// </summary>
+        /// <param name="resource">The resource to be replaced.</param>
+        /// <param name="definition">The new resource definition</param>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is not open for reading.</exception>
+        public void ReplaceResource(PageableResource resource, object definition)
+        {
+            var definitionStream = new MemoryStream();
+            var dataStream = new MemoryStream();
+
+            using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+            using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
+            {
+                var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
+                var serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
+                serializer.Serialize(context, definition);
+
+                var cache = GetResourceCache(resource, out var location);
+                using (var stream = OpenCacheReadWrite(location))
+                {
+                    var data = dataStream.ToArray();
+                    var definitionData = definitionStream.ToArray();
+                    var compressedSize = cache.Compress(stream, resource.Page.Index, data);
+                    resource.Resource.DefinitionData = definitionData;
+                    resource.Resource.FixupLocations = context.FixupLocations;
+                    resource.Resource.DefinitionAddress = context.MainStructOffset;
+                    resource.Resource.InteropLocations = context.InteropLocations;
+                    resource.Page.CompressedBlockSize = compressedSize;
+                    resource.Page.UncompressedBlockSize = (uint)data.Length;
+                    resource.DisableChecksum();
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Compresses and replaces the data for a resource.
         /// </summary>
         /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
