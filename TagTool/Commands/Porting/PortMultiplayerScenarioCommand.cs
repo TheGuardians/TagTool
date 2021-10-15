@@ -358,7 +358,7 @@ namespace TagTool.Commands.Porting
                 if (((includeBspMask >> i) & 1) == 0)
                     continue;
 
-                var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(stream, scnr.StructureBsps[i].StructureBsp);
+                var sbsp = cache.Deserialize<ScenarioStructureBsp>(stream, scnr.StructureBsps[i].StructureBsp);
 
                 foreach(var instance in sbsp.InstancedGeometryInstances)
                 {
@@ -647,7 +647,7 @@ namespace TagTool.Commands.Porting
 
         private void ConvertLightmap(CacheVersion version, Stream srcStream, ScenarioLightmap lightmap, uint includeBspMask)
         {
-            if (version >= CacheVersion.Halo3ODST)
+            if(lightmap.LightmapDataReferences.Count > 0)
             {
                 var newLightmapDataReference = new List<CachedTag>();
                 for (int test_index = 0; test_index < 32; test_index++)
