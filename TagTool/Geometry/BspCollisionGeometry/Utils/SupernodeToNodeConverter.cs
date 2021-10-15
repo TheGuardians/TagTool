@@ -40,8 +40,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			newnode.Plane = Bsp.Planes.Count - 1;
 			nodelist.Add(newnode);
 			int newnode_index = nodelist.Count - 1;
-			nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
-			nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
+            nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
+            nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
 			return newnode_index;
 		}
 
