@@ -15,6 +15,6 @@ namespace TagTool.Ai
         [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused;
 
-        public List<CharacterDialogueVariation> DialogueVariations;
+        public List<CharacterVoice> Voices;
     }
 }
