@@ -166,7 +166,7 @@ namespace TagTool.Commands.Tags
                     ProcessShader(stream, prt3.RenderMethod, type);
                     break;
                 case LightVolumeSystem ltvl:
-                    foreach (var sys in ltvl.LightVolume)
+                    foreach (var sys in ltvl.LightVolumes)
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case BeamSystem beam:
@@ -178,7 +178,7 @@ namespace TagTool.Commands.Tags
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case ContrailSystem cntl:
-                    foreach (var sys in cntl.Contrail)
+                    foreach (var sys in cntl.Contrails)
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
             }

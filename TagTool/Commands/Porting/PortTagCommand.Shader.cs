@@ -67,10 +67,10 @@ namespace TagTool.Commands.Porting
 
                 case ContrailSystem cntl:
                     var blamCntl = (ContrailSystem)blamDefinition;
-                    for (int i = 0; i < cntl.Contrail.Count; i++)
+                    for (int i = 0; i < cntl.Contrails.Count; i++)
                     {
-                        cntl.Contrail[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, cntl.Contrail[i].RenderMethod, blamTag, blamCntl.Contrail[i].RenderMethod);
-                        if (cntl.Contrail[i].RenderMethod == null) return null;
+                        cntl.Contrails[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, cntl.Contrails[i].RenderMethod, blamTag, blamCntl.Contrails[i].RenderMethod);
+                        if (cntl.Contrails[i].RenderMethod == null) return null;
                     }
                     return cntl;
 
@@ -82,10 +82,10 @@ namespace TagTool.Commands.Porting
 
                 case LightVolumeSystem ltvl:
                     var blamLtvl = (LightVolumeSystem)blamDefinition;
-                    for (int i = 0; i < ltvl.LightVolume.Count; i++)
+                    for (int i = 0; i < ltvl.LightVolumes.Count; i++)
                     {
-                        ltvl.LightVolume[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, ltvl.LightVolume[i].RenderMethod, blamTag, blamLtvl.LightVolume[i].RenderMethod);
-                        if (ltvl.LightVolume[i].RenderMethod == null) return null;
+                        ltvl.LightVolumes[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, ltvl.LightVolumes[i].RenderMethod, blamTag, blamLtvl.LightVolumes[i].RenderMethod);
+                        if (ltvl.LightVolumes[i].RenderMethod == null) return null;
                     }
                     return ltvl;
                 case DecalSystem decs:

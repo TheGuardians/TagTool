@@ -11,42 +11,22 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0xC, MaxVersion = CacheVersion.HaloReach)]
     public class LightVolumeSystem : TagStructure
 	{
-        public List<LightVolumeSystemBlock> LightVolume;
+        public List<LightVolumeDefinitionBlock> LightVolumes;
 
         [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused1;
 
-        [Flags]
-        public enum LightVolumeFlags : ushort
-        {
-            None = 0,
-            Bit0 = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3,
-            Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15
-        }
-
         [TagStructure(Size = 0x17C, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x1C8, Align = 0x8, MinVersion = CacheVersion.HaloReach)]
-        public class LightVolumeSystemBlock : TagStructure
+        public class LightVolumeDefinitionBlock : TagStructure
 		{
             public StringId LightVolumeName;
+
             public RenderMethod RenderMethod;
 
-            public LightVolumeFlags Flags;
-
-            public short Unknown;
+            public ushort AppearanceFlags;
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Padd0;
 
             /// <summary>
             /// Average brightness head-on/side-view.
@@ -68,60 +48,134 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Unknown7;
 
-            public TagMapping Length;
-            public TagMapping Offset;
-            public TagMapping ProfileDensity;
-            public TagMapping ProfileLength;
-            public TagMapping ProfileThickness;
-            public TagMapping ProfileColor;
-            public TagMapping ProfileAlpha;
-            public TagMapping ProfileIntensity;
+            public LightVolumePropertyReal Length;
+            public LightVolumePropertyReal Offset;
+            public LightVolumePropertyReal ProfileDensity;
+            public LightVolumePropertyReal ProfileLength;
+            public LightVolumePropertyReal ProfileThickness;
+            public LightVolumePropertyRealRgbColor ProfileColor;
+            public LightVolumePropertyReal ProfileAlpha;
+            public LightVolumePropertyReal ProfileIntensity;
+            public int RuntimeMConstantPerProfileProperties;
+            public int RuntimeMUsedStates;
+            public int RuntimeMMaxProfileCount;
+            public GpuPropertyFunctionColorStruct RuntimeMGpuData;
 
-            public uint RuntimeMConstantPerProfileProperties;
-            public uint RuntimeMUsedStates;
-            public uint RuntimeMMaxProfileCount;
-
-            //[TagField(MinVersion = CacheVersion.HaloReach)]
-            //public int Unknown8;
-            //[TagField(MinVersion = CacheVersion.HaloReach)]
-            //public int Unknown9;
-            //[TagField(MinVersion = CacheVersion.HaloReach)]
-            //public int Unknown10;
-            //[TagField(MinVersion = CacheVersion.HaloReach)]
-            //public int Unknown11;
-            //[TagField(MinVersion = CacheVersion.HaloReach)]
-            //public List<UnknownBlock> Unknown12;
-
-            public List<RuntimeGpuProperty> RuntimeGpuProperties;
-            public List<RuntimeGpuFunction> RuntimeGpuFunctions;
-            public List<RuntimeGpuColor> RuntimeGpuColors;
-
-            [TagStructure(Size = 0x8)]
-            public class UnknownBlock : TagStructure
+            [TagStructure(Size = 0x20)]
+            public class LightVolumePropertyReal : TagStructure
             {
-                public int Unknown1;
-                public int Unknown2;
+                public LightVolumeStateInputEnum InputVariable;
+                public LightVolumeStateInputEnum RangeVariable;
+                public OutputModEnum OutputModifier;
+                public LightVolumeStateInputEnum OutputModifierInput;
+                public byte[] MappingFunction;
+                public float RuntimeMConstantValue;
+                public sbyte RuntimeMFlags;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] DSFDSGLKJ;
+
+                public enum LightVolumeStateInputEnum : sbyte
+                {
+                    ProfilePosition,
+                    GameTime,
+                    LightVolumeAge,
+                    LightVolumeRandom,
+                    LightVolumeCorrelation1,
+                    LightVolumeCorrelation2,
+                    LightVolumeLod,
+                    EffectAScale,
+                    EffectBScale,
+                    InvalidStatePleaseSetAgain
+                }
+
+                public enum OutputModEnum : sbyte
+                {
+                    Unknown,
+                    Plus,
+                    Times
+                }
             }
 
-            [TagStructure(Size = 0x10)]
-            public class RuntimeGpuProperty : TagStructure
-			{
-                [TagField(Length = 4)]
-                public float[] Values = new float[4];
+            [TagStructure(Size = 0x20)]
+            public class LightVolumePropertyRealRgbColor : TagStructure
+            {
+                public LightVolumeStateInputEnum InputVariable;
+                public LightVolumeStateInputEnum RangeVariable;
+                public OutputModEnum OutputModifier;
+                public LightVolumeStateInputEnum OutputModifierInput;
+                public byte[] MappingFunction;
+                public float RuntimeMConstantValue;
+                public sbyte RuntimeMFlags;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] DSFDSGLKJ;
+
+                public enum LightVolumeStateInputEnum : sbyte
+                {
+                    ProfilePosition,
+                    GameTime,
+                    LightVolumeAge,
+                    LightVolumeRandom,
+                    LightVolumeCorrelation1,
+                    LightVolumeCorrelation2,
+                    LightVolumeLod,
+                    EffectAScale,
+                    EffectBScale,
+                    InvalidStatePleaseSetAgain
+                }
+
+                public enum OutputModEnum : sbyte
+                {
+                    Unknown,
+                    Plus,
+                    Times
+                }
             }
 
-            [TagStructure(Size = 0x40)]
-            public class RuntimeGpuFunction : TagStructure
-			{
-                [TagField(Length = 16)]
-                public float[] Values = new float[16];
-            }
+            [TagStructure(Size = 0x24)]
+            public class GpuPropertyFunctionColorStruct : TagStructure
+            {
+                public List<GpuPropertyBlock> RuntimeGpuPropertyBlock;
+                public List<GpuFunctionBlock> RuntimeGpuFunctionsBlock;
+                public List<GpuColorBlock> RuntimeGpuColorsBlock;
 
-            [TagStructure(Size = 0x10)]
-            public class RuntimeGpuColor : TagStructure
-			{
-                public RealRgbColor Color;
-                public float Magnitude;
+                [TagStructure(Size = 0x10)]
+                public class GpuPropertyBlock : TagStructure
+                {
+                    [TagField(Length = 4)]
+                    public GpuPropertySubArray[] RuntimeGpuPropertySubArray;
+
+                    [TagStructure(Size = 0x4)]
+                    public class GpuPropertySubArray : TagStructure
+                    {
+                        public float RuntimeGpuPropertyReal;
+                    }
+                }
+
+                [TagStructure(Size = 0x40)]
+                public class GpuFunctionBlock : TagStructure
+                {
+                    [TagField(Length = 16)]
+                    public GpuFunctionSubArray[] RuntimeGpuFunctionSubArray;
+
+                    [TagStructure(Size = 0x4)]
+                    public class GpuFunctionSubArray : TagStructure
+                    {
+                        public float RuntimeGpuFunctionReal;
+                    }
+                }
+
+                [TagStructure(Size = 0x10)]
+                public class GpuColorBlock : TagStructure
+                {
+                    [TagField(Length = 4)]
+                    public GpuColorSubArray[] RuntimeGpuColorSubArray;
+
+                    [TagStructure(Size = 0x4)]
+                    public class GpuColorSubArray : TagStructure
+                    {
+                        public float RuntimeGpuColorReal;
+                    }
+                }
             }
         }
     }

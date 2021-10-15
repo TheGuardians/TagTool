@@ -9,121 +9,287 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "contrail_system", Tag = "cntl", Size = 0xC)]
     public class ContrailSystem : TagStructure
 	{
-        public List<ContrailSystemBlock> Contrail;
+        public List<ContrailDefinitionBlock> Contrails;
 
-        [TagStructure(Size = 0x26C, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x294, Align = 0x10, MinVersion = CacheVersion.HaloReach)]
-        public class ContrailSystemBlock : TagStructure
+        [TagStructure(Size = 0x26C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x294, MinVersion = CacheVersion.HaloReach)]
+        public class ContrailDefinitionBlock : TagStructure
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public float ForwardScale;
-            public float ForwardOffsetFromSource;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
+
+            public float OriginFadeRangeoriginFadeDistance;
+            public float OriginFadeCutoff;
+            public float EdgeFadeRange;
+            public float EdgeFadeCutoff;
+            public float LodInDistance;
+            public float LodFeatherInDistance;
+            public float LodOutDistance;
+            public float LodFeatherOutDistance;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float UnknownReach;
 
-            public TagMapping ShaderFunction1;
-            public TagMapping ShaderFunction2;
-            public TagMapping ShaderFunction3;
+            public ContrailPropertyScalar EmissionRate;
+            public ContrailPropertyScalar ProfileLifespan;
+            public ContrailPropertyRealVector3d ProfileSelfAcceleration;
+            public ContrailPropertyScalar ProfileSize;
+            public ContrailPropertyRealPoint2d ProfileOffset;
+            public ContrailPropertyScalar ProfileRotation;
+            public ContrailPropertyScalar ProfileRotationRate;
 
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-
-            public TagMapping ShaderFunction4;
-            public TagMapping ShaderFunction5;
-
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-
-            public TagMapping ShaderFunction6;
-            public TagMapping ShaderFunction7;
-
-            public ContrailFlagsUnknown UnknownFlags;
-            public ushort Unknown19_Unused;
-
-            [Flags]
-            public enum ContrailFlagsUnknown : ushort
-            {
-                None = 0,
-                Bit0 = 1 << 0,
-                Bit1 = 1 << 1,
-                Bit2 = 1 << 2,
-                Bit3 = 1 << 3,
-                Bit4 = 1 << 4,
-                Bit5 = 1 << 5,
-                Bit6 = 1 << 6,
-                Bit7 = 1 << 7,
-            }
+            public ContrailAppearanceFlags AppearanceFlags;
+            public ContrailProfileShapeEnum ProfileShape;
+            public byte NumberOfNgonSides;
 
             public RenderMethod RenderMethod;
 
-            public float TileY;
             public float TileX;
-            public float ScrollSpeedY;
+            public float TileY;
             public float ScrollSpeedX;
+            public float ScrollSpeedY;
 
-            public TagMapping ShaderFunction8;
-            public TagMapping ShaderFunction9;
-            public TagMapping ShaderFunction10;
-            public TagMapping ShaderFunction11;
-            public TagMapping ShaderFunction12;
-            public TagMapping ShaderFunction13;
+            public ContrailPropertyColor ProfileColor;
+            public ContrailPropertyScalar ProfileAlpha;
+            public ContrailPropertyScalar ProfileSecondaryAlpha;
+            public ContrailPropertyScalar ProfileBlackPoint;
+            public ContrailPropertyScalar ProfilePalette;
+            public ContrailPropertyScalar ProfileIntensity;
 
-            public int Unknown20;
-            public int Unknown21;
+            public uint RuntimeMConstantPerProfileProperties;
+            public uint RuntimeMUsedStates;
+            public GpuPropertyFunctionColorStruct RuntimeMGpuData;
 
-            public List<UnknownBlock> Unknown22;
-            public List<CompiledFunction> CompiledFunctions;
-            public List<CompiledColorFunction> CompiledColorFunctions;
-
-            [TagStructure(Size = 0x10, Align = 0x10)]
-            public class UnknownBlock : TagStructure
-			{
-                public float Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
+            [Flags]
+            public enum ContrailAppearanceFlags : ushort
+            {
+                TintFromLightmap = 1 << 0,
+                Doublesided = 1 << 1,
+                ProfileOpacityFromScaleA = 1 << 2,
+                RandomUOffset = 1 << 3,
+                RandomVOffset = 1 << 4
             }
 
-            [TagStructure(Size = 0x40, Align = 0x10)]
-            public class CompiledFunction : TagStructure
-			{
-                public float Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public float Unknown5;
-                public float Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float Unknown9;
-                public float Unknown10;
-                public float Unknown11;
-                public float Unknown12;
-                public float Unknown13;
-                public float Unknown14;
-                public float Unknown15;
-                public float Unknown16;
+            public enum ContrailProfileShapeEnum : sbyte
+            {
+                AlignedRibbon,
+                Cross,
+                Ngon
             }
 
-            [TagStructure(Size = 0x10, Align = 0x10)]
-            public class CompiledColorFunction : TagStructure
-			{
-                public RealRgbColor Color;
-                public float Magnitude;
+            [TagStructure(Size = 0x20)]
+            public class ContrailPropertyScalar : TagStructure
+            {
+                public ContrailStateInputEnum InputVariable;
+                public ContrailStateInputEnum RangeVariable;
+                public OutputModEnum OutputModifier;
+                public ContrailStateInputEnum OutputModifierInput;
+                public byte[] MappingFunction;
+                public float RuntimeMConstantValue;
+                public sbyte RuntimeMFlags;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] DSFDSGLKJ;
+
+                public enum ContrailStateInputEnum : sbyte
+                {
+                    ProfileAge,
+                    ProfileRandom,
+                    ProfileCorrelation1,
+                    ProfileCorrelation2,
+                    ProfileCorrelation3,
+                    ProfileCorrelation4,
+                    GameTime,
+                    ContrailAge,
+                    ContrailRandom,
+                    ContrailCorrelation1,
+                    ContrailCorrelation2,
+                    ContrailSpeed,
+                    ContrailLod,
+                    EffectAScale,
+                    EffectBScale,
+                    InvalidStatePleaseSetAgain
+                }
+
+                public enum OutputModEnum : sbyte
+                {
+                    Unknown,
+                    Plus,
+                    Times
+                }
+            }
+
+            [TagStructure(Size = 0x38)]
+            public class ContrailPropertyRealVector3d : TagStructure
+            {
+                public ContrailStateInputEnum InputVariable;
+                public ContrailStateInputEnum RangeVariable;
+                public OutputModEnum OutputModifier;
+                public ContrailStateInputEnum OutputModifierInput;
+                public byte[] MappingFunction;
+                public float RuntimeMConstantValue;
+                public sbyte RuntimeMFlags;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] DSFDSGLKJ;
+                public RealVector3d StartingInterpolant;
+                public RealVector3d EndingInterpolant;
+
+                public enum ContrailStateInputEnum : sbyte
+                {
+                    ProfileAge,
+                    ProfileRandom,
+                    ProfileCorrelation1,
+                    ProfileCorrelation2,
+                    ProfileCorrelation3,
+                    ProfileCorrelation4,
+                    GameTime,
+                    ContrailAge,
+                    ContrailRandom,
+                    ContrailCorrelation1,
+                    ContrailCorrelation2,
+                    ContrailSpeed,
+                    ContrailLod,
+                    EffectAScale,
+                    EffectBScale,
+                    InvalidStatePleaseSetAgain
+                }
+
+                public enum OutputModEnum : sbyte
+                {
+                    Unknown,
+                    Plus,
+                    Times
+                }
+            }
+
+            [TagStructure(Size = 0x30)]
+            public class ContrailPropertyRealPoint2d : TagStructure
+            {
+                public ContrailStateInputEnum InputVariable;
+                public ContrailStateInputEnum RangeVariable;
+                public OutputModEnum OutputModifier;
+                public ContrailStateInputEnum OutputModifierInput;
+                public byte[] MappingFunction;
+                public float RuntimeMConstantValue;
+                public sbyte RuntimeMFlags;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] DSFDSGLKJ;
+                public RealPoint2d StartingInterpolant;
+                public RealPoint2d EndingInterpolant;
+
+                public enum ContrailStateInputEnum : sbyte
+                {
+                    ProfileAge,
+                    ProfileRandom,
+                    ProfileCorrelation1,
+                    ProfileCorrelation2,
+                    ProfileCorrelation3,
+                    ProfileCorrelation4,
+                    GameTime,
+                    ContrailAge,
+                    ContrailRandom,
+                    ContrailCorrelation1,
+                    ContrailCorrelation2,
+                    ContrailSpeed,
+                    ContrailLod,
+                    EffectAScale,
+                    EffectBScale,
+                    InvalidStatePleaseSetAgain
+                }
+
+                public enum OutputModEnum : sbyte
+                {
+                    Unknown,
+                    Plus,
+                    Times
+                }
+            }
+
+            [TagStructure(Size = 0x20)]
+            public class ContrailPropertyColor : TagStructure
+            {
+                public ContrailStateInputEnum InputVariable;
+                public ContrailStateInputEnum RangeVariable;
+                public OutputModEnum OutputModifier;
+                public ContrailStateInputEnum OutputModifierInput;
+                public byte[] MappingFunction;
+                public float RuntimeMConstantValue;
+                public sbyte RuntimeMFlags;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] DSFDSGLKJ;
+
+                public enum ContrailStateInputEnum : sbyte
+                {
+                    ProfileAge,
+                    ProfileRandom,
+                    ProfileCorrelation1,
+                    ProfileCorrelation2,
+                    ProfileCorrelation3,
+                    ProfileCorrelation4,
+                    GameTime,
+                    ContrailAge,
+                    ContrailRandom,
+                    ContrailCorrelation1,
+                    ContrailCorrelation2,
+                    ContrailSpeed,
+                    ContrailLod,
+                    EffectAScale,
+                    EffectBScale,
+                    InvalidStatePleaseSetAgain
+                }
+
+                public enum OutputModEnum : sbyte
+                {
+                    Unknown,
+                    Plus,
+                    Times
+                }
+            }
+
+            [TagStructure(Size = 0x24)]
+            public class GpuPropertyFunctionColorStruct : TagStructure
+            {
+                public List<GpuPropertyBlock> RuntimeGpuPropertyBlock;
+                public List<GpuFunctionBlock> RuntimeGpuFunctionsBlock;
+                public List<GpuColorBlock> RuntimeGpuColorsBlock;
+
+                [TagStructure(Size = 0x10)]
+                public class GpuPropertyBlock : TagStructure
+                {
+                    [TagField(Length = 4)]
+                    public GpuPropertySubArray[] RuntimeGpuPropertySubArray;
+
+                    [TagStructure(Size = 0x4)]
+                    public class GpuPropertySubArray : TagStructure
+                    {
+                        public float RuntimeGpuPropertyReal;
+                    }
+                }
+
+                [TagStructure(Size = 0x40)]
+                public class GpuFunctionBlock : TagStructure
+                {
+                    [TagField(Length = 16)]
+                    public GpuFunctionSubArray[] RuntimeGpuFunctionSubArray;
+
+                    [TagStructure(Size = 0x4)]
+                    public class GpuFunctionSubArray : TagStructure
+                    {
+                        public float RuntimeGpuFunctionReal;
+                    }
+                }
+
+                [TagStructure(Size = 0x10)]
+                public class GpuColorBlock : TagStructure
+                {
+                    [TagField(Length = 4)]
+                    public GpuColorSubArray[] RuntimeGpuColorSubArray;
+
+                    [TagStructure(Size = 0x4)]
+                    public class GpuColorSubArray : TagStructure
+                    {
+                        public float RuntimeGpuColorReal;
+                    }
+                }
             }
         }
     }

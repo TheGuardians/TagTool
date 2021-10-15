@@ -27,11 +27,7 @@ namespace TagTool.Tags.Definitions
         public List<SpawnerBlock> Spawner;
         public List<ProximityMineBlock> ProximityMine;
         public List<MotionTrackerNoiseBlock> MotionTrackerNoise;
-
-        //Probably a unused tagblock
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Unused;
-
+        public List<ShowmeBlock> Showme;
         public List<InvisibilityBlock> Invisibility;
         public List<InvincibilityBlock> Invincibility;
         public List<RegeneratorBlock> Regenerator;
@@ -165,13 +161,13 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x3C)]
         public class SuperShieldBlock : TagStructure
-		{
-            public uint Unused1;
-            public uint Unused2;
-            public float ShieldVitality;
-            public CachedTag Unused3;
-            public CachedTag Unused4;
-            public CachedTag Unused5;
+        {
+            public float ShieldRechargeDelayScale;
+            public float ShieldRechargeRateScale;
+            public float ShieldCeilingScale;
+            public CachedTag ShieldEffect;
+            public CachedTag OverchargeEffect;
+            public CachedTag OverchargeDamageEffect;
         }
 
         [TagStructure(Size = 0x4)]
@@ -230,6 +226,12 @@ namespace TagTool.Tags.Definitions
             public float FlashRadius;
         }
 
+        [TagStructure(Size = 0x4)]
+        public class ShowmeBlock : TagStructure
+        {
+            public float ShowmeRadius;
+        }
+
         [TagStructure(Size = 0x8)]
         public class InvisibilityBlock : TagStructure
 		{
@@ -258,7 +260,7 @@ namespace TagTool.Tags.Definitions
         public class RegeneratorBlock : TagStructure
 		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown;
+            public float PhantomVolumesMakeMyLifeEasy;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag RegeneratingEffect;
