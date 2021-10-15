@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
         /// Indexed by <see cref="TagTool.Geometry.VertexType"/>
         /// </summary>
         public List<VertexTypeShaders> VertexTypes;
-        public uint Unknown2;
+        public uint Version;
         public List<VertexShaderBlock> Shaders;
 
         [TagStructure(Size = 0xC)]

@@ -41,11 +41,11 @@ namespace TagTool.Commands.Porting
             shader_properties.Parameters = new List<RenderMethod.ShaderProperty.ParameterMapping>();
             shader_properties.Functions = new List<RenderMethod.ShaderFunction>();
 
-            List<RenderMethodOption.OptionBlock> templateOptions = new List<RenderMethodOption.OptionBlock>();
+            List<RenderMethodOption.ParameterBlock> templateOptions = new List<RenderMethodOption.ParameterBlock>();
 
-            for (int i = 0; i < rmdf.Methods.Count; i++)
+            for (int i = 0; i < rmdf.Categories.Count; i++)
             {
-                var method = rmdf.Methods[i];
+                var method = rmdf.Categories[i];
                 int selected_option_index = render_method_option_indices.Count > i ? render_method_option_indices[i] : 0;
                 var selected_option = method.ShaderOptions[selected_option_index];
 
@@ -54,7 +54,7 @@ namespace TagTool.Commands.Porting
                 {
                     var rmop = CacheContext.Deserialize<RenderMethodOption>(cacheStream, rmop_instance);
 
-                    templateOptions.AddRange(rmop.Options);
+                    templateOptions.AddRange(rmop.Parameters);
                 }
             }
 
@@ -90,7 +90,7 @@ namespace TagTool.Commands.Porting
                 {
                     foreach (var importData in shaderCortana.ImportData)
                     {
-                        if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                        if (importData.Type != RenderMethodOption.ParameterBlock.OptionDataType.Sampler) continue;
                         if (importData.Name != name) continue;
 
                         if (importData.Bitmap != null)
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var deafult_option in templateOptions)
                     {
-                        if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                        if (deafult_option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Sampler) continue;
                         if (deafult_option.Name != name) continue;
 
                         shaderSamplerArgument.Bitmap = deafult_option.DefaultSamplerBitmap;
@@ -184,7 +184,7 @@ namespace TagTool.Commands.Porting
         private RenderMethod.ShaderProperty.RealConstant ProcessArgument(
             RenderMethodTemplate.ShaderArgument vectorArgument,
             List<RenderMethod.ShaderFunction> shaderFunctions,
-            List<RenderMethodOption.OptionBlock> templateOptions,
+            List<RenderMethodOption.ParameterBlock> templateOptions,
             ShaderCortana shaderCortana)
         {
             RenderMethod.ShaderProperty.RealConstant shaderArgument = new RenderMethod.ShaderProperty.RealConstant();
@@ -208,25 +208,25 @@ namespace TagTool.Commands.Porting
 
                     switch (importData.Type)
                     {
-                        case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Sampler:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 8);
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Float4:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 8);
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Float:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 4);
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.IntegerColor:
                             {
                                 var iblue = argument_data[4];
                                 var igreen = argument_data[5];
@@ -256,7 +256,7 @@ namespace TagTool.Commands.Porting
                     // default arguments
                     switch (importData.Type)
                     {
-                        case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Sampler:
                             shaderArgument.Arg0 = 1.0f;
                             shaderArgument.Arg1 = 1.0f;
                             shaderArgument.Arg2 = 0.0f;

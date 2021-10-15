@@ -94,11 +94,11 @@ namespace TagTool.Shaders
             // Add regular extern if needed, afaik only reach has missing constant table info
             Dictionary<RenderMethodExternReach, StringId> externNames = new Dictionary<RenderMethodExternReach, StringId>();
 
-            if (rmdf.RenderMethodOptions != null)
+            if (rmdf.GlobalOptions != null)
             {
-                var rmop = cache.Deserialize<RenderMethodOption>(cacheStream, rmdf.RenderMethodOptions);
+                var rmop = cache.Deserialize<RenderMethodOption>(cacheStream, rmdf.GlobalOptions);
 
-                foreach (var optionParam in rmop.Options)
+                foreach (var optionParam in rmop.Parameters)
                 {
                     if (optionParam.RenderMethodExternReach != RenderMethodExternReach.none)
                     {
@@ -111,13 +111,13 @@ namespace TagTool.Shaders
 
             for (int i = 0; i < optionIndices.Count; i++)
             {
-                var optionBlock = rmdf.Methods[i].ShaderOptions[optionIndices[i]];
+                var optionBlock = rmdf.Categories[i].ShaderOptions[optionIndices[i]];
 
                 if (optionBlock.Option != null)
                 {
                     var rmop = cache.Deserialize<RenderMethodOption>(cacheStream, optionBlock.Option);
 
-                    foreach (var optionParam in rmop.Options)
+                    foreach (var optionParam in rmop.Parameters)
                     {
                         if (optionParam.RenderMethodExternReach != RenderMethodExternReach.none)
                         {

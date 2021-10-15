@@ -44,7 +44,7 @@ namespace TagTool.Commands.Porting
         {
             if (BlamCache.Version == CacheVersion.Halo3ODST)
             {
-                rasg.Unknown6 = 6;
+                rasg.MotionBlurParametersLegacy.NumberOfTaps = 6;
             }
             return rasg;
         }
@@ -282,8 +282,8 @@ namespace TagTool.Commands.Porting
             var optionBitmaps = Matcher.GetOptionBitmaps(edRmt2Descriptor.Options.ToList(), renderMethodDefinition);
 
             List<string> methodNames = new List<string>();
-            foreach (var method in renderMethodDefinition.Methods)
-                methodNames.Add(CacheContext.StringTable.GetString(method.Type));
+            foreach (var method in renderMethodDefinition.Categories)
+                methodNames.Add(CacheContext.StringTable.GetString(method.Name));
 
             foreach (var a in edRealConstants)
                 newShaderProperty.RealConstants.Add(GetDefaultRealConstant(a, edRmt2Descriptor.Type, methodNames, optionBlocks));
@@ -584,7 +584,7 @@ namespace TagTool.Commands.Porting
 
             // get valid vertex types
             List<int> validVertexTypes = new List<int>();
-            foreach (var vertex in blamRmdf.Vertices)
+            foreach (var vertex in blamRmdf.VertexTypes)
                 if (!validVertexTypes.Contains(vertex.VertexType))
                     validVertexTypes.Add(vertex.VertexType);
 
@@ -884,7 +884,7 @@ namespace TagTool.Commands.Porting
                 int entryIndex = (int)entryPoint;
                 int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
                 int shaderCount = pixl.EntryPointShaders[entryIndex].Count;
-                int vertexShaderIndex = glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[entryIndex].ShaderIndex;
+                int vertexShaderIndex = glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].DrawModes[entryIndex].ShaderIndex;
                 if (shaderCount <= 0 || shaderIndex >= pixl.Shaders.Count || vertexShaderIndex <= 0)
                     continue;
 
@@ -1019,41 +1019,41 @@ namespace TagTool.Commands.Porting
             return textureConstant;
         }
 
-        private uint GetDefaultValue(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
+        private uint GetDefaultValue(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.ParameterBlock> optionBlocks)
         {
-            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.OptionBlock optionBlock))
+            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.ParameterBlock optionBlock))
             {
                 if (!methodNames.Contains(parameter))
                 {
                     new TagToolWarning($"No type found for {type} parameter \"{parameter}\"");
 
-                    optionBlock = new RenderMethodOption.OptionBlock();
+                    optionBlock = new RenderMethodOption.ParameterBlock();
                 }
             }
 
             return optionBlock.DefaultIntBoolArgument;
         }
 
-        private RealConstant GetDefaultRealConstant(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks)
+        private RealConstant GetDefaultRealConstant(string parameter, string type, List<string> methodNames, Dictionary<StringId, RenderMethodOption.ParameterBlock> optionBlocks)
         {
-            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.OptionBlock optionBlock))
+            if (!optionBlocks.TryGetValue(CacheContext.StringTable.GetStringId(parameter), out RenderMethodOption.ParameterBlock optionBlock))
             {
                 // TODO: verify, very rarely some arg names show up
                 if (!methodNames.Contains(parameter))
                 {
                     new TagToolWarning($"No type found for {type} parameter \"{parameter}\"");
 
-                    optionBlock = new RenderMethodOption.OptionBlock
+                    optionBlock = new RenderMethodOption.ParameterBlock
                     {
-                        Type = RenderMethodOption.OptionBlock.OptionDataType.Float,
+                        Type = RenderMethodOption.ParameterBlock.OptionDataType.Float,
                         DefaultFloatArgument = 0.0f
                     };
                 }
 
                 else // particles, contrails, ltvl
-                    optionBlock = new RenderMethodOption.OptionBlock
+                    optionBlock = new RenderMethodOption.ParameterBlock
                     {
-                        Type = RenderMethodOption.OptionBlock.OptionDataType.Sampler,
+                        Type = RenderMethodOption.ParameterBlock.OptionDataType.Sampler,
                         DefaultBitmapScale = 1.0f
                     };
             }
@@ -1063,23 +1063,23 @@ namespace TagTool.Commands.Porting
 
             // use color if one is set
             if (optionBlock.DefaultColor.GetValue() != 0)
-                optionBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.IntegerColor;
+                optionBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.IntegerColor;
 
             // uses 1.0 as default bitmap scale for effect RMs
-            if (EffectRenderMethodTypes.Contains(type) && optionBlock.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler && optionBlock.DefaultBitmapScale == 0.0f)
+            if (EffectRenderMethodTypes.Contains(type) && optionBlock.Type == RenderMethodOption.ParameterBlock.OptionDataType.Sampler && optionBlock.DefaultBitmapScale == 0.0f)
                 optionBlock.DefaultBitmapScale = 1.0f;
 
             switch (optionBlock.Type)
             {
-                case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                case RenderMethodOption.ParameterBlock.OptionDataType.Sampler:
                     return new RealConstant { Arg0 = optionBlock.DefaultBitmapScale, Arg1 = optionBlock.DefaultBitmapScale, Arg2 = 0.0f, Arg3 = 0.0f };
 
-                case RenderMethodOption.OptionBlock.OptionDataType.Float:
-                case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                case RenderMethodOption.ParameterBlock.OptionDataType.Float:
+                case RenderMethodOption.ParameterBlock.OptionDataType.Float4:
                     return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = optionBlock.DefaultFloatArgument, Arg3 = optionBlock.DefaultFloatArgument };
 
                 // convert ARGB to RealRGBA
-                case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                case RenderMethodOption.ParameterBlock.OptionDataType.IntegerColor:
                     return new RealConstant { Arg0 = optionBlock.DefaultColor.Red / 255.0f, Arg1 = optionBlock.DefaultColor.Blue / 255.0f, Arg2 = optionBlock.DefaultColor.Green / 255.0f, Arg3 = optionBlock.DefaultColor.Alpha / 255.0f };
 
                 default:
@@ -1111,10 +1111,10 @@ namespace TagTool.Commands.Porting
 
             if (edRmt2Descriptor.Type == rmt2Type)
             {
-                for (int i = 0; i < rmdf.Methods.Count; i++)
+                for (int i = 0; i < rmdf.Categories.Count; i++)
                 {
                     // find name, and compare the options at that index. maybe need to loop blam rmdf too?
-                    if (CacheContext.StringTable.GetString(rmdf.Methods[i].Type) == methodName && blamRmt2Descriptor.Options[i] != edRmt2Descriptor.Options[i])
+                    if (CacheContext.StringTable.GetString(rmdf.Categories[i].Name) == methodName && blamRmt2Descriptor.Options[i] != edRmt2Descriptor.Options[i])
                     {
                         edOptionIndex = i;
                         return true;

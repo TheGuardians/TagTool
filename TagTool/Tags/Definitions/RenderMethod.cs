@@ -79,7 +79,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
 
-            public RenderMethodOption.OptionBlock.OptionDataType Type;
+            public RenderMethodOption.ParameterBlock.OptionDataType Type;
             public CachedTag Bitmap;
             public float DefaultRealValue;
             public int DefaultIntBoolValue;
@@ -355,7 +355,7 @@ namespace TagTool.Tags.Definitions
         public class LockedParameter : TagStructure
         {
             public StringId Name;
-            public RenderMethodOption.OptionBlock.OptionDataType Type;
+            public RenderMethodOption.ParameterBlock.OptionDataType Type;
             public uint Flags;
         }
 

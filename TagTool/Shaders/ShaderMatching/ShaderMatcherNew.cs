@@ -61,16 +61,16 @@ namespace TagTool.Shaders.ShaderMatching
             IsInitialized = false;
         }
 
-        public Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType> GetOptionParameters(List<byte> options, RenderMethodDefinition rmdf)
+        public Dictionary<StringId, RenderMethodOption.ParameterBlock.OptionDataType> GetOptionParameters(List<byte> options, RenderMethodDefinition rmdf)
         {
-            Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType> optionParameters = new Dictionary<StringId, RenderMethodOption.OptionBlock.OptionDataType>();
+            Dictionary<StringId, RenderMethodOption.ParameterBlock.OptionDataType> optionParameters = new Dictionary<StringId, RenderMethodOption.ParameterBlock.OptionDataType>();
 
             for (int i = 0; i < options.Count; i++)
             {
-                if (rmdf.Methods[i].ShaderOptions[options[i]].Option != null)
+                if (rmdf.Categories[i].ShaderOptions[options[i]].Option != null)
                 {
-                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
-                    foreach (var parameter in rmop.Options)
+                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Categories[i].ShaderOptions[options[i]].Option);
+                    foreach (var parameter in rmop.Parameters)
                         if (!optionParameters.ContainsKey(parameter.Name))
                             optionParameters.Add(parameter.Name, parameter.Type);
                 }
@@ -79,16 +79,16 @@ namespace TagTool.Shaders.ShaderMatching
             return optionParameters;
         }
 
-        public Dictionary<StringId, RenderMethodOption.OptionBlock> GetOptionBlocks(List<byte> options, RenderMethodDefinition rmdf)
+        public Dictionary<StringId, RenderMethodOption.ParameterBlock> GetOptionBlocks(List<byte> options, RenderMethodDefinition rmdf)
         {
-            Dictionary<StringId, RenderMethodOption.OptionBlock> optionBlocks = new Dictionary<StringId, RenderMethodOption.OptionBlock>();
+            Dictionary<StringId, RenderMethodOption.ParameterBlock> optionBlocks = new Dictionary<StringId, RenderMethodOption.ParameterBlock>();
 
             for (int i = 0; i < options.Count; i++)
             {
-                if (rmdf.Methods[i].ShaderOptions[options[i]].Option != null)
+                if (rmdf.Categories[i].ShaderOptions[options[i]].Option != null)
                 {
-                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
-                    foreach (var parameter in rmop.Options)
+                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Categories[i].ShaderOptions[options[i]].Option);
+                    foreach (var parameter in rmop.Parameters)
                         if (!optionBlocks.ContainsKey(parameter.Name))
                             optionBlocks.Add(parameter.Name, parameter);
                 }
@@ -103,11 +103,11 @@ namespace TagTool.Shaders.ShaderMatching
 
             for (int i = 0; i < options.Count; i++)
             {
-                if (rmdf.Methods[i].ShaderOptions[options[i]].Option != null)
+                if (rmdf.Categories[i].ShaderOptions[options[i]].Option != null)
                 {
-                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Methods[i].ShaderOptions[options[i]].Option);
-                    foreach (var parameter in rmop.Options)
-                        if (parameter.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler && parameter.DefaultSamplerBitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
+                    var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Categories[i].ShaderOptions[options[i]].Option);
+                    foreach (var parameter in rmop.Parameters)
+                        if (parameter.Type == RenderMethodOption.ParameterBlock.OptionDataType.Sampler && parameter.DefaultSamplerBitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
                             optionBitmaps.Add(parameter.Name, parameter.DefaultSamplerBitmap);
                 }
             }
@@ -370,19 +370,19 @@ namespace TagTool.Shaders.ShaderMatching
                 List<byte> newOptions = new List<byte>();
 
                 // get option indices (if we loop by basecache rmdf, the options will always be correct length and index)
-                for (int i = 0; i < baseRmdfDefinition.Methods.Count; i++)
+                for (int i = 0; i < baseRmdfDefinition.Categories.Count; i++)
                 {
                     byte option = 0;
 
-                    string methodName = BaseCache.StringTable.GetString(baseRmdfDefinition.Methods[i].Type);
+                    string methodName = BaseCache.StringTable.GetString(baseRmdfDefinition.Categories[i].Name);
 
-                    for (int j = 0; j < portingRmdfDefinition.Methods.Count; j++)
+                    for (int j = 0; j < portingRmdfDefinition.Categories.Count; j++)
                     {
-                        if (methodName != PortingCache.StringTable.GetString(portingRmdfDefinition.Methods[j].Type))
+                        if (methodName != PortingCache.StringTable.GetString(portingRmdfDefinition.Categories[j].Name))
                             continue;
 
                         int portingOptionIndex = srcRmt2Descriptor.Options[j];
-                        string optionName = PortingCache.StringTable.GetString(portingRmdfDefinition.Methods[j].ShaderOptions[portingOptionIndex].Type);
+                        string optionName = PortingCache.StringTable.GetString(portingRmdfDefinition.Categories[j].ShaderOptions[portingOptionIndex].Name);
 
                         // TODO: fill this switch, Reach shadergen might take some time...
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
@@ -438,9 +438,9 @@ namespace TagTool.Shaders.ShaderMatching
 
                         bool matchFound = false;
                         // get basecache option index
-                        for (int k = 0; k < baseRmdfDefinition.Methods[i].ShaderOptions.Count; k++)
+                        for (int k = 0; k < baseRmdfDefinition.Categories[i].ShaderOptions.Count; k++)
                         {
-                            if (optionName == BaseCache.StringTable.GetString(baseRmdfDefinition.Methods[i].ShaderOptions[k].Type))
+                            if (optionName == BaseCache.StringTable.GetString(baseRmdfDefinition.Categories[i].ShaderOptions[k].Name))
                             {
                                 option = (byte)k;
                                 matchFound = true;
@@ -615,9 +615,9 @@ namespace TagTool.Shaders.ShaderMatching
         private List<string> GetRenderMethodDefinitionMethods(RenderMethodDefinition rmdf, GameCache cache)
         {
             var result = new List<string>();
-            foreach(var method in rmdf.Methods)
+            foreach(var method in rmdf.Categories)
             {
-                var str = cache.StringTable.GetString(method.Type);
+                var str = cache.StringTable.GetString(method.Name);
                 result.Add(str);
             }
             return result;
@@ -626,10 +626,10 @@ namespace TagTool.Shaders.ShaderMatching
         private List<string> GetMethodOptions(RenderMethodDefinition rmdf, int methodIndex, GameCache cache)
         {
             var result = new List<string>();
-            var method = rmdf.Methods[methodIndex];
+            var method = rmdf.Categories[methodIndex];
             foreach(var option in method.ShaderOptions)
             {
-                result.Add(cache.StringTable.GetString(option.Type));
+                result.Add(cache.StringTable.GetString(option.Name));
             }
             return result;
         }

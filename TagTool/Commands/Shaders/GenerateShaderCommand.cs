@@ -80,9 +80,9 @@ namespace TagTool.Commands.Shaders
                     {
                         bool found = false;
 
-                        for (int j = 0; j < rmdf.Methods[i].ShaderOptions.Count; j++)
+                        for (int j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
                         {
-                            if (Cache.StringTable.GetString(rmdf.Methods[i].ShaderOptions[j].Type) == args[i].ToLower())
+                            if (Cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[j].Name) == args[i].ToLower())
                             {
                                 found = true;
                                 options.Add(j);
@@ -100,7 +100,7 @@ namespace TagTool.Commands.Shaders
                 }
 
                 // make up options count, may not work very well
-                while (options.Count != rmdf.Methods.Count)
+                while (options.Count != rmdf.Categories.Count)
                     options.Add(0);
 
                 // build tagname

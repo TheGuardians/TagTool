@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
     public class GlobalPixelShader : TagStructure
 	{
         public List<EntryPointBlock> EntryPoints;
-        public uint Unknown2;
+        public uint Version;
         public List<PixelShaderBlock> Shaders;
 
         [TagStructure(Size = 0x10)]

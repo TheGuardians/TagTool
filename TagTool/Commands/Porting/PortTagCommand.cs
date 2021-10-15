@@ -812,7 +812,7 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case RenderMethodOption rmop when BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach:
-                    foreach (var block in rmop.Options)
+                    foreach (var block in rmop.Parameters)
                     {
                         if (BlamCache.Version == CacheVersion.Halo3ODST && block.RenderMethodExtern >= RenderMethodExtern.emblem_player_shoulder_texture)
                             block.RenderMethodExtern = (RenderMethodExtern)((int)block.RenderMethodExtern + 2);

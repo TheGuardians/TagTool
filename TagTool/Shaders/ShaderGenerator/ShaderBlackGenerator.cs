@@ -18,7 +18,7 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             RenderMethodDefinition rmdf = new RenderMethodDefinition();
 
-            rmdf.RenderMethodOptions = cache.TagCache.GetTag(@"shaders\shader_options\global_shader_options", "rmop");
+            rmdf.GlobalOptions = cache.TagCache.GetTag(@"shaders\shader_options\global_shader_options", "rmop");
             /*
             rmdf.GlobalPixelShader = glpsTag;
             rmdf.GlobalVertexShader = glvsTag;
@@ -44,14 +44,14 @@ namespace TagTool.Shaders.ShaderGenerator
             */
             // hackfix for methods
 
-            rmdf.Methods = new List<RenderMethodDefinition.Method>();
+            rmdf.Categories = new List<RenderMethodDefinition.CategoryBlock>();
 
             var blacknessStringid = cache.StringTable.GetStringId("blackness(no_options)");
             if (blacknessStringid == StringId.Invalid)
             {
                 blacknessStringid = cache.StringTable.AddString("blackness(no_options)");
             }
-            rmdf.Methods.Add(new RenderMethodDefinition.Method { Type = blacknessStringid, VertexShaderMethodMacroName = StringId.Invalid, PixelShaderMethodMacroName = StringId.Invalid });
+            rmdf.Categories.Add(new RenderMethodDefinition.CategoryBlock { Name = blacknessStringid, VertexFunction = StringId.Invalid, PixelFunction = StringId.Invalid });
 
             return rmdf;
         }
