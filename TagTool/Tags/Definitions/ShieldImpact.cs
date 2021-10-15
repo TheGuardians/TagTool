@@ -107,41 +107,34 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xA4, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
         public class H3ValuesBlock : TagStructure
         {
-            public CachedTag NoiseTexture1;
-            public CachedTag NoiseTexture2;
-
-            public float Extrusion;
+            public CachedTag ShieldImpactNoiseTexture1;
+            public CachedTag ShieldImpactNoiseTexture2;
+            public float ExtrusionDistance;
 
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public float NoiseUVScale;
-
+            public float TextureScale;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float NoiseUScale;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float NoiseVScale;
+            public RealVector2d TextureScaleUV;
 
-            public float UVScrollRate;
-
-            public float AmbientPlasmaSharpness;
-            public float AmbientPlasmaIntensity;
-            public float AmbientPlasmaFalloff;
-            public float PlasmaSharpness;
-            public float PlasmaIntensity;
-            public float PlasmaFalloff;
-
-            public RealRgbColor OvershieldAmbientPlasmaColor;
-            public float OvershieldAmbientPlasmaMagnitude;
-            public RealRgbColor OvershieldPlasmaColor;
-            public float OvershieldPlasmaMagnitude;
-            public RealRgbColor OvershieldEdgeColor;
-            public float OvershieldEdgeMagnitude;
-
-            public RealRgbColor ShieldImpactAmbientPlasmaColor;
-            public float ShieldImpactAmbientPlasmaMagnitude;
-            public RealRgbColor ShieldImpactPlasmaColor;
-            public float ShieldImpactPlasmaMagnitude;
-            public RealRgbColor ShieldImpactEdgeColor;
-            public float ShieldImpactEdgeMagnitude;
+            public float ScrollSpeed;
+            public float PlasmaSharpness1;
+            public float PlasmaScale1;
+            public float PlasmaThreshold1;
+            public float PlasmaSharpness2;
+            public float PlasmaScale2;
+            public float PlasmaThreshold2;
+            public RealRgbColor OvershieldColor1;
+            public float OvershieldIntensity1;
+            public RealRgbColor OvershieldColor2;
+            public float OvershieldIntensity2;
+            public RealRgbColor OvershieldAmbientColor;
+            public float OvershieldAmbientIntensity;
+            public RealRgbColor ImpactColor1;
+            public float ImpactIntensity1;
+            public RealRgbColor ImpactColor2;
+            public float ImpactIntensity2;
+            public RealRgbColor ImpactAmbientColor;
+            public float ImpactAmbientIntensity2;
         }
 
         /// <summary>
