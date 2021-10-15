@@ -1,6 +1,7 @@
 using TagTool.Bitmaps;
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -120,31 +121,106 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28)]
         public class UsageOverride : TagStructure
 		{
-            /// <summary>
-            /// 0.0 to use xenon curve (default)
-            /// </summary>
-            public float SourceGamma;
+            public float SourceGamma; // 0.0 to use xenon curve (default)
+            public BitmapCurveEnum BitmapCurve;
+            public BitmapUsageFlagsDef Flags;
+            public BitmapUsageSlicerDef Slicer;
+            public BitmapUsageDicerFlagsDef DicerFlags;
+            public BitmapUsagePackerDef Packer;
+            public BitmapTypes Type;
+            public short MipmapLimit;
+            public BitmapUsageDownsampleFilterDef DownsampleFilter;
+            public BitmapUsageDownsampleFlagsDef DownsampleFlags;
+            public RealRgbColor SpriteBackgroundColor;
+            public BitmapUsageSwizzleDef SwizzleRed;
+            public BitmapUsageSwizzleDef SwizzleGreen;
+            public BitmapUsageSwizzleDef SwizzleBlue;
+            public BitmapUsageSwizzleDef SwizzleAlpha;
+            public int BitmapFormat; // 0 means the usage above is used
 
-            public int BitmapCurveEnum;
+            public enum BitmapCurveEnum : int
+            {
+                Unknown,
+                XRGBgammaAbout20SRGBgamma22,
+                Gamma20,
+                Linear,
+                OffsetLog,
+                SRGB
+            }
 
-            public byte Flags;
-            public byte Unknown9;
-            public byte UnknownA;
-            public byte UnknownB;
+            [Flags]
+            public enum BitmapUsageFlagsDef : byte
+            {
+                IgnoreCurveOverride = 1 << 0,
+                DontAllowSizeOptimization = 1 << 1,
+                SwapAxes = 1 << 2
+            }
 
-            public byte UnknownC;
-            public byte UnknownD;
-            public short DownsamplingFlags;
-            public short Unknown10;
-            public short Unknown12;
-            public int Unknown14;
-            public int Unknown18;
-            public int Unknown1C;
-            public byte SwizzleRedEnum;
-            public byte SwizzleBlueEnum;
-            public byte SwizzleGreenEnum;
-            public byte SwizzleAlphaEnum;
-            public int FormatEnum; // 0 means the usage above is used
+            public enum BitmapUsageSlicerDef : sbyte
+            {
+                AutomaticallyDetermineSlicer,
+                NoSlicingeachSourceBitmapGeneratesOneElement,
+                ColorPlateSlicer,
+                CubeMapSlicer
+            }
+
+            [Flags]
+            public enum BitmapUsageDicerFlagsDef : ushort
+            {
+                ConvertPlateColorKeyToAlphaChannel = 1 << 0,
+                RotateCubeMapToMatchDirectXFormat = 1 << 1,
+                SpritesShrinkElementsToSmallestNonZeroAlphaRegion = 1 << 2,
+                SpritesShrinkElementsToSmallestNonZeroColorAndAlphaRegion = 1 << 3,
+                UnsignedSignedScaleAndBias = 1 << 4
+            }
+
+            public enum BitmapUsagePackerDef : sbyte
+            {
+                NoPacking,
+                SpritePackpacksElementsIntoAsFewBitmapsAsPossible,
+                SpritePackIfNeededpacksElementsIntoAsFewBitmapsAsPossible,
+                _3DPackpacksElementsIntoA3DBitmap
+            }
+
+            public enum BitmapTypes : sbyte
+            {
+                _2DTexture,
+                _3DTexture,
+                CubeMap,
+                Array
+            }
+
+            public enum BitmapUsageDownsampleFilterDef : short
+            {
+                PointSampled,
+                BoxFilter,
+                GaussianFilter
+            }
+
+            [Flags]
+            public enum BitmapUsageDownsampleFlagsDef : ushort
+            {
+                SpritesColorBleedInZeroAlphaRegions = 1 << 0,
+                PreMultiplyAlphabeforeDownsampling = 1 << 1,
+                PostDivideAlphaafterDownsampling = 1 << 2,
+                HeightMapConvertToBumpMap = 1 << 3,
+                DetailMapFadeToGray = 1 << 4,
+                SignedUnsignedScaleAndBias = 1 << 5,
+                IllumMapFadeToBlack = 1 << 6,
+                ZBumpScaleByHeightAndRenormalize = 1 << 7
+            }
+
+            public enum BitmapUsageSwizzleDef : sbyte
+            {
+                Default,
+                SourceRedChannel,
+                SourceGreenChannel,
+                SourceBlueChannel,
+                SourceAlphaChannel,
+                SetTo10,
+                SetTo00,
+                SetTo05
+            }
         }
 
         [TagStructure(Size = 0x40)]
