@@ -170,7 +170,7 @@ namespace TagTool.Commands.Tags
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case BeamSystem beam:
-                    foreach (var sys in beam.Beam)
+                    foreach (var sys in beam.Beams)
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case DecalSystem decs:

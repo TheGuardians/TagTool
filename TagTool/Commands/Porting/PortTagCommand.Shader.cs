@@ -98,10 +98,10 @@ namespace TagTool.Commands.Porting
                     return decs;
                 case BeamSystem beamSystem:
                     var blamBeam = (BeamSystem)blamDefinition;
-                    for (int i = 0; i < beamSystem.Beam.Count; i++)
+                    for (int i = 0; i < beamSystem.Beams.Count; i++)
                     {
-                        beamSystem.Beam[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, beamSystem.Beam[i].RenderMethod, blamTag, blamBeam.Beam[i].RenderMethod);
-                        if (beamSystem.Beam[i].RenderMethod == null) return null;
+                        beamSystem.Beams[i].RenderMethod = ConvertShaderInternal(cacheStream, blamCacheStream, beamSystem.Beams[i].RenderMethod, blamTag, blamBeam.Beams[i].RenderMethod);
+                        if (beamSystem.Beams[i].RenderMethod == null) return null;
                     }
                     return beamSystem;
 
