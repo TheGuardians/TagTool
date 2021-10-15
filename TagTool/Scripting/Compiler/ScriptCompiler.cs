@@ -2609,7 +2609,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Enum.TryParse<AiActorType>(actorTypeSymbol.Value, true, out var actorType))
+                if (!Enum.TryParse<ActorTypeEnum>(actorTypeSymbol.Value, true, out var actorType))
                     throw new FormatException(actorTypeSymbol.Value);
 
                 var expr = ScriptExpressions[handle.Index];

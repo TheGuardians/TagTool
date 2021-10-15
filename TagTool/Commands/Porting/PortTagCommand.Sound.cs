@@ -428,7 +428,7 @@ namespace TagTool.Commands.Porting
                     Sound = null,
                     Flags = 0,
                     Unknown = 0,
-                    Name = vocalization.Name,
+                    Name = vocalization.Vocalization,
                 };
                 newVocalization.Add(block);
             }

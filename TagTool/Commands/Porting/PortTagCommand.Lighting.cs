@@ -221,7 +221,7 @@ namespace TagTool.Commands.Porting
             {
                 Flags = CameraFxSettings.FlagsValue.UseDefault
             };
-            cfxs.UnknownIntensity1 = new CameraFxSettings.CameraFxValue
+            cfxs.ColorGrading = new CameraFxSettings.CameraFxValue
             {
                 Flags = CameraFxSettings.FlagsValue.UseDefault
             };

@@ -8,7 +8,7 @@ namespace TagTool.Ai
 	{
         public CharacterGeneralFlags Flags;
 
-        public AiActorType ActorType;
+        public ActorTypeEnum ActorType;
 
         /// <summary>
         /// The rank of this character, helps determine who should be a squad leader. (0 is lowly, 32767 is highest)

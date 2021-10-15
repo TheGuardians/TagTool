@@ -53,7 +53,6 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public ushort Unknown;
 
-            
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public FlagBits Flags;
@@ -63,16 +62,14 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public HiddenFlagBits HiddenFlags;
 
-            //
             //  DISTANCE FALLOFF:
             //      Controls the maximum distance and the distance falloff of this effect.
             //      NOTE: Not used for scenario global effects
-            //
 
             /// <summary>
             /// The maximum distance this screen effect will affect.
             /// </summary>
-            public float MaximumDistance;
+            public float MaximumDistance; // world units
 
             /// <summary>
             /// The function data of the distance falloff.
@@ -89,21 +86,14 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Delay;
 
-            /// <summary>
-            /// The effect is destroyed after this many seconds. (0 = never dies)
-            /// </summary>
-            public float Duration;
+            public float Lifetime; // The effect is destroyed after this many seconds. (0 = never dies)
 
-            /// <summary>
             /// The function data of the time evolution.
-            /// </summary>
             public TagFunction TimeEvolutionFunction = new TagFunction { Data = new byte[0] };
 
-            //
             //  ANGLE FALLOFF:
             //      Controls the falloff of this effect based on how close you are to looking directly at it.
             //      NOTE: not used for scenario global effects
-            //
 
             /// <summary>
             /// The function data of the angle falloff.
@@ -123,20 +113,29 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public TagFunction ObjectFalloff = new TagFunction { Data = new byte[0] };
 
-            public float LightIntensity;
+            public float ExposureBoost; // (in stops)
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Darkness;
-            public float PrimaryHue; ///degrees [0-360] shifts hue R>G>B
-            public float SecondaryHue; ///degrees [0-360] shifts hue R>G>B
-            public float Saturation; ///[0-1]#increases saturation
-            public float Desaturation; ///[0-1]#decreases saturation
-            public float GammaIncrease; ///[0-10]#gamma increase
-            public float GammaDecrease; ///[0-10]#gamma decrease
+
+            public float HueShiftLeft; // degrees [0-360] shifts hue R>G>B
+            public float HueShiftRight; // degrees [0-360] shifts hue R>G>B
+            public float Saturation; // [0-1]#increases saturation
+            public float Desaturation; // [0-1]#decreases saturation
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            public float ContrastEnhance;
+
+            public float GammaIncrease; // [0-10]
+            public float GammaDecrease; // [0-10]
+            
             public float ShadowBrightness;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float BrightNoise;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float DarkNoise;
+
             public RealRgbColor ColorFilter; ///#this color is multiplied on top
             public RealRgbColor ColorFloor; ///#this color is subtracted
 

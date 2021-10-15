@@ -527,9 +527,9 @@ namespace TagTool.Commands.Porting
 						foreach (var screenEffect in sefc.ScreenEffects)
 							screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
-                    if (sefc.ScreenEffects[0].Duration == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
+                    if (sefc.ScreenEffects[0].Lifetime == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
                     {
-                        sefc.ScreenEffects[0].Duration = 1E+19f;
+                        sefc.ScreenEffects[0].Lifetime = 1E+19f;
                         sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
                     }
                     foreach (var screenEffect in sefc.ScreenEffects)
