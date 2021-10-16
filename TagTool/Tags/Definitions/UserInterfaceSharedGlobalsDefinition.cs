@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,31 +10,31 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
 	{
-        public short IncTextUpdatePeriod;
-        public short IncTextBlockCharacter;
-        public float NearClipPlaneDistance;
-        public float ProjectionPlaneDistance;
-        public float FarClipPlaneDistance;
+        public short IncTextUpdatePeriod; // milliseconds
+        public short IncTextBlockCharacter; // ASCII code
+        public float NearClipPlaneDistance; // objects closer than this are not drawn
+        public float ProjectionPlaneDistance; // distance at which objects are rendered when z=0 (normal size)
+        public float FarClipPlaneDistance; // objects farther than this are not drawn
         public CachedTag GlobalStrings;
-        public CachedTag DamageTypeStrings;
+        public CachedTag DamageReportingStrings;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
-        public CachedTag UnknownStrings;
+        public CachedTag InputStrings;
 
         public CachedTag MainMenuMusic;
-        public int MusicFadeTime;
-        public RealArgbColor DefaultTextColor;
-        public RealArgbColor DefaultTextShadowColor;
-        public List<TextColorBlock> TextColors;
-        public List<PlayerColor> PlayerColors;
-        public CachedTag UiSounds;
-        public List<Alert> Alerts;
-        public List<Dialog> Dialogs;
+        public int MusicFadeTime; // milliseconds
+        public RealArgbColor TextColor;
+        public RealArgbColor TextShadowColor;
+        public List<ColorPreset> ColorPresets;
+        public List<PlayerColor> PlayerTintColors;
+        public CachedTag DefaultSounds;
+        public List<GuiAlertDescription> AlertDescriptions;
+        public List<Dialog> DialogDescriptions;
         public List<GlobalDataSource> GlobalDataSources;
         public RealPoint2d WidescreenBitmapScale;
         public RealPoint2d StandardBitmapScale;
-        public RealPoint2d MenuBlur;
+        public RealPoint2d MenuBlurFactor;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<UiWidgetBiped> UiWidgetBipeds;
@@ -47,13 +48,13 @@ namespace TagTool.Tags.Definitions
         public StringId UnknownPlayer4;
 
         //Spartan in H3
-        [TagField(Length = 32)] public string UiEliteBipedName;
-        [TagField(Length = 32)] public string UiEliteAiSquadName;
-        public StringId UiEliteAiLocationName;
+        [TagField(Length = 32)] public string McBipedName;
+        [TagField(Length = 32)] public string McAiSquadName;
+        public StringId McAiStartPosition;
         //Elite in H3
-        [TagField(Length = 32)] public string UiOdst1BipedName;
-        [TagField(Length = 32)] public string UiOdst1AiSquadName;
-        public StringId UiOdst1AiLocationName;
+        [TagField(Length = 32)] public string EliteBipedName;
+        [TagField(Length = 32)] public string EliteAiSquadName;
+        public StringId EliteAiStartPosition;
 
         
         [TagField(Length = 32, MinVersion = CacheVersion.Halo3ODST)]
@@ -105,10 +106,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public StringId UiOdst4AiLocationName;
         
-        public int SingleScrollSpeed;
-        public int ScrollSpeedTransitionWaitTime;
-        public int HeldScrollSpeed;
-        public int AttractVideoIdleWait;
+        public int NavigationScrollInterval; //milliseconds
+        public int NavigationFastScrollDelay; //milliseconds
+        public int NavigationFastScrollInterval; //milliseconds
+        public int AttractVideoDelay; // seconds
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public TagFunction PdaWaypointScaleFunction;
@@ -149,7 +150,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class TextColorBlock : TagStructure
+        public class ColorPreset : TagStructure
 		{
             public StringId Name;
             public RealArgbColor Color;
@@ -158,46 +159,46 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class PlayerColor : TagStructure
 		{
-            public List<PlayerTextColorBlock> PlayerTextColor;
-            public List<TeamTextColorBlock> TeamTextColor;
-            public List<PlayerUiColorBlock> PlayerUiColor;
-            public List<TeamUiColorBlock> TeamUiColor;
+            public List<ColorListBlock> PlayerTextColor;
+            public List<ColorListBlock> TeamTextColor;
+            public List<ColorListBlock> PlayerUiColor;
+            public List<ColorListBlock> TeamUiColor;
 
             [TagStructure(Size = 0x10)]
-            public class PlayerTextColorBlock : TagStructure
-			{
-                public RealArgbColor Color;
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class TeamTextColorBlock : TagStructure
-			{
-                public RealArgbColor Color;
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class PlayerUiColorBlock : TagStructure
-			{
-                public RealArgbColor Color;
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class TeamUiColorBlock : TagStructure
+            public class ColorListBlock : TagStructure
 			{
                 public RealArgbColor Color;
             }
         }
 
         [TagStructure(Size = 0x10)]
-        public class Alert : TagStructure
+        public class GuiAlertDescription : TagStructure
 		{
-            public StringId Name;
-            public byte Flags;
-            public sbyte Unknown;
+            public StringId ErrorName;
+            public GuiAlertFlags Flags;
+            public GuiErrorCategoryEnum ErrorCategory;
             public IconValue Icon;
-            public sbyte Unknown2;
+
+            [TagField(Length = 1, Flags = TagFieldFlags.Padding)]
+            public byte[] Pad0;
+
             public StringId Title;
-            public StringId Body;
+            public StringId Message;
+
+            [Flags]
+            public enum GuiAlertFlags : byte
+            {
+                AllowAutoDismissal = 1 << 0,
+                ShowSpinner = 1 << 1
+            }
+
+            public enum GuiErrorCategoryEnum : sbyte
+            {
+                Default,
+                Networking,
+                StoragereadingwritingFailure,
+                Controller
+            }
 
             public enum IconValue : sbyte
             {
@@ -213,24 +214,43 @@ namespace TagTool.Tags.Definitions
         public class Dialog : TagStructure
 		{
             public StringId Name;
-            public short Unknown;
-            public short Unknown2;
+            public GuiDialogFlags Flags;
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+
             public StringId Title;
             public StringId Body;
-            public StringId Option1;
-            public StringId Option2;
-            public StringId Option3;
-            public StringId Option4;
+            public StringId FirstItem;
+            public StringId SecondItem;
+            public StringId ThirdItem;
+            public StringId FourthItem;
             public StringId KeyLegend;
-            public DefaultOptionValue DefaultOption;
-            public short Unknown3;
+            public GuiDialogChoice DefaultOption;
+            public GuiDialogBButtonActionEnum BButtonAction;
 
-            public enum DefaultOptionValue : short
+            [Flags]
+            public enum GuiDialogFlags : ushort
             {
-                Option1,
-                Option2,
-                Option3,
-                Option4,
+                Unused = 1 << 0
+            }
+
+            public enum GuiDialogChoice : short
+            {
+                FirstItem,
+                SecondItem,
+                ThirdItem,
+                FourthItem
+            }
+
+            public enum GuiDialogBButtonActionEnum : short
+            {
+                DismissesDialog,
+                ButtonIgnored,
+                FirstItemActivates,
+                SecondItemActivates,
+                ThirdItemActivates,
+                FourthItemActivates
             }
         }
 

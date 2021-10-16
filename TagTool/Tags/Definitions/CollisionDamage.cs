@@ -7,13 +7,15 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "collision_damage", Tag = "cddf", Size = 0x30, MinVersion = CacheVersion.HaloOnlineED)]
     public class CollisionDamage : TagStructure
 	{
-        public float ApplyDamageScale;
-        public float ApplyRecoilDamageScale;
-        public Bounds<float> DamageAccelerationBounds;
-        public Bounds<float> DamageScaleBounds;
+        public float ApplyCollisionDamageScale; // 0 means 1.  1 is standard scale.  Some things may want to apply more damage
+        public float FriendlyApplyCollisionDamage; // 0 means 1.  1 is standard scale.  Some things may want to apply more damage, yet go soft on their friends
+        public Bounds<float> GameAccelerationBounds;
+        public Bounds<float> GameDamageScaleBounds;
+
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public Bounds<float> Unknown;
-        public Bounds<float> RecoilDamageAccelerationBounds;
-        public Bounds<float> RecoilDamageScaleBounds;
+
+        public Bounds<float> AbsoluteDamageAccelerationBounds;
+        public Bounds<float> AbsoluteDamageScaleBounds;
     }
 }

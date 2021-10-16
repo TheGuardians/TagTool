@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
     {
         public SkyAtmFlags Flags;
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding0;
+        public byte[] Padding;
 
         public CachedTag FogBitmap;
         public float TextureRepeatRate;
@@ -45,13 +45,14 @@ namespace TagTool.Tags.Definitions
         public class AtmosphereProperty : TagStructure
         {
             public AtmosphereFlags Flags;
+
             [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-            public byte[] ABCDEFGH;
+            public byte[] Padding2;
 
             public StringId Name;
 
-            public float Pitch0To90;
-            public float Heading0To360;
+            public float SunAnglePitch; // 0 to 90
+            public float SunAngleYaw; // 0 to 360
             public RealRgbColor Color;
             public float Intensity;
 
