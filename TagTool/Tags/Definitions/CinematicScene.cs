@@ -10,20 +10,25 @@ namespace TagTool.Tags.Definitions
     public class CinematicScene : TagStructure
 	{
         public StringId Name;
-
         [TagField(Length = 32)]
         public string AnchorName;
-
-        public uint Unknown1;
+        public SceneResetObjectLightingEnum ResetObjectLighting;
+        [TagField(Length = 2, Flags = Padding)]
+        public byte[] Padd;
         public byte[] ImportScriptHeader;
-
         public List<ObjectBlock> Objects;
         public List<ShotBlock> Shots;
         public List<TextureCameraBlock> TextureCameras;
-
         public byte[] ImportScriptFooter;
         public uint Version;
-        
+
+        public enum SceneResetObjectLightingEnum : short
+        {
+            Default,
+            DontResetLighting,
+            ResetLighting
+        }
+
         [TagStructure(Size = 0x74)]
         public class ObjectBlock : TagStructure
 		{
@@ -35,30 +40,33 @@ namespace TagTool.Tags.Definitions
             public StringId VariantName;
             public CachedTag PuppetAnimation;
             public CachedTag PuppetObject;
-
             public ObjectFlags Flags;
+            public uint ShotsActiveFlags;
+            public CinematicCoopTypeFlags OverrideCreationFlags;
+            public byte[] ImportOverrideCreationScript;
+            public List<AttachmentsBlock> Attachments;
+
             [Flags]
-            public enum ObjectFlags : int
+            public enum ObjectFlags : uint
             {
-                None = 0,
+                None,
                 PlacedManuallyInSapien = 1 << 0,
                 ObjectComesFromGame = 1 << 1,
-                SpecialCaseLikePlayer0 = 1 << 2,
+                NameIsFunctionCall = 1 << 2,
                 EffectObject = 1 << 3,
                 NoLightmapShadow = 1 << 4,
-                ApplyPlayerCustomization = 1 << 5,
-                ApplyFirstPersonPlayerCustomization = 1 << 6,
-                IwillanimatetheEnglishlipsyncmanually = 1 << 7,
-                PrimaryCortana = 1 << 8,
-                PreloadTextures = 1 << 9
+                UseMasterChiefPlayerAppearance = 1 << 5,
+                UseDervishArbiterPlayerAppearance = 1 << 6
             }
 
-            public int UnknownShotFlags;
-            public OverrideCreationFlags OverrideCreationFlags;
-
-            public byte[] ImportOverrideCreationScript;
-
-            public List<AttachmentsBlock> Attachments;
+            [Flags]
+            public enum CinematicCoopTypeFlags : uint
+            {
+                SinglePlayer = 1 << 0,
+                _2PlayerCoop = 1 << 1,
+                _3PlayerCoop = 1 << 2,
+                _4PlayerCoop = 1 << 3
+            }
 
             [TagStructure(Size = 0x38)]
             public class AttachmentsBlock : TagStructure
@@ -76,17 +84,7 @@ namespace TagTool.Tags.Definitions
         public class ShotBlock : TagStructure
 		{
             public byte[] ImportScriptHeader;
-
             public ShotFlags Flags;
-            [Flags]
-            public enum ShotFlags : int
-            {
-                None = 0,
-                InstantAutoExposure = 1 << 0,
-                ForceExposure = 1 << 1,
-                GenerateLoopingScript = 1 << 2
-            }
-
             public float EnvironmentDarken;
             public float ForcedExposure;
             public List<LightingBlock> Lighting;
@@ -102,13 +100,21 @@ namespace TagTool.Tags.Definitions
             public List<CortanaEffectBlock> CortanaEffects;
             public List<ImportScriptBlock> ImportScripts;
 
-            //Used in C100 - ODST intro sequence
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public List<UserInputConstraintsBlock> UserInputConstraints;
 
             public byte[] ImportScriptFooter;
             public int FrameCount;
             public List<CameraFrame> CameraFrames;
+
+            [Flags]
+            public enum ShotFlags : int
+            {
+                None = 0,
+                InstantAutoExposure = 1 << 0,
+                ForceExposure = 1 << 1,
+                GenerateLoopingScript = 1 << 2
+            }
 
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
@@ -190,7 +196,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag Effect;
                 public int Frame;
                 public StringId Marker;
-                public int OwnerObjectIndex;
+                public int MarkerParent;
             }
 
             [TagStructure(Size = 0x14)]
@@ -232,7 +238,7 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public CachedTag CortanaEffect;
-                public uint Unknown;
+                public uint Frame;
             }
 
             [TagStructure(Size = 0x18)]
@@ -248,7 +254,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public StringId Unknown;
+            public StringId Type;
             public List<CameraShotBlock> Shots;
 
             [TagStructure(Size = 0xC)]
@@ -258,9 +264,15 @@ namespace TagTool.Tags.Definitions
 
                 [TagStructure(Size = 0x48)]
                 public class FrameBlock : TagStructure
-				{
-                    public uint UnknownIndex;
+                {
+                    public CinematicExtraCameraFrameFlags Flags;
                     public CameraFrame CameraFrame;
+
+                    [Flags]
+                    public enum CinematicExtraCameraFrameFlags : uint
+                    {
+                        Enabled = 1 << 0
+                    }
                 }
             }
         }
@@ -271,11 +283,9 @@ namespace TagTool.Tags.Definitions
             public RealPoint3d CameraPosition;
             public RealVector3d CameraForward;
             public RealVector3d CameraUp;
-
-            public float Unknown7;
-            public float Unknown8;
+            public float HorizontalFieldOfView;
+            public float HorizontalFilmAperture;
             public float FocalLength;
-
             public FlagBits Flags;
             public float NearFocalPlaneDistance;
             public float FarFocalPlaneDistance;
@@ -288,16 +298,6 @@ namespace TagTool.Tags.Definitions
                 None,
                 EnableDepthOfField = 1 << 0
             }
-        }
-
-        [Flags]
-        public enum OverrideCreationFlags : int
-        {
-            None = 0,
-            SinglePlayer = 1 << 0,
-            TwoPlayerCoop = 1 << 1,
-            ThreePlayerCoop = 1 << 2,
-            FourPlayerCoop = 1 << 3
         }
     }
 }

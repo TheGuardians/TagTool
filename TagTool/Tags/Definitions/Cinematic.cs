@@ -14,31 +14,23 @@ namespace TagTool.Tags.Definitions
         public uint ScenesFlags;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint ScenesExpandedFlags;
-
         public List<SceneIndex> Shots;
+
         public CachedTag Scenario;
         public int Zoneset;
+
         public StringId Name;
-        public short Unknown1; // public ChannelTypeEnum ChannelType; // based of h4 defs, though unconfirmed as these fields aren't used in h3 or odst
-        [TagField(Flags = Padding, Length = 0x2)]
-        public byte[] UnusedPadding;
-        public int Unknown2; //public CinematicFlags Flags;
-        public int Unknown3; // public float EasingInTime;
-        public int Unknown4; // public float EasingOutTime;
-        public float Unknown5;
-        public float Unknown6;
-        public float Unknown7;
-        public int Unknown8;
-
-        // I can't confirm the types for these 3 as they don't seem to be used in retail at all
-        public int Unknown9;
-        public int Unknown10;
-        public int Unknown11;
-
-        public int Unknown12;
-        public CachedTag Unknown13; // possible bik reference, though I was unable to get it working ingame
-
-        // Scripts are in ASCIIZ format, they will probably need conversion to work in HO
+        public CinematicChannelTypeEnum ChannelType;
+        [TagField(Length = 2, Flags = Padding)]
+        public byte[] PADDING;
+        public CinematicFlags Flags;
+        public float EasingInTime;
+        public float EasingOutTime;
+        public RealRgbColor FadeInColor;
+        public int FadeInTime;
+        public RealRgbColor FadeOutColor;
+        public int FadeOutTime;
+        public CachedTag BinkMovie;
         public byte[] ImportScriptHeader;
         public List<TagReferenceBlock> CinematicScenes;
         public byte[] ImportScriptFooter;
@@ -50,25 +42,19 @@ namespace TagTool.Tags.Definitions
             public uint ShotFlags;
         }
 
-        [Flags]
-        public enum CinematicFlags : int
-        {
-            None = 0,
-            Outro = 1 << 0,
-            ExtraMemoryBink = 1 << 1,
-            OpaqueBink = 1 << 2,
-            DontStretchBink = 1 << 3,
-            DontForceHologramRender = 1 << 4
-        }
-
-        public enum ChannelTypeEnum : short
+        public enum CinematicChannelTypeEnum : short
         {
             Letterbox,
             Briefing,
             Perspective,
-            Vignette,
-            BinkBriefing, // binks are probably h4 only - need to come back to this
-            BinkFullscreen
+            BinkBriefing,
+            CortanaEffect
+        }
+
+        [Flags]
+        public enum CinematicFlags : uint
+        {
+            Outro = 1 << 0
         }
     }
 }
