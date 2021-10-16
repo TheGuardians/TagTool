@@ -758,8 +758,8 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
-                    ligh.FrustumMinimumViewDistance = ligh.FrustumMinimumViewDistanceReach;
-                    ligh.MaxIntensityRange = ligh.MaxIntensityRangeReach;
+                    ligh.DistanceDiffusion = ligh.FrustumMinimumViewDistanceReach;
+                    ligh.AngularSmoothness = ligh.MaxIntensityRangeReach;
                     break;
 
                 case Model hlmt:
