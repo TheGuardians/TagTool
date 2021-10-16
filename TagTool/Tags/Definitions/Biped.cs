@@ -60,19 +60,15 @@ namespace TagTool.Tags.Definitions
 
         public Angle CameraInterpolationStart; // looking-downward angle that starts camera interpolation to fp position
         public Angle CameraInterpolationEnd; // looking-downward angle at which camera interpolation to fp position is complete
-
         public RealVector3d CameraOffset;
         public float RootOffsetCameraScale;
-
         public float AutoaimWidth; // world units
-
         public BipedLockOnFlags LockonFlags; //bitfield32
         public float LockonDistance;
-
         public short PhysicsControlNodeIndex;
 
-        [TagField(Flags = Padding)]
-        public short Unused;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
 
         public float CosineStationaryTurningThreshold;
         public float CrouchTransitionVelocity;
@@ -175,8 +171,8 @@ namespace TagTool.Tags.Definitions
         public CachedTag DeathSpawnCharacter; // when I die, out of the ashes of my death crawls a ...
         public short DeathSpawnCount;
 
-        [TagField(Length = 2, Flags = Padding)]
-        public short Padding1;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
 
         public BipedLeapingDataStruct BipedLeapingData;
         public BipedGroundFitting BipedGroundFittingData;
