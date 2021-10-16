@@ -8,191 +8,141 @@ namespace TagTool.Tags.GUI
     [TagStructure(Size = 0x4C)]
     public class TextWidget : TagStructure
     {
-        public CachedTag Parent;
+        public CachedTag TemplateReference;
         public GuiTextFlags Flags;
         public GuiDefinition GuiRenderBlock;
-        public StringId DataSourceName;
-        public StringId TextString;
-        public StringId TextColor;
-        public FontValue TextFont;
-        public short Unknown;
+        public StringId ValueOverrideList;
+        public StringId ValueIdentifier;
+        public StringId TextColorPreset;
+        public FontValue CustomFont;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] TextWidgetDefinitionPad;
     }
 
     [Flags]
     public enum GuiTextFlags : int
     {
-        None = 0,
-        Bit0 = 1 << 0,
-        Bit1 = 1 << 1,
-        Bit2 = 1 << 2,
-        LeftAlignment = 1 << 3,
-        RightAlignment = 1 << 4,
-        Bit5 = 1 << 5,
-        AllCaps = 1 << 6,
-        Bit7 = 1 << 7,
-        Bit8 = 1 << 8,
-        Bit9 = 1 << 9,
-        Bit10 = 1 << 10,
-        Bit11 = 1 << 11,
-        Bit12 = 1 << 12,
-        WrapAtBounds = 1 << 13,
-        CutAtBounds = 1 << 14,
-        Bit15 = 1 << 15,
-        Bit16 = 1 << 16,
-        Bit17 = 1 << 17,
-        Bit18 = 1 << 18,
-        Bit19 = 1 << 19,
-        Bit20 = 1 << 20,
-        Bit21 = 1 << 21,
-        Bit22 = 1 << 22,
-        Bit23 = 1 << 23,
-        Bit24 = 1 << 24,
-        Bit25 = 1 << 25,
-        Bit26 = 1 << 26,
-        Bit27 = 1 << 27,
-        Bit28 = 1 << 28,
-        Bit29 = 1 << 29,
-        Bit30 = 1 << 30,
-        Bit31 = 1 << 31
+        DoNotApplyOldContentUpscaling = 1 << 0,
+        OverrideTemplateFlags = 1 << 1,
+        EnableAnimationDebugging = 1 << 2,
+        LeftJustify = 1 << 3,
+        RightJustify = 1 << 4,
+        Scrollable = 1 << 5,
+        Uppercase = 1 << 6,
+        StringFromExportedText = 1 << 7,
+        StringFromExportedStringId = 1 << 8,
+        StringFromExportedGlobalStringId = 1 << 9,
+        StringFromExportedInteger = 1 << 10,
+        StringFromListItemLabel = 1 << 11,
+        UseBracketsToIndicateFocus = 1 << 12,
+        LargeTextBuffer255Chars = 1 << 13,
+        ExtralargeTextBuffer = 1 << 14,
+        SingleDropShadow = 1 << 15,
+        NoDropShadow = 1 << 16,
+        AllowListItemToOverrideAnimationSkin = 1 << 17,
+        DoNotWrapText = 1 << 18,
+        Clickable = 1 << 19
     }
 
     [TagStructure(Size = 0x6C)]
     public class BitmapWidget : TagStructure
     {
-        public CachedTag Parent;
+        public CachedTag TemplateReference;
         public GuiBitmapFlags Flags;
         public GuiDefinition GuiRenderBlock;
         public CachedTag Bitmap;
-        public CachedTag Unknown;
+        public CachedTag CustomPixelShader;
         public BlendMethodValue BlendMethod;
-        public short Unknown1;
-        public short SpriteIndex;
-        public short Unknown2;
-        public StringId DataSourceName;
-        public StringId SpriteDataSourceName;
+        public short InitialSpriteSequence;
+        public short InitialSpriteFrame;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] BitmapWidgetDefinitionAlignmentPad;
+        public StringId ValueOverrideList;
+        public StringId ValueIdentifier;
 
         public enum BlendMethodValue : short
         {
-            Standard,
-            Unknown,
-            Unknown2,
-            Alpha,
-            Overlay,
-            Unknown3,
-            LighterColor,
-            Unknown4,
-            Unknown5,
-            Unknown6,
-            InvertedAlpha,
-            Unknown7,
-            Unknown8,
-            Unknown9,
+            Opaque,
+            Additive,
+            Multiply,
+            AlphaBlend,
+            DoubleMultiply,
+            PreMultipliedAlpha,
+            Maximum,
+            MultiplyAdd,
+            AddSrcTimesDstalpha,
+            AddSrcTimesSrcalpha,
+            InverseAlphaBlend,
+            MotionBlurStatic,
+            MotionBlurInhibit,
+            AddSrcTimesSrcalphaAlphaAccum
         }
     }
 
     [Flags]
     public enum GuiBitmapFlags : int
     {
-        None = 0,
-        Bit0 = 1 << 0,
-        Bit1 = 1 << 1,
-        Bit2 = 1 << 2,
-        ScaleToBounds = 1 << 3,
-        ReplaceWithBlur = 1 << 4,
-        Bit5 = 1 << 5,
-        Bit6 = 1 << 6,
-        Bit7 = 1 << 7,
-        Bit8 = 1 << 8,
-        Bit9 = 1 << 9,
-        ReplaceWithWhite = 1 << 10,
-        ReplaceWithBlack = 1 << 11,
-        Bit12 = 1 << 12,
-        Bit13 = 1 << 13,
-        Bit14 = 1 << 14,
-        Bit15 = 1 << 15,
-        Bit16 = 1 << 16,
-        Bit17 = 1 << 17,
-        Bit18 = 1 << 18,
-        Bit19 = 1 << 19,
-        Bit20 = 1 << 20,
-        Bit21 = 1 << 21,
-        Bit22 = 1 << 22,
-        Bit23 = 1 << 23,
-        Bit24 = 1 << 24,
-        Bit25 = 1 << 25,
-        Bit26 = 1 << 26,
-        Bit27 = 1 << 27,
-        Bit28 = 1 << 28,
-        Bit29 = 1 << 29,
-        Bit30 = 1 << 30,
-        Bit31 = 1 << 31
+        DoNotApplyOldContentUpscaling = 1 << 0,
+        OverrideTemplateFlags = 1 << 1,
+        EnableAnimationDebugging = 1 << 2,
+        ScaleToFitBounds = 1 << 3,
+        RenderAsScreenBlur = 1 << 4,
+        RenderAsPlayerEmblem = 1 << 5,
+        SpriteFromExportedInteger = 1 << 6,
+        SequenceFromExportedInteger = 1 << 7,
+        AttachShaderToExportedInteger = 1 << 8,
+        AllowListItemToOverrideAnimationSkin = 1 << 9,
+        Clickable = 1 << 10
     }
 
     [TagStructure(Size = 0x80)]
     public class ListWidget : TagStructure
     {
-        public CachedTag Parent;
+        public CachedTag TemplateReference;
         public ListWidgetFlags Flags;
         public GuiDefinition GuiRenderBlock;
         public StringId DataSourceName;
         public CachedTag Skin;
-        public int RowCount;
+        public uint Rows;
         public List<ListWidgetItem> ListWidgetItems;
         public CachedTag UpArrowBitmap;
         public CachedTag DownArrowBitmap;
 
+        [Flags]
+        public enum ListWidgetFlags : int
+        {
+            DoNotApplyOldContentUpscaling = 1 << 0,
+            OverrideTemplateFlags = 1 << 1,
+            EnableAnimationDebugging = 1 << 2,
+            SubmenuList = 1 << 3,
+            HorizontalList = 1 << 4,
+            ListWraps = 1 << 5,
+            SelectionVisibleWithoutFocus = 1 << 6,
+            Noninteractive = 1 << 7
+        }
+
         [TagStructure(Size = 0x30)]
         public class ListWidgetItem : TagStructure
         {
-            public uint Flags;
+            public ListItemWidgetFlags Flags;
             public GuiDefinition GuiRenderBlock;
-            public StringId Target;
-        }
-    }
+            public StringId ItemLabel;
 
-    [Flags]
-    public enum ListWidgetFlags : int
-    {
-        None = 0,
-        Bit0 = 1 << 0,
-        Bit1 = 1 << 1,
-        Bit2 = 1 << 2,
-        Bit3 = 1 << 3,
-        Bit4 = 1 << 4,
-        Bit5 = 1 << 5,
-        Bit6 = 1 << 6,
-        Bit7 = 1 << 7,
-        Bit8 = 1 << 8,
-        Bit9 = 1 << 9,
-        Bit10 = 1 << 10,
-        Bit11 = 1 << 11,
-        Bit12 = 1 << 12,
-        Bit13 = 1 << 13,
-        Bit14 = 1 << 14,
-        Bit15 = 1 << 15,
-        Bit16 = 1 << 16,
-        Bit17 = 1 << 17,
-        Bit18 = 1 << 18,
-        Bit19 = 1 << 19,
-        Bit20 = 1 << 20,
-        Bit21 = 1 << 21,
-        Bit22 = 1 << 22,
-        Bit23 = 1 << 23,
-        Bit24 = 1 << 24,
-        Bit25 = 1 << 25,
-        Bit26 = 1 << 26,
-        Bit27 = 1 << 27,
-        Bit28 = 1 << 28,
-        Bit29 = 1 << 29,
-        Bit30 = 1 << 30,
-        Bit31 = 1 << 31
+            [Flags]
+            public enum ListItemWidgetFlags : uint
+            {
+                DoNotApplyOldContentUpscaling = 1 << 0,
+                OverrideTemplateFlags = 1 << 1,
+                EnableAnimationDebugging = 1 << 2
+            }
+        }
     }
 
     [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x94, MinVersion = CacheVersion.Halo3ODST)]
     public class ModelWidget : TagStructure
     {
-        public CachedTag Parent;
+        public CachedTag TemplateReference;
         public ModelWidgetFlags Flags;
         public GuiDefinition GuiRenderBlock;
 
@@ -207,53 +157,40 @@ namespace TagTool.Tags.GUI
         [Flags]
         public enum ModelWidgetFlags : int
         {
-            None = 0,
-            Bit0 = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3,
-            Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
-            Bit12 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15,
-            Bit16 = 1 << 16,
-            Bit17 = 1 << 17,
-            Bit18 = 1 << 18,
-            Bit19 = 1 << 19,
-            Bit20 = 1 << 20,
-            Bit21 = 1 << 21,
-            Bit22 = 1 << 22,
-            Bit23 = 1 << 23,
-            Bit24 = 1 << 24,
-            Bit25 = 1 << 25,
-            Bit26 = 1 << 26,
-            Bit27 = 1 << 27,
-            Bit28 = 1 << 28,
-            Bit29 = 1 << 29,
-            Bit30 = 1 << 30,
-            Bit31 = 1 << 31
+            DoNotApplyOldContentUpscaling = 1 << 0,
+            OverrideTemplateFlags = 1 << 1,
+            EnableAnimationDebugging = 1 << 2,
+            UNUSED = 1 << 3
         }
 
-        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         public class CameraRefinementOld : TagStructure
         {
-            public StringId Biped;
-            public float BaseDistance;
-            public Bounds<float> DistanceRange;
-            public float DistanceChangeRate;
-            public float BaseHeight;
-            public Bounds<float> HeightRange;
-            public float Unknown;
-            public TagFunction DistanceFunction;
-            public TagFunction HeightFunction;
+            public StringId Name;
+            public float Fov;
+            public float InitialRadialOffset;
+            public float FinalRadialOffset;
+            public float CameraRadialStepSize;
+            public float InitialVerticalOffset;
+            public float FinalVerticalOffset;
+            public float CameraVerticalStepSize;
+            public float CameraRotationalStep;
+            //public TagFunction DistanceFunction;
+            //public TagFunction HeightFunction;
+            [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
+            public byte[] Pad6400;
+            public List<KeyframeTransitionFunctionBlock> RadialTransitionFxn;
+            [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
+            public byte[] Pad6401;
+            public List<KeyframeTransitionFunctionBlock> VerticalTransitionFxn;
+            [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
+            public byte[] Pad6402;
+
+            [TagStructure(Size = 0x14)]
+            public class KeyframeTransitionFunctionBlock : TagStructure
+            {
+                public byte[] CustomFunction;
+            }
         }
 
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using TagTool.Common;
 using TagTool.Tags.GUI;
 
@@ -6,35 +7,47 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_widget_scale_animation_definition", Tag = "wscl", Size = 0x24)]
     public class GuiWidgetScaleAnimationDefinition : TagStructure
-	{
-        public GuiAnimationFlags AnimationFlags;
-        public List<AnimationDefinitionBlock> AnimationDefinition;
-        public TagFunction Function;
+    {
+        public WidgetComponentAnimationFlags Flags;
+        public List<WidgetScaleAnimationKeyframeBlock> Keyframes;
+        public TagFunction DefaultFunction;
+
+        [Flags]
+        public enum WidgetComponentAnimationFlags : uint
+        {
+            LoopCyclic = 1 << 0,
+            LoopReverse = 1 << 1
+        }
 
         [TagStructure(Size = 0x24)]
-        public class AnimationDefinitionBlock : TagStructure
-		{
-            public uint Frame;
-            public AnchorValue Anchor;
-            public short Unknown;
-            public RealPoint2d CustomAnchor;
-            public RealVector2d Scale;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
+        public class WidgetScaleAnimationKeyframeBlock : TagStructure
+        {
+            public int TimeOffset; // milliseconds
+            public WidgetPositioning SpecialLocalOrigin; // if used, overrides field below
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Rotationpad0;
+            public RealPoint2d LocalOrigin;
+            public RealVector2d ScaleFactor;
+            public List<KeyframeTransitionFunctionBlock> CustomTransitionFxn;
 
-            public enum AnchorValue : short
+            public enum WidgetPositioning : short
             {
-                Custom,
-                Center,
-                TopCenter,
-                BottomCenter,
-                LeftCenter,
-                RightCenter,
-                TopLeft,
-                TopRight,
-                BottomRight,
-                BottomLeft
+                UNUSED,
+                Centered,
+                TopEdge,
+                BottomEdge,
+                LeftEdge,
+                RightEdge,
+                TopleftCorner,
+                ToprightCorner,
+                BottomrightCorner,
+                BottomleftCorner
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class KeyframeTransitionFunctionBlock : TagStructure
+            {
+                public byte[] CustomFunction;
             }
         }
     }

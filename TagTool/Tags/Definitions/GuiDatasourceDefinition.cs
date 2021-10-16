@@ -8,31 +8,29 @@ namespace TagTool.Tags.Definitions
     public class GuiDatasourceDefinition : TagStructure
 	{
         public StringId Name;
-        public uint Unknown;
-        public uint Unknown2;
-        public uint Unknown3;
-        public List<Datum> Data;
+        [TagField(Length = 12, Flags = TagFieldFlags.Padding)]
+        public byte[] DatasourcePadding;
+        public List<DatasourceElementBlock> Elements;
 
         [TagStructure(Size = 0x28)]
-        public class Datum : TagStructure
+        public class DatasourceElementBlock : TagStructure
 		{
             public List<IntegerValue> IntegerValues;
             public List<StringValue> StringValues;
             public List<StringidValue> StringidValues;
-            public StringId Unknown;
+            public StringId SubmenuControlName;
 
             [TagStructure(Size = 0x8)]
             public class IntegerValue : TagStructure
 			{
-                public StringId DataType;
+                public StringId Name;
                 public int Value;
             }
 
             [TagStructure(Size = 0x24)]
             public class StringValue : TagStructure
 			{
-                public StringId DataType;
-
+                public StringId Name;
                 [TagField(Length = 32)]
                 public string Value;
             }
@@ -40,7 +38,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x8)]
             public class StringidValue : TagStructure
 			{
-                public StringId DataType;
+                public StringId Name;
                 public StringId Value;
             }
         }

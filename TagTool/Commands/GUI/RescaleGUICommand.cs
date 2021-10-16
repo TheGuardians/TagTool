@@ -80,16 +80,16 @@ namespace TagTool.Commands.GUI
                                 scn3tag.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(scn3tag.GuiRenderBlock, scalefactor);
                                 foreach (var groupwidget in scn3tag.GroupWidgets)
                                 {
-                                    groupwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(groupwidget.GuiRenderBlock, scalefactor);
-                                    foreach (var textwidget in groupwidget.TextWidgets)
+                                    groupwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(groupwidget.Definition.GuiRenderBlock, scalefactor);
+                                    foreach (var textwidget in groupwidget.Definition.TextWidgets)
                                     {
                                         textwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.GuiRenderBlock, scalefactor);
                                     }
-                                    foreach (var bitmapwidget in groupwidget.BitmapWidgets)
+                                    foreach (var bitmapwidget in groupwidget.Definition.BitmapWidgets)
                                     {
                                         bitmapwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.GuiRenderBlock, scalefactor);
                                     }
-                                    foreach (var listwidget in groupwidget.ListWidgets)
+                                    foreach (var listwidget in groupwidget.Definition.ListWidgets)
                                     {
                                         listwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidget.GuiRenderBlock, scalefactor);
                                         foreach (var listwidgetitem in listwidget.ListWidgetItems)
@@ -97,7 +97,7 @@ namespace TagTool.Commands.GUI
                                             listwidgetitem.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidgetitem.GuiRenderBlock, scalefactor);
                                         }
                                     }
-                                    foreach (var modelwidget in groupwidget.ModelWidgets)
+                                    foreach (var modelwidget in groupwidget.Definition.ModelWidgets)
                                     {
                                         modelwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.GuiRenderBlock, scalefactor);
                                     }
@@ -120,7 +120,7 @@ namespace TagTool.Commands.GUI
                             case "lst3":
                                 GuiListWidgetDefinition lst3tag = (GuiListWidgetDefinition)Definition;
                                 lst3tag.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(lst3tag.GuiRenderBlock, scalefactor);
-                                foreach (var listwidgetitem in lst3tag.ListWidgetItems)
+                                foreach (var listwidgetitem in lst3tag.Items)
                                 {
                                     listwidgetitem.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidgetitem.GuiRenderBlock, scalefactor);
                                 }
@@ -162,14 +162,14 @@ namespace TagTool.Commands.GUI
 
         public object RescaleGUIDef(GuiDefinition GUIdef, float scalefactor)
         {
-            GUIdef.StandardXMax = (short)(GUIdef.StandardXMax * scalefactor);
-            GUIdef.StandardXMin = (short)(GUIdef.StandardXMin * scalefactor);
-            GUIdef.StandardYMax = (short)(GUIdef.StandardYMax * scalefactor);
-            GUIdef.StandardYMin = (short)(GUIdef.StandardYMin * scalefactor);
-            GUIdef.WidescreenXMax = (short)(GUIdef.WidescreenXMax * scalefactor);
-            GUIdef.WidescreenXMin = (short)(GUIdef.WidescreenXMin * scalefactor);
-            GUIdef.WidescreenYMax = (short)(GUIdef.WidescreenYMax * scalefactor);
-            GUIdef.WidescreenYMin = (short)(GUIdef.WidescreenYMin * scalefactor);
+            GUIdef.Bounds480i.Top = (short)(GUIdef.Bounds480i.Top * scalefactor);
+            GUIdef.Bounds480i.Left = (short)(GUIdef.Bounds480i.Left * scalefactor);
+            GUIdef.Bounds480i.Bottom = (short)(GUIdef.Bounds480i.Bottom * scalefactor);
+            GUIdef.Bounds480i.Right = (short)(GUIdef.Bounds480i.Right * scalefactor);
+            GUIdef.Bounds720p.Top = (short)(GUIdef.Bounds720p.Top * scalefactor);
+            GUIdef.Bounds720p.Left = (short)(GUIdef.Bounds720p.Left * scalefactor);
+            GUIdef.Bounds720p.Bottom = (short)(GUIdef.Bounds720p.Bottom * scalefactor);
+            GUIdef.Bounds720p.Right = (short)(GUIdef.Bounds720p.Right * scalefactor);
             return GUIdef;
         }
     }

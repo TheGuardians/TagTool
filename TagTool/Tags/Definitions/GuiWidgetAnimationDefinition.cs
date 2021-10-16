@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,21 +9,27 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "gui_widget_animation_definition", Tag = "wgan", Size = 0x80, MinVersion = CacheVersion.HaloOnlineED)]
     public class GuiWidgetAnimationDefinition : TagStructure
 	{
-        public StringId Stringid;
-        public uint Unknown2;
+        public StringId Name;
+        public WidgetAnimationFlags Flags;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public CachedTag Unknown;
-        public CachedTag WidgetColor;
-        public CachedTag WidgetPosition;
-        public CachedTag WidgetRotation;
-        public CachedTag WidgetScale;
-        public CachedTag WidgetTextureCoordinate;
-        public CachedTag WidgetSprite;
-        public CachedTag WidgetFont;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public uint Unknown3;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public uint Unknown4;
+        public CachedTag ColorAnimation;
+        public CachedTag PositionAnimation;
+        public CachedTag RotationAnimation;
+        public CachedTag ScaleAnimation;
+        public CachedTag TextureCoordinateAnimation;
+        public CachedTag SpriteAnimation;
+        public CachedTag FontAnimation;
+
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, Flags = TagFieldFlags.Padding, Length = 0x8)]
+        public byte[] Padding;
+
+        [Flags]
+        public enum WidgetAnimationFlags : uint
+        {
+            UNUSED = 1 << 0
+        }
     }
 }
