@@ -7,22 +7,17 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "device_terminal", Tag = "term", Size = 0x140, MinVersion = CacheVersion.Halo3Retail)]
     public class Terminal : Device
     {
-        [TagField(Flags = TagFieldFlags.Padding, Length = 0x4)]
-        public byte[] Unused1;
-
+        public int BahBah;
         public StringId ActionString;
         public short TerminalIndex;
-
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
         public byte[] Unused2;
-
         public float TerminalExposure;
         public CachedTag ActivationSound;
         public CachedTag DeactivationSound;
         public CachedTag TranslateSound1;
         public CachedTag TranslateSound2;
         public CachedTag ErrorSound;
-
         public TerminalScreen EasyScreen;
         public TerminalScreen NormalScreen;
         public TerminalScreen HeroicScreen;

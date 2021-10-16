@@ -20,8 +20,8 @@ namespace TagTool.Shaders
         VS_IntegerExtern,
         PS_RealExtern,
         PS_IntegerExtern,
-        Unused1,
-        Unused2,
+        //Unused1,
+        //Unused2,
         Count
     }
 }

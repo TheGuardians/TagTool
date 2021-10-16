@@ -431,15 +431,15 @@ namespace TagTool.Commands.Porting
                 int bmGlpsIndex = -1;
                 int edGlpsIndex = -1;
 
-                if (externalGlps.EntryPoints[entryPoint].Option.Count > 0 && baseGlps.EntryPoints[entryPoint].Option.Count > 0)
+                if (externalGlps.EntryPoints[entryPoint].CategoryDependency.Count > 0 && baseGlps.EntryPoints[entryPoint].CategoryDependency.Count > 0)
                 {
-                    bmGlpsIndex = externalGlps.EntryPoints[entryPoint].Option[0].OptionMethodShaderIndices[bmOptions[externalGlps.EntryPoints[entryPoint].Option[0].RenderMethodOptionIndex]];
-                    edGlpsIndex = baseGlps.EntryPoints[entryPoint].Option[0].OptionMethodShaderIndices[edOptions[baseGlps.EntryPoints[entryPoint].Option[0].RenderMethodOptionIndex]];
+                    bmGlpsIndex = externalGlps.EntryPoints[entryPoint].CategoryDependency[0].OptionDependency[bmOptions[externalGlps.EntryPoints[entryPoint].CategoryDependency[0].DefinitionCategoryIndex]].CompiledShaderIndex;
+                    edGlpsIndex = baseGlps.EntryPoints[entryPoint].CategoryDependency[0].OptionDependency[edOptions[baseGlps.EntryPoints[entryPoint].CategoryDependency[0].DefinitionCategoryIndex]].CompiledShaderIndex;
                 }
-                else if (externalGlps.EntryPoints[entryPoint].ShaderIndex > -1 && baseGlps.EntryPoints[entryPoint].ShaderIndex > -1)
+                else if (externalGlps.EntryPoints[entryPoint].DefaultCompiledShaderIndex > -1 && baseGlps.EntryPoints[entryPoint].DefaultCompiledShaderIndex > -1)
                 {
-                    bmGlpsIndex = externalGlps.EntryPoints[entryPoint].ShaderIndex;
-                    edGlpsIndex = baseGlps.EntryPoints[entryPoint].ShaderIndex;
+                    bmGlpsIndex = externalGlps.EntryPoints[entryPoint].DefaultCompiledShaderIndex;
+                    edGlpsIndex = baseGlps.EntryPoints[entryPoint].DefaultCompiledShaderIndex;
                 }
 
                 if (bmGlpsIndex != -1 && edGlpsIndex != -1)
@@ -510,7 +510,7 @@ namespace TagTool.Commands.Porting
         {
             List<Dictionary<RegisterID, int>> vertexRegisters = new List<Dictionary<RegisterID, int>>();
 
-            int entryPointCount = externalGlvs.VertexTypes[0].DrawModes.Count;
+            int entryPointCount = externalGlvs.VertexTypes[0].EntryPoints.Count;
 
             while (vertexRegisters.Count != entryPointCount)
                 vertexRegisters.Add(new Dictionary<RegisterID, int>());
@@ -519,15 +519,15 @@ namespace TagTool.Commands.Porting
             {
                 for (int i = 0; i < entryPointCount; i++)
                 {
-                    if (externalGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex == -1)
+                    if (externalGlvs.VertexTypes[validVertexType].EntryPoints[i].ShaderIndex == -1)
                         continue;
-                    if (baseGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex == -1)
+                    if (baseGlvs.VertexTypes[validVertexType].EntryPoints[i].ShaderIndex == -1)
                     {
                         new TagToolWarning($"Invalid vertex shader index \"{((TagTool.Geometry.VertexType)validVertexType).ToString()}, {((EntryPoint)i).ToString()}\"");
                         continue;
                     }
 
-                    foreach (var xboxParameter in externalGlvs.Shaders[externalGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].GetConstantTable(BlamCache.Version, BlamCache.Platform).Constants)
+                    foreach (var xboxParameter in externalGlvs.Shaders[externalGlvs.VertexTypes[validVertexType].EntryPoints[i].ShaderIndex].GetConstantTable(BlamCache.Version, BlamCache.Platform).Constants)
                     {
                         RegisterID registerID = new RegisterID(xboxParameter.RegisterIndex, xboxParameter.RegisterType);
 
@@ -536,7 +536,7 @@ namespace TagTool.Commands.Porting
 
                         string xboxParameterName = BlamCache.StringTable.GetString(xboxParameter.ParameterName);
 
-                        foreach (var pcParameter in baseGlvs.Shaders[baseGlvs.VertexTypes[validVertexType].DrawModes[i].ShaderIndex].GetConstantTable(CacheContext.Version, CacheContext.Platform).Constants)
+                        foreach (var pcParameter in baseGlvs.Shaders[baseGlvs.VertexTypes[validVertexType].EntryPoints[i].ShaderIndex].GetConstantTable(CacheContext.Version, CacheContext.Platform).Constants)
                         {
                             string pcParameterName = CacheContext.StringTable.GetString(pcParameter.ParameterName);
 
@@ -673,7 +673,7 @@ namespace TagTool.Commands.Porting
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count != edRmt2.EntryPoints.Count)
                 finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
-            while (finalRm.ShaderProperties[0].ParameterTables.Count != edRmt2.ParameterTables.Count)
+            while (finalRm.ShaderProperties[0].ParameterTables.Count != edRmt2.Passes.Count)
                 finalRm.ShaderProperties[0].ParameterTables.Add(new ParameterTable());
 
             int skipInt = 0;
@@ -884,7 +884,7 @@ namespace TagTool.Commands.Porting
                 int entryIndex = (int)entryPoint;
                 int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
                 int shaderCount = pixl.EntryPointShaders[entryIndex].Count;
-                int vertexShaderIndex = glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].DrawModes[entryIndex].ShaderIndex;
+                int vertexShaderIndex = glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].EntryPoints[entryIndex].ShaderIndex;
                 if (shaderCount <= 0 || shaderIndex >= pixl.Shaders.Count || vertexShaderIndex <= 0)
                     continue;
 

@@ -113,15 +113,15 @@ namespace TagTool.Shaders.ShaderGenerator
 
             foreach (VertexType vertex in Enum.GetValues(typeof(VertexType)))
             {
-                var vertexBlock = new GlobalVertexShader.VertexTypeShaders { DrawModes = new List<GlobalVertexShader.VertexTypeShaders.DrawMode>() };
+                var vertexBlock = new GlobalVertexShader.VertexTypeShaders { EntryPoints = new List<GlobalVertexShader.VertexTypeShaders.GlobalShaderEntryPointBlock>() };
                 glvs.VertexTypes.Add(vertexBlock);
                 if (generator.IsVertexFormatSupported(vertex))
                 {
                     foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
                     {
-                        var entryBlock = new GlobalVertexShader.VertexTypeShaders.DrawMode { ShaderIndex = -1 };
+                        var entryBlock = new GlobalVertexShader.VertexTypeShaders.GlobalShaderEntryPointBlock { ShaderIndex = -1 };
                         
-                        vertexBlock.DrawModes.Add(entryBlock);
+                        vertexBlock.EntryPoints.Add(entryBlock);
                         if (generator.IsEntryPointSupported(entryPoint) && generator.IsVertexShaderShared(entryPoint))
                         {
                             entryBlock.ShaderIndex = glvs.Shaders.Count;
@@ -171,7 +171,7 @@ namespace TagTool.Shaders.ShaderGenerator
             var glps = new GlobalPixelShader { EntryPoints = new List<GlobalPixelShader.EntryPointBlock>(), Shaders = new List<PixelShaderBlock>() };
             foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
             {
-                var entryPointBlock = new GlobalPixelShader.EntryPointBlock { ShaderIndex = -1 };
+                var entryPointBlock = new GlobalPixelShader.EntryPointBlock { DefaultCompiledShaderIndex = -1 };
                 glps.EntryPoints.Add(entryPointBlock);
 
                 if (generator.IsEntryPointSupported(entryPoint) && 
@@ -179,7 +179,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 {
                     if (generator.IsSharedPixelShaderWithoutMethod(entryPoint))
                     {
-                        entryPointBlock.ShaderIndex = glps.Shaders.Count;
+                        entryPointBlock.DefaultCompiledShaderIndex = glps.Shaders.Count;
                         var result = generator.GenerateSharedPixelShader(entryPoint, 0, 0);
                         glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
                     }
@@ -190,19 +190,19 @@ namespace TagTool.Shaders.ShaderGenerator
                         {
                             if (generator.IsMethodSharedInEntryPoint(entryPoint, i))
                             {
-                                entryPointBlock.Option = new List<GlobalPixelShader.EntryPointBlock.OptionBlock>();
+                                entryPointBlock.CategoryDependency = new List<GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock>();
 
-                                var optionBlock = new GlobalPixelShader.EntryPointBlock.OptionBlock 
+                                var optionBlock = new GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock 
                                 { 
-                                    RenderMethodOptionIndex = (short)i, 
-                                    OptionMethodShaderIndices = new List<int>() 
+                                    DefinitionCategoryIndex = (short)i, 
+                                    OptionDependency = new List<GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock.GlobalShaderOptionDependency>()
                                 };
 
-                                entryPointBlock.Option.Add(optionBlock);
+                                entryPointBlock.CategoryDependency.Add(optionBlock);
 
                                 for (int option = 0; option < generator.GetMethodOptionCount(i); option++)
                                 {
-                                    optionBlock.OptionMethodShaderIndices.Add(glps.Shaders.Count);
+                                    optionBlock.OptionDependency.Add(new GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock.GlobalShaderOptionDependency { CompiledShaderIndex = glps.Shaders.Count });
                                     var result = generator.GenerateSharedPixelShader(entryPoint, i, option);
                                     glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
                                 }
@@ -286,9 +286,9 @@ namespace TagTool.Shaders.ShaderGenerator
             return index;
         }
 
-        private static List<RenderMethodTemplate.ParameterMapping> MapParameters(GameCache cache, ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping, List<RenderMethodTemplate.ShaderArgument> parameterNames)
+        private static List<RenderMethodTemplate.RoutingInfoBlock> MapParameters(GameCache cache, ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping, List<RenderMethodTemplate.ShaderArgument> parameterNames)
         {
-            var result = new List<RenderMethodTemplate.ParameterMapping>();
+            var result = new List<RenderMethodTemplate.RoutingInfoBlock>();
             List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
             switch (usage)
             {
@@ -326,12 +326,12 @@ namespace TagTool.Shaders.ShaderGenerator
             foreach (var parameter in shaderParameters)
             {
                 bool vertex = (usage == ParameterUsage.Texture || usage == ParameterUsage.TextureExtern) && parameter.Flags.HasFlag(ShaderParameterFlags.IsVertexShader);
-                var argumentMapping = new RenderMethodTemplate.ParameterMapping();
+                var argumentMapping = new RenderMethodTemplate.RoutingInfoBlock();
                 var registerName = vertex ? parameter.RegisterName + "_VERTEX_" : parameter.RegisterName;
                 if (shaderRegisterMapping.ContainsKey(registerName))
                 {
-                    argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
-                    argumentMapping.ArgumentIndex = (byte)GetArgumentIndex(cache, parameter.ParameterName, parameterNames);
+                    argumentMapping.DestinationIndex = (ushort)shaderRegisterMapping[registerName];
+                    argumentMapping.SourceIndex = (byte)GetArgumentIndex(cache, parameter.ParameterName, parameterNames);
                     argumentMapping.Flags = (byte)(vertex ? 1 : 0);
                 }
                 else
@@ -344,9 +344,9 @@ namespace TagTool.Shaders.ShaderGenerator
             return result;
         }
 
-        private static List<RenderMethodTemplate.ParameterMapping> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, ShaderParameters globalParameters, Dictionary<string, int> shaderRegisterMapping)
+        private static List<RenderMethodTemplate.RoutingInfoBlock> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, ShaderParameters globalParameters, Dictionary<string, int> shaderRegisterMapping)
         {
-            var result = new List<RenderMethodTemplate.ParameterMapping>();
+            var result = new List<RenderMethodTemplate.RoutingInfoBlock>();
             List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
             switch (usage)
             {
@@ -378,12 +378,12 @@ namespace TagTool.Shaders.ShaderGenerator
             }
             foreach (var parameter in shaderParameters)
             {
-                var argumentMapping = new RenderMethodTemplate.ParameterMapping();
+                var argumentMapping = new RenderMethodTemplate.RoutingInfoBlock();
                 var registerName = parameter.RegisterName;
                 if (shaderRegisterMapping.ContainsKey(registerName))
                 {
-                    argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
-                    argumentMapping.ArgumentIndex = (byte)parameter.RenderMethodExtern; // use the enum integer value
+                    argumentMapping.DestinationIndex = (ushort)shaderRegisterMapping[registerName];
+                    argumentMapping.SourceIndex = (byte)parameter.RenderMethodExtern; // use the enum integer value
                 }
                 else
                 {
@@ -395,16 +395,16 @@ namespace TagTool.Shaders.ShaderGenerator
             return result;
         }
 
-        private static void AddMapping(ParameterUsage usage, RenderMethodTemplate rmt2, RenderMethodTemplate.ParameterTable table, List<RenderMethodTemplate.ParameterMapping> mappings)
+        private static void AddMapping(ParameterUsage usage, RenderMethodTemplate rmt2, RenderMethodTemplate.PassBlock table, List<RenderMethodTemplate.RoutingInfoBlock> mappings)
         {
             if(mappings.Count > 0)
             {
                 table[usage] = new RenderMethodTemplate.TagBlockIndex
                 {
-                    Offset = (ushort)rmt2.Parameters.Count,
+                    Offset = (ushort)rmt2.RoutingInfo.Count,
                     Count = (ushort)mappings.Count
                 };
-                rmt2.Parameters.AddRange(mappings);
+                rmt2.RoutingInfo.AddRange(mappings);
             }
         }
 
@@ -485,8 +485,8 @@ namespace TagTool.Shaders.ShaderGenerator
             foreach (var p in textureParameterNames)
                 rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, p) });
 
-            rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
-            rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
+            rmt2.RoutingInfo = new List<RenderMethodTemplate.RoutingInfoBlock>();
+            rmt2.Passes = new List<RenderMethodTemplate.PassBlock>();
             rmt2.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
 
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
@@ -498,16 +498,16 @@ namespace TagTool.Shaders.ShaderGenerator
                     while (rmt2.EntryPoints.Count < (int)mode)
                         rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
 
-                    entryPoint.Offset = (ushort)rmt2.ParameterTables.Count();
+                    entryPoint.Offset = (ushort)rmt2.Passes.Count();
                     entryPoint.Count = 1;
                     rmt2.EntryPoints.Add(entryPoint);
 
-                    var parameterTable = new RenderMethodTemplate.ParameterTable();
+                    var parameterTable = new RenderMethodTemplate.PassBlock();
 
                     for (int i = 0; i < parameterTable.Values.Length; i++)
                         parameterTable.Values[i] = new RenderMethodTemplate.TagBlockIndex();
 
-                    rmt2.ParameterTables.Add(parameterTable);
+                    rmt2.Passes.Add(parameterTable);
 
                     // find pixel shader and vertex shader block loaded by this entry point
 
@@ -515,20 +515,20 @@ namespace TagTool.Shaders.ShaderGenerator
                     VertexShaderBlock vertexShader;
 
                     if (generator.IsVertexShaderShared(mode))
-                        vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].DrawModes[(int)mode].ShaderIndex];
+                        vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].EntryPoints[(int)mode].ShaderIndex];
                     else
                         vertexShader = vtsh.Shaders[vtsh.EntryPoints[rmdf.VertexTypes[0].VertexType].SupportedVertexTypes[(int)mode].Offset];
 
                     if (generator.IsPixelShaderShared(mode))
                     {
-                        if (glps.EntryPoints[(int)mode].ShaderIndex == -1)
+                        if (glps.EntryPoints[(int)mode].DefaultCompiledShaderIndex == -1)
                         {
                             // assumes shared pixel shader are only used for a single method, otherwise unknown procedure to obtain one or more pixel shader block
-                            var optionValue = generator.GetMethodOptionValue(glps.EntryPoints[(int)mode].Option[0].RenderMethodOptionIndex);
-                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].Option[0].OptionMethodShaderIndices[optionValue]];
+                            var optionValue = generator.GetMethodOptionValue(glps.EntryPoints[(int)mode].CategoryDependency[0].DefinitionCategoryIndex);
+                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].CategoryDependency[0].OptionDependency[optionValue].CompiledShaderIndex];
                         }
                         else
-                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].ShaderIndex];
+                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].DefaultCompiledShaderIndex];
                     }
                     else
                         pixelShader = pixl.Shaders[pixl.EntryPointShaders[(int)mode].Offset];
@@ -589,7 +589,7 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     // build parameter table and registers available for this entry point, order to be determined
 
-                    List<RenderMethodTemplate.ParameterMapping> mappings;
+                    List<RenderMethodTemplate.RoutingInfoBlock> mappings;
                     ParameterUsage currentUsage;
 
                     // sampler (ps)

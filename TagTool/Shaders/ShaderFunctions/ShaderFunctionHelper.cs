@@ -183,8 +183,8 @@ namespace TagTool.Shaders.ShaderFunctions
                         {
                             var rmParam = new RenderMethod.ShaderProperty.ParameterMapping
                             {
-                                RegisterIndex = (short)parameterMapping.RegisterIndex,
-                                SourceIndex = parameterMapping.ArgumentIndex,
+                                RegisterIndex = (short)parameterMapping.DestinationIndex,
+                                SourceIndex = parameterMapping.SourceIndex,
                                 FunctionIndex = (byte)animParameter.FunctionIndex
                             };
 
@@ -205,8 +205,8 @@ namespace TagTool.Shaders.ShaderFunctions
                         {
                             var rmParam = new RenderMethod.ShaderProperty.ParameterMapping
                             {
-                                RegisterIndex = (short)parameterMapping.RegisterIndex,
-                                SourceIndex = parameterMapping.ArgumentIndex,
+                                RegisterIndex = (short)parameterMapping.DestinationIndex,
+                                SourceIndex = parameterMapping.SourceIndex,
                                 FunctionIndex = (byte)animParameter.FunctionIndex
                             };
 
@@ -254,22 +254,22 @@ namespace TagTool.Shaders.ShaderFunctions
             return true;
         }
 
-        static private RenderMethodTemplate.ParameterMapping GetParameterMapping(GameCache cache, RenderMethodTemplate template, string name, EntryPoint entry, ParameterUsage usage)
+        static private RenderMethodTemplate.RoutingInfoBlock GetParameterMapping(GameCache cache, RenderMethodTemplate template, string name, EntryPoint entry, ParameterUsage usage)
         {
             int maxIndex = template.EntryPoints[(int)entry].Offset + template.EntryPoints[(int)entry].Count;
 
             for (int i = template.EntryPoints[(int)entry].Offset; i < maxIndex; i++)
             {
-                var value = template.ParameterTables[i].Values[(int)usage];
+                var value = template.Passes[i].Values[(int)usage];
                 for (int j = value.Offset; j < value.Offset + value.Count; j++)
                 {
-                    RenderMethodTemplate.ParameterMapping parameter = template.Parameters[j];
+                    RenderMethodTemplate.RoutingInfoBlock parameter = template.RoutingInfo[j];
 
                     string pName = null;
                     if (usage == ParameterUsage.Texture)
-                        pName = cache.StringTable.GetString(template.TextureParameterNames[parameter.ArgumentIndex].Name);
+                        pName = cache.StringTable.GetString(template.TextureParameterNames[parameter.SourceIndex].Name);
                     else if (usage == ParameterUsage.PS_Real || usage == ParameterUsage.VS_Real)
-                        pName = cache.StringTable.GetString(template.RealParameterNames[parameter.ArgumentIndex].Name);
+                        pName = cache.StringTable.GetString(template.RealParameterNames[parameter.SourceIndex].Name);
 
                     if (pName == name)
                         return parameter;

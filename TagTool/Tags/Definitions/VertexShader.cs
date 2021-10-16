@@ -7,9 +7,9 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "vertex_shader", Tag = "vtsh", Size = 0x20, MinVersion = CacheVersion.Halo3Retail)]
     public class VertexShader : TagStructure
 	{
-        public uint Unknown;
+        public EntryPointBitMask EntryPointsMask;
         public List<VertexShaderEntryPoint> EntryPoints;
-        public uint Unknown3;
+        public int Version;
         public List<VertexShaderBlock> Shaders;
 
         [TagStructure(Size = 0xC)]

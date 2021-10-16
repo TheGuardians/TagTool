@@ -165,7 +165,7 @@ namespace TagTool.Commands.Shaders
 
                         if (CurrentEntryPointIndex < glps.EntryPoints.Count)
                         {
-                            var entryShader = glps.EntryPoints[CurrentEntryPointIndex].ShaderIndex;
+                            var entryShader = glps.EntryPoints[CurrentEntryPointIndex].DefaultCompiledShaderIndex;
                             if (entryShader != -1)
                             {
                                 string entryName = entry.ToString().ToLower() + ".shared_pixel_shader";
@@ -173,17 +173,17 @@ namespace TagTool.Commands.Shaders
 
                                 DisassembleShader(glps, entryShader, pixelShaderFilename, cache, stream, glps.Shaders[entryShader].GlobalCachePixelShaderIndex != -1 ? gpix : null);
                             }
-                            else if (glps.EntryPoints[CurrentEntryPointIndex].Option.Count > 0)
+                            else if (glps.EntryPoints[CurrentEntryPointIndex].CategoryDependency.Count > 0)
                             {
-                                foreach (var option in glps.EntryPoints[CurrentEntryPointIndex].Option)
+                                foreach (var option in glps.EntryPoints[CurrentEntryPointIndex].CategoryDependency)
                                 {
-                                    var methodIndex = option.RenderMethodOptionIndex;
-                                    for (int i = 0; i < option.OptionMethodShaderIndices.Count; i++)
+                                    var methodIndex = option.DefinitionCategoryIndex;
+                                    for (int i = 0; i < option.OptionDependency.Count; i++)
                                     {
                                         var optionIndex = i;
                                         string glpsFilename = entry.ToString().ToLower() + $"_{methodIndex}_{optionIndex}" + ".shared_pixel_shader";
                                         glpsFilename = Path.Combine(glpsTagName, glpsFilename);
-                                        DisassembleShader(glps, option.OptionMethodShaderIndices[i], glpsFilename, cache, stream, glps.Shaders[option.OptionMethodShaderIndices[i]].GlobalCachePixelShaderIndex != -1 ? gpix : null);
+                                        DisassembleShader(glps, option.OptionDependency[i].CompiledShaderIndex, glpsFilename, cache, stream, glps.Shaders[option.OptionDependency[i].CompiledShaderIndex].GlobalCachePixelShaderIndex != -1 ? gpix : null);
                                     }
                                 }
                             }
@@ -203,9 +203,9 @@ namespace TagTool.Commands.Shaders
                             {
                                 CurrentEntryPointIndex = GetEntryPointIndex(entry, cache.Version);
 
-                                if (CurrentEntryPointIndex < vertexFormat.DrawModes.Count)
+                                if (CurrentEntryPointIndex < vertexFormat.EntryPoints.Count)
                                 {
-                                    var entryShader = vertexFormat.DrawModes[CurrentEntryPointIndex].ShaderIndex;
+                                    var entryShader = vertexFormat.EntryPoints[CurrentEntryPointIndex].ShaderIndex;
                                     if (entryShader != -1)
                                     {
                                         Directory.CreateDirectory(cache.Version.ToString() + "\\" + dirName);

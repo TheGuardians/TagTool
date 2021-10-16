@@ -117,14 +117,14 @@ namespace TagTool.Commands.RenderMethods
                 shaderProperty.ParameterTables.Clear();
                 shaderProperty.Parameters.Clear();
 
-                foreach (var table in rmt2.ParameterTables)
+                foreach (var table in rmt2.Passes)
                     shaderProperty.ParameterTables.Add(new RenderMethod.ShaderProperty.ParameterTable());
 
                 // enumerate parameter tables and find parameters by register (easier to only build specified parameters)
 
-                for (int i = 0; i < rmt2.ParameterTables.Count; i++)
+                for (int i = 0; i < rmt2.Passes.Count; i++)
                 {
-                    var table = rmt2.ParameterTables[i];
+                    var table = rmt2.Passes[i];
                     var rmTable = shaderProperty.ParameterTables[i];
 
                     // vertex parameters
@@ -138,12 +138,12 @@ namespace TagTool.Commands.RenderMethods
                     List<string> addedRegisters = new List<string>();
 
                     for (; rmt2ParameterIndex < (table.Values[(int)TagTool.Shaders.ParameterUsage.VS_Real].Offset + rmt2ParameterCount); rmt2ParameterIndex++)
-                        if (VertexRegisterPairings.TryGetValue(rmt2.Parameters[rmt2ParameterIndex].RegisterIndex, out var registerName) && !addedRegisters.Contains(registerName))
+                        if (VertexRegisterPairings.TryGetValue(rmt2.RoutingInfo[rmt2ParameterIndex].DestinationIndex, out var registerName) && !addedRegisters.Contains(registerName))
                         {
                             RenderMethod.ShaderProperty.ParameterMapping newParameter = new RenderMethod.ShaderProperty.ParameterMapping
                             {
-                                RegisterIndex = (short)rmt2.Parameters[rmt2ParameterIndex].RegisterIndex,
-                                SourceIndex = rmt2.Parameters[rmt2ParameterIndex].ArgumentIndex
+                                RegisterIndex = (short)rmt2.RoutingInfo[rmt2ParameterIndex].DestinationIndex,
+                                SourceIndex = rmt2.RoutingInfo[rmt2ParameterIndex].SourceIndex
                             };
 
                             addedRegisters.Add(registerName);
@@ -165,12 +165,12 @@ namespace TagTool.Commands.RenderMethods
                     addedRegisters.Clear();
 
                     for (; pxRmt2ParameterIndex < (table.Values[(int)TagTool.Shaders.ParameterUsage.PS_Real].Offset + pxRmt2ParameterCount); pxRmt2ParameterIndex++)
-                        if (PixelRegisterPairings.TryGetValue(rmt2.Parameters[pxRmt2ParameterIndex].RegisterIndex, out var registerName) && !addedRegisters.Contains(registerName))
+                        if (PixelRegisterPairings.TryGetValue(rmt2.RoutingInfo[pxRmt2ParameterIndex].DestinationIndex, out var registerName) && !addedRegisters.Contains(registerName))
                         {
                             RenderMethod.ShaderProperty.ParameterMapping newParameter = new RenderMethod.ShaderProperty.ParameterMapping
                             {
-                                RegisterIndex = (short)rmt2.Parameters[pxRmt2ParameterIndex].RegisterIndex,
-                                SourceIndex = rmt2.Parameters[pxRmt2ParameterIndex].ArgumentIndex
+                                RegisterIndex = (short)rmt2.RoutingInfo[pxRmt2ParameterIndex].DestinationIndex,
+                                SourceIndex = rmt2.RoutingInfo[pxRmt2ParameterIndex].SourceIndex
                             };
 
                             addedRegisters.Add(registerName);
