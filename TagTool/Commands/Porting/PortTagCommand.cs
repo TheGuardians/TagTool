@@ -374,7 +374,7 @@ namespace TagTool.Commands.Porting
                 scenario.PerformanceThrottles = null;
                 scenario.GamePerformanceThrottles = null;
 
-                scenario.ScenarioKillTriggers.Clear();
+                //scenario.ScenarioKillTriggers.Clear();
                 scenario.ScenarioSafeTriggers.Clear();
 
                 scenario.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
@@ -478,9 +478,10 @@ namespace TagTool.Commands.Porting
             foreach (var block in palette)
                 if (block.Object != null)
                 {
-                    if (replacements.TryGetValue(block.Object.Name, out string result))
+                    string name = block.Object.Name;
+                    if (replacements.TryGetValue(name, out string result))
                         block.Object.Name = result;
-                    else if (block.Object.Name.Contains("initial_spawn_point") || block.Object.Name.Contains("respawn_zone"))
+                    else if (name.Contains("initial_spawn_point") || name.Contains("zone") || name.Contains("ca_temp"))
                         block.Object = null;
                 }
         }
