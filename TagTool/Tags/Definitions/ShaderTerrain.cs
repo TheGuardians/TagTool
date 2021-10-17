@@ -11,6 +11,6 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 4)]
         public short[] GlobalMaterialIndices;
 
-        public uint Unknown8;
+        public uint SingleMaterial;
     }
 }

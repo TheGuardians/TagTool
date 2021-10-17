@@ -122,7 +122,7 @@ namespace TagTool.Commands.Tags
 
         private string BuildRmt2Name(RenderMethod renderMethod, string type)
         {
-            return $@"shaders\{type}_templates\_{string.Join("_", renderMethod.RenderMethodDefinitionOptionIndices.Select(i => i.OptionIndex))}";
+            return $@"shaders\{type}_templates\_{string.Join("_", renderMethod.Options.Select(i => i.OptionIndex))}";
         }
 
         private void NameRmdf(Stream stream, CachedTag rmdfTag, string type)

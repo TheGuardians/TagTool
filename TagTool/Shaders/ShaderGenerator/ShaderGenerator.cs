@@ -720,25 +720,25 @@ namespace TagTool.Shaders.ShaderGenerator
                             switch (prm.RegisterType)
                             {
                                 case RegisterType.Boolean:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Boolean;
+                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Bool;
                                     break;
                                 case RegisterType.Integer:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Integer;
+                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Int;
                                     break;
                                 case RegisterType.Sampler:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Sampler;
+                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Bitmap;
                                     break;
                                 case RegisterType.Vector:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Float;
+                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Real;
                                     if (prm.Flags.HasFlag(ShaderParameterFlags.IsColor))
-                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.IntegerColor;
+                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor;
                                     else if (prm.Flags.HasFlag(ShaderParameterFlags.IsXFormOnly))
                                     {
-                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Sampler;
+                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Bitmap;
                                         registerName = registerName.Replace("_xform", "");
                                     }
                                     else if (prm.CodeType != HLSLType.Float)
-                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Float4;
+                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Color;
                                     break;
                             }
 

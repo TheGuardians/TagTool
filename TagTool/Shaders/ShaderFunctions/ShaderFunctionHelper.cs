@@ -21,13 +21,13 @@ namespace TagTool.Shaders.ShaderFunctions
             public string Name;
             public ParameterType Type;
             public int FunctionIndex;
-            public RenderMethod.ShaderFunction.FunctionType FunctionType;
+            public RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType FunctionType;
         }
 
         /// <summary>
         /// Returns true if an animated parameter with the supplied information exists in the list.
         /// </summary>
-        static public bool AnimatedParameterExists(List<AnimatedParameter> animatedParameters, string name, ParameterType type, RenderMethod.ShaderFunction.FunctionType functionType)
+        static public bool AnimatedParameterExists(List<AnimatedParameter> animatedParameters, string name, ParameterType type, RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType functionType)
         {
             foreach (var parameter in animatedParameters)
                 if (parameter.Name == name && parameter.Type == type && parameter.FunctionType == functionType)
@@ -46,8 +46,8 @@ namespace TagTool.Shaders.ShaderFunctions
             if (renderMethod.ShaderProperties.Count == 0 ||
                 renderMethod.ShaderProperties[0].Functions.Count == 0 ||
                 renderMethod.ShaderProperties[0].EntryPoints.Count == 0 ||
-                renderMethod.ShaderProperties[0].ParameterTables.Count == 0 ||
-                renderMethod.ShaderProperties[0].Parameters.Count == 0)
+                renderMethod.ShaderProperties[0].Passes.Count == 0 ||
+                renderMethod.ShaderProperties[0].RoutingInfo.Count == 0)
                 return result;
 
             var properties = renderMethod.ShaderProperties[0];
@@ -60,17 +60,17 @@ namespace TagTool.Shaders.ShaderFunctions
                     continue;
 
                 var entry = properties.EntryPoints[i];
-                if (entry.Count == 0 || entry.Offset >= properties.ParameterTables.Count)
+                if (entry.Count == 0 || entry.Offset >= properties.Passes.Count)
                     continue;
 
                 for (int j = entry.Offset; j < entry.Offset + entry.Count; j++)
                 {
-                    var table = properties.ParameterTables[j];
+                    var table = properties.Passes[j];
                     if (table.Texture.Count > 0)
                     {
                         for (int k = table.Texture.Offset; k < table.Texture.Offset + table.Texture.Count; k++)
                         {
-                            var parameter = properties.Parameters[k];
+                            var parameter = properties.RoutingInfo[k];
                             if (parameter.FunctionIndex < properties.Functions.Count)
                             {
                                 string name = cache.StringTable.GetString(template.TextureParameterNames[parameter.SourceIndex].Name);
@@ -94,7 +94,7 @@ namespace TagTool.Shaders.ShaderFunctions
                     {
                         for (int k = table.RealPixel.Offset; k < table.RealPixel.Offset + table.RealPixel.Count; k++)
                         {
-                            var parameter = properties.Parameters[k];
+                            var parameter = properties.RoutingInfo[k];
                             if (parameter.FunctionIndex < properties.Functions.Count)
                             {
                                 string name = cache.StringTable.GetString(template.RealParameterNames[parameter.SourceIndex].Name);
@@ -118,7 +118,7 @@ namespace TagTool.Shaders.ShaderFunctions
                     {
                         for (int k = table.RealVertex.Offset; k < table.RealVertex.Offset + table.RealVertex.Count; k++)
                         {
-                            var parameter = properties.Parameters[k];
+                            var parameter = properties.RoutingInfo[k];
                             if (parameter.FunctionIndex < properties.Functions.Count)
                             {
                                 string name = cache.StringTable.GetString(template.RealParameterNames[parameter.SourceIndex].Name);
@@ -153,8 +153,8 @@ namespace TagTool.Shaders.ShaderFunctions
             uint validEntries = EntryPointHelper.GetEntryMask(cache.Version, template);
 
             properties.EntryPoints.Clear();
-            properties.ParameterTables.Clear();
-            properties.Parameters.Clear();
+            properties.Passes.Clear();
+            properties.RoutingInfo.Clear();
 
             for (int i = 0; i < template.EntryPoints.Count; i++)
                 properties.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
@@ -164,14 +164,14 @@ namespace TagTool.Shaders.ShaderFunctions
                 if ((validEntries >> i & 1) == 0)
                     continue;
 
-                properties.EntryPoints[i].Offset = (ushort)properties.ParameterTables.Count;
+                properties.EntryPoints[i].Offset = (ushort)properties.Passes.Count;
                 properties.EntryPoints[i].Count = 1; // one for now
 
-                var table = new RenderMethod.ShaderProperty.ParameterTable();
+                var table = new RenderMethod.RenderMethodPostprocessBlock.RenderMethodPostprocessPassBlock();
 
-                List<RenderMethod.ShaderProperty.ParameterMapping> textureParameters = new List<RenderMethod.ShaderProperty.ParameterMapping>();
-                List<RenderMethod.ShaderProperty.ParameterMapping> realPixelParameters = new List<RenderMethod.ShaderProperty.ParameterMapping>();
-                List<RenderMethod.ShaderProperty.ParameterMapping> realVertexParameters = new List<RenderMethod.ShaderProperty.ParameterMapping>();
+                List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock> textureParameters = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock>();
+                List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock> realPixelParameters = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock>();
+                List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock> realVertexParameters = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock>();
 
                 foreach (var animParameter in animatedParameters)
                 {
@@ -181,7 +181,7 @@ namespace TagTool.Shaders.ShaderFunctions
 
                         if (parameterMapping != null)
                         {
-                            var rmParam = new RenderMethod.ShaderProperty.ParameterMapping
+                            var rmParam = new RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock
                             {
                                 RegisterIndex = (short)parameterMapping.DestinationIndex,
                                 SourceIndex = parameterMapping.SourceIndex,
@@ -203,7 +203,7 @@ namespace TagTool.Shaders.ShaderFunctions
 
                         if (parameterMapping != null)
                         {
-                            var rmParam = new RenderMethod.ShaderProperty.ParameterMapping
+                            var rmParam = new RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock
                             {
                                 RegisterIndex = (short)parameterMapping.DestinationIndex,
                                 SourceIndex = parameterMapping.SourceIndex,
@@ -219,36 +219,36 @@ namespace TagTool.Shaders.ShaderFunctions
                 }
 
                 // Texture
-                int parametersOffset = properties.Parameters.Count;
-                properties.Parameters.AddRange(textureParameters);
+                int parametersOffset = properties.RoutingInfo.Count;
+                properties.RoutingInfo.AddRange(textureParameters);
 
-                if (properties.Parameters.Count - parametersOffset > 0)
+                if (properties.RoutingInfo.Count - parametersOffset > 0)
                 {
-                    table.Texture.Count = (ushort)(properties.Parameters.Count - parametersOffset);
+                    table.Texture.Count = (ushort)(properties.RoutingInfo.Count - parametersOffset);
                     table.Texture.Offset = (ushort)parametersOffset;
                 }
 
                 // Real VS
-                parametersOffset = properties.Parameters.Count;
-                properties.Parameters.AddRange(realVertexParameters);
+                parametersOffset = properties.RoutingInfo.Count;
+                properties.RoutingInfo.AddRange(realVertexParameters);
 
-                if (properties.Parameters.Count - parametersOffset > 0)
+                if (properties.RoutingInfo.Count - parametersOffset > 0)
                 {
-                    table.RealVertex.Count = (ushort)(properties.Parameters.Count - parametersOffset);
+                    table.RealVertex.Count = (ushort)(properties.RoutingInfo.Count - parametersOffset);
                     table.RealVertex.Offset = (ushort)parametersOffset;
                 }
 
                 // Real PS
-                parametersOffset = properties.Parameters.Count;
-                properties.Parameters.AddRange(realPixelParameters);
+                parametersOffset = properties.RoutingInfo.Count;
+                properties.RoutingInfo.AddRange(realPixelParameters);
 
-                if (properties.Parameters.Count - parametersOffset > 0)
+                if (properties.RoutingInfo.Count - parametersOffset > 0)
                 {
-                    table.RealPixel.Count = (ushort)(properties.Parameters.Count - parametersOffset);
+                    table.RealPixel.Count = (ushort)(properties.RoutingInfo.Count - parametersOffset);
                     table.RealPixel.Offset = (ushort)parametersOffset;
                 }
 
-                properties.ParameterTables.Add(table);
+                properties.Passes.Add(table);
             }
 
             return true;

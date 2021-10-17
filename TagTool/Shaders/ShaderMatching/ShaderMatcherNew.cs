@@ -107,7 +107,7 @@ namespace TagTool.Shaders.ShaderMatching
                 {
                     var rmop = BaseCache.Deserialize<RenderMethodOption>(BaseCacheStream, rmdf.Categories[i].ShaderOptions[options[i]].Option);
                     foreach (var parameter in rmop.Parameters)
-                        if (parameter.Type == RenderMethodOption.ParameterBlock.OptionDataType.Sampler && parameter.DefaultSamplerBitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
+                        if (parameter.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap && parameter.DefaultSamplerBitmap != null && !optionBitmaps.ContainsKey(parameter.Name))
                             optionBitmaps.Add(parameter.Name, parameter.DefaultSamplerBitmap);
                 }
             }

@@ -68,7 +68,7 @@ namespace TagTool.Commands.RenderMethods
 
             var realConstants = Definition.ShaderProperties[0].RealConstants[0];
 
-            int realIndex = Definition.ShaderProperties[0].TextureConstants[parameterIndex].XFormArgumentIndex;
+            int realIndex = Definition.ShaderProperties[0].TextureConstants[parameterIndex].TextureTransformConstantIndex;
             if (realIndex == -1)
             {
                 for (var i = 0; i < template.RealParameterNames.Count; i++)

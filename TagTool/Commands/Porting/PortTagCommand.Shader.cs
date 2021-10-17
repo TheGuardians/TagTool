@@ -9,7 +9,7 @@ using TagTool.Shaders.ShaderMatching;
 using System;
 using System.Linq;
 using static TagTool.Tags.Definitions.RenderMethod;
-using static TagTool.Tags.Definitions.RenderMethod.ShaderProperty;
+using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 
 namespace TagTool.Commands.Porting
 {
@@ -198,7 +198,7 @@ namespace TagTool.Commands.Porting
             var edBoolConstants = new List<string>();
 
             // Make a template of ShaderProperty, with the correct bitmaps and arguments counts. 
-            var newShaderProperty = new RenderMethod.ShaderProperty
+            var newShaderProperty = new RenderMethod.RenderMethodPostprocessBlock
             {
                 TextureConstants = new List<TextureConstant>(),
                 RealConstants = new List<RealConstant>(),
@@ -339,30 +339,30 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            newShaderProperty.AlphaBlendMode = finalRm.ShaderProperties[0].AlphaBlendMode;
-            newShaderProperty.BlendFlags = finalRm.ShaderProperties[0].BlendFlags;
+            newShaderProperty.BlendMode = finalRm.ShaderProperties[0].BlendMode;
+            newShaderProperty.Flags = finalRm.ShaderProperties[0].Flags;
 
             // in these shaders alphatesting acts differently than in h3. disabling\enabling SW alpha testing works for now
             // TODO: fix properly
             if (blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights" ||
                 blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights_blue" ||
                 blamTagName == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
-                newShaderProperty.BlendFlags &= ~BlendModeFlags.EnableAlphaTest;
+                newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.EnableAlphaTest;
             if (blamTagName == @"levels\atlas\sc110\shaders\tree_leaves_acacia" ||
                 (blamTagName == @"levels\solo\030_outskirts\shaders\outtree_leaf" && BlamCache.Version == CacheVersion.Halo3ODST)) // might be in h3 too, remove version if so
-                newShaderProperty.BlendFlags |= BlendModeFlags.EnableAlphaTest;
+                newShaderProperty.Flags |= RenderMethodPostprocessFlags.EnableAlphaTest;
 
             // apply post option->options fixups
             ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
 
-            finalRm.ImportData = new List<ImportDatum>(); // most likely not used
+            finalRm.Parameters = new List<RenderMethodParameterBlock>(); // most likely not used
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
             finalRm.ShaderProperties[0].TextureConstants = newShaderProperty.TextureConstants;
             finalRm.ShaderProperties[0].RealConstants = newShaderProperty.RealConstants;
             finalRm.ShaderProperties[0].IntegerConstants = newShaderProperty.IntegerConstants;
             finalRm.ShaderProperties[0].BooleanConstants = newShaderProperty.BooleanConstants;
-            finalRm.ShaderProperties[0].AlphaBlendMode = newShaderProperty.AlphaBlendMode;
-            finalRm.ShaderProperties[0].BlendFlags = newShaderProperty.BlendFlags;
+            finalRm.ShaderProperties[0].BlendMode = newShaderProperty.BlendMode;
+            finalRm.ShaderProperties[0].Flags = newShaderProperty.Flags;
 
             // fixup runtime queryable properties
             if (BlamCache.Version < CacheVersion.HaloReach)
@@ -394,8 +394,8 @@ namespace TagTool.Commands.Porting
             // fixup xform arguments;
             foreach (var tex in finalRm.ShaderProperties[0].TextureConstants)
             {
-                if (tex.XFormArgumentIndex != -1)
-                    tex.XFormArgumentIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.XFormArgumentIndex]);
+                if (tex.TextureTransformConstantIndex != -1)
+                    tex.TextureTransformConstantIndex = (sbyte)edRealConstants.IndexOf(bmRealConstants[tex.TextureTransformConstantIndex]);
             }
 
             // fixup rm animations
@@ -408,7 +408,7 @@ namespace TagTool.Commands.Porting
             }
 
             // build new rm option indices
-            finalRm.RenderMethodDefinitionOptionIndices = BuildRenderMethodOptionIndices(edRmt2Descriptor);
+            finalRm.Options = BuildRenderMethodOptionIndices(edRmt2Descriptor);
 
             return finalRm;
         }
@@ -553,7 +553,7 @@ namespace TagTool.Commands.Porting
             return vertexRegisters;
         }
 
-        private bool TableParameterAlreadyExists(RenderMethodTemplate.TagBlockIndex tableInteger, List<ParameterMapping> tableParameters, ParameterMapping parameter)
+        private bool TableParameterAlreadyExists(RenderMethodTemplate.TagBlockIndex tableInteger, List<RenderMethodRoutingInfoBlock> tableParameters, RenderMethodRoutingInfoBlock parameter)
         {
             for (int i = tableInteger.Offset; i < tableInteger.Offset + tableInteger.Count; i++)
                 if (tableParameters[i].RegisterIndex == parameter.RegisterIndex &&
@@ -617,28 +617,28 @@ namespace TagTool.Commands.Porting
             //
 
             // EntryPoints<Parameters<RegisterID, FunctionIndex>>
-            List<List<ParameterMapping>> tableUsedSamplerParameters = new List<List<ParameterMapping>>();
-            List<List<ParameterMapping>> tableUsedVertexParameters = new List<List<ParameterMapping>>();
-            List<List<ParameterMapping>> tableUsedPixelParameters = new List<List<ParameterMapping>>();
+            List<List<RenderMethodRoutingInfoBlock>> tableUsedSamplerParameters = new List<List<RenderMethodRoutingInfoBlock>>();
+            List<List<RenderMethodRoutingInfoBlock>> tableUsedVertexParameters = new List<List<RenderMethodRoutingInfoBlock>>();
+            List<List<RenderMethodRoutingInfoBlock>> tableUsedPixelParameters = new List<List<RenderMethodRoutingInfoBlock>>();
 
             foreach (var entryPoint in finalRm.ShaderProperties[0].EntryPoints)
             {
-                List<ParameterMapping> usedSamplerParameters = new List<ParameterMapping>();
-                List<ParameterMapping> usedVertexParameters = new List<ParameterMapping>();
-                List<ParameterMapping> usedPixelParameters = new List<ParameterMapping>();
+                List<RenderMethodRoutingInfoBlock> usedSamplerParameters = new List<RenderMethodRoutingInfoBlock>();
+                List<RenderMethodRoutingInfoBlock> usedVertexParameters = new List<RenderMethodRoutingInfoBlock>();
+                List<RenderMethodRoutingInfoBlock> usedPixelParameters = new List<RenderMethodRoutingInfoBlock>();
 
                 for (int tableIndex = entryPoint.Offset; tableIndex < entryPoint.Offset + entryPoint.Count; tableIndex++)
                 {
-                    var table = finalRm.ShaderProperties[0].ParameterTables[tableIndex];
+                    var table = finalRm.ShaderProperties[0].Passes[tableIndex];
 
                     for (int i = table.Texture.Offset; i < table.Texture.Offset + table.Texture.Count; i++)
-                        usedSamplerParameters.Add(finalRm.ShaderProperties[0].Parameters[i]);
+                        usedSamplerParameters.Add(finalRm.ShaderProperties[0].RoutingInfo[i]);
 
                     for (int i = table.RealVertex.Offset; i < table.RealVertex.Offset + table.RealVertex.Count; i++)
-                        usedVertexParameters.Add(finalRm.ShaderProperties[0].Parameters[i]);
+                        usedVertexParameters.Add(finalRm.ShaderProperties[0].RoutingInfo[i]);
 
                     for (int i = table.RealPixel.Offset; i < table.RealPixel.Offset + table.RealPixel.Count; i++)
-                        usedPixelParameters.Add(finalRm.ShaderProperties[0].Parameters[i]);
+                        usedPixelParameters.Add(finalRm.ShaderProperties[0].RoutingInfo[i]);
                 }
 
                 tableUsedSamplerParameters.Add(usedSamplerParameters);
@@ -668,13 +668,13 @@ namespace TagTool.Commands.Porting
             }
 
             finalRm.ShaderProperties[0].EntryPoints.Clear();
-            finalRm.ShaderProperties[0].ParameterTables.Clear();
-            finalRm.ShaderProperties[0].Parameters.Clear();
+            finalRm.ShaderProperties[0].Passes.Clear();
+            finalRm.ShaderProperties[0].RoutingInfo.Clear();
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count != edRmt2.EntryPoints.Count)
                 finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
-            while (finalRm.ShaderProperties[0].ParameterTables.Count != edRmt2.Passes.Count)
-                finalRm.ShaderProperties[0].ParameterTables.Add(new ParameterTable());
+            while (finalRm.ShaderProperties[0].Passes.Count != edRmt2.Passes.Count)
+                finalRm.ShaderProperties[0].Passes.Add(new RenderMethodPostprocessPassBlock());
 
             int skipInt = 0;
 
@@ -701,7 +701,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (samplerParameters.Count > 0)
                     {
-                        finalRm.ShaderProperties[0].ParameterTables[tableIndex].Texture.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                        finalRm.ShaderProperties[0].Passes[tableIndex].Texture.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
 
                         foreach (var samplerParameter in samplerParameters)
                         {
@@ -714,17 +714,17 @@ namespace TagTool.Commands.Porting
                             samplerParameter.RegisterIndex = (short)pixelRegisters[epIndex][registerID];
                             samplerParameter.SourceIndex = (byte)newTextureConstantIndices[samplerParameter.SourceIndex];
 
-                            if (!TableParameterAlreadyExists(finalRm.ShaderProperties[0].ParameterTables[tableIndex].Texture, finalRm.ShaderProperties[0].Parameters, samplerParameter))
+                            if (!TableParameterAlreadyExists(finalRm.ShaderProperties[0].Passes[tableIndex].Texture, finalRm.ShaderProperties[0].RoutingInfo, samplerParameter))
                             {
-                                finalRm.ShaderProperties[0].Parameters.Add(samplerParameter);
-                                finalRm.ShaderProperties[0].ParameterTables[tableIndex].Texture.Count++;
+                                finalRm.ShaderProperties[0].RoutingInfo.Add(samplerParameter);
+                                finalRm.ShaderProperties[0].Passes[tableIndex].Texture.Count++;
                             }
                         }
                     }
 
                     if (vertexParameters.Count > 0)
                     {
-                        finalRm.ShaderProperties[0].ParameterTables[tableIndex].RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                        finalRm.ShaderProperties[0].Passes[tableIndex].RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
 
                         foreach (var vertexParameter in vertexParameters)
                         {
@@ -737,17 +737,17 @@ namespace TagTool.Commands.Porting
                             vertexParameter.RegisterIndex = (short)vertexRegisters[epIndex][registerID];
                             vertexParameter.SourceIndex = (byte)newRealConstantIndices[vertexParameter.SourceIndex];
 
-                            if (!TableParameterAlreadyExists(finalRm.ShaderProperties[0].ParameterTables[tableIndex].RealVertex, finalRm.ShaderProperties[0].Parameters, vertexParameter))
+                            if (!TableParameterAlreadyExists(finalRm.ShaderProperties[0].Passes[tableIndex].RealVertex, finalRm.ShaderProperties[0].RoutingInfo, vertexParameter))
                             {
-                                finalRm.ShaderProperties[0].Parameters.Add(vertexParameter);
-                                finalRm.ShaderProperties[0].ParameterTables[tableIndex].RealVertex.Count++;
+                                finalRm.ShaderProperties[0].RoutingInfo.Add(vertexParameter);
+                                finalRm.ShaderProperties[0].Passes[tableIndex].RealVertex.Count++;
                             }
                         }
                     }
 
                     if (pixelParameters.Count > 0)
                     {
-                        finalRm.ShaderProperties[0].ParameterTables[tableIndex].RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                        finalRm.ShaderProperties[0].Passes[tableIndex].RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
 
                         foreach (var pixelParameter in pixelParameters)
                         {
@@ -760,10 +760,10 @@ namespace TagTool.Commands.Porting
                             pixelParameter.RegisterIndex = (short)pixelRegisters[epIndex][registerID];
                             pixelParameter.SourceIndex = (byte)newRealConstantIndices[pixelParameter.SourceIndex];
 
-                            if (!TableParameterAlreadyExists(finalRm.ShaderProperties[0].ParameterTables[tableIndex].RealPixel, finalRm.ShaderProperties[0].Parameters, pixelParameter))
+                            if (!TableParameterAlreadyExists(finalRm.ShaderProperties[0].Passes[tableIndex].RealPixel, finalRm.ShaderProperties[0].RoutingInfo, pixelParameter))
                             {
-                                finalRm.ShaderProperties[0].Parameters.Add(pixelParameter);
-                                finalRm.ShaderProperties[0].ParameterTables[tableIndex].RealPixel.Count++;
+                                finalRm.ShaderProperties[0].RoutingInfo.Add(pixelParameter);
+                                finalRm.ShaderProperties[0].Passes[tableIndex].RealPixel.Count++;
                             }
                         }
                     }
@@ -800,12 +800,12 @@ namespace TagTool.Commands.Porting
 
                 for (int j = entryPointBlock.Offset; j < (entryPointBlock.Offset + entryPointBlock.Count); j++)
                 {
-                    var parameterTable = finalRm.ShaderProperties[0].ParameterTables[j];
+                    var parameterTable = finalRm.ShaderProperties[0].Passes[j];
 
                     // sampler
                     for (int k = parameterTable.Texture.Offset; k < (parameterTable.Texture.Offset + parameterTable.Texture.Count); k++)
                     {
-                        var parameter = finalRm.ShaderProperties[0].Parameters[k];
+                        var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
                         RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Sampler, parameter.FunctionIndex, parameter.SourceIndex);
                         if (!externalSamplers[entryPoint].Contains(registerId))
                         {
@@ -821,7 +821,7 @@ namespace TagTool.Commands.Porting
                     // pixel
                     for (int k = parameterTable.RealPixel.Offset; k < (parameterTable.RealPixel.Offset + parameterTable.RealPixel.Count); k++)
                     {
-                        var parameter = finalRm.ShaderProperties[0].Parameters[k];
+                        var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
                         RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
                         if (!externalPixelConstants[entryPoint].Contains(registerId))
                         {
@@ -837,7 +837,7 @@ namespace TagTool.Commands.Porting
                     // vertex
                     for (int k = parameterTable.RealVertex.Offset; k < (parameterTable.RealVertex.Offset + parameterTable.RealVertex.Count); k++)
                     {
-                        var parameter = finalRm.ShaderProperties[0].Parameters[k];
+                        var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
                         RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
                         if (!externalVertexConstants[entryPoint].Contains(registerId))
                         {
@@ -867,8 +867,8 @@ namespace TagTool.Commands.Porting
             var glvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, rmdf.GlobalVertexShader);
 
             finalRm.ShaderProperties[0].EntryPoints.Clear();
-            finalRm.ShaderProperties[0].ParameterTables.Clear();
-            finalRm.ShaderProperties[0].Parameters.Clear();
+            finalRm.ShaderProperties[0].Passes.Clear();
+            finalRm.ShaderProperties[0].RoutingInfo.Clear();
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count < edRmt2.EntryPoints.Count)
                 finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
@@ -879,7 +879,7 @@ namespace TagTool.Commands.Porting
                 if ((((int)edRmt2.ValidEntryPoints >> (int)entryPoint) & 1) == 0/* || !Enum.TryParse(entryPoint.ToString(), out entryPointReach)*/)
                     continue;
 
-                var table = new ParameterTable();
+                var table = new RenderMethodPostprocessPassBlock();
 
                 int entryIndex = (int)entryPoint;
                 int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
@@ -891,7 +891,7 @@ namespace TagTool.Commands.Porting
                 // texture
                 if (AnimatedTextureParameters.Count > 0)
                 {
-                    table.Texture.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                    table.Texture.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
                     foreach (var textureParameter in AnimatedTextureParameters)
                     {
                         string[] parts = textureParameter.Split('\\');
@@ -900,28 +900,28 @@ namespace TagTool.Commands.Porting
                         {
                             if (pcParameter.RegisterType == ShaderParameter.RType.Sampler && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
                             {
-                                var parameterBlock = new ParameterMapping
+                                var parameterBlock = new RenderMethodRoutingInfoBlock
                                 {
                                     RegisterIndex = (short)pcParameter.RegisterIndex,
                                     SourceIndex = TextureConstantMapping[parts[0]],
                                     FunctionIndex = byte.Parse(parts[1])
                                 };
 
-                                finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                                finalRm.ShaderProperties[0].RoutingInfo.Add(parameterBlock);
                                 break;
                             }
                         }
                     }
-                    if (table.Texture.Offset == finalRm.ShaderProperties[0].Parameters.Count)
+                    if (table.Texture.Offset == finalRm.ShaderProperties[0].RoutingInfo.Count)
                         table.Texture.Integer = 0;
                     else
-                        table.Texture.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.Texture.Offset);
+                        table.Texture.Count = (ushort)(finalRm.ShaderProperties[0].RoutingInfo.Count - table.Texture.Offset);
                 }
 
                 // real pixel
                 if (AnimatedPixelParameters.Count > 0)
                 {
-                    table.RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                    table.RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
                     foreach (var pixelParameter in AnimatedPixelParameters)
                     {
                         string[] parts = pixelParameter.Split('\\');
@@ -934,28 +934,28 @@ namespace TagTool.Commands.Porting
                         {
                             if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == registerName)
                             {
-                                var parameterBlock = new ParameterMapping
+                                var parameterBlock = new RenderMethodRoutingInfoBlock
                                 {
                                     RegisterIndex = (short)pcParameter.RegisterIndex,
                                     SourceIndex = RealConstantMapping[parts[0]],
                                     FunctionIndex = byte.Parse(parts[1])
                                 };
 
-                                finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                                finalRm.ShaderProperties[0].RoutingInfo.Add(parameterBlock);
                                 break;
                             }
                         }
                     }
-                    if (table.RealPixel.Offset == finalRm.ShaderProperties[0].Parameters.Count)
+                    if (table.RealPixel.Offset == finalRm.ShaderProperties[0].RoutingInfo.Count)
                         table.RealPixel.Integer = 0;
                     else
-                        table.RealPixel.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealPixel.Offset);
+                        table.RealPixel.Count = (ushort)(finalRm.ShaderProperties[0].RoutingInfo.Count - table.RealPixel.Offset);
                 }
 
                 // real vertex
                 if (AnimatedVertexParameters.Count > 0)
                 {
-                    table.RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].Parameters.Count;
+                    table.RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
                     foreach (var vertexParameter in AnimatedVertexParameters)
                     {
                         string[] parts = vertexParameter.Split('\\');
@@ -964,38 +964,38 @@ namespace TagTool.Commands.Porting
                         {
                             if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
                             {
-                                var parameterBlock = new ParameterMapping
+                                var parameterBlock = new RenderMethodRoutingInfoBlock
                                 {
                                     RegisterIndex = (short)pcParameter.RegisterIndex,
                                     SourceIndex = RealConstantMapping[parts[0]],
                                     FunctionIndex = byte.Parse(parts[1])
                                 };
 
-                                finalRm.ShaderProperties[0].Parameters.Add(parameterBlock);
+                                finalRm.ShaderProperties[0].RoutingInfo.Add(parameterBlock);
                                 break;
                             }
                         }
                     }
-                    if (table.RealVertex.Offset == finalRm.ShaderProperties[0].Parameters.Count)
+                    if (table.RealVertex.Offset == finalRm.ShaderProperties[0].RoutingInfo.Count)
                         table.RealVertex.Integer = 0;
                     else
-                        table.RealVertex.Count = (ushort)(finalRm.ShaderProperties[0].Parameters.Count - table.RealVertex.Offset);
+                        table.RealVertex.Count = (ushort)(finalRm.ShaderProperties[0].RoutingInfo.Count - table.RealVertex.Offset);
                 }
 
                 // TODO: support building parameter table for each shader in entry point. this should be ok for now though
                 if (AnimatedVertexParameters.Count > 0 || AnimatedPixelParameters.Count > 0 || AnimatedTextureParameters.Count > 0)
                 {
-                    finalRm.ShaderProperties[0].EntryPoints[entryIndex].Offset = (ushort)finalRm.ShaderProperties[0].ParameterTables.Count;
+                    finalRm.ShaderProperties[0].EntryPoints[entryIndex].Offset = (ushort)finalRm.ShaderProperties[0].Passes.Count;
                     finalRm.ShaderProperties[0].EntryPoints[entryIndex].Count = 1;
                 }
 
-                finalRm.ShaderProperties[0].ParameterTables.Add(table);
+                finalRm.ShaderProperties[0].Passes.Add(table);
             }
         }
 
         private TextureConstant GetDefaultTextureConstant(string parameter, ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, Dictionary<StringId, CachedTag> optionBitmaps)
         {
-            TextureConstant textureConstant = new TextureConstant { XFormArgumentIndex = -1 };
+            TextureConstant textureConstant = new TextureConstant { TextureTransformConstantIndex = -1 };
 
             if (rmt2Descriptor.Type == "particle")
             {
@@ -1045,7 +1045,7 @@ namespace TagTool.Commands.Porting
 
                     optionBlock = new RenderMethodOption.ParameterBlock
                     {
-                        Type = RenderMethodOption.ParameterBlock.OptionDataType.Float,
+                        Type = RenderMethodOption.ParameterBlock.OptionDataType.Real,
                         DefaultFloatArgument = 0.0f
                     };
                 }
@@ -1053,7 +1053,7 @@ namespace TagTool.Commands.Porting
                 else // particles, contrails, ltvl
                     optionBlock = new RenderMethodOption.ParameterBlock
                     {
-                        Type = RenderMethodOption.ParameterBlock.OptionDataType.Sampler,
+                        Type = RenderMethodOption.ParameterBlock.OptionDataType.Bitmap,
                         DefaultBitmapScale = 1.0f
                     };
             }
@@ -1063,23 +1063,23 @@ namespace TagTool.Commands.Porting
 
             // use color if one is set
             if (optionBlock.DefaultColor.GetValue() != 0)
-                optionBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.IntegerColor;
+                optionBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor;
 
             // uses 1.0 as default bitmap scale for effect RMs
-            if (EffectRenderMethodTypes.Contains(type) && optionBlock.Type == RenderMethodOption.ParameterBlock.OptionDataType.Sampler && optionBlock.DefaultBitmapScale == 0.0f)
+            if (EffectRenderMethodTypes.Contains(type) && optionBlock.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap && optionBlock.DefaultBitmapScale == 0.0f)
                 optionBlock.DefaultBitmapScale = 1.0f;
 
             switch (optionBlock.Type)
             {
-                case RenderMethodOption.ParameterBlock.OptionDataType.Sampler:
+                case RenderMethodOption.ParameterBlock.OptionDataType.Bitmap:
                     return new RealConstant { Arg0 = optionBlock.DefaultBitmapScale, Arg1 = optionBlock.DefaultBitmapScale, Arg2 = 0.0f, Arg3 = 0.0f };
 
-                case RenderMethodOption.ParameterBlock.OptionDataType.Float:
-                case RenderMethodOption.ParameterBlock.OptionDataType.Float4:
+                case RenderMethodOption.ParameterBlock.OptionDataType.Real:
+                case RenderMethodOption.ParameterBlock.OptionDataType.Color:
                     return new RealConstant { Arg0 = optionBlock.DefaultFloatArgument, Arg1 = optionBlock.DefaultFloatArgument, Arg2 = optionBlock.DefaultFloatArgument, Arg3 = optionBlock.DefaultFloatArgument };
 
                 // convert ARGB to RealRGBA
-                case RenderMethodOption.ParameterBlock.OptionDataType.IntegerColor:
+                case RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor:
                     return new RealConstant { Arg0 = optionBlock.DefaultColor.Red / 255.0f, Arg1 = optionBlock.DefaultColor.Blue / 255.0f, Arg2 = optionBlock.DefaultColor.Green / 255.0f, Arg3 = optionBlock.DefaultColor.Alpha / 255.0f };
 
                 default:
@@ -1087,13 +1087,13 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private List<RenderMethodDefinitionOptionIndex> BuildRenderMethodOptionIndices(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor)
+        private List<RenderMethodOptionIndex> BuildRenderMethodOptionIndices(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor)
         {
-            List<RenderMethodDefinitionOptionIndex> newRmIndices = new List<RenderMethodDefinitionOptionIndex>();
+            List<RenderMethodOptionIndex> newRmIndices = new List<RenderMethodOptionIndex>();
 
             foreach (var option in rmt2Descriptor.Options)
             {
-                RenderMethodDefinitionOptionIndex optionIndex = new RenderMethodDefinitionOptionIndex();
+                RenderMethodOptionIndex optionIndex = new RenderMethodOptionIndex();
                 optionIndex.OptionIndex = option;
                 newRmIndices.Add(optionIndex);
             }
@@ -1125,7 +1125,7 @@ namespace TagTool.Commands.Porting
             return false;
         }
 
-        private void ApplyDefaultOptionFixups(ShaderProperty edShaderProperty, ShaderProperty bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
+        private void ApplyDefaultOptionFixups(RenderMethodPostprocessBlock edShaderProperty, RenderMethodPostprocessBlock bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
         {
             //
             // This applies manual option->option fixups for matching. This concept should not be used for rm creation/generation.
@@ -1318,7 +1318,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private void ApplyPostOptionFixups(ShaderProperty edShaderProperty, ShaderProperty bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
+        private void ApplyPostOptionFixups(RenderMethodPostprocessBlock edShaderProperty, RenderMethodPostprocessBlock bmShaderProperty, ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor, ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, RenderMethodDefinition rmdf)
         {
             //
             // This applies manual option->option fixups for matching. This concept should not be used for rm creation/generation.

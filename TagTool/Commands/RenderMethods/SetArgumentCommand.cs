@@ -74,14 +74,14 @@ namespace TagTool.Commands.RenderMethods
                                 {
                                     // constant found, apply default value
 
-                                    if (constantData.Type == RenderMethodOption.ParameterBlock.OptionDataType.Sampler)
+                                    if (constantData.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
                                     {
                                         Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultBitmapScale;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultBitmapScale;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg2 = 0.0f;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg3 = 0.0f;
                                     }
-                                    else if (constantData.Type == RenderMethodOption.ParameterBlock.OptionDataType.Boolean)
+                                    else if (constantData.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bool)
                                     {
                                         Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultIntBoolArgument;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultIntBoolArgument;

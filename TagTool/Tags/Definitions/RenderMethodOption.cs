@@ -59,12 +59,12 @@ namespace TagTool.Tags.Definitions
 
             public enum OptionDataType : uint
             {
-                Sampler = 0,
-                Float4 = 1,
-                Float = 2,
-                Integer = 3,
-                Boolean = 4,
-                IntegerColor = 5
+                Bitmap = 0,
+                Color = 1,
+                Real = 2,
+                Int = 3,
+                Bool = 4,
+                ArgbColor = 5
             }
 
             public enum DefaultFilterModeValue : short
@@ -72,13 +72,13 @@ namespace TagTool.Tags.Definitions
                 Trilinear,
                 Point,
                 Bilinear,
-                unused_00,
-                Anisotropic_2x,
-                unused_01,
-                Anisotropic_4x,
+                Anisotropic1,
+                Anisotropic2Expensive,
+                Anisotropic3Expensive,
+                Anisotropic4EXPENSIVE,
                 LightprobeTextureArray,
-                TextureArrayQuadlinear,
-                TextureArrayQuadanisotropic_2x
+                ComparisonPoint,
+                ComparisonBilinear
             }
 
             public enum DefaultAddressModeValue : short
