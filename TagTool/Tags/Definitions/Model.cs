@@ -15,11 +15,8 @@ namespace TagTool.Tags.Definitions
     public partial class Model : TagStructure
 	{
         public CachedTag RenderModel;
-
         public CachedTag CollisionModel;
-
         public CachedTag Animation;
-
         public CachedTag PhysicsModel;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -53,38 +50,28 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag LodModel;
-
         public List<Variant> Variants;
-
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<RegionName> RegionSort;
-        
         public List<InstanceGroup> InstanceGroups;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Material> ReachMaterialsOld;
-
         public List<Material> Materials;
 
         public List<GlobalDamageInfoBlock> NewDamageInfo;
-
-        //this block has been inlined into the tag for Halo Reach, but the old block above was also preserved
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public OmahaDamageInfoBlock OmahaDamageInfo;
+        public OmahaDamageInfoBlock OmahaDamageInfo; //this block has been inlined into the tag for Halo Reach, but the old block above was also preserved
 
         //Halo Reach preserves an old H3/ODST style targets block here, but we will ignore it in favor of unifying the blocks between versions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Target> ReachTargetsOld;
-
         public List<Target> Targets;
-
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public List<UnknownTarget> UnknownTargets;
         
         public List<CollisionRegion> CollisionRegions;
-
         public List<Node> Nodes;
-
         public int RuntimeNodeListChecksum;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -92,19 +79,15 @@ namespace TagTool.Tags.Definitions
 
         public CachedTag PrimaryDialogue;       
         public CachedTag SecondaryDialogue;
-
         public FlagsValue Flags;
-
         public StringId DefaultDialogueEffect;
 
         [TagField(Length = 8)]
         public int[] RenderOnlyNodeFlags = new int[8];
-
         [TagField(Length = 8)]
         public int[] RenderOnlySectionFlags = new int[8];
 
         public RuntimeFlagsValue RuntimeFlags;
-
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown3;
 
@@ -121,17 +104,16 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ShadowSlopeScaleBias_DynamicLights;
 
-        public PRTShadowDetail ShadowDetail;       
-        public PRTShadowBounces ShadowBounces;      
-        
+        public PRTShadowDetail ShadowDetail;
+        public PRTShadowBounces ShadowBounces;
         [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Pad = new byte[2];
       
-        public List<ShadowCastOverride> ShadowCastOverrides;    
-        public List<ShadowReceiveOverride> ShadowReceiveOverrides;     
+        public List<ShadowCastOverride> ShadowCastOverrides;
+        public List<ShadowReceiveOverride> ShadowReceiveOverrides;
         public List<OcclusionSphere> OcclusionSpheres;
        
-        public CachedTag ShieldImpactThirdPerson;       
+        public CachedTag ShieldImpactThirdPerson;
         public CachedTag ShieldImpactFirstPerson;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1096,13 +1078,23 @@ namespace TagTool.Tags.Definitions
             public short DamageSection;
             public short Variant;
             public float TargetingRelevance;
-            
             public float AoeExclusionRadius;
+            public TargetLockOnFlags LockOnFlags;
+            public float LockOnDistance;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            public StringId TargetFilter;
 
-            public TargetFlags LockOnFlags;
+            [Flags]
+            public enum ByteFlags : byte
+            {
+                None = 0,
+                AoeTopLevel = 1 << 0,
+                AoeTestObstruction = 1 << 1,
+                ShowsTrackingReticle = 1 << 2
+            }
 
             [TagStructure(Size = 0x4)]
-            public class TargetFlags : TagStructure
+            public class TargetLockOnFlags : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FlagsValue Flags;
@@ -1119,8 +1111,8 @@ namespace TagTool.Tags.Definitions
                     Headshot = 1 << 2,
                     Vulnerable = 1 << 3,
                     AlwaysLockedByPlasmaTracking = 1 << 4,
-                    Bit5 = 1 << 5,  //unknown
-                    Bit6 = 1 << 6,  //unknown
+                    IgnoredOnLocalPhysics = 1 << 5,
+                    UseForNetworkLeadVectorOnly = 1 << 6,
                     Bit7 = 1 << 7   //unknown
                 }
 
@@ -1137,20 +1129,6 @@ namespace TagTool.Tags.Definitions
                     Bit6 = 1 << 6,
                     Bit7 = 1 << 7
                 }
-            }
-
-            public float LockOnDistance;
-
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public StringId TargetFilter;
-
-            [Flags]
-            public enum ByteFlags : byte
-            {
-                None = 0,
-                AoeTopLevel = 1 << 0,
-                AoeTestObstruction = 1 << 1,
-                ShowsTrackingReticle = 1 << 2
             }
         }
 
@@ -1178,14 +1156,7 @@ namespace TagTool.Tags.Definitions
                 public enum FlagsValue : byte
                 {
                     None = 0,
-                    CannotBeChosenRandomly = 1 << 0,
-                    Bit1 = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7
+                    CannotBeChosenRandomly = 1 << 0
                 }
             }
         }
@@ -1227,75 +1198,18 @@ namespace TagTool.Tags.Definitions
             // todo: flags versioning
             None = 0,
             ActiveCamoAlwaysOn = 1 << 0,
-            ActiveCamoAlwaysMerge = 1 << 1,
-            ActiveCamoNeverMerge = 1 << 2, // <-- in H3, enables shield_impact on the model
-            InconsequentialTarget = 1 << 3,
-            LockedPrecomputedProbes = 1 << 4,
-            ModelIsBigBattleObject = 1 << 5,
-            ModelNeverUsesCompressedVertexPositions = 1 << 6,
-            ModelIsInvisibleEvenAttachments = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
-            Bit12 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15,
-            Bit16 = 1 << 16,
-            Bit17 = 1 << 17,
-            Bit18 = 1 << 18,
-            Bit19 = 1 << 19,
-            Bit20 = 1 << 20,
-            Bit21 = 1 << 21,
-            Bit22 = 1 << 22,
-            Bit23 = 1 << 23,
-            Bit24 = 1 << 24,
-            Bit25 = 1 << 25,
-            Bit26 = 1 << 26,
-            Bit27 = 1 << 27,
-            Bit28 = 1 << 28,
-            Bit29 = 1 << 29,
-            Bit30 = 1 << 30,
-            Bit31 = 1 << 31
+            ActiveCamoNever = 1 << 1,
+            HasShieldImpactEffect = 1 << 2,
+            ModelUseSkyLighting = 1 << 3,
+            InconsequentialTarget = 1 << 4,
+            ModelUseAirprobeLighting = 1 << 5
         }
 
         [Flags]
         public enum RuntimeFlagsValue : int
         {
             None,
-            ContainsRuntimeNodes = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3,
-            Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
-            Bit12 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15,
-            Bit16 = 1 << 16,
-            Bit17 = 1 << 17,
-            Bit18 = 1 << 18,
-            Bit19 = 1 << 19,
-            Bit20 = 1 << 20,
-            Bit21 = 1 << 21,
-            Bit22 = 1 << 22,
-            Bit23 = 1 << 23,
-            Bit24 = 1 << 24,
-            Bit25 = 1 << 25,
-            Bit26 = 1 << 26,
-            Bit27 = 1 << 27,
-            Bit28 = 1 << 28,
-            Bit29 = 1 << 29,
-            Bit30 = 1 << 30,
-            Bit31 = 1 << 31
+            ContainsRuntimeNodes = 1 << 0
         }
 
         [TagStructure(Size = 0x44)]

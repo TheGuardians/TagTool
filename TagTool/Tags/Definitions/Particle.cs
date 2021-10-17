@@ -23,19 +23,18 @@ namespace TagTool.Tags.Definitions
         public AppearanceFlagsValueReach AppearanceFlagsReach;
 
         public ParticleBillboardStyleValue ParticleBillboardStyle;
-        public short RuntimeMTextureArraySize;
         public short FirstSequenceIndex;
         public short SequenceCount;
+        [TagField(Length = 2, Flags = Padding)]
+        public byte[] Padding0;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public float LowResolutionSwitchDistance;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float CenterOffsetX;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
         public RealPoint2d CenterOffset;
-
-        public float Curvature;
-        public float EdgeRange;
-        public float EdgeCutoff;
+        public float Curvature; // 0=flat, 1=hemisphere
+        public float AngleFadeRange;
+        public float AngleFadeCutoff;
         public float MotionBlurTranslationScale;
         public float MotionBlurRotationScale;
         public float MotionBlurAspectScale;
@@ -83,7 +82,7 @@ namespace TagTool.Tags.Definitions
             None = 0,
             DiesAtRest = 1 << 0,
             DiesOnStructureCollision = 1 << 1,
-            DiesInWater = 1 << 2,
+            DiesInMedia = 1 << 2,
             DiesInAir = 1 << 3,
             HasSweetener = 1 << 4,
             UsesCheapShader = 1 << 5,
@@ -110,7 +109,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public CachedTag Type;
             public TriggerValue Trigger;
-            public byte SkipFraction;
+            public byte Flags;
             public TagMapping.ParticleStates PrimaryScale;
             public TagMapping.ParticleStates SecondaryScale;
 
