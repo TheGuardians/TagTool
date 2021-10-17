@@ -23,6 +23,7 @@ namespace TagTool.Commands.Porting
     {
         private GameCacheHaloOnlineBase CacheContext { get; }
         private GameCache BlamCache { get; }
+        private CommandContextStack ContextStack { get; }
 
         [Flags]
         public enum MultiplayerScenarioConversionFlags
@@ -41,7 +42,7 @@ namespace TagTool.Commands.Porting
 			Default = Objects | DeviceObjects | SpawnPoint
         }
 
-        public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag) :
+        public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag, CommandContextStack contextStack) :
             base(true,
 
                 "PortMultiplayerScenario",
@@ -53,6 +54,7 @@ namespace TagTool.Commands.Porting
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
+            ContextStack = contextStack;
         }
 
         private static string BuildHelpText()
@@ -99,7 +101,7 @@ namespace TagTool.Commands.Porting
                 Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
 
                 Console.WriteLine("Enter the scenario name:");
-                var scenarioName = Console.ReadLine();
+                var scenarioName = ReplaceArgumentVariables(Console.ReadLine().Trim(), IgnoreArgumentVariables, ContextStack);
                 if (!Regex.IsMatch(scenarioName, "[a-z0-9_]+"))
                     return new TagToolError(CommandError.CustomMessage, "Scenario name must consist of lowercase alphanumeric characters and underscores");
 
@@ -119,7 +121,7 @@ namespace TagTool.Commands.Porting
 
                 // try to parse one from input
                 var tmpMapId = -1;
-                var mapIdInput = Console.ReadLine();
+                var mapIdInput = ReplaceArgumentVariables(Console.ReadLine().Trim(), IgnoreArgumentVariables, ContextStack);
                 if (int.TryParse(mapIdInput, out tmpMapId))
                 {
                     if (tmpMapId < kMinMapId || tmpMapId > kMaxMapId)
@@ -134,12 +136,12 @@ namespace TagTool.Commands.Porting
                     mapId = tmpMapId;
 
                 Console.WriteLine("Enter the map name (for display):");
-                var mapName = Console.ReadLine();
+                var mapName = ReplaceArgumentVariables(Console.ReadLine().Trim(), IgnoreArgumentVariables, ContextStack);
                 if (mapName.Length >= 4 && mapName.Length > 15)
                     return new TagToolError(CommandError.CustomMessage, "Map name must be at 4 to 15 characters");
 
                 Console.WriteLine("Enter the map description:");
-                var mapDescription = Console.ReadLine();
+                var mapDescription = ReplaceArgumentVariables(Console.ReadLine().Trim(), IgnoreArgumentVariables, ContextStack);
                 if (mapDescription.Length > 127)
                     return new TagToolError(CommandError.CustomMessage, "Map description must be no longer than 127 characters");
 
@@ -155,7 +157,7 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("Enter the name or index of the zone set to use:");
 
                 // read the zone set name from input, trim it so we don't have to worry about spaces
-                string zoneSetName = Console.ReadLine().Trim();
+                string zoneSetName = ReplaceArgumentVariables(Console.ReadLine().Trim(), IgnoreArgumentVariables, ContextStack);
                 // if they entered a valid name, use that index it is mapped to
                 if (zoneSetsByName.ContainsKey(zoneSetName))
                 {
@@ -191,7 +193,7 @@ namespace TagTool.Commands.Porting
                 // setting the bit corresponding to the bsp index of the desired bsp mask
                 //
 
-                for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                for (string line; !string.IsNullOrWhiteSpace(line = ReplaceArgumentVariables(Console.ReadLine().Trim(), IgnoreArgumentVariables, ContextStack)) ;)
                 {
                     var sbspName = line.Trim();
                     int bspIndex = -1;
@@ -1026,6 +1028,22 @@ namespace TagTool.Commands.Porting
                 originalNames[tag] = tag.Name;
                 tag.Name = name;
             }
+        }
+
+        private string ReplaceArgumentVariables(string input, bool ignoreArgumentVariables, CommandContextStack contextStack)
+        {
+            if (!ignoreArgumentVariables)
+            {
+                for (int i = 0; i < contextStack.ArgumentVariables.Count; i++)
+                {
+                    foreach (var variable in contextStack.ArgumentVariables)
+                    {
+                        input = input.Replace(variable.Key, variable.Value);
+                    }
+                }
+            }
+
+            return input;
         }
     }
 }

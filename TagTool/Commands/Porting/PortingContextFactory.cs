@@ -53,7 +53,7 @@ namespace TagTool.Commands.Porting
                     context.AddCommand(portTagCommand);
                     context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portTagCommand));
                     context.AddCommand(new PortMultiplayerEventsCommand(hoCache, portingCache));
-                    context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand));
+                    context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand, contextStack));
                     context.AddCommand(new PortInstancedGeometryObjectCommand(hoCache, portingCache));
                     context.AddCommand(new PortClusterGeometryObjectCommand(hoCache, portingCache));
                     context.AddCommand(new DoNotReplaceGroupsCommand());
