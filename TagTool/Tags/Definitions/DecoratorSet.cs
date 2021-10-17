@@ -30,9 +30,8 @@ namespace TagTool.Tags.Definitions
 
         public float ShadedDark; // dark side darkness
         public float ShadedBright; // bright side brightness
-
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x8)]
-        public byte[] Padding1;
+        public byte[] Padding1; // the above 2 fields and these 8 bytes are supplied directly to shaders as a 4d vector.
 
         public DecoratorLodTransition LodSettings;
         public List<GlobalDecoratorType> DecoratorTypes;
@@ -72,9 +71,9 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum DecoratorFlags : byte 
         {
-            RenderTwoSided = 1 << 0,
-            // takes twice as long to light
-            DontSampleLightThroughGeometry = 1 << 1 // unchecked will render regardless of detail quality
+            RenderTwoSided = 1 << 0, // takes twice as long to light
+            DontSampleLightThroughGeometry = 1 << 1,
+            EnabledViaPreferences = 1 << 2 // unchecked will render regardless of detail quality
         }
 
         public enum DecoratorShader : byte
