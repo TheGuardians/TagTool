@@ -59,20 +59,10 @@ namespace TagTool.Commands.Modding
             ModCache = new GameCacheModPackage(Cache, file);
             Context = TagCacheContextFactory.Create(ContextStack, ModCache, $"{ModCache.BaseModPackage.Metadata.Name}.pak");
             ContextStack.Push(Context);
-            ContextStack.ContextPopped += ContextStack_ContextPopped;
 
             Console.WriteLine("Done!");
 
             return true;
-        }
-
-        private void ContextStack_ContextPopped(CommandContext context)
-        {
-            if (context != Context)
-                return;
-
-            ContextStack.ContextPopped -= ContextStack_ContextPopped;
-            ModCache.BaseCacheStream?.Dispose();
         }
     }
 }

@@ -57,7 +57,7 @@ namespace TagTool.Commands.Modding
             Console.WriteLine($"Building initial tag cache from reference...");
 
             modCache.BaseModPackage.CacheNames = new List<string>();
-            modCache.BaseModPackage.TagCachesStreams = new List<ModPackageStream>();
+            modCache.BaseModPackage.TagCachesStreams = new List<ExtantStream>();
             modCache.BaseModPackage.TagCacheNames = new List<Dictionary<int, string>>();
 
             var referenceStream = new MemoryStream(); // will be reused by all base caches
@@ -123,7 +123,7 @@ namespace TagTool.Commands.Modding
                     ms.Position = 0;
                 }
 
-                modCache.BaseModPackage.TagCachesStreams.Add(new ModPackageStream(ms));
+                modCache.BaseModPackage.TagCachesStreams.Add(new ExtantStream(ms));
                 modCache.BaseModPackage.CacheNames.Add(name);
                 modCache.BaseModPackage.TagCacheNames.Add(tagNames);
             }

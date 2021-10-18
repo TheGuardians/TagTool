@@ -78,132 +78,131 @@ namespace TagTool.Commands.Modding
 
 
             // shut down base cache stream from mod cache and reopen once applying is complete
-            ModCache.BaseCacheStream.Dispose();
-
-            CacheStream = BaseCache.OpenCacheReadWrite();
-
-            for (int i = 0; i < ModCache.TagCache.Count; i++)
+            using (CacheStream = BaseCache.OpenCacheReadWrite())
             {
-                var modTag = ModCache.TagCache.GetTag(i);
 
-                if (modTag != null)
+                for (int i = 0; i < ModCache.TagCache.Count; i++)
                 {
-                    if (!TagMapping.ContainsKey(modTag.Index))
-                        ConvertCachedTagInstance(ModCache.BaseModPackage, modTag, false);
-                }
-            }
+                    var modTag = ModCache.TagCache.GetTag(i);
 
-            // fixup map files
-            foreach (var mapFile in ModCache.BaseModPackage.MapFileStreams)
-            {
-                if (BaseCache is GameCacheModPackage)
-                {
-                    var reader = new EndianReader(mapFile);
-
-                    MapFile map = new MapFile();
-                    map.Read(reader);
-                    var header = (CacheFileHeaderGenHaloOnline)map.Header;
-                    var modIndex = header.ScenarioTagIndex;
-                    TagMapping.TryGetValue(modIndex, out int newScnrIndex);
-                    header.ScenarioTagIndex = newScnrIndex;
-
-                    var modPackCache = BaseCache as GameCacheModPackage;
-                    modPackCache.AddMapFile(mapFile, header.MapId);
-                }
-                else
-                {
-                    using (var reader = new EndianReader(mapFile))
+                    if (modTag != null)
                     {
+                        if (!TagMapping.ContainsKey(modTag.Index))
+                            ConvertCachedTagInstance(ModCache.BaseModPackage, modTag, false);
+                    }
+                }
+
+                // fixup map files
+                foreach (var mapFile in ModCache.BaseModPackage.MapFileStreams)
+                {
+                    if (BaseCache is GameCacheModPackage)
+                    {
+                        var reader = new EndianReader(mapFile);
+
                         MapFile map = new MapFile();
                         map.Read(reader);
                         var header = (CacheFileHeaderGenHaloOnline)map.Header;
                         var modIndex = header.ScenarioTagIndex;
                         TagMapping.TryGetValue(modIndex, out int newScnrIndex);
                         header.ScenarioTagIndex = newScnrIndex;
-                        var mapName = header.Name;
 
-                        var mapPath = $"{BaseCache.Directory.FullName}\\{mapName}.map";
-                        var file = new FileInfo(mapPath);
-                        var fileStream = file.OpenWrite();
-                        using (var writer = new EndianWriter(fileStream, map.EndianFormat))
-                        {
-                            map.Write(writer);
-                        }
-                    }
-                }
-            }
-
-            // apply .campaign file
-            if(ModCache.BaseModPackage.CampaignFileStream != null && ModCache.BaseModPackage.CampaignFileStream.Length > 0)
-            {
-                if (BaseCache is GameCacheModPackage)
-                {
-                    var BaseCacheContext = BaseCache as GameCacheModPackage;
-                    BaseCacheContext.SetCampaignFile(ModCache.BaseModPackage.CampaignFileStream);
-                }
-                else
-                {
-                    var campaignFilepath = $"{BaseCache.Directory.FullName}\\halo3.campaign";
-                    var campaignFile = new FileInfo(campaignFilepath);
-                    using (var campaignFileStream = campaignFile.OpenWrite())
-                    {
-                        ModCache.BaseModPackage.CampaignFileStream.CopyTo(campaignFileStream);
-                    }
-                }
-            }
-            
-            // apply fonts
-            if(ModCache.BaseModPackage.FontPackage != null && ModCache.BaseModPackage.FontPackage.Length > 0)
-            {
-                using (var stream = ModCache.BaseModPackage.FontPackage)
-                {
-                    BaseCache.SaveFonts(stream);
-                }
-            }
-
-            // apply mod files
-            if(ModCache.BaseModPackage.Files != null && ModCache.BaseModPackage.Files.Count > 0)
-            {
-
-                if(BaseCache is GameCacheHaloOnline)
-                {
-                    Console.WriteLine("Mod Files exist in package. Overwrite in BaseCache? (y/n)");
-                    string response = Console.ReadLine();
-                    if (response.ToLower().StartsWith("y"))
-                    {
-                        Console.WriteLine("Please enter the directory for the Mod Files:");
-                        string directoryPath = Console.ReadLine();
-
-                        var directory = new DirectoryInfo(directoryPath);
-                        if (!directory.Exists)
-                        {
-                            return new TagToolError(CommandError.DirectoryNotFound);
-                        }
-
-                        Console.WriteLine("Writing Mod Files to Directory");
-                        foreach (var file in ModCache.BaseModPackage.Files)
-                        {
-                            Console.WriteLine("Writing: {0}", file.Key);
-                            directory.CreateSubdirectory(Path.GetDirectoryName(file.Key.ToString()));
-                            BaseCache.AddModFile(Path.Combine(directory.FullName, file.Key), file.Value);
-                        }
-
+                        var modPackCache = BaseCache as GameCacheModPackage;
+                        modPackCache.AddMapFile(mapFile, header.MapId);
                     }
                     else
-                        Console.WriteLine("Skipping Mod Files");
-                }else
-                foreach (var file in ModCache.BaseModPackage.Files)
-                {
-                    Console.WriteLine("Copying: {0}", file.Key);
-                    BaseCache.AddModFile(file.Key, file.Value);
-                }
-            }
-            
-            CacheStream.Dispose();
-            BaseCache.SaveTagNames();
-            BaseCache.SaveStrings();
+                    {
+                        using (var reader = new EndianReader(mapFile))
+                        {
+                            MapFile map = new MapFile();
+                            map.Read(reader);
+                            var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                            var modIndex = header.ScenarioTagIndex;
+                            TagMapping.TryGetValue(modIndex, out int newScnrIndex);
+                            header.ScenarioTagIndex = newScnrIndex;
+                            var mapName = header.Name;
 
-            ModCache.BaseCacheStream = BaseCache.OpenCacheRead();
+                            var mapPath = $"{BaseCache.Directory.FullName}\\{mapName}.map";
+                            var file = new FileInfo(mapPath);
+                            var fileStream = file.OpenWrite();
+                            using (var writer = new EndianWriter(fileStream, map.EndianFormat))
+                            {
+                                map.Write(writer);
+                            }
+                        }
+                    }
+                }
+
+                // apply .campaign file
+                if (ModCache.BaseModPackage.CampaignFileStream != null && ModCache.BaseModPackage.CampaignFileStream.Length > 0)
+                {
+                    if (BaseCache is GameCacheModPackage)
+                    {
+                        var BaseCacheContext = BaseCache as GameCacheModPackage;
+                        BaseCacheContext.SetCampaignFile(ModCache.BaseModPackage.CampaignFileStream);
+                    }
+                    else
+                    {
+                        var campaignFilepath = $"{BaseCache.Directory.FullName}\\halo3.campaign";
+                        var campaignFile = new FileInfo(campaignFilepath);
+                        using (var campaignFileStream = campaignFile.OpenWrite())
+                        {
+                            ModCache.BaseModPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                        }
+                    }
+                }
+
+                // apply fonts
+                if (ModCache.BaseModPackage.FontPackage != null && ModCache.BaseModPackage.FontPackage.Length > 0)
+                {
+                    using (var stream = ModCache.BaseModPackage.FontPackage)
+                    {
+                        BaseCache.SaveFonts(stream);
+                    }
+                }
+
+                // apply mod files
+                if (ModCache.BaseModPackage.Files != null && ModCache.BaseModPackage.Files.Count > 0)
+                {
+
+                    if (BaseCache is GameCacheHaloOnline)
+                    {
+                        Console.WriteLine("Mod Files exist in package. Overwrite in BaseCache? (y/n)");
+                        string response = Console.ReadLine();
+                        if (response.ToLower().StartsWith("y"))
+                        {
+                            Console.WriteLine("Please enter the directory for the Mod Files:");
+                            string directoryPath = Console.ReadLine();
+
+                            var directory = new DirectoryInfo(directoryPath);
+                            if (!directory.Exists)
+                            {
+                                return new TagToolError(CommandError.DirectoryNotFound);
+                            }
+
+                            Console.WriteLine("Writing Mod Files to Directory");
+                            foreach (var file in ModCache.BaseModPackage.Files)
+                            {
+                                Console.WriteLine("Writing: {0}", file.Key);
+                                directory.CreateSubdirectory(Path.GetDirectoryName(file.Key.ToString()));
+                                BaseCache.AddModFile(Path.Combine(directory.FullName, file.Key), file.Value);
+                            }
+
+                        }
+                        else
+                            Console.WriteLine("Skipping Mod Files");
+                    }
+                    else
+                        foreach (var file in ModCache.BaseModPackage.Files)
+                        {
+                            Console.WriteLine("Copying: {0}", file.Key);
+                            BaseCache.AddModFile(file.Key, file.Value);
+                        }
+                }
+
+
+                BaseCache.SaveTagNames();
+                BaseCache.SaveStrings();
+            }
 
             return true;
         }

@@ -678,6 +678,7 @@
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
     <Compile Include="Havok\HavokMoppGenerator.cs" />
+    <Compile Include="IO\ExtantStream.cs" />
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
     <Compile Include="IO\XCompress.cs" />
