@@ -37,7 +37,7 @@ namespace TagTool.Cache.Gen3
                 LocaleTable table = new LocaleTable();
                 var languageIndex = (int)language;
 
-                var localeBlock = matg.LocaleGlobals[languageIndex];
+                var localeBlock = matg.LanguagePacks[languageIndex];
 
                 if (localeBlock.StringCount == 0)
                     continue;

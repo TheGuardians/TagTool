@@ -11,58 +11,60 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x1B0, MinVersion = CacheVersion.HaloReach)]
     public class AiGlobalsDatum : TagStructure
     {
-        public float InfantryOnAiWeaponDamageScale;
-        public float VehicleOnAiWeaponDamageScale;
-        public float PlayerOnAiWeaponDamageScale;
+        public float AiInfantryOnAiWeaponDamageScale; // [0,1] Global scale on weapon damage made by AI on other AI
+        public float AiVehicleOnAiWeaponDamageScale; // [0,1] Global scale on weapon damage made by AI in a vehicle on other AI
+        public float AiInPlayerVehicleOnAiWeaponDamageScale; // [0,1] Global scale on weapon damage made by AI in a vehicle with the player on other AI
         public float DangerBroadlyFacing;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public float Unknown1;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
 
         public float DangerShootingNear;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public float Unknown2;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
 
         public float DangerShootingAt;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public float Unknown3;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding2;
 
         public float DangerExtremelyClose;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public float Unknown4;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
 
         public float DangerShieldDamage;
         public float DangerExtendedShieldDamage;
         public float DangerBodyDamage;
         public float DangerExtendedBodyDamage;
 
-        [TagField(Flags = Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused1;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 48, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding4;
 
         public CachedTag GlobalDialogue;
         public StringId DefaultMissionDialogueSoundEffect;
 
-        [TagField(Flags = Padding, Length = 20, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused2;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 20, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding5;
 
-        public float JumpDown;
-        public float JumpStep;
-        public float JumpCrouch;
-        public float JumpStand;
-        public float JumpStorey;
-        public float JumpTower;
+        public float JumpDown; // wu/tick
+        public float JumpStep; // wu/tick
+        public float JumpCrouch; // wu/tick
+        public float JumpStand; // wu/tick
+        public float JumpStorey; // wu/tick
+        public float JumpTower; // wu/tick
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown5;
 
-        public float MaxJumpDownHeightDown;
-        public float MaxJumpDownHeightStep;
-        public float MaxJumpDownHeightCrouch;
-        public float MaxJumpDownHeightStand;
-        public float MaxJumpDownHeightStorey;
-        public float MaxJumpDownHeightTower;
+        public float MaxJumpDownHeightDown; // wu
+        public float MaxJumpDownHeightStep; // wu
+        public float MaxJumpDownHeightCrouch; // wu
+        public float MaxJumpDownHeightStand; // wu
+        public float MaxJumpDownHeightStorey; // wu
+        public float MaxJumpDownHeightTower; // wu
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Unknown6;
 
@@ -70,11 +72,11 @@ namespace TagTool.Ai
         public Bounds<float> HoistCrouch;
         public Bounds<float> HoistStand;
 
-        [TagField(Flags = Padding, Length = 24, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused3;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 24, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding6;
 
-        public Bounds<float> VaultStep;
-        public Bounds<float> VaultCrouch;
+        public Bounds<float> VaultStep; // wus
+        public Bounds<float> VaultCrouch; // wus
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeInfantry; // 30
@@ -88,26 +90,27 @@ namespace TagTool.Ai
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeGiant; // 200
 
-        [TagField(Flags = Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused4;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
+        public byte[] Padding7;
 
         public List<GravemindPropertyBlock> GravemindProperties;
 
-        [TagField(Flags = Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused5;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
+        public byte[] Padding8;
 
-        public float ScaryTargetThreshold;
-        public float ScaryWeaponThreshold;
+        public float ScaryTargetThreshold; // A target of this scariness is offically considered scary (by combat dialogue, etc.)
+        public float ScaryWeaponThreshold; // A weapon of this scariness is offically considered scary (by combat dialogue, etc.)
         public float PlayerScariness;
         public float BerserkingActorScariness;
         public float KamikazeingActorScariness;
-        public float InvincibleActorScariness;
+        public float InvincibleActorScariness; // when an actor's target is invincible, he is this much more scared
         public float MinimumDeathTime;
         public float ProjectileDistance;
         public float IdleClumpDistance;
         public float DangerousClumpDistance;
         public float ConverSearchDuration;
         public float TaskSearchDuration;
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown7;
 
