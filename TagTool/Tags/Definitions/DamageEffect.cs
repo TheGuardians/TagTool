@@ -207,46 +207,46 @@ namespace TagTool.Tags.Definitions
         public class CameraImpulseStruct : TagStructure
         {
 
-            public float CameraImpulseDuration; // seconds
-            public FunctionType CameraImpulseFadeFunction;
+            public float Duration; // seconds
+            public FunctionType FadeFunction;
 
             [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
 
-            public Angle CameraImpulseRotation; // degrees
-            public float CameraImpulsePushback; // world units
-            public Bounds<float> CameraImpulseJitter; // world units
+            public Angle Rotation; // degrees
+            public float Pushback; // world units
+            public Bounds<float> Jitter; // world units
         }
 
         [TagStructure(Size = 0x1C)]
         public class CameraShakeStruct : TagStructure
         {
-            public float CameraShakeDuration; // seconds
-            public FunctionType CameraShakeFalloffFunction;
+            public float Duration; // seconds
+            public FunctionType FalloffFunction;
 
             [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
 
-            public float CameraShakeRandomTranslation; // random translation in all directions (world units)
-            public Angle CameraShakeRandomRotation; // random rotation in all directions (degrees)
-            public GlobalPeriodicFunctionType CameraShakeWobbleFunction;
+            public float RandomTranslation; // random translation in all directions (world units)
+            public Angle RandomRotation; // random rotation in all directions (degrees)
+            public GlobalPeriodicFunctionType WobbleFunction;
 
             [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
 
-            public float CameraShakeWobbleFunctionPeriod; // seconds
-            public float CameraShakeWobbleWeight; // a value of 0.0 signifies that the wobble function has no effect; a value of 1.0 signifies that the effect will not be felt when the wobble function's value is zero.
+            public float WobbleFunctionPeriod; // seconds
+            public float WobbleWeight; // a value of 0.0 signifies that the wobble function has no effect; a value of 1.0 signifies that the effect will not be felt when the wobble function's value is zero.
         }
 
         [TagStructure(Size = 0x18)]
         public class BreakingEffectStruct : TagStructure
         {
-            public float BreakingEffectForwardVelocity; // world units per second
-            public float BreakingEffectForwardRadius; // world units
-            public float BreakingEffectForwardExponent;
-            public float BreakingEffectOutwardVelocity; // world units per second
-            public float BreakingEffectOutwardRadius; // world units
-            public float BreakingEffectOutwardExponent;
+            public float ForwardVelocity; // world units per second
+            public float ForwardRadius; // world units
+            public float ForwardExponent;
+            public float OutwardVelocity; // world units per second
+            public float OutwardRadius; // world units
+            public float OutwardExponent;
         }
     }
 }
