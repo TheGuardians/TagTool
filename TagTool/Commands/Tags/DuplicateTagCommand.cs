@@ -56,7 +56,7 @@ namespace TagTool.Commands.Tags
                     return new TagToolError(CommandError.CustomError, $"Malformed target tag path '{name}'");
 
                 if (Cache.TagCache.TagExists($"{name}.{originalTag.Group}"))
-                    return new TagToolError(CommandError.CustomError, "Target tag already exists.");
+                    return new TagToolError(CommandError.CustomError, "A tag with the requested name already exists!");
             }
 
             var newTag = Cache.TagCache.AllocateTag(originalTag.Group, name);
