@@ -83,7 +83,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<PlayerCharacterType> PlayerCharacterTypes;
 
-        public List<FallingDamageBlock> FallingDamage;
+        public List<FallingDamageBlock> FallDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ShieldBoostBlock> ShieldBoost;
@@ -1248,13 +1248,13 @@ namespace TagTool.Tags.Definitions
             public CachedTag FallingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTag Unknown;
+            public CachedTag JumpingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTag SoftLanding;
+            public CachedTag SoftLandingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTag HardLanding;
+            public CachedTag HardLandingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag ScriptDamage;
@@ -1268,7 +1268,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag FallingDamageResponse;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public CachedTag Unknown1;
+            public CachedTag FriendlyFireDamageResponse;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float RuntimeMaximumFallingVelocity;
@@ -1276,37 +1276,37 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> RuntimeDamageVelocityBounds;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown5;
+            public float PlayerShieldSpillover;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown6;
+            public float CurrentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown7;
+            public float CurrentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown8;
+            public float CurrentDamageDecayRate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown9;
+            public float RecentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown10;
+            public float RecentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown11;
+            public float AiCurrentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown12;
+            public float AiCurrentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown13;
+            public float AiCurrentDamageDecayRate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown14;
+            public float AiRecentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown15;
+            public float AiRecentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown16;
+            public float ShieldImpactCurrentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown17;
+            public float ShieldImpactCurrentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown18;
+            public float ShieldImpactCurrentDamageDecayRate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown19;
+            public float ShieldImpactRecentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown20;
+            public float ShieldImpactRecentDamageDecayTime;
         }
 
         [TagStructure(Size = 0xC)]
