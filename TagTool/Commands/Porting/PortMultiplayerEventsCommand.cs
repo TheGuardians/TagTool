@@ -24,7 +24,7 @@ namespace TagTool.Commands.Porting
             BlamCache = blamCache;
         }
 
-        private void CopyEvents(List<MultiplayerGlobals.RuntimeBlock.EventBlock> events1, List<MultiplayerGlobals.RuntimeBlock.EventBlock> events2)
+        private void CopyEvents(List<MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock> events1, List<MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock> events2)
         {
             for (var i = 0; i < events1.Count; i++)
             {

@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
             return matg;
         }
 
-        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.RuntimeBlock.EventBlock edEvent, MultiplayerGlobals.RuntimeBlock.EventBlock h3Event)
+        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock edEvent, MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock h3Event)
         {
             if (h3Event.EnglishSound != null)
                 edEvent.EnglishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.EnglishSound);
