@@ -20,9 +20,8 @@ namespace TagTool.Commands.Scenarios
     public class GenerateCanvasCommand : Command
     {
         private GameCacheHaloOnlineBase Cache;
-        private CommandContextStack ContextStack { get; }
 
-        public GenerateCanvasCommand(CommandContextStack contextStack, GameCacheHaloOnlineBase cache) :
+        public GenerateCanvasCommand(GameCacheHaloOnlineBase cache) :
             base(false,
 
                 "GenerateCanvas",
@@ -33,7 +32,6 @@ namespace TagTool.Commands.Scenarios
                 "Generates a mostly empty scenario for use with Forge. Use arg \"default\" to bypass input dialog.")
         {
             Cache = cache;
-            ContextStack = contextStack;
         }
 
         public enum WorldType
@@ -71,27 +69,27 @@ namespace TagTool.Commands.Scenarios
                 case 0:
                     {
                         Console.WriteLine(@"Enter desired scenario tagname (e.g. levels\eldewrito\canvas\canvas):");
-                        parameters.ScenarioPath = ReplaceArgumentVariables(@Console.ReadLine(), IgnoreArgumentVariables, ContextStack);
+                        parameters.ScenarioPath = CommandRunner.ApplyUserVars(@Console.ReadLine(), IgnoreArgumentVariables);
                         if (parameters.ScenarioPath.Length < 5)
                             return new TagToolError(CommandError.CustomError, "Please put some effort into your scenario tagname.");
 
                         Console.WriteLine("Enter the map display name (4-15 characters):");
-                        parameters.MapName = ReplaceArgumentVariables(Console.ReadLine(), IgnoreArgumentVariables, ContextStack);
+                        parameters.MapName = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
                         if (parameters.MapName.Length > 15 || parameters.MapName.Length < 4)
                             return new TagToolError(CommandError.CustomError, "Provided name must be between 4 and 15 characters.");
 
                         Console.WriteLine("Enter the map description: (<128 characters)");
-                        parameters.MapDescription = ReplaceArgumentVariables(Console.ReadLine(), IgnoreArgumentVariables, ContextStack);
+                        parameters.MapDescription = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
                         if (parameters.MapDescription.Length > 127)
                             return new TagToolError(CommandError.CustomError, "Description exceeds 127 characters.");
 
                         Console.WriteLine("Enter the map author (4-15 characters):");
-                        parameters.MapAuthor = ReplaceArgumentVariables(Console.ReadLine(), IgnoreArgumentVariables, ContextStack);
+                        parameters.MapAuthor = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
                         if (parameters.MapAuthor.Length > 15 || parameters.MapAuthor.Length < 4)
                             return new TagToolError(CommandError.CustomError, "Author name must be between 4 and 15 characters.");
 
                         Console.WriteLine("Enter a mapID (integer) between 7000 and 65535:");
-                        if (int.TryParse(ReplaceArgumentVariables(Console.ReadLine(), IgnoreArgumentVariables, ContextStack), out int result))
+                        if (int.TryParse(CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables), out int result))
                         {
                             parameters.MapId = result;
                             if (parameters.MapId < 7001 || parameters.MapId > 65534)
@@ -789,22 +787,6 @@ namespace TagTool.Commands.Scenarios
                 def.Format = VertexBufferFormat.Unknown1B;
                 def.VertexSize = 0x24;
             }
-        }
-
-        private string ReplaceArgumentVariables(string input, bool ignoreArgumentVariables, CommandContextStack contextStack)
-        {
-            if (!ignoreArgumentVariables)
-            {
-                for (int i = 0; i < contextStack.ArgumentVariables.Count; i++)
-                {
-                    foreach (var variable in contextStack.ArgumentVariables)
-                    {
-                        input = input.Replace(variable.Key, variable.Value);
-                    }
-                }
-            }
-
-            return input;
         }
     }
 }

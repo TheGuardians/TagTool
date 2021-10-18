@@ -86,7 +86,7 @@ namespace TagTool.Commands.Tags
 				// modding commands
 				context.AddCommand(new OpenModPackageCommand(contextStack, hoCache));
                 context.AddCommand(new CreateCharacterType(cache));
-                context.AddCommand(new GenerateCanvasCommand(contextStack, hoCache));
+                context.AddCommand(new GenerateCanvasCommand(hoCache));
 
 
                 context.AddCommand(new UpdateMapFilesCommand(cache));
@@ -126,7 +126,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ListModFilesCommand(modCache));
                 context.AddCommand(new DeleteModFilesCommand(modCache));
                 context.AddCommand(new NameTagCacheCommand(modCache));
-                context.AddCommand(new UpdateDescriptionCommand(contextStack, modCache));
+                context.AddCommand(new UpdateDescriptionCommand(modCache));
                 context.AddCommand(new SetModTypeCommand(modCache));
                 context.AddCommand(new Modding.MapFileCommand(modCache));
             }
