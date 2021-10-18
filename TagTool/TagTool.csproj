@@ -459,6 +459,7 @@
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Shaders\DumpDisassembledShadersCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateRenderMethodCommand.cs" />
+    <Compile Include="Commands\Shaders\GenerateRmdfCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
     <Compile Include="Commands\Shaders\UseShaderCacheCommand.cs" />
     <Compile Include="Commands\Shaders\UseXSDCommand.cs" />
@@ -717,6 +718,7 @@
     <Compile Include="Shaders\ShaderConstantTable.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderFunctions\ShaderFunctionHelper.cs" />
+    <Compile Include="Shaders\ShaderGenerator\RenderMethodDefinitionGenerator.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderBlackGenerator.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderGenerator.cs" />
     <Compile Include="Shaders\ShaderMatching\ParticleSorter.cs" />

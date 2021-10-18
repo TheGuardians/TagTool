@@ -10,6 +10,7 @@ using HaloShaderGenerator.Globals;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.Definitions.RenderMethodDefinition;
 
 namespace TagTool.Shaders.ShaderGenerator
 {
@@ -231,44 +232,6 @@ namespace TagTool.Shaders.ShaderGenerator
                 }
             }
             return pixl;
-        }
-
-        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, Stream cacheStream, IShaderGenerator generator, string shaderType, out GlobalPixelShader glps, out GlobalVertexShader glvs)
-        {
-            var rmdf = new RenderMethodDefinition();
-
-            glps = GenerateSharedPixelShader(cache, generator);
-            glvs = GenerateSharedVertexShader(cache, generator);
-
-            if (!cache.TagCache.TryGetTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders", out CachedTag glpsTag))
-                glpsTag = cache.TagCache.AllocateTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders");
-            cache.Serialize(cacheStream, glpsTag, glps);
-            rmdf.GlobalPixelShader = glpsTag;
-
-            if (!cache.TagCache.TryGetTag<GlobalVertexShader>($"shaders\\{shaderType.ToLower()}_shared_vertex_shaders", out CachedTag glvsTag))
-                glvsTag = cache.TagCache.AllocateTag<GlobalVertexShader>($"shaders\\{shaderType.ToLower()}_shared_vertex_shaders");
-            cache.Serialize(cacheStream, glvsTag, glvs);
-            rmdf.GlobalVertexShader = glvsTag;
-
-            rmdf.EntryPoints = new List<RenderMethodDefinition.EntryPointBlock>();
-            rmdf.VertexTypes = new List<RenderMethodDefinition.VertexBlock>();
-
-            foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
-                if (generator.IsEntryPointSupported(entryPoint))
-                    rmdf.EntryPoints.Add(new RenderMethodDefinition.EntryPointBlock { EntryPoint = (uint)entryPoint });
-
-            foreach (VertexType vertexType in Enum.GetValues(typeof(VertexType)))
-                if (generator.IsVertexFormatSupported(vertexType))
-                    rmdf.VertexTypes.Add(new RenderMethodDefinition.VertexBlock { VertexType = (short)vertexType });
-
-            rmdf.GlobalOptions = cache.TagCache.GetTag<RenderMethodOption>(@"shaders\shader_options\global_shader_options");
-
-            rmdf.Categories = CreateMethods(shaderType, generator, cache, cacheStream);
-
-            // problems without this
-            cache.SaveStrings();
-
-            return rmdf;
         }
 
         private static int GetArgumentIndex(GameCache cache, string name, List<RenderMethodTemplate.ShaderArgument> args)
@@ -515,9 +478,9 @@ namespace TagTool.Shaders.ShaderGenerator
                     VertexShaderBlock vertexShader;
 
                     if (generator.IsVertexShaderShared(mode))
-                        vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].EntryPoints[(int)mode].ShaderIndex];
+                        vertexShader = glvs.Shaders[glvs.VertexTypes[(ushort)rmdf.VertexTypes[0].VertexType].EntryPoints[(int)mode].ShaderIndex];
                     else
-                        vertexShader = vtsh.Shaders[vtsh.EntryPoints[rmdf.VertexTypes[0].VertexType].SupportedVertexTypes[(int)mode].Offset];
+                        vertexShader = vtsh.Shaders[vtsh.EntryPoints[(ushort)rmdf.VertexTypes[0].VertexType].SupportedVertexTypes[(int)mode].Offset];
 
                     if (generator.IsPixelShaderShared(mode))
                     {
@@ -658,128 +621,30 @@ namespace TagTool.Shaders.ShaderGenerator
             return rmt2;
         }
 
-        /// <summary>
-        /// Returns a list of ShaderMethods based on input shader type.
-        /// </summary>
-        private static List<RenderMethodDefinition.CategoryBlock> CreateMethods(string shaderType, IShaderGenerator generator, GameCache cache, Stream cacheStream)
+        public static IShaderGenerator GetGlobalShaderGenerator(string shaderType, bool applyFixes = false)
         {
-            List<RenderMethodDefinition.CategoryBlock> result = new List<RenderMethodDefinition.CategoryBlock>();
-
-            Array enumValues = generator.GetMethodNames();
-
-            if (enumValues == null || generator == null)
-                return result;
-
-            foreach (var method in enumValues)
+            switch (shaderType)
             {
-                // fixup names that can't be put into enums
-                string methodName = FixupMethodOptionName(method.ToString().ToLower());
-
-                var nameStringid = cache.StringTable.GetStringId(methodName);
-                if (nameStringid == StringId.Invalid)
-                    nameStringid = cache.StringTable.AddString(methodName);
-
-                var newMethod = new RenderMethodDefinition.CategoryBlock();
-
-                newMethod.Name = nameStringid;
-                newMethod.ShaderOptions = new List<RenderMethodDefinition.CategoryBlock.ShaderOption>();
-
-                for (int i = 0; i < generator.GetMethodOptionCount((int)method); i++)
-                {
-                    if (shaderType == "black")
-                        break;
-
-                    var optionBlock = new RenderMethodDefinition.CategoryBlock.ShaderOption();
-
-                    var parameters = generator.GetParametersInOption(methodName, i, out string rmopName, out string optionName);
-
-                    // fixup names that can't be put into enums
-                    optionName = FixupMethodOptionName(optionName.ToLower());
-
-                    optionBlock.Name = cache.StringTable.GetStringId(optionName);
-                    if (optionBlock.Name == StringId.Invalid)
-                        optionBlock.Name = cache.StringTable.AddString(optionName);
-
-                    optionBlock.Option = null;
-                    if (rmopName != null && rmopName != "" && !cache.TagCache.TryGetTag<RenderMethodOption>(rmopName, out optionBlock.Option))
-                    {
-                        Console.WriteLine($"Generating rmop \"{rmopName}\"");
-
-                        var rmop = new RenderMethodOption();
-                        rmop.Parameters = new List<RenderMethodOption.ParameterBlock>();
-
-                        foreach (var prm in parameters.Parameters)
-                        {
-                            if (!prm.Flags.HasFlag(ShaderParameterFlags.IsXFormOnly) && (prm.CodeType == HLSLType.Xform_2d || prm.CodeType == HLSLType.Xform_3d))
-                                continue;
-
-                            var rmopParamBlock = new RenderMethodOption.ParameterBlock();
-
-                            string registerName = prm.RegisterName;
-
-                            switch (prm.RegisterType)
-                            {
-                                case RegisterType.Boolean:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Bool;
-                                    break;
-                                case RegisterType.Integer:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Int;
-                                    break;
-                                case RegisterType.Sampler:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Bitmap;
-                                    break;
-                                case RegisterType.Vector:
-                                    rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Real;
-                                    if (prm.Flags.HasFlag(ShaderParameterFlags.IsColor))
-                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor;
-                                    else if (prm.Flags.HasFlag(ShaderParameterFlags.IsXFormOnly))
-                                    {
-                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Bitmap;
-                                        registerName = registerName.Replace("_xform", "");
-                                    }
-                                    else if (prm.CodeType != HLSLType.Float)
-                                        rmopParamBlock.Type = RenderMethodOption.ParameterBlock.OptionDataType.Color;
-                                    break;
-                            }
-
-                            rmopParamBlock.Name = cache.StringTable.GetStringId(registerName);
-                            if (rmopParamBlock.Name == StringId.Invalid)
-                                rmopParamBlock.Name = cache.StringTable.AddString(registerName);
-
-                            rmopParamBlock.RenderMethodExtern = (RenderMethodExtern)((int)prm.RenderMethodExtern);
-
-                            rmop.Parameters.Add(rmopParamBlock);
-                        }
-
-                        optionBlock.Option = cache.TagCache.AllocateTag<RenderMethodOption>(rmopName);
-                        cache.Serialize(cacheStream, optionBlock.Option, rmop);
-                    }
-
-                    newMethod.ShaderOptions.Add(optionBlock);
-                }
-
-                result.Add(newMethod);
+                case "beam":            return new HaloShaderGenerator.Beam.BeamGenerator(applyFixes);
+                case "black":           return new HaloShaderGenerator.Black.ShaderBlackGenerator();
+                case "contrail":        return new HaloShaderGenerator.Contrail.ContrailGenerator(applyFixes);
+                //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(applyFixes);
+                case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(applyFixes);
+                case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(applyFixes);
+                case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
+                //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(applyFixes);
+                case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(applyFixes);
+                case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(applyFixes);
+                case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(applyFixes);
+                case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(applyFixes);
+                case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(applyFixes);
+                case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(applyFixes);
+                case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
+                case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(applyFixes);
             }
 
-            return result;
-        }
-
-        /// <summary>
-        /// Contains hardcoded fixups for shader method or option names
-        /// </summary>
-        private static string FixupMethodOptionName(string input)
-        {
-            switch (input)
-            {
-                case "first_person_never_with_rotating_bitmaps":
-                    return @"first_person_never_w/rotating_bitmaps";
-                case "_3_channel_self_illum":
-                    return "3_channel_self_illum";
-                case "blackness_no_options":
-                    return "blackness(no_options)";
-            }
-
-            return input;
+            Console.WriteLine($"ERROR: Could not retrieve shared shader generator for \"{shaderType}\"");
+            return null;
         }
     }
 }

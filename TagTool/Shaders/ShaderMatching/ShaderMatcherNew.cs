@@ -292,7 +292,7 @@ namespace TagTool.Shaders.ShaderMatching
             if (!BaseCache.TagCache.TryGetTag($"shaders\\{rmt2Desc.Type}.rmdf", out rmdfTag))
             {
                 Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
-                rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, rmt2Desc.Type, out glps, out glvs);
+                rmdf = ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, rmt2Desc.Type, out glps, out glvs);
                 rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
                 BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
                 (BaseCache as GameCacheHaloOnlineBase).SaveTagNames();

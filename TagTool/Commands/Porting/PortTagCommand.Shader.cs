@@ -585,8 +585,8 @@ namespace TagTool.Commands.Porting
             // get valid vertex types
             List<int> validVertexTypes = new List<int>();
             foreach (var vertex in blamRmdf.VertexTypes)
-                if (!validVertexTypes.Contains(vertex.VertexType))
-                    validVertexTypes.Add(vertex.VertexType);
+                if (!validVertexTypes.Contains((int)vertex.VertexType))
+                    validVertexTypes.Add((int)vertex.VertexType);
 
             // EntryPoints<<external ID, new register>>
             List<Dictionary<RegisterID, int>> vertexRegisters = MatchVertexRegisters(blamGlvs, glvs, validVertexTypes);
@@ -884,7 +884,7 @@ namespace TagTool.Commands.Porting
                 int entryIndex = (int)entryPoint;
                 int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
                 int shaderCount = pixl.EntryPointShaders[entryIndex].Count;
-                int vertexShaderIndex = glvs.VertexTypes[rmdf.VertexTypes[0].VertexType].EntryPoints[entryIndex].ShaderIndex;
+                int vertexShaderIndex = glvs.VertexTypes[(ushort)rmdf.VertexTypes[0].VertexType].EntryPoints[entryIndex].ShaderIndex;
                 if (shaderCount <= 0 || shaderIndex >= pixl.Shaders.Count || vertexShaderIndex <= 0)
                     continue;
 

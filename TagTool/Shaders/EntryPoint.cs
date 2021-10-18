@@ -176,4 +176,84 @@ namespace TagTool.Shaders
         Imposter_Static_Sh = 1 << 22,
         Imposter_Static_Prt_Ambient = 1 << 23,
     }
+
+    public enum EntryPoint_32 : uint
+    {
+        Default,
+        Albedo,
+        Static_Default,
+        Static_Per_Pixel,
+        Static_Per_Vertex,
+        Static_Sh,
+        Static_Prt_Ambient,
+        Static_Prt_Linear,
+        Static_Prt_Quadratic,
+        Dynamic_Light,
+        Shadow_Generate,
+        Shadow_Apply,
+        Active_Camo,
+        Lightmap_Debug_Mode,
+        Static_Per_Vertex_Color,
+        Water_Tessellation,
+        Water_Shading,
+        Dynamic_Light_Cinematic,
+        Z_Only,
+        Sfx_Distort
+    }
+
+    public enum EntryPointMs30_32 : uint
+    {
+        Default,
+        Albedo,
+        Albedo_Low,
+        Static_Default,
+        Static_Per_Pixel,
+        Static_Per_Vertex,
+        Static_Sh,
+        Static_Prt_Ambient,
+        Static_Prt_Linear,
+        Static_Prt_Quadratic,
+        Static_Per_Pixel_Low,
+        Static_Per_Vertex_Low,
+        Static_Sh_Low,
+        Dynamic_Light,
+        Shadow_Generate,
+        Shadow_Apply,
+        Active_Camo,
+        Lightmap_Debug_Mode,
+        Static_Per_Vertex_Color,
+        Water_Tessellation,
+        Water_Shading,
+        Dynamic_Light_Cinematic,
+        Z_Only,
+        Sfx_Distort
+    }
+
+    public enum EntryPointReach_32 : uint
+    {
+        Default,
+        Albedo,
+        Static_Default,
+        Static_Per_Pixel,
+        Static_Per_Vertex,
+        Static_Sh,
+        Static_Prt_Ambient,
+        Static_Prt_Linear,
+        Static_Prt_Quadratic,
+        Dynamic_Light,
+        Shadow_Generate,
+        Shadow_Apply,
+        Active_Camo,
+        Lightmap_Debug_Mode,
+        Static_Per_Vertex_Color,
+        Water_Tessellation,
+        Water_Shading,
+        Dynamic_Light_Cinematic,
+        Single_Pass_Per_Pixel,
+        Single_Pass_Per_Vertex,
+        Single_Pass_Single_Probe,
+        Single_Pass_Single_Probe_Ambient,
+        Imposter_Static_Sh,
+        Imposter_Static_Prt_Ambient,
+    }
 }
