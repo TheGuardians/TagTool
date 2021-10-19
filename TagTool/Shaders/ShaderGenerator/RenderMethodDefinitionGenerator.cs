@@ -38,11 +38,11 @@ namespace TagTool.Shaders.ShaderGenerator
             return rmdf;
         }
 
-        public static void UpdateRenderMethodDefinition(GameCache cache, Stream stream, string shaderType)
+        public static bool UpdateRenderMethodDefinition(GameCache cache, Stream stream, string shaderType)
         {
             var generator = ShaderGenerator.GetGlobalShaderGenerator(shaderType, true);
             if (generator == null)
-                return;
+                return false;
 
             string rmdfName = $"shaders\\{shaderType}";
             
@@ -75,6 +75,8 @@ namespace TagTool.Shaders.ShaderGenerator
 
                 cache.Serialize(stream, rmdfTag, rmdf);
             }
+
+            return true;
         }
 
         private static CategoryBlock.ShaderOption BuildCategoryOption(GameCache cache, Stream cacheStream, string categoryName, uint categoryIndex, int optionIndex, IShaderGenerator generator, bool autoMacro)
@@ -220,7 +222,9 @@ namespace TagTool.Shaders.ShaderGenerator
 
                 RenderMethodOption.ParameterBlock parameterBlock = new RenderMethodOption.ParameterBlock();
 
-                parameterBlock.Name = cache.StringTable.AddString(parameter.ParameterName);
+                StringId nameId = cache.StringTable.GetStringId(parameter.ParameterName);
+                parameterBlock.Name = nameId != StringId.Invalid ? nameId : cache.StringTable.AddString(parameter.ParameterName);
+
                 parameterBlock.RenderMethodExtern = (RenderMethodExtern)parameter.RenderMethodExtern;
 
                 switch (parameter.RegisterType)

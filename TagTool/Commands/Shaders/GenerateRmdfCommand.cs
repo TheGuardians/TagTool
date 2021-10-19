@@ -17,7 +17,7 @@ namespace TagTool.Commands.Shaders
                 "GenerateRmdf",
                 "Generates a render method definition tag according to the specified type.",
 
-                "GenerateRmdf <type>",
+                "GenerateRmdf <type> [update]",
                 "Generates a render method definition tag according to the specified type.")
         {
             Cache = cache;

@@ -185,7 +185,6 @@ namespace TagTool.Commands.Shaders
             if (generator == null)
                 return null;
 
-            //var rmdf = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out _, out _);
             var rmdf = TagTool.Shaders.ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out _, out _);
             CachedTag rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
             Cache.Serialize(stream, rmdfTag, rmdf);

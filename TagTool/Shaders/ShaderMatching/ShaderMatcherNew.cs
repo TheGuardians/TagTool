@@ -20,6 +20,7 @@ namespace TagTool.Shaders.ShaderMatching
         private Stream BaseCacheStream;
         private Stream PortingCacheStream;
         private Dictionary<CachedTag, RenderMethodTemplate> _rmt2Cache;
+        private List<string> UpdatedRmdf;
 
         public static string DefaultTemplate => @"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0.rmt2";
         public bool IsInitialized { get; private set; } = false;
@@ -47,6 +48,7 @@ namespace TagTool.Shaders.ShaderMatching
             BaseCacheStream = baseCacheStream;
             PortingCacheStream = portingCacheStream;
             _rmt2Cache = new Dictionary<CachedTag, RenderMethodTemplate>();
+            UpdatedRmdf = new List<string>();
             IsInitialized = true;
         }
 
@@ -58,6 +60,7 @@ namespace TagTool.Shaders.ShaderMatching
             PortingCache = null;
             BaseCacheStream = null;
             PortingCacheStream = null;
+            UpdatedRmdf = null;
             IsInitialized = false;
         }
 
@@ -125,6 +128,15 @@ namespace TagTool.Shaders.ShaderMatching
             Rmt2Descriptor sourceRmt2Desc;
             if (!Rmt2Descriptor.TryParse(sourceRmt2Tag.Name, out sourceRmt2Desc))
                 throw new ArgumentException($"Invalid rmt2 name '{sourceRmt2Tag.Name}'", nameof(sourceRmt2Tag));
+
+            if (!UpdatedRmdf.Contains(sourceRmt2Desc.Type)) // will update or generate rmdf as needed
+            {
+                if (!ShaderGenerator.RenderMethodDefinitionGenerator.UpdateRenderMethodDefinition(BaseCache, BaseCacheStream, sourceRmt2Desc.Type))
+                    Console.WriteLine($"WARNING: rmdf for shader type \"{sourceRmt2Desc.Type}\" could not be updated or generated.");
+                else
+                    Console.WriteLine($"Rmdf for shader type \"{sourceRmt2Desc.Type}\" updated or generated.");
+                UpdatedRmdf.Add(sourceRmt2Desc.Type);
+            }
 
             // rebuild options to match base cache
             sourceRmt2Desc = RebuildRmt2Options(sourceRmt2Desc, BaseCacheStream, PortingCacheStream);
