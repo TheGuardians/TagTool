@@ -45,7 +45,7 @@ namespace TagTool.Commands.HUD
                         {
                             foreach (var textWidget in hudWidget.TextWidgets)
                             {
-                                if (fontIndices.Contains((int)textWidget.Font) || applyToAll)
+                                if (fontIndices.Contains((int)textWidget.Font_H3) || applyToAll)
                                 {
                                     foreach (var placementData in textWidget.PlacementData)
                                     {

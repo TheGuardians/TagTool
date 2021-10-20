@@ -19,6 +19,7 @@ using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
 using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Commands.Porting
 {
@@ -1119,6 +1120,36 @@ namespace TagTool.Commands.Porting
 
 				case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
+
+				case TextWidget textWidget:
+                    switch (BlamCache.Version)
+                    {
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
+                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_H3);
+                            break;
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_H3MCC);
+                            break;
+                        case CacheVersion.Halo3ODST:
+                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_ODST);
+                            break;
+                    }
+                    return textWidget;
+
+				case GuiTextWidgetDefinition guiTextWidget:
+                    switch (BlamCache.Version)
+                    {
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
+                            guiTextWidget.CustomFont = GetEquivalentValue(guiTextWidget.CustomFont, guiTextWidget.CustomFont_H3);
+                            break;
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                            guiTextWidget.CustomFont = GetEquivalentValue(guiTextWidget.CustomFont, guiTextWidget.CustomFont_H3MCC);
+                            break;
+                        case CacheVersion.Halo3ODST:
+                            guiTextWidget.CustomFont = GetEquivalentValue(guiTextWidget.CustomFont, guiTextWidget.CustomFont_ODST);
+                            break;
+                    }
+                    return guiTextWidget;
 
 				case Array _:
 				case IList _: // All arrays and List<T> implement IList, so we should just use that

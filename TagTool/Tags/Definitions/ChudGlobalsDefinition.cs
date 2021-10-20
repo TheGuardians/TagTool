@@ -13,34 +13,38 @@ namespace TagTool.Tags.Definitions
     {
         public List<HudGlobal> HudGlobals;
         public List<HudShader> HudShaders;
-        public List<UnknownBlock> Unknown;
-        public List<CortanaSuckBlock> CortanaSuck;
+        public List<ChudSuckProfile> SuckProfiles;
+        public List<CortanaEffectConfig> CortanaConfigs;
         public List<PlayerTrainingDatum> PlayerTrainingData;
-        public CachedTag StartMenuEmblems;
-        public CachedTag CampaignMedals;
-        public CachedTag CampaignMedalHudAnimation;
+        public CachedTag CampaignMetagameEmblems;
+        public CachedTag CampaignMetagameMedals;
+        public CachedTag CampaignMetagameMedalAnimation;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ChudDefinition.HudWidget.PlacementDatum.AnchorValue CampaignMedalChudAnchor;
+        public ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType CampaignMedalChudAnchor;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 2, Flags = Padding)]
         public byte[] PostAnchorPadding;
+
         public float CampaignMedalScale;
         public float CampaignMedalSpacing;
         public float CampaignMedalOffsetX;
         public float CampaignMedalOffsetY;
         public float MetagameScoreboardTopY;
         public float MetagameScoreboardSpacing;
-        public CachedTag UnitDamageGrid;
-        public float MicroTextureTileAmount;
+        public CachedTag DirectDamageMicrotexture;
+        public float MicrotextureScale;
         public float MediumSensorBlipScale;
         public float SmallSensorBlipScale;
         public float LargeSensorBlipScale;
-        public float SensorBlipGlowAmount;
-        public float SensorBlipGlowRadius;
-        public float SensorBlipGlowOpacity;
+        public float MaxAgeSize; // SensorBlipGlowAmount ??
+        public float SizePower; // SensorBlipGlowRadius ??
+        public float AlphaPower; // SensorBlipGlowOpacity ??
         public CachedTag MotionSensorBlip;
-        public CachedTag BirthdayPartyEffect;
-        public CachedTag CampaignFloodMask;
-        public CachedTag CampaignFloodMaskTile;
+        public CachedTag GruntBirthdayEffect;
+        public CachedTag CampaignFloodMask; // TentaclePorn
+        public CachedTag CampaignFloodMaskTile; // FloodGoo
+
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float MotionSensorBlipHeightModifier;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -313,8 +317,8 @@ namespace TagTool.Tags.Definitions
         public class HudGlobal : TagStructure
         {
             [TagField(Flags = Label)]
-            public BipedValue Biped;
-
+            public ChudSkinType Type;
+            // possible mismatches below
             public ArgbColor HUDDisabled;
             public ArgbColor HUDPrimary;
             public ArgbColor HUDForeground;
@@ -322,31 +326,31 @@ namespace TagTool.Tags.Definitions
             public ArgbColor NeutralReticule;
             public ArgbColor HostileReticule;
             public ArgbColor FriendlyReticule;
-            public ArgbColor GlobalDynamic7_UnknownBlip;
+            public ArgbColor BaseBlip;
             public ArgbColor NeutralBlip;
             public ArgbColor HostileBlip;
             public ArgbColor FriendlyPlayerBlip;
             public ArgbColor FriendlyAIBlip;
-            public ArgbColor GlobalDynamic12;
+            public ArgbColor Blipping;
             public ArgbColor WaypointBlip;
             public ArgbColor DistantWaypointBlip;
             public ArgbColor FriendlyWaypoint;
-            public ArgbColor GlobalDynamic16;
+            public ArgbColor NeutralWaypoint;
             public ArgbColor HostileWaypoint;
-            public ArgbColor GlobalDynamic18;
+            public ArgbColor DeadWaypoint;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ArgbColor BlueWaypoint_HO;
 
-            public ArgbColor GlobalDynamic19;
-            public ArgbColor GlobalDynamic20;
-            public ArgbColor GlobalDynamic21;
-            public ArgbColor GlobalDynamic22;
-            public ArgbColor GlobalDynamic23;
-            public ArgbColor GlobalDynamic24;
-            public ArgbColor GlobalDynamic25;
-            public ArgbColor GlobalDynamic26;
-            public ArgbColor GlobalDynamic27;
+            public ArgbColor MessageFlashSelf;
+            public ArgbColor MessageFlashFriend;
+            public ArgbColor MessageFlashEnemy;
+            public ArgbColor MessageFlashNeutral;
+            public ArgbColor InvincibleShield;
+            public ArgbColor PlayerNavpointStandingBy;
+            public ArgbColor PlayerNavpointFiring;
+            public ArgbColor PlayerNavpointTakingDamage;
+            public ArgbColor PlayerNavpointSpeaking;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ArgbColor GlobalDynamic29_HO; //White
@@ -366,16 +370,17 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ArgbColor PWRItemOutline;
 
-            public List<HudAttribute> HudAttributes;
+            public List<HudCurvatureInfo> HudCurvature;
             public List<HudSound> HudSounds;
-            public CachedTag Unknown;
+            public CachedTag BannedVehicleEntranceSound;
             public CachedTag FragGrenadeSwapSound;
             public CachedTag PlasmaGrenadeSwapSound;
             public CachedTag SpikeGrenadeSwapSound;
             public CachedTag FirebombGrenadeSwapSound;
             public CachedTag DamageMicrotexture;
             public CachedTag DamageNoise;
-            public CachedTag DirectionalArrow;
+            public CachedTag DamageDirectionalArrow;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag GrenadeWaypoint = null;
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -394,58 +399,70 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float Unknown12;
 
-            public CachedTag ObjectiveWaypoints;
+            public CachedTag Waypoints;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag PlayerWaypoints = null;
+
             public CachedTag ScoreboardHud;
             public CachedTag MetagameScoreboardHud;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public CachedTag SurvivalHud = null;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public CachedTag MetagameScoreboardHud2 = null;
+
             public CachedTag TheaterHud;
             public CachedTag ForgeHud;
             public CachedTag HudStrings;
             public CachedTag Medals;
             public List<MultiplayerMedal> MultiplayerMedals;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public CachedTag MedalHudAnimation2 = null;
-            public CachedTag MedalHudAnimation;
-            public CachedTag CortanaChannel;
-            public CachedTag Unknown20;
-            public CachedTag Unknown21;
-            public CachedTag JammerResponse;
-            public CachedTag JammerShieldHit;
+
+            public CachedTag MedalAnimation;
+            public CachedTag CortanaChannel; // TestBitmap0
+            public CachedTag TestBitmap1;
+            public CachedTag TestBitmap2;
+            public CachedTag JammerDamage;
+            public CachedTag JammerDamageSound;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public RealPoint2d GrenadeSchematicsOffset;
-            public float GrenadeScematicsSpacing;
-            public float EquipmentScematicOffsetY;
-            public float DualEquipmentScematicOffsetY;
-            public float UnknownScematicOffsetY; //equipment related
-            public float UnknownScematicOffsetY_2; //equipment related
-            public float ScoreboardLeaderOffsetY;
-            public float WaypointScaleMin;
-            public float WaypointScaleMax;
+
+            public float GrenadeAnchorOffset; // GrenadeScematicsSpacing
+            public float EquipmentVerticalOffset;
+            public float EquipmentVerticalOffsetDual;
+            public float EquipmentVerticalOffsetNone;
+            public float EquipmentHorizontalSize;
+            public float ScoreboardSpacingSize;
+            public float WaypointMinDistanceScale;
+            public float WaypointMaxDistanceScale;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public float Unknown29;
 
-            public enum BipedValue : int
+            public enum ChudSkinType : int
             {
-                Spartan,
-                Elite,
-                Monitor
+                Default,
+                Dervish,
+                Monitor,
+                MpFfa,
+                MpRedTeam,
+                MpBlueTeam
             }
 
             [TagStructure(Size = 0x60, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x130, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.HaloOnlineED)]
-            public class HudAttribute : TagStructure
+            public class HudCurvatureInfo : TagStructure
             {
                 public ResolutionFlagValue ResolutionFlags;
 
-                public Angle WarpAngle;
-                public float WarpAmount;
-                public float WarpDirection;
+                public Angle SourceFovY; // WarpAngle
+                public float WarpAmount; // WarpAmount
+                public float DestinationOffsetZ;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public float Unknown4;
@@ -513,15 +530,15 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public RealPoint2d HUDOffset;
 
-                public uint ResolutionWidth;
-                public uint ResolutionHeight;
-                public RealPoint2d MotionSensorOffset;
+                public uint VirtualWidth; // resolution
+                public uint VirtualHeight; // resolution
+                public RealPoint2d MotionSensorOrigin;
                 public float MotionSensorRadius;
-                public float MotionSensorScale;
-                public float HorizontalScale;
-                public float VerticalScale;
-                public float HorizontalStretch;
-                public float VerticalStretch;
+                public float BlipRadius; // MotionSensorScale ?
+                public float GlobalSafeFrameHorizontal; // HorizontalScale
+                public float GlobalSafeFrameVertical; // VerticalScale
+                public float SafeFrameHorizontalDing; // HorizontalStretch
+                public float SafeFrameVerticalDing; // VerticalStretch
 
                 //these four tagrefs have no function in HO
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -556,13 +573,13 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public float StateLeftRightOffsetY_H3;
 
-                public float StateCenterOffsetY;
-                public float StateCenterOffsetY_2;
+                public float MessageAnchorVerticalOffset;
+                public float StateMessageVerticalOffset;
                 public float MedalScale;
-                public float MedalSpacing;
+                public float MedalWidth; // medal spacing
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public float StateScale;
+                public float StateMessageScale;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public RealPoint2d SurvivalMedalsOffset; //referenced by chud anchors -- must be neither campaign nor multiplayer
@@ -571,9 +588,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public RealPoint2d MultiplayerMedalsOffset; //referenced by chud anchors
 
-                public float NotificationScale;
-                public float NotificationLineSpacing;
-                public int NotificationLineCountModifier; //controls max number of notification lines onscreen
+                public float MessageScale;
+                public float MessageHeight; // line spacing
+                public int MessageCountDelta; //controls max number of notification lines onscreen
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public float NotificationOffsetX_HO;
@@ -607,31 +624,7 @@ namespace TagTool.Tags.Definitions
                     WideQuarter = 1 << 4,
                     StandardHalf = 1 << 5,
                     NativeQuarter = 1 << 6,
-                    StandardQuarter = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15,
-                    Bit16 = 1 << 16,
-                    Bit17 = 1 << 17,
-                    Bit18 = 1 << 18,
-                    Bit19 = 1 << 19,
-                    Bit20 = 1 << 20,
-                    Bit21 = 1 << 21,
-                    Bit22 = 1 << 22,
-                    Bit23 = 1 << 23,
-                    Bit24 = 1 << 24,
-                    Bit25 = 1 << 25,
-                    Bit26 = 1 << 26,
-                    Bit27 = 1 << 27,
-                    Bit28 = 1 << 28,
-                    Bit29 = 1 << 29,
-                    Bit30 = 1 << 30,
-                    Bit31 = 1 << 31
+                    StandardQuarter = 1 << 7
                 }
             }
 
@@ -644,9 +637,9 @@ namespace TagTool.Tags.Definitions
                 public CachedTag SpartanSound;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public LatchedToValues_H3 LatchedTo_H3;
+                public ChudSoundCueFlags_H3 LatchedTo_H3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public LatchedToValues LatchedTo;
+                public ChudSoundCueFlags LatchedTo;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline498295)]
                 public uint LatchedTo2;
@@ -659,7 +652,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag EliteSound;
 
                 [Flags]
-                public enum LatchedToValues : int
+                public enum ChudSoundCueFlags : int
                 {
                     None,
                     HealthRecharging = 1 << 0,
@@ -678,12 +671,12 @@ namespace TagTool.Tags.Definitions
                     ShieldEmpty = 1 << 13,
                     RocketLocking = 1 << 14,
                     RocketLocked = 1 << 15,
-                    MissileLocking = 1 << 16,
-                    MissileLocked = 1 << 17,
-                    Bit18 = 1 << 18,
-                    Bit19 = 1 << 19,
-                    Bit20 = 1 << 20,
-                    Bit21 = 1 << 21,
+                    TrackedTarget = 1 << 16,
+                    LockedTarget = 1 << 17,
+                    Vip = 1 << 18,
+                    Juggernaut = 1 << 19,
+                    Zombie = 1 << 20,
+                    LastManStanding = 1 << 21,
                     StaminaFull = 1 << 22,
                     StaminaWarning = 1 << 23,
                     StaminaRecharge = 1 << 24,
@@ -697,7 +690,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum LatchedToValues_H3 : int
+                public enum ChudSoundCueFlags_H3 : int
                 {
                     None,
                     ShieldRecharging = 1 << 0,
@@ -710,28 +703,12 @@ namespace TagTool.Tags.Definitions
                     HealthMajorDamage = 1 << 7,
                     RocketLocking = 1 << 8,
                     RocketLocked = 1 << 9,
-                    MissileLocking = 1 << 10,
-                    MissileLocked = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15,
-                    Bit16 = 1 << 16,
-                    Bit17 = 1 << 17,
-                    Bit18 = 1 << 18,
-                    Bit19 = 1 << 19,
-                    Bit20 = 1 << 20,
-                    Bit21 = 1 << 21,
-                    Bit22 = 1 << 22,
-                    Bit23 = 1 << 23,
-                    Bit24 = 1 << 24,
-                    Bit25 = 1 << 25,
-                    Bit26 = 1 << 26,
-                    Bit27 = 1 << 27,
-                    Bit28 = 1 << 28,
-                    Bit29 = 1 << 29,
-                    Bit30 = 1 << 30,
-                    Bit31 = 1 << 31
+                    TrackedTarget = 1 << 10,
+                    LockedTarget = 1 << 11,
+                    Vip = 1 << 12,
+                    Juggernaut = 1 << 13,
+                    Zombie = 1 << 14,
+                    LastManStanding = 1 << 15
                 }
 
                 [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
@@ -773,7 +750,7 @@ namespace TagTool.Tags.Definitions
             public class MultiplayerMedal : TagStructure
             {
                 [TagField(Flags = Label)]
-                public StringId Medal;
+                public StringId MedalName;
             }
         }
 
@@ -785,88 +762,56 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40)]
-        public class UnknownBlock : TagStructure
+        public class ChudSuckProfile : TagStructure
         {
-            public float Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
+            public float EffectRadius;
+            public float VertexNoiseMin;
+            public float VertexNoiseMax;
+            public float VertexNoisePower;
+            public float PixelNoiseMin;
+            public float PixelNoiseMax;
+            public float PixelNoisePower;
+            public float WarpRadiusMin;
+            public float WarpRadiusMax;
+            public float WarpRadiusPower;
+            public float WarpIntensityMin;
+            public float WarpIntensityMax;
+            public float WarpIntensityPower;
+            public float NoiseSharpnessMin;
+            public float NoiseSharpnessMax;
+            public float NoiseSharpnessPower;
         }
 
         [TagStructure(Size = 0x10)]
-        public class CortanaSuckBlock : TagStructure
+        public class CortanaEffectConfig : TagStructure
         {
-            public uint Unknown;
-            public List<LevelsBlock> Levels;
+            public StringId Name;
+            public List<CortanaEffectDistanceConfig> DistanceConfigs;
 
             [TagStructure(Size = 0xE4)]
-            public class LevelsBlock : TagStructure
+            public class CortanaEffectDistanceConfig : TagStructure
             {
-                public float Scale;
-                //Section A
-                public float NoiseaVelocitymin;
-                public float NoiseaVelocitymax;
-                public float NoiseaScalexmin;
-                public float NoiseaScalexmax;
-                public float NoiseaScaleymin;
-                public float NoiseaScaleymax;
-                public float NoisebVelocitymin;
-                public float NoisebVelocitymax;
-                public float NoisebScalexmin;
-                public float NoisebScalexmax;
-                public float NoisebScaleymin;
-                public float NoisebScaleymax;
-                public float NoisePixelThresholdmin;
-                public float NoisePixelThresholdmax;
-                public float NoisePixelPersistencemin;
-                public float NoisePixelPersistencemax;
-                public float NoisePixelVelocitymin;
-                public float NoisePixelVelocitymax;
-                public float NoisePixelTurbulencemin;
-                public float NoisePixelTurbulencemax;
-                public float NoiseTranslationScalexmin;
-                public float NoiseTranslationScalexmax;
-                public float NoiseTranslationScaleymin;
-                public float NoiseTranslationScaleymax;
-                public CachedTag Message;
-                //Section B
-                public float NoiseaVelocitymin_B;
-                public float NoiseaVelocitymax_B;
-                public float NoiseaScalexmin_B;
-                public float NoiseaScalexmax_B;
-                public float NoiseaScaleymin_B;
-                public float NoiseaScaleymax_B;
-                public float NoisebVelocitymin_B;
-                public float NoisebVelocitymax_B;
-                public float NoisebScalexmin_B;
-                public float NoisebScalexmax_B;
-                public float NoisebScaleymin_B;
-                public float NoisebScaleymax_B;
-                public float NoisePixelThresholdmin_B;
-                public float NoisePixelThresholdmax_B;
-                public float NoisePixelPersistencemin_B;
-                public float NoisePixelPersistencemax_B;
-                public float NoisePixelVelocitymin_B;
-                public float NoisePixelVelocitymax_B;
-                public float NoisePixelTurbulencemin_B;
-                public float NoisePixelTurbulencemax_B;
-                public float NoiseTranslationScalexmin_B;
-                public float NoiseTranslationScalexmax_B;
-                public float NoiseTranslationScaleymin_B;
-                public float NoiseTranslationScaleymax_B;
-                public CachedTag Message_B;
+                public float Distance;
+                public CortanaEffectHeadingConfigStruct Facing;
+                public CortanaEffectHeadingConfigStruct Oblique;
+
+                [TagStructure(Size = 0x70)]
+                public class CortanaEffectHeadingConfigStruct : TagStructure
+                {
+                    public Bounds<float> NoiseAVelocity;
+                    public Bounds<float> NoiseAScaleX;
+                    public Bounds<float> NoiseAScaleY;
+                    public Bounds<float> NoiseBVelocity;
+                    public Bounds<float> NoiseBScaleX;
+                    public Bounds<float> NoiseBScaleY;
+                    public Bounds<float> PixelationThreshold;
+                    public Bounds<float> PixelationPersistence;
+                    public Bounds<float> PixelationVelocity;
+                    public Bounds<float> PixelationTurbulence;
+                    public Bounds<float> TranslationScaleX;
+                    public Bounds<float> TranslationScaleY;
+                    public CachedTag SoundReference;
+                }
             }
         }
 
@@ -874,14 +819,22 @@ namespace TagTool.Tags.Definitions
         public class PlayerTrainingDatum : TagStructure
         {
             [TagField(Flags = Label)]
-            public StringId DisplayString;
-            public short MaxDisplayTime;
-            public short DisplayCount;
-            public short DisappearDelay;
-            public short RedisplayDelay;
-            public float DisplayDelay;
-            public ushort Flags;
-            public short Unknown;
+            public StringId DisplayString; // comes out of the HUD text globals
+            public short MaxDisplayTime; // how long the message can be on screen before being hidden
+            public short DisplayCount; // how many times a training message will get displayed (0-3 only!)
+            public short DisappearDelay; // how long a displayed but untriggered message stays up
+            public short RedisplayDelay; // how long after display this message will stay hidden
+            public float DisplayDelay; // how long the event can be triggered before it's displayed
+            public PlayerTrainingFlags Flags;
+
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Padding0;
+
+            [Flags]
+            public enum PlayerTrainingFlags : ushort
+            {
+                NotInMultiplayer = 1 << 0
+            }
         }
     }
 }

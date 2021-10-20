@@ -11,30 +11,14 @@ namespace TagTool.Tags.Definitions
     public class ChudDefinition : TagStructure
     {
         public List<HudWidget> HudWidgets;
-        public int LowClipCutoff;
-        public int LowAmmoCutoff;
-        public int AgeCutoff;
+        public ChudAmmunitionInfo HudAmmunitionInfo;
 
-        [Flags]
-        public enum WidgetFlags : byte
+        [TagStructure(Size = 0xC)]
+        public class ChudAmmunitionInfo : TagStructure
         {
-            None,
-            BootSequenceOnly = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3
-        }
-
-        public enum LayerEnum : byte
-        {
-            Layer0,
-            Layer1,
-            Layer2,
-            Layer3,
-            Layer4,
-            Layer5,
-            UseParent,
-            AlwaysShowNoWarping
+            public int LowAmmoLoadedThreshold;
+            public int LowAmmoReserveThreshold;
+            public int LowBatteryThreshold;
         }
 
         [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
@@ -43,9 +27,10 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public SpecialHudTypeValue SpecialHudType;
-            public WidgetFlags Flags;
-            public LayerEnum Layer;
+
+            public ChudScriptingClass ScriptingClass;
+            public WidgetFlags BaseFlags;
+            public WidgetLayerEnum SortLayer;
             public List<StateDatum> StateData;
             public List<PlacementDatum> PlacementData;
             public List<AnimationDatum> AnimationData;
@@ -57,23 +42,6 @@ namespace TagTool.Tags.Definitions
             public List<BitmapWidget> BitmapWidgets;
             public List<TextWidget> TextWidgets;
 
-            public enum SpecialHudTypeValue : short
-            {
-                Unspecial,
-                Ammo,
-                CrosshairAndScope,
-                UnitShieldMeter,
-                Grenades,
-                Gametype,
-                MotionSensor,
-                SpikeGrenade,
-                FirebombGrenade,
-                Compass,
-                Stamina,
-                EnergyMeter,
-                Consumable
-            }
-
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline571627)]
@@ -81,38 +49,38 @@ namespace TagTool.Tags.Definitions
             public class StateDatum : TagStructure
 			{
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public Engine_H3 EngineFlags_H3;
+                public ChudGameStateH3 GameStateH3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public Engine_ODST EngineFlags_ODST;
+                public ChudGameStateODSTFlags GameStateODST;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public Engine EngineFlags;
+                public ChudGameStateED GameState;
 
-                public PlayerType PlayerTypeFlags;
+                public ChudSkinState SkinState;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public PDA PDAFlags;
 
-                public Multiplayer MultiplayerFlags;
-                public Resolution ResolutionFlags;
+                public ChudGameTeam GameTeam;
+                public ChudWindowState WindowState;
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public MultiplayerEvents_H3 MultiplayerEventsFlags_H3;
+                public ChudGameEngineState_Retail MultiplayerEventsFlags_H3;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public MultiplayerEvents MultiplayerEventsFlags;
+                public ChudGameEngineState_ED MultiplayerEvents;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public UnitBase UnitBaseFlags;
+                public ChudMiscState_ED UnitBaseFlags;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public UnitBase_ODST UnitBaseFlags_ODST;
+                public ChudMiscState_ODST UnitBaseFlags_ODST;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public UnitBase_H3 UnitBaseFlags_H3;
+                public ChudMiscState_H3 UnitBaseFlags_H3;
 
-                public Editor EditorFlags;
+                public ChudSandboxEditorState EditorFlags;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public EngineGeneralH3 EngineGeneralFlags_H3;
+                public ChudHindsightState_H3 EngineGeneralFlags_H3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public EngineGeneral EngineGeneralFlags;               
+                public ChudHindsightState_ED EngineGeneralFlags;               
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Skulls SkullFlags;
@@ -143,10 +111,10 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public ushort Unused4;
 
-                public WeaponKudos WeaponKudosFlags;
+                public ChudWeaponImpulseState WeaponKudosFlags;
                 public WeaponStatus WeaponStatusFlags;
                 public WeaponTarget WeaponTargetFlags;
-                public WeaponTargetB WeaponTargetBFlags;
+                public ChudWeaponMiscState WeaponTargetBFlags;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Player_Special Player_SpecialFlags;
@@ -169,15 +137,14 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public EnergyMeter EnergyMeterFlags;
 
-                [Flags]
-                public enum Engine : ushort
+                [Flags] public enum ChudGameStateED : ushort
                 {
                     None,
                     CampaignSolo = 1 << 0,
                     CampaignCoop = 1 << 1,
                     Survival = 1 << 2, //not sure about this one
-                    FFAgame = 1 << 3,
-                    Teamgame = 1 << 4,
+                    FreeForAll = 1 << 3,
+                    TeamGame = 1 << 4,
                     CTF = 1 << 5,
                     Slayer = 1 << 6,
                     Oddball = 1 << 7,
@@ -191,8 +158,7 @@ namespace TagTool.Tags.Definitions
                     Theater = 1 << 15
                 }
 
-                [Flags]
-                public enum Engine_ODST : ushort
+                [Flags] public enum ChudGameStateODSTFlags : ushort
                 {
                     None,
                     CampaignSolo = 1 << 0,
@@ -202,14 +168,13 @@ namespace TagTool.Tags.Definitions
                     Theater = 1 << 4,
                 }
 
-                [Flags]
-                public enum Engine_H3 : ushort
+                [Flags] public enum ChudGameStateH3 : ushort
                 {
-                    None,
-                    CampaignSolo = 1 << 0,
-                    CampaignCoop = 1 << 1,
-                    Teamgame = 1 << 2,
-					FFAgame = 1 << 3,
+					None,
+					CampaignSolo = 1 << 0,
+					CampaignCoop = 1 << 1,
+					FreeForAll = 1 << 2,
+					TeamGame = 1 << 3,
 					CTF = 1 << 4,
 					Slayer = 1 << 5,
 					Oddball = 1 << 6,
@@ -224,8 +189,7 @@ namespace TagTool.Tags.Definitions
 					Theater = 1 << 15
 				}
 
-				[Flags]
-                public enum PlayerType : ushort
+				[Flags] public enum ChudSkinState : ushort
                 {
                     None,
                     Spartan = 1 << 0,
@@ -233,8 +197,7 @@ namespace TagTool.Tags.Definitions
                     Monitor = 1 << 2,
                 }
 
-                [Flags]
-                public enum PDA : ushort
+                [Flags] public enum PDA : ushort
                 {
                     None,
                     SplitscreenPDAOpen = 1 << 0,
@@ -242,22 +205,20 @@ namespace TagTool.Tags.Definitions
                     CameraUnknown = 1 << 2,
                 }
 
-                [Flags]
-                public enum PDA2 : ushort
+                [Flags] public enum PDA2 : ushort
                 {
                     None,
                     VisibleInPDA = 1 << 0,
                 }
 
-                [Flags]
-                public enum Multiplayer : ushort
+                [Flags] public enum ChudGameTeam : ushort
                 {
                     None,
-                    OffenseTeam = 1 << 0,
-                    DefenseTeam = 1 << 1,
-                    NormalTeam = 1 << 2,
-                    SpecialTeam = 1 << 3,
-                    Extraspecialteam = 1 << 4, //broken?
+                    Offense = 1 << 0,
+                    Defense = 1 << 1,
+                    NotApplicable = 1 << 2,
+                    PlayerIsSpecial = 1 << 3,
+                    PlayerSpecialAndDefense = 1 << 4, //broken?
                     NoMicrophone = 1 << 5,
                     TalkingDisabled = 1 << 6,
                     TapToTalk = 1 << 7,
@@ -266,8 +227,7 @@ namespace TagTool.Tags.Definitions
                     Talking = 1 << 10,
                 }
 
-                [Flags]
-                public enum Resolution : ushort
+                [Flags] public enum ChudWindowState : ushort
                 {
                     None,
                     WideFull = 1 << 0,
@@ -280,18 +240,17 @@ namespace TagTool.Tags.Definitions
                     StandardQuarter = 1 << 7,
                 }
 
-                [Flags]
-                public enum MultiplayerEvents : uint
+                [Flags] public enum ChudGameEngineState_ED : uint
                 {
                     None,
-                    HasFriends = 1 << 0,
-                    HasEnemies = 1 << 1,
-                    VariantNameValid = 1 << 2,
-                    SomeoneIsTalking = 1 << 3,
-                    IsArming = 1 << 4,
-                    TimeEnabled = 1 << 5,
-                    FriendsHaveX = 1 << 6,
-                    EnemiesHaveX = 1 << 7,
+                    FriendlyScoreAvailable = 1 << 0,
+                    EnemyScoreAvailable = 1 << 1,
+                    VariantNameAvailable = 1 << 2,
+                    TalkingPlayerAvailable = 1 << 3,
+                    ArmingMeterAvailable = 1 << 4,
+                    TimeLeftAvailable = 1 << 5,
+                    FriendlyPosession = 1 << 6,
+                    EnemyPosession = 1 << 7,
                     FriendsAreX = 1 << 8,
                     EnemiesAreX = 1 << 9,
                     XIsDown = 1 << 10,
@@ -301,50 +260,47 @@ namespace TagTool.Tags.Definitions
                     AttackerTeamIsDead = 1 << 14,
                     SummaryEnabled = 1 << 15,
                     Unknown16 = 1 << 16,
-                    NetDebugEnabled = 1 << 17
+                    TestEnabled = 1 << 17
                 }
 
-                [Flags]
-                public enum MultiplayerEvents_H3 : ushort
+                [Flags] public enum ChudGameEngineState_Retail : ushort
                 {
                     None,
-                    HasFriends = 1 << 0,
-                    HasEnemies = 1 << 1,
-                    VariantNameValid = 1 << 2,
-                    SomeoneIsTalking = 1 << 3,
-                    IsArming = 1 << 4,
-                    TimeEnabled = 1 << 5,
-                    FriendsHaveX = 1 << 6,
-                    EnemiesHaveX = 1 << 7,
-                    FriendsAreX = 1 << 8,
-                    EnemiesAreX = 1 << 9,
-                    XIsDown = 1 << 10,
-                    SummaryEnabled = 1 << 11,
-                    NetDebugEnabled = 1 << 12,
+                    FriendlyScoreAvailable = 1 << 0,
+                    EnemyScoreAvailable = 1 << 1,
+                    VariantNameAvailable = 1 << 2,
+                    TalkingPlayerAvailable = 1 << 3,
+                    ArmingMeterAvailable = 1 << 4,
+                    TimeLeftAvailable = 1 << 5,
+                    FriendlyPosession = 1 << 6,
+                    EnemyPosession = 1 << 7,
+                    VariantCustomA = 1 << 8,
+                    VariantCustomB = 1 << 9,
+                    VariantCustomC = 1 << 10,
+                    RoundStartPeriod = 1 << 11,
+                    TestEnabled = 1 << 12
                 }
 
-                [Flags]
-                public enum UnitBase_H3 : ushort
+                [Flags] public enum ChudMiscState_H3 : ushort
                 {
                     None,
-                    TextureCamEnabled = 1 << 0,
-                    BinocularsTargeted = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    TrainingPrompt = 1 << 4,
-                    ObjectivePrompt = 1 << 5,
+                    TextureCamAvailable = 1 << 0,
+                    SniperFlavaAvailable = 1 << 1,
+                    SavedFilmRecordingMode = 1 << 2,
+                    SavedFilmNormalMode = 1 << 3,
+                    PlayerTrainingAvailable = 1 << 4,
+                    CampaignObjectiveAvailable = 1 << 5
                 }
 
-                [Flags]
-                public enum UnitBase_ODST : uint
+                [Flags] public enum ChudMiscState_ODST : uint
                 {
                     None,
-                    TextureCamEnabled = 1 << 0,
-                    BinocularsTargeted = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    TrainingPrompt = 1 << 4,
-                    ObjectivePrompt = 1 << 5,
+                    TextureCamAvailable = 1 << 0,
+                    SniperFlavaAvailable = 1 << 1,
+                    SavedFilmRecordingMode = 1 << 2,
+                    SavedFilmNormalMode = 1 << 3,
+                    PlayerTrainingAvailable = 1 << 4,
+                    CampaignObjectiveAvailable = 1 << 5,
                     SurvivalState = 1 << 6,
                     BeaconEnabled = 1 << 7,
                     UserWaypointEnabled = 1 << 8,
@@ -357,16 +313,15 @@ namespace TagTool.Tags.Definitions
                     ARGEnabled = 1 << 15,
                 }
 
-                [Flags]
-                public enum UnitBase : uint
+                [Flags] public enum ChudMiscState_ED : uint
                 {
                     None,
-                    TextureCamEnabled = 1 << 0,
-                    BinocularsTargeted = 1 << 1,
-                    Bit2 = 1 << 2, //unused
-                    Bit3 = 1 << 3, //unused
-                    TrainingPrompt = 1 << 4,
-                    ObjectivePrompt = 1 << 5,
+                    TextureCamAvailable = 1 << 0,
+                    SniperFlavaAvailable = 1 << 1,
+                    SavedFilmRecordingMode = 1 << 2,
+                    SavedFilmNormalMode = 1 << 3,
+                    PlayerTrainingAvailable = 1 << 4,
+                    CampaignObjectiveAvailable = 1 << 5,
                     SurvivalState = 1 << 6,
                     Bit7 = 1 << 7, //unused
                     Achievement1 = 1 << 8,
@@ -379,59 +334,53 @@ namespace TagTool.Tags.Definitions
                     ARGEnabled = 1 << 15, //unused, but kept this here so it ports right
                 }
 
-                [Flags]
-                public enum Editor : ushort
+
+                [Flags] public enum ChudSandboxEditorState : ushort
                 {
                     None,
-                    EditorInactive = 1 << 0,
-                    EditorActive = 1 << 1,
-                    EditorHolding = 1 << 2,
-                    EditorNotAllowed = 1 << 3,
-                    IsEditorBiped = 1 << 4,
+                    DefaultCrosshair = 1 << 0,
+                    ActiveCrosshair = 1 << 1,
+                    ManipulationCrosshair = 1 << 2,
+                    NotallowedCrosshair = 1 << 3,
+                    BudgetAvailable = 1 << 4
                 }
 
-                [Flags]
-                public enum EngineGeneralH3 : ushort
+                [Flags] public enum ChudHindsightState_H3 : ushort
                 {
                     None,
-                    MotionTracker10M = 1 << 0,
-                    MotionTracker25M = 1 << 1,
-                    MotionTracker75M = 1 << 2,
-                    MotionTracker150M = 1 << 3,
-                    MetagameDebugEnabled = 1 << 4,
-                    Bit5 = 1 << 5,
-                    MetagamePlayer2Exists = 1 << 6,
-                    Bit7 = 1 << 7,
-                    MetagamePlayer3Exists = 1 << 8,
-                    Bit9 = 1 << 9,
-                    MetagamePlayer4Exists = 1 << 10,
-                    Bit11 = 1 << 11,
-                    MetagameScoreAdded = 1 << 12,
-                    MetagameMultikill = 1 << 13,
-                    MetagameScoreRemoved = 1 << 14,
-                    Bit14 = 1 << 15,
+                    SensorRange10m = 1 << 0,
+                    SensorRange25m = 1 << 1,
+                    SensorRange75m = 1 << 2,
+                    SensorRange150m = 1 << 3,
+                    MetagameP1Talking = 1 << 4,
+                    MetagameP2Enabled = 1 << 5,
+                    MetagameP2Talking = 1 << 6,
+                    MetagameP3Enabled = 1 << 7,
+                    MetagameP3Talking = 1 << 8,
+                    MetagameP4Enabled = 1 << 9,
+                    MetagameP4Talking = 1 << 10,
+                    TransientScoreAvail = 1 << 11,
+                    MetagameMultikillAvail = 1 << 12,
+                    MetagameNegScoreAvail = 1 << 13
                 }
 
-                [Flags]
-                public enum EngineGeneral : ushort
+                [Flags] public enum ChudHindsightState_ED : ushort
                 {
                     None,
-                    MotionTracker10M = 1 << 0,
-                    MotionTracker25M = 1 << 1,
-                    MotionTracker75M = 1 << 2,
-                    MotionTracker150M = 1 << 3,
-                    MetagameDebugEnabled = 1 << 4,
-                    MetagamePlayer2Exists = 1 << 5,
-                    Bit6 = 1 << 6,
-                    MetagamePlayer3Exists = 1 << 7,
-                    Bit8 = 1 << 8,
-                    MetagamePlayer4Exists = 1 << 9,
-                    Bit10 = 1 << 10,
-                    MetagameScoreAdded = 1 << 11,
-                    MetagameMultikill = 1 << 12,
-                    MetagameScoreRemoved = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    SensorRange10m = 1 << 0,
+                    SensorRange25m = 1 << 1,
+                    SensorRange75m = 1 << 2,
+                    SensorRange150m = 1 << 3,
+                    MetagameP1Talking = 1 << 4,
+                    MetagameP2Enabled = 1 << 5,
+                    MetagameP2Talking = 1 << 6,
+                    MetagameP3Enabled = 1 << 7,
+                    MetagameP3Talking = 1 << 8,
+                    MetagameP4Enabled = 1 << 9,
+                    MetagameP4Talking = 1 << 10,
+                    TransientScoreAvail = 1 << 11,
+                    MetagameMultikillAvail = 1 << 12,
+                    MetagameNegScoreAvail = 1 << 13
                 }
 
                 [Flags]
@@ -627,51 +576,43 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-				public enum WeaponKudos : ushort
+				public enum ChudWeaponImpulseState : ushort
 				{
 					None,
-					Bit0 = 1 << 0,
-					PickupAmmo = 1 << 1,
-					Bit2 = 1 << 2,
+					AmmoUsed = 1 << 0,
+					AmmoPickup = 1 << 1,
+					AmmoThreshold = 1 << 2,
 					Bit3 = 1 << 3,
 					Bit4 = 1 << 4,
 					Bit5 = 1 << 5,
 					Bit6 = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
+					Bit7 = 1 << 7
 				}
 
 				[Flags]
 				public enum WeaponTarget : ushort
 				{
 					None,
-					NoTarget = 1 << 0,
-					FriendlyTarget = 1 << 1,
-					EnemyTarget = 1 << 2,
-					HeadshotTarget = 1 << 3,
-					VulnerableTarget = 1 << 4,
-					InvincibleTarget = 1 << 5, //Defunct
-					PlasmaLocked = 1 << 6,
-					PlasmaLocking = 1 << 7,
-					PlasmaLockAvailable = 1 << 8,
+					Normal = 1 << 0,
+					Friendly = 1 << 1,
+					Enemy = 1 << 2,
+					EnemyHeadshot = 1 << 3,
+					EnemyWeakpoint = 1 << 4,
+					Invincible = 1 << 5, //Defunct
+					LockAvailable = 1 << 6,
+					PlasmaTrack = 1 << 7,
+					LockUnavailable = 1 << 8,
 					Bit9 = 1 << 9,
 					Bit10 = 1 << 10,
 				}
 
 				[Flags]
-				public enum WeaponTargetB : ushort
+				public enum ChudWeaponMiscState : ushort
 				{
 					None,
-					HumanLocking = 1 << 0,
-					HumanLocked = 1 << 1,
-					HumanLockAvailable = 1 << 2,
+					LockingOnAvailable = 1 << 0,
+					LockedOnAvailable = 1 << 1,
+					LockedOnUnavailable = 1 << 2,
 				}
 
                 [Flags]
@@ -809,13 +750,13 @@ namespace TagTool.Tags.Definitions
             public class PlacementDatum : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public AnchorValue Anchor;
-                public short Unknown;
-                public RealPoint2d MirrorOffset;
+                public ChudAnchorType Anchor;
+                public ChudWidgetPlacementFlags AnchorFlags;
+                public RealPoint2d Origin;
                 public RealPoint2d Offset;
                 public RealPoint2d Scale;
 
-                public enum AnchorValue : short
+                public enum ChudAnchorType : short
                 {
                     TopLeft,
                     TopRight,
@@ -833,27 +774,27 @@ namespace TagTool.Tags.Definitions
                     BottomEdge, //same as center
                     EquipmentXY, //uses both x and y offsets
                     EquipmentY, //x offset always 0
-                    Unknown2, //same as center
-                    Depreciated,
-                    Depreciated2,
-                    Depreciated3,
-                    Depreciated4,
-                    Depreciated5,
-                    Notification, //uses notification offset in chgd
-                    Gametype, //bottom center
-                    Unknown4,
-                    StateRight,
-                    StateLeft,
-                    StateCenter,
-                    StateCenter2, //separate float for this in chgd
+                    Ddamge, //same as center
+                    Territory1,
+                    Territory2,
+                    Territory3,
+                    Territory4,
+                    Territory5,
+                    Messaging, //uses notification offset in chgd
+                    BottomCenter, //bottom center
+                    WeaponTarget,
+                    StateMessageRight,
+                    StateMessageLeft,
+                    MessageBottomState,
+                    MessageBottomPrimary, //separate float for this in chgd
                     GametypeFriendly,
                     GametypeEnemy,
-                    MetagameTop,
+                    MetagameBar,
                     MetagamePlayer1,
                     MetagamePlayer2,
                     MetagamePlayer3,
                     MetagamePlayer4,
-                    Theater,
+                    TopCenterSavedfilm,
                     Prompt, //ODST, corresponds to prompt offset in chgd
                     HologramTarget, 
                     Medals, //uses medal offset in chgd
@@ -861,68 +802,50 @@ namespace TagTool.Tags.Definitions
                     UnknownHO_Offset3, //has values in chgd
                     MotionSensor
                 }
+
+                [Flags]
+                public enum ChudWidgetPlacementFlags : ushort
+                {
+                    MoreSoon = 1 << 0
+                }
             }
 
             [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnlineED)]
             public class AnimationDatum : TagStructure
 			{
-                //HUD Initialize Animation
-                public AnimationFlags HUDInitializeFlags;
-                public AnimationFunction HUDInitializeFunction;
-                public CachedTag HUDInitialize;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float HUDInitializeUnknown;
+                public ChudWidgetAnimationStruct Initializing;
+                public ChudWidgetAnimationStruct Active;
+                public ChudWidgetAnimationStruct Flashing;
+                public ChudWidgetAnimationStruct Readying;
+                public ChudWidgetAnimationStruct Unreadying;
+                public ChudWidgetAnimationStruct Impulse;
 
-                //Idle Animation
-                public AnimationFlags IdleFlags;
-                public AnimationFunction IdleFunction;
-                public CachedTag Idle;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float IdleUnknown;
-
-                //Special State Animation
-                public AnimationFlags SpecialStateFlags;
-                public AnimationFunction SpecialStateFunction;
-                public CachedTag SpecialState;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float SpecialStateUnknown;
-
-                //Transition In Animation
-                public AnimationFlags TransitionInFlags;
-                public AnimationFunction TransitionInFunction;
-                public CachedTag TransitionIn;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float TransitionInUnknown;
-
-                //Transition Out Animation
-                public AnimationFlags TransitionOutFlags;
-                public AnimationFunction TransitionOutFunction;
-                public CachedTag TransitionOut;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float TransitionOutUnknown;
-
-                //Brief State Animation
-                public AnimationFlags BriefStateFlags;
-                public AnimationFunction BriefStateFunction;
-                public CachedTag BriefState;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float BriefStateUnknown;
-
-                [Flags]
-                public enum AnimationFlags : short
+                [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3ODST)]
+                [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
+                public class ChudWidgetAnimationStruct : TagStructure
                 {
-                    None,
-                    ReverseFrames = 1 << 0,
-                }
+                    public ChudWidgetAnimationFlags Flags;
+                    public ChudWidgetAnimationInputTypeEnum InputType;
+                    public CachedTag Animation;
 
-                public enum AnimationFunction : short
-                {
-                    Default,
-                    UseInput,
-                    UseRangeInput,
-                    UseCompassTarget, //?
-                    UseUserTarget //?
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                    public float StateUnknown;
+
+                    [Flags]
+                    public enum ChudWidgetAnimationFlags : ushort
+                    {
+                        PlayReverse = 1 << 0
+                    }
+
+                    public enum ChudWidgetAnimationInputTypeEnum : short
+                    {
+                        Time,
+                        Extern1,
+                        Extern2,
+                        UseCompassTarget, //? HO or invalid
+                        UseUserTarget //? HO or invalid
+                    }
                 }
             }
 
@@ -931,25 +854,31 @@ namespace TagTool.Tags.Definitions
             public class RenderDatum : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public ShaderIndexValue ShaderIndex;
+                public ChudShaderType ShaderType;
+
                 [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
                 public byte[] Padding;
+
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudBlendMode BlendModeHO;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public InputValue_HO Input_HO;
+                public ChudRenderExternalInputHO ExternalInput;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public InputValue_HO RangeInput_HO;
+                public ChudRenderExternalInputHO RangeInput;
+
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public InputValue_H3 Input_H3;
+                public ChudRenderExternalInputH3 ExternalInputA_H3;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public InputValue_H3 RangeInput_H3;
+                public ChudRenderExternalInputH3 ExternalInputB_H3;
+
                 [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-                public InputValue_ODST Input_ODST;
+                public ChudRenderExternalInput_ODST ExternalInput_ODST;
+
                 [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public InputValue_ODST RangeInput_ODST;
+                public ChudRenderExternalInput_ODST RangeInput_ODST;
+
                 public ArgbColor LocalColorA;
                 public ArgbColor LocalColorB;
                 public ArgbColor LocalColorC;
@@ -958,6 +887,7 @@ namespace TagTool.Tags.Definitions
                 public float LocalScalarB;
                 public float LocalScalarC;
                 public float LocalScalarD;
+
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public OutputColorValue OutputColorA;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -970,6 +900,7 @@ namespace TagTool.Tags.Definitions
                 public OutputColorValue OutputColorE;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public OutputColorValue OutputColorF;
+
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorA_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -982,12 +913,14 @@ namespace TagTool.Tags.Definitions
                 public OutputColorValue_HO OutputColorE_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public OutputColorValue_HO OutputColorF_HO;
+
                 public OutputScalarValue OutputScalarA;
                 public OutputScalarValue OutputScalarB;
                 public OutputScalarValue OutputScalarC;
                 public OutputScalarValue OutputScalarD;
                 public OutputScalarValue OutputScalarE;
                 public OutputScalarValue OutputScalarF;
+
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown2;
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -997,7 +930,7 @@ namespace TagTool.Tags.Definitions
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
 				public short Unknown5;
 
-                public enum ShaderIndexValue : short
+                public enum ChudShaderType : short
                 {
                     Simple,
                     Meter,
@@ -1005,11 +938,11 @@ namespace TagTool.Tags.Definitions
                     MeterShield,
                     MeterGradient,
                     Crosshair,
-                    DirectionalDamage,
-                    Solid,
-                    Sensor,
+                    DirectionalDamage, // dontUse
+                    Solid, // dontUse
+                    Sensor, // dontUse
                     MeterSingleColor,
-                    Navpoint,
+                    Navpoints,
                     Medal,
                     TextureCam,
                     CortanaScreen,
@@ -1019,12 +952,12 @@ namespace TagTool.Tags.Definitions
                     MeterChapter,
                     MeterDoubleGradient,
                     MeterRadialGradient,
-                    Turbulence,
+                    DistortionAndBlur,
                     Emblem,
                     CortanaComposite,
                     DirectionalDamageApply,
                     ReallySimple,
-                    Unknown
+                    Unknown // ?? not in H3
                 }
 
                 public enum ChudBlendMode : short
@@ -1044,65 +977,65 @@ namespace TagTool.Tags.Definitions
                     SeparateAlphaBlendAdditive
                 }
 
-                public enum InputValue_HO : short
+                public enum ChudRenderExternalInputHO : short
                 {
                     Zero,
                     One,
-                    Time,
-                    Fade,
-                    UnitHealthCurrent,
-                    UnitHealth,
-                    UnitShieldCurrent,
-                    UnitShield,
-                    ClipAmmoFraction,
-                    TotalAmmoFraction,
+                    DebugSlide1,    // ? Time
+                    DebugSlide100,  // ? Fade
+                    BodyVitality,
+                    HealthRecentDamage,
+                    ShieldAmount,
+                    ShieldRecentDamage,
+                    WeaponAmmoLoaded,
+                    WeaponAmmoReserve,
                     WeaponVersionNumber,
-                    HeatFraction,
-                    BatteryFraction,
+                    WeaponHeatFraction,
+                    WeaponBatteryFraction,
                     WeaponErrorCurrent1,
                     WeaponErrorCurrent2,
-                    Pickup,
-                    UnitAutoaimed,
-                    Grenade,
-                    GrenadeFraction,
-                    ChargeFraction,
+                    ImpulseValue,
+                    Autoaim,
+                    GrenadeSelected,
+                    GrenadeCount,
+                    WeaponChargeFraction,
                     FriendlyScore,
                     EnemyScore,
                     ScoreToWin,
                     ArmingFraction,
-                    UnknownX18,
+                    LockingAmount,
                     Unit1xOvershieldCurrent,
-                    Unit1xOvershield,
+                    Unit1xOvershieldRecentDmg,
                     Unit2xOvershieldCurrent,
-                    Unit2xOvershield,
+                    Unit2xOvershieldRecentDmg,
                     Unit3xOvershieldCurrent,
-                    Unit3xOvershield,
-                    AimYaw,
-                    AimPitch,
+                    Unit3xOvershieldRecentDmg,
+                    CameraYaw,
+                    CameraPitch,
                     TargetDistance,
                     TargetElevation,
-                    EditorBudget,
-                    EditorBudgetCost,
-                    FilmTotalTime,
-                    FilmCurrentTime,
-                    UnknownX27,
-                    FilmTimelineFraction1,
-                    FilmTimelineFraction2,
-                    UnknownX2a,
-                    UnknownX2b,
+                    EditorBudgetFraction,
+                    EditorBudgetLeft,
+                    SavedFilmTotalTime,
+                    SavedFilmMarkerTime,
+                    SavedFilmChapterWidth,
+                    SavedFilmBufferedTheta,
+                    SavedFilmCurrentPositionTheta,
+                    SavedFilmRecordStartTheta,
+                    SavedFilmPieFraction,
                     MetagameTime,
-                    MetagameScoreTransient,
-                    MetagameScorePlayer1,
-                    MetagameScorePlayer2,
-                    MetagameScorePlayer3,
-                    MetagameScorePlayer4,
-                    MetagameModifier,
-                    MetagameSkullModifier,
-                    SensorRange,
-                    NetdebugLatency,
-                    NetdebugLatencyQuality,
-                    NetdebugHostQuality,
-                    NetdebugLocalQuality,
+                    MetagameTransientScore,
+                    MetagameP1Score,
+                    MetagameP2Score,
+                    MetagameP3Score,
+                    MetagameP4Score,
+                    MetagameTimeMultiplier,
+                    MetagameSkullDifficultyModifier,
+                    MotionSensorRange,
+                    NetworkLatency,
+                    NetworkLatencyQuality,
+                    NetworkHostQuality,
+                    NetworkLocalQuality,
                     MetagameScoreNegative,
                     SurvivalCurrentSet,
                     SurvivalCurrentRound,
@@ -1159,62 +1092,62 @@ namespace TagTool.Tags.Definitions
                     UnitStaminaCurrent
                 }
 
-                public enum InputValue_ODST : short
+                public enum ChudRenderExternalInput_ODST : short
                 {
                     Zero,
                     One,
-                    Time,
-                    Fade,
-                    UnitHealthCurrent,
-                    UnitHealth,
-                    UnitShieldCurrent,
-                    UnitShield,
-                    ClipAmmoFraction,
-                    TotalAmmoFraction,
-                    HeatFraction,
-                    BatteryFraction,
-                    Pickup,
-                    UnitAutoaimed,
-                    Grenade,
-                    GrenadeFraction,
-                    ChargeFraction,
+                    DebugSlide1,        // ? Time
+                    DebugSlide100,      // ? Fade
+                    BodyVitality,
+                    HealthRecentDamage,
+                    ShieldAmount,
+                    ShieldRecentDamage,
+                    WeaponAmmoLoaded,
+                    WeaponAmmoReserve,
+                    WeaponHeatFraction,
+                    WeaponBatteryFraction,
+                    ImpulseValue,
+                    Autoaim,
+                    GrenadeSelected,
+                    GrenadeCount,
+                    WeaponChargeFraction,
                     FriendlyScore,
                     EnemyScore,
                     ScoreToWin,
                     ArmingFraction,
-                    UnknownX18,
+                    LockingAmount,
                     Unit1xOvershieldCurrent,
-                    Unit1xOvershield,
+                    Unit1xOvershieldRecentDmg,
                     Unit2xOvershieldCurrent,
-                    Unit2xOvershield,
+                    Unit2xOvershieldRecentDmg,
                     Unit3xOvershieldCurrent,
-                    Unit3xOvershield,
-                    AimYaw,
-                    AimPitch,
+                    Unit3xOvershieldRecentDmg,
+                    CameraYaw,
+                    CameraPitch,
                     TargetDistance,
                     TargetElevation,
-                    EditorBudget,
-                    EditorBudgetCost,
-                    FilmTotalTime,
-                    FilmCurrentTime,
-                    UnknownX27,
-                    FilmTimelineFraction1,
-                    FilmTimelineFraction2,
-                    UnknownX2a,
-                    UnknownX2b,
+                    EditorBudgetFraction,
+                    EditorBudgetLeft,
+                    SavedFilmTotalTime,
+                    SavedFilmMarkerTime,
+                    SavedFilmChapterWidth,
+                    SavedFilmBufferedTheta,
+                    SavedFilmCurrentPositionTheta,
+                    SavedFilmRecordStartTheta,
+                    SavedFilmPieFraction,
                     MetagameTime,
-                    MetagameScoreTransient,
-                    MetagameScorePlayer1,
-                    MetagameScorePlayer2,
-                    MetagameScorePlayer3,
-                    MetagameScorePlayer4,
-                    MetagameModifier,
-                    MetagameSkullModifier,
-                    SensorRange,
-                    NetdebugLatency,
-                    NetdebugLatencyQuality,
-                    NetdebugHostQuality,
-                    NetdebugLocalQuality,
+                    MetagameTransientScore,
+                    MetagameP1Score,
+                    MetagameP2Score,
+                    MetagameP3Score,
+                    MetagameP4Score,
+                    MetagameTimeMultiplier,
+                    MetagameSkullDifficultyModifer,
+                    MotionSensorRange,
+                    NetworkLatency,
+                    NetworkLatencyQuality,
+                    NetworkHostQuality,
+                    NetworkLocalQuality,
                     MetagameScoreNegative,
                     Unknown1,
                     CompassDistanceToUserTarget,
@@ -1246,60 +1179,62 @@ namespace TagTool.Tags.Definitions
                     Achievement5Icon,
                 }
 
-                public enum InputValue_H3 : short
+                public enum ChudRenderExternalInputH3 : short
                 {
                     Zero,
                     One,
-                    Time,
-                    Fade,
-                    UnitShieldCurrent,
-                    UnitShield,
-                    ClipAmmoFraction,
-                    TotalAmmoFraction,
-                    HeatFraction,
-                    BatteryFraction,
-                    Pickup,
-                    UnitAutoaimed,
-                    Grenade,
-                    GrenadeFraction,
-                    ChargeFraction,
+                    DebugSlide1,    // ? Time
+                    DebugSlide100,  // ? Fade
+                    BodyVitality,       // possibly MCC only
+                    HealthRecentDamage, // possibly MCC only
+                    ShieldAmount,
+                    ShieldRecentDamage,
+                    WeaponAmmoLoaded,
+                    WeaponAmmoReserve,
+                    WeaponHeatFraction,
+                    WeaponBatteryFraction,
+                    ImpulseValue,
+                    Autoaim,
+                    GrenadeSelected,
+                    GrenadeCount,
+                    WeaponChargeFraction,
                     FriendlyScore,
                     EnemyScore,
                     ScoreToWin,
                     ArmingFraction,
-                    UnknownX18,
+                    LockingAmount,
                     Unit1xOvershieldCurrent,
-                    Unit1xOvershield,
+                    Unit1xOvershieldRecentDmg,
                     Unit2xOvershieldCurrent,
-                    Unit2xOvershield,
+                    Unit2xOvershieldRecentDmg,
                     Unit3xOvershieldCurrent,
-                    Unit3xOvershield,
-                    AimYaw,
-                    AimPitch,
+                    Unit3xOvershieldRecentDmg,
+                    CameraYaw,
+                    CameraPitch,
                     TargetDistance,
                     TargetElevation,
-                    EditorBudget,
-                    EditorBudgetCost,
-                    FilmTotalTime,
-                    FilmCurrentTime,
-                    UnknownX27,
-                    FilmTimelineFraction1,
-                    FilmTimelineFraction2,
-                    UnknownX2a,
-                    UnknownX2b,
+                    EditorBudgetFraction,
+                    EditorBudgetLeft,
+                    SavedFilmTotalTime,
+                    SavedFilmMarkerTime,
+                    SavedFilmChapterWidth,
+                    SavedFilmBufferedTheta,
+                    SavedFilmCurrentPositionTheta,
+                    SavedFilmRecordStartTheta,
+                    SavedFilmPieFraction,
                     MetagameTime,
-                    MetagameScoreTransient,
-                    MetagameScorePlayer1,
-                    MetagameScorePlayer2,
-                    MetagameScorePlayer3,
-                    MetagameScorePlayer4,
-                    MetagameModifier,
-                    Unknown,
-                    SensorRange,
-                    NetdebugLatency,
-                    NetdebugLatencyQuality,
-                    NetdebugHostQuality,
-                    NetdebugLocalQuality,
+                    MetagameTransientScore,
+                    MetagameP1Score,
+                    MetagameP2Score,
+                    MetagameP3Score,
+                    MetagameP4Score,
+                    MetagameTimeMultiplier,
+                    MetagameSkullDifficultyModifer,
+                    MotionSensorRange,
+                    NetworkLatency,
+                    NetworkLatencyQuality,
+                    NetworkHostQuality,
+                    NetworkLocalQuality,
                     MetagameScoreNegative,
                 }
 
@@ -1423,43 +1358,46 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public StringId Name;
-                public SpecialHudTypeValue SpecialHudType;
-                public WidgetFlags Unknown;
-                public LayerEnum Layer;
+                public ChudScriptingClass ScriptingClass;
+                public WidgetFlags BaseFlags;
+                public WidgetLayerEnum SortLayer;
                 public List<StateDatum> StateData;
                 public List<PlacementDatum> PlacementData;
                 public List<AnimationDatum> AnimationData;
                 public List<RenderDatum> RenderData;
-                public int WidgetIndex;
-                public FlagsValue Flags;
-                public short Unknown3;
+                public int RuntimeWidgetIndex;
+                public WidgetBitmapFlags Flags;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
+
                 public CachedTag Bitmap;
                 public byte BitmapSpriteIndex;
-                public byte Unknown4;
-                public byte Unknown5;
-                public byte Unknown6;
+
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
 
                 [Flags]
-                public enum FlagsValue : ushort
+                public enum WidgetBitmapFlags : ushort
                 {
                     None,
                     MirrorHorizontally = 1 << 0,
                     MirrorVertically = 1 << 1,
-                    StretchEdges = 1 << 2,
-                    EnableTextureCam = 1 << 3,
-                    Looping = 1 << 4,
-                    Bit5 = 1 << 5,
+                    ExtendBorder = 1 << 2, // stretch edges
+                    UseTextureCam = 1 << 3,
+                    UseWrapSampling = 1 << 4, // looping
+                    AutoPermute = 1 << 5,
                     Player1Emblem = 1 << 6,
                     Player2Emblem = 1 << 7,
                     Player3Emblem = 1 << 8,
                     Player4Emblem = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    InputControlsConsumable = 1 << 14,
-                    InputControlsWeapon = 1 << 15
-                }
+                    ScaleAlphaByColOutA = 1 << 10,
+                    Stretch = 1 << 11,
+                    Bit12 = 1 << 12,					// not in H3
+                    Bit13 = 1 << 13,                    // not in H3
+					InputControlsConsumable = 1 << 14,  // not in H3
+					InputControlsWeapon = 1 << 15       // not in H3
+				}
             }
 
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
@@ -1469,69 +1407,106 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public StringId Name;
-                public SpecialHudTypeValue SpecialHudType;
-                public WidgetFlags Unknown;
-                public LayerEnum Layer;
+                public ChudScriptingClass ScriptingClass;
+                public WidgetFlags Flags;
+                public WidgetLayerEnum SortLayer;
                 public List<StateDatum> StateData;
                 public List<PlacementDatum> PlacementData;
                 public List<AnimationDatum> AnimationData;
                 public List<RenderDatum> RenderData;
                 public int WidgetIndex;
-                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+
+                    // flags
                 [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-                public FlagsValue Flags;
-				[TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-				public FlagsValue_H3 Flags_H3;
-                public FontValue Font;
-                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-                public short Unknown4;
-                public StringId String;
+                public WidgetTextFlags TextFlags;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+                public WidgetTextFlags_H3Original TextFlags_H3Original;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public WidgetTextFlags_H3MCC TextFlags_H3MCC;
+
+                    // fonts
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+                public WidgetFontValue_H3Original Font_H3;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public WidgetFontValue_H3MCC Font_H3MCC;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                public WidgetFontValue_ODST Font_ODST;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                public WidgetFontValue Font;
+
+                public StringId InputString;
 
                 [Flags]
-				public enum FlagsValue_H3 : ushort
+                public enum WidgetTextFlags_H3Original : ushort
                 {
-                    None,
-                    StringIsANumber = 1 << 0,
-                    Force2Digit = 1 << 1,
-                    Force3Digit = 1 << 2,
-                    PlusSuffix = 1 << 3,
-                    MSuffix = 1 << 4,
-					HundredthsDecimal = 1 << 5,
-					ThousandthsDecimal = 1 << 6,
-					HundredThousandthsDecimal = 1 << 7,
-					OnlyANumber = 1 << 8,
-					XSuffix = 1 << 9,
-					InBrackets = 1 << 10,
-					TimeFormat_S_MS = 1 << 11,
-					TimeFormat_H_M_S = 1 << 12,
-					MoneyFormat = 1 << 13,
-					MinusPrefix = 1 << 14,
-					Bit15 = 1 << 15
+					None,
+					StringIsANumber = 1 << 0,
+					Force2DigitNumber = 1 << 1,
+					Force3DigitNumber = 1 << 2,
+					SuffixWithPlus = 1 << 3,
+					SuffixWithM = 1 << 4,
+					Decimal2Digits = 1 << 5,
+					Decimal3Digits = 1 << 6,
+					Decimal5Digits = 1 << 7,
+					SuperHugeNumber = 1 << 8,
+					SuffixWithX = 1 << 9,
+					WrapWithBrackets = 1 << 10,
+					FormatAsTime_S_MS = 1 << 11,
+					FormatAsTime_H_M_S = 1 << 12,
+					FormatAsBudgetNumber = 1 << 13,
+					PrefixWithMinus = 1 << 14,
+					OnlyAxesGlobal = 1 << 15
 				}
 
                 [Flags]
-                public enum FlagsValue : uint
+                public enum WidgetTextFlags_H3MCC : uint
+                {
+                    StringIsANumber = 1 << 0,
+                    Force2digitNumber = 1 << 1,
+                    Force3digitNumber = 1 << 2,
+                    Kudos = 1 << 3,
+                    PostfixMForMeters = 1 << 4,
+                    Decimal2Digits = 1 << 5,
+                    Decimal3Digits = 1 << 6,
+                    Decimal5Digits = 1 << 7,
+                    SuperhugeNubmer = 1 << 8,
+                    PostfixX = 1 << 9,
+                    WrapWithBrackets = 1 << 10,
+                    FormatAsTime = 1 << 11,
+                    FormatAsHhmmssTime = 1 << 12,
+                    FormatAsBudgetNumber = 1 << 13,
+                    Kudosnegative = 1 << 14,
+                    OnlyAxesGlobal = 1 << 15,
+                    OnlyAxesLocal = 1 << 16
+                }
+                
+                [Flags]
+                public enum WidgetTextFlags : uint
                 {
                     None,
                     StringIsANumber = 1 << 0,
-                    Force2Digit = 1 << 1,
-                    Force3Digit = 1 << 2,
-                    PlusSuffix = 1 << 3,
-                    MSuffix = 1 << 4,
-                    TenthsDecimal = 1 << 5,
-                    HundredthsDecimal = 1 << 6,
-                    ThousandthsDecimal = 1 << 7,
-                    HundredThousandthsDecimal = 1 << 8,
-                    OnlyANumber = 1 << 9,
-                    XSuffix = 1 << 10,
-                    InBrackets = 1 << 11,
-                    TimeFormat_S_MS = 1 << 12,
-                    TimeFormat_H_M_S = 1 << 13,
-                    MoneyFormat = 1 << 14,
-                    MinusPrefix = 1 << 15,
-                    Centered = 1 << 16,
-                    Bit17 = 1 << 17,
+                    Force2DigitNumber = 1 << 1,
+                    Force3DigitNumber = 1 << 2,
+                    SuffixWithPlus = 1 << 3,
+                    SuffixWithM = 1 << 4,
+                    Decimal1Digit = 1 << 5,
+                    Decimal2Digits = 1 << 6,
+                    Decimal3Digits = 1 << 7,
+                    Decimal5Digits = 1 << 8,
+                    SuperHugeNumber = 1 << 9,
+                    SuffixWithX = 1 << 10,
+                    WrapWithBrackets = 1 << 11,
+                    FormatAsTime_S_MS = 1 << 12,
+                    FormatAsTime_H_M_S = 1 << 13,
+                    FormatAsBudgetNumber = 1 << 14,
+                    PrefixWithMinus = 1 << 15,
+                    Centered = 1 << 16,         // OnlyAxesGlobal ?
+                    Bit17 = 1 << 17,            // OnlyAxesLocal ?
                     Bit18 = 1 << 18,
                     Bit19 = 1 << 19,
                     Bit20 = 1 << 20,
@@ -1547,6 +1522,46 @@ namespace TagTool.Tags.Definitions
                     Bit30 = 1 << 30,
                 }
             }
+
+            public enum ChudScriptingClass : short
+            {
+                UseParent,
+                WeaponStats,
+                Crosshair,
+                Shield,
+                Grenades,
+                Messages, //gametype related
+                MotionSensor,
+                SpikeGrenade,
+                FireGrenade,
+                Compass,
+                Stamina,
+                EnergyMeter,
+                Consumable
+            }
+        }
+
+        [Flags]
+        public enum WidgetFlags : byte
+        {
+            None,
+            DieOnActive = 1 << 0,
+            SkipInputUpdateWhenUnreadying = 1 << 1,
+            ResetTimerOnInputChange = 1 << 2,
+            WeaponSwapHack = 1 << 3,
+            EquipmentHack = 1 << 4
+        }
+
+        public enum WidgetLayerEnum : byte
+        {
+            Background,
+            Flashes,
+            Parent,
+            Middle,
+            Child,
+            Foreground,
+            Inherited,
+            SavedFilm
         }
     }
 }

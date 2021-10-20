@@ -1,4 +1,5 @@
 using System;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.GUI;
 
@@ -12,9 +13,21 @@ namespace TagTool.Tags.Definitions
         public StringId ValueOverrideList;
         public StringId ValueIdentifier; // for setting string
         public StringId TextColorPreset;
-        public FontValue CustomFont;
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] TextWidgetDefinitionPad;
+
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        public WidgetFontValue_H3Original CustomFont_H3;
+
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original, Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] TextWidgetH3OriginalPadding;
+
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public WidgetFontValue_H3MCC CustomFont_H3MCC;
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        public WidgetFontValue_ODST CustomFont_ODST;
+
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public WidgetFontValue CustomFont;
 
         [Flags]
         public enum GuiTextFlags : int
