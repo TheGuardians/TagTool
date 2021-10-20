@@ -391,18 +391,18 @@ namespace TagTool.Commands.Porting
             }
 
             //metagame values
-            H3Definition.CampaignMedalScale = 1.5f;
-            H3Definition.CampaignMedalSpacing = 60.0f;
+            H3Definition.CampaignMetagame.MedalScale = 1.5f;
+            H3Definition.CampaignMetagame.MedalSpacing = 60.0f;
 
             if (BlamCache.Version <= CacheVersion.Halo3Retail)
             {
                 // H3 metagame fixups
-                H3Definition.CampaignMedalSpacing = 47.0f;
-                H3Definition.CampaignMedalChudAnchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
-                H3Definition.CampaignMedalOffsetX = -290;
-                H3Definition.CampaignMedalOffsetY = -113;
-                H3Definition.MetagameScoreboardTopY = 0;
-                H3Definition.MetagameScoreboardSpacing = 0;
+                H3Definition.CampaignMetagame.MedalSpacing = 47.0f;
+                H3Definition.CampaignMetagame.MedalChudAnchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
+                H3Definition.CampaignMetagame.MedalOffset.X = -290;
+                H3Definition.CampaignMetagame.MedalOffset.Y = -113;
+                H3Definition.CampaignMetagame.ScoreboardTopY = 0;
+                H3Definition.CampaignMetagame.ScoreboardSpacing = 0;
             }
 
             //upscale blip bitmap sizes

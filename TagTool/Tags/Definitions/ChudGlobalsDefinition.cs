@@ -16,22 +16,7 @@ namespace TagTool.Tags.Definitions
         public List<ChudSuckProfile> SuckProfiles;
         public List<CortanaEffectConfig> CortanaConfigs;
         public List<PlayerTrainingDatum> PlayerTrainingData;
-        public CachedTag CampaignMetagameEmblems;
-        public CachedTag CampaignMetagameMedals;
-        public CachedTag CampaignMetagameMedalAnimation;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType CampaignMedalChudAnchor;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 2, Flags = Padding)]
-        public byte[] PostAnchorPadding;
-
-        public float CampaignMedalScale;
-        public float CampaignMedalSpacing;
-        public float CampaignMedalOffsetX;
-        public float CampaignMedalOffsetY;
-        public float MetagameScoreboardTopY;
-        public float MetagameScoreboardSpacing;
+        public CampaignMetagameStruct CampaignMetagame;
         public CachedTag DirectDamageMicrotexture;
         public float MicrotextureScale;
         public float MediumSensorBlipScale;
@@ -835,6 +820,27 @@ namespace TagTool.Tags.Definitions
             {
                 NotInMultiplayer = 1 << 0
             }
+        }
+
+        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x4C, MinVersion = CacheVersion.Halo3ODST)]
+        public class CampaignMetagameStruct : TagStructure
+        {
+            public CachedTag Emblems;
+            public CachedTag Medals;
+            public CachedTag MedalAnimation;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType MedalChudAnchor;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 2, Flags = Padding)]
+            public byte[] PostAnchorPadding;
+
+            public float MedalScale;
+            public float MedalSpacing;
+            public RealPoint2d MedalOffset;
+            public float ScoreboardTopY;
+            public float ScoreboardSpacing;
         }
     }
 }
