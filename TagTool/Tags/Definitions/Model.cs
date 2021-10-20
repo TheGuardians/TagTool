@@ -1125,8 +1125,8 @@ namespace TagTool.Tags.Definitions
                     LockedByHumanTracking = 1 << 2, //unconfirmed
                     AlwaysLockedByPlasmaTracking = 1 << 3,
                     Vulnerable = 1 << 4,    //unconfirmed
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
+                    IgnoredOnLocalPhysics = 1 << 5,
+                    UseForNetworkLeadVectorOnly = 1 << 6,
                     Bit7 = 1 << 7
                 }
             }
