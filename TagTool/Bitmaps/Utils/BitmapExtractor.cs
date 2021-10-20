@@ -12,7 +12,7 @@ namespace TagTool.Bitmaps
     {
         public static byte[] ExtractBitmapData(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            var resourceReference = bitmap.Resources[imageIndex];
+            var resourceReference = bitmap.HardwareTextures[imageIndex];
             var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
             if (cache is GameCacheHaloOnlineBase)
             {

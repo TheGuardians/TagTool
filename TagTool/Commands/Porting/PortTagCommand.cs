@@ -206,10 +206,10 @@ namespace TagTool.Commands.Porting
                         // need to assign resource reference to an object here -- otherwise it compiles strangely??
                         object bitmapResourceDefinition;
 
-                        if (image.XboxFlags.HasFlag(TagTool.Bitmaps.BitmapFlagsXbox.UseInterleavedTextures))
-                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                        if (image.XboxFlags.HasFlag(TagTool.Bitmaps.BitmapFlagsXbox.Xbox360UseInterleavedTextures))
+                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedHardwareTextures[image.InterleavedInterop]);
                         else
-                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[i]);
+                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.HardwareTextures[i]);
 
                         if (bitmapResourceDefinition == null)
                             return false;

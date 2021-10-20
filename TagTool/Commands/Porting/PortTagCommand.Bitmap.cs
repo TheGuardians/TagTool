@@ -32,8 +32,8 @@ namespace TagTool.Commands.Porting
                 resourceList.Add(resource);
             }
 
-            bitmap.Resources = resourceList;
-            bitmap.InterleavedResources = null;
+            bitmap.HardwareTextures = resourceList;
+            bitmap.InterleavedHardwareTextures = null;
 
             //fixup for HO expecting 6 sequences in sensor_blips bitmap
             if (tagName == "ui\\chud\\bitmaps\\sensor_blips")
