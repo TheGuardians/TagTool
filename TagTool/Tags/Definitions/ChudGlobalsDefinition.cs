@@ -355,7 +355,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ArgbColor PWRItemOutline;
 
-            public List<HudCurvatureInfo> HudCurvature;
+            public List<HudAttribute> HudAttributes;
             public List<HudSound> HudSounds;
             public CachedTag BannedVehicleEntranceSound;
             public CachedTag FragGrenadeSwapSound;
@@ -441,13 +441,13 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x60, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x130, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.HaloOnlineED)]
-            public class HudCurvatureInfo : TagStructure
+            public class HudAttribute : TagStructure
             {
                 public ResolutionFlagValue ResolutionFlags;
 
-                public Angle SourceFovY; // WarpAngle
+                public Angle WarpSourceFovY; // WarpAngle
                 public float WarpAmount; // WarpAmount
-                public float DestinationOffsetZ;
+                public float WarpDestinationZOffset; // the Z-axis is along the camera line of sight.
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public float Unknown4;
@@ -536,7 +536,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag ThirdPersonDamageBorder = null;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float StateScale_HO;
+                public float StateMessageScale;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public RealPoint2d StateLeftRightOffset_HO;
 
@@ -564,7 +564,7 @@ namespace TagTool.Tags.Definitions
                 public float MedalWidth; // medal spacing
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public float StateMessageScale;
+                public float StateMessageScaleH3;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public RealPoint2d SurvivalMedalsOffset; //referenced by chud anchors -- must be neither campaign nor multiplayer
@@ -578,9 +578,7 @@ namespace TagTool.Tags.Definitions
                 public int MessageCountDelta; //controls max number of notification lines onscreen
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float NotificationOffsetX_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public float NotificationOffsetY_HO;
+                public RealPoint2d MessageOffset;
 
                 //This group of 5 floats is all part of the same system
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]

@@ -285,9 +285,9 @@ namespace TagTool.Commands.Porting
                 //fixups
                 H3globs.GrenadeAnchorOffset = 1.5f * H3globs.GrenadeAnchorOffset;
 
-                for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudCurvature.Count; hudAttributesIndex++)
+                for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
-                    var H3att = H3Definition.HudGlobals[hudGlobalsIndex].HudCurvature[hudAttributesIndex];
+                    var H3att = H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
 
                     if (BlamCache.Version <= CacheVersion.Halo3Retail)
                     {
@@ -303,15 +303,15 @@ namespace TagTool.Commands.Porting
                     H3att.MotionSensorRadius *= 1.5f;
                     H3att.BlipRadius *= 1.5f;
                     H3att.StateLeftRightOffset_HO.Y = H3att.StateLeftRightOffsetY_H3;
-                    H3att.StateScale_HO = H3att.StateMessageScale;
-                    H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
-                    H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
+                    H3att.StateMessageScale = H3att.StateMessageScaleH3;
+                    H3att.MessageOffset.X = H3att.NotificationOffsetX_H3;
+                    H3att.MessageOffset.Y = H3att.NotificationOffsetY_H3;
                     H3att.MessageScale *= 1.5f;
                     H3att.MessageHeight *= 1.5f;
 
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
-                        H3att.SourceFovY = Angle.FromDegrees(4.5f);
+                        H3att.WarpSourceFovY = Angle.FromDegrees(4.5f);
                         H3att.WarpAmount = 0.1f;
                         H3att.StateLeftRightOffset_HO.Y = 0.2f; // 0.2 due to odsts 0.87 hud scale
                     }

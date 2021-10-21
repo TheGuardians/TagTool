@@ -1372,9 +1372,9 @@ namespace TagTool.Tags.Definitions
                 public byte[] Padding0;
 
                 public CachedTag Bitmap;
-                public byte BitmapSpriteIndex;
+                public byte BitmapSequenceIndex;
 
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                [TagField(Length = 3, Flags = Padding)]
                 public byte[] Padding1;
 
                 [Flags]
