@@ -528,7 +528,7 @@ namespace TagTool.Commands.Porting
 						foreach (var screenEffect in sefc.ScreenEffects)
 							screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
-                    if (sefc.ScreenEffects.Count > 0 && blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui")
+                    if (sefc.ScreenEffects.Count > 0 && sefc.ScreenEffects[0].Lifetime == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
                     {
                         sefc.ScreenEffects[0].Lifetime = 1E+19f;
                         sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
