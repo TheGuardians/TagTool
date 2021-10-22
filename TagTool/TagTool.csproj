@@ -368,6 +368,8 @@
     <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
     <Compile Include="Commands\Files\ExtractBlfImageCommand.cs" />
     <Compile Include="Commands\Forge\MaximizeBudgetCommand.cs" />
+    <Compile Include="Commands\Gen2\ModelAnimationGraphs\AnimationContextFactory.cs" />
+    <Compile Include="Commands\Gen2\ModelAnimationGraphs\ExtractAnimationCommand.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\BSPContextFactory.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\Gen4\ModelAnimationGraphs\AnimationContextFactory.cs" />
