@@ -889,30 +889,30 @@ namespace TagTool.Tags.Definitions
                 public float LocalScalarD;
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorA;
+                public OutputColorValue OutputColorA_Retail;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorB;
+                public OutputColorValue OutputColorB_Retail;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorC;
+                public OutputColorValue OutputColorC_Retail;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorD;
+                public OutputColorValue OutputColorD_Retail;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorE;
+                public OutputColorValue OutputColorE_Retail;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorF;
+                public OutputColorValue OutputColorF_Retail;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public OutputColorValue_HO OutputColorA_HO;
+                public OutputColorValue_HO OutputColorA;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public OutputColorValue_HO OutputColorB_HO;
+                public OutputColorValue_HO OutputColorB;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public OutputColorValue_HO OutputColorC_HO;
+                public OutputColorValue_HO OutputColorC;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public OutputColorValue_HO OutputColorD_HO;
+                public OutputColorValue_HO OutputColorD;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public OutputColorValue_HO OutputColorE_HO;
+                public OutputColorValue_HO OutputColorE;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public OutputColorValue_HO OutputColorF_HO;
+                public OutputColorValue_HO OutputColorF;
 
                 public OutputScalarValue OutputScalarA;
                 public OutputScalarValue OutputScalarB;
@@ -1244,44 +1244,44 @@ namespace TagTool.Tags.Definitions
                     LocalB,
                     LocalC,
                     LocalD,
-                    Unused1, //just returns 0 for the color
-                    Unused2, //just returns 0 for the color
+                    ColorAnimationA, //just returns 0 for the color
+                    ColorAnimationB, //just returns 0 for the color
                     ScoreboardFriendly,
                     ScoreboardEnemy,
-                    ArmingTeam,
+                    ArmingMeter,
                     MetagamePlayer1,
                     MetagamePlayer2,
                     MetagamePlayer3,
                     MetagamePlayer4,
                     GameTimeRemaining, //returns LocalA if there is more than 60 seconds left, or LocalB if there is less
-                    GlobalDynamic0,
-                    GlobalDynamic1,
-                    GlobalDynamic2,
-                    GlobalDynamic3,
-                    GlobalDynamic4,
-                    GlobalDynamic5,
-                    GlobalDynamic6,
-                    GlobalDynamic7,
-                    GlobalDynamic8,
-                    GlobalDynamic9,
-                    GlobalDynamic10,
-                    GlobalDynamic11,
-                    GlobalDynamic12,
-                    GlobalDynamic13,
-                    GlobalDynamic14,
-                    GlobalDynamic15,
-                    GlobalDynamic16,
-                    GlobalDynamic17,
-                    GlobalDynamic18,
-                    GlobalDynamic19,
-                    GlobalDynamic20,
-                    GlobalDynamic21,
-                    GlobalDynamic22,
-                    GlobalDynamic23,
-                    GlobalDynamic24,
-                    GlobalDynamic25,
-                    GlobalDynamic26,
-                    GlobalDynamic27,
+                    PrimaryBackground,      // global 0
+                    SecondaryBackground,
+                    HighlightForeground,
+                    WarningFlash,
+                    CrosshairNormal,
+                    CrosshairEnemy,         // global 5
+                    CrosshairFriendly,
+                    BlipBase,
+                    SelfBlip,
+                    EnemyBlip,
+                    NeutralBlip,            // global 10
+                    FriendlyBlip,
+                    BlipPing,
+                    ObjectiveBlipOnRadar,
+                    ObjectiveBlipOffRadar,
+                    NavpointFriendly,       // global 15
+                    NavpointNeutral,
+                    NavpointEnemy,
+                    NavpointAllyDead,
+                    MessageFlashSelf,
+                    MessageFlashFriendly,   // global 20
+                    MessageFlashEnemy,
+                    MessageFlashNeutral,
+                    InvincibleShield,
+                    NavpointAllyStandingBy,
+                    NavpointAllyFiring,   // global 25
+                    NavpointAllyTakingDamage,
+                    NavpointAllySpeaking,
                 }
 
                 public enum OutputColorValue_HO : short
@@ -1290,8 +1290,8 @@ namespace TagTool.Tags.Definitions
                     LocalB,
                     LocalC,
                     LocalD,
-                    Unknown4,
-                    Unknown5,
+                    ColorAnimationA,
+                    ColorAnimationB,
                     ScoreboardFriendly,
                     ScoreboardEnemy,
                     ArmingTeam,
@@ -1300,44 +1300,44 @@ namespace TagTool.Tags.Definitions
                     MetagamePlayer3,
                     MetagamePlayer4,
                     WeaponVersion,
-                    Unknown14,
-                    GlobalDynamic0,
-                    GlobalDynamic1,
-                    GlobalDynamic2,
-                    GlobalDynamic3,
-                    GlobalDynamic4,
-                    GlobalDynamic5,
-                    GlobalDynamic6,
-                    GlobalDynamic7,
-                    GlobalDynamic8,
-                    GlobalDynamic9,
-                    GlobalDynamic10,
-                    GlobalDynamic11,
-                    GlobalDynamic12,
-                    GlobalDynamic13,
-                    GlobalDynamic14,
-                    GlobalDynamic15,
-                    GlobalDynamic16,
-                    GlobalDynamic17,
-                    GlobalDynamic18,
-                    BlueWaypoint_HO,
-                    GlobalDynamic19,
-                    GlobalDynamic20,
-                    GlobalDynamic21,
-                    GlobalDynamic22,
-                    GlobalDynamic23,
-                    GlobalDynamic24,
-                    GlobalDynamic25,
-                    GlobalDynamic26,
-                    GlobalDynamic27,
-                    GlobalDynamic28,
-                    GlobalDynamic29,
-                    GlobalDynamic30,
-                    GlobalDynamic31,
-                    GlobalDynamic32,
-                    GlobalDynamic33,
-                    GlobalDynamic34,
-                    GlobalDynamic35
+                    GameTimeRemaining,      // Unknown14
+                    PrimaryBackground,      // global 0
+                    SecondaryBackground,
+                    HighlightForeground,
+                    WarningFlash,
+                    CrosshairNormal,        // global 4
+                    CrosshairEnemy,
+                    CrosshairFriendly,
+                    BlipBase,
+                    SelfBlip,
+                    EnemyBlip,
+                    NeutralBlip,            // global 10
+                    FriendlyBlip,
+                    BlipPing,
+                    ObjectiveBlipOnRadar,
+                    ObjectiveBlipOffRadar,
+                    NavpointFriendly,       // global 15
+                    NavpointNeutral,
+                    NavpointEnemy,
+                    NavpointAllyDead,
+                    NavpointAllyBlue,
+                    MessageFlashSelf,        // global 20
+                    MessageFlashFriendly,
+                    MessageFlashEnemy,
+                    MessageFlashNeutral,
+                    InvincibleShield,
+                    NavpointAllyStandingBy,
+                    NavpointAllyFiring,
+                    NavpointAllyTakingDamage,
+                    NavpointAllySpeaking,
+                    GlobalDynamic29_HO,     // White
+                    WeaponOutlineDefault,
+                    WeaponOutlineAmmo,
+                    WeaponOutlineDamage,
+                    WeaponOutlineAccuracy,
+                    WeaponOutlineRateOfFire,
+                    WeaponOutlineRange,
+                    WeaponOutlinePower
                 }
                 
                 public enum OutputScalarValue : short

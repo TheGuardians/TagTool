@@ -56,12 +56,12 @@ namespace TagTool.Commands.Porting
                 default:
                     break;
             }
-            renderData.OutputColorA_HO = GetEquivalentValue(renderData.OutputColorA_HO, renderData.OutputColorA);
-            renderData.OutputColorB_HO = GetEquivalentValue(renderData.OutputColorB_HO, renderData.OutputColorB);
-            renderData.OutputColorC_HO = GetEquivalentValue(renderData.OutputColorC_HO, renderData.OutputColorC);
-            renderData.OutputColorD_HO = GetEquivalentValue(renderData.OutputColorD_HO, renderData.OutputColorD);
-            renderData.OutputColorE_HO = GetEquivalentValue(renderData.OutputColorE_HO, renderData.OutputColorE);
-            renderData.OutputColorF_HO = GetEquivalentValue(renderData.OutputColorF_HO, renderData.OutputColorF);
+            renderData.OutputColorA = GetEquivalentValue(renderData.OutputColorA, renderData.OutputColorA_Retail);
+            renderData.OutputColorB = GetEquivalentValue(renderData.OutputColorB, renderData.OutputColorB_Retail);
+            renderData.OutputColorC = GetEquivalentValue(renderData.OutputColorC, renderData.OutputColorC_Retail);
+            renderData.OutputColorD = GetEquivalentValue(renderData.OutputColorD, renderData.OutputColorD_Retail);
+            renderData.OutputColorE = GetEquivalentValue(renderData.OutputColorE, renderData.OutputColorE_Retail);
+            renderData.OutputColorF = GetEquivalentValue(renderData.OutputColorF, renderData.OutputColorF_Retail);
 
             return renderData;
         }
@@ -111,7 +111,7 @@ namespace TagTool.Commands.Porting
                     //fixup for waypoint light
                     if (bitmapwidgetname.Contains("waypoint_light"))
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC_HO = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
                     }
 
                     //Fix some elements not displaying in forge mode

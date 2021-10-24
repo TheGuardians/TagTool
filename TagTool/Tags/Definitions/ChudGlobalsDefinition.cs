@@ -304,44 +304,44 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public ChudSkinType Type;
             // possible mismatches below
-            public ArgbColor HUDDisabled;
-            public ArgbColor HUDPrimary;
-            public ArgbColor HUDForeground;
-            public ArgbColor HUDWarning;
-            public ArgbColor NeutralReticule;
-            public ArgbColor HostileReticule;
-            public ArgbColor FriendlyReticule;
+            public ArgbColor PrimaryBackground;         // global 0
+            public ArgbColor SecondaryBackground;
+            public ArgbColor HighlightForeground;
+            public ArgbColor WarningFlash;
+            public ArgbColor CrosshairNormal;
+            public ArgbColor CrosshairEnemy;            // global 5
+            public ArgbColor CrosshairFriendly;
             public ArgbColor BaseBlip;
-            public ArgbColor NeutralBlip;
-            public ArgbColor HostileBlip;
-            public ArgbColor FriendlyPlayerBlip;
-            public ArgbColor FriendlyAIBlip;
-            public ArgbColor Blipping;
-            public ArgbColor WaypointBlip;
-            public ArgbColor DistantWaypointBlip;
-            public ArgbColor FriendlyWaypoint;
-            public ArgbColor NeutralWaypoint;
-            public ArgbColor HostileWaypoint;
-            public ArgbColor DeadWaypoint;
+            public ArgbColor SelfBlip;
+            public ArgbColor EnemyBlip;
+            public ArgbColor NeutralBlip;               // global 10
+            public ArgbColor FriendlyBlip;
+            public ArgbColor BlipPing;
+            public ArgbColor ObjectiveBlipOnRadar;
+            public ArgbColor ObjectiveBlipOffRadar;
+            public ArgbColor NavpointFriendly;          // global 15
+            public ArgbColor NavpointNeutral;
+            public ArgbColor NavpointEnemy;
+            public ArgbColor NavpointAllyDead;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public ArgbColor BlueWaypoint_HO;
+            public ArgbColor NavpointAllyBlue;
 
-            public ArgbColor MessageFlashSelf;
-            public ArgbColor MessageFlashFriend;
+            public ArgbColor MessageFlashSelf;          // global 20
+            public ArgbColor MessageFlashFriendly;
             public ArgbColor MessageFlashEnemy;
             public ArgbColor MessageFlashNeutral;
             public ArgbColor InvincibleShield;
-            public ArgbColor PlayerNavpointStandingBy;
-            public ArgbColor PlayerNavpointFiring;
-            public ArgbColor PlayerNavpointTakingDamage;
-            public ArgbColor PlayerNavpointSpeaking;
+            public ArgbColor NavpointAllyStandingBy;    // global 25
+            public ArgbColor NavpointAllyFiring;
+            public ArgbColor NavpointAllyTakingDamage;
+            public ArgbColor NavpointAllySpeaking;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public ArgbColor GlobalDynamic29_HO; //White
+            public ArgbColor GlobalDynamic29_HO;        // White
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public ArgbColor DefaultItemOutline;
+            public ArgbColor DefaultItemOutline;        // global 30
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ArgbColor MAGItemOutline;
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
