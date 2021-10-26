@@ -81,6 +81,9 @@ namespace TagTool.Commands.Porting
 			argParameters = ParsePortingOptions(portingOptions);
 
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;
+
+            InitializeSoundConverter();
+
             /*
             if(CacheContext is GameCacheModPackage)
             {
@@ -88,11 +91,11 @@ namespace TagTool.Commands.Porting
             }*/
 
 
-			//
-			// Convert Blam data to ElDorado data
-			//
+            //
+            // Convert Blam data to ElDorado data
+            //
 
-			var resourceStreams = new Dictionary<ResourceLocation, Stream>();
+            var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
             try
             {

@@ -21,7 +21,7 @@ namespace TagTool.Commands.Porting
     {
         private SoundCacheFileGestalt BlamSoundGestalt { get; set; } = null;
         private Dictionary<Sound, Task> SoundConversionTasks = new Dictionary<Sound, Task>();
-        private SemaphoreSlim ConcurrencyLimiter = new SemaphoreSlim(12);
+        private SemaphoreSlim ConcurrencyLimiter;
 
         class SoundConversionResult
         {
@@ -30,6 +30,11 @@ namespace TagTool.Commands.Porting
             // a list of functions that will be run after conversion
             // used for operations like string id conversion which cannot be done concurrently
             public List<Action> PostConversionOperations = new List<Action>();
+        }
+
+        public void InitializeSoundConverter()
+        {
+            ConcurrencyLimiter = new SemaphoreSlim(PortingOptions.Current.MaxThreads);
         }
 
         private void WaitForPendingSoundConversion()
@@ -205,7 +210,7 @@ namespace TagTool.Commands.Porting
                 // Set compression format
                 //
 
-                var targetFormat = Compression.MP3;
+                var targetFormat = PortingOptions.Current.AudioCodec;
                 sound.PlatformCodec.Compression = targetFormat;
 
                 //
