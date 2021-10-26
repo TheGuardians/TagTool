@@ -867,9 +867,14 @@ namespace TagTool.Tags.Definitions
                 public ChudRenderExternalInputHO RangeInput;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public ChudRenderExternalInputH3 ExternalInputA_H3;
+                public ChudRenderExternalInput_H3 ExternalInput_H3;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public ChudRenderExternalInputH3 ExternalInputB_H3;
+                public ChudRenderExternalInput_H3 RangeInput_H3;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public ChudRenderExternalInput_H3MCC ExternalInput_H3MCC;
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public ChudRenderExternalInput_H3MCC RangeInput_H3MCC;
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
@@ -1092,6 +1097,63 @@ namespace TagTool.Tags.Definitions
                     UnitStaminaCurrent
                 }
 
+                public enum ChudRenderExternalInput_H3 : short
+                {
+                    Zero,
+                    One,
+                    DebugSlide1,    // ? Time
+                    DebugSlide100,  // ? Fade
+                    ShieldAmount,
+                    ShieldRecentDamage,
+                    WeaponAmmoLoaded,
+                    WeaponAmmoReserve,
+                    WeaponHeatFraction,
+                    WeaponBatteryFraction,
+                    ImpulseValue,
+                    Autoaim,
+                    GrenadeSelected,
+                    GrenadeCount,
+                    WeaponChargeFraction,
+                    FriendlyScore,
+                    EnemyScore,
+                    ScoreToWin,
+                    ArmingFraction,
+                    LockingAmount,
+                    Unit1xOvershieldCurrent,
+                    Unit1xOvershieldRecentDmg,
+                    Unit2xOvershieldCurrent,
+                    Unit2xOvershieldRecentDmg,
+                    Unit3xOvershieldCurrent,
+                    Unit3xOvershieldRecentDmg,
+                    CameraYaw,
+                    CameraPitch,
+                    TargetDistance,
+                    TargetElevation,
+                    EditorBudgetFraction,
+                    EditorBudgetLeft,
+                    SavedFilmTotalTime,
+                    SavedFilmMarkerTime,
+                    SavedFilmChapterWidth,
+                    SavedFilmBufferedTheta,
+                    SavedFilmCurrentPositionTheta,
+                    SavedFilmRecordStartTheta,
+                    SavedFilmPieFraction,
+                    MetagameTime,
+                    MetagameTransientScore,
+                    MetagameP1Score,
+                    MetagameP2Score,
+                    MetagameP3Score,
+                    MetagameP4Score,
+                    MetagameTimeMultiplier,
+                    MetagameSkullDifficultyModifer,
+                    MotionSensorRange,
+                    NetworkLatency,
+                    NetworkLatencyQuality,
+                    NetworkHostQuality,
+                    NetworkLocalQuality,
+                    MetagameScoreNegative,
+                }
+
                 public enum ChudRenderExternalInput_ODST : short
                 {
                     Zero,
@@ -1179,14 +1241,14 @@ namespace TagTool.Tags.Definitions
                     Achievement5Icon,
                 }
 
-                public enum ChudRenderExternalInputH3 : short
+                public enum ChudRenderExternalInput_H3MCC : short
                 {
                     Zero,
                     One,
                     DebugSlide1,    // ? Time
                     DebugSlide100,  // ? Fade
-                    BodyVitality,       // possibly MCC only
-                    HealthRecentDamage, // possibly MCC only
+                    BodyVitality,       // MCC only
+                    HealthRecentDamage, // MCC only
                     ShieldAmount,
                     ShieldRecentDamage,
                     WeaponAmmoLoaded,

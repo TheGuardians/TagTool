@@ -45,10 +45,13 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                    renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInputA_H3);
-                    renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.ExternalInputB_H3);
+                    renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_H3);
+                    renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_H3);
                     break;
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                    renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_H3MCC);
+                    renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_H3MCC);
+                    break;
                 case CacheVersion.Halo3ODST when BlamCache.Platform == CachePlatform.Original:
                     renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_ODST);
                     renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_ODST);
