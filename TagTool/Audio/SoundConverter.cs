@@ -23,7 +23,7 @@ namespace TagTool.Audio
             IntermediateDirectory.Create();
         }
 
-        public static string GetSoundCacheFileName(string tagName, CacheVersion version, string cacheFilePath, int pitch_range_index, int permutation_index)
+        public static string GetSoundCacheFileName(string tagName, Compression targetFormat, CacheVersion version, string cacheFilePath, int pitch_range_index, int permutation_index)
         {
             var split = tagName.Split('\\');
             var endName = split[split.Length - 1]; //get the last portion of the tag name
@@ -45,7 +45,8 @@ namespace TagTool.Audio
 
             var basePermutationCacheName = Path.Combine(newPath, endName); //combine the last portion of the tag name with the new path
 
-            return $"{basePermutationCacheName}_{pitch_range_index}_{permutation_index}.mp3";
+            var extension = AudioUtils.GetFormtFileExtension(targetFormat);
+            return $"{basePermutationCacheName}_{pitch_range_index}_{permutation_index}.{extension}";
         }
 
         public static BlamSound ConvertGen2Sound(GameCache cache, Gen2SoundCacheFileGestalt soundGestalt, Gen2Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
@@ -74,7 +75,7 @@ namespace TagTool.Audio
 
                 if (useSoundCache)
                 {
-                    var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                    var fileName = GetSoundCacheFileName(tagName, targetFormat, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
                     if (File.Exists(fileName))
                         cachedSoundExists = true;
                 }
@@ -131,7 +132,7 @@ namespace TagTool.Audio
                     // store WAV file in cache if it does not exist.
                     if (useSoundCache && !cachedSoundExists)
                     {
-                        var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                        var fileName = GetSoundCacheFileName(tagName, targetFormat, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
                         WriteWAVFile(blamSound, fileName);
                     }
 
@@ -139,7 +140,7 @@ namespace TagTool.Audio
                 else
                 {
                     // read and update blamSound from existing cache file.
-                    var fileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                    var fileName = GetSoundCacheFileName(tagName, targetFormat, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
                     ReadWAVFile(blamSound, fileName);
                     // write a temporary copy to WAVFile
                     WriteWAVFile(blamSound, WAVFileName);
@@ -178,12 +179,13 @@ namespace TagTool.Audio
         }
 
         public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
-        {
+        {      
             var id = Guid.NewGuid();
             var baseFileName = $"{id}";
+            var targetFileExt = AudioUtils.GetFormtFileExtension(targetFormat);
             var XMAFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.xma");
             var WAVFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.wav");
-            var MP3FileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.mp3");
+            var targetFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.{targetFileExt}");
 
             try
             {
@@ -209,8 +211,8 @@ namespace TagTool.Audio
 
                 if (useSoundCache)
                 {
-                    MP3FileName = GetSoundCacheFileName(tagName, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
-                    cachedSoundExists = File.Exists(MP3FileName);
+                    targetFileName = GetSoundCacheFileName(tagName, targetFormat, cache.Version, soundCachePath, pitchRangeIndex, permutationIndex);
+                    cachedSoundExists = File.Exists(targetFileName);
                 }
 
                 if (!cachedSoundExists && blamSound.Compression == Compression.XMA)
@@ -232,14 +234,19 @@ namespace TagTool.Audio
                     }
                 }
 
-                // we know blamSound is now in PCM format with proper sample count and wav data, headerless
-
                 if (targetFormat == Compression.MP3)
                 {
                     if(!cachedSoundExists)
-                        ConvertToMP3(WAVFileName, MP3FileName);
+                        ConvertToMP3(WAVFileName, targetFileName);
 
-                    blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3FileName));
+                    blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(targetFileName));
+                }
+                else if(targetFormat == Compression.OGG)
+                {
+                    if (!cachedSoundExists)
+                        ConvertToOggVorbis(WAVFileName, targetFileName);
+
+                    blamSound.UpdateFormat(Compression.OGG, File.ReadAllBytes(targetFileName));
                 }
                 else if (targetFormat == Compression.PCM)
                 {
@@ -260,7 +267,7 @@ namespace TagTool.Audio
                 DeleteFile(XMAFileName);
                 DeleteFile(WAVFileName);
                 if(!useSoundCache)
-                    DeleteFile(MP3FileName);
+                    DeleteFile(targetFileName);
             }
         }
 
@@ -304,6 +311,11 @@ namespace TagTool.Audio
         private static void ConvertToMP3(string WAVFileName, string MP3FileName)
         {
             RunTool("ffmpeg", $"-i \"{WAVFileName}\" -y -q:a 0 \"{MP3FileName}\"");
+        }
+
+        private static void ConvertToOggVorbis(string WAVFileName, string OGGFileName)
+        {
+            RunTool("ffmpeg", $"-i \"{WAVFileName}\" -y -q:a 0 -c:a libvorbis \"{OGGFileName}\"");
         }
 
         private static void RunTool(string executableName, string arguments)

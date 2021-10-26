@@ -25,5 +25,25 @@ namespace TagTool.Audio
                 Data = new TagData()
             };
         }
+
+        public static string GetFormtFileExtension(Compression format)
+        {
+            switch (format)
+            {
+                case Compression.XMA:
+                    return "xma";
+                case Compression.OGG:
+                    return "ogg";
+                case Compression.Tagtool_WAV:
+                case Compression.PCM: // should really be 'raw', but leaving for now
+                    return "wav";
+                case Compression.MP3:
+                    return "mp3";
+                case Compression.FSB4:
+                    return "fsb";
+                default:
+                    throw new NotSupportedException();
+            }
+        }
     }
 }
