@@ -137,6 +137,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new UseShaderCacheCommand());
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
+            context.AddCommand(new DiffTagCommand(cache, cache));
         }
     }
 }
