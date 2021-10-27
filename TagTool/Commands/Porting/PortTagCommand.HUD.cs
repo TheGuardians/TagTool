@@ -74,11 +74,11 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                    textWidget.Flags = GetEquivalentFlags(textWidget.Flags, textWidget.TextFlags_H3Original);
+                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3Original);
                     textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3);
                     break;
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
-                    textWidget.Flags = GetEquivalentFlags(textWidget.Flags, textWidget.TextFlags_H3MCC);
+                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3MCC);
                     textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3MCC);
                     break;
                 case CacheVersion.Halo3ODST:
@@ -457,6 +457,7 @@ namespace TagTool.Commands.Porting
                 }
                 catch (ArgumentException)
                 {
+                    new TagToolWarning($"Unable to find matching flag for {flag2} in {typeof(E1).FullName}");
                     continue;
                 }
             }
@@ -482,6 +483,7 @@ namespace TagTool.Commands.Porting
             }
             catch (Exception)
             {
+                new TagToolWarning($"Unable to find matching value for {enum1} in {typeof(E2).FullName}");
                 return enum1;
             }
         }
