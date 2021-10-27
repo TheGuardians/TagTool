@@ -227,7 +227,7 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < permutationCount; i++)
                 {
-                    var permutationIndex = pitchRange.FirstPermutationIndex + i;
+                    var permutationIndex = BlamSoundGestalt.GetFirstPermutationIndex(pitchRangeIndex, BlamCache.Platform) + i;
 
                     var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
@@ -274,7 +274,8 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < pitchRange.PermutationCount; i++)
                 {
-                    var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex + i);
+                    int permutationIndex = BlamSoundGestalt.GetFirstPermutationIndex(pitchRange, BlamCache.Platform) + i;
+                    var permutation = BlamSoundGestalt.GetPermutation(permutationIndex);
                     var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
 
                     extraInfo.LanguagePermutations.Add(new ExtraInfo.LanguagePermutation

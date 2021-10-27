@@ -194,8 +194,7 @@ namespace TagTool.Audio
                 {
                     var gen3Cache = (GameCacheGen3)cache;
                     blamSound = GetSoundBankData(cache, soundGestalt, gen3Cache.FMODSoundCache, sound, pitchRangeIndex, permutationIndex);
-                    var waveFile = new WAVFile(blamSound.Data, TagTool.Audio.Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz(), 32);
-                    waveFile.FMT.PCMLinearQuantization = 3;
+                    var waveFile = new WAVFile(blamSound.Data, TagTool.Audio.Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz());
                     using (var output = new EndianWriter(File.Create(WAVFileName)))
                         waveFile.Write(output);
                 }
@@ -277,15 +276,31 @@ namespace TagTool.Audio
             int permutationGestaltIndex = soundGestalt.GetFirstPermutationIndex(pitchRangeGestaltIndex, cache.Platform) + permutationIndex;
             var permutation = soundGestalt.GetPermutation(permutationGestaltIndex);
             byte[] permutationData = fmodSoundCache.ExtractSound(permutation.FsbSoundHash);
+            permutationData = ConvertToPCM16(permutationData);
             var blamSound = new BlamSound(sound, permutationGestaltIndex, permutationData, cache.Version, soundGestalt);
             blamSound.UpdateFormat(Compression.PCM, permutationData);
             return blamSound;
         }
 
+        private static byte[] ConvertToPCM16(byte[] data)
+        {
+            var newData = new byte[data.Length / 2];
+            var inputStream = new MemoryStream(data);
+            var outputStream = new MemoryStream(newData);
+            using (var reader = new EndianReader(inputStream))
+            using (var writer = new EndianWriter(outputStream))
+            {
+                while(!reader.EOF)
+                    writer.Write((short)(reader.ReadSingle() * short.MaxValue));
+            }
+            return newData;
+        }
+
+
         public static BlamSound GetXMA(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)
         {
             int pitchRangeGestaltIndex = sound.SoundReference.PitchRangeIndex + pitchRangeIndex;
-            int permutationGestaltIndex = soundGestalt.PitchRanges[pitchRangeGestaltIndex].FirstPermutationIndex + permutationIndex;
+            int permutationGestaltIndex = soundGestalt.GetFirstPermutationIndex(pitchRangeGestaltIndex, cache.Platform) + permutationIndex;
 
             var permutationSize = soundGestalt.GetPermutationSize(permutationGestaltIndex);
             var permutationOffset = soundGestalt.GetPermutationOffset(permutationGestaltIndex);
