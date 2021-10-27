@@ -733,7 +733,7 @@ namespace TagTool.Commands.Porting
                     {
                         if (obj.MultiplayerObject.Count == 0)
                         {
-                            obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 30 });
+                            obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { DefaultSpawnTime = 30, DefaultAbandonTime = 30 });
                         }
 
                         if (argParameters.Count() > 0)

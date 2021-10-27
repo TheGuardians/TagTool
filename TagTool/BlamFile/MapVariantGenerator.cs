@@ -253,7 +253,7 @@ namespace TagTool.BlamFile
                 case GameObjectTypeHalo3ODST.Equipment:
                 case GameObjectTypeHalo3ODST.Weapon:
                 case GameObjectTypeHalo3ODST.Vehicle:
-                    if (obje.MultiplayerObject[0].Type < GameObject.MultiplayerObjectBlock.TypeValue.Teleporter2way)
+                    if (obje.MultiplayerObject[0].Type < GameObject.MultiplayerObjectBlock.MultiplayerObjectType.Teleporter2way)
                         mapvPlacement.PlacementFlags |= PlacementFlags.UnknownBit7;
                     break;
             }
@@ -318,15 +318,15 @@ namespace TagTool.BlamFile
 
 
             var objeMultiplayerProperties = obje.MultiplayerObject[0];
-            properties.SpawnTime = (byte)objeMultiplayerProperties.SpawnTime;
+            properties.SpawnTime = (byte)objeMultiplayerProperties.DefaultSpawnTime;
             properties.ObjectType = (MultiplayerObjectType)objeMultiplayerProperties.Type;
             properties.Shape = new MultiplayerObjectBoundaryShape()
             {
                 Type = (MultiplayerObjectShapeType)objeMultiplayerProperties.BoundaryShape,
                 Bottom = objeMultiplayerProperties.BoundaryBottom,
-                Length = objeMultiplayerProperties.BoundaryLength,
+                Length = objeMultiplayerProperties.BoundaryBoxLength,
                 Top = objeMultiplayerProperties.BoundaryTop,
-                Width = objeMultiplayerProperties.BoundaryWidth
+                Width = objeMultiplayerProperties.BoundaryWidthRadius
             };
 
             if (objeMultiplayerProperties.EngineFlags != 0)
@@ -474,7 +474,7 @@ namespace TagTool.BlamFile
         private bool ObjectIsEarlyMover(CachedTag tag)
         {
             var obje = _cache.Deserialize(_cacheStream, tag) as GameObject;
-            return obje.ObjectFlags.HasFlag(GameObjectFlags.EarlyMoverLocalizedPhysics);
+            return obje.ObjectFlags.HasFlag(ObjectDefinitionFlags.EarlyMoverLocalizedPhysics);
         }
 
         public bool ObjectIsForgeable(CachedTag tag)

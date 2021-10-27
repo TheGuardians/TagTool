@@ -226,7 +226,7 @@ namespace TagTool.Geometry.Utils
                 SweetenerSize = GameObject.SweetenerSizeValue.Large,
                 MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>()
                 {
-                    new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 60 }
+                    new GameObject.MultiplayerObjectBlock() { DefaultSpawnTime = 30, DefaultAbandonTime = 60 }
                 },
                 // SceneryFlags = Scenery.SceneryFlagBits.PhysicallySimulates // static lighting updates (breaks player collision :/)
             };
