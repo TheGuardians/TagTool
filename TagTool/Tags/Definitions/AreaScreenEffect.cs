@@ -123,9 +123,6 @@ namespace TagTool.Tags.Definitions
             public float Saturation; // [0-1]#increases saturation
             public float Desaturation; // [0-1]#decreases saturation
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-            public float ContrastEnhance;
-
             public float GammaIncrease; // [0-10]
             public float GammaDecrease; // [0-10]
             
