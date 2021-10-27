@@ -114,19 +114,19 @@ namespace TagTool.Tags.Definitions
             public TagFunction ObjectFalloff = new TagFunction { Data = new byte[0] };
 
             public float ExposureBoost; // (in stops)
-
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Darkness;
+            public float ExposureDeboost;
 
             public float HueShiftLeft; // degrees [0-360] shifts hue R>G>B
             public float HueShiftRight; // degrees [0-360] shifts hue R>G>B
+
             public float Saturation; // [0-1]#increases saturation
             public float Desaturation; // [0-1]#decreases saturation
 
-            public float GammaIncrease; // [0-10]
-            public float GammaDecrease; // [0-10]
-            
-            public float ShadowBrightness;
+            public float ContrastEnhance; // [0-1]
+
+            public float GammaEnhance; // [0-10]    
+            public float GammaReduce; // [0-10]
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float BrightNoise;
