@@ -323,15 +323,15 @@ namespace TagTool.Tags.Definitions
                     PlayerTrainingAvailable = 1 << 4,
                     CampaignObjectiveAvailable = 1 << 5,
                     SurvivalState = 1 << 6,
-                    Bit7 = 1 << 7, //unused
+                    BeaconEnabled = 1 << 7, //unused, kept for odst porting
                     Achievement1 = 1 << 8,
 					Achievement2 = 1 << 9,
 					Achievement3 = 1 << 10,
 					Achievement4 = 1 << 11,
 					Achievement5 = 1 << 12,
                     GameTimeUnknown = 1 << 13,
-                    Bit14 = 1 << 14, //unused
-                    ARGEnabled = 1 << 15, //unused, but kept this here so it ports right
+                    UserWaypointEnabled = 1 << 14, //unused, kept for odst porting
+                    ARGEnabled = 1 << 15, //unused, kept for odst porting
                 }
 
 
@@ -1211,12 +1211,12 @@ namespace TagTool.Tags.Definitions
                     NetworkHostQuality,
                     NetworkLocalQuality,
                     MetagameScoreNegative,
-                    Unknown1,
-                    CompassDistanceToUserTarget,
-                    CompassDistanceToUserTarget2,
-                    Unknown2,
-                    CompassDistanceToTarget,
-                    CompassDistanceToTarget2,
+                    CompassUserTargetUnknown, // Unknown1
+                    CompassUserTargetYaw, // CompassDistanceToUserTarget
+                    CompassUserTargetDistance, // CompassDistanceToUserTarget2
+                    CompassTargetUnknown, // Unknown2
+                    CompassTargetYaw, // CompassDistanceToTarget
+                    CompassTargetDistance, // CompassDistanceToTarget2
                     SurvivalCurrentSet,
                     SurvivalCurrentRound,
                     SurvivalCurrentWave,

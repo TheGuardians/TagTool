@@ -483,7 +483,7 @@ namespace TagTool.Commands.Porting
             }
             catch (Exception)
             {
-                new TagToolWarning($"Unable to find matching value for {enum1} in {typeof(E2).FullName}");
+                new TagToolWarning($"Unable to find matching value for \"{enum2}\" in {typeof(E1).FullName}");
                 return enum1;
             }
         }
