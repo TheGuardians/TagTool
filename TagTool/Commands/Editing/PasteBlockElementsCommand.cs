@@ -87,11 +87,9 @@ namespace TagTool.Commands.Editing
 			var field = TagStructure.GetTagFieldEnumerable(Structure)
 				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
 
-			var fieldType = field.FieldType;
+			var fieldType = field?.FieldType;
 
-            if ((field == null) ||
-                (!fieldType.IsGenericType) ||
-                (fieldType.GetInterface("IList") == null))
+            if (field == null || !fieldType.IsGenericType || fieldType.GetInterface("IList") == null)
             {
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
@@ -103,8 +101,10 @@ namespace TagTool.Commands.Editing
 
             if (elementType != CopyBlockElementsCommand.ElementType)
             {
-                Console.WriteLine("Invalid block element type!");
-                return false;
+				while (ContextStack.Context != previousContext) ContextStack.Pop();
+				Owner = previousOwner;
+				Structure = previousStructure;
+				return new TagToolError(CommandError.CustomError, "Invalid block element type");
             }
 
             var blockValue = field.GetValue(Owner) as IList;
