@@ -17,9 +17,9 @@ namespace TagTool.Bitmaps.Utils
         {
             var image = bitmap.Images[imageIndex];
 
-            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360UseInterleavedTextures))
             {
-                BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                BitmapTextureInterleavedInteropResource resource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedHardwareTextures[image.InterleavedInterop]);
                 if (resource == null)
                     return null;
 
@@ -27,7 +27,7 @@ namespace TagTool.Bitmaps.Utils
                 BitmapTextureInteropDefinition otherDefinition;
                 int pairIndex = 0;
 
-                if (image.InterleavedTextureIndex2 > 0)
+                if (image.InterleavedTextureIndex > 0)
                 {
                     definition = resource.Texture.Definition.Bitmap2;
                     otherDefinition = resource.Texture.Definition.Bitmap1;
@@ -42,7 +42,7 @@ namespace TagTool.Bitmaps.Utils
             }
             else
             {
-                BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[imageIndex]);
+                BitmapTextureInteropResource resource = cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.HardwareTextures[imageIndex]);
                 if (resource == null)
                     return null;
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Cache.MCC;
 using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
@@ -49,7 +50,7 @@ namespace TagTool.BlamFile
             MapVersion = GetMapFileVersion(reader);
             CacheVersion version = CacheVersion.Unknown;
             CachePlatform platform = CachePlatform.All;
-            DetectCacheVersionAndPlatform(reader, ref version, ref platform);
+            DetectCacheVersionAndPlatform(reader, MapVersion, ref version, ref platform);
             Version = version;
             CachePlatform = platform;
 
@@ -173,11 +174,21 @@ namespace TagTool.BlamFile
             return (CacheFileVersion)reader.ReadInt32();
         }
 
-        private static void DetectCacheVersionAndPlatform(EndianReader reader, ref CacheVersion cacheVersion, ref CachePlatform cachePlatform)
+        private static void DetectCacheVersionAndPlatform(EndianReader reader, CacheFileVersion mapVersion, ref CacheVersion cacheVersion, ref CachePlatform cachePlatform)
         {
             var version = GetMapFileVersion(reader);
             var buildDate = GetBuildDate(reader, version);
-            CacheVersionDetection.GetFromBuildName(buildDate, ref cacheVersion, ref cachePlatform);
+
+            if(mapVersion == CacheFileVersion.HaloMCCUniversal)
+            {
+                // force it to h3 for now as that is the only one supported
+                cacheVersion = CacheVersion.Halo3Retail;
+                cachePlatform = CachePlatform.MCC;
+            }
+            else
+            {
+                CacheVersionDetection.GetFromBuildName(buildDate, ref cacheVersion, ref cachePlatform);
+            }
         }
 
         public static MapFile GenerateMapFile(CacheVersion version, Scenario scnr, CachedTag scenarioTag, Blf mapInfo = null)

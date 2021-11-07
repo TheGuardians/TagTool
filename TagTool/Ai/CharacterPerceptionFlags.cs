@@ -3,7 +3,7 @@ using System;
 namespace TagTool.Ai
 {
     [Flags]
-    public enum CharacterPerceptionFlags : ushort
+    public enum CharacterPerceptionFlags : uint
     {
         None = 0,
         CharacterCanSeeInDarkness = 1 << 0,

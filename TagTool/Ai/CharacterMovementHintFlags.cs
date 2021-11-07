@@ -2,7 +2,6 @@ using System;
 
 namespace TagTool.Ai
 {
-    [Flags]
     public enum CharacterMovementHintFlags : int
     {
         None = 0,

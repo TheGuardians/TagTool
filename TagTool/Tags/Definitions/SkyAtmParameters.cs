@@ -9,99 +9,85 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "sky_atm_parameters", Tag = "skya", Size = 0x54, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "sky_atm_parameters", Tag = "skya", Size = 0x44, MinVersion = CacheVersion.HaloReach)]
     public class SkyAtmParameters : TagStructure
-	{
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-        public int Unknown0;
+    {
+        public SkyAtmFlags Flags;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
 
         public CachedTag FogBitmap;
         public float TextureRepeatRate;
         public float DistanceBetweenSheets;
         public float DepthFadeFactor;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-        public float Unknown5;
-
+        public float ClusterSearchRadius;
         public float FalloffStartDistance;
         public float DistanceFalloffPower;
         public float TransparentSortDistance;
-        public SortingLayerValue TransparentSortingLayer;
 
+        public SortingLayerValue TransparentSortLayer;
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x3)]
-        public byte[] Unused;
+        public byte[] Padding1;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown10;
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown11;
 
-        public List<AtmosphereProperty> AtmosphereProperties;
-        public List<UnderwaterBlock> Underwater;
-        
-        [TagStructure(Size = 0xA4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach)]
+        public List<AtmosphereProperty> AtmosphereSettings;
+        public List<UnderwaterBlock> UnderwaterSettings;
+
+        [Flags]
+        public enum SkyAtmFlags : ushort
+        {
+            LockEffectsToNearestCluster = 1 << 0
+        }
+
+        [TagStructure(Size = 0xA4)]
         public class AtmosphereProperty : TagStructure
-		{
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public StringId ReachName;
+        {
+            public AtmosphereFlags Flags;
 
-            public short Unknown1;
-            public short Unknown2;
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public StringId Name;
 
-            public RealPoint2d LightSource;
+            public float SunAnglePitch; // 0 to 90
+            public float SunAngleYaw; // 0 to 360
+            public RealRgbColor Color;
+            public float Intensity;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public RealRgbColor FogColor;
+            public float SeaLevel;
+            public float RayleignHeightScale;
+            public float MieHeightScale;
+            public float RayleighMultiplier;
+            public float MieMultiplier;
+            public float SunPhaseFunction;
+            public float Desaturation;
+            public float DistanceBias;
+            public float MaxFogThickness;
+            public RealVector3d BetaM;
+            public RealVector3d BetaP;
+            public RealVector3d BetaMThetaPrefix;
+            public RealVector3d BetaPThetaPrefix;
 
-            public float Brightness;
-            public float FogGradientThreshold;
-            public float LightIntensity;
-            public float SkyInvisibilityThroughFog;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public RealRgbColor FogColorReach;
-
-            public float Unknown3;
-            public float Unknown4;
-            public float LightSourceSpread;
-            public float Unknown5;
-            public float FogIntensity;
-
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float UnknownFlags;
-
-            public float TintCyan;
-            public float TintMagenta;
-            public float TintYellow;
-
-            public float FogIntensityCyan;
-            public float FogIntensityMagenta;
-            public float FogIntensityYellow;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown;
-
-            public RealRgbColor BackgroundColor;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown1;
-
-            public RealRgbColor Tint2;
-
-            public float FogIntensity2;
-            public float StartDistance;
-            public float EndDistance;
-
-            public RealVector3d FogVelocity;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknown2;
+            public float SheetDensity;
+            public float FullIntensityHeight;
+            public float HalfIntensityHeight;
+            public RealVector3d WindDirection;
 
             public CachedTag WeatherEffect;
-            public uint Unknown7;
-            public uint Unknown8;
+            public float RuntimeWeight;
+            public float RuntimeEffectWeight;
+
+            [Flags]
+            public enum AtmosphereFlags : short
+            {
+                None,
+                EnableAtmosphere = 1 << 0,
+                OverrideRealSunValues = 1 << 1,
+                PatchyFog = 1 << 2,
+                Bit3 = 1 << 3,
+            }
         }
 
         [TagStructure(Size = 0x14)]
@@ -109,7 +95,7 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId Name;
             public float Murkiness;
-            public RealRgbColor Color;
+            public RealRgbColor FogColor;
         }
     }
 }

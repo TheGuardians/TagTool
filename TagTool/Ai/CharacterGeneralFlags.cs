@@ -25,30 +25,10 @@ namespace TagTool.Ai
         DoNotAllowMovingCrouch = 1 << 14,
         CriticalBetrayal = 1 << 15,
         DeathlessCriticalBetrayal = 1 << 16,
-
-        /// <summary>
-        /// Non-depleted ai-tracked damage sections prevent instant melee kills.
-        /// </summary>
-        ArmorPreventsAssassination = 1 << 17,
-
-        /// <summary>
-        /// The default is to drop only the currently equipped weapon.
-        /// </summary>
-        DropAllWeaponsOnDeath = 1 << 18,
-
-        /// <summary>
-        /// This will override 'drop all weapons'.
-        /// </summary>
-        DropNoWeaponsOnDeath = 1 << 19,
-
-        /// <summary>
-        /// Cannot be assassinated unless its shield has been depleted.
-        /// </summary>
-        ShieldPreventsAssassination = 1 << 20,
-
-        /// <summary>
-        /// This overrides all other character assassination modifications.
-        /// </summary>
-        CannotBeAssassinated = 1 << 21
+        ArmorPreventsAssassination = 1 << 17, // Non-depleted ai-tracked damage sections prevent instant melee kills.
+        DropAllWeaponsOnDeath = 1 << 18, // The default is to drop only the currently equipped weapon.
+        DropNoWeaponsOnDeath = 1 << 19, // This will override 'drop all weapons'.
+        ShieldPreventsAssassination = 1 << 20, // Cannot be assassinated unless its shield has been depleted.
+        CannotBeAssassinated = 1 << 21 // This overrides all other character assassination modifications.
     }
 }

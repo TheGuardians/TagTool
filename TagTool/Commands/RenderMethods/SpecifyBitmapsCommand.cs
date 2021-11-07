@@ -58,7 +58,7 @@ namespace TagTool.Commands.RenderMethods
                 }
             }
 
-            foreach (var import in Definition.ImportData)
+            foreach (var import in Definition.Parameters)
                 if (shaderMaps.ContainsKey(import.Name))
                     import.Bitmap = shaderMaps[import.Name];
 

@@ -9,7 +9,7 @@ namespace TagTool.Ai
         public float DecelerationDistance;
         public float NormalizedSpeed;
         public float BufferDistance;
-        public Bounds<float> ThrottleThresholdBOunds;
+        public Bounds<float> ThrottleThresholdBounds;
         public float DecelerationStopTime;
     }
 }

@@ -12,15 +12,15 @@ namespace TagTool.Ai
         [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused;
 
-        public float ScatterRadius;
-        public float ScatterTime;
+        public float ScatterRadius; // the distance from the target that the swarm scatters
+        public float ScatterTime; // amount of time to remain scattered
         public Bounds<float> HoundDistance;
-        public Bounds<float> InfectionTime;
-        public float PerlinOffsetScale;
-        public Bounds<float> OffsetPeriod;
-        public float PerlinIdleMovementThreshold;
-        public float PerlinCombatMovementThreshold;
-        public float StuckTime;
-        public float StuckDistance;
+        public Bounds<float> InfectionTime; // how long the infection form and its victim will wrestle before the point of no return
+        public float PerlinOffsetScale; // amount of randomness added to creature's throttle [0-1]
+        public Bounds<float> OffsetPeriod; // how fast the creature changes random offset to throttle (seconds)
+        public float PerlinIdleMovementThreshold; // a random offset lower then given threshold is made 0. (threshold of 1 = no movement)
+        public float PerlinCombatMovementThreshold; // a random offset lower then given threshold is made 0. (threshold of 1 = no movement)
+        public float StuckTime; // how long we have to move (stuck distance) before we get deleted
+        public float StuckDistance; // how far we have to move in (stuck time) to not get deleted
     }
 }

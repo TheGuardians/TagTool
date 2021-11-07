@@ -2884,7 +2884,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public UserHintShortFlags Flags;
                 public short ParallelogramIndex;
-                public AiDistanceValue ForceJumpHeight;
+                public GlobalAiJumpHeight ForceJumpHeight;
                 public ControlFlagsValue ControlFlags;
 
                 [Flags]

@@ -138,25 +138,25 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Ai\AiActorType.cs" />
+    <Compile Include="Ai\ActorTypeEnum.cs" />
     <Compile Include="Ai\AiAnimationImpulse.cs" />
     <Compile Include="Ai\AiCombatStatus.cs" />
-    <Compile Include="Ai\AiDialoguePattern.cs" />
-    <Compile Include="Ai\AiDialoguePatternFlags.cs" />
-    <Compile Include="Ai\AiDialoguePatternHostility.cs" />
+    <Compile Include="Ai\VocalizationPattern.cs" />
+    <Compile Include="Ai\PatternFlags.cs" />
+    <Compile Include="Ai\HostilityEnum.cs" />
     <Compile Include="Ai\AiDialoguePerception.cs" />
-    <Compile Include="Ai\AiDialogueSpeakerType.cs" />
-    <Compile Include="Ai\AiDialogueType.cs" />
+    <Compile Include="Ai\SpeakerTypeEnum.cs" />
+    <Compile Include="Ai\DialogueTypeEnum.cs" />
     <Compile Include="Ai\AiEmotion.cs" />
-    <Compile Include="Ai\AiFollowerPositioning.cs" />
+    <Compile Include="Ai\CombatPositioning.cs" />
     <Compile Include="Ai\AiGlanceBehavior.cs" />
     <Compile Include="Ai\AiGlobalsDatum.cs" />
     <Compile Include="Ai\AiMissionDialogueLine.cs" />
     <Compile Include="Ai\AiMissionDialogueLineVariant.cs" />
     <Compile Include="Ai\AiSize.cs" />
-    <Compile Include="Ai\AiVocalization.cs" />
-    <Compile Include="Ai\AiVocalizationFlags.cs" />
-    <Compile Include="Ai\AiVocalizationPriority.cs" />
+    <Compile Include="Ai\VocalizationDefinition.cs" />
+    <Compile Include="Ai\VocalizationFlags.cs" />
+    <Compile Include="Ai\VocalizationPriority.cs" />
     <Compile Include="Ai\AiVocalizationResponse.cs" />
     <Compile Include="Ai\AiVocalizationResponseFlags.cs" />
     <Compile Include="Ai\AiVocalizationResponseType.cs" />
@@ -173,7 +173,7 @@
     <Compile Include="Ai\CharacterCoverFlags.cs" />
     <Compile Include="Ai\CharacterCoverProperties.cs" />
     <Compile Include="Ai\CharacterDefaultGrenadeType.cs" />
-    <Compile Include="Ai\CharacterDialogueVariation.cs" />
+    <Compile Include="Ai\CharacterVoice.cs" />
     <Compile Include="Ai\CharacterEngageFlags.cs" />
     <Compile Include="Ai\CharacterEngageProperties.cs" />
     <Compile Include="Ai\CharacterEngineerProperties.cs" />
@@ -212,7 +212,7 @@
     <Compile Include="Ai\CharacterSearchFlags.cs" />
     <Compile Include="Ai\CharacterSearchProperties.cs" />
     <Compile Include="Ai\CharacterSwarmProperties.cs" />
-    <Compile Include="Ai\CharacterUnitDialogue.cs" />
+    <Compile Include="Ai\CharacterVoiceProperties.cs" />
     <Compile Include="Ai\CharacterScarabProperties.cs" />
     <Compile Include="Ai\CharacterGuardianProperties.cs" />
     <Compile Include="Ai\CharacterVariant.cs" />
@@ -372,6 +372,8 @@
     <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
     <Compile Include="Commands\Files\ExtractBlfImageCommand.cs" />
     <Compile Include="Commands\Forge\MaximizeBudgetCommand.cs" />
+    <Compile Include="Commands\Gen2\ModelAnimationGraphs\AnimationContextFactory.cs" />
+    <Compile Include="Commands\Gen2\ModelAnimationGraphs\ExtractAnimationCommand.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\BSPContextFactory.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\Gen4\ModelAnimationGraphs\AnimationContextFactory.cs" />
@@ -413,6 +415,7 @@
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\PortClusterGeometryObjectCommand.cs" />
+    <Compile Include="Commands\Porting\PortingOptions.cs" />
     <Compile Include="Commands\Porting\PortInstancedGeometryObjectCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
@@ -433,6 +436,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.ShaderGen.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
+    <Compile Include="Commands\Porting\SetPortingOptionCommand.cs" />
     <Compile Include="Commands\RenderMethods\AddFunctionCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListFunctionsCommand.cs" />
     <Compile Include="Commands\RenderMethods\PopulateParametersCommand.cs" />
@@ -463,6 +467,7 @@
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Shaders\DumpDisassembledShadersCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateRenderMethodCommand.cs" />
+    <Compile Include="Commands\Shaders\GenerateRmdfCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
     <Compile Include="Commands\Shaders\UseShaderCacheCommand.cs" />
     <Compile Include="Commands\Shaders\UseXSDCommand.cs" />
@@ -686,6 +691,7 @@
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
     <Compile Include="Havok\HavokMoppGenerator.cs" />
+    <Compile Include="IO\ExtantStream.cs" />
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
     <Compile Include="IO\XCompress.cs" />
@@ -724,6 +730,7 @@
     <Compile Include="Shaders\ShaderConstantTable.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderFunctions\ShaderFunctionHelper.cs" />
+    <Compile Include="Shaders\ShaderGenerator\RenderMethodDefinitionGenerator.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderBlackGenerator.cs" />
     <Compile Include="Shaders\ShaderGenerator\ShaderGenerator.cs" />
     <Compile Include="Shaders\ShaderMatching\ParticleSorter.cs" />

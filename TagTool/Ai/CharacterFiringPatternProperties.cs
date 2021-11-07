@@ -10,6 +10,7 @@ namespace TagTool.Ai
 	{
         [TagField(Flags = Label)]
         public CachedTag Weapon;
+
         public List<CharacterFiringPattern> FiringPatterns;
     }
 }

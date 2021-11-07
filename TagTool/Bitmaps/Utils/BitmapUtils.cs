@@ -285,7 +285,7 @@ namespace TagTool.Bitmaps
             image.Format = bitmap.Format;
             image.Type = bitmap.Type;
             image.MipmapCount = (sbyte)bitmap.MipMapCount;
-            image.DataSize = bitmap.Data.Length;
+            image.PixelDataSize = bitmap.Data.Length;
             image.XboxFlags = BitmapFlagsXbox.None;
             image.Flags = bitmap.Flags;
             image.Curve = bitmap.Curve;

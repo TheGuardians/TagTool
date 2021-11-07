@@ -11,15 +11,13 @@ namespace TagTool.Tags.Definitions
     public class RasterizerGlobals : TagStructure
 	{
         public List<DefaultBitmap> DefaultBitmaps;
-        public List<DefaultRasterizerBitmap> DefaultRasterizerBitmaps;
-        public CachedTag VertexShaderSimple;
-        public CachedTag PixelShaderSimple;
+        public List<MaterialTextureBlock> MaterialTextures;
+        public CachedTag DefaultVertexShader;
+        public CachedTag DefaultPixelShader;
         public List<ExplicitShader> DefaultShaders;
-        public uint Unknown;
-        public uint Unknown2;
-        public uint Unknown3;
-        public int Unknown4;
-        public int Unknown5;
+        public List<CachedTag> AtmosphereLookupTables;
+        public int RuntimeMMaxVsGprs;
+        public int RuntimeMMaxPsGprs;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ActiveCamoDistortion;
         public CachedTag DefaultPerformanceTemplate;
@@ -31,10 +29,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag DefaultVisionMode;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public int Unknown6; //6 
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -116,13 +110,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class DefaultRasterizerBitmap : TagStructure
+        public class MaterialTextureBlock : TagStructure
 		{
             public CachedTag Bitmap;
         }
 
-        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class ExplicitShader : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -130,16 +126,19 @@ namespace TagTool.Tags.Definitions
 
             public CachedTag VertexShader;
             public CachedTag PixelShader;
+            [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            public CachedTag ComputeShader;
         }
 
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0x1C)]
         public class MotionBlurParametersLegacyBlock : TagStructure
         {
-            public float MaxBlur;
-            public float Unknown;
-            public float BlurScale;
-            public float CenterFalloffX;
-            public float CenterFalloffY;
+            public uint NumberOfTaps;
+            public float MaxBlurX;
+            public float MaxBlurY;
+            public float BlurScaleX;
+            public float BlurScaleY;
+            public float CenterFalloff;
             public float ExpectedTimePerTick;
         }
 

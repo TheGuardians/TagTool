@@ -16,9 +16,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CachedTag Reference;
 
-        public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
-        public List<ImportDatum> ImportData;
-        public List<ShaderProperty> ShaderProperties;
+        public List<RenderMethodOptionIndex> Options;
+        public List<RenderMethodParameterBlock> Parameters;
+        public List<RenderMethodPostprocessBlock> ShaderProperties; // Postprocess
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public uint IsTemplate;
@@ -28,29 +28,25 @@ namespace TagTool.Tags.Definitions
         public List<LockedParameter> LockedParameters;
 
         public RenderMethodRenderFlags RenderFlags;
-        public SortingLayerValue SortingLayer;
-        public byte Version;
-        public int SkyAtmospherePropertiesIndex; // skya AtmosphereProperties block index
-        public int Unknown2; // usually -1
+        public SortingLayerValue SortLayer;
+        public GlobalRenderMethodRuntimeFlagsDefintion RuntimeFlags;
+        public int CustomFogSettingIndex; // skya AtmosphereProperties block index
+        public int PredictionAtomIndex;
 
         [TagStructure(Size = 0x2)]
-        public class RenderMethodDefinitionOptionIndex : TagStructure
+        public class RenderMethodOptionIndex : TagStructure
         {
             public short OptionIndex;
         }
 
         [TagStructure(Size = 0x24)]
-        public class ShaderFunction : TagStructure
+        public class RenderMethodAnimatedParameterBlock : TagStructure
         {
             public FunctionType Type;
-
             [TagField(Flags = Label)]
             public StringId InputName;
-
             public StringId RangeName;
-
             public float TimePeriod;
-
             public TagFunction Function = new TagFunction { Data = new byte[0] };
 
             public enum FunctionType : int
@@ -74,29 +70,29 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class ImportDatum : TagStructure
+        public class RenderMethodParameterBlock : TagStructure
         {
             [TagField(Flags = Label)]
             public StringId Name;
-
-            public RenderMethodOption.OptionBlock.OptionDataType Type;
+            public RenderMethodOption.ParameterBlock.OptionDataType ParameterType;
             public CachedTag Bitmap;
-            public float DefaultRealValue;
-            public int DefaultIntBoolValue;
-            public short SamplerFlags;
-            public short SamplerFilterMode;
-            public short DefaultAddressMode;
-            public short AddressU;
-            public short AddressV;
-            // one of these is extern_mode
-            public short Unknown9;
-            public uint Unknown10;
-            public List<ShaderFunction> Functions;
+            public float RealValue;
+            public int IntBoolValue;
+            public short BitmapFlags;
+            public short BitmapFilterMode;
+            public short BitmapAddressMode;
+            public short BitmapAddressModeX;
+            public short BitmapAddressModeY;
+            public short BitmapAnisotropyAmount;
+            public short BitmapExternRTTMode;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
+            public byte[] Padding;
+            public List<RenderMethodAnimatedParameterBlock> AnimatedParameters;
         }
 
         [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach)]
-        public class ShaderProperty : TagStructure
+        public class RenderMethodPostprocessBlock : TagStructure
         {
             public CachedTag Template;
             public List<TextureConstant> TextureConstants;
@@ -104,12 +100,13 @@ namespace TagTool.Tags.Definitions
             public List<uint> IntegerConstants;
             public uint BooleanConstants; // Each bit indicates true/false. SourceIndex = bit index
             public List<TagBlockIndex> EntryPoints; // Ranges of ParameterTables
-            public List<ParameterTable> ParameterTables; // Ranges of Parameters by usage
-            public List<ParameterMapping> Parameters; // Mapping of constants functions, and registers
-            public List<ShaderFunction> Functions; // Functions for animated parameters
-            public AlphaBlendModeValue AlphaBlendMode;
-            public BlendModeFlags BlendFlags;
-            public uint Unknown8; // unused?
+            public List<RenderMethodPostprocessPassBlock> Passes; // Ranges of Parameters by usage
+            public List<RenderMethodRoutingInfoBlock> RoutingInfo; // Mapping of constants functions, and registers
+            public List<RenderMethodAnimatedParameterBlock> Functions; // Functions for animated parameters
+            public BlendModeValue BlendMode;
+            public RenderMethodPostprocessFlags Flags;
+            [TagField(Length = 0x4, Flags = Padding)]
+            public byte[] ImSoFiredPad;
 
             // Indices of constants. TODO: create an enum
             [TagField(Length = 8, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -117,25 +114,25 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 0x1C, MinVersion = CacheVersion.HaloReach)]
             public short[] QueryablePropertiesReach;
 
-            public enum AlphaBlendModeValue : uint
+            public enum BlendModeValue : uint
             {
-                opaque = 0,
-                additive = 1,
-                multiply = 2,
-                alpha_blend = 3,
-                double_multiply = 4,
-                pre_multiplied_alpha = 5,
-                maximum = 6,
-                multiply_add = 7,
-                add_src_times_dstalpha = 8,
-                add_src_times_srcalpha = 9,
-                inv_alpha_blend = 10,
-                separate_alpha_blend = 11,
-                separate_alpha_blend_additive = 12
+                Opaque,
+                Additive,
+                Multiply,
+                AlphaBlend,
+                DoubleMultiply,
+                PreMultipliedAlpha,
+                Maximum,
+                MultiplyAdd,
+                AddSrcTimesDstalpha,
+                AddSrcTimesSrcalpha,
+                InverseAlphaBlend,
+                MotionBlurStatic,
+                MotionBlurInhibit,
             }
 
             [Flags]
-            public enum BlendModeFlags : uint
+            public enum RenderMethodPostprocessFlags : uint
             {
                 None = 0,
                 Bit0 = 1 << 0,
@@ -162,33 +159,30 @@ namespace TagTool.Tags.Definitions
                 public PackedSamplerFilterMode FilterModeReach;
 
                 [TagField(Platform = CachePlatform.MCC)]
-                public byte Unknown1;
+                public byte ComparisonFunction;
+                public sbyte ExternTextureMode;
+                public sbyte TextureTransformConstantIndex;
 
-                public sbyte ExternMode;
-                public sbyte XFormArgumentIndex;
-                public TagBlockIndex Functions = new TagBlockIndex(); // Range of Functions
+                [TagField(Flags = Padding, Length = 0x1, Platform = CachePlatform.MCC)]
+                public byte Padding0;
 
-                [TagField(Platform = CachePlatform.MCC)]
-                public byte Unknown2;
+                public TagBlockIndex TextureTransformOverlayIndices = new TagBlockIndex();
 
-                [TagField(Platform = CachePlatform.MCC)]
-                public byte Unknown3;
-
-                [TagField(Platform = CachePlatform.MCC)]
-                public byte Unknown4;
+                [TagField(Flags = Padding, Length = 0x2, Platform = CachePlatform.MCC)]
+                public byte Padding1;
 
                 public enum SamplerFilterMode : byte
                 {
                     Trilinear,
                     Point,
                     Bilinear,
-                    unused_00,
-                    Anisotropic_2x,
-                    unused_01,
-                    Anisotropic_4x,
+                    Anisotropic1,
+                    Anisotropic2Expensive,
+                    Anisotropic3Expensive,
+                    Anisotropic4EXPENSIVE,
                     LightprobeTextureArray,
-                    TextureArrayQuadlinear,
-                    TextureArrayQuadanisotropic_2x
+                    ComparisonPoint,
+                    ComparisonBilinear
                 }
 
                 [TagStructure(Size = 0x1)]
@@ -275,7 +269,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x6)]
-            public class ParameterTable : TagStructure
+            public class RenderMethodPostprocessPassBlock : TagStructure
             {
                 public TagBlockIndex Texture = new TagBlockIndex();
                 public TagBlockIndex RealVertex = new TagBlockIndex();
@@ -283,7 +277,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class ParameterMapping : TagStructure
+            public class RenderMethodRoutingInfoBlock : TagStructure
             {
                 public enum RenderMethodExternalValue : byte
                 {
@@ -355,7 +349,7 @@ namespace TagTool.Tags.Definitions
         public class LockedParameter : TagStructure
         {
             public StringId Name;
-            public RenderMethodOption.OptionBlock.OptionDataType Type;
+            public RenderMethodOption.ParameterBlock.OptionDataType Type;
             public uint Flags;
         }
 
@@ -366,8 +360,14 @@ namespace TagTool.Tags.Definitions
             IgnoreFog = 1 << 0,
             UseSkyAtmosphereProperties = 1 << 1,
             UsesDepthCamera = 1 << 2,
-            DisableWithShields = 1 << 3,
-            EnableWithShields = 1 << 4,
+            //DisableWithShields = 1 << 3,
+            //EnableWithShields = 1 << 4,
+        }
+
+        [Flags]
+        public enum GlobalRenderMethodRuntimeFlagsDefintion : byte
+        {
+            UseVSWithMisc = 1 << 0
         }
     }
 }

@@ -63,25 +63,25 @@ namespace TagTool.Commands.RenderMethods
 
                     for (int methodIndex = 0; methodIndex < rmt2Descriptor.Options.Length; methodIndex++)
                     {
-                        var optionTag = rmdf.Methods[methodIndex].ShaderOptions[rmt2Descriptor.Options[methodIndex]].Option;
+                        var optionTag = rmdf.Categories[methodIndex].ShaderOptions[rmt2Descriptor.Options[methodIndex]].Option;
 
                         if (optionTag != null)
                         {
                             var rmop = Cache.Deserialize<RenderMethodOption>(stream, optionTag);
 
-                            foreach (var constantData in rmop.Options)
+                            foreach (var constantData in rmop.Parameters)
                                 if (Cache.StringTable.GetString(constantData.Name) == constantName)
                                 {
                                     // constant found, apply default value
 
-                                    if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
+                                    if (constantData.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
                                     {
                                         Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultBitmapScale;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultBitmapScale;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg2 = 0.0f;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg3 = 0.0f;
                                     }
-                                    else if (constantData.Type == RenderMethodOption.OptionBlock.OptionDataType.Boolean)
+                                    else if (constantData.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bool)
                                     {
                                         Definition.ShaderProperties[0].RealConstants[index].Arg0 = constantData.DefaultIntBoolArgument;
                                         Definition.ShaderProperties[0].RealConstants[index].Arg1 = constantData.DefaultIntBoolArgument;

@@ -16,22 +16,18 @@ namespace TagTool.Tags.Definitions
         public EffectFlagsMCC FlagsMCC;
 
         public uint FixedRandomSeed;
-        public float OverlapThreshold;
+        public float RestartIfWithin;
         public float ContinueIfWithin;
         public float DeathDelay;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public sbyte Unknown1;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public sbyte Unknown2;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public sbyte Unknown3;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public sbyte Unknown4;
+        public GlobalEffectPriorityEnum Priority;
+        [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padd;
 
         public short LoopStartEvent;
-        public EffectPriority Priority;
-        public uint Unknown5;
+        public short LocalLocation0;
+        public float RuntimeDangerRadius;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public uint Unknown6;
@@ -47,9 +43,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte LocationIndex;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public sbyte EventIndex;
+        public sbyte BindScaleToEvent;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public short Unknown11;
+        public short LocalLocation1;
 
         public float AlwaysPlayDistance;
         public float NeverPlayDistance;
@@ -62,20 +58,26 @@ namespace TagTool.Tags.Definitions
         public class Location : TagStructure
 		{
             public StringId MarkerName;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public int Unknown1;
+            public EffectLocationFlags Flags;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown5;
+            public GlobalEffectPriorityEnum Priority;
+            [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padd2;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public Int16 Flags;
+            public Int16 ReachFlags;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public EffectPriority Priority;
+            public EffectPriority ReachPriority;
+
+            [Flags]
+            public enum EffectLocationFlags : uint
+            {
+                Optional = 1 << 0,
+                Destructible = 1 << 1,
+                TrackSubframeMovements = 1 << 2
+            }
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -94,13 +96,9 @@ namespace TagTool.Tags.Definitions
                 LoopEventAgeDurationOverride = 1 << 2
             }
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public EffectPriority Priority;
-
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown4;
+            public GlobalEffectPriorityEnum Priority;
+            [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padd3;
 
             public float SkipFraction;
             public Bounds<float> DelayBounds;
@@ -171,11 +169,11 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class ParticleSystem : TagStructure
-			{
-                public EffectEventPriority Priority;
-                public sbyte GameMode;
-                public sbyte Unknown3;
-                public sbyte Unknown4;
+            {
+                public GlobalEffectPriorityEnum Priority;
+                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padd3;
+
                 public CachedTag Particle;
                 public uint LocationIndex;
                 public ParticleCoordinateSystem CoordinateSystem;
@@ -189,28 +187,6 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ParticleSystemFlags Flags;
 
-                [Flags]
-                public enum ParticleSystemFlags : ushort
-                {
-                    None = 0,
-                    ParticlesFreezeWhenOffscreen = 1 << 0,
-                    ParticlesContinueAsUsualWhenOffscreen = 1 << 1,
-                    LodAlways1 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    DisabledForDebugging = 1 << 5,
-                    InheritEffectVelocity = 1 << 6,
-                    DontRenderSystem = 1 << 7,
-                    RenderWhenZoomed = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    EnableCollision = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15,
-                }
-
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public int FlagsReach;
 
@@ -218,6 +194,7 @@ namespace TagTool.Tags.Definitions
                 public float Unknown18;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown19;
+
                 public float PixelBudget; // ms
                 public float NearRange;
                 public float NearCutoff;
@@ -228,6 +205,7 @@ namespace TagTool.Tags.Definitions
                 public float LodOutDistance;
                 public float LodFeatherOutDelta;
                 public float InverseLodFeatherOut;
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown15;
 
@@ -236,6 +214,25 @@ namespace TagTool.Tags.Definitions
                 public float RuntimeMaximumLifespan;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
+
+                [Flags]
+                public enum ParticleSystemFlags : ushort
+                {
+                    ParticlesFreezeWhenOffscreen = 1 << 0,
+                    ParticlesContinueAsUsualWhenOffscreen = 1 << 1,
+                    LodAlways10 = 1 << 2,
+                    LodSameInSplitscreen = 1 << 3,
+                    DisabledIn3And4waySplitscreen = 1 << 4,
+                    DisabledForDebugging = 1 << 5,
+                    InheritEffectVelocity = 1 << 6,
+                    DontRenderSystem = 1 << 7,
+                    RenderWhenZoomed = 1 << 8,
+                    ForceCpuUpdating = 1 << 9,
+                    ForceGpuUpdating = 1 << 10,
+                    OverrideNearFade = 1 << 11,
+                    ParticlesDieWhenEffectEnds = 1 << 12,
+                    GpuOcclusion = 1 << 13
+                }
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
                 [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -264,8 +261,10 @@ namespace TagTool.Tags.Definitions
 
                     public float BoundingRadiusEstimate;
                     public float BoundRadiusOverride;
+
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public RealPoint3d AxisScale;
+
                     public RealPoint2d UVScrollRate;
 
                     /// <summary>
@@ -359,16 +358,7 @@ namespace TagTool.Tags.Definitions
                         ImpactArea,
                         Debris,
                         Line,
-                        CustomPoints,
-                        BoatHullSurface,
-                        Cube,
-                        Cylinder,
-                        UnweightedLine,
-                        Plane,
-                        Jetwash,
-                        PlanarOrbit,
-                        SphereOrbit,
-                        PlaneSpray
+                        BreakableSurface
                     }
 
                     public enum ParticleModelAxis : byte
@@ -584,20 +574,29 @@ namespace TagTool.Tags.Definitions
         UseParentPositionButWorldOrientation = 1 << 4,
         CanPenetrateWalls = 1 << 5,
         CannotBeRestarted = 1 << 6,
-        Unknown8 = 1 << 8,
-        ForceLooping = 1 << 9,
-        ObsoleteEffectOrdnanceIsGone = 1 << 10,
-        RenderInHologramPass = 1 << 11,
-        LightprobeOnlySampleAirprobes = 1 << 12,
-        PlayEffectEvenOutsideBsps = 1 << 13,
-        DrawLensFlaresWhenStopped = 1 << 14,
-        KillParticlesWhenStopped = 1 << 15,
-        PlayEvenOnHiddenObjects = 1 << 16,
-        DisableFirstPersonPartsInBlindSkull = 1 << 17,
-        HidesAssociatedObjectOnEffectDeletion = 1 << 18,
-        BypassMpThrottle = 1 << 19,
-        RenderInNonFirstPersonPass = 1 << 20,
-        UseAveragedLocationsForLods = 1 << 21
+        ForceUseOwnLightprobe = 1 << 7,
+        HeavyPerformance = 1 << 8,
+        HalfResolution = 1 << 9,
+        ForceLooping = 1 << 10,
+        ObsoleteEffectOrdnanceIsGone = 1 << 11,
+        RenderInHologramPass = 1 << 12,
+        LightprobeOnlySampleAirprobes = 1 << 13,
+        PlayEffectEvenOutsideBsps = 1 << 14,
+        DrawLensFlaresWhenStopped = 1 << 15,
+        KillParticlesWhenStopped = 1 << 16,
+        PlayEvenOnHiddenObjects = 1 << 17,
+        DisableFirstPersonPartsInBlindSkull = 1 << 18,
+        HidesAssociatedObjectOnEffectDeletion = 1 << 19,
+        BypassMpThrottle = 1 << 20,
+        RenderInNonFirstPersonPass = 1 << 21,
+        UseAveragedLocationsForLods = 1 << 22
+    }
+
+    public enum GlobalEffectPriorityEnum : byte
+    {
+        Normal,
+        High,
+        Essential
     }
 
     public enum EffectPriority : short

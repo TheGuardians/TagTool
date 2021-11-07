@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
 	{
         public ModelWidgetFlags Flags;
         public GuiDefinition GuiRenderBlock;
-        public List<CameraRefinement> CameraControl;
+        public List<CameraSettingsBlock> CameraSettings;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown2;
@@ -60,21 +60,31 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<TexCam> TextureCameraSections;
 
+        [Flags]
+        public enum ModelWidgetFlags : int
+        {
+            DoNotApplyOldContentUpscaling = 1 << 0,
+            OverrideTemplateFlags = 1 << 1,
+            EnableAnimationDebugging = 1 << 2,
+            UNUSED = 1 << 3
+        }
+
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
-        public class CameraRefinement : TagStructure
+        public class CameraSettingsBlock : TagStructure
 		{
-            public StringId Biped2;
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public float Unknown4;
-            public float BipedAngle; //[0 to 1]
-            public uint Unknown6;
-            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public RealPoint2d BaseOffsetOld;
+            public StringId Name;
+            public float Fov;
+            public float InitialRadialOffset;
+            public float FinalRadialOffset;
+            public float CameraRadialStepSize;
+            public float InitialVerticalOffset;
+            public float FinalVerticalOffset;
+            public float CameraVerticalStepSize;
+            public float CameraRotationalStep;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealPoint3d BaseOffsetNew;
+            public float BaseOffsetNew;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public RealVector3d Unknown10;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -86,9 +96,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public RealVector3d Unknown22;
 
-            public List<ZoomData> ZoomData1;
+            public List<ZoomData> RadialTransitionFxn;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public List<ZoomData> ZoomData2;
+            public List<ZoomData> VerticalTransitionFxn;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown26;
@@ -129,43 +139,5 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> XBounds;   
             public Bounds<float> YBounds;
         }
-    }
-
-    [Flags]
-    public enum ModelWidgetFlags : int
-    {
-        None = 0,
-        Bit0 = 1 << 0,
-        Bit1 = 1 << 1,
-        Bit2 = 1 << 2,
-        Bit3 = 1 << 3,
-        Bit4 = 1 << 4,
-        Bit5 = 1 << 5,
-        Bit6 = 1 << 6,
-        Bit7 = 1 << 7,
-        Bit8 = 1 << 8,
-        Bit9 = 1 << 9,
-        Bit10 = 1 << 10,
-        Bit11 = 1 << 11,
-        Bit12 = 1 << 12,
-        Bit13 = 1 << 13,
-        Bit14 = 1 << 14,
-        Bit15 = 1 << 15,
-        Bit16 = 1 << 16,
-        Bit17 = 1 << 17,
-        Bit18 = 1 << 18,
-        Bit19 = 1 << 19,
-        Bit20 = 1 << 20,
-        Bit21 = 1 << 21,
-        Bit22 = 1 << 22,
-        Bit23 = 1 << 23,
-        Bit24 = 1 << 24,
-        Bit25 = 1 << 25,
-        Bit26 = 1 << 26,
-        Bit27 = 1 << 27,
-        Bit28 = 1 << 28,
-        Bit29 = 1 << 29,
-        Bit30 = 1 << 30,
-        Bit31 = 1 << 31
     }
 }

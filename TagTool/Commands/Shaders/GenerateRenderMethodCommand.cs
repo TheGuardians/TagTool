@@ -70,7 +70,7 @@ namespace TagTool.Commands.Shaders
                 List<RenderMethodOption> renderMethodOptions = new List<RenderMethodOption>();
                 for (int i = 0; i < rmt2Descriptor.Options.Length; i++)
                 {
-                    var rmopTag = rmdf.Methods[i].ShaderOptions[rmt2Descriptor.Options[i]].Option;
+                    var rmopTag = rmdf.Categories[i].ShaderOptions[rmt2Descriptor.Options[i]].Option;
                     if (rmopTag != null)
                         renderMethodOptions.Add(Cache.Deserialize<RenderMethodOption>(stream, rmopTag));
                 }
@@ -83,16 +83,16 @@ namespace TagTool.Commands.Shaders
                 rmDefinition.BaseRenderMethod = rmdfTag;
 
                 // initialize lists
-                rmDefinition.RenderMethodDefinitionOptionIndices = new List<RenderMethod.RenderMethodDefinitionOptionIndex>();
-                rmDefinition.ShaderProperties = new List<RenderMethod.ShaderProperty>();
+                rmDefinition.Options = new List<RenderMethod.RenderMethodOptionIndex>();
+                rmDefinition.ShaderProperties = new List<RenderMethod.RenderMethodPostprocessBlock>();
 
                 foreach (var option in rmt2Descriptor.Options)
-                    rmDefinition.RenderMethodDefinitionOptionIndices.Add(new RenderMethod.RenderMethodDefinitionOptionIndex { OptionIndex = option });
-                rmDefinition.SortingLayer = TagTool.Shaders.SortingLayerValue.Normal;
-                rmDefinition.Unknown2 = -1;
+                    rmDefinition.Options.Add(new RenderMethod.RenderMethodOptionIndex { OptionIndex = option });
+                rmDefinition.SortLayer = TagTool.Shaders.SortingLayerValue.Normal;
+                rmDefinition.PredictionAtomIndex = -1;
 
                 // setup shader property
-                RenderMethod.ShaderProperty shaderProperty = new RenderMethod.ShaderProperty
+                RenderMethod.RenderMethodPostprocessBlock shaderProperty = new RenderMethod.RenderMethodPostprocessBlock
                 {
                     Template = rmt2Tag,
                     // setup constants
@@ -101,7 +101,7 @@ namespace TagTool.Commands.Shaders
                     IntegerConstants = SetupIntegerConstants(rmt2, renderMethodOptions),
                     BooleanConstants = SetupBooleanConstants(rmt2, renderMethodOptions),
                     // get alpha blend mode
-                    AlphaBlendMode = GetAlphaBlendMode(rmt2Descriptor, rmdf),
+                    BlendMode = GetAlphaBlendMode(rmt2Descriptor, rmdf),
                     // TODO
                     QueryableProperties = new short[] { -1, -1, -1, -1, -1, -1, -1, -1 }
                 };
@@ -116,32 +116,32 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        List<RenderMethod.ShaderProperty.TextureConstant> SetupTextureConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
+        List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant> SetupTextureConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
         {
-            List<RenderMethod.ShaderProperty.TextureConstant> textureConstants = new List<RenderMethod.ShaderProperty.TextureConstant>();
+            List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant> textureConstants = new List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant>();
 
             foreach (var samplerName in rmt2.TextureParameterNames)
             {
                 string name = Cache.StringTable.GetString(samplerName.Name);
 
-                RenderMethod.ShaderProperty.TextureConstant textureConstant = new RenderMethod.ShaderProperty.TextureConstant();
+                RenderMethod.RenderMethodPostprocessBlock.TextureConstant textureConstant = new RenderMethod.RenderMethodPostprocessBlock.TextureConstant();
 
                 foreach (var rmop in renderMethodOptions)
                 {
                     bool found = false;
 
-                    foreach (var option in rmop.Options)
+                    foreach (var option in rmop.Parameters)
                     {
-                        if (Cache.StringTable.GetString(option.Name) == name && option.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
+                        if (Cache.StringTable.GetString(option.Name) == name && option.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
                         {
                             textureConstant.Bitmap = option.DefaultSamplerBitmap;
-                            textureConstant.SamplerAddressMode = new RenderMethod.ShaderProperty.TextureConstant.PackedSamplerAddressMode
+                            textureConstant.SamplerAddressMode = new RenderMethod.RenderMethodPostprocessBlock.TextureConstant.PackedSamplerAddressMode
                             {
-                                AddressU = (RenderMethod.ShaderProperty.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode,
-                                AddressV = (RenderMethod.ShaderProperty.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode
+                                AddressU = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode,
+                                AddressV = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode
                             };
-                            textureConstant.FilterMode = (RenderMethod.ShaderProperty.TextureConstant.SamplerFilterMode)option.DefaultFilterMode;
-                            textureConstant.ExternMode = (sbyte)option.RenderMethodExtern;
+                            textureConstant.FilterMode = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant.SamplerFilterMode)option.DefaultFilterMode;
+                            textureConstant.ExternTextureMode = (sbyte)option.RenderMethodExtern;
 
                             found = true;
                             break;
@@ -157,7 +157,7 @@ namespace TagTool.Commands.Shaders
                     string realName = Cache.StringTable.GetString(rmt2.RealParameterNames[i].Name);
                     if (name == realName)
                     {
-                        textureConstant.XFormArgumentIndex = i;
+                        textureConstant.TextureTransformConstantIndex = i;
                         break;
                     }
                 }
@@ -171,34 +171,34 @@ namespace TagTool.Commands.Shaders
             return textureConstants;
         }
 
-        List<RenderMethod.ShaderProperty.RealConstant> SetupRealConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
+        List<RenderMethod.RenderMethodPostprocessBlock.RealConstant> SetupRealConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
         {
-            List<RenderMethod.ShaderProperty.RealConstant> realConstants = new List<RenderMethod.ShaderProperty.RealConstant>();
+            List<RenderMethod.RenderMethodPostprocessBlock.RealConstant> realConstants = new List<RenderMethod.RenderMethodPostprocessBlock.RealConstant>();
 
             foreach (var realConstantName in rmt2.RealParameterNames)
             {
                 string name = Cache.StringTable.GetString(realConstantName.Name);
 
-                RenderMethod.ShaderProperty.RealConstant realConstant = new RenderMethod.ShaderProperty.RealConstant();
+                RenderMethod.RenderMethodPostprocessBlock.RealConstant realConstant = new RenderMethod.RenderMethodPostprocessBlock.RealConstant();
 
                 foreach (var rmop in renderMethodOptions)
                 {
                     bool found = false;
 
-                    foreach (var option in rmop.Options)
+                    foreach (var option in rmop.Parameters)
                     {
                         if (Cache.StringTable.GetString(option.Name) == name &&
-                            option.Type != RenderMethodOption.OptionBlock.OptionDataType.Boolean &&
-                            option.Type != RenderMethodOption.OptionBlock.OptionDataType.Integer)
+                            option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Bool &&
+                            option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Int)
                         {
-                            if (option.Type == RenderMethodOption.OptionBlock.OptionDataType.Sampler)
+                            if (option.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
                             {
                                 realConstant.Arg0 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
                                 realConstant.Arg1 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
                                 realConstant.Arg2 = 0;
                                 realConstant.Arg3 = 0;
                             }
-                            else if (option.Type == RenderMethodOption.OptionBlock.OptionDataType.IntegerColor)
+                            else if (option.Type == RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor)
                             {
                                 realConstant.Arg0 = (float)option.DefaultColor.Red / 255;
                                 realConstant.Arg1 = (float)option.DefaultColor.Green / 255;
@@ -242,9 +242,9 @@ namespace TagTool.Commands.Shaders
                 {
                     bool found = false;
 
-                    foreach (var option in rmop.Options)
+                    foreach (var option in rmop.Parameters)
                     {
-                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != RenderMethodOption.OptionBlock.OptionDataType.Integer)
+                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Int)
                         {
                             integerConstant = option.DefaultIntBoolArgument;
                             found = true;
@@ -274,9 +274,9 @@ namespace TagTool.Commands.Shaders
                 {
                     bool found = false;
 
-                    foreach (var option in rmop.Options)
+                    foreach (var option in rmop.Parameters)
                     {
-                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != RenderMethodOption.OptionBlock.OptionDataType.Boolean)
+                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Bool)
                         {
                             booleanConstants |= option.DefaultIntBoolArgument >> i;
                             found = true;
@@ -292,23 +292,23 @@ namespace TagTool.Commands.Shaders
             return booleanConstants;
         }
 
-        RenderMethod.ShaderProperty.AlphaBlendModeValue GetAlphaBlendMode(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, RenderMethodDefinition rmdf)
+        RenderMethod.RenderMethodPostprocessBlock.BlendModeValue GetAlphaBlendMode(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, RenderMethodDefinition rmdf)
         {
-            for (int i = 0; i < rmdf.Methods.Count; i++)
+            for (int i = 0; i < rmdf.Categories.Count; i++)
             {
-                if (Cache.StringTable.GetString(rmdf.Methods[i].Type) == "blend_mode")
+                if (Cache.StringTable.GetString(rmdf.Categories[i].Name) == "blend_mode")
                 {
-                    string blendMode = Cache.StringTable.GetString(rmdf.Methods[i].ShaderOptions[rmt2Descriptor.Options[i]].Type);
+                    string blendMode = Cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[rmt2Descriptor.Options[i]].Name);
 
-                    if (Enum.TryParse<RenderMethod.ShaderProperty.AlphaBlendModeValue>(blendMode, out var alphaBlendMode))
+                    if (Enum.TryParse<RenderMethod.RenderMethodPostprocessBlock.BlendModeValue>(blendMode, out var alphaBlendMode))
                         return alphaBlendMode;
 
                     Console.WriteLine($"Could not parse blend mode \"{blendMode}\"");
-                    return RenderMethod.ShaderProperty.AlphaBlendModeValue.opaque;
+                    return RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Opaque;
                 }
             }
 
-            return RenderMethod.ShaderProperty.AlphaBlendModeValue.opaque;
+            return RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Opaque;
         }
     }
 }

@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     public class UserInterfaceSoundsDefinition : TagStructure
 	{
         public CachedTag Error;
-        public CachedTag VerticalNavigation;
-        public CachedTag HorizontalNavigation;
+        public CachedTag CursorSoundVertical;
+        public CachedTag CursorSoundHorizontal;
         public CachedTag AButton;
         public CachedTag BButton;
         public CachedTag XButton;
@@ -24,9 +24,9 @@ namespace TagTool.Tags.Definitions
         public CachedTag TimerSound;
         public CachedTag TimerSoundZero;
         public CachedTag AltTimerSound;
-        public CachedTag SecondAltTimerSound;
+        public CachedTag AltTimerSoundZero;
         public CachedTag MatchmakingAdvanceSound;
-        public CachedTag RankUp;
+        public CachedTag RankUpSound;
         public CachedTag MatchmakingPartyUpSound;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]

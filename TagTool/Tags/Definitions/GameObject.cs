@@ -13,17 +13,19 @@ namespace TagTool.Tags.Definitions
     public class GameObject : TagStructure
 	{
         public GameObjectType ObjectType;
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.HaloReach)]
+
+        [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.HaloReach)]
         public byte[] pad = new byte[2];
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameObjectFlagsReach ReachObjectFlags;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public GameObjectFlags ObjectFlags;
 
-        public float BoundingRadius;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public ObjectDefinitionFlags ObjectFlags;
+
+        public float BoundingRadius; // world units
         public RealPoint3d BoundingOffset;
-        public float AccelerationScale;
+        public float AccelerationScale; // [0,+inf] marine 1.0, grunt 1.4, elite 0.9, hunter 0.5, etc.
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float VerticalAccelerationScale;
@@ -32,10 +34,10 @@ namespace TagTool.Tags.Definitions
 
         public LightmapShadowModeValue LightmapShadowMode;
         public SweetenerSizeValue SweetenerSize;
-        public WaterDensityValue WaterDensity;
+        public WaterDensityType WaterDensity;
         public int RuntimeFlags;
-        public float DynamicLightSphereRadius;
-        public RealPoint3d DynamicLightSphereOffset;
+        public float DynamicLightSphereRadius; // sphere to use for dynamic lights and shadows. only used if not 0
+        public RealPoint3d DynamicLightSphereOffset; // only used if radius not 0
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId GenericHUDText;
@@ -60,7 +62,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ArmorSounds;
 
-        public CachedTag MeleeImpact;
+        public CachedTag MeleeImpactSound; // sound made when I am meleed. Overrides the sweetener sound of my material.
 
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
@@ -70,7 +72,7 @@ namespace TagTool.Tags.Definitions
 
         public short HudTextMessageIndex;
 
-        public short SecondaryFlags;
+        public ObjectDefinitionSecondaryFlags SecondaryFlags;
 
         public List<Attachment> Attachments;
 
@@ -120,20 +122,21 @@ namespace TagTool.Tags.Definitions
 
         public enum SweetenerSizeValue : sbyte
         {
+            Default,
             Small,
             Medium,
             Large
         }
 
-        public enum WaterDensityValue : sbyte
+        public enum WaterDensityType : sbyte
         {
             Default,
-            Least,
-            Some,
-            Equal,
-            More,
-            MoreStill,
-            LotsMore
+            SuperFloater,
+            Floater,
+            Neutral,
+            Sinker,
+            SuperSinker,
+            None
         }
 
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
@@ -149,7 +152,7 @@ namespace TagTool.Tags.Definitions
         public class EarlyMoverProperty : TagStructure
 		{
             [TagField(Flags = Label)]
-            public StringId Name;
+            public StringId NodeName;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int RuntimeNodeIndex;
@@ -165,20 +168,20 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class AiProperty : TagStructure
 		{
-            public FlagsValue Flags;
+            public AiPropertiesFlags AiFlags;
             public StringId AiTypeName;
 
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.Halo3Retail)]
-            public byte[] Padding;
+            [TagField(Length = 0x4, Flags = Padding, MaxVersion = CacheVersion.Halo3Retail)]
+            public byte[] Padding0;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId InteractionName;
 
-            public ObjectSizeValue Size;
-            public AiDistanceValue LeapJumpSpeed;
+            public AiSizeEnum AiSize;
+            public GlobalAiJumpHeight LeapJumpSpeed;
 
             [Flags]
-            public enum FlagsValue : int
+            public enum AiPropertiesFlags : int
             {
                 None = 0,
                 DestroyableCover = 1 << 0,
@@ -189,44 +192,33 @@ namespace TagTool.Tags.Definitions
                 HasCornerMarkers = 1 << 5,
                 IdleWhenFlying = 1 << 6
             }
-        }
 
-        public enum ObjectSizeValue : short
-        {
-            Default,
-            Tiny,
-            Small,
-            Medium,
-            Large,
-            Huge,
-            Immobile
-        }
+            public enum AiSizeEnum : short
+            {
+                Default,
+                Tiny,
+                Small,
+                Medium,
+                Large,
+                Huge,
+                Immobile
+            }
 
-        public enum AiDistanceValue : short
-        {
-            None,
-            Down,
-            Step,
-            Crouch,
-            Stand,
-            Storey,
-            Tower,
-            Infinite
         }
 
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
         public class Function : TagStructure
 		{
-            public FlagsValue Flags;
+            public ObjectFunctionFlags Flags;
             public StringId ImportName;
             public StringId ExportName;
-            public StringId TurnOffWith;
+            public StringId TurnOffWith; // if the specified function is off, so is this function
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId RangedInterpolationName;
 
-            public float MinimumValue;
+            public float MinimumValue; // function must exceed this value (after mapping) to be active. 0 means do nothing
             public TagFunction DefaultFunction = new TagFunction { Data = new byte[0] };
             public StringId ScaleBy;
 
@@ -247,15 +239,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum FlagsValue : int
+            public enum ObjectFunctionFlags : int
             {
                 None = 0,
-                Invert = 1 << 0,
-                MappingDoesNotControlsActive = 1 << 1,
-                AlwaysActive = 1 << 2,
-                RandomTimeOffset = 1 << 3,
-                AlwaysExportsValue = 1 << 4,
-                TurnOffWithUsesMagnitude = 1 << 5
+                Invert = 1 << 0, // result of function is one minus actual result
+                MappingDoesNotControlsActive = 1 << 1, // the curve mapping can make the function active/inactive
+                AlwaysActive = 1 << 2, // function does not deactivate when at or below lower bound
+                RandomTimeOffset = 1 << 3, // function offsets periodic function input by random value between 0 and 1
+                AlwaysExportsValue = 1 << 4, // when this function is deactivated, it still exports its value
+                TurnOffWithUsesMagnitude = 1 << 5 // the function will be turned off if the value of the turns_off_with function is 0
             }
         }
 
@@ -273,7 +265,9 @@ namespace TagTool.Tags.Definitions
 
             public StringId Marker;
             public ChangeColorValue ChangeColor;
-            public FlagsValue Flags;
+
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Padding0;
 
             public StringId PrimaryScale;
             public StringId SecondaryScale;
@@ -295,20 +289,13 @@ namespace TagTool.Tags.Definitions
                 Quaternary
             }
 
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                None,
-                ForceAlwaysOn = 1 << 0,
-                EffectSizeScaleFromObjectScale = 1 << 1
-            }
         }
         
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
         public class ChangeColor : TagStructure
 		{
             public List<InitialPermutation> InitialPermutations;
-            public List<Function> Functions;
+            public List<ChangeColorFunction> Functions;
 
             [TagStructure(Size = 0x20)]
             public class InitialPermutation : TagStructure
@@ -317,28 +304,28 @@ namespace TagTool.Tags.Definitions
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
                 [TagField(Flags = Label)]
-                public StringId VariantName;
+                public StringId VariantName; // if empty, may be used by any model variant
             }
 
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
-            public class Function : TagStructure
+            public class ChangeColorFunction : TagStructure
 			{
                 [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte[] Unused = new byte[4];
 
-                public ScaleFlagsValue ScaleFlags;
+                public GlobalRgbInterpolationFlags ScaleFlags;
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
                 public StringId DarkenBy;
                 public StringId ScaleBy;
 
                 [Flags]
-                public enum ScaleFlagsValue : int
+                public enum GlobalRgbInterpolationFlags : int
                 {
                     None = 0,
-                    BlendInHsv = 1 << 0,
-                    MoreColors = 1 << 1
+                    BlendInHsv = 1 << 0, // blends colors in hsv rather than rgb space
+                    MoreColors = 1 << 1 // blends colors through more hues (goes the long way around the color wheel)
                 }
             }
         }
@@ -364,28 +351,31 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public EngineFlagsReachValue ReachEngineFlags;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public EngineFlagsValue EngineFlags;
-            public TypeValue Type;
+
+            public MultiplayerObjectType Type;
             public TeleporterPassabilityFlags TeleporterPassability;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public FlagsValue Flags;
+            public MultiplayerObjectFlags Flags;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public BoundaryShapeValue BoundaryShape;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public SpawnTimerTypeValue SpawnTimerType;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
+
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
             public byte[] pad = new byte[1];
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public short SpawnTime;
+            public short DefaultSpawnTime; // seconds
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public short AbandonTime;
+            public short DefaultAbandonTime;
 
-            public float BoundaryWidth;
-            public float BoundaryLength;
+            public float BoundaryWidthRadius;
+            public float BoundaryBoxLength;
             public float BoundaryTop;
             public float BoundaryBottom;
 
@@ -398,20 +388,18 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short AbandonTimeReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public FlagsValue FlagsReach;
+            public MultiplayerObjectFlags FlagsReach;
 
             //only the first of these exists in Reach
-            public float RespawnZoneWeight;
+            public float StandardRespawnZoneWeight;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RespawnZoneUnknown2;
+            public float FlagAwayRespawnZoneWeight;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float RespawnZoneUnknown3;
+            public float FlagAtHomeRespawnZoneWeight;
 
             public StringId BoundaryCenterMarker;
             public StringId SpawnedObjectMarkerName;
-
             public CachedTag SpawnedObject;
-
             public StringId NyiBoundaryMaterial;
 
             [TagField(Length = (int)BoundaryShapeValue.Count)]
@@ -430,7 +418,7 @@ namespace TagTool.Tags.Definitions
                 Assault = 1 << 6,
                 Vip = 1 << 7,
                 Infection = 1 << 8,
-                Bit9 = 1 << 9
+                TargetTraining = 1 << 9
             }
 
             [Flags]
@@ -444,7 +432,7 @@ namespace TagTool.Tags.Definitions
                 Firefight = 1 << 4
             }
 
-            public enum TypeValue : sbyte
+            public enum MultiplayerObjectType : sbyte
             {
                 Ordinary,
                 Weapon,
@@ -460,16 +448,16 @@ namespace TagTool.Tags.Definitions
                 TeleporterReceiver,
                 PlayerSpawnLocation,
                 PlayerRespawnZone,
-                HoldSpawnObjective,
-                CaptureSpawnObjective,
-                HoldDestinationObjective,
-                CaptureDestinationObjective,
-                HillObjective,
-                InfectionHavenObjective,
-                TerritoryObjective,
-                VipBoundaryObjective,
-                VipDestinationObjective,
-                JuggernautDestinationObjective
+                HoldSpawnLocation, // OddballSpawnLocation (only? or assault also)
+                CtfFlagSpawnLocation,
+                AssaultTargetLocation, // formerly TargetSpawnLocation. assumed only for Assault
+                CtfFlagReturnArea,
+                KothHillArea,
+                InfectionSafeArea,
+                TerritoryArea,
+                VipInfluenceArea,
+                VipDestinationZone,
+                JuggernautDestinationZone
             }
 
             [Flags]
@@ -484,13 +472,13 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum FlagsValue : ushort
+            public enum MultiplayerObjectFlags : ushort
             {
                 None,
-                OnlyRenderInEditor = 1 << 0,
+                OnlyVisibleInEditor = 1 << 0,
                 ValidInitialPlayerSpawn = 1 << 1,
                 FixedBoundaryOrientation = 1 << 2,
-                InheritOwningTeamColor = 1 << 3,
+                InheritOwningTeamColor = 1 << 3,    // CandyMonitorShouldIgnore(?)
                 Bit4 = 1 << 4,
                 Bit5 = 1 << 5,
                 Bit6 = 1 << 6,
@@ -793,8 +781,8 @@ namespace TagTool.Tags.Definitions
     {
         None = 0,
         DoesNotCastShadow = 1 << 0,
-        SearchCardinalDirectionMaps = 1 << 1,
-        Bit2 = 1 << 2,
+        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
+        PreservesInitialDamageOwner = 1 << 2,
         NotAPathfindingObstacle = 1 << 3,
         ExtensionOfParent = 1 << 4,
         DoesNotCauseCollisionDamage = 1 << 5,
@@ -803,32 +791,51 @@ namespace TagTool.Tags.Definitions
         UseStaticMassiveLightmapSample = 1 << 8,
         ObjectScalesAttachments = 1 << 9,
         InheritsPlayersAppearance = 1 << 10,
-        DeadBipedsCantLocalize = 1 << 11,
+        NonPhysicalInMapEditor = 1 << 11,
         AttachToClustersByDynamicSphere = 1 << 12,
         EffectsDoNotSpawnObjectsInMultiplayer = 1 << 13,
-        Bit14 = 1 << 14,
-        Bit15 = 1 << 15
+        DoesNotCollideWithCamera = 1 << 14,
+        DamageNotBlockedByObstructions = 1 << 15
     }
 
     [Flags]
-    public enum GameObjectFlags : ushort
+    public enum ObjectDefinitionFlags : ushort
     {
         None = 0,
         DoesNotCastShadow = 1 << 0,
-        SearchCardinalDirectionMaps = 1 << 1,
-        Bit2 = 1 << 2,
+        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
+        PreservesInitialDamageOwner = 1 << 2,
         NotAPathfindingObstacle = 1 << 3,
-        ExtensionOfParent = 1 << 4,
+        ExtensionOfParent = 1 << 4, // object passes all function values to parent and uses parent's markers
         DoesNotCauseCollisionDamage = 1 << 5,
         EarlyMover = 1 << 6,
         EarlyMoverLocalizedPhysics = 1 << 7,
         UseStaticMassiveLightmapSample = 1 << 8,
         ObjectScalesAttachments = 1 << 9,
         InheritsPlayersAppearance = 1 << 10,
-        DeadBipedsCantLocalize = 1 << 11,
-        AttachToClustersByDynamicSphere = 1 << 12,
+        NonPhysicalInMapEditor = 1 << 11, // formerly DeadBipedsCantLocalize, which was probably incorrect
+        AttachToClustersByDynamicSphere = 1 << 12, // use this for the mac gun on spacestation
         EffectsDoNotSpawnObjectsInMultiplayer = 1 << 13,
-        Bit14 = 1 << 14,
-        Bit15 = 1 << 15
+        DoesNotCollideWithCamera = 1 << 14, // specifically the flying observer camera
+        DamageNotBlockedByObstructions = 1 << 15 // AOE damage being applied to this object does not test for obstrutions.
+    }
+
+    public enum GlobalAiJumpHeight : short
+    {
+        None,
+        Down,
+        Step,
+        Crouch,
+        Stand,
+        Storey,
+        Tower,
+        Infinite
+    }
+
+    [Flags]
+    public enum ObjectDefinitionSecondaryFlags : ushort
+    {
+        None = 0,
+        DoesNotAffectProjectileAiming = 1 << 0
     }
 }

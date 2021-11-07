@@ -12,9 +12,6 @@ namespace TagTool.Tags.Definitions
 	{
         public CameraTrackFlags Flags;
 
-        [TagField(Flags = Padding, Length = 3)]
-        public byte[] Unused1 = new byte[3];
-
         public List<CameraPoint> CameraPoints;
 
         [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnlineED)]
@@ -29,7 +26,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [Flags]
-    public enum CameraTrackFlags : byte
+    public enum CameraTrackFlags : uint
     {
         None,
         LensEnabled = 1 << 0

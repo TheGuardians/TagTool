@@ -163,6 +163,7 @@ namespace TagTool.Commands.Sounds
                                 break;
                             case Compression.MP3:
                             case Compression.FSB4:
+                            case Compression.OGG:
                                 writer.Write(permutationData);
                                 break;
                         }
@@ -175,25 +176,8 @@ namespace TagTool.Commands.Sounds
 
         private string GetExportFileName(Compression targetFormat, int pitchRangeIndex, int permutationIndex)
         {
-            string extension = GetFormtFileExtension(targetFormat);
+            string extension = AudioUtils.GetFormtFileExtension(targetFormat);
             return $"{Tag.ToString().Replace('\\', '_')}_{pitchRangeIndex}_{permutationIndex}.{extension}";
-        }
-
-        private string GetFormtFileExtension(Compression format)
-        {
-            switch (format)
-            {
-                case Compression.XMA:
-                    return "xma";
-                case Compression.PCM:
-                    return "wav";
-                case Compression.MP3:
-                    return "mp3";
-                case Compression.FSB4:
-                    return "fsb";
-                default:
-                    throw new NotSupportedException();
-            }
         }
     }
 }

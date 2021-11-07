@@ -122,7 +122,7 @@ namespace TagTool.Commands.Tags
 
         private string BuildRmt2Name(RenderMethod renderMethod, string type)
         {
-            return $@"shaders\{type}_templates\_{string.Join("_", renderMethod.RenderMethodDefinitionOptionIndices.Select(i => i.OptionIndex))}";
+            return $@"shaders\{type}_templates\_{string.Join("_", renderMethod.Options.Select(i => i.OptionIndex))}";
         }
 
         private void NameRmdf(Stream stream, CachedTag rmdfTag, string type)
@@ -166,11 +166,11 @@ namespace TagTool.Commands.Tags
                     ProcessShader(stream, prt3.RenderMethod, type);
                     break;
                 case LightVolumeSystem ltvl:
-                    foreach (var sys in ltvl.LightVolume)
+                    foreach (var sys in ltvl.LightVolumes)
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case BeamSystem beam:
-                    foreach (var sys in beam.Beam)
+                    foreach (var sys in beam.Beams)
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case DecalSystem decs:
@@ -178,7 +178,7 @@ namespace TagTool.Commands.Tags
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
                 case ContrailSystem cntl:
-                    foreach (var sys in cntl.Contrail)
+                    foreach (var sys in cntl.Contrails)
                         ProcessShader(stream, sys.RenderMethod, type);
                     break;
             }

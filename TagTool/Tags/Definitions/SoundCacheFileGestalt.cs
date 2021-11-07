@@ -144,6 +144,17 @@ namespace TagTool.Tags.Definitions
         public int GetFirstPermutationIndex(int pitchRangeIndex, CachePlatform platform)
         {
             var pitchRange = PitchRanges[pitchRangeIndex];
+            return GetFirstPermutationIndex(pitchRange, platform);
+        }
+
+        /// <summary>
+        /// Get the index of the first permutation in a pitch range block.
+        /// </summary>
+        /// <param name="pitchRange"></param>
+        /// <param name="platform"></param>
+        /// <returns></returns>
+        public int GetFirstPermutationIndex(PitchRange pitchRange, CachePlatform platform)
+        {
             if (platform == CachePlatform.MCC)
             {
                 return (int)(pitchRange.EncodedPermutationInfoMCC << 12 >> 12);
@@ -151,7 +162,7 @@ namespace TagTool.Tags.Definitions
             else
             {
                 return pitchRange.FirstPermutationIndex;
-            } 
+            }
         }
 
         /// <summary>

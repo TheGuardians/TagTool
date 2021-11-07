@@ -21,11 +21,11 @@ namespace TagTool.Cache
 
         public ModPackageMetadata Metadata { get; set; } = new ModPackageMetadata();
 
-        public List<ModPackageStream> TagCachesStreams { get; set; } = new List<ModPackageStream>();
+        public List<ExtantStream> TagCachesStreams { get; set; } = new List<ExtantStream>();
 
         public List<Dictionary<int, string>> TagCacheNames { get; set; } = new List<Dictionary<int, string>>();
 
-        public ModPackageStream ResourcesStream { get; set; }
+        public ExtantStream ResourcesStream { get; set; }
 
         public List<Stream> MapFileStreams { get; set; } = new List<Stream>();
 
@@ -69,7 +69,7 @@ namespace TagTool.Cache
             {
                 // init a single cache
                 var tagStream = new MemoryStream();
-                TagCachesStreams.Add(new ModPackageStream(tagStream));
+                TagCachesStreams.Add(new ExtantStream(tagStream));
 
                 FontPackage = new MemoryStream();
 
@@ -81,7 +81,7 @@ namespace TagTool.Cache
                 Header.SectionTable = new ModPackageSectionTable();
                 if (!unmanagedResourceStream)
                 {
-                    ResourcesStream = new ModPackageStream(new MemoryStream());
+                    ResourcesStream = new ExtantStream(new MemoryStream());
                 }
                 else
                 {
@@ -89,7 +89,7 @@ namespace TagTool.Cache
                     {
                         long bufferSize = 4L * 1024 * 1024 * 1024; // 4 GB max
                         IntPtr data = Marshal.AllocHGlobal((IntPtr)bufferSize);
-                        ResourcesStream = new ModPackageStream(new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite));
+                        ResourcesStream = new ExtantStream(new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite));
                     }
                 }
                 
@@ -324,7 +324,7 @@ namespace TagTool.Cache
             header.RSASignature = rsa.SignHash(header.SHA1, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
         }
 
-        private static void CopyStreamChunk(EndianReader reader, ModPackageStream stream, uint size)
+        private static void CopyStreamChunk(EndianReader reader, ExtantStream stream, uint size)
         {
             var bufferSize = 0x14000;
             var remaining = size;
@@ -501,7 +501,7 @@ namespace TagTool.Cache
             var entry = new GenericSectionEntry(reader);
             var cacheCount = entry.Count;
 
-            TagCachesStreams = new List<ModPackageStream>();
+            TagCachesStreams = new List<ExtantStream>();
             CacheNames = new List<string>();
 
             for(int i = 0; i < cacheCount; i++)
@@ -517,7 +517,7 @@ namespace TagTool.Cache
                 var tagStream = new MemoryStream();
                 StreamUtil.Copy(reader.BaseStream, tagStream, (int)tableEntry.Size);
                 tagStream.Position = 0;
-                TagCachesStreams.Add(new ModPackageStream(tagStream));
+                TagCachesStreams.Add(new ExtantStream(tagStream));
             }
         }
 
@@ -530,7 +530,7 @@ namespace TagTool.Cache
             if(section.Size <= 0x7FFFFFFF)
             {
                 newResourceStream = new MemoryStream();
-                ResourcesStream = new ModPackageStream(newResourceStream);
+                ResourcesStream = new ExtantStream(newResourceStream);
                 CopyStreamChunk(reader, ResourcesStream, section.Size);
             }
             else
@@ -540,7 +540,7 @@ namespace TagTool.Cache
                     long bufferSize = 4L * 1024 * 1024 * 1024; // 4 GB max
                     IntPtr data = Marshal.AllocHGlobal((IntPtr)bufferSize);
                     newResourceStream = new UnmanagedMemoryStream((byte*)data.ToPointer(), 0, bufferSize, FileAccess.ReadWrite);
-                    ResourcesStream = new ModPackageStream(newResourceStream);
+                    ResourcesStream = new ExtantStream(newResourceStream);
                     CopyStreamChunk(reader, ResourcesStream, section.Size);
                 }
             }
@@ -771,27 +771,27 @@ namespace TagTool.Cache
 
         // IO stuff
 
-        public void CreateDescription(CommandContextStack contextStack, bool ignoreArgumentVariables)
+        public void CreateDescription(bool ignoreArgumentVariables)
         {
             Metadata = new ModPackageMetadata();
 
             Console.WriteLine("Enter the display name of the mod package (32 chars max):");
-            Metadata.Name = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
+            Metadata.Name = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), ignoreArgumentVariables);
             
             Console.WriteLine();
             Console.WriteLine("Enter the description of the mod package (512 chars max):");
-            Metadata.Description = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
+            Metadata.Description = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), ignoreArgumentVariables);
 
             Console.WriteLine();
             Console.WriteLine("Enter the author of the mod package (32 chars max):");
-            Metadata.Author = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
+            Metadata.Author = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), ignoreArgumentVariables);
 
             Console.WriteLine();
             Console.WriteLine("Enter the version of the mod package: (major.minor)");
 
             try
             {
-                var version = Version.Parse(ReplaceArgumentVariables(Console.ReadLine(), ignoreArgumentVariables, contextStack));
+                var version = Version.Parse(CommandRunner.ApplyUserVars(Console.ReadLine(), ignoreArgumentVariables));
                 Metadata.VersionMajor = (short)version.Major;
                 Metadata.VersionMinor = (short)version.Minor;
                 if (version.Major == 0 && version.Minor == 0)
@@ -807,7 +807,7 @@ namespace TagTool.Cache
 
             Console.WriteLine();
             Console.WriteLine("Please enter the types of the mod package. Separated by a space [MainMenu Multiplayer Campaign Firefight Character]");
-            string response = ReplaceArgumentVariables(Console.ReadLine().Trim(), ignoreArgumentVariables, contextStack);
+            string response = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), ignoreArgumentVariables);
 
             Header.ModifierFlags = Header.ModifierFlags & ModifierFlags.SignedBit;
 
@@ -825,22 +825,6 @@ namespace TagTool.Cache
 
             Metadata.BuildDateLow = (int)DateTime.Now.ToFileTime() & 0x7FFFFFFF;
             Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
-        }
-
-        private string ReplaceArgumentVariables(string input, bool ignoreArgumentVariables, CommandContextStack contextStack)
-        {            
-            if (!ignoreArgumentVariables)
-            {
-                for (int i = 0; i < contextStack.ArgumentVariables.Count; i++)
-                {
-                    foreach (var variable in contextStack.ArgumentVariables)
-                    {
-                        input = input.Replace(variable.Key, variable.Value);
-                    }
-                }
-            }
-
-            return input;
         }
     }
 }

@@ -94,11 +94,11 @@ namespace TagTool.Shaders
             // Add regular extern if needed, afaik only reach has missing constant table info
             Dictionary<RenderMethodExternReach, StringId> externNames = new Dictionary<RenderMethodExternReach, StringId>();
 
-            if (rmdf.RenderMethodOptions != null)
+            if (rmdf.GlobalOptions != null)
             {
-                var rmop = cache.Deserialize<RenderMethodOption>(cacheStream, rmdf.RenderMethodOptions);
+                var rmop = cache.Deserialize<RenderMethodOption>(cacheStream, rmdf.GlobalOptions);
 
-                foreach (var optionParam in rmop.Options)
+                foreach (var optionParam in rmop.Parameters)
                 {
                     if (optionParam.RenderMethodExternReach != RenderMethodExternReach.none)
                     {
@@ -111,13 +111,13 @@ namespace TagTool.Shaders
 
             for (int i = 0; i < optionIndices.Count; i++)
             {
-                var optionBlock = rmdf.Methods[i].ShaderOptions[optionIndices[i]];
+                var optionBlock = rmdf.Categories[i].ShaderOptions[optionIndices[i]];
 
                 if (optionBlock.Option != null)
                 {
                     var rmop = cache.Deserialize<RenderMethodOption>(cacheStream, optionBlock.Option);
 
-                    foreach (var optionParam in rmop.Options)
+                    foreach (var optionParam in rmop.Parameters)
                     {
                         if (optionParam.RenderMethodExternReach != RenderMethodExternReach.none)
                         {
@@ -135,7 +135,7 @@ namespace TagTool.Shaders
 
             for (int i = rmt2.EntryPoints[entryPointIndex].Offset; i < rmt2.EntryPoints[entryPointIndex].Offset + 1/*rmt2.EntryPoints[entryPointIndex].Count*/; i++)
             {
-                var table = rmt2.ParameterTables[i];
+                var table = rmt2.Passes[i];
 
                 for (ParameterUsage j = ParameterUsage.Texture; j < ParameterUsage.Count; j++)
                 {
@@ -185,35 +185,35 @@ namespace TagTool.Shaders
 
                     for (int k = oC.Offset; k < oC.Offset + oC.Count; k++)
                     {
-                        var parameter = rmt2.Parameters[k];
+                        var parameter = rmt2.RoutingInfo[k];
 
                         StringId name = StringId.Invalid;
-                        ushort register = parameter.RegisterIndex;
+                        ushort register = parameter.DestinationIndex;
 
                         switch (j)
                         {
                             case ParameterUsage.Texture:
-                                name = rmt2.TextureParameterNames[parameter.ArgumentIndex].Name;
-                                register = (ushort)((parameter.Flags & 1) == 1 ? parameter.RegisterIndex + 16 : register);
+                                name = rmt2.TextureParameterNames[parameter.SourceIndex].Name;
+                                register = (ushort)((parameter.Flags & 1) == 1 ? parameter.DestinationIndex + 16 : register);
                                 break;
                             case ParameterUsage.PS_Real:
-                                name = rmt2.RealParameterNames[parameter.ArgumentIndex].Name;
+                                name = rmt2.RealParameterNames[parameter.SourceIndex].Name;
                                 break;
                             case ParameterUsage.PS_Integer:
-                                name = rmt2.IntegerParameterNames[parameter.ArgumentIndex].Name;
+                                name = rmt2.IntegerParameterNames[parameter.SourceIndex].Name;
                                 break;
                             case ParameterUsage.PS_Boolean:
-                                name = rmt2.BooleanParameterNames[parameter.ArgumentIndex].Name;
+                                name = rmt2.BooleanParameterNames[parameter.SourceIndex].Name;
                                 break;
                             case ParameterUsage.TextureExtern:
-                                name = externNames[(RenderMethodExternReach)parameter.ArgumentIndex];
-                                register = (ushort)((parameter.Flags & 1) == 1 ? parameter.RegisterIndex + 16 : register);
+                                name = externNames[(RenderMethodExternReach)parameter.SourceIndex];
+                                register = (ushort)((parameter.Flags & 1) == 1 ? parameter.DestinationIndex + 16 : register);
                                 break;
                             case ParameterUsage.VS_RealExtern:
                             case ParameterUsage.VS_IntegerExtern:
                             case ParameterUsage.PS_RealExtern:
                             case ParameterUsage.PS_IntegerExtern:
-                                name = externNames[(RenderMethodExternReach)parameter.ArgumentIndex];
+                                name = externNames[(RenderMethodExternReach)parameter.SourceIndex];
                                 break;
                         }
 

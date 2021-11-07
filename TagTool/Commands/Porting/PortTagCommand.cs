@@ -19,7 +19,7 @@ using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
 using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
-using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Commands.Porting
 {
@@ -81,6 +81,9 @@ namespace TagTool.Commands.Porting
 			argParameters = ParsePortingOptions(portingOptions);
 
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;
+
+            InitializeSoundConverter();
+
             /*
             if(CacheContext is GameCacheModPackage)
             {
@@ -88,11 +91,11 @@ namespace TagTool.Commands.Porting
             }*/
 
 
-			//
-			// Convert Blam data to ElDorado data
-			//
+            //
+            // Convert Blam data to ElDorado data
+            //
 
-			var resourceStreams = new Dictionary<ResourceLocation, Stream>();
+            var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
             try
             {
@@ -206,10 +209,10 @@ namespace TagTool.Commands.Porting
                         // need to assign resource reference to an object here -- otherwise it compiles strangely??
                         object bitmapResourceDefinition;
 
-                        if (image.XboxFlags.HasFlag(TagTool.Bitmaps.BitmapFlagsXbox.UseInterleavedTextures))
-                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedResources[image.InterleavedTextureIndex1]);
+                        if (image.XboxFlags.HasFlag(TagTool.Bitmaps.BitmapFlagsXbox.Xbox360UseInterleavedTextures))
+                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInterleavedInteropResource(bitmap.InterleavedHardwareTextures[image.InterleavedInterop]);
                         else
-                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[i]);
+                            bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.HardwareTextures[i]);
 
                         if (bitmapResourceDefinition == null)
                             return false;
@@ -751,9 +754,9 @@ namespace TagTool.Commands.Porting
 						foreach (var screenEffect in sefc.ScreenEffects)
 							screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
-                    if (sefc.ScreenEffects[0].Duration == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
+                    if (sefc.ScreenEffects.Count > 0 && sefc.ScreenEffects[0].Lifetime == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
                     {
-                        sefc.ScreenEffects[0].Duration = 1E+19f;
+                        sefc.ScreenEffects[0].Lifetime = 1E+19f;
                         sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
                     }
                     foreach (var screenEffect in sefc.ScreenEffects)
@@ -944,7 +947,7 @@ namespace TagTool.Commands.Porting
                     {
                         if (obj.MultiplayerObject.Count == 0)
                         {
-                            obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { SpawnTime = 30, AbandonTime = 30 });
+                            obj.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock() { DefaultSpawnTime = 30, DefaultAbandonTime = 30 });
                         }
 
                         if (argParameters.Count() > 0)
@@ -973,8 +976,8 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
-                    ligh.FrustumMinimumViewDistance = ligh.FrustumMinimumViewDistanceReach;
-                    ligh.MaxIntensityRange = ligh.MaxIntensityRangeReach;
+                    ligh.DistanceDiffusion = ligh.FrustumMinimumViewDistanceReach;
+                    ligh.AngularSmoothness = ligh.MaxIntensityRangeReach;
                     break;
 
                 case Model hlmt:
@@ -982,9 +985,9 @@ namespace TagTool.Commands.Porting
                     {
                         if (BlamCache.Version <= CacheVersion.Halo3ODST)
                         {
-                            if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetFlags.FlagsValue.LockedByHumanTracking))
+                            if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetLockOnFlags.FlagsValue.LockedByHumanTracking))
                                 target.TargetFilter = CacheContext.StringTable.GetStringId("flying_vehicles");
-                            else if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetFlags.FlagsValue.LockedByPlasmaTracking))
+                            else if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetLockOnFlags.FlagsValue.LockedByPlasmaTracking))
                                 target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
                         }
                     }
@@ -1036,7 +1039,7 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case RenderMethodOption rmop when BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach:
-                    foreach (var block in rmop.Options)
+                    foreach (var block in rmop.Parameters)
                     {
                         if (BlamCache.Version == CacheVersion.Halo3ODST && block.RenderMethodExtern >= RenderMethodExtern.emblem_player_shoulder_texture)
                             block.RenderMethodExtern = (RenderMethodExtern)((int)block.RenderMethodExtern + 2);
@@ -1348,7 +1351,7 @@ namespace TagTool.Commands.Porting
                 case Vehicle.HavokVehiclePhysicsFlags havokVehicleFlags:
                     return ConvertHavokVehicleFlags(havokVehicleFlags);
 
-                case Model.Target.TargetFlags targetflags:
+                case Model.Target.TargetLockOnFlags targetflags:
                     return ConvertTargetFlags(targetflags);
 
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
@@ -1375,6 +1378,36 @@ namespace TagTool.Commands.Porting
 
                 case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
+
+				case TextWidget textWidget:
+                    switch (BlamCache.Version)
+                    {
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
+                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_H3);
+                            break;
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_H3MCC);
+                            break;
+                        case CacheVersion.Halo3ODST:
+                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_ODST);
+                            break;
+                    }
+                    return textWidget;
+
+				case GuiTextWidgetDefinition guiTextWidget:
+                    switch (BlamCache.Version)
+                    {
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
+                            guiTextWidget.CustomFont = GetEquivalentValue(guiTextWidget.CustomFont, guiTextWidget.CustomFont_H3);
+                            break;
+                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                            guiTextWidget.CustomFont = GetEquivalentValue(guiTextWidget.CustomFont, guiTextWidget.CustomFont_H3MCC);
+                            break;
+                        case CacheVersion.Halo3ODST:
+                            guiTextWidget.CustomFont = GetEquivalentValue(guiTextWidget.CustomFont, guiTextWidget.CustomFont_ODST);
+                            break;
+                    }
+                    return guiTextWidget;
 
 				case Array _:
 				case IList _: // All arrays and List<T> implement IList, so we should just use that
@@ -1748,7 +1781,7 @@ namespace TagTool.Commands.Porting
             return barrelflags;
         }
 
-        private object ConvertTargetFlags(Model.Target.TargetFlags target)
+        private object ConvertTargetFlags(Model.Target.TargetLockOnFlags target)
         {
             if (BlamCache.Version <= CacheVersion.Halo3ODST)
                 if (!Enum.TryParse(target.Flags.ToString(), out target.Flags_HO))

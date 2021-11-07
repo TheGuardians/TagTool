@@ -20,16 +20,36 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public EntryPointBitMaskReach ValidEntryPointsReach;
 
-        public List<TagBlockIndex> EntryPoints; // Ranges of ParameterTables by usage
-        public List<ParameterTable> ParameterTables; // Ranges of Parameters
-        public List<ParameterMapping> Parameters; 
+        public List<TagBlockIndex> EntryPoints;
+        public List<PassBlock> Passes;
+        public List<RoutingInfoBlock> RoutingInfo; 
         public List<ShaderArgument> RealParameterNames;
         public List<ShaderArgument> IntegerParameterNames;
         public List<ShaderArgument> BooleanParameterNames;
         public List<ShaderArgument> TextureParameterNames;
+        public List<RenderMethodTemplatePlatformBlock> OtherPlatforms;
 
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Unused;
+        [TagStructure(Size = 0x78)]
+        public class RenderMethodTemplatePlatformBlock : TagStructure
+        {
+            public CachedTag VertexShader;
+            public CachedTag PixelShader;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline235640)]
+            public EntryPointBitMask ValidEntryPoints;
+            [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline700123)]
+            public EntryPointBitMaskMs30 ValidEntryPointsHO;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public EntryPointBitMaskReach ValidEntryPointsReach;
+
+            public List<TagBlockIndex> EntryPoints;
+            public List<PassBlock> Passes;
+            public List<RoutingInfoBlock> RoutingInfo;
+            public List<ShaderArgument> RealParameterNames;
+            public List<ShaderArgument> IntegerParameterNames;
+            public List<ShaderArgument> BooleanParameterNames;
+            public List<ShaderArgument> TextureParameterNames;
+        }
 
         [TagStructure(Size = 0x2)]
         public class TagBlockIndex : TagStructure
@@ -60,10 +80,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class ParameterTable : TagStructure
+        public class PassBlock : TagStructure
 		{
             [TagField(Length = (int)ParameterUsage.Count)]
             public TagBlockIndex[] Values = new TagBlockIndex[(int)ParameterUsage.Count];
+
+            public short PixelParametersSize;
+            public short VertexParametersSize;
 
             public TagBlockIndex this[ParameterUsage usage]
             {
@@ -72,24 +95,12 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        /// <summary>
-        /// Binds an argument in the render method tag to a pixel shader constant.
-        /// </summary>
         [TagStructure(Size = 0x4)]
-        public class ParameterMapping : TagStructure
+        public class RoutingInfoBlock : TagStructure
 		{
-            /// <summary>
-            /// The GPU register to bind the argument to.
-            /// </summary>
-            public ushort RegisterIndex;
-
-            /// <summary>
-            /// The index of the argument in one of the blocks in the render method tag.
-            /// The block used depends on the argument type.
-            /// </summary>
-            public byte ArgumentIndex;
-
-            public byte Flags; // bitmap flag 1 = vertex sampler (register+16). also used as vector swizzle mask
+            public ushort DestinationIndex; // The GPU register to bind the argument to.
+            public byte SourceIndex; // Source argument block index.
+            public byte Flags; // Changes on usage, bitmap: bit 1 = vertex sampler. real: vector swizzle mask
         }
 
         [TagStructure(Size = 0x4)]

@@ -99,7 +99,7 @@ namespace TagTool.Commands.Porting
                 Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
 
                 Console.WriteLine("Enter the scenario name:");
-                var scenarioName = Console.ReadLine();
+                var scenarioName = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), IgnoreArgumentVariables);
                 if (!Regex.IsMatch(scenarioName, "[a-z0-9_]+"))
                     return new TagToolError(CommandError.CustomMessage, "Scenario name must consist of lowercase alphanumeric characters and underscores");
 
@@ -119,7 +119,7 @@ namespace TagTool.Commands.Porting
 
                 // try to parse one from input
                 var tmpMapId = -1;
-                var mapIdInput = Console.ReadLine();
+                var mapIdInput = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), IgnoreArgumentVariables);
                 if (int.TryParse(mapIdInput, out tmpMapId))
                 {
                     if (tmpMapId < kMinMapId || tmpMapId > kMaxMapId)
@@ -134,12 +134,12 @@ namespace TagTool.Commands.Porting
                     mapId = tmpMapId;
 
                 Console.WriteLine("Enter the map name (for display):");
-                var mapName = Console.ReadLine();
+                var mapName = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), IgnoreArgumentVariables);
                 if (mapName.Length >= 4 && mapName.Length > 15)
                     return new TagToolError(CommandError.CustomMessage, "Map name must be at 4 to 15 characters");
 
                 Console.WriteLine("Enter the map description:");
-                var mapDescription = Console.ReadLine();
+                var mapDescription = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), IgnoreArgumentVariables);
                 if (mapDescription.Length > 127)
                     return new TagToolError(CommandError.CustomMessage, "Map description must be no longer than 127 characters");
 
@@ -155,7 +155,7 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("Enter the name or index of the zone set to use:");
 
                 // read the zone set name from input, trim it so we don't have to worry about spaces
-                string zoneSetName = Console.ReadLine().Trim();
+                string zoneSetName = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), IgnoreArgumentVariables);
                 // if they entered a valid name, use that index it is mapped to
                 if (zoneSetsByName.ContainsKey(zoneSetName))
                 {
@@ -191,7 +191,7 @@ namespace TagTool.Commands.Porting
                 // setting the bit corresponding to the bsp index of the desired bsp mask
                 //
 
-                for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                for (string line; !string.IsNullOrWhiteSpace(line = CommandRunner.ApplyUserVars(Console.ReadLine().Trim(), IgnoreArgumentVariables));)
                 {
                     var sbspName = line.Trim();
                     int bspIndex = -1;
@@ -358,7 +358,7 @@ namespace TagTool.Commands.Porting
                 if (((includeBspMask >> i) & 1) == 0)
                     continue;
 
-                var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(stream, scnr.StructureBsps[i].StructureBsp);
+                var sbsp = cache.Deserialize<ScenarioStructureBsp>(stream, scnr.StructureBsps[i].StructureBsp);
 
                 foreach(var instance in sbsp.InstancedGeometryInstances)
                 {
@@ -429,6 +429,7 @@ namespace TagTool.Commands.Porting
             {
                 var porttag = new PortTagCommand(destCache, srcCache);
                 porttag.SetFlags(portingFlags);
+                porttag.InitializeSoundConverter();
 
                 var sldtTag = scnr.Lightmap;
                 tagRenamer.Rename(sldtTag, $"{scenarioPath}_faux_lightmap");
@@ -647,7 +648,7 @@ namespace TagTool.Commands.Porting
 
         private void ConvertLightmap(CacheVersion version, Stream srcStream, ScenarioLightmap lightmap, uint includeBspMask)
         {
-            if (version >= CacheVersion.Halo3ODST)
+            if(lightmap.LightmapDataReferences.Count > 0)
             {
                 var newLightmapDataReference = new List<ScenarioLightmap.DataReferenceBlock>();
                 for (int test_index = 0; test_index < 32; test_index++)

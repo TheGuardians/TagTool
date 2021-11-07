@@ -8,14 +8,14 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method_option", Tag = "rmop", Size = 0xC)]
     public class RenderMethodOption : TagStructure
     {
-        public List<OptionBlock> Options;
+        public List<ParameterBlock> Parameters;
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x4C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
-        public class OptionBlock : TagStructure
+        public class ParameterBlock : TagStructure
         {
             public StringId Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -33,20 +33,16 @@ namespace TagTool.Tags.Definitions
 
             public short Flags;
             public DefaultFilterModeValue DefaultFilterMode;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            public short DefaultComparisionFunction;
             public DefaultAddressModeValue DefaultAddressMode;
             public short AnisotropyAmount;
 
-            [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-            public int UnknownMCC;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC, Flags = TagFieldFlags.Padding, Length = 0x2)]
+            public byte[] Padding;
 
             public ArgbColor DefaultColor;
             public float DefaultBitmapScale;
-
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public uint Unknown16;
@@ -59,14 +55,16 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
             public uint Unknown20;
 
+            public byte[] HelpText;
+
             public enum OptionDataType : uint
             {
-                Sampler = 0,
-                Float4 = 1,
-                Float = 2,
-                Integer = 3,
-                Boolean = 4,
-                IntegerColor = 5
+                Bitmap = 0,
+                Color = 1,
+                Real = 2,
+                Int = 3,
+                Bool = 4,
+                ArgbColor = 5
             }
 
             public enum DefaultFilterModeValue : short
@@ -74,13 +72,13 @@ namespace TagTool.Tags.Definitions
                 Trilinear,
                 Point,
                 Bilinear,
-                unused_00,
-                Anisotropic_2x,
-                unused_01,
-                Anisotropic_4x,
+                Anisotropic1,
+                Anisotropic2Expensive,
+                Anisotropic3Expensive,
+                Anisotropic4EXPENSIVE,
                 LightprobeTextureArray,
-                TextureArrayQuadlinear,
-                TextureArrayQuadanisotropic_2x
+                ComparisonPoint,
+                ComparisonBilinear
             }
 
             public enum DefaultAddressModeValue : short

@@ -15,19 +15,19 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
-                    stateData.EngineFlags = GetEquivalentFlags(stateData.EngineFlags, stateData.EngineFlags_H3);
+                    stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3);
                     stateData.EngineGeneralFlags = GetEquivalentFlags(stateData.EngineGeneralFlags, stateData.EngineGeneralFlags_H3);
                     stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_H3);
                     stateData.Player_SpecialFlags = GetEquivalentFlags(stateData.Player_SpecialFlags, stateData.Player_SpecialFlags_H3);
                     break;
 
                 case CacheVersion.Halo3ODST:
-                    stateData.EngineFlags = GetEquivalentFlags(stateData.EngineFlags, stateData.EngineFlags_ODST);
+                    stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateODST);
                     stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_ODST);
                     break;
             }
 
-            stateData.MultiplayerEventsFlags = GetEquivalentFlags(stateData.MultiplayerEventsFlags, stateData.MultiplayerEventsFlags_H3);
+            stateData.MultiplayerEvents = GetEquivalentFlags(stateData.MultiplayerEvents, stateData.MultiplayerEventsFlags_H3);
             stateData.GeneralKudosFlags = GetEquivalentFlags(stateData.GeneralKudosFlags, stateData.GeneralKudosFlags_H3);
 
             return stateData;
@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
         {
             // Writing to the distortion surface requires an additive blend mode
             // This is actually still set in-engine like H3, but sabers code involving this field overwrites it
-            if (renderData.ShaderIndex == ChudDefinition.HudWidget.RenderDatum.ShaderIndexValue.Turbulence)
+            if (renderData.ShaderType == ChudDefinition.HudWidget.RenderDatum.ChudShaderType.DistortionAndBlur)
             {
                 renderData.BlendModeHO = ChudDefinition.HudWidget.RenderDatum.ChudBlendMode.Additive;
             }
@@ -45,23 +45,26 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                    renderData.Input_HO = GetEquivalentValue(renderData.Input_HO, renderData.Input_H3);
-                    renderData.RangeInput_HO = GetEquivalentValue(renderData.RangeInput_HO, renderData.RangeInput_H3);
+                    renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_H3);
+                    renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_H3);
                     break;
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                    renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_H3MCC);
+                    renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_H3MCC);
+                    break;
                 case CacheVersion.Halo3ODST when BlamCache.Platform == CachePlatform.Original:
-                    renderData.Input_HO = GetEquivalentValue(renderData.Input_HO, renderData.Input_ODST);
-                    renderData.RangeInput_HO = GetEquivalentValue(renderData.RangeInput_HO, renderData.RangeInput_ODST);
+                    renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_ODST);
+                    renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_ODST);
                     break;
                 default:
                     break;
             }
-            renderData.OutputColorA_HO = GetEquivalentValue(renderData.OutputColorA_HO, renderData.OutputColorA);
-            renderData.OutputColorB_HO = GetEquivalentValue(renderData.OutputColorB_HO, renderData.OutputColorB);
-            renderData.OutputColorC_HO = GetEquivalentValue(renderData.OutputColorC_HO, renderData.OutputColorC);
-            renderData.OutputColorD_HO = GetEquivalentValue(renderData.OutputColorD_HO, renderData.OutputColorD);
-            renderData.OutputColorE_HO = GetEquivalentValue(renderData.OutputColorE_HO, renderData.OutputColorE);
-            renderData.OutputColorF_HO = GetEquivalentValue(renderData.OutputColorF_HO, renderData.OutputColorF);
+            renderData.OutputColorA = GetEquivalentValue(renderData.OutputColorA, renderData.OutputColorA_Retail);
+            renderData.OutputColorB = GetEquivalentValue(renderData.OutputColorB, renderData.OutputColorB_Retail);
+            renderData.OutputColorC = GetEquivalentValue(renderData.OutputColorC, renderData.OutputColorC_Retail);
+            renderData.OutputColorD = GetEquivalentValue(renderData.OutputColorD, renderData.OutputColorD_Retail);
+            renderData.OutputColorE = GetEquivalentValue(renderData.OutputColorE, renderData.OutputColorE_Retail);
+            renderData.OutputColorF = GetEquivalentValue(renderData.OutputColorF, renderData.OutputColorF_Retail);
 
             return renderData;
         }
@@ -71,7 +74,15 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                    textWidget.Flags = GetEquivalentFlags(textWidget.Flags, textWidget.Flags_H3);
+                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3Original);
+                    textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3);
+                    break;
+                case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
+                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3MCC);
+                    textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3MCC);
+                    break;
+                case CacheVersion.Halo3ODST:
+                    textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_ODST);
                     break;
             }
 
@@ -103,13 +114,13 @@ namespace TagTool.Commands.Porting
                     //fixup for waypoint light
                     if (bitmapwidgetname.Contains("waypoint_light"))
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC_HO = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
                     }
 
                     //Fix some elements not displaying in forge mode
                     if (bitmapwidgetname.Contains("who_am_i") || bitmapwidgetname.Contains("summary_sandbox_title"))
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[0].EngineFlags_H3 |= ChudDefinition.HudWidget.StateDatum.Engine_H3.Editor;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[0].GameStateH3 |= ChudDefinition.HudWidget.StateDatum.ChudGameStateH3.Editor;
                     }
 
                     //fix elite upper corner weirdness
@@ -122,7 +133,7 @@ namespace TagTool.Commands.Porting
                     //fix spartan bottom HUD gap
                     if (bitmapwidgetname.Contains("middle_bar_720"))
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.0179f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Origin.X = 1.0179f;
                     }
 
                     //fix enemy scorebar spacing
@@ -143,19 +154,19 @@ namespace TagTool.Commands.Porting
 
                         if (widgetname.Contains("vitality_meter"))
                         {
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -1.01333f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Origin.X = -1.01333f;
                         }
 
                         //fix odst bottom HUD gap
                         if (bitmapwidgetname.Contains("middle_bar_720"))
                         {
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.006253f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Origin.X = 1.006253f;
                         }
 
                         //fix odst top HUD gap
                         if (bitmapwidgetname.Contains("center_720"))
                         {
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.01005f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Origin.X = 1.01005f;
                         }
 
                         //remove beacon and waypoint (non-functional in HO)
@@ -241,27 +252,27 @@ namespace TagTool.Commands.Porting
                     if (widgetname == "top_bar")
                     { 
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = -90;
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
                     }
                     if (widgetname == "p1_bar")
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = -40;
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
                     }
                     if (widgetname == "p2_bar")
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 13;
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
                     }
                     if (widgetname == "p3_bar")
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 13;
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
                     }
                     if (widgetname == "p4_bar")
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 13;
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
                     }
                 }
             }
@@ -275,7 +286,7 @@ namespace TagTool.Commands.Porting
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
 
                 //fixups
-                H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
+                H3globs.GrenadeAnchorOffset = 1.5f * H3globs.GrenadeAnchorOffset;
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
@@ -283,27 +294,27 @@ namespace TagTool.Commands.Porting
 
                     if (BlamCache.Version <= CacheVersion.Halo3Retail)
                     {
-                        H3att.HorizontalScale = 1.0f;
-                        H3att.VerticalScale = 1.0f;
+                        H3att.GlobalSafeFrameHorizontal = 1.0f;
+                        H3att.GlobalSafeFrameVertical = 1.0f;
                     }
 
                     //more fixups
-                    H3att.ResolutionWidth = (uint)(H3att.ResolutionWidth * 1.5f);
-                    H3att.ResolutionHeight = (uint)(H3att.ResolutionHeight * 1.5f);
-                    H3att.MotionSensorOffset.X *= 1.5f;
-                    H3att.MotionSensorOffset.Y *= 1.5f;
+                    H3att.VirtualWidth = (uint)(H3att.VirtualWidth * 1.5f);
+                    H3att.VirtualHeight = (uint)(H3att.VirtualHeight * 1.5f);
+                    H3att.MotionSensorOrigin.X *= 1.5f;
+                    H3att.MotionSensorOrigin.Y *= 1.5f;
                     H3att.MotionSensorRadius *= 1.5f;
-                    H3att.MotionSensorScale *= 1.5f;
+                    H3att.BlipRadius *= 1.5f;
                     H3att.StateLeftRightOffset_HO.Y = H3att.StateLeftRightOffsetY_H3;
-                    H3att.StateScale_HO = H3att.StateScale;
-                    H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
-                    H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
-                    H3att.NotificationScale *= 1.5f;
-                    H3att.NotificationLineSpacing *= 1.5f;
+                    H3att.StateMessageScale = H3att.StateMessageScaleH3;
+                    H3att.MessageOffset.X = H3att.NotificationOffsetX_H3;
+                    H3att.MessageOffset.Y = H3att.NotificationOffsetY_H3;
+                    H3att.MessageScale *= 1.5f;
+                    H3att.MessageHeight *= 1.5f;
 
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
-                        H3att.WarpAngle = Angle.FromDegrees(4.5f);
+                        H3att.WarpSourceFovY = Angle.FromDegrees(4.5f);
                         H3att.WarpAmount = 0.1f;
                         H3att.StateLeftRightOffset_HO.Y = 0.2f; // 0.2 due to odsts 0.87 hud scale
                     }
@@ -383,25 +394,25 @@ namespace TagTool.Commands.Porting
             }
 
             //metagame values
-            H3Definition.CampaignMedalScale = 1.5f;
-            H3Definition.CampaignMedalSpacing = 60.0f;
+            H3Definition.CampaignMetagame.MedalScale = 1.5f;
+            H3Definition.CampaignMetagame.MedalSpacing = 60.0f;
 
             if (BlamCache.Version <= CacheVersion.Halo3Retail)
             {
                 // H3 metagame fixups
-                H3Definition.CampaignMedalSpacing = 47.0f;
-                H3Definition.CampaignMedalChudAnchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.BottomRight;
-                H3Definition.CampaignMedalOffsetX = -290;
-                H3Definition.CampaignMedalOffsetY = -113;
-                H3Definition.MetagameScoreboardTopY = 0;
-                H3Definition.MetagameScoreboardSpacing = 0;
+                H3Definition.CampaignMetagame.MedalSpacing = 47.0f;
+                H3Definition.CampaignMetagame.MedalChudAnchor = ChudDefinition.HudWidget.PlacementDatum.ChudAnchorType.BottomRight;
+                H3Definition.CampaignMetagame.MedalOffset.X = -290;
+                H3Definition.CampaignMetagame.MedalOffset.Y = -113;
+                H3Definition.CampaignMetagame.ScoreboardTopY = 0;
+                H3Definition.CampaignMetagame.ScoreboardSpacing = 0;
             }
 
             //upscale blip bitmap sizes
             H3Definition.LargeSensorBlipScale *= 1.5f;
             H3Definition.MediumSensorBlipScale *= 1.5f;
             H3Definition.SmallSensorBlipScale *= 1.5f;
-            H3Definition.SensorBlipGlowRadius *= 1.5f;
+            H3Definition.SizePower *= 1.5f;
 
             //prevent crash?
             H3Definition.AchievementDisplayTime = 3.0f;
@@ -446,6 +457,7 @@ namespace TagTool.Commands.Porting
                 }
                 catch (ArgumentException)
                 {
+                    new TagToolWarning($"Unable to find matching flag for {flag2} in {typeof(E1).FullName}");
                     continue;
                 }
             }
@@ -471,6 +483,7 @@ namespace TagTool.Commands.Porting
             }
             catch (Exception)
             {
+                new TagToolWarning($"Unable to find matching value for \"{enum2}\" in {typeof(E1).FullName}");
                 return enum1;
             }
         }

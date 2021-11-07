@@ -19,13 +19,13 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.HaloReach)]
 		public sbyte Unknown4;
 		
-        public List<LightingVariable> LightingVariables;
+        public List<PerObjectTypeRelativeMinLuminanceBlock> PerObjectTypeSettings;
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
-        public class LightingVariable : TagStructure
+        public class PerObjectTypeRelativeMinLuminanceBlock : TagStructure
 		{
-            public float LightmapBrightnessOffset;
+            public float MinimumLuminance;
 			
 			[TagField(MinVersion = CacheVersion.HaloReach)]
 			public float LightmapDarknessOffset;

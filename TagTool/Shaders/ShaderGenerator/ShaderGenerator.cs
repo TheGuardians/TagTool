@@ -10,6 +10,7 @@ using HaloShaderGenerator.Globals;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.Definitions.RenderMethodDefinition;
 
 namespace TagTool.Shaders.ShaderGenerator
 {
@@ -113,15 +114,15 @@ namespace TagTool.Shaders.ShaderGenerator
 
             foreach (VertexType vertex in Enum.GetValues(typeof(VertexType)))
             {
-                var vertexBlock = new GlobalVertexShader.VertexTypeShaders { DrawModes = new List<GlobalVertexShader.VertexTypeShaders.DrawMode>() };
+                var vertexBlock = new GlobalVertexShader.VertexTypeShaders { EntryPoints = new List<GlobalVertexShader.VertexTypeShaders.GlobalShaderEntryPointBlock>() };
                 glvs.VertexTypes.Add(vertexBlock);
                 if (generator.IsVertexFormatSupported(vertex))
                 {
                     foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
                     {
-                        var entryBlock = new GlobalVertexShader.VertexTypeShaders.DrawMode { ShaderIndex = -1 };
+                        var entryBlock = new GlobalVertexShader.VertexTypeShaders.GlobalShaderEntryPointBlock { ShaderIndex = -1 };
                         
-                        vertexBlock.DrawModes.Add(entryBlock);
+                        vertexBlock.EntryPoints.Add(entryBlock);
                         if (generator.IsEntryPointSupported(entryPoint) && generator.IsVertexShaderShared(entryPoint))
                         {
                             entryBlock.ShaderIndex = glvs.Shaders.Count;
@@ -171,7 +172,7 @@ namespace TagTool.Shaders.ShaderGenerator
             var glps = new GlobalPixelShader { EntryPoints = new List<GlobalPixelShader.EntryPointBlock>(), Shaders = new List<PixelShaderBlock>() };
             foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
             {
-                var entryPointBlock = new GlobalPixelShader.EntryPointBlock { ShaderIndex = -1 };
+                var entryPointBlock = new GlobalPixelShader.EntryPointBlock { DefaultCompiledShaderIndex = -1 };
                 glps.EntryPoints.Add(entryPointBlock);
 
                 if (generator.IsEntryPointSupported(entryPoint) && 
@@ -179,7 +180,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 {
                     if (generator.IsSharedPixelShaderWithoutMethod(entryPoint))
                     {
-                        entryPointBlock.ShaderIndex = glps.Shaders.Count;
+                        entryPointBlock.DefaultCompiledShaderIndex = glps.Shaders.Count;
                         var result = generator.GenerateSharedPixelShader(entryPoint, 0, 0);
                         glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
                     }
@@ -190,19 +191,19 @@ namespace TagTool.Shaders.ShaderGenerator
                         {
                             if (generator.IsMethodSharedInEntryPoint(entryPoint, i))
                             {
-                                entryPointBlock.Option = new List<GlobalPixelShader.EntryPointBlock.OptionBlock>();
+                                entryPointBlock.CategoryDependency = new List<GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock>();
 
-                                var optionBlock = new GlobalPixelShader.EntryPointBlock.OptionBlock 
+                                var optionBlock = new GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock 
                                 { 
-                                    RenderMethodOptionIndex = (short)i, 
-                                    OptionMethodShaderIndices = new List<int>() 
+                                    DefinitionCategoryIndex = (short)i, 
+                                    OptionDependency = new List<GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock.GlobalShaderOptionDependency>()
                                 };
 
-                                entryPointBlock.Option.Add(optionBlock);
+                                entryPointBlock.CategoryDependency.Add(optionBlock);
 
                                 for (int option = 0; option < generator.GetMethodOptionCount(i); option++)
                                 {
-                                    optionBlock.OptionMethodShaderIndices.Add(glps.Shaders.Count);
+                                    optionBlock.OptionDependency.Add(new GlobalPixelShader.EntryPointBlock.CategoryDependencyBlock.GlobalShaderOptionDependency { CompiledShaderIndex = glps.Shaders.Count });
                                     var result = generator.GenerateSharedPixelShader(entryPoint, i, option);
                                     glps.Shaders.Add(GeneratePixelShaderBlock(cache, result));
                                 }
@@ -233,44 +234,6 @@ namespace TagTool.Shaders.ShaderGenerator
             return pixl;
         }
 
-        public static RenderMethodDefinition GenerateRenderMethodDefinition(GameCache cache, Stream cacheStream, IShaderGenerator generator, string shaderType, out GlobalPixelShader glps, out GlobalVertexShader glvs)
-        {
-            var rmdf = new RenderMethodDefinition();
-
-            glps = GenerateSharedPixelShader(cache, generator);
-            glvs = GenerateSharedVertexShader(cache, generator);
-
-            if (!cache.TagCache.TryGetTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders", out CachedTag glpsTag))
-                glpsTag = cache.TagCache.AllocateTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders");
-            cache.Serialize(cacheStream, glpsTag, glps);
-            rmdf.GlobalPixelShader = glpsTag;
-
-            if (!cache.TagCache.TryGetTag<GlobalVertexShader>($"shaders\\{shaderType.ToLower()}_shared_vertex_shaders", out CachedTag glvsTag))
-                glvsTag = cache.TagCache.AllocateTag<GlobalVertexShader>($"shaders\\{shaderType.ToLower()}_shared_vertex_shaders");
-            cache.Serialize(cacheStream, glvsTag, glvs);
-            rmdf.GlobalVertexShader = glvsTag;
-
-            rmdf.DrawModes = new List<RenderMethodDefinition.DrawMode>();
-            rmdf.Vertices = new List<RenderMethodDefinition.VertexBlock>();
-
-            foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
-                if (generator.IsEntryPointSupported(entryPoint))
-                    rmdf.DrawModes.Add(new RenderMethodDefinition.DrawMode { Mode = (int)entryPoint });
-
-            foreach (VertexType vertexType in Enum.GetValues(typeof(VertexType)))
-                if (generator.IsVertexFormatSupported(vertexType))
-                    rmdf.Vertices.Add(new RenderMethodDefinition.VertexBlock { VertexType = (short)vertexType });
-
-            rmdf.RenderMethodOptions = cache.TagCache.GetTag<RenderMethodOption>(@"shaders\shader_options\global_shader_options");
-
-            rmdf.Methods = CreateMethods(shaderType, generator, cache, cacheStream);
-
-            // problems without this
-            cache.SaveStrings();
-
-            return rmdf;
-        }
-
         private static int GetArgumentIndex(GameCache cache, string name, List<RenderMethodTemplate.ShaderArgument> args)
         {
             int index = -1;
@@ -286,9 +249,9 @@ namespace TagTool.Shaders.ShaderGenerator
             return index;
         }
 
-        private static List<RenderMethodTemplate.ParameterMapping> MapParameters(GameCache cache, ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping, List<RenderMethodTemplate.ShaderArgument> parameterNames)
+        private static List<RenderMethodTemplate.RoutingInfoBlock> MapParameters(GameCache cache, ParameterUsage usage, ShaderParameters parameters, Dictionary<string, int> shaderRegisterMapping, List<RenderMethodTemplate.ShaderArgument> parameterNames)
         {
-            var result = new List<RenderMethodTemplate.ParameterMapping>();
+            var result = new List<RenderMethodTemplate.RoutingInfoBlock>();
             List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
             switch (usage)
             {
@@ -326,12 +289,12 @@ namespace TagTool.Shaders.ShaderGenerator
             foreach (var parameter in shaderParameters)
             {
                 bool vertex = (usage == ParameterUsage.Texture || usage == ParameterUsage.TextureExtern) && parameter.Flags.HasFlag(ShaderParameterFlags.IsVertexShader);
-                var argumentMapping = new RenderMethodTemplate.ParameterMapping();
+                var argumentMapping = new RenderMethodTemplate.RoutingInfoBlock();
                 var registerName = vertex ? parameter.RegisterName + "_VERTEX_" : parameter.RegisterName;
                 if (shaderRegisterMapping.ContainsKey(registerName))
                 {
-                    argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
-                    argumentMapping.ArgumentIndex = (byte)GetArgumentIndex(cache, parameter.ParameterName, parameterNames);
+                    argumentMapping.DestinationIndex = (ushort)shaderRegisterMapping[registerName];
+                    argumentMapping.SourceIndex = (byte)GetArgumentIndex(cache, parameter.ParameterName, parameterNames);
                     argumentMapping.Flags = (byte)(vertex ? 1 : 0);
                 }
                 else
@@ -344,9 +307,9 @@ namespace TagTool.Shaders.ShaderGenerator
             return result;
         }
 
-        private static List<RenderMethodTemplate.ParameterMapping> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, ShaderParameters globalParameters, Dictionary<string, int> shaderRegisterMapping)
+        private static List<RenderMethodTemplate.RoutingInfoBlock> MapExternParameters(ParameterUsage usage, ShaderParameters parameters, ShaderParameters globalParameters, Dictionary<string, int> shaderRegisterMapping)
         {
-            var result = new List<RenderMethodTemplate.ParameterMapping>();
+            var result = new List<RenderMethodTemplate.RoutingInfoBlock>();
             List<HaloShaderGenerator.Globals.ShaderParameter> shaderParameters;
             switch (usage)
             {
@@ -378,12 +341,12 @@ namespace TagTool.Shaders.ShaderGenerator
             }
             foreach (var parameter in shaderParameters)
             {
-                var argumentMapping = new RenderMethodTemplate.ParameterMapping();
+                var argumentMapping = new RenderMethodTemplate.RoutingInfoBlock();
                 var registerName = parameter.RegisterName;
                 if (shaderRegisterMapping.ContainsKey(registerName))
                 {
-                    argumentMapping.RegisterIndex = (ushort)shaderRegisterMapping[registerName];
-                    argumentMapping.ArgumentIndex = (byte)parameter.RenderMethodExtern; // use the enum integer value
+                    argumentMapping.DestinationIndex = (ushort)shaderRegisterMapping[registerName];
+                    argumentMapping.SourceIndex = (byte)parameter.RenderMethodExtern; // use the enum integer value
                 }
                 else
                 {
@@ -395,16 +358,16 @@ namespace TagTool.Shaders.ShaderGenerator
             return result;
         }
 
-        private static void AddMapping(ParameterUsage usage, RenderMethodTemplate rmt2, RenderMethodTemplate.ParameterTable table, List<RenderMethodTemplate.ParameterMapping> mappings)
+        private static void AddMapping(ParameterUsage usage, RenderMethodTemplate rmt2, RenderMethodTemplate.PassBlock table, List<RenderMethodTemplate.RoutingInfoBlock> mappings)
         {
             if(mappings.Count > 0)
             {
                 table[usage] = new RenderMethodTemplate.TagBlockIndex
                 {
-                    Offset = (ushort)rmt2.Parameters.Count,
+                    Offset = (ushort)rmt2.RoutingInfo.Count,
                     Count = (ushort)mappings.Count
                 };
-                rmt2.Parameters.AddRange(mappings);
+                rmt2.RoutingInfo.AddRange(mappings);
             }
         }
 
@@ -485,8 +448,8 @@ namespace TagTool.Shaders.ShaderGenerator
             foreach (var p in textureParameterNames)
                 rmt2.TextureParameterNames.Add(new RenderMethodTemplate.ShaderArgument { Name = AddString(cache, p) });
 
-            rmt2.Parameters = new List<RenderMethodTemplate.ParameterMapping>();
-            rmt2.ParameterTables = new List<RenderMethodTemplate.ParameterTable>();
+            rmt2.RoutingInfo = new List<RenderMethodTemplate.RoutingInfoBlock>();
+            rmt2.Passes = new List<RenderMethodTemplate.PassBlock>();
             rmt2.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
 
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
@@ -498,16 +461,16 @@ namespace TagTool.Shaders.ShaderGenerator
                     while (rmt2.EntryPoints.Count < (int)mode)
                         rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
 
-                    entryPoint.Offset = (ushort)rmt2.ParameterTables.Count();
+                    entryPoint.Offset = (ushort)rmt2.Passes.Count();
                     entryPoint.Count = 1;
                     rmt2.EntryPoints.Add(entryPoint);
 
-                    var parameterTable = new RenderMethodTemplate.ParameterTable();
+                    var parameterTable = new RenderMethodTemplate.PassBlock();
 
                     for (int i = 0; i < parameterTable.Values.Length; i++)
                         parameterTable.Values[i] = new RenderMethodTemplate.TagBlockIndex();
 
-                    rmt2.ParameterTables.Add(parameterTable);
+                    rmt2.Passes.Add(parameterTable);
 
                     // find pixel shader and vertex shader block loaded by this entry point
 
@@ -515,20 +478,20 @@ namespace TagTool.Shaders.ShaderGenerator
                     VertexShaderBlock vertexShader;
 
                     if (generator.IsVertexShaderShared(mode))
-                        vertexShader = glvs.Shaders[glvs.VertexTypes[rmdf.Vertices[0].VertexType].DrawModes[(int)mode].ShaderIndex];
+                        vertexShader = glvs.Shaders[glvs.VertexTypes[(ushort)rmdf.VertexTypes[0].VertexType].EntryPoints[(int)mode].ShaderIndex];
                     else
-                        vertexShader = vtsh.Shaders[vtsh.EntryPoints[rmdf.Vertices[0].VertexType].SupportedVertexTypes[(int)mode].Offset];
+                        vertexShader = vtsh.Shaders[vtsh.EntryPoints[(ushort)rmdf.VertexTypes[0].VertexType].SupportedVertexTypes[(int)mode].Offset];
 
                     if (generator.IsPixelShaderShared(mode))
                     {
-                        if (glps.EntryPoints[(int)mode].ShaderIndex == -1)
+                        if (glps.EntryPoints[(int)mode].DefaultCompiledShaderIndex == -1)
                         {
                             // assumes shared pixel shader are only used for a single method, otherwise unknown procedure to obtain one or more pixel shader block
-                            var optionValue = generator.GetMethodOptionValue(glps.EntryPoints[(int)mode].Option[0].RenderMethodOptionIndex);
-                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].Option[0].OptionMethodShaderIndices[optionValue]];
+                            var optionValue = generator.GetMethodOptionValue(glps.EntryPoints[(int)mode].CategoryDependency[0].DefinitionCategoryIndex);
+                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].CategoryDependency[0].OptionDependency[optionValue].CompiledShaderIndex];
                         }
                         else
-                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].ShaderIndex];
+                            pixelShader = glps.Shaders[glps.EntryPoints[(int)mode].DefaultCompiledShaderIndex];
                     }
                     else
                         pixelShader = pixl.Shaders[pixl.EntryPointShaders[(int)mode].Offset];
@@ -589,7 +552,7 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     // build parameter table and registers available for this entry point, order to be determined
 
-                    List<RenderMethodTemplate.ParameterMapping> mappings;
+                    List<RenderMethodTemplate.RoutingInfoBlock> mappings;
                     ParameterUsage currentUsage;
 
                     // sampler (ps)
@@ -658,128 +621,30 @@ namespace TagTool.Shaders.ShaderGenerator
             return rmt2;
         }
 
-        /// <summary>
-        /// Returns a list of ShaderMethods based on input shader type.
-        /// </summary>
-        private static List<RenderMethodDefinition.Method> CreateMethods(string shaderType, IShaderGenerator generator, GameCache cache, Stream cacheStream)
+        public static IShaderGenerator GetGlobalShaderGenerator(string shaderType, bool applyFixes = false)
         {
-            List<RenderMethodDefinition.Method> result = new List<RenderMethodDefinition.Method>();
-
-            Array enumValues = generator.GetMethodNames();
-
-            if (enumValues == null || generator == null)
-                return result;
-
-            foreach (var method in enumValues)
+            switch (shaderType)
             {
-                // fixup names that can't be put into enums
-                string methodName = FixupMethodOptionName(method.ToString().ToLower());
-
-                var nameStringid = cache.StringTable.GetStringId(methodName);
-                if (nameStringid == StringId.Invalid)
-                    nameStringid = cache.StringTable.AddString(methodName);
-
-                var newMethod = new RenderMethodDefinition.Method();
-
-                newMethod.Type = nameStringid;
-                newMethod.ShaderOptions = new List<RenderMethodDefinition.Method.ShaderOption>();
-
-                for (int i = 0; i < generator.GetMethodOptionCount((int)method); i++)
-                {
-                    if (shaderType == "black")
-                        break;
-
-                    var optionBlock = new RenderMethodDefinition.Method.ShaderOption();
-
-                    var parameters = generator.GetParametersInOption(methodName, i, out string rmopName, out string optionName);
-
-                    // fixup names that can't be put into enums
-                    optionName = FixupMethodOptionName(optionName.ToLower());
-
-                    optionBlock.Type = cache.StringTable.GetStringId(optionName);
-                    if (optionBlock.Type == StringId.Invalid)
-                        optionBlock.Type = cache.StringTable.AddString(optionName);
-
-                    optionBlock.Option = null;
-                    if (rmopName != null && rmopName != "" && !cache.TagCache.TryGetTag<RenderMethodOption>(rmopName, out optionBlock.Option))
-                    {
-                        Console.WriteLine($"Generating rmop \"{rmopName}\"");
-
-                        var rmop = new RenderMethodOption();
-                        rmop.Options = new List<RenderMethodOption.OptionBlock>();
-
-                        foreach (var prm in parameters.Parameters)
-                        {
-                            if (!prm.Flags.HasFlag(ShaderParameterFlags.IsXFormOnly) && (prm.CodeType == HLSLType.Xform_2d || prm.CodeType == HLSLType.Xform_3d))
-                                continue;
-
-                            var rmopParamBlock = new RenderMethodOption.OptionBlock();
-
-                            string registerName = prm.RegisterName;
-
-                            switch (prm.RegisterType)
-                            {
-                                case RegisterType.Boolean:
-                                    rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.Boolean;
-                                    break;
-                                case RegisterType.Integer:
-                                    rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.Integer;
-                                    break;
-                                case RegisterType.Sampler:
-                                    rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.Sampler;
-                                    break;
-                                case RegisterType.Vector:
-                                    rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.Float;
-                                    if (prm.Flags.HasFlag(ShaderParameterFlags.IsColor))
-                                        rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.IntegerColor;
-                                    else if (prm.Flags.HasFlag(ShaderParameterFlags.IsXFormOnly))
-                                    {
-                                        rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.Sampler;
-                                        registerName = registerName.Replace("_xform", "");
-                                    }
-                                    else if (prm.CodeType != HLSLType.Float)
-                                        rmopParamBlock.Type = RenderMethodOption.OptionBlock.OptionDataType.Float4;
-                                    break;
-                            }
-
-                            rmopParamBlock.Name = cache.StringTable.GetStringId(registerName);
-                            if (rmopParamBlock.Name == StringId.Invalid)
-                                rmopParamBlock.Name = cache.StringTable.AddString(registerName);
-
-                            rmopParamBlock.RenderMethodExtern = (RenderMethodExtern)((int)prm.RenderMethodExtern);
-
-                            rmop.Options.Add(rmopParamBlock);
-                        }
-
-                        optionBlock.Option = cache.TagCache.AllocateTag<RenderMethodOption>(rmopName);
-                        cache.Serialize(cacheStream, optionBlock.Option, rmop);
-                    }
-
-                    newMethod.ShaderOptions.Add(optionBlock);
-                }
-
-                result.Add(newMethod);
+                case "beam":            return new HaloShaderGenerator.Beam.BeamGenerator(applyFixes);
+                case "black":           return new HaloShaderGenerator.Black.ShaderBlackGenerator();
+                case "contrail":        return new HaloShaderGenerator.Contrail.ContrailGenerator(applyFixes);
+                //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(applyFixes);
+                case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(applyFixes);
+                case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(applyFixes);
+                case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(applyFixes);
+                //case "glass":           return new HaloShaderGenerator.Glass.GlassGenerator(applyFixes);
+                case "halogram":        return new HaloShaderGenerator.Halogram.HalogramGenerator(applyFixes);
+                case "light_volume":    return new HaloShaderGenerator.LightVolume.LightVolumeGenerator(applyFixes);
+                case "particle":        return new HaloShaderGenerator.Particle.ParticleGenerator(applyFixes);
+                case "screen":          return new HaloShaderGenerator.Screen.ScreenGenerator(applyFixes);
+                case "shader":          return new HaloShaderGenerator.Shader.ShaderGenerator(applyFixes);
+                case "terrain":         return new HaloShaderGenerator.Terrain.TerrainGenerator(applyFixes);
+                case "water":           return new HaloShaderGenerator.Water.WaterGenerator(applyFixes);
+                case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(applyFixes);
             }
 
-            return result;
-        }
-
-        /// <summary>
-        /// Contains hardcoded fixups for shader method or option names
-        /// </summary>
-        private static string FixupMethodOptionName(string input)
-        {
-            switch (input)
-            {
-                case "first_person_never_with_rotating_bitmaps":
-                    return @"first_person_never_w/rotating_bitmaps";
-                case "_3_channel_self_illum":
-                    return "3_channel_self_illum";
-                case "blackness_no_options":
-                    return "blackness(no_options)";
-            }
-
-            return input;
+            Console.WriteLine($"ERROR: Could not retrieve shared shader generator for \"{shaderType}\"");
+            return null;
         }
     }
 }

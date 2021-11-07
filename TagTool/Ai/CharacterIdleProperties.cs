@@ -12,7 +12,8 @@ namespace TagTool.Ai
         [TagField(Flags = Padding, Length = 4)]
         public byte[] Unused;
 
-        public Bounds<float> IdlePoseDelayTime;
+        public Bounds<float> IdlePoseDelayTime; // time range for delays between idle poses (seconds)
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public Bounds<float> WanderDelayTime;
     }

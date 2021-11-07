@@ -75,6 +75,7 @@ namespace TagTool.Commands.Porting
             }
 
             context.AddCommand(new DiffTagCommand(currentCache, portingCache));
+            context.AddCommand(new SetPortingOptionCommand());
         }
     }
 }

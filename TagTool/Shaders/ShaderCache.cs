@@ -65,7 +65,7 @@ namespace TagTool.Shaders
             {
                 var generator = rmt2Desc.GetGenerator(true);
                 Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
-                var rmdf = ShaderGenerator.ShaderGenerator.GenerateRenderMethodDefinition(destCache, destCacheStream, generator, rmt2Desc.Type, out GlobalPixelShader glps, out GlobalVertexShader glvs);
+                var rmdf = ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(destCache, destCacheStream, generator, rmt2Desc.Type, out _, out _);
                 rmdfTag = destCache.TagCache.AllocateTag<RenderMethodDefinition>(rmdfName);
                 destCache.Serialize(destCacheStream, rmdfTag, rmdf);
                 (destCache as GameCacheHaloOnlineBase).SaveTagNames();

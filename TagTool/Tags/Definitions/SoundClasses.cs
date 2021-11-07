@@ -19,15 +19,16 @@ namespace TagTool.Tags.Definitions
 		{
             public short MaxSoundsPerTag;
             public short MaxSoundsPerObject;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short MaxSoundsPerClass;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short MaxSoundsPerObjectPerClass;
 
-            public int PreemptionTime;
+            public int PreemptionTime; // replaces other instances after this many milliseconds
             public InternalFlagBits InternalFlags;
-            public ClassFlagBits Flags;
-            public short Priority;
+            public ExternalFlagBits ClassFlags;
+            public short Priority; // higher means more important
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public CacheMissModeValue CacheMissMode;
 
@@ -119,15 +120,15 @@ namespace TagTool.Tags.Definitions
             public enum InternalFlagBits : ushort
             {
                 None,
-                ClassIsValid = 1 << 0,
-                ClassIsSpeech = 1 << 1,
-                ClassIsScripted = 1 << 2,
-                MutesWithObject = 1 << 3,
-                Bit4 = 1 << 4,
-                Bit5 = 1 << 5,
-                Bit6 = 1 << 6,
+                Valid = 1 << 0,
+                IsSpeech = 1 << 1,
+                Scripted = 1 << 2,
+                StopsWithObject = 1 << 3,
+                ValidXmaCompressionLevel = 1 << 4,
+                ValidDopplerFactor = 1 << 5,
+                ValidObstructionFactor = 1 << 6,
                 Multilingual = 1 << 7,
-                Bit8 = 1 << 8,
+                ValidUnderwaterPropagation = 1 << 8,
                 Bit9 = 1 << 9,
                 Bit10 = 1 << 10,
                 StopsWithDeadObject = 1 << 11,
@@ -138,7 +139,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum ClassFlagBits : ushort
+            public enum ExternalFlagBits : ushort
             {
                 None,
                 CanPlayDuringPause = 1 << 0,

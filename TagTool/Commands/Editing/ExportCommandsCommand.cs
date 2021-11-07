@@ -101,7 +101,7 @@ namespace TagTool.Commands.Editing
                             	for (int i = 0; i < collection.Count; i++)
                             	{
                             		var realParameterName = Cache.StringTable.GetString(rmt2.RealParameterNames[i].Name);
-                            		var realConstant = (RenderMethod.ShaderProperty.RealConstant)collection[i];
+                            		var realConstant = (RenderMethod.RenderMethodPostprocessBlock.RealConstant)collection[i];
                             		var concat = string.Join(" ", realConstant.Values);
 
                                     commands.Add($"SetArgument {realParameterName} {concat}");
@@ -117,7 +117,7 @@ namespace TagTool.Commands.Editing
                             	for (int i = 0; i < collection.Count; i++)
                             	{
                             		var textureParameterName = Cache.StringTable.GetString(rmt2.TextureParameterNames[i].Name);
-                            		var textureConstant = (RenderMethod.ShaderProperty.TextureConstant)collection[i];
+                            		var textureConstant = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant)collection[i];
                             		var bitmapName = textureConstant.Bitmap.Name;
 
                                     commands.Add($"SetBitmap {textureParameterName} {bitmapName}.bitmap");

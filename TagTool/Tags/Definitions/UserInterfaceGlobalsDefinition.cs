@@ -9,9 +9,9 @@ namespace TagTool.Tags.Definitions
     
     public class UserInterfaceGlobalsDefinition : TagStructure
 	{
-        public CachedTag SharedUiGlobals;
-        public CachedTag EditableSettings;
-        public CachedTag MatchmakingHopperStrings;
+        public CachedTag SharedGlobals;
+        public CachedTag MpVariantSettingsUi;
+        public CachedTag GameHopperDescriptions;
         public List<ScreenWidget> ScreenWidgets;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]

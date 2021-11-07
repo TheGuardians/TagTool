@@ -29,8 +29,8 @@ namespace TagTool.Commands.RenderMethods
             if (Definition.ShaderProperties.Count == 0 || 
                 Definition.ShaderProperties[0].Functions.Count == 0 ||
                 Definition.ShaderProperties[0].EntryPoints.Count == 0 ||
-                Definition.ShaderProperties[0].ParameterTables.Count == 0 ||
-                Definition.ShaderProperties[0].Parameters.Count == 0 ||
+                Definition.ShaderProperties[0].Passes.Count == 0 ||
+                Definition.ShaderProperties[0].RoutingInfo.Count == 0 ||
                 Definition.ShaderProperties[0].Template == null)
                 return true;
 

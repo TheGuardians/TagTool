@@ -46,13 +46,13 @@ namespace TagTool.Commands.Decorators
 
         public override object Execute(List<string> args)
         {
-            if (Decorator.Model is null)
+            if (Decorator.RenderModel is null)
                 return new TagToolError(CommandError.CustomError, "The model does not have a render model associated with it.");
 
             // Deserialize the render model tag
             RenderModel renderModel;
             using (var cacheStream = Cache.OpenCacheRead())
-                renderModel = Cache.Deserialize<RenderModel>(cacheStream, Decorator.Model);
+                renderModel = Cache.Deserialize<RenderModel>(cacheStream, Decorator.RenderModel);
             
             if (renderModel.Geometry.Resource is null)
                 return new TagToolError(CommandError.CustomError, "Render model does not have a resource associated with it");

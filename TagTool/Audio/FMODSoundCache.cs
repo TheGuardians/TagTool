@@ -100,7 +100,6 @@ namespace TagTool.Audio
                         return null;
                     }
 
-                    result = FMOD_Sound_SeekData(fmodSubSound, (uint)(fsbSound.FirstSample / (fsbSound.ChannelCount * fsbSound.SampleSize)));
                     result = FMOD_Sound_GetFormat(fmodSubSound, out var type, out var format, out int channels, out int bits);
                     if (result != FMOD_RESULT.FMOD_OK)
                     {
@@ -108,8 +107,16 @@ namespace TagTool.Audio
                         return null;
                     }
 
-                    byte[] buffer = new byte[(fsbSound.SampleCount - fsbSound.FirstSample) / (fsbSound.SampleSize * fsbSound.ChannelCount) * channels * bits / 8];
-                    result = FMOD_Sound_ReadData(fmodSubSound, buffer, (uint)buffer.Length, out uint read);
+                    FMOD_Sound_GetLength(fmodSubSound, out uint pcmBytes, FMOD_TIMEUNIT.FMOD_TIMEUNIT_PCMBYTES);
+                    if (result != FMOD_RESULT.FMOD_OK)
+                    {
+                        new TagToolError(CommandError.CustomError, $"FMOD_Sound_GetLength() failed. {result}");
+                        return null;
+                    }
+
+                    byte[] buffer = new byte[pcmBytes];
+                    result = FMOD_Sound_SeekData(fmodSubSound, 0);
+                    result = FMOD_Sound_ReadData(fmodSubSound, buffer, pcmBytes, out uint read);
                     if (result != FMOD_RESULT.FMOD_OK)
                     {
                         new TagToolError(CommandError.CustomError, $"FMOD_Sound_ReadData() failed. {result}");
@@ -129,8 +136,8 @@ namespace TagTool.Audio
         public uint SampleCount;
         public int ChannelCount;
         public int SampleSize;
-        public int FirstSample;
-        public uint Unknown6; //set for looping sounds. needs to be looked into
+        public uint LoopStart;
+        public uint LoopEnd;
         [TagField(Length = 256)]
         public string Filename;
 

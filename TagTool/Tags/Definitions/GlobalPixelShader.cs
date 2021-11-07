@@ -7,20 +7,29 @@ namespace TagTool.Tags.Definitions
     public class GlobalPixelShader : TagStructure
 	{
         public List<EntryPointBlock> EntryPoints;
-        public uint Unknown2;
+        public uint Version;
         public List<PixelShaderBlock> Shaders;
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x10, Platform = Cache.CachePlatform.Original)]
+        [TagStructure(Size = 0x14, Platform = Cache.CachePlatform.MCC)]
         public class EntryPointBlock : TagStructure
 		{
-            public List<OptionBlock> Option;
-            public int ShaderIndex; // this is used if there is no option block
+            public List<CategoryDependencyBlock> CategoryDependency;
+            public int DefaultCompiledShaderIndex;
+            [TagField(Platform = Cache.CachePlatform.MCC)]
+            public int CustomCompiledShaderIndex;
 
             [TagStructure(Size = 0x10)]
-            public class OptionBlock : TagStructure
+            public class CategoryDependencyBlock : TagStructure
 			{
-                public int RenderMethodOptionIndex;
-                public List<int> OptionMethodShaderIndices; // the value is the shader index
+                public int DefinitionCategoryIndex;
+                public List<GlobalShaderOptionDependency> OptionDependency;
+
+                [TagStructure(Size = 0x4)]
+                public class GlobalShaderOptionDependency : TagStructure
+                {
+                    public int CompiledShaderIndex;
+                }
             }
         }
     }

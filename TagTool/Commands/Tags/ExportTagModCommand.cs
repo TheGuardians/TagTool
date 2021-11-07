@@ -238,9 +238,9 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag {tagName}.{instance.Group.Tag}");
 
-                                for (var i = 0; i < bitm.Resources.Count; i++)
+                                for (var i = 0; i < bitm.HardwareTextures.Count; i++)
                                 {
-                                    var resourceFile = ExportResource(bitm.Resources[i].HaloOnlinePageableResource, "bitmap_texture_interop_resource", bitm.Resources.Count > 1 ? $"_image_{i}" : "_image");
+                                    var resourceFile = ExportResource(bitm.HardwareTextures[i].HaloOnlinePageableResource, "bitmap_texture_interop_resource", bitm.HardwareTextures.Count > 1 ? $"_image_{i}" : "_image");
 
                                     if (resourceFile == null)
                                     {
@@ -249,7 +249,7 @@ namespace TagTool.Commands.Tags
                                     }
 
                                     scriptWriter.WriteLine($"SetField Resources[{i}].HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Resources[{i}].HaloOnlinePageableResource ResourcesB \"tags\\{tagName}{(bitm.Resources.Count > 1 ? $"_image_{i}" : "_image")}.bitmap_texture_interop_resource\"");
+                                    scriptWriter.WriteLine($"SetField Resources[{i}].HaloOnlinePageableResource ResourcesB \"tags\\{tagName}{(bitm.HardwareTextures.Count > 1 ? $"_image_{i}" : "_image")}.bitmap_texture_interop_resource\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");

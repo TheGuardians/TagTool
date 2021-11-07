@@ -13,11 +13,11 @@ namespace TagTool.Tags.Definitions
         public ExposureBlock Exposure;
 
         public CameraFxValue AutoExposureSensitivity;
-        public CameraFxValue ExposureCompensation;
+        public CameraFxValue AutoExposureAntiBloom;
 
-        public CameraFxStrength HighlightBloom;
+        public CameraFxStrength BloomPoint;
         public CameraFxStrength InherentBloom;
-        public CameraFxStrength LightingBloom;
+        public CameraFxStrength BloomIntensity;
 
         public CameraFxColor HighlightBloomTint;
         public CameraFxColor InherentBloomTint;
@@ -25,18 +25,17 @@ namespace TagTool.Tags.Definitions
 
         public CameraFxStrength BlingIntensity;
         public CameraFxStrength BlingSize;
-
         public CameraFxStrength BlingAngle;
         public CameraFxBlingCountStruct BlingCount;
 
-        public CameraFxStrength SelfIllumExposure;
+        public CameraFxStrength SelfIllumPreferred;
         public CameraFxStrength SelfIllumScale;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public SsaoPropertiesBlock SsaoProperties;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public CameraFxValue UnknownIntensity1;
+        public CameraFxValue ColorGrading;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<UnknownBlock1> Unknown33;

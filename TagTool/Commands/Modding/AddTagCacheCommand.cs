@@ -82,7 +82,7 @@ namespace TagTool.Commands.Modding
                 foreach (var tag in Cache.BaseCacheReference.TagCache.NonNull())
                     tagNames[tag.Index] = tag.Name;
 
-                Cache.BaseModPackage.TagCachesStreams.Add(new ModPackageStream(newTagCacheStream));
+                Cache.BaseModPackage.TagCachesStreams.Add(new ExtantStream(newTagCacheStream));
                 Cache.BaseModPackage.CacheNames.Add(name);
                 Cache.BaseModPackage.TagCacheNames.Add(tagNames);
             }

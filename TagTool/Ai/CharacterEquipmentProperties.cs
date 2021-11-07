@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Tags;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using System;
 
 namespace TagTool.Ai
 {
@@ -10,8 +11,15 @@ namespace TagTool.Ai
 	{
         [TagField(Flags = Label)]
         public CachedTag Equipment;
-        public uint Unknown;
-        public float UsageChance;
-        public List<CharacterEquipmentUsageCondition> UsageConditions;
+
+        public CharacterEquipmentFlags Flags;
+        public float RelativeDropChance; // The relative chance of this equipment being dropped with respect to the other pieces of equipment specified in this block
+        public List<CharacterEquipmentUsageCondition> UseConditions;
+
+        [Flags]
+        public enum CharacterEquipmentFlags : uint
+        {
+            DefaultEquipment = 1 << 0
+        }
     }
 }

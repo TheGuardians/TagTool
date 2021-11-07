@@ -18,7 +18,7 @@ namespace TagTool.Commands.Porting
 
         private void ConvertShaderCortana(ShaderCortana shaderCortana, Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
-            var render_method_option_indices = shaderCortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
+            var render_method_option_indices = shaderCortana.Options.Select(c => (int)c.OptionIndex).ToList();
 
             //CachedTag newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
             //var ho_cortana_shader = (ShaderCortana)Activator.CreateInstance(typeof(ShaderCortana));
@@ -33,19 +33,19 @@ namespace TagTool.Commands.Porting
             //ho_cortana_shader.ShaderProperties = shader.ShaderProperties;
 
             var shader_properties = shaderCortana.ShaderProperties[0];
-            shader_properties.TextureConstants = new List<RenderMethod.ShaderProperty.TextureConstant>();
-            shader_properties.RealConstants = new List<RenderMethod.ShaderProperty.RealConstant>();
+            shader_properties.TextureConstants = new List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant>();
+            shader_properties.RealConstants = new List<RenderMethod.RenderMethodPostprocessBlock.RealConstant>();
             shader_properties.IntegerConstants = new List<uint>();
             shader_properties.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
-            shader_properties.ParameterTables = new List<RenderMethod.ShaderProperty.ParameterTable>();
-            shader_properties.Parameters = new List<RenderMethod.ShaderProperty.ParameterMapping>();
-            shader_properties.Functions = new List<RenderMethod.ShaderFunction>();
+            shader_properties.Passes = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodPostprocessPassBlock>();
+            shader_properties.RoutingInfo = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock>();
+            shader_properties.Functions = new List<RenderMethod.RenderMethodAnimatedParameterBlock>();
 
-            List<RenderMethodOption.OptionBlock> templateOptions = new List<RenderMethodOption.OptionBlock>();
+            List<RenderMethodOption.ParameterBlock> templateOptions = new List<RenderMethodOption.ParameterBlock>();
 
-            for (int i = 0; i < rmdf.Methods.Count; i++)
+            for (int i = 0; i < rmdf.Categories.Count; i++)
             {
-                var method = rmdf.Methods[i];
+                var method = rmdf.Categories[i];
                 int selected_option_index = render_method_option_indices.Count > i ? render_method_option_indices[i] : 0;
                 var selected_option = method.ShaderOptions[selected_option_index];
 
@@ -54,7 +54,7 @@ namespace TagTool.Commands.Porting
                 {
                     var rmop = CacheContext.Deserialize<RenderMethodOption>(cacheStream, rmop_instance);
 
-                    templateOptions.AddRange(rmop.Options);
+                    templateOptions.AddRange(rmop.Parameters);
                 }
             }
 
@@ -77,20 +77,20 @@ namespace TagTool.Commands.Porting
             }
             //shader_properties.DrawModes = rmt2.DrawModes;
 
-            var shaderFunctions = new List<RenderMethod.ShaderFunction>();
-            var shaderVectorArguments = new RenderMethod.ShaderProperty.RealConstant[rmt2.RealParameterNames.Count];
+            var shaderFunctions = new List<RenderMethod.RenderMethodAnimatedParameterBlock>();
+            var shaderVectorArguments = new RenderMethod.RenderMethodPostprocessBlock.RealConstant[rmt2.RealParameterNames.Count];
 
-            var shaderSamplerArguments = new RenderMethod.ShaderProperty.TextureConstant[rmt2.TextureParameterNames.Count];
+            var shaderSamplerArguments = new RenderMethod.RenderMethodPostprocessBlock.TextureConstant[rmt2.TextureParameterNames.Count];
             for (int rmt2SamplerIndex = 0; rmt2SamplerIndex < rmt2.TextureParameterNames.Count; rmt2SamplerIndex++)
             {
                 var rmt2SamplerArgument = rmt2.TextureParameterNames[rmt2SamplerIndex];
                 var name = rmt2SamplerArgument.Name;
                 var name_str = CacheContext.StringTable.GetString(name);
-                var shaderSamplerArgument = new RenderMethod.ShaderProperty.TextureConstant();
+                var shaderSamplerArgument = new RenderMethod.RenderMethodPostprocessBlock.TextureConstant();
                 {
-                    foreach (var importData in shaderCortana.ImportData)
+                    foreach (var importData in shaderCortana.Parameters)
                     {
-                        if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                        if (importData.ParameterType != RenderMethodOption.ParameterBlock.OptionDataType.Bitmap) continue;
                         if (importData.Name != name) continue;
 
                         if (importData.Bitmap != null)
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var deafult_option in templateOptions)
                     {
-                        if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                        if (deafult_option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Bitmap) continue;
                         if (deafult_option.Name != name) continue;
 
                         shaderSamplerArgument.Bitmap = deafult_option.DefaultSamplerBitmap;
@@ -133,7 +133,7 @@ namespace TagTool.Commands.Porting
                         var shaderVectorArgument = ProcessArgument(rmt2SamplerArgument, shaderFunctions, templateOptions, shaderCortana);
                         shaderVectorArguments[xform_index] = shaderVectorArgument;
                     }
-                    shaderSamplerArgument.XFormArgumentIndex = (sbyte)xform_index;
+                    shaderSamplerArgument.TextureTransformConstantIndex = (sbyte)xform_index;
                 }
             }
             shader_properties.TextureConstants = shaderSamplerArguments.ToList();
@@ -181,22 +181,22 @@ namespace TagTool.Commands.Porting
             return xform_index;
         }
 
-        private RenderMethod.ShaderProperty.RealConstant ProcessArgument(
+        private RenderMethod.RenderMethodPostprocessBlock.RealConstant ProcessArgument(
             RenderMethodTemplate.ShaderArgument vectorArgument,
-            List<RenderMethod.ShaderFunction> shaderFunctions,
-            List<RenderMethodOption.OptionBlock> templateOptions,
+            List<RenderMethod.RenderMethodAnimatedParameterBlock> shaderFunctions,
+            List<RenderMethodOption.ParameterBlock> templateOptions,
             ShaderCortana shaderCortana)
         {
-            RenderMethod.ShaderProperty.RealConstant shaderArgument = new RenderMethod.ShaderProperty.RealConstant();
+            RenderMethod.RenderMethodPostprocessBlock.RealConstant shaderArgument = new RenderMethod.RenderMethodPostprocessBlock.RealConstant();
 
             var name = vectorArgument.Name;
             var nameStr = CacheContext.StringTable.GetString(name);
 
-            foreach (var importData in shaderCortana.ImportData)
+            foreach (var importData in shaderCortana.Parameters)
             {
                 if (importData.Name != name) continue;
 
-                var argument_data = importData.Functions.Count > 0 ? importData.Functions[0].Function.Data : null;
+                var argument_data = importData.AnimatedParameters.Count > 0 ? importData.AnimatedParameters[0].Function.Data : null;
                 if (argument_data != null)
                 {
                     var unknown0A = BitConverter.ToUInt16(argument_data, 0);
@@ -206,27 +206,27 @@ namespace TagTool.Commands.Porting
                     var unknown2 = BitConverter.ToUInt32(argument_data, 24);
                     var unknown3 = BitConverter.ToUInt32(argument_data, 28);
 
-                    switch (importData.Type)
+                    switch (importData.ParameterType)
                     {
-                        case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Bitmap:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 8);
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Color:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 8);
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Real:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 4);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 4);
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor:
                             {
                                 var iblue = argument_data[4];
                                 var igreen = argument_data[5];
@@ -254,9 +254,9 @@ namespace TagTool.Commands.Porting
                 else
                 {
                     // default arguments
-                    switch (importData.Type)
+                    switch (importData.ParameterType)
                     {
-                        case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                        case RenderMethodOption.ParameterBlock.OptionDataType.Bitmap:
                             shaderArgument.Arg0 = 1.0f;
                             shaderArgument.Arg1 = 1.0f;
                             shaderArgument.Arg2 = 0.0f;
@@ -265,9 +265,9 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                for (int functionIndex = 1; functionIndex < importData.Functions.Count; functionIndex++)
+                for (int functionIndex = 1; functionIndex < importData.AnimatedParameters.Count; functionIndex++)
                 {
-                    shaderFunctions.Add(importData.Functions[functionIndex]);
+                    shaderFunctions.Add(importData.AnimatedParameters[functionIndex]);
                 }
 
                 goto datafound;

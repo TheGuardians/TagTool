@@ -1,122 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace TagTool.IO
 {
     /// <summary>
-	///  A wrapper for a Stream which prevents it from being closed or disposed by code unless explicitely required by the user.
+	/// Manages the lifetime of the base cache stream to ensure it gets disposed with the mod package
 	/// </summary>
-	public class ModPackageStream : Stream
+    public class ModPackageStream : Stream
     {
-        private readonly Stream BaseStream;
-        private bool CanBeDisposed;
+        public readonly Stream ModStream;
+        public readonly Stream BaseStream;
 
-        public ModPackageStream(Stream baseStream)
+        public ModPackageStream(Stream baseStream, Stream sharedStream)
         {
-            BaseStream = baseStream;
-            CanBeDisposed = false;
+            ModStream = baseStream;
+            BaseStream = sharedStream;
         }
 
-        public void SetDisposable(bool canBeDisposed)
-        {
-            CanBeDisposed = canBeDisposed;
-        }
+        public override bool CanRead => ModStream.CanRead;
 
-        public override bool CanRead
-        {
-            get { return BaseStream.CanRead; }
-        }
+        public override bool CanSeek => ModStream.CanSeek;
 
-        public override bool CanSeek
-        {
-            get { return BaseStream.CanSeek; }
-        }
+        public override bool CanWrite => ModStream.CanWrite;
 
-        public override bool CanWrite
-        {
-            get { return BaseStream.CanWrite; }
-        }
+        public override long Length => ModStream.Length;
 
-        public override long Length
-        {
-            get { return BaseStream.Length; }
-        }
+        public override long Position { get => ModStream.Position; set => ModStream.Position = value; }
 
-        public override long Position
-        {
-            get { return BaseStream.Position; }
-            set { BaseStream.Position = value; }
-        }
+        public override void Flush() => ModStream.Flush();
 
-        public override bool CanTimeout
-        {
-            get { return BaseStream.CanTimeout; }
-        }
+        public override int Read(byte[] buffer, int offset, int count) => ModStream.Read(buffer, offset, count);
 
-        public override int ReadTimeout
-        {
-            get { return BaseStream.ReadTimeout; }
-            set { BaseStream.ReadTimeout = value; }
-        }
+        public override long Seek(long offset, SeekOrigin origin) => ModStream.Seek(offset, origin);
 
-        public override int WriteTimeout
-        {
-            get { return BaseStream.WriteTimeout; }
-            set { BaseStream.WriteTimeout = value; }
-        }
+        public override void SetLength(long value) => ModStream.SetLength(value);
 
-        public override void Flush()
-        {
-            BaseStream.Flush();
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            return BaseStream.Read(buffer, offset, count);
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            if (origin == SeekOrigin.Begin)
-                return BaseStream.Seek(offset, SeekOrigin.Begin);
-            return BaseStream.Seek(offset, origin);
-        }
-
-        public override void SetLength(long value)
-        {
-            BaseStream.SetLength(value);
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            BaseStream.Write(buffer, offset, count);
-        }
+        public override void Write(byte[] buffer, int offset, int count) => ModStream.Write(buffer, offset, count);
 
         protected override void Dispose(bool disposing)
         {
-            if (CanBeDisposed)
+            if (disposing)
             {
-                if (disposing)
-                    BaseStream.Dispose();
-            }
-            else
-                Debug.WriteLine("Dispose was attempted on mod package stream not signaled to be disposed.");
+                ModStream?.Dispose();
+                BaseStream?.Dispose();
+            }    
         }
-
-        public override void Close()
-        {
-            if (CanBeDisposed)
-            {
-                base.Close();
-            }
-            else
-                Debug.WriteLine("Dispose was attempted on mod package stream not signaled to be disposed.");
-        }
-
     }
 }

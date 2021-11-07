@@ -21,7 +21,7 @@ namespace TagTool.Commands.Porting
     {
         private SoundCacheFileGestalt BlamSoundGestalt { get; set; } = null;
         private Dictionary<Sound, Task> SoundConversionTasks = new Dictionary<Sound, Task>();
-        private SemaphoreSlim ConcurrencyLimiter = new SemaphoreSlim(12);
+        private SemaphoreSlim ConcurrencyLimiter;
 
         class SoundConversionResult
         {
@@ -30,6 +30,11 @@ namespace TagTool.Commands.Porting
             // a list of functions that will be run after conversion
             // used for operations like string id conversion which cannot be done concurrently
             public List<Action> PostConversionOperations = new List<Action>();
+        }
+
+        public void InitializeSoundConverter()
+        {
+            ConcurrencyLimiter = new SemaphoreSlim(PortingOptions.Current.MaxThreads);
         }
 
         private void WaitForPendingSoundConversion()
@@ -205,7 +210,7 @@ namespace TagTool.Commands.Porting
                 // Set compression format
                 //
 
-                var targetFormat = Compression.MP3;
+                var targetFormat = PortingOptions.Current.AudioCodec;
                 sound.PlatformCodec.Compression = targetFormat;
 
                 //
@@ -222,7 +227,7 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < permutationCount; i++)
                 {
-                    var permutationIndex = pitchRange.FirstPermutationIndex + i;
+                    var permutationIndex = BlamSoundGestalt.GetFirstPermutationIndex(pitchRangeIndex, BlamCache.Platform) + i;
 
                     var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
@@ -269,7 +274,8 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < pitchRange.PermutationCount; i++)
                 {
-                    var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex + i);
+                    int permutationIndex = BlamSoundGestalt.GetFirstPermutationIndex(pitchRange, BlamCache.Platform) + i;
+                    var permutation = BlamSoundGestalt.GetPermutation(permutationIndex);
                     var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
 
                     extraInfo.LanguagePermutations.Add(new ExtraInfo.LanguagePermutation
@@ -420,17 +426,16 @@ namespace TagTool.Commands.Porting
 
             //Create empty udlg vocalization block and fill it with empty blocks matching adlg
 
-            List<Dialogue.Vocalization> newVocalization = new List<Dialogue.Vocalization>();
-            foreach (var vocalization in adlg.Vocalizations)
+            List<Dialogue.SoundReference> newSoundReference = new List<Dialogue.SoundReference>();
+            foreach (var soundreference in adlg.Vocalizations)
             {
-                Dialogue.Vocalization block = new Dialogue.Vocalization
+                Dialogue.SoundReference block = new Dialogue.SoundReference
                 {
                     Sound = null,
                     Flags = 0,
-                    Unknown = 0,
-                    Name = vocalization.Name,
+                    Vocalization = soundreference.Vocalization,
                 };
-                newVocalization.Add(block);
+                newSoundReference.Add(block);
             }
 
             //Match the tags with the proper stringId
@@ -439,15 +444,14 @@ namespace TagTool.Commands.Porting
             {
                 for (int i = 0; i < 304; i++)
                 {
-                    var vocalization = newVocalization[i];
+                    var soundreference = newSoundReference[i];
                     for (int j = 0; j < dialogue.Vocalizations.Count; j++)
                     {
-                        var vocalizationH3 = dialogue.Vocalizations[j];
-                        if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationH3.Name)))
+                        var soundreferenceH3 = dialogue.Vocalizations[j];
+                        if (CacheContext.StringTable.GetString(soundreference.Vocalization).Equals(CacheContext.StringTable.GetString(soundreferenceH3.Vocalization)))
                         {
-                            vocalization.Flags = vocalizationH3.Flags;
-                            vocalization.Unknown = vocalizationH3.Unknown;
-                            vocalization.Sound = vocalizationH3.Sound;
+                            soundreference.Flags = soundreferenceH3.Flags;
+                            soundreference.Sound = soundreferenceH3.Sound;
                             break;
                         }
                     }
@@ -457,11 +461,11 @@ namespace TagTool.Commands.Porting
             {
                 for (int i = 0; i < 304; i++)
                 {
-                    var vocalization = newVocalization[i];
+                    var vocalization = newSoundReference[i];
                     for (int j = 0; j < dialogue.Vocalizations.Count; j++)
                     {
                         var vocalizationReach = dialogue.Vocalizations[j];
-                        if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationReach.Name)))
+                        if (CacheContext.StringTable.GetString(vocalization.Vocalization).Equals(CacheContext.StringTable.GetString(vocalizationReach.Vocalization)))
                         {
                             // we use index 0 because other indices are for different situation like stealth. 
                             if(vocalizationReach.ReachSounds.Count > 0)
@@ -475,7 +479,7 @@ namespace TagTool.Commands.Porting
 
             
 
-            dialogue.Vocalizations = newVocalization;
+            dialogue.Vocalizations = newSoundReference;
 
             return dialogue;
         }
@@ -498,9 +502,9 @@ namespace TagTool.Commands.Porting
                 MaxSoundsPerObject = 1,
                 PreemptionTime = 100,
 
-                InternalFlags = (SoundClasses.Class.InternalFlagBits.ClassIsValid | SoundClasses.Class.InternalFlagBits.Bit4 |
-                 SoundClasses.Class.InternalFlagBits.Bit5 | SoundClasses.Class.InternalFlagBits.Bit6 |
-                 SoundClasses.Class.InternalFlagBits.Bit8 | SoundClasses.Class.InternalFlagBits.Bit9),
+                InternalFlags = (SoundClasses.Class.InternalFlagBits.Valid | SoundClasses.Class.InternalFlagBits.ValidXmaCompressionLevel |
+                 SoundClasses.Class.InternalFlagBits.ValidDopplerFactor | SoundClasses.Class.InternalFlagBits.ValidObstructionFactor |
+                 SoundClasses.Class.InternalFlagBits.ValidUnderwaterPropagation | SoundClasses.Class.InternalFlagBits.Bit9),
 
                 Priority = 5,
                 DistanceBounds = new Bounds<float>(8, 120),
@@ -522,8 +526,8 @@ namespace TagTool.Commands.Porting
             }
 
             // ms23 requires this flag to play a class on the mainmenu
-            sncl.Classes[32].Flags |= SoundClasses.Class.ClassFlagBits.ClassPlaysOnMainmenu; // Music
-            sncl.Classes[52].Flags |= SoundClasses.Class.ClassFlagBits.ClassPlaysOnMainmenu; // UI
+            sncl.Classes[32].ClassFlags |= SoundClasses.Class.ExternalFlagBits.ClassPlaysOnMainmenu; // Music
+            sncl.Classes[52].ClassFlags |= SoundClasses.Class.ExternalFlagBits.ClassPlaysOnMainmenu; // UI
 
             return sncl;
         }

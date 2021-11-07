@@ -1,4 +1,6 @@
 using TagTool.Cache;
+using TagTool.Common;
+using System;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
@@ -6,31 +8,45 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "new_cinematic_lighting", Tag = "nclt", Size = 0x1C, MinVersion = CacheVersion.Halo3Retail)]
     public class NewCinematicLighting : TagStructure
 	{
-        public List<UnknownBlock> Unknown1;
-        public List<LightingBlock> Lighting;
-        public float Unknown2;
+        public List<CinematicShLightBlock> ShLights;
+        public List<CinematicDynamicLightBlock> DynamicLights;
+        public float EnvironmentalLightingScale;
 
         [TagStructure(Size = 0x20)]
-        public class UnknownBlock : TagStructure
-		{
-            public int Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
+        public class CinematicShLightBlock : TagStructure
+        {
+            public CinematicShLightFlags Flags;
+            public float Direction; // degrees
+            public float FrontBack; // degrees
+            public float Intensity;
+            public RealRgbColor Color;
+            public float Diffusion;
+
+            [Flags]
+            public enum CinematicShLightFlags : uint
+            {
+                None,
+                DebugThisLight = 1 << 0
+            }
         }
 
         [TagStructure(Size = 0x20)]
-        public class LightingBlock : TagStructure
-		{
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
+        public class CinematicDynamicLightBlock : TagStructure
+        {
+            public CinematicDynamicLightFlags Flags;
+            public float Direction;
+            public float FrontBack;
+            public float Distance; // world units
             public CachedTag Light;
+
+            [Flags]
+            public enum CinematicDynamicLightFlags : uint
+            {
+                None,
+                DebugThisLight = 1 << 0,
+                FollowObject = 1 << 1,
+                PositionAtMarker = 1 << 2
+            }
         }
     }
 }

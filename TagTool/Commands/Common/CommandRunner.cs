@@ -97,6 +97,18 @@ namespace TagTool.Commands.Common
             }
         }
 
+        public static string ApplyUserVars(string inputStr, bool ignoreArgumentVariables)
+        {
+            if (!ignoreArgumentVariables)
+            {
+                foreach (var variable in Current.ContextStack.ArgumentVariables)
+                {
+                    inputStr = inputStr.Replace(variable.Key, variable.Value);
+                }
+            }
+            return inputStr;
+        }
+
         public static string CurrentCommandName = "";
 
         private static bool ExecuteCommand(CommandContext context, List<string> commandAndArgs, Dictionary<string, string> argVariables)
@@ -125,16 +137,8 @@ namespace TagTool.Commands.Common
             commandAndArgs.RemoveAt(0);
 
             // Replace argument variables with their values
-            if (!command.IgnoreArgumentVariables)
-            {
-                for (int i = 0; i < commandAndArgs.Count; i++)
-                {
-                    foreach (var variable in argVariables)
-                    {
-                        commandAndArgs[i] = commandAndArgs[i].Replace(variable.Key, variable.Value);
-                    }
-                }
-            }
+            for (int i = 0; i < commandAndArgs.Count; i++)
+                commandAndArgs[i] = ApplyUserVars(commandAndArgs[i], command.IgnoreArgumentVariables);
 
 #if !DEBUG
             try

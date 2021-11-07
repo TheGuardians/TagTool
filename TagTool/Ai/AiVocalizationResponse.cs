@@ -12,6 +12,6 @@ namespace TagTool.Ai
         public AiVocalizationResponseFlags Flags;
         public short VocalizationIndex;
         public AiVocalizationResponseType ResponseType;
-        public short ImportDialogueIndex;
+        public short DialogueIndexImport;
     }
 }

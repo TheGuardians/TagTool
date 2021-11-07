@@ -91,7 +91,7 @@ namespace TagTool.Commands.Tags
 
                     bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
                     bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
-                    bitmap.Resources.Add(new TagResourceReference());
+                    bitmap.HardwareTextures.Add(new TagResourceReference());
 
                     var imageIndex = 0;
                     BitmapImageCurve curve = BitmapImageCurve.xRGB;
@@ -113,7 +113,7 @@ namespace TagTool.Commands.Tags
 
                     // set the tag data
 
-                    bitmap.Resources[imageIndex] = reference;
+                    bitmap.HardwareTextures[imageIndex] = reference;
                     bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
 
                     Cache.Serialize(stream, instance, bitmap);

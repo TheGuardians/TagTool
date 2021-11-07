@@ -92,7 +92,7 @@ namespace TagTool.Commands.RenderMethods
 
                 var animatedParameters = ShaderFunctionHelper.GetAnimatedParameters(Cache, Definition, template);
 
-                var functionType = RenderMethod.ShaderFunction.FunctionType.Value;
+                var functionType = RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType.Value;
                 if (functionIndex < properties.Functions.Count)
                     functionType = properties.Functions[functionIndex].Type;
 
@@ -103,7 +103,7 @@ namespace TagTool.Commands.RenderMethods
                 {
                     FunctionIndex = functionIndex,
                     Name = parameterName,
-                    FunctionType = RenderMethod.ShaderFunction.FunctionType.Value,
+                    FunctionType = RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType.Value,
                     Type = parameterType
                 };
 

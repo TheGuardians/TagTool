@@ -22,7 +22,7 @@ namespace TagTool.Commands.Porting
                 {
                     Data = new List<AiGlobalsDatum>(),
                 };
-                foreach (var value in matg.AiGlobalsOld)
+                foreach (var value in matg.AiGlobals)
                 {
                     value.SearchRangeInfantry = 30;
                     value.SearchRangeFlying = 40;
@@ -37,8 +37,8 @@ namespace TagTool.Commands.Porting
                 CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag(CacheContext.TagCache.TagDefinitions.GetTagGroupFromTag("aigl"));
                 edTag.Name = "globals\ai_globals";
                 CacheContext.Serialize(cacheStream, edTag, aigl);
-                matg.AiGlobals = edTag;
-                matg.AiGlobalsOld = new List<AiGlobalsDatum>();
+                matg.AiGlobalsTag = edTag;
+                matg.AiGlobals = new List<AiGlobalsDatum>();
             }
 
             //Might require adding the GfxUiStrings block
@@ -55,7 +55,7 @@ namespace TagTool.Commands.Porting
                     }
                 };
 
-                foreach (var metagame in matg.MetagameGlobals)
+                foreach (var metagame in matg.CampaignMetagameGlobals)
                 {
                     //Medal values for H3 do not need to be modified, but if survival is introduced on an H3 port, it will require ODST or HO points
 
@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
             return matg;
         }
 
-        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.RuntimeBlock.EventBlock edEvent, MultiplayerGlobals.RuntimeBlock.EventBlock h3Event)
+        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock edEvent, MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock h3Event)
         {
             if (h3Event.EnglishSound != null)
                 edEvent.EnglishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.EnglishSound);

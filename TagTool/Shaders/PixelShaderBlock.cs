@@ -1,4 +1,3 @@
-
 using System;
 using TagTool.Cache;
 using TagTool.Tags;

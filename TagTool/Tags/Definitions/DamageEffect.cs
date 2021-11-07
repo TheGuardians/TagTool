@@ -12,29 +12,29 @@ namespace TagTool.Tags.Definitions
     public class DamageEffect : TagStructure
 	{
         public Bounds<float> Radius; // world units
-        public float CutoffScale;
-        public FlagsValue Flags;
-        public SideEffectValue SideEffect;
-        public CategoryValue Category;
-        public FlagsValue1 Flags2;
-        public float AreaOfEffectCoreRadius;
+        public float CutoffScale; // [0-1]
+        public DamageEffectFlags EffectFlags;
+        public DamageSideEffects SideEffect;
+        public DamageCategories Category;
+        public DamageFlags Flags;
+        public float AreaOfEffectCoreRadius; // if this is area of effect damage
         public float DamageLowerBound;
         public Bounds<float> DamageUpperBound;
         public Angle DamageInnerConeAngle;
         public Angle DamageOuterConeAngle;
-        public float ActiveCamoflageDamage;
-        public float Stun;
-        public float MaxStun;
-        public float StunTime;
-        public float InstantaneousAcceleration;
+        public float ActiveCamoflageDamage; // how much more visible this damage makes a player who is active camouflaged [0,1]
+        public float Stun; // amount of stun added to damaged unit [0,1]
+        public float MaximumStun; // damaged unit's stun will never exceed this amount [0,1]
+        public float StunDuration; // duration of stun due to this damage (seconds)
+        public float InstantaneousAcceleration; // [0,+inf]
         public float RiderDirectDamageScale;
         public float RiderMaxTransferDamageScale;
         public float RiderMinTransferDamageScale;
         public StringId GeneralDamage;
         public StringId SpecificDamage;
-        public StringId SpecialDamage;
-        public float AiStunRadius;
-        public Bounds<float> AiStunBounds;
+        public StringId CustomResponseLabel;
+        public float AiStunRadius; // world units
+        public Bounds<float> AiStunBounds; // (0-1)
         public float ShakeRadius;
         public float EmpRadius;
         public float AOESpikeRadius;
@@ -45,34 +45,16 @@ namespace TagTool.Tags.Definitions
 
         public List<PlayerResponseBlock> PlayerResponses;
         public CachedTag DamageResponse;
-        public float CameraImpulseDuration;
-        public FunctionType CameraImpulseFadeFunction;
-        public short Unknown;
-        public Angle CameraImpulseRotation;
-        public float CameraImpulsePushback;
-        public Bounds<float> CameraImpulseJitter;
-        public float CameraShakeDuration;
-        public FunctionType CameraShakeFalloffFunction;
-        public short Unknown2;
-        public float CameraShakeRandomTranslation;
-        public Angle CameraShakeRandomRotation;
-        public WobbleFunctionValue CameraShakeWobbleFunction;
-        public short Unknown3;
-        public float CameraShakeWobbleFunctionPeriod;
-        public float CameraShakeWobbleWeight;
+        public CameraImpulseStruct CameraImpulse;
+        public CameraShakeStruct CameraShake;
         public CachedTag Sound;
-        public float BreakingEffectForwardVelocity;
-        public float BreakingEffectForwardRadius;
-        public float BreakingEffectForwardExponent;
-        public float BreakingEffectOutwardVelocity;
-        public float BreakingEffectOutwardRadius;
-        public float BreakingEffectOutwardExponent;
+        public BreakingEffectStruct BreakingEffect;
 
         [Flags]
-        public enum FlagsValue : uint
+        public enum DamageEffectFlags : uint
         {
             None = 0,
-            DonTScaleDamageByDistance = 1 << 0,
+            DontScaleDamageByDistance = 1 << 0,
             /// <summary>
             /// area of effect damage only affects players
             /// </summary>
@@ -80,8 +62,33 @@ namespace TagTool.Tags.Definitions
             AffectsModelTargets = 1 << 2
         }
 
+        public enum DamageSideEffects : short
+        {
+            None,
+            Harmless,
+            LethalToTheUnsuspecting,
+            Emp
+        }
+
+        public enum DamageCategories : short
+        {
+            None,
+            Falling,
+            Bullet,
+            Grenade,
+            HighExplosive,
+            Sniper,
+            Melee,
+            Flame,
+            MountedWeapon,
+            Vehicle,
+            Plasma,
+            Needle,
+            Shotgun
+        }
+
         [Flags]
-        public enum FlagsValue1 : uint
+        public enum DamageFlags : uint
         {
             None = 0,
             DoesNotHurtOwner = 1 << 0,
@@ -99,53 +106,59 @@ namespace TagTool.Tags.Definitions
             InfectionFormPop = 1 << 12,
             IgnoreSeatScaleForDirDmg = 1 << 13,
             ForcesHardPing = 1 << 14,
-            DoesNotHurtPlayers = 1 << 15
-        }
-
-        public enum SideEffectValue : short
-        {
-            None,
-            Harmless,
-            LethalToTheUnsuspecting,
-            Emp
-        }
-
-        public enum CategoryValue : short
-        {
-            None,
-            Falling,
-            Bullet,
-            Grenade,
-            HighExplosive,
-            Sniper,
-            Melee,
-            Flame,
-            MountedWeapon,
-            Vehicle,
-            Plasma,
-            Needle,
-            Shotgun
+            DoesNotHurtPlayers = 1 << 15,
+            DoesNotOvercombine = 1 << 16,
+            EnablesSpecialDeath = 1 << 17,
+            CannotCauseBetrayals = 1 << 18,
+            UsesOldEmpBehavior = 1 << 19,
+            IgnoresDamageResistance = 1 << 20,
+            ForceSKillOnDeath = 1 << 21,
+            CauseMagicDeceleration = 1 << 22
         }
 
         [TagStructure(Size = 0x70)]
         public class PlayerResponseBlock : TagStructure
 		{
             public ResponseTypeValue ResponseType;
-            public short Unknown;
-            public TypeValue Type;
-            public PriorityValue Priority;
-            public float Duration;
-            public FunctionType FadeFunction;
-            public short Unknown2;
-            public float MaximumIntensity;
-            public RealArgbColor Color;
-            public float LowFrequencyVibrationDuration;
-            public TagFunction LowFrequencyVibrationFunction = new TagFunction { Data = new byte[0] };
-            public float HighFrequencyVibrationDuration;
-            public TagFunction HighFrequencyVibrationFunction = new TagFunction { Data = new byte[0] };
-            public StringId EffectName;
-            public float Duration2;
-            public TagFunction EffectScaleFunction = new TagFunction { Data = new byte[0] };
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+
+            public ScreenFlashStruct ScreenFlash;
+            public RumbleDefinitionStruct Rumble;
+            public DamageEffectSoundEffectDefinition SoundEffect;
+
+            [TagStructure(Size = 0x20)]
+            public class ScreenFlashStruct : TagStructure
+            {
+                public ScreenFlashTypes Type;
+                public ScreenFlashPriorities Priority;
+                public float Duration; // seconds
+                public FunctionType FadeFunction;
+
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+
+                public float MaximumIntensity;
+                public RealArgbColor Color;
+            }
+
+            [TagStructure(Size = 0x30)]
+            public class RumbleDefinitionStruct : TagStructure
+            {
+                public float LowFrequencyRumbleDuration;
+                public TagFunction LowFrequencyRumbleFunction = new TagFunction { Data = new byte[0] };
+                public float HighFrequencyRumbleDuration;
+                public TagFunction HighFrequencyRumbleFunction = new TagFunction { Data = new byte[0] };
+            }
+
+            [TagStructure(Size = 0x1C)]
+            public class DamageEffectSoundEffectDefinition : TagStructure
+            {
+                public StringId EffectName;
+                public float Duration;
+                public TagFunction EffectScaleFunction = new TagFunction { Data = new byte[0] };
+            }
 
             public enum ResponseTypeValue : short
             {
@@ -154,7 +167,7 @@ namespace TagTool.Tags.Definitions
                 All
             }
 
-            public enum TypeValue : short
+            public enum ScreenFlashTypes : short
             {
                 None,
                 Lighten,
@@ -165,15 +178,16 @@ namespace TagTool.Tags.Definitions
                 Tint
             }
 
-            public enum PriorityValue : short
+            public enum ScreenFlashPriorities : short
             {
                 Low,
                 Medium,
                 High
             }
+
         }
 
-        public enum WobbleFunctionValue : short
+        public enum GlobalPeriodicFunctionType : short
         {
             One,
             Zero,
@@ -187,6 +201,52 @@ namespace TagTool.Tags.Definitions
             Jitter,
             Wander,
             Spark
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class CameraImpulseStruct : TagStructure
+        {
+
+            public float Duration; // seconds
+            public FunctionType FadeFunction;
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+
+            public Angle Rotation; // degrees
+            public float Pushback; // world units
+            public Bounds<float> Jitter; // world units
+        }
+
+        [TagStructure(Size = 0x1C)]
+        public class CameraShakeStruct : TagStructure
+        {
+            public float Duration; // seconds
+            public FunctionType FalloffFunction;
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+
+            public float RandomTranslation; // random translation in all directions (world units)
+            public Angle RandomRotation; // random rotation in all directions (degrees)
+            public GlobalPeriodicFunctionType WobbleFunction;
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+
+            public float WobbleFunctionPeriod; // seconds
+            public float WobbleWeight; // a value of 0.0 signifies that the wobble function has no effect; a value of 1.0 signifies that the effect will not be felt when the wobble function's value is zero.
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class BreakingEffectStruct : TagStructure
+        {
+            public float ForwardVelocity; // world units per second
+            public float ForwardRadius; // world units
+            public float ForwardExponent;
+            public float OutwardVelocity; // world units per second
+            public float OutwardRadius; // world units
+            public float OutwardExponent;
         }
     }
 }
