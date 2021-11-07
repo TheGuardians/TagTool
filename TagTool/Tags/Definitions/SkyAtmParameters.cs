@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {

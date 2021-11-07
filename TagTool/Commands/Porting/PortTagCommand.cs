@@ -20,6 +20,7 @@ using TagTool.Cache.Gen3;
 using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
 using TagTool.Tags.GUI;
+using TagTool.Geometry.BspCollisionGeometry;
 
 namespace TagTool.Commands.Porting
 {
@@ -408,18 +409,18 @@ namespace TagTool.Commands.Porting
                 RemoveNullPlacements(scenario.CratePalette, scenario.Crates);
             }
 
-            if (definition is SkyAtmParameters skya)
-            {
-                foreach (SkyAtmParameters.AtmosphereProperty atmProperty in skya.AtmosphereProperties)
-                {
-                    atmProperty.Name = ConvertStringId(atmProperty.ReachName);
-                    atmProperty.FogColor = atmProperty.FogColorReach;
-                    atmProperty.UnknownFlags = 0;
-                    atmProperty.FogIntensityCyan = 1;
-                    atmProperty.FogIntensityMagenta = 1;
-                    atmProperty.FogIntensityYellow = 1;
-                }
-            }
+            //if (definition is SkyAtmParameters skya)
+            //{
+            //    foreach (SkyAtmParameters.AtmosphereProperty atmProperty in skya.AtmosphereProperties)
+            //    {
+            //        atmProperty.Name = ConvertStringId(atmProperty.ReachName);
+            //        atmProperty.FogColor = atmProperty.FogColorReach;
+            //        atmProperty.UnknownFlags = 0;
+            //        atmProperty.FogIntensityCyan = 1;
+            //        atmProperty.FogIntensityMagenta = 1;
+            //        atmProperty.FogIntensityYellow = 1;
+            //    }
+            //}
 
             if (definition is Model hlmt)
             {
