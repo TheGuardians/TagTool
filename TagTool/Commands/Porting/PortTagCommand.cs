@@ -351,8 +351,6 @@ namespace TagTool.Commands.Porting
                     return null;//CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
                     return null;// CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
-				case "rmct":
-                    return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
 				case "rmgl":
 					return CacheContext.TagCache.GetTag<Shader>(@"levels\dlc\sidewinder\shaders\side_hall_glass03");
 				case "rmt2":
@@ -920,6 +918,7 @@ namespace TagTool.Commands.Porting
                 case LightVolumeSystem ltvl:
                 case DecalSystem decs:
                 case BeamSystem beam:
+                case ShaderCortana rmct:
                     if (!FlagIsSet(PortingFlags.MatchShaders))
                         return GetDefaultShader(blamTag.Group.Tag, edTag);
                     else
@@ -932,13 +931,6 @@ namespace TagTool.Commands.Porting
                         if (blamDefinition == null) // convert shader failed
                             return GetDefaultShader(blamTag.Group.Tag, edTag);
                     }
-                    break;
-
-                case ShaderCortana rmct:
-                    if (!FlagIsSet(PortingFlags.MatchShaders))
-                        ConvertShaderCortana(rmct, cacheStream, blamCacheStream, resourceStreams);
-                    else // invalid for now, TODO: fix this up, rmct shouldnt be a special case
-                        return GetDefaultShader(blamTag.Group.Tag, edTag);
                     break;
             }
 
