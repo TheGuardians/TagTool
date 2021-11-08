@@ -96,8 +96,9 @@ namespace TagTool.Tags.Definitions
                 LoopEventAgeDurationOverride = 1 << 2
             }
 
+			[TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public GlobalEffectPriorityEnum Priority;
-            [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+            [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padd3;
 
             public float SkipFraction;
