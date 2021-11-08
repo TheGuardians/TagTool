@@ -396,17 +396,31 @@ namespace TagTool.Commands.Porting
             if (soundLooping.SoundClass == SoundLooping.SoundClassValue.FirstPersonOutside)
                 soundLooping.SoundClass = SoundLooping.SoundClassValue.OutsideSurroundTail;
 
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
-            {
-                foreach (var track in soundLooping.Tracks)
-                {
-                    // FadeMode was added in ODST, H3 uses InversePower for in sounds, and Power for out sounds
-                    track.FadeInMode = SoundLooping.Track.SoundFadeMode.None;
-                    track.FadeOutMode = SoundLooping.Track.SoundFadeMode.None;
-                    track.AlternateCrossfadeMode = SoundLooping.Track.SoundFadeMode.None;
-                    track.AlternateFadeOutMode = SoundLooping.Track.SoundFadeMode.None;
-                }
-            }
+			if (BlamCache.Version == CacheVersion.Halo3Retail)
+			{
+				foreach (var track in soundLooping.Tracks)
+				{
+					// FadeMode was added in ODST, H3 uses InversePower for in sounds, and Power for out sounds
+					track.FadeInMode = SoundLooping.Track.SoundFadeMode.None;
+					track.FadeOutMode = SoundLooping.Track.SoundFadeMode.None;
+					track.AlternateCrossfadeMode = SoundLooping.Track.SoundFadeMode.None;
+					track.AlternateFadeOutMode = SoundLooping.Track.SoundFadeMode.None;
+				}
+			}
+			else if (BlamCache.Version == CacheVersion.HaloReach)
+			{
+				foreach (var track in soundLooping.Tracks)
+				{
+					track.Flags = GetEquivalentFlags(track.Flags, track.FlagsReach);
+					track.OutputEffect = track.OutputEffectReach;
+					track.FadeInDuration = track.FadeInDurationReach;
+					track.FadeInMode = GetEquivalentValue(track.FadeInMode, track.FadeInModeReach);
+					track.FadeOutDuration = track.FadeOutDurationReach;
+					track.FadeOutMode = GetEquivalentValue(track.FadeOutMode, track.FadeOutModeReach);
+					track.AlternateCrossfadeMode = GetEquivalentValue(track.AlternateCrossfadeMode, track.AlternateCrossfadeModeReach);
+					track.AlternateFadeOutMode = GetEquivalentValue(track.AlternateFadeOutMode, track.AlternateFadeOutModeReach);
+				}
+			}
 
             return soundLooping;
         }

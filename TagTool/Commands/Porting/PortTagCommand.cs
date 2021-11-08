@@ -881,7 +881,7 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case TextValuePairDefinition sily:
-                    Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
+                    Enum.TryParse(sily.ParameterH3.ToString(), out sily.Parameter);
                     break;
                     
                 case UserInterfaceSharedGlobalsDefinition wigl:
