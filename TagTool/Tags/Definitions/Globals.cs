@@ -1468,7 +1468,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float DragE;
 
-                [TagField(Length = 4, Flags = Padding)]
+                [TagField(Length = 4, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte[] Padding0;
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1482,7 +1482,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float SuperSinker;
 
-                [TagField(Length = 4, Flags = Padding)]
+                [TagField(Length = 4, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte[] Padding1;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]

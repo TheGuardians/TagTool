@@ -63,6 +63,8 @@ namespace TagTool.Commands.Porting
                 case ShaderBlack rmbk:
                 case ShaderGlass rmgl:
                 case ShaderScreen rmss:
+                case ShaderZonly rmzo:
+                case ShaderCortana rmct:
                     return ConvertShaderInternal(cacheStream, blamCacheStream, (RenderMethod)definition, blamTag, (RenderMethod)blamDefinition);
 
                 case ContrailSystem cntl:
@@ -104,10 +106,6 @@ namespace TagTool.Commands.Porting
                         if (beamSystem.Beams[i].RenderMethod == null) return null;
                     }
                     return beamSystem;
-
-                case ShaderZonly rmzo:
-                case ShaderCortana rmct:
-                    return null;
             }
             return null;
         }

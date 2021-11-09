@@ -626,7 +626,7 @@ namespace TagTool.Shaders.ShaderMatching
                         case "beam":            return new HaloShaderGenerator.Beam.BeamGenerator(Options, applyFixes);
                         case "black":           return new HaloShaderGenerator.Black.ShaderBlackGenerator();
                         case "contrail":        return new HaloShaderGenerator.Contrail.ContrailGenerator(Options, applyFixes);
-                        //case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(Options, applyFixes);
+                        case "cortana":         return new HaloShaderGenerator.Cortana.CortanaGenerator(Options, applyFixes);
                         case "custom":          return new HaloShaderGenerator.Custom.CustomGenerator(Options, applyFixes);
                         case "decal":           return new HaloShaderGenerator.Decal.DecalGenerator(Options, applyFixes);
                         case "foliage":         return new HaloShaderGenerator.Foliage.FoliageGenerator(Options, applyFixes);
