@@ -156,13 +156,7 @@ namespace TagTool.Tags.Definitions
                 public class DamageResponseRumbleFrequencyStruct : TagStructure
                 {
                     public float Duration; // seconds
-                    public MappingFunction DirtyRumble;
-
-                    [TagStructure(Size = 0x14)]
-                    public class MappingFunction : TagStructure
-                    {
-                        public byte[] Data;
-                    }
+					public TagFunction DirtyRumble = new TagFunction { Data = new byte[0] };
                 }
             }
 
