@@ -15,13 +15,17 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
         public byte[] Unused;
 
-        [TagStructure(Size = 0xC0)]
+		[TagStructure(Size = 0xAC, MaxVersion = CacheVersion.Halo3Beta)]
+		[TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3Retail)]
         public class DamageResponseClass : TagStructure
         {
             public DamageResponseClassTypeEnum Type;
             public DamageResponseClassFlags Flags;
             public DamageResponseScreenFlashStruct ScreenFlash;
-            public DamageResponseMotionBlurStruct MotionBlur;
+
+			[TagField(MinVersion = CacheVersion.Halo3Retail)]
+			public DamageResponseMotionBlurStruct MotionBlur;
+
             public DamageResponseDirectionalFlashStruct DirectionalFlash;
             public DamageResponseRumbleStruct Rumble;
             public DamageResponseCameraImpulseStruct CameraImpulse;
@@ -48,7 +52,7 @@ namespace TagTool.Tags.Definitions
                 public float Duration;
                 public GlobalReverseTransitionFunctionsEnum FadeFunction;
 
-                [TagField(Length = 2, Flags = Padding)]
+                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3Retail)]
                 public byte[] Padding0;
 
                 public float MaxIntensity;
@@ -195,9 +199,11 @@ namespace TagTool.Tags.Definitions
                 public float ShakeDuration; // seconds
                 // a function to envelope the effect's magnitude over time
                 public GlobalReverseTransitionFunctionsEnum FalloffFunction;
-                [TagField(Length = 2, Flags = Padding)]
+                
+				[TagField(Length = 2, Flags = Padding)]
                 public byte[] Padding0;
-                // random translation in all directions
+                
+				// random translation in all directions
                 public float RandomTranslation; // world units
                 // random rotation in all directions
                 public Angle RandomRotation; // degrees
