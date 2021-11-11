@@ -7,7 +7,8 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF0, MaxVersion = CacheVersion.Halo3ODST)]
+	[TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xE8, MaxVersion = CacheVersion.Halo3Beta)]
+	[TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnlineED)]
     public class DamageEffect : TagStructure
 	{
@@ -37,8 +38,11 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> AiStunBounds; // (0-1)
         public float ShakeRadius;
         public float EmpRadius;
+
+		[TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float AOESpikeRadius;
-        public float AOESpikeDamageBump;
+		[TagField(MinVersion = CacheVersion.Halo3Retail)]
+		public float AOESpikeDamageBump;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float Unknown_HO = 1.0f;

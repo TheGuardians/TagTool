@@ -47,8 +47,10 @@ namespace TagTool.Tags.Definitions
                 public ScreenFlashPriorityEnum Priority;
                 public float Duration;
                 public GlobalReverseTransitionFunctionsEnum FadeFunction;
-                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-                public byte[] ZFARTPOO;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
+
                 public float MaxIntensity;
                 public RealArgbColor FlashColor;
 
@@ -118,8 +120,10 @@ namespace TagTool.Tags.Definitions
             {
                 public float Duration;
                 public GlobalReverseTransitionFunctionsEnum FadeFunction;
-                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-                public byte[] ZASSFACE;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
+
                 public float Size;
                 public float InnerScale;
                 public float OuterScale;
@@ -163,8 +167,10 @@ namespace TagTool.Tags.Definitions
             {
                 public float Duration; // seconds
                 public GlobalReverseTransitionFunctionsEnum FadeFunction;
-                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-                public byte[] INF;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
+
                 public Angle Rotation; // degrees
                 public float Pushback; // world units
                 public Bounds<float> Jitter; // world units
@@ -189,16 +195,18 @@ namespace TagTool.Tags.Definitions
                 public float ShakeDuration; // seconds
                 // a function to envelope the effect's magnitude over time
                 public GlobalReverseTransitionFunctionsEnum FalloffFunction;
-                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-                public byte[] DYOOQZFW;
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
                 // random translation in all directions
                 public float RandomTranslation; // world units
                 // random rotation in all directions
                 public Angle RandomRotation; // degrees
                 // a function to perturb the effect's behavior over time
                 public GlobalPeriodicFunctionsEnum WobbleFunction;
-                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-                public byte[] FXGSKJ;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding1;
+
                 public float WobbleFunctionPeriod; // seconds
                 // a value of 0.0 signifies that the wobble function has no effect; a value of 1.0 signifies that the effect will not be felt when the wobble function's value is zero.
                 public float WobbleWeight;
