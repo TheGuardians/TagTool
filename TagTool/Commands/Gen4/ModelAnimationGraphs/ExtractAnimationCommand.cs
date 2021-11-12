@@ -134,7 +134,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
             var datasizes = resourcemember.DataSizes;
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount,
                 resourcemember.NodeCount, (int)resourcemember.AnimationChecksum,
-                (FrameInfoType)resourcemember.MovementDataType, datasizes.StaticNodeFlags, datasizes.AnimatedNodeFlags);
+                (FrameInfoType)resourcemember.MovementDataType, datasizes.StaticNodeFlags, datasizes.AnimatedNodeFlags, datasizes.StaticDataSize);
             using (var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using (var reader = new EndianReader(stream, CacheContext.Endianness))
             {

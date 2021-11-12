@@ -160,6 +160,9 @@ namespace TagTool.Commands.Editing
                     case "sbsp":
                         CommandsGen2.ScenarioStructureBSPs.BSPContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ScenarioStructureBsp)definition);
                         break;
+                    case "jmad":
+                        CommandsGen2.ModelAnimationGraphs.AnimationContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ModelAnimationGraph)definition);
+                        break;
                 }
             }
             if (CacheVersionDetection.IsInGen(CacheGeneration.Fourth, cache.Version))
