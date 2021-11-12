@@ -278,7 +278,7 @@ namespace TagTool.Bitmaps.DDS
                         break;
 
                     case BitmapFormat.A8Y8:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0x00FF; ABitMask = 0xFF00;
                         break;
 
@@ -288,22 +288,22 @@ namespace TagTool.Bitmaps.DDS
                         break;
 
                     case BitmapFormat.A1R5G5B5:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0x7C00; GBitMask = 0x03E0; BBitMask = 0x001F; ABitMask = 0x8000;
                         break;
 
                     case BitmapFormat.A4R4G4B4:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0xF000; GBitMask = 0x0F00; BBitMask = 0x00F0; ABitMask = 0x000F;
                         break;
 
                     case BitmapFormat.A4R4G4B4Font:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0xF000; GBitMask = 0x0F00; BBitMask = 0x00F0; ABitMask = 0x000F;
                         break;
 
                     case BitmapFormat.A8R8G8B8:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0x00FF0000; GBitMask = 0x0000FF00; BBitMask = 0x000000FF; ABitMask = 0xFF000000;
                         break;
 
