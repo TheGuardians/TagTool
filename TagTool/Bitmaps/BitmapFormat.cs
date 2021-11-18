@@ -202,6 +202,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.V16U16:
                 case BitmapFormat.R5G6B5:
                     blockDimension = 1;
                     break;
@@ -256,6 +257,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A8R8G8B8_reach:
+                case BitmapFormat.V16U16:
                     compressionFactor = 0.25;
                     break;
                 case BitmapFormat.A16B16G16R16F:
@@ -293,6 +295,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A8R8G8B8_reach:
                 case BitmapFormat.A32B32G32R32F:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.V16U16:
                     minimalSize = 32;
                     break;
 

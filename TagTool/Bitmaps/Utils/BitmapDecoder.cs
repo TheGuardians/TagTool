@@ -1310,6 +1310,32 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        public static byte[] DecodeV16U16(byte[] data, int width, int height, bool swapXY = false)
+        {
+            byte[] buffer = new byte[width * height * 4];
+            for (int i = 0; i < (width * height * 4); i += 4)
+            {
+                ushort X = (ushort)(((((ushort)data[i + 2]) << 8) | (ushort)data[i + 3]) + 0x7FFF);
+                ushort Y = (ushort)(((((ushort)data[i + 0]) << 8) | (ushort)data[i + 1]) + 0x7FFF);
+        
+                if (swapXY)
+                {
+                    buffer[i] = (byte)((X >> 8) & 0xFF);
+                    buffer[(i) + 1] = (byte)(X & 0xFF);
+                    buffer[(i) + 2] = (byte)((Y >> 8) & 0xFF);
+                    buffer[(i) + 3] = (byte)(Y & 0xFF);
+                }
+                else
+                {
+                    buffer[i] = (byte)((Y >> 8) & 0xFF);
+                    buffer[(i) + 1] = (byte)(Y & 0xFF);
+                    buffer[(i) + 2] = (byte)((X >> 8) & 0xFF);
+                    buffer[(i) + 3] = (byte)(X & 0xFF);
+                }
+            }
+            return buffer;
+        }
+
         private static byte[] DecodeY8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 4];
@@ -1429,6 +1455,10 @@ namespace TagTool.Bitmaps
                     bitmRaw = DecodeV8U8(bitmRaw, virtualWidth, virtualHeight);
                     break;
 
+                case BitmapFormat.V16U16:
+                    bitmRaw = DecodeV16U16(bitmRaw, virtualWidth, virtualHeight);
+                    break;
+
                 case BitmapFormat.A8R8G8B8_reach:
                     bitmRaw = DecodeA8R8G8B8(bitmRaw, virtualWidth, virtualHeight);
                     break;
@@ -1531,6 +1561,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A8R8G8B8_reach:
+                case BitmapFormat.V16U16:
                     blockSizeX = 1;
                     blockSizeY = 1;
                     texPitch = 4;

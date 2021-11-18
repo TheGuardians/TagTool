@@ -146,7 +146,8 @@ namespace TagTool.Bitmaps.Utils
 
             if (cachePlatform == CachePlatform.MCC)
             {
-                if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
+                if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8 ||
+                    bitmap.Images[imageIndex].Format == BitmapFormat.V16U16)
                 {
                     resultBitmap.UpdateFormat(BitmapFormat.Dxn);
                 }
@@ -235,6 +236,14 @@ namespace TagTool.Bitmaps.Utils
                 int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
                 int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV8U8(pixelData, width, height, true);
+                pixelData = EncodeDXN(rgba, width, height);
+            }
+            else if (bitmap.Images[imageIndex].Format == BitmapFormat.V16U16)
+            {
+                // convert R16G16_SNORM to ati2n_unorm
+                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
+                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
+                var rgba = BitmapDecoder.DecodeV16U16(pixelData, width, height, true);
                 pixelData = EncodeDXN(rgba, width, height);
             }
 
@@ -452,6 +461,7 @@ namespace TagTool.Bitmaps.Utils
                 case BitmapFormat.A8:
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.V16U16:
                 case BitmapFormat.X8R8G8B8:
                     GenerateUncompressedMipMaps(bitmap);
                     break;
@@ -622,6 +632,7 @@ namespace TagTool.Bitmaps.Utils
 
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.V16U16:
                     channelCount = 2;
                     break;
                 case BitmapFormat.Y8:
