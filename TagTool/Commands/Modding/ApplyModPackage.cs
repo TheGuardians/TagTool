@@ -246,7 +246,7 @@ namespace TagTool.Commands.Modding
                 TagMapping.Add(modTag.Index, newTag.Index);
                 var definitionType = BaseCache.TagCache.TagDefinitions.GetTagDefinitionType(modTag.Group);
 
-                var tagDefinition = ModCache.Deserialize(ModCache.OpenCacheRead(), modTag);
+                var tagDefinition = ModCache.Deserialize(ModCache.OpenCacheRead(CacheStream), modTag);
                 tagDefinition = ConvertData(modPack, tagDefinition);
 
                 if (definitionType == typeof(ForgeGlobalsDefinition))
