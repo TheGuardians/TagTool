@@ -18,11 +18,11 @@ namespace TagTool.Commands.Porting
         public DiffTagCommand(GameCache cache1, GameCache cache2)
             : base(true,
                    "DiffTag",
-                   "Deep compares two tags.",
+                   "Deep compares two tags and lists their differences.",
 
-                   "DiffTag [Options] <Tag> [OtherTag]",
+                   "DiffTag [simple] <Tag> [OtherTag]",
 
-                   "Deep compares two tags.")
+                   "Deep compares two tags and lists their differences. Use the \"simple\" argument to list only the difference count.")
         {
             Cache1 = cache1;
             Cache2 = cache2;
@@ -31,7 +31,7 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             CachedTag tag1, tag2;
-            bool verbose = false;
+            bool simple = false;
 
             if (args.Count < 1)
                 return new TagToolError(CommandError.ArgCount);
@@ -39,9 +39,9 @@ namespace TagTool.Commands.Porting
             for (int i = 0; i < args.Count; i++)
             {
                 var arg = args[i].ToLower();
-                if (arg == "verbose")
+                if (arg == "simple")
                 {
-                    verbose = true;
+                    simple = true;
                     args.RemoveAt(i);
                 }
             }
@@ -57,22 +57,24 @@ namespace TagTool.Commands.Porting
             using (var stream2 = Cache2.OpenCacheRead())
                 DiffTags(differences, stream1, Cache1, tag1, stream2, Cache2, tag2);
 
-            if (verbose)
+            if (!simple)
             {
+                Console.WriteLine($"\n{differences.Count} differences:\n");
+
                 foreach (var diff in differences)
                 {
                     var value1 = diff.Value1 ?? "null";
                     var value2 = diff.Value2 ?? "null";
 
                     if (diff.Kind == DifferenceKind.ElementCount)
-                        Console.WriteLine($"{diff.Path}.Count {((IList)diff.Value1).Count} != {((IList)diff.Value2).Count}");
+                        Console.WriteLine($"{diff.Path}.Count {((IList)diff.Value1).Count} | {((IList)diff.Value2).Count}");
                     else
-                        Console.WriteLine($"{diff.Path} {value1} != {value2}");
+                        Console.WriteLine($"{diff.Path} {value1} | {value2}");
                 }
             }
             else
             {
-                Console.WriteLine($"{differences.Count} differences.");
+                Console.WriteLine($"\n{differences.Count} differences.");
             }
 
             return true;
