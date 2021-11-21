@@ -1321,7 +1321,7 @@
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />
     <Compile Include="Tags\TagFunction.cs" />
-    <Compile Include="Tags\TagMapping.cs" />
+    <Compile Include="Tags\ParticlePropertyScalar.cs" />
     <Compile Include="Tags\TagReferenceBlock.cs" />
     <Compile Include="Common\TagVersionMap.cs" />
     <Compile Include="Extensions\BinaryReaderExtensions.cs" />
