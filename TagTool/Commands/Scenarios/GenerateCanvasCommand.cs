@@ -27,9 +27,11 @@ namespace TagTool.Commands.Scenarios
                 "GenerateCanvas",
                 "Generates a mostly empty scenario.",
 
-                "GenerateCanvas [default]",
+                "GenerateCanvas [worldtype] [quick]",
 
-                "Generates a mostly empty scenario for use with Forge. Use arg \"default\" to bypass input dialog.")
+                "Generates a mostly empty scenario for use with Forge. Use arg 'quick' to bypass custom parameter dialog.\n" +
+                "Worldtypes include 'default' (empty) and 'water' (very large plane of bsp water).\n" +
+                "Using the command without args will begin a dialog for a default worldtype scenario.")
         {
             Cache = cache;
         }
@@ -62,61 +64,84 @@ namespace TagTool.Commands.Scenarios
                 ScenarioPath = @"levels\eldewrito\canvas\canvas",
                 WorldBounds = new RealRectangle3d(-1000, 1000, -1000, 1000, -1000, 1000)
             };
-            // TODO: take input
 
-            switch (args.Count)
+            bool quick = false;
+
+            if (args.Count > 0)
             {
-                case 0:
-                    {
-                        Console.WriteLine(@"Enter desired scenario tagname (e.g. levels\eldewrito\canvas\canvas):");
-                        parameters.ScenarioPath = CommandRunner.ApplyUserVars(@Console.ReadLine(), IgnoreArgumentVariables);
-                        if (parameters.ScenarioPath.Length < 5)
-                            return new TagToolError(CommandError.CustomError, "Please put some effort into your scenario tagname.");
-
-                        Console.WriteLine("Enter the map display name (4-15 characters):");
-                        parameters.MapName = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
-                        if (parameters.MapName.Length > 15 || parameters.MapName.Length < 4)
-                            return new TagToolError(CommandError.CustomError, "Provided name must be between 4 and 15 characters.");
-
-                        Console.WriteLine("Enter the map description: (<128 characters)");
-                        parameters.MapDescription = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
-                        if (parameters.MapDescription.Length > 127)
-                            return new TagToolError(CommandError.CustomError, "Description exceeds 127 characters.");
-
-                        Console.WriteLine("Enter the map author (4-15 characters):");
-                        parameters.MapAuthor = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
-                        if (parameters.MapAuthor.Length > 15 || parameters.MapAuthor.Length < 4)
-                            return new TagToolError(CommandError.CustomError, "Author name must be between 4 and 15 characters.");
-
-                        Console.WriteLine("Enter a mapID (integer) between 7000 and 65535:");
-                        if (int.TryParse(CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables), out int result))
-                        {
-                            parameters.MapId = result;
-                            if (parameters.MapId < 7001 || parameters.MapId > 65534)
-                                return new TagToolError(CommandError.CustomError, "MapID must be between 7000 and 65535.");
-                        }
-                        else
-                            return new TagToolError(CommandError.CustomError, "MapID must be an integer.");
-
+                switch (args[0].ToLower())
+                {
+                    case "default":
                         break;
-                    }
-                case 1:
-                    switch(args[0].ToLower())
-                    {
-                        case "default":
-                            break;
-                        case "water":
-                            parameters.WorldType = WorldType.Water;
-                            break;
-                        default:
-                            return new TagToolError(CommandError.ArgInvalid);
-                    }
-                    break;
-                default:
+                    case "water":
+                        parameters.WorldType = WorldType.Water;
+                        break;
+                    case "quick":
+                        quick = true;
+                        break;
+                    default:
+                        return new TagToolError(CommandError.ArgInvalid);
+                }
+
+                if (args.Count == 2 && args[1].ToLower() == "quick")
+                    quick = true;
+
+                if (args.Count > 2)
                     return new TagToolError(CommandError.ArgCount);
             }
 
-            GenerateCanvas(parameters);
+            if (quick || AskForParameterInput(parameters))
+                GenerateCanvas(parameters);
+
+            return true;
+        }
+
+        private bool AskForParameterInput(GeneratorParameters parameters)
+        {
+            Console.WriteLine("\nEnter desired scenario tagname (e.g. levels\\eldewrito\\canvas\\canvas):");
+            parameters.ScenarioPath = CommandRunner.ApplyUserVars(@Console.ReadLine().ToLower(), IgnoreArgumentVariables);
+            if (parameters.ScenarioPath.Length < 4)
+            {
+                new TagToolError(CommandError.CustomError, "Provided tagname must be greater than 3 characters.");
+                return false;
+            }
+            Console.WriteLine("Enter the map display name (4-15 characters):");
+            parameters.MapName = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
+            if (parameters.MapName.Length > 15 || parameters.MapName.Length < 4)
+            {
+                new TagToolError(CommandError.CustomError, "Provided name must be between 4 and 15 characters.");
+                return false;
+            }
+            Console.WriteLine("Enter the map description: (<128 characters)");
+            parameters.MapDescription = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
+            if (parameters.MapDescription.Length > 127)
+            {
+                new TagToolError(CommandError.CustomError, "Description exceeds 127 characters.");
+                return false;
+            }
+            Console.WriteLine("Enter the map author (4-15 characters):");
+            parameters.MapAuthor = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
+            if (parameters.MapAuthor.Length > 15 || parameters.MapAuthor.Length < 4)
+            {
+                new TagToolError(CommandError.CustomError, "Author name must be between 4 and 15 characters.");
+                return false;
+            }
+            Console.WriteLine("Enter a mapID (integer) between 7000 and 65535:");
+            if (int.TryParse(CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables), out int result))
+            {
+                parameters.MapId = result;
+                if (parameters.MapId < 7001 || parameters.MapId > 65534)
+                {
+                    new TagToolError(CommandError.CustomError, "MapID must be between 7000 and 65535.");
+                    return false;
+                }
+            }
+            else
+            {
+                new TagToolError(CommandError.CustomError, "MapID must be an integer.");
+                return false;
+            }
+
             return true;
         }
 
@@ -126,7 +151,7 @@ namespace TagTool.Commands.Scenarios
             {
                 using (var stream = Cache.OpenCacheReadWrite())
                 {
-                    Console.WriteLine("Generating scenario...");
+                    Console.WriteLine("\nGenerating scenario...");
                     var scenarioTag = GenerateCanvas(stream, parameters.WorldType, parameters.MapId, parameters.ScenarioPath, parameters.WorldBounds);
                     Console.WriteLine("Generating map file...");
                     GenerateMapFile(stream, Cache, scenarioTag, parameters.MapName, parameters.MapDescription, parameters.MapAuthor);
