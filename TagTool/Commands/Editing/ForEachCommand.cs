@@ -192,6 +192,12 @@ namespace TagTool.Commands.Editing
             }
             else
             {
+                while (ContextStack.Context != previousContext)
+                    ContextStack.Pop();
+
+                Owner = previousOwner;
+                Structure = previousStructure;
+
                 if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
                     .Execute(new List<string> { $"{blockName}" })
                     .Equals(false))
