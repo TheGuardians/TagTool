@@ -9,123 +9,171 @@ namespace TagTool.Commands.Porting
     {
         private ShieldImpact PreConvertShieldImpact(ShieldImpact shit, CacheVersion blamVersion, GameCacheHaloOnlineBase cache)
         {
-            cache.TagCache.TryGetCachedTag(@"levels\shared\bitmaps\test_maps\cloud_1.bitmap", out CachedTag Noise1);
-            cache.TagCache.TryGetCachedTag(@"levels\shared\bitmaps\test_maps\cloud_2.bitmap", out CachedTag Noise2);
+            CachedTag noise1 = shit.H3Values.ShieldImpactNoiseTexture1;
+            CachedTag noise2 = shit.H3Values.ShieldImpactNoiseTexture2;
+
+            StringId shield_intensity = CacheContext.StringTable.GetStringId("shield_intensity");
+            StringId recent_shield_intensity = CacheContext.StringTable.GetStringId("recent_shield_intensity");
+            StringId recent_shield_damage = CacheContext.StringTable.GetStringId("recent_shield_damage");
+            StringId object_overshield_amount = CacheContext.StringTable.GetStringId("object_overshield_amount");
+            StringId one = CacheContext.StringTable.GetStringId("one");
+
+            RealVector2d tilingUV = blamVersion == CacheVersion.Halo3ODST ? shit.H3Values.TextureScaleUV : new RealVector2d(shit.H3Values.TextureScale);
+
+            shit.Version = 4;
 
             // Shield Intensity
             shit.ShieldIntensity = new ShieldImpact.ShieldIntensityBlock
             {
-                RecentDamageIntensity = 1,
-                CurrentDamageIntensity = 1
+                RecentDamageIntensity = 1.0f,
+                CurrentDamageIntensity = 1.0f
             };
 
-            // Shield Edge
+            // Shield Edge (Not present in H3, so we should not render this)
             shit.ShieldEdge = new ShieldImpact.ShieldEdgeBlock
             {
+                //OvershieldScale = isOvershield ? 1.0f : 0.0f;
                 EdgeGlowColor = new ShieldImpactFunction
                 {
                     InputVariable = StringId.Invalid,
                     RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[14] }
+                    Function = new TagFunction
+                    {
+                        Data = new byte[] { 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 } // black
+                    }
                 },
                 EdgeGlowIntensity = new ShieldImpactFunction
                 {
                     InputVariable = StringId.Invalid,
                     RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[14] }
+                    Function = new TagFunction
+                    {
+                        Data = new byte[] { 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, } // zero intensity
+                    }
                 },
+            };
+
+            float magnitude = shit.H3Values.ImpactAmbientIntensity;
+            //if (isOvershield)
+            //    magnitude = shit.H3Values.OvershieldAmbientIntensity;
+
+            byte[] magnitudeBytes = System.BitConverter.GetBytes(magnitude);
+
+            ArgbColor plasmaColor = new ArgbColor
+            {
+                Alpha = 0xFF,
+                Red = (byte)(shit.H3Values.ImpactAmbientColor.Red * 255.0f),
+                Green = (byte)(shit.H3Values.ImpactAmbientColor.Green * 255.0f),
+                Blue = (byte)(shit.H3Values.ImpactAmbientColor.Blue * 255.0f)
             };
 
             // Plasma
             shit.Plasma = new ShieldImpact.PlasmaBlock
             {
-                PlasmaNoiseBitmap1 = Noise1,
-                PlasmaNoiseBitmap2 = Noise2,
-                ScrollSpeed = shit.H3Values.ScrollSpeed,
-                EdgeSharpness = shit.H3Values.PlasmaSharpness1,
-                CenterSharpness = shit.H3Values.PlasmaSharpness2,
+                PlasmaNoiseBitmap1 = noise1,
+                PlasmaNoiseBitmap2 = noise2,
+                TilingScale = tilingUV.I,
+                ScrollSpeed = 1.0f / shit.H3Values.ScrollSpeed,
+
+                // TODO: improve
+                EdgeSharpness = shit.H3Values.PlasmaSharpness2,
+                CenterSharpness = shit.H3Values.PlasmaSharpness1,
+
+                // No depth fade
+                PlasmaDepthFadeRange = 0.0f,
+
+                // Adjust these values as needed
+                PlasmaOuterFadeRadius = 0.0f,
+                PlasmaCenterRadius = 0.25f,
+                PlasmaInnerFadeRadius = 0.5f,
 
                 PlasmaCenterColor = new ShieldImpactFunction
                 {
-                    InputVariable = cache.StringTable.GetStringId("shield_intensity"),
-                    RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[60] }
+                    InputVariable = shield_intensity,
+                    RangeVariable = /*isOvershield ? object_overshield_amount : */recent_shield_damage,
+                    Function = new TagFunction // Can simplify this
+                    {
+                        Data = new byte[] { 0x08, 0x34, 0x02, 0x00, 0x00, 0x00, 0x00, 0xFF,
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, plasmaColor.Blue,
+                            plasmaColor.Green, plasmaColor.Red, plasmaColor.Alpha,
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                            0x00, 0x01, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0xCD, 0xFF, 0xFF,
+                            0x7F, 0x7F, 0xC4, 0x40, 0x67, 0x3F, 0xE0, 0xF9, 0xC5, 0x3D, 0x00,
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+                    }
                 },
                 PlasmaCenterIntensity = new ShieldImpactFunction
                 {
-                    InputVariable = cache.StringTable.GetStringId("shield_vitality"),
-                    RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[60] }
+                    InputVariable = recent_shield_intensity,
+                    RangeVariable = /*isOvershield ? StringId.Invalid : */recent_shield_damage,
+                    Function = new TagFunction
+                    {
+                        Data = new byte[] { 0x08, 0x00, 0x00, 0x00, magnitudeBytes[3], magnitudeBytes[2], magnitudeBytes[1], magnitudeBytes[0] }
+                    }
                 },
                 PlasmaEdgeColor = new ShieldImpactFunction
                 {
-                    InputVariable = cache.StringTable.GetStringId("shield_intensity"),
+                    InputVariable = StringId.Invalid,
                     RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[84] }
+                    Function = new TagFunction
+                    {
+                        Data = new byte[] { 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 } // black 
+                    }
                 },
                 PlasmaEdgeIntensity = new ShieldImpactFunction
                 {
-                    InputVariable = cache.StringTable.GetStringId("shield_vitality"),
+                    InputVariable = StringId.Invalid,
                     RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[60] }
+                    Function = new TagFunction // zero intensity
+                    {
+                        Data = new byte[] { 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, }
+                    }
                 },
             };
 
-            if (blamVersion <= CacheVersion.Halo3Retail)
-                shit.Plasma.TilingScale = shit.H3Values.TextureScale;
-            else if (blamVersion == CacheVersion.Halo3ODST)
-                shit.Plasma.TilingScale = shit.H3Values.TextureScaleUV.I;
+            // Might need conversion?
+            float extrusion = shit.H3Values.ExtrusionDistance;
+            byte[] extrusionBytes = System.BitConverter.GetBytes(extrusion);
 
-            // Extrusion Oscillation
             shit.ExtrusionOscillation = new ShieldImpact.ExtrusionOscillationBlock
             {
-                OscillationBitmap1 = Noise1,
-                OscillationBitmap2 = Noise2,
-                OscillationScrollSpeed = shit.H3Values.ScrollSpeed,
+                OscillationBitmap1 = noise1,
+                OscillationBitmap2 = noise2,
+                OscillationScrollSpeed = 0.0f,
+                OscillationTilingScale = 0.0f,
+
+                // Min\Max value (0.0f <-> extrusion), interpolated by the input and range variables
+                // If the input is always one, this function behaves like H3
 
                 ExtrusionAmount = new ShieldImpactFunction
                 {
-                    InputVariable = cache.StringTable.GetStringId("shield_vitality"),
-                    RangeVariable = cache.StringTable.GetStringId("recent_shield_vitality"),
-                    Function = new TagFunction { Data = new byte[48] }
+                    InputVariable = one,
+                    Function = new TagFunction
+                    {
+                        Data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                            extrusionBytes[3], extrusionBytes[2], extrusionBytes[1], extrusionBytes[0]
+                        }
+                    }
                 },
-                OscillationAmplitude = new ShieldImpactFunction
-                {
-                    InputVariable = cache.StringTable.GetStringId("shield_vitality"),
-                    RangeVariable = StringId.Invalid,
-                    Function = new TagFunction { Data = new byte[20] }
-                },
+
+                OscillationAmplitude = new ShieldImpactFunction()
             };
 
-            if (blamVersion <= CacheVersion.Halo3Retail)
-                shit.ExtrusionOscillation.OscillationTilingScale = shit.H3Values.TextureScale;
-            else if (blamVersion == CacheVersion.Halo3ODST)
-                shit.ExtrusionOscillation.OscillationTilingScale = shit.H3Values.TextureScaleUV.I;
-
-            // Hit Response
+            // Hit Response (only used when rendering as effect)
             shit.HitResponse = new ShieldImpact.HitResponseBlock
             {
-                HitTime = 2.857143f,
-
-                HitColor = new ShieldImpactFunction
-                {
-                    InputVariable = StringId.Invalid,
-                    RangeVariable = cache.StringTable.GetStringId("hit_time"),
-                    Function = new TagFunction { Data = new byte[20] }
-                },
-                HitIntensity = new ShieldImpactFunction
-                {
-                    InputVariable = cache.StringTable.GetStringId("shield_vitality"),
-                    RangeVariable = cache.StringTable.GetStringId("shield_vitality"),
-                    Function = new TagFunction { Data = new byte[20] }
-                },
+                HitColor = new ShieldImpactFunction(),
+                HitIntensity = new ShieldImpactFunction()
             };
 
-            // Scales, Offsets, Depth Fade
-            shit.EdgeScales = new RealQuaternion(4, -2.857143f, 2, -4);
-            shit.EdgeOffsets = new RealQuaternion(-1, 2.428571f, 0, 3);
-            shit.PlasmaScales = new RealQuaternion(3, 3, -45, 60);
-            shit.DepthFadeParameters = new RealQuaternion(5, 20, 0, 0);
+            shit.UpdateParameters();
+
+            if (blamVersion == CacheVersion.Halo3ODST)
+            {
+                float plasmaPowerScale = shit.PlasmaScales.K;
+                float plasmaPowerOffset = shit.PlasmaScales.W;
+                shit.PlasmaScales = new RealQuaternion(tilingUV, plasmaPowerScale, plasmaPowerOffset);
+            }
 
             return shit;
         }

@@ -495,7 +495,7 @@ namespace TagTool.Commands.Porting
 						instance.Name = StringId.Invalid;
 					break;
 
-                case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloReach:
+                case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloOnlineED:
                     blamDefinition = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
                     break;
             }

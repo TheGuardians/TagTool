@@ -17,6 +17,12 @@ namespace TagTool.Common
             J = y;
         }
 
+        public RealVector2d(float x)
+        {
+            I = x;
+            J = x;
+        }
+
         public RealVector2d(float[] elements) :
             this(elements[0], elements[1])
         {

@@ -34,13 +34,31 @@ namespace TagTool.Tags.Definitions
         public HitResponseBlock HitResponse;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion EdgeScales;
+        public RealQuaternion EdgeScales; // outer scale, inner scale, plasmaedge outer scale, plasmaedge inner scale
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion EdgeOffsets;
+        public RealQuaternion EdgeOffsets; // outer offset, inner offset, plasmaedge outer offset, plasmaedge inner offset
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion PlasmaScales;
+        public RealQuaternion PlasmaScales; // U scale, V scale, plasmanoise power scale, plasmanoise power offset
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion DepthFadeParameters;
+        public RealQuaternion DepthFadeParameters; // edge depth fade, plasma depth fade, unused, unused
+
+        public void UpdateParameters()
+        {
+            float outerScale = 1.0f / (ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius);
+            float innerScale = 1.0f / (ShieldEdge.CenterRadius - ShieldEdge.InnerFadeRadius);
+            float plasmaOuterScale = 1.0f / (Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius);
+            float plasmaInnerScale = 1.0f / (Plasma.PlasmaCenterRadius - Plasma.PlasmaInnerFadeRadius);
+
+            float outerOffset = -1.0f / ((ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius) / ShieldEdge.OuterFadeRadius);
+            float innerOffset = -1.0f / ((ShieldEdge.CenterRadius - ShieldEdge.InnerFadeRadius) / ShieldEdge.InnerFadeRadius);
+            float plasmaOuterOffset = -1.0f / ((Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius) / Plasma.PlasmaOuterFadeRadius);
+            float plasmaInnerOffset = -1.0f / ((Plasma.PlasmaCenterRadius - Plasma.PlasmaInnerFadeRadius) / Plasma.PlasmaInnerFadeRadius);
+
+            EdgeScales = new RealQuaternion(outerScale, innerScale, plasmaOuterScale, plasmaInnerScale);
+            EdgeOffsets = new RealQuaternion(outerOffset, innerOffset, plasmaOuterOffset, plasmaInnerOffset);
+            PlasmaScales = new RealQuaternion(Plasma.TilingScale, Plasma.TilingScale, -(Plasma.CenterSharpness - Plasma.EdgeSharpness), Plasma.CenterSharpness);
+            DepthFadeParameters = new RealQuaternion(1.0f / ShieldEdge.DepthFadeRange, 1.0f / Plasma.PlasmaDepthFadeRange);
+        }
 
         /// <summary>
         /// Shield intensity is a combination of recent damage and current damage.
@@ -66,7 +84,7 @@ namespace TagTool.Tags.Definitions
         public class ShieldEdgeBlock : TagStructure
         {
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public float OneIfOvershield;
+            public float OvershieldScale;
             public float DepthFadeRange;            //In world units
             public float OuterFadeRadius;           //Within [0,1]
             public float CenterRadius;              //Within [0,1]
@@ -134,7 +152,7 @@ namespace TagTool.Tags.Definitions
             public RealRgbColor ImpactColor2;
             public float ImpactIntensity2;
             public RealRgbColor ImpactAmbientColor;
-            public float ImpactAmbientIntensity2;
+            public float ImpactAmbientIntensity;
         }
 
         /// <summary>
