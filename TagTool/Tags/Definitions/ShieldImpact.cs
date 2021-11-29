@@ -64,7 +64,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach)]
         public class ShieldEdgeBlock : TagStructure
-		{
+        {
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public float OneIfOvershield;
             public float DepthFadeRange;            //In world units
@@ -84,7 +84,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloOnlineED)]
         public class PlasmaBlock : TagStructure
-		{
+        {
             public float PlasmaDepthFadeRange;      //In world units
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag PlasmaNoiseBitmap1;
@@ -146,7 +146,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagStructure(Size = 0x60)]
         public class ExtrusionOscillationBlock : TagStructure
-		{
+        {
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag OscillationBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
@@ -168,13 +168,10 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x3C)]
         public class HitResponseBlock : TagStructure
-		{
-            /// <summary>
-            /// The hit time of the hit response in seconds.
-            /// </summary>
-            public float HitTime;
+        {
+            public float HitTime; // (seconds) time of the hit response
             public ShieldImpactFunction HitColor;
-	        public ShieldImpactFunction HitIntensity;
+            public ShieldImpactFunction HitIntensity;
         }
         
     }
@@ -192,16 +189,14 @@ namespace TagTool.Tags.Definitions
         DontRenderAsEffect = 1 << 3 // HO only
     }
 
-    /// <summary>
-    /// You can use the following variables as inputs to the functions here, in addition to any object variables:
-    /// {shield_vitality (percentage of shield remaining),
-    /// shield_intensity (mixture of recent and current damage),
-    /// current_shield_damage,
-    /// recent_shield_damage}
-    /// </summary>
+    // The following variables can be inputs to the functions, in addition to any object variables:
+    // shield_vitality (percentage of shield remaining)
+    // shield_intensity (mixture of recent and current damage)
+    // current_shield_damage
+    // recent_shield_damage
     [TagStructure(Size = 0x1C)]
     public class ShieldImpactFunction : TagStructure
-	{
+    {
         public StringId InputVariable;
         public StringId RangeVariable;
         public TagFunction Function = new TagFunction { Data = new byte[0] };

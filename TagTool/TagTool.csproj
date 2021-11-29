@@ -426,6 +426,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.HUD.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Lighting.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Models.cs" />
+    <Compile Include="Commands\Porting\PortTagCommand.ShieldImpact.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Physics.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Scenario.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
@@ -474,6 +475,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.PortingOptions.cs" />
     <Compile Include="Commands\Editing\ExportCommandsCommand.cs" />
     <Compile Include="Commands\Bitmaps\GenerateBitmapCommand.cs" />
+    <Compile Include="Commands\Tags\SwitchObjectType.cs" />
     <Compile Include="Commands\Tags\FindValueCommand.cs" />
     <Compile Include="Commands\Tags\NameShaderTagsCommand.cs" />
     <Compile Include="Commands\Tags\TestSerializerCommand.cs" />
