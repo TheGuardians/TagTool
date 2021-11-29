@@ -335,13 +335,6 @@ namespace TagTool.Commands.Porting
                         return null;
                     break;
 
-				case "shit": // use the global shit tag until shit tags are port-able
-					if (CacheContext.TagCache.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
-                        return shitInstance;
-                    if (BlamCache.Version < CacheVersion.HaloOnlineED)
-                        return CacheContext.Deserialize<RasterizerGlobals>(cacheStream, CacheContext.TagCache.GetTag<RasterizerGlobals>(@"globals\rasterizer_globals")).DefaultShieldImpact;
-                    break;
-
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
 
@@ -501,7 +494,11 @@ namespace TagTool.Commands.Porting
 					foreach (var instance in bsp.InstancedGeometryInstances)
 						instance.Name = StringId.Invalid;
 					break;
-			}
+
+                case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloReach:
+                    blamDefinition = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
+                    break;
+            }
 
             ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
 
