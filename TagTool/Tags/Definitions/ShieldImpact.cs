@@ -44,20 +44,25 @@ namespace TagTool.Tags.Definitions
 
         public void UpdateParameters()
         {
-            float outerScale = 1.0f / (ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius);
-            float innerScale = 1.0f / (ShieldEdge.CenterRadius - ShieldEdge.InnerFadeRadius);
-            float plasmaOuterScale = 1.0f / (Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius);
-            float plasmaInnerScale = 1.0f / (Plasma.PlasmaCenterRadius - Plasma.PlasmaInnerFadeRadius);
+            float edgeOuterFade = ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius;
+            float edgeInnerFade = ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius;
+            float plasmaOuterFade = Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius;
+            float plasmaInnerFade = Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius;
 
-            float outerOffset = -1.0f / ((ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius) / ShieldEdge.OuterFadeRadius);
-            float innerOffset = -1.0f / ((ShieldEdge.CenterRadius - ShieldEdge.InnerFadeRadius) / ShieldEdge.InnerFadeRadius);
-            float plasmaOuterOffset = -1.0f / ((Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius) / Plasma.PlasmaOuterFadeRadius);
-            float plasmaInnerOffset = -1.0f / ((Plasma.PlasmaCenterRadius - Plasma.PlasmaInnerFadeRadius) / Plasma.PlasmaInnerFadeRadius);
+            float outerScale = RealMath.SafeRcp(edgeOuterFade);
+            float innerScale = RealMath.SafeRcp(edgeInnerFade);
+            float plasmaOuterScale = RealMath.SafeRcp(plasmaOuterFade);
+            float plasmaInnerScale = RealMath.SafeRcp(plasmaInnerFade);
+
+            float outerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(edgeOuterFade, ShieldEdge.OuterFadeRadius));
+            float innerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(edgeInnerFade, ShieldEdge.InnerFadeRadius));
+            float plasmaOuterOffset = -RealMath.SafeRcp(RealMath.SafeDiv(plasmaOuterFade, Plasma.PlasmaOuterFadeRadius));
+            float plasmaInnerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(plasmaInnerFade, Plasma.PlasmaInnerFadeRadius));
 
             EdgeScales = new RealQuaternion(outerScale, innerScale, plasmaOuterScale, plasmaInnerScale);
             EdgeOffsets = new RealQuaternion(outerOffset, innerOffset, plasmaOuterOffset, plasmaInnerOffset);
             PlasmaScales = new RealQuaternion(Plasma.TilingScale, Plasma.TilingScale, -(Plasma.CenterSharpness - Plasma.EdgeSharpness), Plasma.CenterSharpness);
-            DepthFadeParameters = new RealQuaternion(1.0f / ShieldEdge.DepthFadeRange, 1.0f / Plasma.PlasmaDepthFadeRange);
+            DepthFadeParameters = new RealQuaternion(RealMath.SafeRcp(ShieldEdge.DepthFadeRange), RealMath.SafeRcp(Plasma.PlasmaDepthFadeRange));
         }
 
         /// <summary>

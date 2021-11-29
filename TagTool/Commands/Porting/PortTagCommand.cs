@@ -496,7 +496,13 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloOnlineED:
-                    blamDefinition = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
+                    shit = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
+                    // These won't convert automatically due to versioning
+                    shit.Plasma.PlasmaNoiseBitmap1 = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, shit.Plasma.PlasmaNoiseBitmap1, null, shit.Plasma.PlasmaNoiseBitmap1.Name);
+                    shit.Plasma.PlasmaNoiseBitmap2 = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, shit.Plasma.PlasmaNoiseBitmap2, null, shit.Plasma.PlasmaNoiseBitmap2.Name);
+                    shit.ExtrusionOscillation.OscillationBitmap1 = shit.Plasma.PlasmaNoiseBitmap1;
+                    shit.ExtrusionOscillation.OscillationBitmap2 = shit.Plasma.PlasmaNoiseBitmap2;
+                    blamDefinition = shit;
                     break;
             }
 
