@@ -27,12 +27,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			if(index > 14) //is a child
             {
 				int child = Bsp.Bsp3dSupernodes[supernode_index].ChildIndices[index - 15];
-				if (child == 0)
-					return -1;
-				else if ((child & 0xC0000000) != 0)
-					return buildnode((int)(child & 0xBFFFFFFF), nodelist);
-				else
-					return buildsupernode(child, 0, nodelist);
+                if (child == 0)
+                    return -1;
+                else if ((child & 0xC0000000) != 0)
+                    return buildnode((int)(child & 0xBFFFFFFF), nodelist);
+                else
+                    return buildsupernode(child, 0, nodelist);
 			}
 			LargeBsp3dNode newnode = new LargeBsp3dNode();
 			Plane newplane = generate_new_node_plane(Bsp.Bsp3dSupernodes[supernode_index], index);
@@ -42,7 +42,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			int newnode_index = nodelist.Count - 1;
             nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
             nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
-			return newnode_index;
+            if (nodelist[newnode_index].BackChild == -1)
+                return nodelist[newnode_index].FrontChild;
+            if (nodelist[newnode_index].FrontChild == -1)
+                return nodelist[newnode_index].BackChild;
+
+            return newnode_index;
 		}
 
 		public int buildnode(int index, TagBlock<LargeBsp3dNode> nodelist)
