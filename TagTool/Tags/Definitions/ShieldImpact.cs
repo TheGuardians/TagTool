@@ -34,13 +34,36 @@ namespace TagTool.Tags.Definitions
         public HitResponseBlock HitResponse;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion EdgeScales;
+        public RealQuaternion EdgeScales; // outer scale, inner scale, plasmaedge outer scale, plasmaedge inner scale
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion EdgeOffsets;
+        public RealQuaternion EdgeOffsets; // outer offset, inner offset, plasmaedge outer offset, plasmaedge inner offset
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion PlasmaScales;
+        public RealQuaternion PlasmaScales; // U scale, V scale, plasmanoise power scale, plasmanoise power offset
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public RealQuaternion DepthFadeParameters;
+        public RealQuaternion DepthFadeParameters; // edge depth fade, plasma depth fade, unused, unused
+
+        public void UpdateParameters()
+        {
+            float edgeOuterFade = ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius;
+            float edgeInnerFade = ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius;
+            float plasmaOuterFade = Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius;
+            float plasmaInnerFade = Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius;
+
+            float outerScale = RealMath.SafeRcp(edgeOuterFade);
+            float innerScale = RealMath.SafeRcp(edgeInnerFade);
+            float plasmaOuterScale = RealMath.SafeRcp(plasmaOuterFade);
+            float plasmaInnerScale = RealMath.SafeRcp(plasmaInnerFade);
+
+            float outerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(edgeOuterFade, ShieldEdge.OuterFadeRadius));
+            float innerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(edgeInnerFade, ShieldEdge.InnerFadeRadius));
+            float plasmaOuterOffset = -RealMath.SafeRcp(RealMath.SafeDiv(plasmaOuterFade, Plasma.PlasmaOuterFadeRadius));
+            float plasmaInnerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(plasmaInnerFade, Plasma.PlasmaInnerFadeRadius));
+
+            EdgeScales = new RealQuaternion(outerScale, innerScale, plasmaOuterScale, plasmaInnerScale);
+            EdgeOffsets = new RealQuaternion(outerOffset, innerOffset, plasmaOuterOffset, plasmaInnerOffset);
+            PlasmaScales = new RealQuaternion(Plasma.TilingScale, Plasma.TilingScale, -(Plasma.CenterSharpness - Plasma.EdgeSharpness), Plasma.CenterSharpness);
+            DepthFadeParameters = new RealQuaternion(RealMath.SafeRcp(ShieldEdge.DepthFadeRange), RealMath.SafeRcp(Plasma.PlasmaDepthFadeRange));
+        }
 
         /// <summary>
         /// Shield intensity is a combination of recent damage and current damage.
@@ -64,9 +87,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach)]
         public class ShieldEdgeBlock : TagStructure
-		{
+        {
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public float OneIfOvershield;
+            public float OvershieldScale;
             public float DepthFadeRange;            //In world units
             public float OuterFadeRadius;           //Within [0,1]
             public float CenterRadius;              //Within [0,1]
@@ -84,7 +107,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloOnlineED)]
         public class PlasmaBlock : TagStructure
-		{
+        {
             public float PlasmaDepthFadeRange;      //In world units
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag PlasmaNoiseBitmap1;
@@ -134,7 +157,7 @@ namespace TagTool.Tags.Definitions
             public RealRgbColor ImpactColor2;
             public float ImpactIntensity2;
             public RealRgbColor ImpactAmbientColor;
-            public float ImpactAmbientIntensity2;
+            public float ImpactAmbientIntensity;
         }
 
         /// <summary>
@@ -146,7 +169,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagStructure(Size = 0x60)]
         public class ExtrusionOscillationBlock : TagStructure
-		{
+        {
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag OscillationBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
@@ -168,13 +191,10 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x3C)]
         public class HitResponseBlock : TagStructure
-		{
-            /// <summary>
-            /// The hit time of the hit response in seconds.
-            /// </summary>
-            public float HitTime;
+        {
+            public float HitTime; // (seconds) time of the hit response
             public ShieldImpactFunction HitColor;
-	        public ShieldImpactFunction HitIntensity;
+            public ShieldImpactFunction HitIntensity;
         }
         
     }
@@ -192,16 +212,14 @@ namespace TagTool.Tags.Definitions
         DontRenderAsEffect = 1 << 3 // HO only
     }
 
-    /// <summary>
-    /// You can use the following variables as inputs to the functions here, in addition to any object variables:
-    /// {shield_vitality (percentage of shield remaining),
-    /// shield_intensity (mixture of recent and current damage),
-    /// current_shield_damage,
-    /// recent_shield_damage}
-    /// </summary>
+    // The following variables can be inputs to the functions, in addition to any object variables:
+    // shield_vitality (percentage of shield remaining)
+    // shield_intensity (mixture of recent and current damage)
+    // current_shield_damage
+    // recent_shield_damage
     [TagStructure(Size = 0x1C)]
     public class ShieldImpactFunction : TagStructure
-	{
+    {
         public StringId InputVariable;
         public StringId RangeVariable;
         public TagFunction Function = new TagFunction { Data = new byte[0] };

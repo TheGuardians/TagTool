@@ -546,13 +546,6 @@ namespace TagTool.Commands.Porting
                         return null;
                     break;
 
-				case "shit": // use the global shit tag until shit tags are port-able
-					if (CacheContext.TagCache.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
-                        return shitInstance;
-                    if (BlamCache.Version < CacheVersion.HaloOnlineED)
-                        return CacheContext.Deserialize<RasterizerGlobals>(cacheStream, CacheContext.TagCache.GetTag<RasterizerGlobals>(@"globals\rasterizer_globals")).DefaultShieldImpact;
-                    break;
-
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
 
@@ -725,7 +718,16 @@ namespace TagTool.Commands.Porting
                             instance.Name = StringId.Invalid;
                     }
                     break;
-			}
+                case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloOnlineED:
+                    shit = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
+                    // These won't convert automatically due to versioning
+                    shit.Plasma.PlasmaNoiseBitmap1 = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, shit.Plasma.PlasmaNoiseBitmap1, null, shit.Plasma.PlasmaNoiseBitmap1.Name);
+                    shit.Plasma.PlasmaNoiseBitmap2 = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, shit.Plasma.PlasmaNoiseBitmap2, null, shit.Plasma.PlasmaNoiseBitmap2.Name);
+                    shit.ExtrusionOscillation.OscillationBitmap1 = shit.Plasma.PlasmaNoiseBitmap1;
+                    shit.ExtrusionOscillation.OscillationBitmap2 = shit.Plasma.PlasmaNoiseBitmap2;
+                    blamDefinition = shit;
+                    break;
+            }
 
             ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
 

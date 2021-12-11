@@ -106,13 +106,15 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
             //    return null;
             var staticflagssize = animationblock.DataSizes.StaticNodeFlags;
             var animatedflagssize = animationblock.DataSizes.AnimatedNodeFlags;
+            var staticdatasize = animationblock.DataSizes.StaticDataSize;
             AnimationResourceData data = new AnimationResourceData(
                 animationblock.FrameCount,
                 animationblock.NodeCount,
                 CalculateNodeListChecksum(Animation.Resources.SkeletonNodesAbcdcc, 0),
                 (FrameInfoType)animationblock.FrameInfoType,
                 staticflagssize,
-                animatedflagssize);
+                animatedflagssize,
+                staticdatasize);
 
             using (var stream = new MemoryStream(animationblock.AnimationData))
             using (var reader = new EndianReader(stream, CacheContext.Endianness))

@@ -283,42 +283,42 @@ namespace TagTool.Tags.Definitions
                     /// Defines the size of the emitter.
                     /// </summary>
                     [TagField(Format = "World Units")]
-                    public TagMapping EmissionRadius;
+                    public ParticlePropertyScalar EmissionRadius;
 
                     /// <summary>
                     /// Determines the angle at which particles are emitted.
                     /// </summary>
                     [TagField(Format = "Degrees")]
-                    public TagMapping EmissionAngle;
+                    public ParticlePropertyScalar EmissionAngle;
 
                     /// <summary>
                     /// Number of particles that are spawned at the birth of the effect.
                     /// </summary>
-                    public TagMapping ParticleStartingCount;
+                    public ParticlePropertyScalar ParticleStartingCount;
 
                     /// <summary>
                     /// Max number of particles allowed to exist at one time.
                     /// </summary>
                     [TagField(Format = "0 = Unlimited")]
-                    public TagMapping ParticleMaxCount;
+                    public ParticlePropertyScalar ParticleMaxCount;
 
                     /// <summary>
                     /// Number of particles that are spawned every second from the emitters.
                     /// </summary>
                     [TagField(Format = "Particles Per Second")]
-                    public TagMapping ParticleEmissionRate;
+                    public ParticlePropertyScalar ParticleEmissionRate;
 
                     /// <summary>
                     /// Number of particles that are spawned every world unit of motion from the emitters.
                     /// </summary>
                     [TagField(Format = "Particles Per World Unit")]
-                    public TagMapping ParticleEmissionPerDistance;
+                    public ParticlePropertyScalar ParticleEmissionPerDistance;
 
                     /// <summary>
                     /// Number of seconds a particle will live after emission.
                     /// </summary>
                     [TagField(Format = "Seconds")]
-                    public TagMapping ParticleLifespan;
+                    public ParticlePropertyScalar ParticleLifespan;
 
                     public ParticleMovementData ParticleMovement;
 
@@ -326,24 +326,24 @@ namespace TagTool.Tags.Definitions
                     public ParticleSelfAccelerationData ParticleSelfAcceleration;
 
                     [TagField(Format = "World Units Per Second")]
-                    public TagMapping ParticleVelocity;
+                    public ParticlePropertyScalar ParticleVelocity;
 
                     [TagField(Format = "360 Degree Rotations Per Second")]
-                    public TagMapping ParticleAngularVelocity;
+                    public ParticlePropertyScalar ParticleAngularVelocity;
 
-                    public TagMapping ParticleMass;
-                    public TagMapping ParticleDragCoefficient;
+                    public ParticlePropertyScalar ParticleMass;
+                    public ParticlePropertyScalar ParticleDragCoefficient;
 
                     [TagField(Format = "World Units")]
-                    public TagMapping ParticleSize;
+                    public ParticlePropertyScalar ParticleSize;
 
                     [TagField(Format = "RGB")]
-                    public TagMapping ParticleTint;
+                    public ParticlePropertyScalar ParticleTint;
 
-                    public TagMapping ParticleAlpha;
+                    public ParticlePropertyScalar ParticleAlpha;
 
                     [TagField(Format = "0 = Normal, 1 = Clamped")]
-                    public TagMapping ParticleAlphaBlackPoint;
+                    public ParticlePropertyScalar ParticleAlphaBlackPoint;
 
                     public RuntimeMGpuData RuntimeMGpu;
 
@@ -390,7 +390,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x38)]
 					public class TranslationalOffsetData : TagStructure
 					{
-                        public TagMapping Mapping;
+                        public ParticlePropertyScalar Mapping;
                         public RealPoint3d StartingInterpolant;
                         public RealPoint3d EndingInterpolant;
                     }
@@ -398,7 +398,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x38)]
 					public class RelativeDirectionData : TagStructure
 					{
-                        public TagMapping Mapping;
+                        public ParticlePropertyScalar Mapping;
                         public RealEulerAngles3d DirectionAt0;
                         public RealEulerAngles3d DirectionAt1;
                     }
@@ -470,7 +470,7 @@ namespace TagTool.Tags.Definitions
                             public class Parameter : TagStructure
 							{
                                 public int ParameterId;
-                                public TagMapping Property;
+                                public ParticlePropertyScalar Property;
                             }
                         }
                     }
@@ -478,7 +478,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x38)]
 					public class ParticleSelfAccelerationData : TagStructure
 					{
-                        public TagMapping Mapping;
+                        public ParticlePropertyScalar Mapping;
                         public RealVector3d StartingInterpolant;
                         public RealVector3d EndingInterpolant;
                     }
@@ -488,7 +488,7 @@ namespace TagTool.Tags.Definitions
 					{
                         public int ConstantPerParticleProperties;
                         public int ConstantOverTimeProperties;
-                        public TagMapping.ParticleStatesFlags UsedParticleStates;
+                        public ParticlePropertyScalar.ParticleStatesFlags UsedParticleStates;
                         public List<Property> Properties;
                         public List<Function> Functions;
                         public List<Color> Colors;

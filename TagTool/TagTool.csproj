@@ -430,6 +430,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.HUD.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Lighting.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Models.cs" />
+    <Compile Include="Commands\Porting\PortTagCommand.ShieldImpact.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Physics.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Scenario.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
@@ -478,6 +479,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.PortingOptions.cs" />
     <Compile Include="Commands\Editing\ExportCommandsCommand.cs" />
     <Compile Include="Commands\Bitmaps\GenerateBitmapCommand.cs" />
+    <Compile Include="Commands\Tags\SwitchObjectType.cs" />
     <Compile Include="Commands\Tags\FindValueCommand.cs" />
     <Compile Include="Commands\Tags\NameShaderTagsCommand.cs" />
     <Compile Include="Commands\Tags\TestSerializerCommand.cs" />
@@ -500,6 +502,7 @@
     <Compile Include="Commands\Tags\Test2Command.cs" />
     <Compile Include="Commands\Video\ImportBinkFileCommand.cs" />
     <Compile Include="Common\IndexBufferIndex.cs" />
+    <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RSAUtil.cs" />
     <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Types.cs" />
@@ -1329,7 +1332,7 @@
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />
     <Compile Include="Tags\TagFunction.cs" />
-    <Compile Include="Tags\TagMapping.cs" />
+    <Compile Include="Tags\ParticlePropertyScalar.cs" />
     <Compile Include="Tags\TagReferenceBlock.cs" />
     <Compile Include="Common\TagVersionMap.cs" />
     <Compile Include="Extensions\BinaryReaderExtensions.cs" />

@@ -61,14 +61,14 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CachedTag Unknown10;
 
-        public TagMapping AspectRatio;
-        public TagMapping Color;
-        public TagMapping Intensity;
-        public TagMapping Alpha;
+        public ParticlePropertyScalar AspectRatio;
+        public ParticlePropertyScalar Color;
+        public ParticlePropertyScalar Intensity;
+        public ParticlePropertyScalar Alpha;
         public AnimationFlagsValue AnimationFlags;
-        public TagMapping FrameIndex;
-        public TagMapping AnimationRate;
-        public TagMapping PaletteAnimation;
+        public ParticlePropertyScalar FrameIndex;
+        public ParticlePropertyScalar AnimationRate;
+        public ParticlePropertyScalar PaletteAnimation;
         public CachedTag ParticleModel;
         public uint RuntimeMUsedParticleStates;
         public uint RuntimeMConstantPerParticleProperties;
@@ -110,8 +110,8 @@ namespace TagTool.Tags.Definitions
             public CachedTag Type;
             public TriggerValue Trigger;
             public byte Flags;
-            public TagMapping.ParticleStates PrimaryScale;
-            public TagMapping.ParticleStates SecondaryScale;
+            public ParticlePropertyScalar.ParticleStates PrimaryScale;
+            public ParticlePropertyScalar.ParticleStates SecondaryScale;
 
             public enum TriggerValue : sbyte
             {

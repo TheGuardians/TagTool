@@ -4,6 +4,7 @@ using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Shaders.ShaderMatching;
+using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 
 namespace TagTool.Commands.Shaders
 {
@@ -116,15 +117,15 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant> SetupTextureConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
+        List<TextureConstant> SetupTextureConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
         {
-            List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant> textureConstants = new List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant>();
+            List<TextureConstant> textureConstants = new List<TextureConstant>();
 
             foreach (var samplerName in rmt2.TextureParameterNames)
             {
                 string name = Cache.StringTable.GetString(samplerName.Name);
 
-                RenderMethod.RenderMethodPostprocessBlock.TextureConstant textureConstant = new RenderMethod.RenderMethodPostprocessBlock.TextureConstant();
+                TextureConstant textureConstant = new TextureConstant();
 
                 foreach (var rmop in renderMethodOptions)
                 {
@@ -135,12 +136,12 @@ namespace TagTool.Commands.Shaders
                         if (Cache.StringTable.GetString(option.Name) == name && option.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
                         {
                             textureConstant.Bitmap = option.DefaultSamplerBitmap;
-                            textureConstant.SamplerAddressMode = new RenderMethod.RenderMethodPostprocessBlock.TextureConstant.PackedSamplerAddressMode
+                            textureConstant.SamplerAddressMode = new TextureConstant.PackedSamplerAddressMode
                             {
-                                AddressU = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode,
-                                AddressV = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode
+                                AddressU = (TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode,
+                                AddressV = (TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode
                             };
-                            textureConstant.FilterMode = (RenderMethod.RenderMethodPostprocessBlock.TextureConstant.SamplerFilterMode)option.DefaultFilterMode;
+                            textureConstant.FilterMode = (TextureConstant.SamplerFilterMode)option.DefaultFilterMode;
                             textureConstant.ExternTextureMode = (sbyte)option.RenderMethodExtern;
 
                             found = true;
@@ -171,15 +172,15 @@ namespace TagTool.Commands.Shaders
             return textureConstants;
         }
 
-        List<RenderMethod.RenderMethodPostprocessBlock.RealConstant> SetupRealConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
+        List<RealConstant> SetupRealConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions)
         {
-            List<RenderMethod.RenderMethodPostprocessBlock.RealConstant> realConstants = new List<RenderMethod.RenderMethodPostprocessBlock.RealConstant>();
+            List<RealConstant> realConstants = new List<RealConstant>();
 
             foreach (var realConstantName in rmt2.RealParameterNames)
             {
                 string name = Cache.StringTable.GetString(realConstantName.Name);
 
-                RenderMethod.RenderMethodPostprocessBlock.RealConstant realConstant = new RenderMethod.RenderMethodPostprocessBlock.RealConstant();
+                RealConstant realConstant = new RealConstant();
 
                 foreach (var rmop in renderMethodOptions)
                 {
@@ -292,7 +293,22 @@ namespace TagTool.Commands.Shaders
             return booleanConstants;
         }
 
-        RenderMethod.RenderMethodPostprocessBlock.BlendModeValue GetAlphaBlendMode(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, RenderMethodDefinition rmdf)
+        private static readonly Dictionary<string, BlendModeValue> BlendModeBinding = new Dictionary<string, BlendModeValue>
+        {
+            ["opaque"] = BlendModeValue.Opaque,
+            ["additive"] = BlendModeValue.Additive,
+            ["multiply"] = BlendModeValue.Multiply,
+            ["alpha_blend"] = BlendModeValue.AlphaBlend,
+            ["double_multiply"] = BlendModeValue.DoubleMultiply,
+            ["pre_multiplied_alpha"] = BlendModeValue.PreMultipliedAlpha,
+            ["maximum"] = BlendModeValue.Maximum,
+            ["multiply_add"] = BlendModeValue.MultiplyAdd,
+            ["add_src_times_dstalpha"] = BlendModeValue.AddSrcTimesDstalpha,
+            ["add_src_times_srcalpha"] = BlendModeValue.AddSrcTimesSrcalpha,
+            ["inv_alpha_blend"] = BlendModeValue.InverseAlphaBlend,
+        };
+
+        BlendModeValue GetAlphaBlendMode(ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, RenderMethodDefinition rmdf)
         {
             for (int i = 0; i < rmdf.Categories.Count; i++)
             {
@@ -300,15 +316,15 @@ namespace TagTool.Commands.Shaders
                 {
                     string blendMode = Cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[rmt2Descriptor.Options[i]].Name);
 
-                    if (Enum.TryParse<RenderMethod.RenderMethodPostprocessBlock.BlendModeValue>(blendMode, out var alphaBlendMode))
+                    if (BlendModeBinding.TryGetValue(blendMode, out BlendModeValue alphaBlendMode))
                         return alphaBlendMode;
 
                     Console.WriteLine($"Could not parse blend mode \"{blendMode}\"");
-                    return RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Opaque;
+                    return BlendModeValue.Opaque;
                 }
             }
 
-            return RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Opaque;
+            return BlendModeValue.Opaque;
         }
     }
 }

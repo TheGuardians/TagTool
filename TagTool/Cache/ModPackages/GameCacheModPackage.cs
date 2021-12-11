@@ -120,6 +120,8 @@ namespace TagTool.Cache
 
         public override Stream OpenCacheRead() => new ModPackageStream(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], BaseCacheReference.OpenCacheRead());
 
+        public Stream OpenCacheRead(Stream baseCacheStream) => new ModPackageStream(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], baseCacheStream);
+
         public override Stream OpenCacheReadWrite() => new ModPackageStream(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], BaseCacheReference.OpenCacheRead());
 
         public override Stream OpenCacheWrite() => new ModPackageStream(BaseModPackage.TagCachesStreams[CurrentTagCacheIndex], BaseCacheReference.OpenCacheRead());

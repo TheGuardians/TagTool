@@ -1,5 +1,6 @@
 ﻿using TagTool.Animations.Codecs;
 using TagTool.IO;
+using System.IO;
 using System;
 using System.Collections;
 using TagTool.Commands.Common;
@@ -16,6 +17,7 @@ namespace TagTool.Animations.Data
 
         public int StaticFlagsSize { get; set; }
         public int AnimatedFlagsSize { get; set; }
+        public int StaticDataSize { get; set; }
         public FrameInfoType FrameInfoType { get; set; }
 
         public CodecBase Static_Data { get; set; }
@@ -46,7 +48,8 @@ namespace TagTool.Animations.Data
           int nodeListChecksum,
           FrameInfoType frameInfoType,
           int staticflagssize,
-          int animatedflagssize)
+          int animatedflagssize,
+          int staticdatasize)
         {
             FrameCount = frameCount;
             NodeCount = nodeCount;
@@ -54,6 +57,7 @@ namespace TagTool.Animations.Data
             FrameInfoType = frameInfoType;
             StaticFlagsSize = staticflagssize;
             AnimatedFlagsSize = animatedflagssize;
+            StaticDataSize = staticdatasize;
         }
 
         public bool Read(EndianReader reader)
@@ -67,6 +71,8 @@ namespace TagTool.Animations.Data
                     case AnimationCodecType.UncompressedStatic:
                         Static_Data = (CodecBase)new UncompressedStaticDataCodec(FrameCount);
                         Static_Data.Read(reader);
+                        //sometimes there is strange padding (not alignment) after static codec
+                        reader.BaseStream.Position = StaticDataSize;
                         continue;
                     case AnimationCodecType._8ByteQuantizedRotationOnly:
                         Animation_Data = (CodecBase)new _8ByteQuantizedRotationOnlyCodec(FrameCount);
@@ -148,6 +154,14 @@ namespace TagTool.Animations.Data
             Movement_Data = new MovementData(FrameInfoType, FrameCount);
             Movement_Data.Read(reader);
             return true;
+        }
+
+        public void AlignStream(Stream stream, int align)
+        {
+            var currentPos = stream.Position;
+            var alignedPos = (currentPos + align - 1) & ~(align - 1);
+            if (alignedPos > currentPos)
+                stream.Position = alignedPos;
         }
 
         public void Write(EndianWriter writer) => throw new NotImplementedException();

@@ -38,7 +38,7 @@ namespace TagTool.Tags.GUI
 		SuperLargeFont,         // Conduit 32 [3]
 		LargeBodyText,			// Conduit 23
 		Value7,
-		HudNumber,              // Conduit 16 [loop]
+		HudNumberText,			// Conduit 16 [loop]
 		Value9,
 		Value10,
 		Value11,

@@ -96,8 +96,9 @@ namespace TagTool.Commands.Editing
                 return new TagToolError(CommandError.ArgInvalid, $"\"{ownerType.Name}\" does not contain a tag block named \"{fieldName}\".");
 
             IList fieldValue = null;
+            var structureAttribute = field.FieldType.CustomAttributes.ToList().Find(a => a.AttributeType == typeof(TagStructureAttribute));
 
-            if (field.FieldType.GetInterface("IList") == null || (fieldValue = (IList)field.GetValue(Owner)) == null)
+            if ((field.FieldType.GetInterface("IList") == null || (fieldValue = (IList)field.GetValue(Owner)) == null) && structureAttribute == null)
                 return new TagToolError(CommandError.ArgInvalid, $"\"{ownerType.Name}\" does not contain a tag block named \"{fieldName}\".");
 
             string fromName = null;
@@ -167,9 +168,29 @@ namespace TagTool.Commands.Editing
                 commandsToExecute.Add(args);
             }
 
-            for (var i = (from ?? 0);
-                i < (to.HasValue ? to.Value + 1 : fieldValue.Count);
-                i++)
+            if (structureAttribute == null)
+            {
+                for (var i = (from ?? 0); i < (to.HasValue ? to.Value + 1 : fieldValue.Count); i++)
+                {
+                    while (ContextStack.Context != previousContext)
+                        ContextStack.Pop();
+
+                    Owner = previousOwner;
+                    Structure = previousStructure;
+
+                    if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
+                            .Execute(new List<string> { $"{blockName}[{i}]" })
+                            .Equals(false))
+                        return new TagToolError(CommandError.ArgInvalid, $"Invalid tag block name: {blockName}");
+
+                    var label = GetLabel(fieldValue, i);
+
+                    Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
+                    foreach (var command in commandsToExecute)
+                        ContextStack.Context.GetCommand(command[0]).Execute(command.Skip(1).ToList());
+                }
+            }
+            else
             {
                 while (ContextStack.Context != previousContext)
                     ContextStack.Pop();
@@ -178,13 +199,10 @@ namespace TagTool.Commands.Editing
                 Structure = previousStructure;
 
                 if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
-                        .Execute(new List<string> { $"{blockName}[{i}]" })
-                        .Equals(false))
-                    return new TagToolError(CommandError.ArgInvalid, $"Invalid tag block name");
+                    .Execute(new List<string> { $"{blockName}" })
+                    .Equals(false))
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid tag structure name: {blockName}");
 
-                var label = GetLabel(fieldValue, i);
-
-                Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
                 foreach (var command in commandsToExecute)
                     ContextStack.Context.GetCommand(command[0]).Execute(command.Skip(1).ToList());
             }

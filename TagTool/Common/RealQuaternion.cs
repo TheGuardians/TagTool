@@ -54,7 +54,12 @@ namespace TagTool.Common
             this(ij.I, ij.J, k, w)
         {
         }
-        
+
+        public RealQuaternion(RealVector2d ij, RealVector2d kw) :
+            this(ij.I, ij.J, kw.I, kw.J)
+        {
+        }
+
         public RealQuaternion(RealVector3d ijk, float w) :
             this(ijk.I, ijk.J, ijk.K, w)
         {

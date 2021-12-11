@@ -10,14 +10,14 @@ namespace TagTool.Tags.Definitions
     public class ParticlePhysics : TagStructure
 	{
         public CachedTag Template;
-        public FlagsValue Flags;
-        public List<Movement> Movements;
+        public ParticleMovementFlags Flags;
+        public List<ParticleController> Movements;
 
         [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
-        public byte[] Unused1;
+        public byte[] Padding_ED;
 
         [Flags]
-        public enum FlagsValue : uint
+        public enum ParticleMovementFlags : uint
         {
             None = 0,
             Physics = 1 << 0,
@@ -31,17 +31,18 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class Movement : TagStructure
+        public class ParticleController : TagStructure
 		{
-            public TypeValue Type;
-            public byte Flags;
-            [TagField(Flags = Padding, Length = 1)]
-            public byte Unused;
-            public List<Parameter> Parameters;
-            public int Unknown2;
-            public int Unknown3;
+            public ParticleMovementType Type;
 
-            public enum TypeValue : short
+            [TagField(Flags = Padding, Length = 2)]
+            public byte Padding0;
+
+            public List<ParticleControllerParameter> Parameters;
+            public int RuntimeMConstantParameters;
+            public int RuntimeMUsedParticleStates;
+
+            public enum ParticleMovementType : short
             {
                 Physics,
                 Collider,
@@ -50,10 +51,10 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x24)]
-            public class Parameter : TagStructure
+            public class ParticleControllerParameter : TagStructure
 			{
                 public int ParameterId;
-                public TagMapping Property;
+                public ParticlePropertyScalar Property;
             }
         }
     }

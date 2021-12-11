@@ -83,6 +83,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new GenerateRenderMethodCommand(hoCache));
                 context.AddCommand(new GenerateRmdfCommand(hoCache));
                 context.AddCommand(new GenerateBitmapCommand(hoCache));
+                context.AddCommand(new SwitchObjectTypeCommand(hoCache));
 
 				// modding commands
 				context.AddCommand(new OpenModPackageCommand(contextStack, hoCache));
