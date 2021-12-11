@@ -8,6 +8,8 @@ using System.IO;
 using TagTool.Tags;
 using TagTool.Geometry;
 using TagTool.Tags.Resources;
+using TagTool.Lighting;
+using TagTool.Commands.Bitmaps;
 
 namespace TagTool.Commands.Porting
 {
@@ -141,13 +143,13 @@ namespace TagTool.Commands.Porting
         }
 
         public ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
-        {
+        {  
             if (BlamCache.Version > CacheVersion.Halo3Retail || BlamCache.Platform == CachePlatform.MCC)
                 return scenarioLightmap;
 
             scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
 
-            for(int i = 0; i< scenarioLightmap.Lightmaps.Count; i++)
+            for (int i = 0; i < scenarioLightmap.Lightmaps.Count; i++)
             {
                 var entry = scenarioLightmap.Lightmaps[i];
 
@@ -166,7 +168,7 @@ namespace TagTool.Commands.Porting
 
                 CachedTag edTag = edTag = CacheContext.TagCacheGenHO.AllocateTag(groupTag);
 
-                if(scenarioLightmap.Lightmaps.Count != 1)
+                if (scenarioLightmap.Lightmaps.Count != 1)
                     edTag.Name = $"{blamTagName}_{i}_data";
                 else
                     edTag.Name = $"{blamTagName}_data";
@@ -175,12 +177,13 @@ namespace TagTool.Commands.Porting
 
                 scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = edTag });
             }
-            
+
 
             scenarioLightmap.Airprobes.Clear();
 
             return scenarioLightmap;
         }
+
 
         private ScenarioLightmapBspData ConvertScenarioLightmapBspData(ScenarioLightmapBspData Lbsp)
         {
@@ -195,16 +198,6 @@ namespace TagTool.Commands.Porting
             //
             // convert vertex buffers and add them to the new resource
             //
-
-            if(BlamCache.Version == CacheVersion.HaloReach)
-            {
-                foreach(var elem in Lbsp.InstancedGeometry)
-                    elem.StaticPerVertexLightingIndex = -1;
-                foreach (var elem in Lbsp.ClusterStaticPerVertexLightingBuffers)
-                    elem.StaticPerVertexLightingIndex = -1;
-
-                Lbsp.StaticPerVertexLightingBuffers.Clear();
-            }
 
             if (Lbsp.StaticPerVertexLightingBuffers != null)
             {
@@ -223,6 +216,113 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
+
+            return Lbsp;
+        }
+
+
+        private ScenarioLightmap ConvertReachLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
+        {
+            // TODO: cleanup
+
+            var scnr = BlamCache.Deserialize<Scenario>(blamCacheStream, BlamCache.TagCache.FindFirstInGroup("scnr"));
+            var blamLightmap = BlamCache.Deserialize<ScenarioLightmap>(blamCacheStream, scnr.Lightmap);
+            for (int i = 0; i < scenarioLightmap.LightmapDataReferences.Count; i++)
+            {
+                var sbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, scnr.StructureBsps[i].StructureBsp);
+                var lbspTag = scenarioLightmap.LightmapDataReferences[i].LightmapBspData;
+                var Lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(blamCacheStream, lbspTag);
+
+                Lbsp.BspIndex = (short)i;
+
+                Console.WriteLine($"Converting lightmap bsp: {i + 1}/{ scenarioLightmap.LightmapDataReferences.Count}");
+
+                bool useCache = !string.IsNullOrEmpty(PortingOptions.Current.ReachLightmapCache);
+
+                CachedLightmap convertedLightmap = null;
+                var lightmapCachePath = Path.Combine(PortingOptions.Current.ReachLightmapCache, lbspTag.Name);
+
+                if (Lbsp.LightmapSHCoefficientsBitmap != null)
+                {
+                    convertedLightmap = new CachedLightmap();
+                    if (!useCache || !convertedLightmap.Load(lightmapCachePath))
+                    {
+                        Console.WriteLine("Converting Lightmap... This may take a while! ");
+                        var lightmapConverter = new ReachLightmapConverter();
+                        lightmapConverter.ProgressUpdated += progress => Console.Write($"\rProgress: {progress * 100:0.0}%");
+                        var result = lightmapConverter.Convert(BlamCache, blamCacheStream, Lbsp);
+
+                        Console.WriteLine();
+
+                        convertedLightmap.Height = result.Height;
+                        convertedLightmap.Width = result.Width;
+                        convertedLightmap.MaxLs = result.MaxLs;
+                        convertedLightmap.LinearSH = result.LinearSH;
+                        convertedLightmap.Intensity = result.Intensity;
+
+                        if(useCache)
+                            convertedLightmap.Store(lightmapCachePath);
+                    }
+                }
+
+                Lbsp = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, Lbsp, scenarioLightmap, blamTagName);
+
+                if (convertedLightmap != null)
+                {
+                    Lbsp.LightmapSHCoefficientsBitmap.Name = $"{lbspTag.Name}_16f_lp_array_dxt5";
+                    Lbsp.LightmapDominantLightDirectionBitmap.Name = $"{lbspTag.Name}_16f_lp_array_intensity_dxt5";
+                    convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp);
+                }
+
+                Lbsp = ConvertScenarioLightmapBspDataReach(Lbsp, sbsp);
+
+                CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(scenarioLightmap.LightmapDataReferences[i].LightmapBspData.Name);
+                CacheContext.Serialize(cacheStream, edTag, Lbsp);
+            }
+
+            return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, scenarioLightmap, scenarioLightmap, blamTagName);
+        }
+
+        private ScenarioLightmapBspData ConvertScenarioLightmapBspDataReach(ScenarioLightmapBspData Lbsp, ScenarioStructureBsp sbsp)
+        {
+            var lightmapResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
+
+            if (lightmapResourceDefinition == null)
+                return Lbsp;
+
+            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
+           
+
+            var converter = new RenderGeometryConverter(CacheContext, BlamCache);
+            var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
+
+            //
+            // convert vertex buffers and add them to the new resource
+            //
+
+          
+            //foreach (var elem in Lbsp.InstancedGeometry)
+            //    elem.StaticPerVertexLightingIndex = -1;
+
+            foreach (var elem in Lbsp.ClusterStaticPerVertexLightingBuffers)
+                elem.StaticPerVertexLightingIndex = -1;
+               
+            foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)
+            {
+                if (staticPerVertexLighting.VertexBufferIndexReach != -1)
+                {
+                    staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndexReach].Definition;
+                       
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
+                    newLightmapResourceDefinition.VertexBuffers.Add(d3dPointer);
+                    // set the new buffer index
+                    staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
+                }
+            }
+               
+            
             Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
 
             return Lbsp;

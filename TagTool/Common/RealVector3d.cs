@@ -128,6 +128,11 @@ namespace TagTool.Common
             return Normalize(result);
         }
 
+        public static float DotProduct(RealVector3d a, RealVector3d b)
+        {
+            return a.I * b.I + a.J * b.J + a.K * b.K;
+        }
+
         public static float Magnitude(RealVector3d a)
         {
             return a.I * a.I + a.J * a.J + a.K * a.K;
@@ -140,7 +145,10 @@ namespace TagTool.Common
 
         public static RealVector3d Normalize(RealVector3d a)
         {
-            return 1 / Norm(a) * a;
+            float n = Norm(a);
+            if (n < float.Epsilon)
+                return new RealVector3d(0, 0, 0);
+            return 1 / n * a;
         }
     }
 }

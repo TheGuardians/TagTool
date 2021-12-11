@@ -517,7 +517,7 @@ namespace TagTool.Geometry
                         }
 
                         // Skip all lightmap related buffers due to VMF incompability with SH. StaticPerVertexColor is fine though.
-                        if(vertexBuffer.Format == VertexBufferFormat.StaticPerPixel || vertexBuffer.Format == VertexBufferFormat.StaticPerVertex)
+                        if(vertexBuffer.Format == VertexBufferFormat.StaticPerVertex)
                         {
                             mesh.ResourceVertexBuffers[i] = null;
                             mesh.VertexBufferIndices[i] = -1;

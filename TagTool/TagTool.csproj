@@ -348,8 +348,14 @@
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
+    <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\ObjectIdentifier.cs" />
+    <Compile Include="Common\RealVector4d.cs" />
+    <Compile Include="Common\SphericalHarmonics.cs" />
+    <Compile Include="Lighting\LightmapCache.cs" />
+    <Compile Include="Lighting\Vmf.cs" />
+    <Compile Include="Lighting\VmfConversion.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\LargeCollisionBSPBuilder.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\ErrorGeometry.cs" />
     <Compile Include="Commands\CollisionModels\ImportCollisionGeometryCommand.cs" />
@@ -504,7 +510,6 @@
     <Compile Include="Common\IndexBufferIndex.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RSAUtil.cs" />
-    <Compile Include="Common\SphericalHarmonics.cs" />
     <Compile Include="Direct3D\D3D9\D3D9Types.cs" />
     <Compile Include="Direct3D\D3DObjectType.cs" />
     <Compile Include="Bitmaps\Utils\BitmapConverter.cs" />
@@ -698,6 +703,10 @@
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
     <Compile Include="IO\XCompress.cs" />
+    <Compile Include="Lighting\DxtCompression.cs" />
+    <Compile Include="Lighting\FauxDxtEncoder.cs" />
+    <Compile Include="Lighting\LightmapCompressor.cs" />
+    <Compile Include="Lighting\ReachLightmapConverter.cs" />
     <Compile Include="Pathfinding\PathfindingGeometry.cs" />
     <Compile Include="Pathfinding\Utils\PathfindingConverter.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />

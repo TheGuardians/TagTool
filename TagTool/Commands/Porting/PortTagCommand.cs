@@ -731,6 +731,16 @@ namespace TagTool.Commands.Porting
 
             ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
 
+            if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                if (blamDefinition is Scenario scnr)
+                {
+                    var lightmap = BlamCache.Deserialize<ScenarioLightmap>(blamCacheStream, scnr.Lightmap);
+                    ConvertReachLightmap(cacheStream, blamCacheStream, resourceStreams, scnr.Lightmap.Name, lightmap);
+                }
+            }
+           
+
 			//
 			// Perform automatic conversion on the Blam tag definition
 			//
@@ -1063,7 +1073,8 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case ScenarioLightmap sLdT:
-					blamDefinition = ConvertScenarioLightmap(cacheStream, blamCacheStream, resourceStreams, blamTag.Name, sLdT);
+                    if(BlamCache.Version < CacheVersion.HaloReach)
+					    blamDefinition = ConvertScenarioLightmap(cacheStream, blamCacheStream, resourceStreams, blamTag.Name, sLdT);
                     //fixup lightmap bsp references
                     if (BlamCache.Version >= CacheVersion.HaloReach)
                     {
@@ -1080,7 +1091,8 @@ namespace TagTool.Commands.Porting
                     break;
 
 				case ScenarioLightmapBspData Lbsp:
-					blamDefinition = ConvertScenarioLightmapBspData(Lbsp);
+                    if (BlamCache.Version < CacheVersion.HaloReach)
+                        blamDefinition = ConvertScenarioLightmapBspData(Lbsp);
 					break;
 
 				case ScenarioStructureBsp sbsp:

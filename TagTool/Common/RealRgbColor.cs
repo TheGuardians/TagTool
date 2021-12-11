@@ -33,6 +33,18 @@ namespace TagTool.Common
         public static bool operator !=(RealRgbColor a, RealRgbColor b) =>
             !a.Equals(b);
 
+        public static RealRgbColor operator +(RealRgbColor a, RealRgbColor b) =>
+                    new RealRgbColor(a.Red + b.Red, a.Green + b.Green, a.Blue + b.Blue);
+
+        public static RealRgbColor operator -(RealRgbColor a, RealRgbColor b) =>
+                    new RealRgbColor(a.Red - b.Red, a.Green - b.Green, a.Blue - b.Blue);
+
+        public static RealRgbColor operator *(RealRgbColor a, float b) =>
+                    new RealRgbColor(a.Red * b, a.Green * b, a.Blue * b);
+
+        public static RealRgbColor operator /(RealRgbColor a, float b) =>
+                    new RealRgbColor(a.Red / b, a.Green / b, a.Blue / b);
+
         public override int GetHashCode() =>
             13 * 17 + Red.GetHashCode()
                * 17 + Green.GetHashCode()
@@ -70,6 +82,26 @@ namespace TagTool.Common
                 error = null;
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Returns the luminance of the color
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static float GetLuminance(RealRgbColor c)
+        {
+            return 0.212656f * c.Red + 0.715158f * c.Green + 0.072186f * c.Blue;
+        }
+
+        /// <summary>
+        /// Returns the perceived brightness of the color
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static float GetBrightness(RealRgbColor c)
+        {
+            return (0.299f * c.Red) + (0.587f * c.Green) + (0.114f * c.Blue);
         }
     }
 }

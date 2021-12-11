@@ -41,6 +41,9 @@ namespace TagTool.Tags.Definitions
 
         public RenderGeometry Geometry;
 
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public List<NullBlock> Unknown7;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Unknown1Block> Unknown8;
 
@@ -68,7 +71,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach, Downgrade = nameof(VertexBufferIndex))]
             public short VertexBufferIndexReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short Coefficient; // half - shader constant
+            public ushort HDRScalar;
 
             [TagField(Flags = Runtime)]
             public VertexBufferDefinition VertexBuffer;
@@ -81,7 +84,7 @@ namespace TagTool.Tags.Definitions
             public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint AnalyticalLightIndex;
+            public int FirstVertexIndex;
         }
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
