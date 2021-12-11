@@ -15,6 +15,9 @@ namespace TagTool.Commands.Porting
         [Description("Path to reach lightmap cache directory")]
         public string ReachLightmapCache = null;
 
+        [Description("Enable experimental super node conversion")]
+        public bool ReachSuperNodeConversion = false;
+
 
         public static PortingOptions Current = new PortingOptions();
     }
