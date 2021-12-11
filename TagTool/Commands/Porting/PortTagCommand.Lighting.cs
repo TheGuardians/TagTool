@@ -291,23 +291,36 @@ namespace TagTool.Commands.Porting
             if (lightmapResourceDefinition == null)
                 return Lbsp;
 
-            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
-           
 
-            var converter = new RenderGeometryConverter(CacheContext, BlamCache);
-            var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
+            //
+            // convert tag light probes
+            //
+
+            // TODO: has issues currently for unknown reasons
+            // foreach(var probe in Lbsp.InstancedGeometryLightProbes)
+            //     probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
+
+            foreach (var probe in Lbsp.Airprobes)
+                probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
+
+            foreach (var probe in Lbsp.SceneryLightProbes)
+                probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
+
+            foreach (var machineProbe in Lbsp.MachineLightProbes)
+            {
+                foreach (var probe in machineProbe.LightProbes)
+                    probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
+            }
 
             //
             // convert vertex buffers and add them to the new resource
             //
 
-          
-            //foreach (var elem in Lbsp.InstancedGeometry)
-            //    elem.StaticPerVertexLightingIndex = -1;
+            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
 
-            foreach (var elem in Lbsp.ClusterStaticPerVertexLightingBuffers)
-                elem.StaticPerVertexLightingIndex = -1;
-               
+            var converter = new RenderGeometryConverter(CacheContext, BlamCache);
+            var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
+
             foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)
             {
                 if (staticPerVertexLighting.VertexBufferIndexReach != -1)
@@ -321,7 +334,6 @@ namespace TagTool.Commands.Porting
                     staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
                 }
             }
-               
             
             Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
 

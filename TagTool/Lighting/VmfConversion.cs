@@ -4,6 +4,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
+using TagTool.IO;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Lighting
@@ -12,6 +13,48 @@ namespace TagTool.Lighting
     {
         public static void ConvertStaticPerVertexBuffers(ScenarioLightmapBspData Lbsp, TagTool.Tags.Resources.RenderGeometryApiResourceDefinition renderGeometryResource, CacheVersion targetVersion, CachePlatform targetPlatform = CachePlatform.All)
         {
+            foreach (var clusterLighting in Lbsp.ClusterStaticPerVertexLightingBuffers)
+            {
+                clusterLighting.StaticPerVertexLightingIndex = -1;
+
+                if (clusterLighting.StaticPerVertexLightingIndex != -1)
+                {
+                    var element = Lbsp.StaticPerVertexLightingBuffers[clusterLighting.StaticPerVertexLightingIndex];
+
+                     if (element.VertexBufferIndexReach == -1)
+                     {
+                         clusterLighting.StaticPerVertexLightingIndex = -1;
+                     }
+                     else
+                     {
+                        if (clusterLighting.FirstVertexIndex > 0)
+                        {
+                            // TODO: figure out how to make the buffer compatible with the geometry index buffer
+                            clusterLighting.StaticPerVertexLightingIndex = -1;
+                           
+                            // var vertexBuffer = renderGeometryResource.VertexBuffers[element.VertexBufferIndexReach].Definition;
+                            // var ms = new MemoryStream();
+                            // StreamUtil.Fill(ms, 0xCD, clusterLighting.FirstVertexIndex * 6);
+                            // ms.Write(vertexBuffer.Data.Data, 0, vertexBuffer.Data.Data.Length);
+                            // vertexBuffer.Data = new Tags.TagData(ms.ToArray());
+                            // vertexBuffer.Count += clusterLighting.FirstVertexIndex;
+                        }
+                     }
+                }
+            }
+
+            foreach (var instanceLighting in Lbsp.InstancedGeometry)
+            {
+                if (instanceLighting.StaticPerVertexLightingIndex != -1)
+                {
+                    var element = Lbsp.StaticPerVertexLightingBuffers[instanceLighting.StaticPerVertexLightingIndex];
+                    if (element.VertexBufferIndexReach == -1)
+                    {
+                        instanceLighting.StaticPerVertexLightingIndex = -1;
+                    }
+                }
+            }
+
             for (int i = 0; i < Lbsp.StaticPerVertexLightingBuffers.Count; i++)
             {
                 if (Lbsp.StaticPerVertexLightingBuffers[i].VertexBufferIndexReach == -1)
@@ -20,65 +63,90 @@ namespace TagTool.Lighting
                 var element = Lbsp.StaticPerVertexLightingBuffers[i];
                 var vertexBuffer = renderGeometryResource.VertexBuffers[element.VertexBufferIndexReach].Definition;
                 float hdrScalar = Half.ToHalf(element.HDRScalar);
-                vertexBuffer.Data.Data = ConvertStaticPerVertexData(vertexBuffer.Data.Data, hdrScalar, out int vertexCount, targetVersion, targetPlatform);
+                var data = ConvertStaticPerVertexData(vertexBuffer.Data.Data, hdrScalar, out int vertexCount, targetVersion, targetPlatform);
+                vertexBuffer.Data = new Tags.TagData(data);
                 vertexBuffer.Count = vertexCount;
             }
         }
 
         public static byte[] ConvertStaticPerVertexData(byte[] data, float hdrScalar, out int vertexCount, CacheVersion targetVersion, CachePlatform targetPlatform)
         {
-            using (var ms = new MemoryStream())
+            var outputStream = new MemoryStream();
+            var vertexStream = VertexStreamFactory.Create(targetVersion, targetPlatform, outputStream);
+
+            if (data.Length % 6 != 0)
             {
-                var vertexStream = VertexStreamFactory.Create(targetVersion, targetPlatform, ms);
-
-                if (data.Length % 6 != 0)
-                {
-                    if (!data.Skip(data.Length / 6 * 6).Take(data.Length % 6).All(x => x == 0xCD))
-                        throw new InvalidDataException();
-                }
-
-                vertexCount = data.Length / 6;
-                for (int i = 0; i < vertexCount; i++)
-                {
-                    int offset = i * 6;
-                    int directionIndex = data[offset + 0] & 0x7f;
-                    if (directionIndex >= tessellatedIcosahedron.Length)
-                        throw new InvalidDataException();
-
-                    float dc = (((data[offset + 0] >> 7) & 1) | ((data[offset + 1] & 1) << 1)) / 3.0f;
-                    float r1 = (float)Math.Pow(((data[offset + 1] >> 1) & 31) / 31.0f, 2) * hdrScalar;
-                    float g1 = (float)Math.Pow((((data[offset + 1] >> 6) & 3) | ((data[offset + 2] & 7) << 2)) / 31.0f, 2) * hdrScalar;
-                    float b1 = (float)Math.Pow(((data[offset + 2] >> 3) & 31) / 31.0f, 2) * hdrScalar;
-                    float r0 = (float)Math.Pow(data[offset + 3] / 255.0f, 2) * hdrScalar;
-                    float g0 = (float)Math.Pow(data[offset + 4] / 255.0f, 2) * hdrScalar;
-                    float b0 = (float)Math.Pow(data[offset + 5] / 255.0f, 2) * hdrScalar;
-
-                    var direction = tessellatedIcosahedron[directionIndex];
-
-                    var vmfProbe = new DualVmfBasis();
-                    vmfProbe.Direct = new VmfLight()
-                    {
-                        Direction = direction,
-                        Magnitude = dc,
-                        Color = new RealRgbColor(r0, g0, b0),
-                        Scale = 1.0f
-                    };
-                    vmfProbe.Indirect = new VmfLight()
-                    {
-                        Direction = new RealVector3d(0, 0, 1),
-                        Magnitude = dc,
-                        Color = new RealRgbColor(r1, g1, b1),
-                        Scale = 0.0f
-                    };
-
-                    var qudraticShProbe = ConvertVmfLightprobe(vmfProbe);
-                    SphericalHarmonics.QudraticToLinearAndIntensity(qudraticShProbe, out SphericalHarmonics.SH2Probe linearShProbe, out RealRgbColor intensity);
-                    var spv = CompressStaticPerVertex(intensity, linearShProbe, targetVersion, targetPlatform);
-                    vertexStream.WriteStaticPerVertexData(spv);
-                }
-
-                return ms.ToArray();
+                if (!data.Skip(data.Length / 6 * 6).Take(data.Length % 6).All(x => x == 0xCD))
+                    throw new InvalidDataException();
             }
+
+            vertexCount = data.Length / 6;
+            for (int i = 0; i < vertexCount; i++)
+            {
+                int offset = i * 6;
+                int directionIndex = data[offset + 0] & 0x7f;
+                if (directionIndex >= tessellatedIcosahedron.Length)
+                    throw new InvalidDataException();
+
+                float dc = (((data[offset + 0] >> 7) & 1) | ((data[offset + 1] & 1) << 1)) / 3.0f;
+                float r1 = (float)Math.Pow(((data[offset + 1] >> 1) & 31) / 31.0f, 2) * hdrScalar;
+                float g1 = (float)Math.Pow((((data[offset + 1] >> 6) & 3) | ((data[offset + 2] & 7) << 2)) / 31.0f, 2) * hdrScalar;
+                float b1 = (float)Math.Pow(((data[offset + 2] >> 3) & 31) / 31.0f, 2) * hdrScalar;
+                float r0 = (float)Math.Pow(data[offset + 3] / 255.0f, 2) * hdrScalar;
+                float g0 = (float)Math.Pow(data[offset + 4] / 255.0f, 2) * hdrScalar;
+                float b0 = (float)Math.Pow(data[offset + 5] / 255.0f, 2) * hdrScalar;
+
+                var direction = tessellatedIcosahedron[directionIndex];
+
+                var vmfProbe = new DualVmfBasis();
+                vmfProbe.Direct = new VmfLight()
+                {
+                    Direction = direction,
+                    Magnitude = dc,
+                    Color = new RealRgbColor(r0, g0, b0),
+                    Scale = 1.0f
+                };
+                vmfProbe.Indirect = new VmfLight()
+                {
+                    Direction = new RealVector3d(0, 0, 1),
+                    Magnitude = dc,
+                    Color = new RealRgbColor(r1, g1, b1),
+                    Scale = 0.0f
+                };
+
+                var qudraticShProbe = ConvertVmfLightprobe(vmfProbe);
+                SphericalHarmonics.QudraticToLinearAndIntensity(qudraticShProbe, out SphericalHarmonics.SH2Probe linearShProbe, out RealRgbColor intensity);
+                var spv = CompressStaticPerVertex(intensity, linearShProbe, targetVersion, targetPlatform);
+                vertexStream.WriteStaticPerVertexData(spv);
+            }
+
+            return outputStream.ToArray();
+        }
+
+        public static HalfRGBLightProbe ConvertHalfLightprobe(DualVmfLightProbe halfVmf)
+        {
+            var vmf = new DualVmfBasis(halfVmf.VmfTerms);
+            var sh = ConvertVmfLightprobe(vmf);
+            var halfsh = new HalfRGBLightProbe();
+
+            var dominantDirection = SphericalHarmonics.GetDominantLightDirection(sh.R, sh.G, sh.B);
+            SphericalHarmonics.QudraticToLinearAndIntensity(sh, out SphericalHarmonics.SH2Probe linearShProbe, out RealRgbColor intensity);
+
+            halfsh.DominantLightDirection[0] = Half.GetBits((Half)dominantDirection.I);
+            halfsh.DominantLightDirection[1] = Half.GetBits((Half)dominantDirection.J);
+            halfsh.DominantLightDirection[2] = Half.GetBits((Half)dominantDirection.K);
+            halfsh.DominantLightIntensity[0] = Half.GetBits((Half)intensity.Red);
+            halfsh.DominantLightIntensity[1] = Half.GetBits((Half)intensity.Green);
+            halfsh.DominantLightIntensity[2] = Half.GetBits((Half)intensity.Blue);
+            
+            for (int i = 0; i < 9; i++)
+            {
+                halfsh.SHRed[i] = Half.GetBits((Half)sh.R[i]);
+                halfsh.SHGreen[i] = Half.GetBits((Half)sh.G[i]);
+                halfsh.SHBlue[i] = Half.GetBits((Half)sh.B[i]);
+            }
+
+            return halfsh;
         }
 
         public static SphericalHarmonics.SH3Probe ConvertVmfLightprobe(DualVmfBasis vmf)

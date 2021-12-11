@@ -175,7 +175,7 @@ namespace TagTool.Tags.Definitions
     public class DualVmfLightProbe : TagStructure
     {
         [TagField(Length = 16)]
-        public short[] VmfTerms;
+        public ushort[] VmfTerms;
         public uint AnalyticalLightIndex;
     }
 }

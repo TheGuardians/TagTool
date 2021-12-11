@@ -274,23 +274,23 @@ namespace TagTool.Common
     public class HalfRGBLightProbe : TagStructure
     {
         [TagField(Length = 3)]
-        public short[] DominantLightDirection = new short[3];
+        public ushort[] DominantLightDirection = new ushort[3];
 
-        public short Padding1;
+        public ushort Padding1;
 
         [TagField(Length = 3)]
-        public short[] DominantLightIntensity = new short[3];
+        public ushort[] DominantLightIntensity = new ushort[3];
 
-        public short Padding2;
+        public ushort Padding2;
 
         [TagField(Length = 9)]
-        public short[] SHRed = new short[SphericalHarmonics.Order2Count];
+        public ushort[] SHRed = new ushort[SphericalHarmonics.Order2Count];
         [TagField(Length = 9)]
-        public short[] SHGreen = new short[SphericalHarmonics.Order2Count];
+        public ushort[] SHGreen = new ushort[SphericalHarmonics.Order2Count];
         [TagField(Length = 9)]
-        public short[] SHBlue = new short[SphericalHarmonics.Order2Count];
+        public ushort[] SHBlue = new ushort[SphericalHarmonics.Order2Count];
 
-        public short Padding3;
+        public ushort Padding3;
     }
 
     [TagStructure(Size = 0x18)]
