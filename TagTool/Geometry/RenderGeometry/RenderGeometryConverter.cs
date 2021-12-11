@@ -207,7 +207,7 @@ namespace TagTool.Geometry
             for (int j = 0; j < mesh.Parts.Count(); j++)
             {
                 var part = mesh.Parts[j];
-                if (part.FlagsNew.HasFlag(Part.PartFlagsNew.IsWaterPart) || ((part.FlagsNew16 >> 0) & 1) != 0)
+                if (part.FlagsNew.HasFlag(Part.PartFlagsNew.IsWaterSurface) || part.FlagsReach.HasFlag(Part.PartFlagsReach.IsWaterSurface))
                     waterData.PartData.Add(new Tuple<int, int>(part.FirstIndex, part.IndexCount));
             }
 
@@ -401,9 +401,11 @@ namespace TagTool.Geometry
 
             foreach(var mesh in geometry.Meshes)
             {
-                foreach(var part in mesh.Parts)
+                mesh.Flags = mesh.FlagsReach.ConvertLexical<MeshFlags>();
+
+                foreach (var part in mesh.Parts)
                 {
-                    part.FlagsNew = (Part.PartFlagsNew)((part.FlagsNew16 & 0x7F) + (part.FlagsNew16 >> 13) & 1);
+                    part.FlagsNew = part.FlagsReach.ConvertLexical<Part.PartFlagsNew>();
                 }
             }
 
@@ -524,14 +526,11 @@ namespace TagTool.Geometry
                             continue;
                         }
 
-                        // skip conversion of water vertices, done right after the loop
-                        if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
+                        if(vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
                         {
-                            mesh.ResourceVertexBuffers[i] = null;
-                            mesh.VertexBufferIndices[i] = -1;
                             continue;
                         }
-                           
+ 
                         if (SourceCache.Platform == CachePlatform.MCC && vertexBuffer.Format == VertexBufferFormat.Unknown1C)
                             continue;
 

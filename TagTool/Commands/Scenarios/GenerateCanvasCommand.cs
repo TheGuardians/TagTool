@@ -618,7 +618,7 @@ namespace TagTool.Commands.Scenarios
                 TransparentSortingIndex = -1,
                 FirstIndex = 0,
                 IndexCount = indices.Length,
-                FlagsNew = Part.PartFlagsNew.IsWaterPart
+                FlagsNew = Part.PartFlagsNew.IsWaterSurface
 
             };
             var mesh = new Mesh()

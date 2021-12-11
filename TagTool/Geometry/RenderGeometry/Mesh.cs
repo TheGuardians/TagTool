@@ -172,8 +172,8 @@ namespace TagTool.Geometry
 
         [TagField(MinVersion = Halo3Beta, MaxVersion = HaloOnline700123)]
         public MeshFlags Flags;
-        [TagField(MinVersion = HaloReach)]
-        public short FlagsReach;
+        [TagField(MinVersion = HaloReach, Downgrade = nameof(Flags))]
+        public MeshFlagsReach FlagsReach;
 
         [TagField(MinVersion = Halo3Beta, Format = nameof(Flags))]
         public sbyte RigidNodeIndex;
@@ -291,7 +291,7 @@ namespace TagTool.Geometry
         [TagField(MinVersion = Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123, Downgrade = nameof(FlagsOld))]
         public PartFlagsNew FlagsNew;
         [TagField(MinVersion = HaloReach)]
-        public ushort FlagsNew16;
+        public PartFlagsReach FlagsReach;
 
         [TagField(MaxVersion = Halo2Vista)]
         public byte MaxNodesPerVertex;
@@ -357,15 +357,31 @@ namespace TagTool.Geometry
         [Flags]
         public enum PartFlagsNew : byte
         {
-            None,
-            CanBeRenderedInDrawBundles = 1 << 0,
+            DislikesPhotons = 1 << 0,
+            IgnoredByLightmapper = 1 << 1,
+            HasTransparentSortingPlane = 1 << 2,
+            IsWaterSurface = 1 << 3,
+            Unknown1 = 1 << 4 // set on only one ho mesh as far as I can tell, might have been a mistake
+        }
+
+        [Flags]
+        public enum PartFlagsReach : ushort
+        {
+            IsWaterSurface = 1 << 0,
             PerVertexLightmapPart = 1 << 1,
-            RenderInZPrepass = 1 << 2,
-            IsWaterPart = 1 << 3,
+            DebugFlagInstancePart = 1 << 2,
+            SubpartsHasUberlightsInfo = 1 << 3,
             DrawCullDistanceMedium = 1 << 4,
             DrawCullDistanceClose = 1 << 5,
             DrawCullRenderingShields = 1 << 6,
-            DrawCullRenderingActiveCamo = 1 << 7
+            CannotSinglePassRender = 1 << 7,
+            IsTransparent = 1 << 8,
+            CannotTwoPass = 1 << 9,
+            // expensive
+            TransparentShouldOutputDepthForDoF = 1 << 10,
+            DoNotIncludeInStaticLightmap = 1 << 11,
+            DoNotIncludeInPvsGeneration = 1 << 12,
+            DrawCullRenderingActiveCamo = 1 << 13
         }
 
         public enum SpecializedRenderType : sbyte
