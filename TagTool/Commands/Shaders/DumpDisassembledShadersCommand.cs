@@ -214,6 +214,27 @@ namespace TagTool.Commands.Shaders
 
                                         DisassembleShader(glvs, entryShader, vertexShaderFileName, cache, stream, null);
                                     }
+                                    else
+                                    {
+                                        for (int i = 0; i < vertexFormat.EntryPoints[CurrentEntryPointIndex].CategoryDependency.Count; i++)
+                                        {
+                                            var catDep = vertexFormat.EntryPoints[CurrentEntryPointIndex].CategoryDependency[i];
+                                            for (int j = 0; j < catDep.OptionDependency.Count; j++)
+                                            {
+                                                var opDep = catDep.OptionDependency[j];
+                                                entryShader = opDep.CompiledShaderIndex;
+
+                                                if (entryShader != -1)
+                                                {
+                                                    Directory.CreateDirectory(cache.Version.ToString() + "\\" + dirName);
+                                                    string entryName = entry.ToString().ToLower() + $"_catg{i}_i{j}.shared_vertex_shader";
+                                                    string vertexShaderFileName = Path.Combine(dirName, entryName);
+
+                                                    DisassembleShader(glvs, entryShader, vertexShaderFileName, cache, stream, null);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -300,79 +321,82 @@ namespace TagTool.Commands.Shaders
                     }
                 }
 
-                CachedTag chgdTag = cache.TagCache.FindFirstInGroup("chgd");
-                if (chgdTag != null)
+                if (cache.Version < CacheVersion.HaloReach)
                 {
-                    var chgd = cache.Deserialize<ChudGlobalsDefinition>(stream, chgdTag);
-
-                    for (int i = 0; i < chgd.HudShaders.Count; i++)
+                    CachedTag chgdTag = cache.TagCache.FindFirstInGroup("chgd");
+                    if (chgdTag != null)
                     {
-                        var hudShader = chgd.HudShaders[i];
+                        var chgd = cache.Deserialize<ChudGlobalsDefinition>(stream, chgdTag);
 
-                        if (hudShader.PixelShader == null)
+                        for (int i = 0; i < chgd.HudShaders.Count; i++)
                         {
-                            Console.WriteLine($"Invalid chud pixel shader {i}");
-                        }
-                        else
-                        {
-                            string shaderName = hudShader.PixelShader.Name.Split('\\')[2];
-                            Directory.CreateDirectory(cache.Version.ToString() + "\\chud\\" + shaderName);
+                            var hudShader = chgd.HudShaders[i];
 
-                            var pixl = cache.Deserialize<PixelShader>(stream, hudShader.PixelShader);
-                            foreach (var entry in Enum.GetValues(entryPointEnum))
+                            if (hudShader.PixelShader == null)
                             {
-                                CurrentEntryPointIndex = GetEntryPointIndex(entry, cache.Version);
-
-                                if (pixl.EntryPointShaders.Count <= CurrentEntryPointIndex)
-                                    break;
-
-                                for (int j = 0; j < pixl.EntryPointShaders[CurrentEntryPointIndex].Count; j++)
-                                {
-                                    int shaderIndex = pixl.EntryPointShaders[CurrentEntryPointIndex].Offset + j;
-                                    string entryName = shaderIndex + "_" + entry.ToString().ToLower() + ".pixel_shader";
-                                    string pixelShaderFilename = Path.Combine("chud\\" + shaderName, entryName);
-
-                                    DisassembleShader(pixl, shaderIndex, pixelShaderFilename, cache, stream, pixl.Shaders[shaderIndex].GlobalCachePixelShaderIndex != -1 ? gpix : null);
-                                }
+                                Console.WriteLine($"Invalid chud pixel shader {i}");
                             }
-
-                            CurrentEntryPointIndex = -1;
-                        }
-
-                        if (hudShader.VertexShader == null)
-                        {
-                            Console.WriteLine($"Invalid chud vertex shader {i}");
-                        }
-                        else
-                        {
-                            string shaderName = hudShader.VertexShader.Name.Split('\\')[2];
-
-                            var vtsh = cache.Deserialize<VertexShader>(stream, hudShader.VertexShader);
-                            foreach (var entry in Enum.GetValues(entryPointEnum))
+                            else
                             {
-                                CurrentEntryPointIndex = GetEntryPointIndex(entry, cache.Version);
+                                string shaderName = hudShader.PixelShader.Name.Split('\\')[2];
+                                Directory.CreateDirectory(cache.Version.ToString() + "\\chud\\" + shaderName);
 
-                                if (vtsh.EntryPoints.Count <= CurrentEntryPointIndex)
-                                    break;
-
-                                for (int j = 0; j < vtsh.EntryPoints[CurrentEntryPointIndex].SupportedVertexTypes.Count; j++)
+                                var pixl = cache.Deserialize<PixelShader>(stream, hudShader.PixelShader);
+                                foreach (var entry in Enum.GetValues(entryPointEnum))
                                 {
-                                    for (int k = 0; k < vtsh.EntryPoints[CurrentEntryPointIndex].SupportedVertexTypes[j].Count; k++)
+                                    CurrentEntryPointIndex = GetEntryPointIndex(entry, cache.Version);
+
+                                    if (pixl.EntryPointShaders.Count <= CurrentEntryPointIndex)
+                                        break;
+
+                                    for (int j = 0; j < pixl.EntryPointShaders[CurrentEntryPointIndex].Count; j++)
                                     {
-                                        int shaderIndex = vtsh.EntryPoints[CurrentEntryPointIndex].SupportedVertexTypes[j].Offset + k;
+                                        int shaderIndex = pixl.EntryPointShaders[CurrentEntryPointIndex].Offset + j;
+                                        string entryName = shaderIndex + "_" + entry.ToString().ToLower() + ".pixel_shader";
+                                        string pixelShaderFilename = Path.Combine("chud\\" + shaderName, entryName);
 
-                                        var dirName = Path.Combine("chud\\" + shaderName + "\\", ((VertexType)k).ToString().ToLower() + "\\");
-                                        Directory.CreateDirectory(cache.Version.ToString() + "\\" + dirName);
-
-                                        string entryName = shaderIndex + "_" + entry.ToString().ToLower() + ".vertex_shader";
-                                        string vertexShaderFilename = Path.Combine(dirName, entryName);
-
-                                        DisassembleShader(vtsh, shaderIndex, vertexShaderFilename, cache, stream, null);
+                                        DisassembleShader(pixl, shaderIndex, pixelShaderFilename, cache, stream, pixl.Shaders[shaderIndex].GlobalCachePixelShaderIndex != -1 ? gpix : null);
                                     }
                                 }
+
+                                CurrentEntryPointIndex = -1;
                             }
 
-                            CurrentEntryPointIndex = -1;
+                            if (hudShader.VertexShader == null)
+                            {
+                                Console.WriteLine($"Invalid chud vertex shader {i}");
+                            }
+                            else
+                            {
+                                string shaderName = hudShader.VertexShader.Name.Split('\\')[2];
+
+                                var vtsh = cache.Deserialize<VertexShader>(stream, hudShader.VertexShader);
+                                foreach (var entry in Enum.GetValues(entryPointEnum))
+                                {
+                                    CurrentEntryPointIndex = GetEntryPointIndex(entry, cache.Version);
+
+                                    if (vtsh.EntryPoints.Count <= CurrentEntryPointIndex)
+                                        break;
+
+                                    for (int j = 0; j < vtsh.EntryPoints[CurrentEntryPointIndex].SupportedVertexTypes.Count; j++)
+                                    {
+                                        for (int k = 0; k < vtsh.EntryPoints[CurrentEntryPointIndex].SupportedVertexTypes[j].Count; k++)
+                                        {
+                                            int shaderIndex = vtsh.EntryPoints[CurrentEntryPointIndex].SupportedVertexTypes[j].Offset + k;
+
+                                            var dirName = Path.Combine("chud\\" + shaderName + "\\", ((VertexType)k).ToString().ToLower() + "\\");
+                                            Directory.CreateDirectory(cache.Version.ToString() + "\\" + dirName);
+
+                                            string entryName = shaderIndex + "_" + entry.ToString().ToLower() + ".vertex_shader";
+                                            string vertexShaderFilename = Path.Combine(dirName, entryName);
+
+                                            DisassembleShader(vtsh, shaderIndex, vertexShaderFilename, cache, stream, null);
+                                        }
+                                    }
+                                }
+
+                                CurrentEntryPointIndex = -1;
+                            }
                         }
                     }
                 }
