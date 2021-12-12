@@ -296,10 +296,10 @@ namespace TagTool.Commands.Porting
             // convert tag light probes
             //
 
-            // TODO: has issues currently for unknown reasons
-            // foreach(var probe in Lbsp.InstancedGeometryLightProbes)
-            //     probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
-
+             // TODO: has issues currently for unknown reasons
+            foreach (var probe in Lbsp.InstancedGeometryLightProbes)
+                probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
+                
             foreach (var probe in Lbsp.Airprobes)
                 probe.LightProbe = VmfConversion.ConvertHalfLightprobe(probe.VmfLightProbe);
 
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Porting
             // convert vertex buffers and add them to the new resource
             //
 
-            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
+            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, sbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
 
             var converter = new RenderGeometryConverter(CacheContext, BlamCache);
             var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);

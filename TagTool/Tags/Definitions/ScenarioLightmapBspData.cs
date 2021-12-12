@@ -84,7 +84,7 @@ namespace TagTool.Tags.Definitions
             public short LightmapBitmapsImageIndex;
             public short StaticPerVertexLightingIndex;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int FirstVertexIndex;
+            public int PerVertexOffset;
         }
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -118,8 +118,8 @@ namespace TagTool.Tags.Definitions
         }
     }
 
-    [TagStructure(Size = 0x2C, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x48, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
     public class InstancedGeometryLightProbe : TagStructure
     {
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]

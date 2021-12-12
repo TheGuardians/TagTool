@@ -11,50 +11,8 @@ namespace TagTool.Lighting
 {
     static class VmfConversion
     {
-        public static void ConvertStaticPerVertexBuffers(ScenarioLightmapBspData Lbsp, TagTool.Tags.Resources.RenderGeometryApiResourceDefinition renderGeometryResource, CacheVersion targetVersion, CachePlatform targetPlatform = CachePlatform.All)
+        public static void ConvertStaticPerVertexBuffers(ScenarioLightmapBspData Lbsp, ScenarioStructureBsp sbsp, TagTool.Tags.Resources.RenderGeometryApiResourceDefinition renderGeometryResource, CacheVersion targetVersion, CachePlatform targetPlatform = CachePlatform.All)
         {
-            foreach (var clusterLighting in Lbsp.ClusterStaticPerVertexLightingBuffers)
-            {
-                clusterLighting.StaticPerVertexLightingIndex = -1;
-
-                if (clusterLighting.StaticPerVertexLightingIndex != -1)
-                {
-                    var element = Lbsp.StaticPerVertexLightingBuffers[clusterLighting.StaticPerVertexLightingIndex];
-
-                     if (element.VertexBufferIndexReach == -1)
-                     {
-                         clusterLighting.StaticPerVertexLightingIndex = -1;
-                     }
-                     else
-                     {
-                        if (clusterLighting.FirstVertexIndex > 0)
-                        {
-                            // TODO: figure out how to make the buffer compatible with the geometry index buffer
-                            clusterLighting.StaticPerVertexLightingIndex = -1;
-                           
-                            // var vertexBuffer = renderGeometryResource.VertexBuffers[element.VertexBufferIndexReach].Definition;
-                            // var ms = new MemoryStream();
-                            // StreamUtil.Fill(ms, 0xCD, clusterLighting.FirstVertexIndex * 6);
-                            // ms.Write(vertexBuffer.Data.Data, 0, vertexBuffer.Data.Data.Length);
-                            // vertexBuffer.Data = new Tags.TagData(ms.ToArray());
-                            // vertexBuffer.Count += clusterLighting.FirstVertexIndex;
-                        }
-                     }
-                }
-            }
-
-            foreach (var instanceLighting in Lbsp.InstancedGeometry)
-            {
-                if (instanceLighting.StaticPerVertexLightingIndex != -1)
-                {
-                    var element = Lbsp.StaticPerVertexLightingBuffers[instanceLighting.StaticPerVertexLightingIndex];
-                    if (element.VertexBufferIndexReach == -1)
-                    {
-                        instanceLighting.StaticPerVertexLightingIndex = -1;
-                    }
-                }
-            }
-
             for (int i = 0; i < Lbsp.StaticPerVertexLightingBuffers.Count; i++)
             {
                 if (Lbsp.StaticPerVertexLightingBuffers[i].VertexBufferIndexReach == -1)
@@ -66,6 +24,28 @@ namespace TagTool.Lighting
                 var data = ConvertStaticPerVertexData(vertexBuffer.Data.Data, hdrScalar, out int vertexCount, targetVersion, targetPlatform);
                 vertexBuffer.Data = new Tags.TagData(data);
                 vertexBuffer.Count = vertexCount;
+            }
+
+            foreach (var clusterLighting in Lbsp.ClusterStaticPerVertexLightingBuffers)
+            {
+                if (clusterLighting.StaticPerVertexLightingIndex != -1)
+                {
+                    var element = Lbsp.StaticPerVertexLightingBuffers[clusterLighting.StaticPerVertexLightingIndex];
+
+                    if (clusterLighting.PerVertexOffset > 0)
+                    {
+                        // We need pad the buffer to make it 1:1 with the geometry index buffer
+                        // The mesh parts < PerVertexOffset will have the PerVertexLightmapPart flag, which will then
+                        // will be used to disable static per vertex for just those part (at runtime)
+
+                        var vertexBuffer = renderGeometryResource.VertexBuffers[element.VertexBufferIndexReach].Definition;
+                        var ms = new MemoryStream();
+                        StreamUtil.Fill(ms, 0xCD, clusterLighting.PerVertexOffset * 0x14);
+                        ms.Write(vertexBuffer.Data.Data, 0, vertexBuffer.Data.Data.Length);
+                        vertexBuffer.Data = new Tags.TagData(ms.ToArray());
+                        vertexBuffer.Count += clusterLighting.PerVertexOffset;
+                    }
+                }
             }
         }
 

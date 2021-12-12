@@ -14,7 +14,13 @@ namespace TagTool.Geometry
             Stream = new VertexElementStream(stream, EndianFormat.BigEndian);
         }
 
-        public AmbientPrtData ReadAmbientPrtData() => null;
+        public AmbientPrtData ReadAmbientPrtData()
+        {
+            return new AmbientPrtData
+            {
+                SHCoefficient = Stream.ReadFloat1()
+            };
+        }
 
         public BeamVertex ReadBeamVertex()
         {
