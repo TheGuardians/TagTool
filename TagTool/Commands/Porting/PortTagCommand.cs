@@ -398,13 +398,33 @@ namespace TagTool.Commands.Porting
                     {"objects\\multi\\models\\mp_circle\\mp_circle", "objects\\multi\\oddball\\oddball_ball_spawn_point"},
                     {"objects\\multi\\archive\\vip\\vip_boundary", "objects\\multi\\vip\\vip_destination_static"}
                 };
-
-                CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
-                CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
-                CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
-                
+		
+		Dictionary<string, string> reachVehicles = new Dictionary<string, string>()
+                {
+                    {"objects\\vehicles\\human\\warthog\\warthog", "objects\\vehicles\\warthog\\warthog"},
+                    {"objects\\vehicles\\human\\mongoose\\mongoose", "objects\\vehicles\\mongoose\\mongoose"},
+                    {"objects\\vehicles\\human\\scorpion\\scorpion", "objects\\vehicles\\scorpion\\scorpion"},
+                    {"objects\\vehicles\\human\\falcon\\falcon", "objects\\vehicles\\hornet\\hornet"},
+                    {"objects\\vehicles\\covenant\\ghost\\ghost", "objects\\vehicles\\ghost\\ghost"},
+                    {"objects\\vehicles\\covenant\\wraith\\wraith", "objects\\vehicles\\wraith\\wraith"},
+                    {"objects\\vehicles\\covenant\\banshee\\banshee", "objects\\vehicles\\banshee\\banshee"},
+                    {"objects\\vehicles\\human\\turrets\\machinegun\\machinegun", "objects\\weapons\\turret\\machinegun_turret\\machinegun_turret"},
+                    {"objects\\vehicles\\covenant\\turrets\\plasma_turret\\plasma_turret_mounted", "objects\\weapons\\turret\\plasma_cannon\\plasma_cannon"},
+                    {"objects\\vehicles\\covenant\\turrets\\shade\\shade", "objects\\vehicles\\shade\\shade"}
+                };
+		
                 ReplaceObjects(scenario.SceneryPalette, reachObjectives);
                 ReplaceObjects(scenario.CratePalette, reachObjectives);
+                ReplaceObjects(scenario.VehiclePalette, reachVehicles);
+				
+				
+		CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
+                CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
+		CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
+                CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
+                CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
+
+				
                 RemoveNullPlacements(scenario.SceneryPalette, scenario.Scenery);
                 RemoveNullPlacements(scenario.CratePalette, scenario.Crates);
             }
