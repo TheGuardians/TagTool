@@ -251,18 +251,18 @@ namespace TagTool.Commands.Porting
                 return Lbsp;
 
             //
-            // cconvert lighprobe textures
+            // cconvert lightprobe textures
             //
 
-            bool useCache = !string.IsNullOrEmpty(PortingOptions.Current.ReachLightmapCache);
-
             CachedLightmap convertedLightmap = null;
-            var lightmapCachePath = Path.Combine(PortingOptions.Current.ReachLightmapCache, LbspTag.Name);
-
             if (Lbsp.LightmapSHCoefficientsBitmap != null)
             {
+                var lightmapCachePath = !string.IsNullOrEmpty(PortingOptions.Current.ReachLightmapCache)
+                   ? Path.Combine(PortingOptions.Current.ReachLightmapCache, LbspTag.Name)
+                   : null;
+
                 convertedLightmap = new CachedLightmap();
-                if (!useCache || !convertedLightmap.Load(lightmapCachePath))
+                if (lightmapCachePath == null || !convertedLightmap.Load(lightmapCachePath))
                 {
                     Console.WriteLine("Converting Lightmap... This may take a while! ");
                     var lightmapConverter = new ReachLightmapConverter();
@@ -277,7 +277,7 @@ namespace TagTool.Commands.Porting
                     convertedLightmap.LinearSH = result.LinearSH;
                     convertedLightmap.Intensity = result.Intensity;
 
-                    if (useCache)
+                    if (lightmapCachePath != null)
                         convertedLightmap.Store(lightmapCachePath);
                 }
             }
