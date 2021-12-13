@@ -2,16 +2,18 @@
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Lighting
 {
     static class VmfConversion
     {
-        public static void ConvertStaticPerVertexBuffers(ScenarioLightmapBspData Lbsp, ScenarioStructureBsp sbsp, TagTool.Tags.Resources.RenderGeometryApiResourceDefinition renderGeometryResource, CacheVersion targetVersion, CachePlatform targetPlatform = CachePlatform.All)
+        public static void ConvertStaticPerVertexBuffers(ScenarioLightmapBspData Lbsp, RenderGeometryApiResourceDefinition renderGeometryResource, CacheVersion targetVersion, CachePlatform targetPlatform = CachePlatform.All)
         {
             for (int i = 0; i < Lbsp.StaticPerVertexLightingBuffers.Count; i++)
             {
@@ -57,7 +59,9 @@ namespace TagTool.Lighting
             if (data.Length % 6 != 0)
             {
                 if (!data.Skip(data.Length / 6 * 6).Take(data.Length % 6).All(x => x == 0xCD))
-                    throw new InvalidDataException();
+                {
+                    new TagToolWarning("Expected debug fill in static per vertex data!");
+                }
             }
 
             vertexCount = data.Length / 6;

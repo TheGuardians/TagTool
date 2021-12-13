@@ -230,8 +230,10 @@ namespace TagTool.Commands.Porting
             var blamLightmap = BlamCache.Deserialize<ScenarioLightmap>(blamCacheStream, scnr.Lightmap);
             for (int i = 0; i < scenarioLightmap.LightmapDataReferences.Count; i++)
             {
-                var sbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, scnr.StructureBsps[i].StructureBsp);
                 var lbspTag = scenarioLightmap.LightmapDataReferences[i].LightmapBspData;
+                if (lbspTag == null)
+                    continue;
+
                 var Lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(blamCacheStream, lbspTag);
 
                 Lbsp.BspIndex = (short)i;
@@ -275,7 +277,7 @@ namespace TagTool.Commands.Porting
                     convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp);
                 }
 
-                Lbsp = ConvertScenarioLightmapBspDataReach(Lbsp, sbsp);
+                Lbsp = ConvertScenarioLightmapBspDataReach(Lbsp);
 
                 CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(scenarioLightmap.LightmapDataReferences[i].LightmapBspData.Name);
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
@@ -284,7 +286,7 @@ namespace TagTool.Commands.Porting
             return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, scenarioLightmap, scenarioLightmap, blamTagName);
         }
 
-        private ScenarioLightmapBspData ConvertScenarioLightmapBspDataReach(ScenarioLightmapBspData Lbsp, ScenarioStructureBsp sbsp)
+        private ScenarioLightmapBspData ConvertScenarioLightmapBspDataReach(ScenarioLightmapBspData Lbsp)
         {
             var lightmapResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
 
@@ -316,7 +318,7 @@ namespace TagTool.Commands.Porting
             // convert vertex buffers and add them to the new resource
             //
 
-            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, sbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
+            VmfConversion.ConvertStaticPerVertexBuffers(Lbsp, lightmapResourceDefinition, CacheContext.Version, CacheContext.Platform);
 
             var converter = new RenderGeometryConverter(CacheContext, BlamCache);
             var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
