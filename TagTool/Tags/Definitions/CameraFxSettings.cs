@@ -7,12 +7,14 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xDC, MinVersion = CacheVersion.HaloReach)]
     public class CameraFxSettings : TagStructure
 	{
         public ExposureBlock Exposure;
 
         public CameraFxValue AutoExposureSensitivity;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraFxValue AutoExposureAntiBloom;
 
         public CameraFxStrength BloomPoint;
@@ -31,26 +33,26 @@ namespace TagTool.Tags.Definitions
         public CameraFxStrength SelfIllumPreferred;
         public CameraFxStrength SelfIllumScale;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public SsaoPropertiesBlock SsaoProperties;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraFxValue ColorGrading;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock1> Unknown33;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock2> Unknown34;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock3> Unknown35;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock4> Unknown36;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock5> Unknown37;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock6> Unknown38;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public GodraysPropertiesBlock GodraysProperties;
 
         [Flags]

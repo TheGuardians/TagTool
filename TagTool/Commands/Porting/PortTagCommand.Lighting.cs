@@ -353,6 +353,15 @@ namespace TagTool.Commands.Porting
                 Flags = CameraFxSettings.FlagsValue.UseDefault
             };
 
+            // todo: convert
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                cfxs.AutoExposureAntiBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
+                cfxs.BloomPoint.Flags |= CameraFxSettings.FlagsValue.UseDefault;
+                cfxs.InherentBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
+                cfxs.BloomIntensity.Flags |= CameraFxSettings.FlagsValue.UseDefault;
+            }
+
             switch (blamTagName)
             {
                 // citadel godrays

@@ -369,10 +369,10 @@ namespace TagTool.Commands.Porting
                 scenario.LightmapAirprobes.Clear();
 
                 scenario.Fog.Clear();
-                scenario.CameraFx.Clear();
+                //scenario.CameraFx.Clear();
                 scenario.SkyParameters = null;
 
-                scenario.DefaultCameraFx = null;
+                //scenario.DefaultCameraFx = null;
                 scenario.DefaultScreenFx = null;
                 scenario.GlobalLighting = null;
                 scenario.PerformanceThrottles = null;
