@@ -424,7 +424,7 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "plasma";
                                 break;
                             case @"misc\default":
-                                optionName = "first_person_never";
+                                optionName = "always_calc_albedo";
                                 break;
                             // Reach rmhg //
                             case @"self_illumination\palettized_depth_fade":
