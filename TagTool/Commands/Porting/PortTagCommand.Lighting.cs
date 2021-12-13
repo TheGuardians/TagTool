@@ -224,60 +224,17 @@ namespace TagTool.Commands.Porting
 
         private ScenarioLightmap ConvertReachLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
-            // TODO: cleanup
-
-            var scnr = BlamCache.Deserialize<Scenario>(blamCacheStream, BlamCache.TagCache.FindFirstInGroup("scnr"));
-            var blamLightmap = BlamCache.Deserialize<ScenarioLightmap>(blamCacheStream, scnr.Lightmap);
             for (int i = 0; i < scenarioLightmap.LightmapDataReferences.Count; i++)
             {
                 var lbspTag = scenarioLightmap.LightmapDataReferences[i].LightmapBspData;
                 if (lbspTag == null)
                     continue;
 
-                var Lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(blamCacheStream, lbspTag);
-
-                Lbsp.BspIndex = (short)i;
-
                 Console.WriteLine($"Converting lightmap bsp: {i + 1}/{ scenarioLightmap.LightmapDataReferences.Count}");
 
-                bool useCache = !string.IsNullOrEmpty(PortingOptions.Current.ReachLightmapCache);
-
-                CachedLightmap convertedLightmap = null;
-                var lightmapCachePath = Path.Combine(PortingOptions.Current.ReachLightmapCache, lbspTag.Name);
-
-                if (Lbsp.LightmapSHCoefficientsBitmap != null)
-                {
-                    convertedLightmap = new CachedLightmap();
-                    if (!useCache || !convertedLightmap.Load(lightmapCachePath))
-                    {
-                        Console.WriteLine("Converting Lightmap... This may take a while! ");
-                        var lightmapConverter = new ReachLightmapConverter();
-                        lightmapConverter.ProgressUpdated += progress => Console.Write($"\rProgress: {progress * 100:0.0}%");
-                        var result = lightmapConverter.Convert(BlamCache, blamCacheStream, Lbsp);
-
-                        Console.WriteLine();
-
-                        convertedLightmap.Height = result.Height;
-                        convertedLightmap.Width = result.Width;
-                        convertedLightmap.MaxLs = result.MaxLs;
-                        convertedLightmap.LinearSH = result.LinearSH;
-                        convertedLightmap.Intensity = result.Intensity;
-
-                        if(useCache)
-                            convertedLightmap.Store(lightmapCachePath);
-                    }
-                }
-
-                Lbsp = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, Lbsp, scenarioLightmap, blamTagName);
-
-                if (convertedLightmap != null)
-                {
-                    Lbsp.LightmapSHCoefficientsBitmap.Name = $"{lbspTag.Name}_16f_lp_array_dxt5";
-                    Lbsp.LightmapDominantLightDirectionBitmap.Name = $"{lbspTag.Name}_16f_lp_array_intensity_dxt5";
-                    convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp);
-                }
-
-                Lbsp = ConvertScenarioLightmapBspDataReach(Lbsp);
+                var Lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(blamCacheStream, lbspTag);
+                Lbsp.BspIndex = (short)i;
+                Lbsp = ConvertScenarioLightmapBspDataReach(cacheStream, blamCacheStream, resourceStreams, lbspTag.Name, lbspTag, Lbsp);
 
                 CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(scenarioLightmap.LightmapDataReferences[i].LightmapBspData.Name);
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
@@ -286,12 +243,58 @@ namespace TagTool.Commands.Porting
             return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, scenarioLightmap, scenarioLightmap, blamTagName);
         }
 
-        private ScenarioLightmapBspData ConvertScenarioLightmapBspDataReach(ScenarioLightmapBspData Lbsp)
+        private ScenarioLightmapBspData ConvertScenarioLightmapBspDataReach(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, CachedTag LbspTag, ScenarioLightmapBspData Lbsp)
         {
             var lightmapResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
 
             if (lightmapResourceDefinition == null)
                 return Lbsp;
+
+            //
+            // cconvert lighprobe textures
+            //
+
+            bool useCache = !string.IsNullOrEmpty(PortingOptions.Current.ReachLightmapCache);
+
+            CachedLightmap convertedLightmap = null;
+            var lightmapCachePath = Path.Combine(PortingOptions.Current.ReachLightmapCache, LbspTag.Name);
+
+            if (Lbsp.LightmapSHCoefficientsBitmap != null)
+            {
+                convertedLightmap = new CachedLightmap();
+                if (!useCache || !convertedLightmap.Load(lightmapCachePath))
+                {
+                    Console.WriteLine("Converting Lightmap... This may take a while! ");
+                    var lightmapConverter = new ReachLightmapConverter();
+                    lightmapConverter.ProgressUpdated += progress => Console.Write($"\rProgress: {progress * 100:0.0}%");
+                    var result = lightmapConverter.Convert(BlamCache, blamCacheStream, Lbsp);
+
+                    Console.WriteLine();
+
+                    convertedLightmap.Height = result.Height;
+                    convertedLightmap.Width = result.Width;
+                    convertedLightmap.MaxLs = result.MaxLs;
+                    convertedLightmap.LinearSH = result.LinearSH;
+                    convertedLightmap.Intensity = result.Intensity;
+
+                    if (useCache)
+                        convertedLightmap.Store(lightmapCachePath);
+                }
+            }
+
+            // convert main structure (recursive)
+            Lbsp = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, Lbsp, blamTagName, blamTagName);
+
+            //
+            // import converted lightprobe textures
+            //
+
+            if (convertedLightmap != null)
+            {
+                Lbsp.LightmapSHCoefficientsBitmap.Name = $"{LbspTag.Name}_16f_lp_array_dxt5";
+                Lbsp.LightmapDominantLightDirectionBitmap.Name = $"{LbspTag.Name}_16f_lp_array_intensity_dxt5";
+                convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp);
+            }
 
 
             //

@@ -4,6 +4,7 @@ using TagTool.Geometry;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -12,7 +13,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x15C, MinVersion = CacheVersion.HaloReach)]
     public class ScenarioLightmapBspData : TagStructure
     {
-        public ushort Flags;
+        public ScenarioLightmapBspFlags Flags;
         public short BspIndex;
         public int StructureChecksum;
 
@@ -58,6 +59,29 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<int> Unused;
+
+        [Flags]
+        public enum ScenarioLightmapBspFlags : ushort
+        {
+            // Halo 3 / ODST
+            Compressed = 1 << 0,
+            XsyncedGeometry = 1 << 1,
+            Relightmapped = 1 << 2,
+            GenerateFakeSmallLightmaps = 1 << 3,
+            GeneratedFromMatchData = 1 << 4,
+            // Reach
+            OnlyACheckerBoard = 1 << 5,
+            SurfaceToTriangleMappingPruned = 1 << 6,
+            FakedLightmapTagForCacheBuild = 1 << 7,
+            OptimizedForLessDpAll = 1 << 8,
+            // Halo 4
+            FloatingShadowsEnabled = 1 << 9,
+            AtlasUnrefinedPacking = 1 << 10,
+            AtlasRepacked = 1 << 11,
+            UsingSimplifiedIrradianceLighting = 1 << 12,
+            DisableShadowGeometry = 1 << 13,
+            DisableHybridRefinement = 1 << 14
+        }
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
