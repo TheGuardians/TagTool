@@ -24,7 +24,7 @@ namespace TagTool.Tags.Resources
     }
 
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class BitmapTextureInteropDefinition
