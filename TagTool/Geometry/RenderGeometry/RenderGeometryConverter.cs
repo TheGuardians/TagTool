@@ -295,7 +295,12 @@ namespace TagTool.Geometry
                         {
                             var worldVertex = worldVertices[unknown1A.Vertices[j]];
                             var unknown1B = h3WaterParameters[unknown1A.Indices[j]];
-                            var spp = staticPerPixel.Count > 0 ? staticPerPixel[unknown1A.Vertices[j]] : new StaticPerPixelData() { Texcoord = new RealVector2d(0, 0) };
+
+                            StaticPerPixelData spp;
+                            if (SourceCache.Version == CacheVersion.HaloReach)
+                                spp = new StaticPerPixelData() { Texcoord = new RealVector2d(0, 0) }; // TODO
+                            else
+                                spp = staticPerPixel[unknown1A.Vertices[j]];
 
                             var worldWaterVertex = new WorldWaterVertex()
                             {

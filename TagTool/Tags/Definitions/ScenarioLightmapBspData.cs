@@ -184,7 +184,7 @@ namespace TagTool.Tags.Definitions
         public List<MachineLightProbe> LightProbes;
 
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
         public class MachineLightProbe : TagStructure
         {
             public RealPoint3d Position;
