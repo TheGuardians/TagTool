@@ -356,6 +356,11 @@ namespace TagTool.Commands.Porting
             // todo: convert
             if (BlamCache.Version >= CacheVersion.HaloReach)
             {
+                cfxs.AutoExposureAntiBloom = new CameraFxSettings.CameraFxValue();
+                cfxs.BloomPoint = new CameraFxSettings.CameraFxStrength();
+                cfxs.InherentBloom = new CameraFxSettings.CameraFxStrength();
+                cfxs.BloomIntensity = new CameraFxSettings.CameraFxStrength();
+
                 cfxs.AutoExposureAntiBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
                 cfxs.BloomPoint.Flags |= CameraFxSettings.FlagsValue.UseDefault;
                 cfxs.InherentBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
