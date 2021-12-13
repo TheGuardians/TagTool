@@ -14,14 +14,6 @@ namespace TagTool.Geometry
             Stream = new VertexElementStream(stream, EndianFormat.BigEndian);
         }
 
-        public AmbientPrtData ReadAmbientPrtData()
-        {
-            return new AmbientPrtData
-            {
-                SHCoefficient = Stream.ReadFloat1()
-            };
-        }
-
         public BeamVertex ReadBeamVertex()
         {
             throw new NotImplementedException();
@@ -155,7 +147,31 @@ namespace TagTool.Geometry
             throw new NotImplementedException();
         }
 
-        public LinearPrtData ReadLinearPrtData() => null;
+        public AmbientPrtData ReadAmbientPrtData()
+        {
+            return new AmbientPrtData
+            {
+                SHCoefficient = Stream.ReadFloat8_1()
+            };
+        }
+
+        public LinearPrtData ReadLinearPrtData()
+        {
+            return new LinearPrtData
+            {
+                SHCoefficients = Stream.ReadSByte4N()
+            };
+        }
+
+        public QuadraticPrtData ReadQuadraticPrtData()
+        {
+            return new QuadraticPrtData
+            {
+                SHCoefficients1 = Stream.ReadDec3N(),
+                SHCoefficients2 = Stream.ReadDec3N(),
+                SHCoefficients3 = Stream.ReadDec3N()
+            };
+        }
 
         public ParticleModelVertex ReadParticleModelVertex()
         {
@@ -183,8 +199,6 @@ namespace TagTool.Geometry
                 Position = Stream.ReadFloat4()
             };
         }
-
-        public QuadraticPrtData ReadQuadraticPrtData() => null;
 
         public RigidVertex ReadRigidVertex()
         {

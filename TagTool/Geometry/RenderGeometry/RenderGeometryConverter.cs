@@ -499,9 +499,7 @@ namespace TagTool.Geometry
             {
                 foreach (var mesh in geometry.Meshes)
                 {
-                    mesh.PrtType = PrtSHType.None;
                     mesh.Type = ConvertReachVertexType(mesh.ReachType);
-
 
                     for(int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
                     {
@@ -510,26 +508,9 @@ namespace TagTool.Geometry
                         if (vertexBuffer == null)
                             continue;
 
-                        // Skip any kind of prt for now (VMF->SH basis conversion required), ambient also requires the fix for the vertex count
-                        if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt || vertexBuffer.Format == VertexBufferFormat.LinearPrt || vertexBuffer.Format == VertexBufferFormat.QuadraticPrt)
-                        {
-                            mesh.ResourceVertexBuffers[i] = null;
-                            mesh.VertexBufferIndices[i] = -1;
+                        // skip conversion of water vertices, done right after the loop
+                        if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
                             continue;
-                        }
-
-                        // Skip all lightmap related buffers due to VMF incompability with SH. StaticPerVertexColor is fine though.
-                        if(vertexBuffer.Format == VertexBufferFormat.StaticPerVertex)
-                        {
-                            mesh.ResourceVertexBuffers[i] = null;
-                            mesh.VertexBufferIndices[i] = -1;
-                            continue;
-                        }
-
-                        if(vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
-                        {
-                            continue;
-                        }
  
                         if (SourceCache.Platform == CachePlatform.MCC && vertexBuffer.Format == VertexBufferFormat.Unknown1C)
                             continue;
