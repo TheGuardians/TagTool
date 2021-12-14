@@ -359,7 +359,17 @@ namespace TagTool.Tags.Definitions
                         ImpactArea,
                         Debris,
                         Line,
-                        BreakableSurface
+                        BreakableSurface,
+                        CustomPoints,
+                        // Reach+
+                        BoatHullSurface,
+                        Cube,
+                        Cylinder,
+                        UnweightedLine,
+                        Plane,
+                        Jetwash,
+                        PlanarOrbit,
+                        SphereOrbit
                     }
 
                     public enum ParticleModelAxis : byte

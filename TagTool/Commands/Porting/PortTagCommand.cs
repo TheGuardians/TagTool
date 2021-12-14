@@ -1275,6 +1275,20 @@ namespace TagTool.Commands.Porting
                     {
                         particleSystem.NearRange = 1 / particleSystem.NearRange;
                     }
+
+                    if(BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        foreach(var emitter in particleSystem.Emitters)
+                        {
+                            // Needs to be implemented in the engine
+                            if(emitter.EmissionShape >= Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.BoatHullSurface)
+                            {
+                                new TagToolWarning($"Unsupported particle emitter shape '{emitter.EmissionShape}'. Using default.");
+                                emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Sprayer;
+                            }
+                        }
+                    }
+
                     if (particleSystem.Particle != null)// yucky hack-fix for some particles taking over the screen
                     {
                         var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
