@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class Effect : TagStructure
 		{
-            public List<EffectReference> OldMaterials;
+            public List<OldMaterialEffectBlock> OldMaterials;
             public List<EffectReference> Sounds;
             public List<EffectReference> Effects;
 
@@ -24,16 +24,40 @@ namespace TagTool.Tags.Definitions
                 public CachedTag Effect;
                 public CachedTag Sound;
                 public StringId MaterialName;
-                public short GlobalMaterialIndex;
+                public short RuntimeMaterialIndex; // formerly GlobalMaterialIndex
                 public SweetenerModeValue SweetenerMode;
 
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Unused;
+                [TagField(Flags = Padding)]
+                public byte Unused;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float MaxVisibilityDistance;
 
                 public enum SweetenerModeValue : sbyte
+                {
+                    Default,
+                    Enabled,
+                    Disabled
+                }
+            }
+
+            [TagStructure(Size = 0x2C)]
+            public class OldMaterialEffectBlock : TagStructure
+            {
+                public CachedTag Effect;
+                public CachedTag Sound;
+                public StringId MaterialName;
+                public short RuntimeMaterialIndex;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] KTRVUIKB;
+
+                public SweeneterModeEnum SweetenerMode;
+
+                [TagField(Length = 3, Flags = Padding)]
+                public byte[] QNGPTA;
+
+                public enum SweeneterModeEnum : sbyte
                 {
                     SweetenerDefault,
                     SweetenerEnabled,
