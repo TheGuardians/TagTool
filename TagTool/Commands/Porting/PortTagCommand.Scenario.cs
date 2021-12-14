@@ -1362,7 +1362,7 @@ namespace TagTool.Commands.Porting
                         for (var seatIndex = 0; seatIndex < unitDefinition.Seats.Count; seatIndex++)
                         {
                             var seat = unitDefinition.Seats[seatIndex];
-                            var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
+                            var seatName = CacheContext.StringTable.GetString(seat.Label);
 
                             if (seatMappingString == seatName)
                             {
@@ -1386,7 +1386,7 @@ namespace TagTool.Commands.Porting
                                 for (var seatIndex = 0; seatIndex < definition.Seats.Count; seatIndex++)
                                 {
                                     var seat = definition.Seats[seatIndex];
-                                    var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
+                                    var seatName = CacheContext.StringTable.GetString(seat.Label);
 
                                     if (seatMappingString == seatName)
                                     {

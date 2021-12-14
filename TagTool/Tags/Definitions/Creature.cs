@@ -67,7 +67,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown14;
         public CachedTag ImpactDamage;
         public CachedTag ImpactShieldDamage;
-        public List<Unit.MetagameProperty> MetagameProperties;
+        public List<Unit.CampaignMetagameBucket> MetagameProperties;
         public Bounds<float> DestroyAfterDeathTimeBounds;
     }
 
