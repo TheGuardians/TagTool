@@ -268,17 +268,22 @@ namespace TagTool.Commands.Porting
                     var lightmapConverter = new ReachLightmapConverter();
                     lightmapConverter.ProgressUpdated += progress => Console.Write($"\rProgress: {progress * 100:0.0}%");
                     var result = lightmapConverter.Convert(BlamCache, blamCacheStream, Lbsp);
-
                     Console.WriteLine();
+                    if (result != null)
+                    {
+                        convertedLightmap.Height = result.Height;
+                        convertedLightmap.Width = result.Width;
+                        convertedLightmap.MaxLs = result.MaxLs;
+                        convertedLightmap.LinearSH = result.LinearSH;
+                        convertedLightmap.Intensity = result.Intensity;
 
-                    convertedLightmap.Height = result.Height;
-                    convertedLightmap.Width = result.Width;
-                    convertedLightmap.MaxLs = result.MaxLs;
-                    convertedLightmap.LinearSH = result.LinearSH;
-                    convertedLightmap.Intensity = result.Intensity;
-
-                    if (lightmapCachePath != null)
-                        convertedLightmap.Store(lightmapCachePath);
+                        if (lightmapCachePath != null)
+                            convertedLightmap.Store(lightmapCachePath);
+                    }
+                    else
+                    {
+                        convertedLightmap = null;
+                    }
                 }
             }
 

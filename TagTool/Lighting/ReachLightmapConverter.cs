@@ -26,6 +26,9 @@ namespace TagTool.Lighting
             var convertedDirectionBitmap = BitmapConverter.ConvertGen3Bitmap(sourceCache, directionBitmap, 0, true);
             var convertedIntensityBitmap = BitmapConverter.ConvertGen3Bitmap(sourceCache, intensityBitmap, 0, true);
 
+            if (convertedDirectionBitmap == null || convertedIntensityBitmap == null)
+                return null;
+               
             int width = convertedIntensityBitmap.Width;
             int height = convertedIntensityBitmap.Height;
 
