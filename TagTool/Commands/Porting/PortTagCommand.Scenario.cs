@@ -467,7 +467,7 @@ namespace TagTool.Commands.Porting
                         continue;
 
                     var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[i].StructureBsp);
-                    var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData);
+                   
 
                     // Reach doesn't have the camera fx block in sbsp anymore, move it back
                     sbsp.CameraEffects = scnr.CameraFx;
@@ -479,23 +479,26 @@ namespace TagTool.Commands.Porting
                     // In reach this is the mesh index, the per pixel data is indexed by instance index instead, 
                     // with a -1 vertex buffer index for instances that do not have per pixel data
 
-                    var newPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
-                    for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
+                    if (lightmap.LightmapDataReferences[i].LightmapBspData != null)
                     {
-                        var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[instanceIndex];
-                        if (lightingElement.VertexBufferIndex != -1)
+                        var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData);
+                        var newPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
+                        for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
                         {
-                            sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = (short)newPerPixelLighting.Count;
-                            newPerPixelLighting.Add(lightingElement);
+                            var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[instanceIndex];
+                            if (lightingElement.VertexBufferIndex != -1)
+                            {
+                                sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = (short)newPerPixelLighting.Count;
+                                newPerPixelLighting.Add(lightingElement);
+                            }
+                            else
+                            {
+                                sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = -1;
+                            }
                         }
-                        else
-                        {
-                            sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = -1;
-                        }
+                        Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
+                        CacheContext.Serialize(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData, Lbsp);
                     }
-                    Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
-
-                    CacheContext.Serialize(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData, Lbsp);
                     CacheContext.Serialize(cacheStream, scnr.StructureBsps[i].StructureBsp, sbsp);
                 }
             }
