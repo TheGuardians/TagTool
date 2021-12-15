@@ -360,7 +360,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock3> Unknown109;
         public List<FogBlock> Fog;
-        public List<CameraFxBlock> CameraFx;
+        public List<ScenarioStructureBsp.CameraEffect> CameraFx;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<ScenarioWeatherPaletteBlock> WeatherPalette;
@@ -3395,24 +3395,6 @@ namespace TagTool.Tags.Definitions
             public short Unknown2;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag Fog;
-        }
-
-        [TagStructure(Size = 0x30)]
-        public class CameraFxBlock : TagStructure
-		{
-            [TagField(Flags = Label)]
-            public StringId Name;
-            public CachedTag CameraFx;
-            public byte Unknown;
-            public byte Unknown2;
-            public byte Unknown3;
-            public byte Unknown4;
-            public uint Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
         }
 
         [TagStructure(Size = 0x14)]

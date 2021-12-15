@@ -530,18 +530,31 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class CameraEffect : TagStructure
         {
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
-            public CachedTag Effect;
-            public sbyte Unknown;
-            public sbyte Unknown2;
-            public sbyte Unknown3;
-            public sbyte Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
+            // if empty, uses default
+            public CachedTag ClusterCameraFxTag;
+            public CameraFxPaletteFlags Flags;
+            [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            // the target exposure (ONLY USED WHEN FORCE EXPOSURE IS CHECKED)
+            public float ForcedExposure; // stops
+            // how bright you want the screen to be (ONLY USED WHEN FORCE AUTO EXPOSURE IS CHECKED)
+            public float ForcedAutoexposureScreenBrightness; // [0.0001-1]
+            public float ExposureMin; // stops
+            public float ExposureMax; // stops
+            public float InherentBloom;
+            public float BloomIntensity;
+
+            [Flags]
+            public enum CameraFxPaletteFlags : byte
+            {
+                ForceExposure = 1 << 0,
+                ForceAutoexposure = 1 << 1,
+                OverrideExposureBounds = 1 << 2,
+                OverrideInherentBloom = 1 << 3,
+                OverrideBloomIntensity = 1 << 4
+            }
         }
 
         [TagStructure(Size = 0x34)]

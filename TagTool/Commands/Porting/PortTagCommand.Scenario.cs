@@ -446,47 +446,49 @@ namespace TagTool.Commands.Porting
             }
 
             //
-            // Rebuild reach instanced geometry instance per pixel data
-            //
+            // Reach fixups
+            //    
 
-            if (BlamCache.Version >= CacheVersion.HaloOnline700123 && Flags.HasFlag(PortingFlags.Recursive))
+            if (BlamCache.Version >= CacheVersion.HaloReach && Flags.HasFlag(PortingFlags.Recursive))
             {
-                // Prior to reach the "LodDataIndex" was the index of the instanced geometry instance per pixel data.
-                // In reach this is the mesh index, the per pixel data is indexed by instance index instead, 
-                // with a -1 vertex buffer index for instances that do not have per pixel data
-
-                Console.WriteLine("Rebuilding Reach instanced geometry per pixel...");
-
                 var lightmap = CacheContext.Deserialize<ScenarioLightmap>(cacheStream, scnr.Lightmap);
 
-                foreach(var LbspReference in lightmap.LightmapDataReferences)
+                for (int i = 0; i < scnr.StructureBsps.Count; i++)
                 {
-                    if (LbspReference.LightmapBspData == null)
+                    if (scnr.StructureBsps[i].StructureBsp == null)
                         continue;
 
-                    var LbspTag = LbspReference.LightmapBspData;
-                    var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, LbspReference.LightmapBspData);
-                    var sbspTag = scnr.StructureBsps[Lbsp.BspIndex].StructureBsp;
-                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, sbspTag);
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[i].StructureBsp);
+                    var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData);
+
+                    // Reach doesn't have the camera fx block in sbsp anymore, move it back
+                    sbsp.CameraEffects = scnr.CameraFx;
+
+
+                    // Rebuild reach instanced geometry instance per pixel data
+                    //
+                    // Prior to reach the "LodDataIndex" was the index of the instanced geometry instance per pixel data.
+                    // In reach this is the mesh index, the per pixel data is indexed by instance index instead, 
+                    // with a -1 vertex buffer index for instances that do not have per pixel data
 
                     var newPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
-                    for (int i = 0; i < sbsp.InstancedGeometryInstances.Count; i++)
+                    for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
                     {
-                        var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[i];
+                        var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[instanceIndex];
                         if (lightingElement.VertexBufferIndex != -1)
                         {
-                            sbsp.InstancedGeometryInstances[i].LodDataIndex = (short)newPerPixelLighting.Count;
+                            sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = (short)newPerPixelLighting.Count;
                             newPerPixelLighting.Add(lightingElement);
                         }
                         else
                         {
-                            sbsp.InstancedGeometryInstances[i].LodDataIndex = -1;
+                            sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = -1;
                         }
                     }
-
                     Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
-                    CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
-                    CacheContext.Serialize(cacheStream, sbspTag, sbsp);
+
+                    CacheContext.Serialize(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData, Lbsp);
+                    CacheContext.Serialize(cacheStream, scnr.StructureBsps[i].StructureBsp, sbsp);
                 }
             }
 
