@@ -13,7 +13,6 @@ using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Geometry;
-
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
@@ -25,6 +24,15 @@ namespace TagTool.Commands.Porting
         public Scenario ConvertScenario(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
             CurrentScenario = scnr;
+
+            foreach(var zoneset in scnr.ZoneSets)
+            {
+                // cex_ff_halo references bsps that don't exist, remove them
+                zoneset.LoadedBsps &= (Scenario.BspFlags)(scnr.StructureBsps.Count >= 32 ? uint.MaxValue : ~(-1u << scnr.StructureBsps.Count));
+                if (scnr.BspAtlas == null || scnr.BspAtlas.Count == 0)
+                    zoneset.BspAtlasIndex = -1;
+            }
+               
 
             //
             // Halo 3 scenario ai data
