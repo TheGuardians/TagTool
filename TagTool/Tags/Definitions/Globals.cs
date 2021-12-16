@@ -158,11 +158,14 @@ namespace TagTool.Tags.Definitions
         public StringId GlobalWaterMaterial;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public StringId UnknownMaterial;
+        public StringId GlobalAirMaterial;
 
         public short GlobalWaterMaterialType;
 
-        [TagField(Length = 2, Flags = Padding)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short GlobalAirMaterialType;
+
+        [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Padding5;
 
         [TagField(ValidTags = new[] { "effg" })]
@@ -175,7 +178,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag GroundedFriction;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock2> UnknownBlocks2;
+        public List<ActiveCamoGlobalsBlock> ActiveCamo;
 
         [TagField(ValidTags = new[] { "igpd" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag IncidentGlobals;
@@ -205,9 +208,9 @@ namespace TagTool.Tags.Definitions
         public CachedTag PerformanceThrottleGlobals;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock3> UnknownBlocks3;
+        public List<GarbageCollectionBlock> GarbageCollection;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock4> UnknownBlocks4;
+        public List<GlobalCameraImpulseBlock> CameraImpulse;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Material> AlternateMaterials;
 
@@ -1531,34 +1534,28 @@ namespace TagTool.Tags.Definitions
             public float CinematicFilmAperture;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown2;
+            public float CinematicSkipUiUpTime;
 
+            // percentage towards the center - 0=default, 0.5=center of the screen
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown3;
+            public Bounds<float> SubtitleRectWidth;
+            // 0=default, 0.5=center of the screen
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown4;
+            public Bounds<float> SubtitleRectHeight;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown5;
+            public RealRgbColor DefaultSubtitleColor;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown6;
+            public RealRgbColor DefaultSubtitleShadowColor;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown7;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown8;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown9;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown10;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown11;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown12;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown13;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown14;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown15;
+            public List<CinematicCharactersBlock> CinematicCharacters;
+
+            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
+            public class CinematicCharactersBlock : TagStructure
+            {
+                public StringId CharacterName;
+                public RealRgbColor SubtitleColor;
+                public RealRgbColor ShadowColor;
+            }
         }
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
@@ -1672,44 +1669,51 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x54)]
-        public class UnknownBlock2 : TagStructure
+        public class ActiveCamoGlobalsBlock : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
+            // for bipeds, the speed at which you are on the far right of the 'speed to max camo' graph
+            public float BipedSpeedReference; // wu/s
+            // for vehicles, the speed at which you are on the far right of the 'speed to max camo' graph
+            public float VehicleSpeedReference; // wu/s
+            // minimum active camo percentage at which a player's game name will start becoming visible
+            public float CamoValueForGameName;
 
-            public TagFunction Unknown4 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown5 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown6 = new TagFunction { Data = new byte[0] };
+            public TagFunction CamoValueToDistortion = new TagFunction { Data = new byte[0] };
+            public TagFunction CamoValueToTransparency = new TagFunction { Data = new byte[0] };
+            public TagFunction CamoDistortionTextureStrength = new TagFunction { Data = new byte[0] };
 
-            public List<UnknownBlock> UnknownBlocks;
+            public List<ActiveCamoLevelDefinitionBlock> CamoLevels;
 
             [TagStructure(Size = 0x24)]
-            public class UnknownBlock : TagStructure
+            public class ActiveCamoLevelDefinitionBlock : TagStructure
             {
-                public float Unknown1;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public TagFunction Unknown5 = new TagFunction { Data = new byte[0] };
+                // reduces camo value by this much when throwing a grenade
+                public float GrenadeThrowPenalty; // 0..1
+                // reduces camo by this much when meleeing
+                public float MeleePenalty; // 0..1
+                // when taking damage or doing other actions that reduce camo, we will never drop below this value
+                public float MinimumDingedValue;
+                // time it takes to interpolate from 0.0 to 1.0
+                public float InterpolationTime; // s
+                public TagFunction SpeedToMaximumCamo = new TagFunction { Data = new byte[0] };
             }
         }
 
         [TagStructure(Size = 0x18)]
-        public class UnknownBlock3 : TagStructure
+        public class GarbageCollectionBlock : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
+            public float DroppedItem; // seconds
+            public float DroppedItemByPlayer; // seconds
+            public float DroppedItemInMultiplayer; // seconds
+            public float BrokenConstraints; // seconds
+            public float DeadUnit; // seconds
+            public float DeadPlayer; // seconds
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock4 : TagStructure
+        public class GlobalCameraImpulseBlock : TagStructure
         {
-            public TagFunction Unknown = new TagFunction { Data = new byte[0] };
+            public TagFunction Function = new TagFunction { Data = new byte[0] };
         }
 
         [TagStructure(Size = 0x24)]

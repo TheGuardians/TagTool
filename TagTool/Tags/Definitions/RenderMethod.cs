@@ -105,8 +105,7 @@ namespace TagTool.Tags.Definitions
             public List<RenderMethodAnimatedParameterBlock> Functions; // Functions for animated parameters
             public BlendModeValue BlendMode;
             public RenderMethodPostprocessFlags Flags;
-            [TagField(Length = 0x4, Flags = Padding)]
-            public byte[] ImSoFiredPad;
+            public int ImSoFiredPad;
 
             // Indices of constants. TODO: create an enum
             [TagField(Length = 8, MaxVersion = CacheVersion.HaloOnline700123)]
