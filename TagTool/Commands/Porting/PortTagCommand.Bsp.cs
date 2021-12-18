@@ -134,6 +134,9 @@ namespace TagTool.Commands.Porting
 
         void GenerateInstanceBuckets(ScenarioStructureBsp sbsp)
         {
+            if (sbsp.InstancedGeometryInstances == null)
+                return;
+
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
                 var cluster = sbsp.Clusters[i];
