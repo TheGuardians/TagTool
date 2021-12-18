@@ -8,6 +8,8 @@ using TagTool.Pathfinding.Utils;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using System.Linq;
+using System.Collections.Generic;
+using System;
 
 namespace TagTool.Commands.Porting
 {
@@ -81,12 +83,28 @@ namespace TagTool.Commands.Porting
             {
                 bsp.InstancedGeometryInstances = new System.Collections.Generic.List<InstancedGeometryInstance>();
                 bsp.InstancedGeometryInstances.AddRange(resourceDefinition.InstancedGeometryInstances);
+
+                // convert instances
                 foreach(var instancedgeo in bsp.InstancedGeometryInstances)
                 {
                     if(instancedgeo.SeamBitVector.Skip(1).Any(x => x != 0))
                         new TagToolWarning("Instanced seam bit vector truncated!");
 
                     instancedgeo.SeamBitVector = new uint[] { instancedgeo.SeamBitVector[0] };
+              
+                    instancedgeo.PathfindingPolicy = instancedgeo.LightmappingPolicyReach.ConvertLexical<Scenery.PathfindingPolicyValue>();
+
+                    instancedgeo.LightmappingPolicy = instancedgeo.LightmappingPolicyReach.ConvertLexical<InstancedGeometryInstance.InstancedGeometryLightmappingPolicy>();
+                    if (instancedgeo.LightmappingPolicy == InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.SingleProbe)
+                        instancedgeo.LightmappingPolicy = InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.PerPixelShared;
+
+                    if (instancedgeo.BspPhysicsReach.Count > 0)
+                    {
+                        instancedgeo.BspPhysics = new List<CollisionBspPhysicsDefinition>()
+                        {
+                            ConvertCollisionBspPhysicsReach(instancedgeo.BspPhysicsReach[0])
+                        };
+                    };
                 }
 
                 //convert cluster instanced geometry physics
@@ -101,9 +119,9 @@ namespace TagTool.Commands.Porting
                             Shape = new Havok.HkpMoppBvTreeShape(),
                             ClusterIndex = i,
                             MoppCodes = new System.Collections.Generic.List<Havok.TagHkpMoppCode>
-                        {
-                            resourceDefinition.ClusterMoppCode[bsp.Clusters[i].InstanceImposterClusterMoppIndex]
-                        }
+                            {
+                                resourceDefinition.ClusterMoppCode[bsp.Clusters[i].InstanceImposterClusterMoppIndex]
+                            }
                         };
                     }
                 }

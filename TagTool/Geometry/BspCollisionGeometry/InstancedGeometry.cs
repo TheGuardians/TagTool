@@ -27,7 +27,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public CollisionGeometry CollisionInfo;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CollisionGeometry Unused1; // type 2 - unused
-        public TagBlock<CollisionGeometry> CollisionGeometries;
+        public TagBlock<CollisionGeometry> RenderBsp;
 
         public TagBlock<TagHkpMoppCode> CollisionMoppCodes;
         public TagBlock<BreakableSurfaceBits> BreakableSurfaces;
@@ -40,12 +40,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
 
         [TagField(Platform = CachePlatform.MCC)]
-        public uint Unknown1;
-        [TagField(Platform = CachePlatform.MCC)]
-        public uint Unknown2;
-        [TagField(Platform = CachePlatform.MCC)]
-        public uint Unknown3;
-
+        public TagBlock<SmallSurfacesPlanes> SmallSurfacesPlanes;
         public TagBlock<SurfacesPlanes> SurfacePlanes;
         public TagBlock<PlaneReference> Planes;
 
@@ -74,6 +69,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagStructure(Size = 0x80)]
         public class PolyhedronBlock : TagStructure
         {
+            // hkpConvexVerticesShape
             public uint VTableAddress;
             public HkpReferencedObject ReferencedObject;
             public uint UserDataAddress;
@@ -87,13 +83,12 @@ namespace TagTool.Geometry.BspCollisionGeometry
             public uint UseSpuBuffer;
             public HkArrayBase PlaneEquations;
             public uint Connectivity;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+
+            public int MaterialIndex; // sbsp collision materials
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
         }
 
         [TagStructure(Size = 0x30, Align = 0x10)]
@@ -143,35 +138,25 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public Scenery.PathfindingPolicyValue PathfindingPolicy;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public Scenery.LightmappingPolicyValue LightmappingPolicy;
+        public InstancedGeometryLightmappingPolicy LightmappingPolicy;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public byte PathfindingPolicyReach;
+        public InstancedGeometryPathfindingPolicyReach PathfindingPolicyReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public byte LightmappingPolicyReach;
+        public InstancedGeometryLightmappingPolicyReach LightmappingPolicyReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public byte ImposterPolicy;
+        public InstancedGeometryImposterPolicy ImposterPolicy;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public byte Unknown1;
+        public InstancedGeometryStreamingpriority Streamingpriority;
 
         public float LightmapResolutionScale;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CollisionBspPhysicsDefinition> BspPhysics;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public short GroupIndex;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public short GroupListIndex;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public MeshFlags MeshOverrideFlags;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public short Unknown7;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown8;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown13;
+        public float SinglePassRenderDistance;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<CollisionBspPhysicsReach> BspPhysicsReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -179,17 +164,21 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public byte Unknown17b;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public byte Unknown17c;
+        public short GroupIndex;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public byte Unknown17d;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown18a;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown18b;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown19;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public RealVector3d Unknown20;
+        public short GroupListIndex;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public ushort FadePixelsStart;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public ushort FadePixelsEnd;
+
+        public short CubemapBitmapIndex0;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public short CubemapBitmapIndex1;
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public float CubemapBlendFactor;
+
 
         [Flags]
         public enum FlagsValue : ushort
@@ -211,6 +200,46 @@ namespace TagTool.Geometry.BspCollisionGeometry
             DisableFX = 1 << 13,
             DisablePlayCollision = 1 << 14,
             DisableBulletCollision = 1 << 15
+        }
+
+        public enum InstancedGeometryImposterPolicy : sbyte
+        {
+            PolygonDefault,
+            PolygonHigh,
+            CardsMedium,
+            CardsHigh,
+            None,
+            RainbowBox
+        }
+
+        public enum InstancedGeometryStreamingpriority : sbyte
+        {
+            Default,
+            Higher,
+            Highest
+        }
+
+        public enum InstancedGeometryLightmappingPolicy : short
+        {
+            PerPixelSeperate,
+            PerVertex,
+            SingleProbe,
+            PerPixelShared
+        }
+
+        public enum InstancedGeometryLightmappingPolicyReach : sbyte
+        {
+            PerPixelShared,
+            PerVertex,
+            SingleProbe,
+            Exclude
+        }
+
+        public enum InstancedGeometryPathfindingPolicyReach : sbyte
+        {
+            CutOut,
+            Static,
+            None
         }
     }
 }

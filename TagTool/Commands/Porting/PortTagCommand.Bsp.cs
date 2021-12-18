@@ -70,14 +70,6 @@ namespace TagTool.Commands.Porting
 
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
             sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, instance);
-
-            if(BlamCache.Version == CacheVersion.HaloReach)
-            {
-                FixupReachInstancedGeometryInstances(sbsp);
-                ConvertReachEnvironmentMopp(sbsp);
-            }
-                
-
             sbsp.Unknown86 = 1;
 
             //
@@ -96,7 +88,16 @@ namespace TagTool.Commands.Porting
 
             // Without this 005_intro crash on cortana sbsp       
             sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
-            
+
+            if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision
+                sbsp.ImportVersion = 2;
+                GenerateInstanceBuckets(sbsp);
+
+                ConvertReachEnvironmentMopp(sbsp);
+            }
+
             return sbsp;
         }
 
@@ -111,34 +112,28 @@ namespace TagTool.Commands.Porting
             };
 
             if (bspPhysicsReach.GeometryShape.Count > 0)
+            {
                 bspPhysics.GeometryShape = bspPhysicsReach.GeometryShape[0];
+            }
             else if (bspPhysicsReach.PoopShape.Count > 0)
-                bspPhysics.GeometryShape = bspPhysicsReach.PoopShape[0].GeometryShape;
+            {
+                var poop = bspPhysicsReach.PoopShape[0];
+                bspPhysics.GeometryShape = new CollisionGeometryShape()
+                {
+                    ReferencedObject = new Havok.HkpReferencedObject(),
+                    Type = 2,
+                    AABB_Center = poop.AabbCenter,
+                    AABB_Half_Extents = poop.AabbHalfExtents,
+                    CollisionGeometryShapeType = 2,
+                    Scale = poop.Scale
+                };
+            }
 
             return bspPhysics;
         }
 
-        void FixupReachInstancedGeometryInstances(ScenarioStructureBsp sbsp)
+        void GenerateInstanceBuckets(ScenarioStructureBsp sbsp)
         {
-            sbsp.InstancedGeometryInstanceNames.Clear();
-
-            if (sbsp.InstancedGeometryInstances == null)
-                return;
-
-            for(int i = 0; i < sbsp.InstancedGeometryInstances.Count; i++)
-            {
-                var instance = sbsp.InstancedGeometryInstances[i];
-                if (instance.BspPhysicsReach.Count > 0)
-                {
-                    instance.BspPhysics = new List<CollisionBspPhysicsDefinition>()
-                    {
-                        ConvertCollisionBspPhysicsReach(instance.BspPhysicsReach[0])
-                    };
-                }
-            }
-
-            // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision
-            sbsp.ImportVersion = 2;
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
                 var cluster = sbsp.Clusters[i];

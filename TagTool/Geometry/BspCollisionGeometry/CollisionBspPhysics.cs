@@ -29,8 +29,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public class MoppBvTreeShapeStruct : TagStructure
         {
             public HavokShapeStruct20102 MoppBvTreeShape;
-            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
+            public BvTreeTypeValue Type;
             [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
             public int MoppCodePointer;
@@ -43,6 +42,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
             public int ChildSize;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
+            //c_mopp_bv_tree
             public float MoppScale;
             [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
             public byte[] Padding3;
@@ -56,18 +56,25 @@ namespace TagTool.Geometry.BspCollisionGeometry
                 public int UserData;
                 public int Type;
             }
+
+            public enum BvTreeTypeValue : sbyte
+            {
+                Mopp,
+                TrisampledHeightfield,
+                User,
+            };
         }
 
         // A collection of scaled hkpConvexVerticesShape (polyhedra in instanced geometry definition)
-        [TagStructure(Size = 0x90)]
+        [TagStructure(Size = 0x30, Align = 16)]
         public class DecomposedPoopShape : HkpShapeCollection
         {
             [TagField(Align = 16)]
             public RealQuaternion AabbCenter;
             public RealQuaternion AabbHalfExtents;
             public float Scale;
-            [TagField(Align = 16)]
-            public CollisionGeometryShape GeometryShape;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding5;
         }
     }
 

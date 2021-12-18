@@ -499,6 +499,18 @@ namespace TagTool.Commands.Porting
                         Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
                         CacheContext.Serialize(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData, Lbsp);
                     }
+
+                    // Fixup instance bsp physics
+                    for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
+                    {
+                        var instance = sbsp.InstancedGeometryInstances[instanceIndex];
+                        foreach(var bspPhysics in instance.BspPhysics)
+                        {
+                            bspPhysics.GeometryShape.BspIndex = (sbyte)i;
+                            bspPhysics.GeometryShape.CollisionGeometryShapeKey = (ushort)instanceIndex;
+                        }
+                    }
+
                     CacheContext.Serialize(cacheStream, scnr.StructureBsps[i].StructureBsp, sbsp);
                 }
             }

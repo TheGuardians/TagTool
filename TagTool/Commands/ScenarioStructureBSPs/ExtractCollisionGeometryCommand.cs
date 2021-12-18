@@ -206,7 +206,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                         baseVertex += instance.CollisionInfo.Vertices.Count;
 
-                        foreach (var bsp in instance.CollisionGeometries)
+                        foreach (var bsp in instance.RenderBsp)
                         {
                             for (var i = 0; i < bsp.Vertices.Count; i++)
                             {

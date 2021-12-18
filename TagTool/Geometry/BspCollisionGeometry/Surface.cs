@@ -31,6 +31,13 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public int PlaneCountNew;
     }
 
+    [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    public class SmallSurfacesPlanes : TagStructure
+    {
+        public ushort PlaneIndexOld;
+        public short PlaneCountOld;
+    }
+
     [TagStructure(Size = 0x4)]
     public class EdgeToSeamMapping : TagStructure
     {
