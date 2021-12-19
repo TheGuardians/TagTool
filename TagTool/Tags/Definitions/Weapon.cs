@@ -10,7 +10,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x354, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x358, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x384, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline449175, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x2CC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x50C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class Weapon : Item
     {
@@ -519,18 +520,18 @@ namespace TagTool.Tags.Definitions
             public FiringNoiseValue FiringNoise;
  
             // how loud this weapon appears to the AI
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public FiringNoiseValue FiringNoiseReach;
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public PredictionTypeValue PredictionTypeReach;
             // Valid only for barrels set to prediction type "continuous". Controls how many projectiles per second can be
             // individually synchronized (use debug_projectiles to diagnose).
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float EventSynchronizedProjectilesPerSecond;
             // Valid only for barrels set to prediction type "continuous". If the barrel's current error level is over this value
             // (zero to one scale), we will not consider synchronizing projectiles with individual events (use debug_projectiles
             // to diagnose).
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float MaximumBarrelErrorForEventSynchronization;
 
             public FiringErrorStruct FiringError;
@@ -559,6 +560,7 @@ namespace TagTool.Tags.Definitions
             // the amount of heat generated each time the trigger is fired
             public float HeatGeneratedPerRound;
             // function value sets the amount of heat to add to the weapon each tick the barrel is firing
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId HeatGeneratedPerRoundFunction;
             // the amount the weapon ages each time the trigger is fired
             public float AgeGeneratedPerRoundMp;
