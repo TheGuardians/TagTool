@@ -868,6 +868,9 @@ namespace TagTool.Commands.Porting
                 case DamageEffect damageEffect:
                     blamDefinition = ConvertDamageEffect(damageEffect);
                     break;
+                case DamageResponseDefinition damageResponse:
+                    blamDefinition = ConvertDamageResponseDefinition(blamCacheStream, damageResponse);
+                    break;
 
                 case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);

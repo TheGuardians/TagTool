@@ -7,29 +7,48 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloReach)]
     public class DamageResponseDefinition : TagStructure
-	{
+    {
         public List<DamageResponseClass> Classes;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<AreaControlBlockStruct> AreaControl;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused;
 
-		[TagStructure(Size = 0xAC, MaxVersion = CacheVersion.Halo3Beta)]
-		[TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xAC, MaxVersion = CacheVersion.Halo3Beta)]
+        [TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x84, MinVersion = CacheVersion.HaloReach)]
         public class DamageResponseClass : TagStructure
         {
             public DamageResponseClassTypeEnum Type;
             public DamageResponseClassFlags Flags;
-            public DamageResponseScreenFlashStruct ScreenFlash;
 
-			[TagField(MinVersion = CacheVersion.Halo3Retail)]
-			public DamageResponseMotionBlurStruct MotionBlur;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public DamageResponseScreenFlashStruct ScreenFlash;
+            [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+            public DamageResponseMotionBlurStruct MotionBlur;
 
             public DamageResponseDirectionalFlashStruct DirectionalFlash;
-            public DamageResponseRumbleStruct Rumble;
-            public DamageResponseCameraImpulseStruct CameraImpulse;
-            public DamageResponseCameraShakeStruct CameraShake;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public DamageResponseMotionSensorPing MotionSensorPing;
+            [TagField(ValidTags = new[] { "rmbl" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag RumbleReference;
+            [TagField(ValidTags = new[] { "csdt" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag CameraShakeReachReference;
+            [TagField(ValidTags = new[] { "sidt" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag SimulatedInput;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public Rumble Rumble;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public CameraShake CameraShake;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<DamageResponseGlobalSoundEffectBlockStruct> GlobalSoundEffect;
 
             public enum DamageResponseClassTypeEnum : short
             {
@@ -119,20 +138,35 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x24)]
+            [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
             public class DamageResponseDirectionalFlashStruct : TagStructure
             {
                 public float Duration;
-                public GlobalReverseTransitionFunctionsEnum FadeFunction;
 
+                public GlobalReverseTransitionFunctionsEnum FadeFunction;
                 [TagField(Length = 2, Flags = Padding)]
                 public byte[] Padding0;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float Size;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float CenterSize;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float OffscreenSize;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float CenterAlpha;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float OffscreenAlpha;
+
                 public float InnerScale;
                 public float OuterScale;
                 public RealArgbColor FlashColor;
 
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealArgbColor ArrowColor;
+
                 public enum GlobalReverseTransitionFunctionsEnum : short
                 {
                     Linear,
@@ -145,98 +179,73 @@ namespace TagTool.Tags.Definitions
                     One
                 }
             }
+        }
 
-            [TagStructure(Size = 0x30)]
-            public class DamageResponseRumbleStruct : TagStructure
+        [TagStructure(Size = 0x4)]
+        public class DamageResponseMotionSensorPing : TagStructure
+        {
+            public short PingDuration; // ticks
+            public short PingScale;
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class DamageResponseGlobalSoundEffectBlockStruct : TagStructure
+        {
+            public StringId EffectName;
+            public MappingFunction ScaleDuration; // seconds
+
+            [TagStructure(Size = 0x14)]
+            public class MappingFunction : TagStructure
             {
-                public DamageResponseRumbleFrequencyStruct LowFrequencyRumble;
-                public DamageResponseRumbleFrequencyStruct HighFrequencyRumble;
+                public byte[] Data;
+            }
+        }
 
-                [TagStructure(Size = 0x18)]
-                public class DamageResponseRumbleFrequencyStruct : TagStructure
-                {
-                    public float Duration; // seconds
-					public TagFunction DirtyRumble = new TagFunction { Data = new byte[0] };
-                }
+        [TagStructure(Size = 0x4C)]
+        public class AreaControlBlockStruct : TagStructure
+        {
+            public AreaControlFlags Flags;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            // the maximum distance this player feedback will affect
+            public float MaximumDistance; // world units
+            public AreaControlScalarFunctionStruct DistanceFalloff;
+            public AreaControlScalarFunctionStruct AngleFalloff;
+            public AreaControlScalarObjectFunctionStruct ObjectFalloff;
+
+            [Flags]
+            public enum AreaControlFlags : ushort
+            {
+                DistanceFalloff = 1 << 0,
+                AngleFalloff = 1 << 1,
+                ObjectFunctionFalloff = 1 << 2,
+                // use the head position and facing vector of the unit instead of the player camera
+                UseUnitPosition = 1 << 3
             }
 
-            [TagStructure(Size = 0x18)]
-            public class DamageResponseCameraImpulseStruct : TagStructure
+            [TagStructure(Size = 0x14)]
+            public class AreaControlScalarFunctionStruct : TagStructure
             {
-                public float Duration; // seconds
-                public GlobalReverseTransitionFunctionsEnum FadeFunction;
+                public MappingFunction Mapping;
 
-                [TagField(Length = 2, Flags = Padding)]
-                public byte[] Padding0;
-
-                public Angle Rotation; // degrees
-                public float Pushback; // world units
-                public Bounds<float> Jitter; // world units
-
-                public enum GlobalReverseTransitionFunctionsEnum : short
+                [TagStructure(Size = 0x14)]
+                public class MappingFunction : TagStructure
                 {
-                    Linear,
-                    Late,
-                    VeryLate,
-                    Early,
-                    VeryEarly,
-                    Cosine,
-                    Zero,
-                    One
+                    public byte[] Data;
                 }
             }
 
             [TagStructure(Size = 0x1C)]
-            public class DamageResponseCameraShakeStruct : TagStructure
+            public class AreaControlScalarObjectFunctionStruct : TagStructure
             {
-                // the effect will last for this duration.
-                public float ShakeDuration; // seconds
-                // a function to envelope the effect's magnitude over time
-                public GlobalReverseTransitionFunctionsEnum FalloffFunction;
-                
-				[TagField(Length = 2, Flags = Padding)]
-                public byte[] Padding0;
-                
-				// random translation in all directions
-                public float RandomTranslation; // world units
-                // random rotation in all directions
-                public Angle RandomRotation; // degrees
-                // a function to perturb the effect's behavior over time
-                public GlobalPeriodicFunctionsEnum WobbleFunction;
+                public StringId InputVariable;
+                public StringId RangeVariable;
+                public MappingFunction Mapping;
 
-                [TagField(Length = 2, Flags = Padding)]
-                public byte[] Padding1;
-
-                public float WobbleFunctionPeriod; // seconds
-                // a value of 0.0 signifies that the wobble function has no effect; a value of 1.0 signifies that the effect will not be felt when the wobble function's value is zero.
-                public float WobbleWeight;
-
-                public enum GlobalReverseTransitionFunctionsEnum : short
+                [TagStructure(Size = 0x14)]
+                public class MappingFunction : TagStructure
                 {
-                    Linear,
-                    Late,
-                    VeryLate,
-                    Early,
-                    VeryEarly,
-                    Cosine,
-                    Zero,
-                    One
-                }
-
-                public enum GlobalPeriodicFunctionsEnum : short
-                {
-                    One,
-                    Zero,
-                    Cosine,
-                    CosinevariablePeriod,
-                    DiagonalWave,
-                    DiagonalWavevariablePeriod,
-                    Slide,
-                    SlidevariablePeriod,
-                    Noise,
-                    Jitter,
-                    Wander,
-                    Spark
+                    public byte[] Data;
                 }
             }
         }

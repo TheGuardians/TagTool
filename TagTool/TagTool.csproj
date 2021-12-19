@@ -762,6 +762,7 @@
     <Compile Include="Shaders\ShaderMatching\TerrainSorter.cs" />
     <Compile Include="Shaders\ShaderType.cs" />
     <Compile Include="Shaders\SortingLayer.cs" />
+    <Compile Include="Tags\Definitions\CameraShake.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
     <Compile Include="Cache\Gen1\TagDefinitionsGen1.cs" />
@@ -1231,6 +1232,7 @@
     <Compile Include="Tags\Definitions\GlobalCacheFilePixelShaders.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
+    <Compile Include="Tags\Definitions\Rumble.cs" />
     <Compile Include="Tags\Definitions\ShaderGlass.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />

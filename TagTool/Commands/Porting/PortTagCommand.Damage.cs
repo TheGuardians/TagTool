@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using TagTool.Cache;
 using TagTool.Damage;
 using TagTool.Tags.Definitions;
@@ -12,9 +13,43 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version == CacheVersion.HaloReach)
             {
                 damageEffect.Flags = damageEffect.FlagsReach.ConvertLexical<DamageEffect.DamageFlags>();
+
+                if(damageEffect.CustomResponseLabels.Count > 0)
+                    damageEffect.CustomResponseLabel = damageEffect.CustomResponseLabels[0].CustomLabel;
             }
 
             return damageEffect;
+        }
+
+        public DamageResponseDefinition ConvertDamageResponseDefinition(Stream blamCacheStream, DamageResponseDefinition damageResponse)
+        {
+            if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                foreach(var responseClass in damageResponse.Classes)
+                {
+                    responseClass.DirectionalFlash.Size = responseClass.DirectionalFlash.CenterSize;
+
+                    if(responseClass.RumbleReference != null)
+                    {
+                        var rumble = BlamCache.Deserialize<Rumble>(blamCacheStream, responseClass.RumbleReference);
+                        responseClass.Rumble = rumble;
+                    }
+
+                    if (responseClass.CameraShakeReachReference != null)
+                    {
+                        var cameraShake = BlamCache.Deserialize<CameraShake>(blamCacheStream, responseClass.CameraShakeReachReference);
+                        responseClass.CameraShake = ConvertCameraShake(cameraShake);
+                    }
+                }
+            }
+
+            return damageResponse;
+        }
+
+        public CameraShake ConvertCameraShake(CameraShake cameraShake)
+        {
+            // TODO
+            return cameraShake;
         }
 
         public DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)
