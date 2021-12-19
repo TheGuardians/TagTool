@@ -1029,7 +1029,10 @@ namespace TagTool.Commands.Porting
                     }
                     if(BlamCache.Version >= CacheVersion.HaloReach)
                     {
-                        foreach(var material in hlmt.Materials)
+                        if(hlmt.NewDamageInfo == null || hlmt.NewDamageInfo.Count == 0)
+                            hlmt.NewDamageInfo = new List<Model.GlobalDamageInfoBlock>() { ConvertDamageInfoReach(hlmt.OmahaDamageInfo) };
+
+                        foreach (var material in hlmt.Materials)
                         {
                             string name = CacheContext.StringTable.GetString(material.MaterialName);
                             material.GlobalMaterialIndex = (short)ConvertReachMaterial(CacheContext, cacheStream, BlamCache, blamCacheStream, ref name, material.GlobalMaterialIndex);
