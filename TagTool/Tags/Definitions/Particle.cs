@@ -23,10 +23,15 @@ namespace TagTool.Tags.Definitions
         public AppearanceFlagsValueReach AppearanceFlagsReach;
 
         public ParticleBillboardStyleValue ParticleBillboardStyle;
+
+        [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Padding1;
+
         public short FirstSequenceIndex;
         public short SequenceCount;
-        [TagField(Length = 2, Flags = Padding)]
-        public byte[] Padding0;
+
+        [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding2;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float LowResolutionSwitchDistance;

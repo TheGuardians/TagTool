@@ -860,29 +860,27 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x6C)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
         public class EnvironmentObject : TagStructure
         {
             [TagField(Length = 32)]
-            public string Name;
-            
+            public string Name;     
             public RealQuaternion Rotation;
             public RealPoint3d Position;
-            public float Scale;
-            
-            public short PaletteIndex;
-            
+            public float Scale; 
+            public short PaletteIndex;   
             public FlagsValue Flags;
-            
             [TagField(Flags = Padding, Length = 1)]
-            public byte[] Unused = new byte[1];
-            
+            public byte[] Padding1 = new byte[1];
             public int UniqueId;
-
             public Tag ExportedObjectType;
-
-            [TagField(Length = 32)]
+            [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
             public string ScenarioObjectName;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId ScenarioObjectNameReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId VariantName;
 
             [Flags]
             public enum FlagsValue : byte

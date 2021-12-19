@@ -5,7 +5,8 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x24, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x24, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "device_machine", Tag = "mach", Size = 0x18, MinVersion = CacheVersion.HaloReach)]
     public class DeviceMachine : Device
     {
         public TypeValue Type;
@@ -15,9 +16,10 @@ namespace TagTool.Tags.Definitions
         public CollisionResponseValue CollisionResponse;
         public short ElevatorNode;
         public PathfindingPolicyValue PathfindingPolicy;
-        public short Unknown6;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unknown7;
  
         public enum TypeValue : short

@@ -3,6 +3,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Damage;
 
 namespace TagTool.Tags.Definitions
 {
@@ -122,8 +123,12 @@ namespace TagTool.Tags.Definitions
                 public EffectEventPartCameraMode CameraMode;
                 public Tag RuntimeBaseGroupTag;
 
-                [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
-                public byte[] Unused;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public EffectpartGameModeDefinition GameMode;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public DamageReportingType DamageReportingType;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+                public byte[] Padding1;
 
                 public CachedTag Type;
                 public Bounds<float> VelocityBounds;
@@ -135,6 +140,16 @@ namespace TagTool.Tags.Definitions
                 public RealEulerAngles2d RelativeOrientation;
                 public EffectEventPartScales AScalesValues;
                 public EffectEventPartScales BScalesValues;
+
+                public enum EffectpartGameModeDefinition : sbyte
+                {
+                    Any,
+                    CampaignOnly,
+                    MultiplayerOnly,
+                    CampaignOnlyNotCinematics,
+                    CampaignCinematicsOnly,
+                    CampaignSoloOnly
+                }
             }
 
             [TagStructure(Size = 0x14)]

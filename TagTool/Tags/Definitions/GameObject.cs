@@ -67,8 +67,8 @@ namespace TagTool.Tags.Definitions
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
 
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
-        public byte[] RuntimeInterpolatorFunctionsBlock = new byte[0xC];
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ObjectRuntimeInterpolatorFunctionsBlock> RuntimeInterpolatorFunctions;
 
         public short HudTextMessageIndex;
 
@@ -137,6 +137,12 @@ namespace TagTool.Tags.Definitions
             Sinker,
             SuperSinker,
             None
+        }
+
+        [TagStructure(Size = 0x4)]
+        public class ObjectRuntimeInterpolatorFunctionsBlock : TagStructure
+        {
+            public int RuntimeInterpolatorToObjectFunctionMapping;
         }
 
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
