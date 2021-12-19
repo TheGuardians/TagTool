@@ -36,21 +36,45 @@ namespace TagTool.Tags.Definitions
         public float HeatDetonationFraction; // [0,1]
         // the amount of heat lost each second when the weapon is not being fired
         public float HeatLossPerSecond; // [0,1]
+        // function values sets the current heat loss per second
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId HeatLoss;
+        // function value sets the heat loss per second while weapon is being vented
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId HeatLossVenting;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float HeatVentingTime; // seconds
+        // heat at which to begin the venting exit animations so that the weapon is just about fully cooled when the exit
+        // animation completes.
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float HeatVentingExitHeat;
         // the amount of illumination given off when the weapon is overheated
         public float HeatIllumination; // [0,1]
+        // the amount of heat at which a warning will be displayed on the hud
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float HeatWarningThreshold;
         // the amount of heat lost each second when the weapon is not being fired
         public float OverheatedHeatLossPerSecond; // [0,1]
+        // function values sets the heat loss per second when weapon is overheated
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId OverheatedHeatLoss;
         public CachedTag Overheated;
         public CachedTag OverheatedDamageEffect;
         public CachedTag Detonation;
         public CachedTag DetonationDamageEffect2;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag PlayerMeleeDamage;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag PlayerMeleeResponse;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown27;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public MeleeDamageParametersStruct MeleeDamageParameters;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<MeleeDamageParametersStruct> MeleeDamageParametersReach;
 
         public CachedTag ClangEffect;
 
@@ -74,14 +98,24 @@ namespace TagTool.Tags.Definitions
         public uint Unknown15;
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<Unit.TargetTrackingBlock> TargetTracking;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+
+        // ballistics ?
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown16;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown17;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown18;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown19;
+
+        // At the min range (or closer), the minimum ballistic arcing is used, at the max (or farther away), the maximum
+        // arcing is used
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Bounds<float> BallisticArcingFiringBounds; // world units
+        // Controls speed and degree of arc. 0 = low, fast, 1 = high, slow
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Bounds<float> BallisticArcingFractionBounds; // [0-1]
 
         public MovementPenaltyModes MovementPenalized;
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
@@ -114,36 +148,42 @@ namespace TagTool.Tags.Definitions
         // how much to decrease active camo when a round is fired
         public float ActiveCamoDing;
         // how fast to increase active camo (per tick) when a round is fired
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float ActiveCamoRegrowthRate;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown22; // HandleNode ?
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown23;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId HandleNode;
 
         // -------- weapon labels
         public StringId WeaponClass;
         public StringId WeaponName;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public MultiplayerWeaponTypeValue MultiplayerWeaponType;
         public WeaponTypeValue WeaponType;
 
         public TrackingType Tracking;
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Padding5;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public SpecialHudVersionValue SpecialHudVersion;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public int SpecialHudIcon;
 
         // -------- interface
         [TagField(Flags = Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = Padding, Length = 16, MinVersion = CacheVersion.HaloReach)]
         public byte[] SharedInterface;
         public List<FirstPersonBlock> FirstPerson;
         public CachedTag HudInterface;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag AlternateHudInterface;
 
         public List<PredictedResource> PredictedWeaponResources;
         public List<Magazine> Magazines;
@@ -171,11 +211,13 @@ namespace TagTool.Tags.Definitions
         public CachedTag AgedMaterialEffects;
         public float ExternalAgingAmount;
         public uint CampaignExternalAgingAmount;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ExternalHeatAmount;
 
         public RealVector3d FirstPersonWeaponOffset;
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public RealVector3d CenteredFirstPersonWeaponOffset;
-        [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<FirstPersonOffsetBlock> NewFirstPersonWeaponOffsets;
         public RealVector2d FirstPersonScopeSize;
         // range in degrees. 0 is straight, -90 is down, 90 is up
@@ -183,9 +225,12 @@ namespace TagTool.Tags.Definitions
         public float WeaponZoomTime; // seconds
         public float WeaponReadyForUseTime; // seconds
         // e.g. - 2.0 makes playspeed twice as fast
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public float WeaponReadyFirstPersonAnimationPlaybackScale;
         public StringId UnitStowAnchorName;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<WeaponScreenEffectBlock> ScreenEffects;
 
         public enum SecondaryTriggerModeValue : short
         {
@@ -312,7 +357,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x90)]
+        [TagStructure(Size = 0x90, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloReach)]
         public class Trigger : TagStructure
         {
             public TriggerFlags Flags;
@@ -325,8 +371,11 @@ namespace TagTool.Tags.Definitions
             public byte[] Padding;
             public AutofireStruct Autofire;
             public ChargingStruct Charging;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float LockonHoldTime;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float LockonAcquireTime;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float LockonGraceTime;
 
             [TagStructure(Size = 0xC)]
@@ -346,19 +395,26 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x68)]
+            [TagStructure(Size = 0x68, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class ChargingStruct : TagStructure
             {
                 // the amount of time it takes for this trigger to become fully charged
                 public float ChargingTime; // seconds
                 // the amount of time this trigger can be charged before becoming overcharged
                 public float ChargedTime; // seconds
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public OverchargedActionValue OverchargedAction;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public OverchargedActionValueReach OverchargedActionReach;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ChargingFlagsValue Flags;
                 // 96 was the constant in code for the pp
                 public short CancelledTriggerThrow;
                 // the amount of illumination given off when the weapon is fully charged
                 public float ChargedIllumination; // [0,1]
                 // length of time the weapon will spew (fire continuously) while discharging
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float SpewTime; // seconds
                 // the charging effect is created once when the trigger begins to charge
                 public CachedTag ChargingEffect;
@@ -372,12 +428,39 @@ namespace TagTool.Tags.Definitions
                 public CachedTag DischargeEffect;
                 // the discharging effect is created once when the trigger releases its charge
                 public CachedTag DischargeDamageEffect;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<WeaponTriggerChargingFireFraction> FireFractions;
 
                 public enum OverchargedActionValue : short
                 {
                     None,
                     Explode,
                     Discharge
+                }
+
+                public enum OverchargedActionValueReach : sbyte
+                {
+                    None,
+                    Explode,
+                    Discharge
+                }
+
+                [Flags]
+                public enum ChargingFlagsValue : byte
+                {
+                    // discharging a partially charged weapon will spew for the charged fraction of the spew time set below
+                    CanFireFromPartialCharge = 1 << 0,
+                    // if magazine present, do not fire more than current rounds loaded (mantis rocket launcher)
+                    LimitToCurrentRoundsLoaded = 1 << 1,
+                    // spew-charge triggers only
+                    WontChargeUnlessTrackedTargetIsValid = 1 << 2
+                }
+
+                [TagStructure(Size = 0x4)]
+                public class WeaponTriggerChargingFireFraction : TagStructure
+                {
+                    // charging fraction at which the weapon should additionally fire a shot.
+                    public float ChargeFraction; // [0.1]
                 }
             }
 
@@ -416,7 +499,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x134, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x1AC, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x1AC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x184, MinVersion = CacheVersion.HaloReach)]
         public class Barrel : TagStructure
         {
             public BarrelFlags Flags;
@@ -426,11 +510,31 @@ namespace TagTool.Tags.Definitions
             public short MinimumRoundsLoaded;
             public short RoundsBetweenTracers;
             public StringId OptionalBarrelMarkerName;
+
             // -------- prediction properties
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public PredictionTypeValue PredictionType;
             // how loud this weapon appears to the AI
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public FiringNoiseValue FiringNoise;
+ 
+            // how loud this weapon appears to the AI
+            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            public FiringNoiseValue FiringNoiseReach;
+            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            public PredictionTypeValue PredictionTypeReach;
+            // Valid only for barrels set to prediction type "continuous". Controls how many projectiles per second can be
+            // individually synchronized (use debug_projectiles to diagnose).
+            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            public float EventSynchronizedProjectilesPerSecond;
+            // Valid only for barrels set to prediction type "continuous". If the barrel's current error level is over this value
+            // (zero to one scale), we will not consider synchronizing projectiles with individual events (use debug_projectiles
+            // to diagnose).
+            [TagField(MaxVersion = CacheVersion.HaloReach)]
+            public float MaximumBarrelErrorForEventSynchronization;
+
             public FiringErrorStruct FiringError;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public DualWeaponErrorStruct DualWeaponError;
             public DistributionFunctionValue ProjectileDistributionFunction;
             public short ProjectilesPerShot;
@@ -454,40 +558,59 @@ namespace TagTool.Tags.Definitions
             public float IlluminationRecoveryTime;
             // the amount of heat generated each time the trigger is fired
             public float HeatGeneratedPerRound;
+            // function value sets the amount of heat to add to the weapon each tick the barrel is firing
+            public StringId HeatGeneratedPerRoundFunction;
             // the amount the weapon ages each time the trigger is fired
             public float AgeGeneratedPerRoundMp;
             // the amount the weapon ages each time the trigger is fired
             public float AgeGeneratedPerRoundSp;
             // the next trigger fires this often while holding down this trigger
             public float OverloadTime;
+           
             // -------- angle change (recoil)
             // angle change per shot of the weapon during firing
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<Angle> AngleChangePerShot;
             // the continuous firing time it takes for the weapon to achieve its final angle change per shot
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float AngleChangeAccelerationTime;
             // the continuous idle time it takes for the weapon to return to its initial angle change per shot
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float AngleChangeDecelerationTime;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public AngleChangeFunctionValue AngleChangeFunction;
-            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padding2;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float AngleChangeAccelerationRate;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float AngleChangeDecelerationRate;
+
             public float IlluminationRecoveryRate;
             public float EjectionPortRecoveryRate;
             public float RateOfFireAccelerationTime;
             public float RateOfFireDecelerationTime;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float ErrorAccelerationRate;
             public float ErrorDecelerationRate;
+
             // firing effects determine what happens when this trigger is fired
             public List<FiringEffectBlock> FiringEffects;
 
-            [TagStructure(Size = 0x24)]
+            [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloReach)]
             public class WeaponBarrelFiringParametersStruct : TagStructure
             {
                 // the number of firing effects created per second
                 public Bounds<float> RoundsPerSecond;
+                // function value sets the current rate of fire when the barrel is firing
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId RateOfFireAcceleration;
                 // the continuous firing time it takes for the weapon to achieve its final rounds per second
                 public float AccelerationTime; // seconds
+                // function value sets the current rate of fire when the barrel is not firing
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId RateOfFireDeceleration;
                 // the continuous idle time it takes for the weapon to return from its final rounds per second to its initial
                 public float DecelerationTime; // seconds
                 // scale the barrel spin speed by this amount
@@ -500,12 +623,20 @@ namespace TagTool.Tags.Definitions
                 public float FireRecoveryTime; // seconds
                 // how much of the recovery allows shots to be queued
                 public float SoftRecoveryFraction;
+                // how long after a set of shots it takes before the weapon can melee
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float MeleeFireRecoveryTime; // seconds
+                // how much of the melee recovery allows melee to be queued
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float MeleeSoftRecoveryFraction;
             }
 
-            [TagStructure(Size = 0x1C)]
+            [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
             public class FiringErrorStruct : TagStructure
             {
                 // the continuous firing time it takes for the weapon to achieve its final error
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float AccelerationTime; // seconds
                 // the continuous idle time it takes for the weapon to return to its initial error
                 public float DecelerationTime; // seconds
@@ -811,18 +942,44 @@ namespace TagTool.Tags.Definitions
         NonlungeMeleeDashDisabled = 1 << 2
     }
 
-    [TagStructure(Size = 0xCC)]
+    [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloReach)]
     public class MeleeDamageParametersStruct : TagStructure
     {
         public RealEulerAngles2d DamagePyramidAngles;
         public float DamagePyramidDepth;
+
+        // 0 defaults to 1.22f
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float MaximumLungeRange; // wu
+        // the distance out from the pyramid center to spawn explosive effects.  This value will be clamped to the damage
+        // pyramid depth. 0 defaults to the damage pyramid depth
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DamageLungeExplosiveDepth; // wu
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float RuntimeDamageLungeExplosiveFraction;
+
         // -------- melee combo damage
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag FirstHitMeleeDamage;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag FirstHitMeleeResponse;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag SecondHitMeleeDamage;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag SecondHitMeleeResponse;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ThirdHitMeleeDamage;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ThirdHitMeleeResponse;
+
+        // this is only important for the energy sword
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag MeleeDamage;
+        // this is only important for the energy sword
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag MeleeResponse;
+
         // this is only important for the energy sword
         public CachedTag LungeMeleeDamage;
         // this is only important for the energy sword
@@ -838,7 +995,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnlineED)]
     public class AimAssistStruct : TagStructure
     {
         // the maximum angle that autoaim works at full strength
@@ -868,5 +1025,24 @@ namespace TagTool.Tags.Definitions
         public byte[] CVYGPMLMX;
         [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
         public byte[] UQXKLVAXI;
+    }
+
+    [TagStructure(Size = 0x14)]
+    public class WeaponScreenEffectBlock : TagStructure
+    {
+        public WeaponScreenEffectFlags Flags;
+        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        [TagField(ValidTags = new[] { "sefc" })]
+        public CachedTag ScreenEffect;
+
+        [Flags]
+        public enum WeaponScreenEffectFlags : byte
+        {
+            OverridesUnitAndCameraScreenEffects = 1 << 0,
+            Unzoomed = 1 << 1,
+            ZoomLevel1 = 1 << 2,
+            ZoomLevel2 = 1 << 3
+        }
     }
 }
