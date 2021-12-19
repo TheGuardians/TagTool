@@ -388,7 +388,7 @@ namespace TagTool.BlamFile
             {
                 var magazine = weap.Magazines[0];
 
-                var initial = magazine.RoundsTotalLoadedMaximum;
+                var initial = magazine.RoundsLoadedMaximum;
                 var total = magazine.RoundsTotalInitial;
 
                 // Override from scenario
