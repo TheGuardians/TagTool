@@ -7,15 +7,17 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "beam_system", Tag = "beam", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "beam_system", Tag = "beam", Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "beam_system", Tag = "beam", Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "beam_system", Tag = "beam", Size = 0x18, MinVersion = CacheVersion.HaloReach)]
     public class BeamSystem : TagStructure
 	{
         public List<BeamDefinitionBlock> Beams;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused1; // can prob yeet this
 
-        [TagStructure(Size = 0x208)]
+        [TagStructure(Size = 0x208, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x238, MinVersion = CacheVersion.HaloReach)]
         public class BeamDefinitionBlock : TagStructure
 		{
             [TagField(Flags = Label)]
@@ -29,10 +31,20 @@ namespace TagTool.Tags.Definitions
 
             public RealVector2d UvTiling;
             public RealVector2d UvScrolling;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint Unknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint Unknown3;
+
             public float OriginFadeRange;
             public float OriginFadeCutoff;
             public float EdgeFadeRange;
             public float EdgeFadeCutoff;
+
+           
 
             public BeamPropertyReal Length;
             public BeamPropertyReal Offset;

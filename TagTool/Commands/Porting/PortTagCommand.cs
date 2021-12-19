@@ -475,9 +475,7 @@ namespace TagTool.Commands.Porting
                     {
                         string name = ((TagGroupGen3)part.Type.Group).Name;
 
-                        if (name == "beam_system" || name == "projectile")
-                            part.Type = DefaultTags[part.Type.Group.Tag];
-                        else if (name == "cheap_particle_emitter")
+                        if (name == "cheap_particle_emitter")
                             part.Type = null;
                     }
             }
