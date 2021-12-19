@@ -865,7 +865,11 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-				case Dialogue udlg:
+                case DamageEffect damageEffect:
+                    blamDefinition = ConvertDamageEffect(damageEffect);
+                    break;
+
+                case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
 					break;
 
@@ -1868,41 +1872,6 @@ namespace TagTool.Commands.Porting
 
             return flags;
         }
-
-        private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)
-		{
-			string value = null;
-
-			switch (BlamCache.Version)
-			{
-				case CacheVersion.Halo2Vista:
-				case CacheVersion.Halo2Xbox:
-					value = damageReportingType.Halo2Retail.ToString();
-					break;
-
-				case CacheVersion.Halo3ODST:
-                    if (damageReportingType.Halo3ODST == DamageReportingType.Halo3ODSTValue.ElephantTurret)
-                        value = DamageReportingType.HaloOnlineValue.GuardiansUnknown.ToString();
-                    else
-					    value = damageReportingType.Halo3ODST.ToString();
-					break;
-
-				case CacheVersion.Halo3Retail:
-                    if (damageReportingType.Halo3Retail == DamageReportingType.Halo3RetailValue.ElephantTurret)
-                        value = DamageReportingType.HaloOnlineValue.GuardiansUnknown.ToString();
-                    else
-                        value = damageReportingType.Halo3Retail.ToString();
-					break;
-                case CacheVersion.HaloReach:
-                    value = damageReportingType.HaloReach.ToString();
-                    break;
-			}
-
-			if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
-				throw new NotSupportedException(value ?? CacheContext.Version.ToString());
-
-			return damageReportingType;
-		}
 
 		private TagFunction ConvertTagFunction(TagFunction function)
 		{

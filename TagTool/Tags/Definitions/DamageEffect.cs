@@ -9,7 +9,8 @@ namespace TagTool.Tags.Definitions
 {
 	[TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xE8, MaxVersion = CacheVersion.Halo3Beta)]
 	[TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xE8, MinVersion = CacheVersion.HaloReach)]
     public class DamageEffect : TagStructure
 	{
         public Bounds<float> Radius; // world units
@@ -17,42 +18,73 @@ namespace TagTool.Tags.Definitions
         public DamageEffectFlags EffectFlags;
         public DamageSideEffects SideEffect;
         public DamageCategories Category;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public DamageDeathVocalizations DeathVocalization;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public DamageFlags Flags;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public DamageFlagsReach FlagsReach;
         public float AreaOfEffectCoreRadius; // if this is area of effect damage
         public float DamageLowerBound;
         public Bounds<float> DamageUpperBound;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public TagFunction DamageFalloffFunction;
         public Angle DamageInnerConeAngle;
         public Angle DamageOuterConeAngle;
         public float ActiveCamoflageDamage; // how much more visible this damage makes a player who is active camouflaged [0,1]
         public float Stun; // amount of stun added to damaged unit [0,1]
         public float MaximumStun; // damaged unit's stun will never exceed this amount [0,1]
         public float StunDuration; // duration of stun due to this damage (seconds)
+        // how long we stun recovering current body damage
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int DamageStun; // ticks
         public float InstantaneousAcceleration; // [0,+inf]
         public float RiderDirectDamageScale;
         public float RiderMaxTransferDamageScale;
         public float RiderMinTransferDamageScale;
+        // The maximum amount to apply the pain screen pose overlay
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float SoftPingPainScreenScale; // [0,1]
         public StringId GeneralDamage;
         public StringId SpecificDamage;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public StringId CustomResponseLabel;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<CustomDamageResponseLabelBlock> CustomResponseLabels;
         public float AiStunRadius; // world units
         public Bounds<float> AiStunBounds; // (0-1)
         public float ShakeRadius;
-        public float EmpRadius;
-
+        public float EmpRadius;   
 		[TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float AOESpikeRadius;
 		[TagField(MinVersion = CacheVersion.Halo3Retail)]
-		public float AOESpikeDamageBump;
-
+		public float AOESpikeDamageBump;   
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public float Unknown_HO = 1.0f;
-
+        public float ShieldRenderEffectsScale = 1.0f; 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<PlayerResponseBlock> PlayerResponses;
         public CachedTag DamageResponse;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraImpulseStruct CameraImpulse;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraShakeStruct CameraShake;
         public CachedTag Sound;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public BreakingEffectStruct BreakingEffect;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<DamageEffectSoundBlockStruct> DamageSounds;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ForwardVelocity; // world units per second
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ForwardRadius; // world units
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ForwardExponent;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float OutwardVelocity; // world units per second
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float OutwardRadius; // world units
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float OutwardExponent;
 
         [Flags]
         public enum DamageEffectFlags : uint
@@ -63,7 +95,7 @@ namespace TagTool.Tags.Definitions
             /// area of effect damage only affects players
             /// </summary>
             AreaDamagePlayersOnly = 1 << 1,
-            AffectsModelTargets = 1 << 2
+            AffectsModelTargets = 1 << 2,
         }
 
         public enum DamageSideEffects : short
@@ -88,7 +120,25 @@ namespace TagTool.Tags.Definitions
             Vehicle,
             Plasma,
             Needle,
-            Shotgun
+            Shotgun,
+            Assassinated
+        }
+
+        public enum DamageDeathVocalizations : int
+        {
+            // uses code to figure out what vocalization to use
+            Default,
+            Dth,
+            DthFall,
+            DthMjr,
+            DthSlw,
+            DthHdsht,
+            DthSlnt,
+            DthDrama,
+            DthReanimated,
+            Thrwn,
+            DieSpace,
+            DieAss
         }
 
         [Flags]
@@ -118,6 +168,37 @@ namespace TagTool.Tags.Definitions
             IgnoresDamageResistance = 1 << 20,
             ForceSKillOnDeath = 1 << 21,
             CauseMagicDeceleration = 1 << 22
+        }
+
+        [Flags]
+        public enum DamageFlagsReach : uint
+        {
+            None = 0,
+            DoesNotHurtOwner = 1 << 0,
+            CanCauseHeadshots = 1 << 1,
+            IgnoresHeadshotObstructions = 1 << 2,
+            PingsResistantUnits = 1 << 3,
+            DoesNotHurtFriends = 1 << 4,
+            DoesNotPingUnits = 1 << 5,
+            DetonatesExplosives = 1 << 6,
+            OnlyHurtsShields = 1 << 7,
+            CausesFlamingDeath = 1 << 8,
+            SkipsShields = 1 << 9,
+            Unknown10 = 1 << 10,
+            TransferDamageAlwaysUsesMinimum = 1 << 11,
+            IgnoreSeatScaleForDirDmg = 1 << 12,
+            ForcesHardPingIfBodyDmg = 1 << 13,
+            ForcesHardPing = 1 << 14,
+            DoesNotHurtPlayers = 1 << 15,
+            EnablesSpecialDeath = 1 << 16,
+            CannotCauseBetrayals = 1 << 17,
+            UsesOldEmpBehavior = 1 << 18,
+            IgnoresDamageResistance = 1 << 19,
+            ForceSKillOnDeath = 1 << 20,
+            CauseMagicDeceleration = 1 << 21,
+            AoeSkipObstructionTest = 1 << 22,
+            DoesNotSpillOver = 1 << 23,
+            DoesNotHurtBoarders = 1 << 24
         }
 
         [TagStructure(Size = 0x70)]
@@ -251,6 +332,54 @@ namespace TagTool.Tags.Definitions
             public float OutwardVelocity; // world units per second
             public float OutwardRadius; // world units
             public float OutwardExponent;
+        }
+
+        [TagStructure(Size = 0x4)]
+        public class CustomDamageResponseLabelBlock : TagStructure
+        {
+            // label used to control what damage response will fire.^
+            public StringId CustomLabel;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class DamageEffectSoundBlockStruct : TagStructure
+        {
+            [TagField(ValidTags = new[] { "scmb", "sndo", "snd!" })]
+            public CachedTag Sound;
+            public DamageEffectSoundTypeFlags DamageTypes;
+            public ObjectTypeEnum ObjectTypes;
+
+            [Flags]
+            public enum DamageEffectSoundTypeFlags : ushort
+            {
+                None = 1 << 0,
+                // headshots and assassinations
+                LethalInstantaneous = 1 << 1,
+                // excludes headshots and assassinations
+                Lethal = 1 << 2,
+                NonLethal = 1 << 3
+            }
+
+            [Flags]
+            public enum ObjectTypeEnum : ushort
+            {
+                Biped = 1 << 0,
+                Vehicle = 1 << 1,
+                Weapon = 1 << 2,
+                Equipment = 1 << 3,
+                Terminal = 1 << 4,
+                Projectile = 1 << 5,
+                Scenery = 1 << 6,
+                Machine = 1 << 7,
+                Control = 1 << 8,
+                Dispenser = 1 << 9,
+                SoundScenery = 1 << 10,
+                Crate = 1 << 11,
+                Creature = 1 << 12,
+                Giant = 1 << 13,
+                EffectScenery = 1 << 14,
+                Spawner = 1 << 15
+            }
         }
     }
 }
