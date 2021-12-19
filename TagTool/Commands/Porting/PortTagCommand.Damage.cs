@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Damage;
 using TagTool.Tags.Definitions;
 
@@ -82,7 +83,10 @@ namespace TagTool.Commands.Porting
             }
 
             if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
-                throw new NotSupportedException(value ?? CacheContext.Version.ToString());
+            {
+                new TagToolWarning($"Unsupported Damage reporting type '{value}'. Using default.");
+                damageReportingType.HaloOnline = DamageReportingType.HaloOnlineValue.GuardiansUnknown;
+            }    
 
             return damageReportingType;
         }

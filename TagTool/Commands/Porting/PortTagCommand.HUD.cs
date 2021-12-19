@@ -91,6 +91,9 @@ namespace TagTool.Commands.Porting
 
         private ChudDefinition ConvertChudDefinition(ChudDefinition chudDefinition)
         {
+            if (BlamCache.Version == CacheVersion.HaloReach)
+                return chudDefinition;
+
             for (int hudWidgetIndex = 0; hudWidgetIndex < chudDefinition.HudWidgets.Count; hudWidgetIndex++)
             {
                 //get stringid text for patch targeting
