@@ -477,6 +477,8 @@ namespace TagTool.Commands.Porting
 
                         if (name == "cheap_particle_emitter")
                             part.Type = null;
+                        if (name == "decal_system")
+                            part.Type = null;
                     }
             }
         }
