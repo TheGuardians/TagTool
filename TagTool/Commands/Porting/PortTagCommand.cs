@@ -1544,7 +1544,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Vehicle.VehicleSteeringControl steering:
-                    steering.OverdampenCuspAngleNew = Angle.FromDegrees(steering.OverdampenCuspAngleOld);
+                    steering.OverdampenCuspAngle = Angle.FromDegrees(steering.OverdampenCuspAngleOld);
                     break;
 
                 case Vehicle vehi:
@@ -1563,8 +1563,8 @@ namespace TagTool.Commands.Porting
                                 new Vehicle.HumanTankPhysics
                                 {
                                     ForwardArc = Angle.FromDegrees(100.0f),
-                                    FlipWindow = 0.4f,
-                                    PeggedFraction = 1.0f,
+                                    ForwardTurnScale = 0.4f,
+                                    ReverseTurnScale = 1.0f,
                                     MaximumLeftDifferential = vehi.MaximumLeftSlide,
                                     MaximumRightDifferential = vehi.MaximumRightSlide,
                                     DifferentialAcceleration = vehi.SlideAcceleration,
@@ -1665,18 +1665,18 @@ namespace TagTool.Commands.Porting
                                         SlideAcceleration = vehi.SlideAcceleration,
                                         SlideDeceleration = vehi.SlideDeceleration,
                                     },
-                                    Flags = Vehicle.VehicleScoutPhysicsFlags.None, // TODO
+                                    Flags = Vehicle.AlienScoutPhysics.AlienScoutFlags.None, // TODO
                                     DragCoefficient = 0.0f,
                                     ConstantDeceleration = 0.0f,
                                     TorqueScale = 1.0f,
-                                    EngineGravityFunction = new Vehicle.AlienScoutGravityFunction
+                                    EngineGravityFunction = new Vehicle.AlienScoutPhysics.EngineFunctionStruct
                                     {// TODO
                                         ObjectFunctionDamageRegion = StringId.Invalid,
                                         AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
                                         EngineSpeedAcceleration = 0.0f,
                                         MaximumVehicleSpeed = 0.0f
                                     },
-                                    ContrailObjectFunction = new Vehicle.AlienScoutGravityFunction
+                                    ContrailObjectFunction = new Vehicle.AlienScoutPhysics.EngineFunctionStruct
                                     {// TODO
                                         ObjectFunctionDamageRegion = StringId.Invalid,
                                         AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
@@ -1716,7 +1716,7 @@ namespace TagTool.Commands.Porting
                                         SlideAcceleration = vehi.SlideAcceleration,
                                         SlideDeceleration = vehi.SlideDeceleration,
                                     },
-                                    SlideAccelAgainstDirection = 1.0f,
+                                    MaximumTrickFrequency = 1.0f,
                                     FlyingTorqueScale = vehi.FlyingTorqueScale,
                                     FixedGunOffset = vehi.FixedGunOffset,
                                     LoopTrickDuration = 1.8f,
@@ -1724,7 +1724,7 @@ namespace TagTool.Commands.Porting
                                     ZeroGravitySpeed = 4.0f,
                                     FullGravitySpeed = 3.7f,
                                     StrafeBoostScale = 7.5f,
-                                    OffStickDecelScale = 0.1f,
+                                    OffStickDecelerationScale = 0.1f,
                                     CruisingThrottle = 0.75f,
                                     DiveSpeedScale = 0.0f
                                 }
@@ -1891,7 +1891,7 @@ namespace TagTool.Commands.Porting
                 var gen2Values = Enum.GetValues(typeof(Vehicle.VehicleFlagBits.Gen2Bits));
                 var gen3Values = Enum.GetValues(typeof(Vehicle.VehicleFlagBits.Gen3Bits));
 
-                flags.Gen3 = Vehicle.VehicleFlagBits.Gen3Bits.None;
+                flags.Gen3 = flags.Gen2.ConvertLexical<Vehicle.VehicleFlagBits.Gen3Bits>();
 
                 foreach (var gen2 in gen2Values)
                 {
@@ -1912,10 +1912,7 @@ namespace TagTool.Commands.Porting
 
                     if (!wasSet)
                         new TagToolWarning($"Vehicle flag not found in gen3: {gen2}");
-                }
-
-                if (!flags.Gen2.HasFlag(Vehicle.VehicleFlagBits.Gen2Bits.KillsRidersAtTerminalVelocity))
-                    flags.Gen3 |= Vehicle.VehicleFlagBits.Gen3Bits.DoNotKillRidersAtTerminalVelocity;
+                }  
             }
 
             return flags;
