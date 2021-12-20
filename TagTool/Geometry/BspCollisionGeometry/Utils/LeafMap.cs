@@ -10,7 +10,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
     class LeafMap
     {
         private LargeCollisionBspBlock Bsp { get; set; }
-
         class leaf
         {
             public int immediate_parent_3dnode;
@@ -29,10 +28,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public float polygon_area;
             public List<RealPoint3d> points;
         };
-        bool setup_leaf_map()
+        bool setup_leafy_bsp()
         {
-            List<leaf> leaves = new List<leaf>();
-            List<RealPlane3d> planes = new List<RealPlane3d>();
+            List<leaf> leaves = new List<leaf>(Bsp.Bsp3dNodes.Count + 1);
+
+            if (!populate_plane_designators(ref leaves, new List<int>(), 0, -1))
+                return false;
+
             int surface_index = 0;
             for (int use_plane_margins = 0; use_plane_margins < 2; use_plane_margins++)
             {
@@ -64,7 +66,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             polygon current_polygon = polygon_block[polygon_index];
                             int plane_index = current_polygon.plane_index;
                             bool plane_mirror_check = plane_index < 0;
-                            RealPlane3d plane_block = planes[plane_index & 0x7FFFFFFF];
+                            RealPlane3d plane_block = Bsp.Planes[plane_index & 0x7FFFFFFF].Value;
                             current_polygon.polygon_area = 0.0f; //polygon_get_area();
                             current_leaf.polygon_areas[use_plane_margins, current_polygon.polygon_type] += current_polygon.polygon_area;
                             ++current_leaf.polygon_counts[use_plane_margins, current_polygon.polygon_type];
@@ -78,6 +80,30 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
             }
 
+            return true;
+        }
+
+        bool populate_plane_designators(ref List<leaf> leaves, List<int> plane_designators, int bsp3dnode_index, int parent_bsp3dnode_index)
+        {
+            if(bsp3dnode_index < 0)
+            {
+                leaf current_leaf = leaves[bsp3dnode_index & 0x7FFFFFFF];
+                current_leaf.immediate_parent_3dnode = parent_bsp3dnode_index;
+                current_leaf.plane_designators = plane_designators.DeepClone();
+                return true;
+            }
+            LargeBsp3dNode current_node = Bsp.Bsp3dNodes[bsp3dnode_index];
+            for(var i = 0; i < 2; i++)
+            {
+                int plane_index = current_node.Plane;
+                int masked_plane_index = (int)(i == 1 ? plane_index & 0x7FFFFFFF : plane_index | 0x80000000);
+                int masked_node_index = (int)(i == 1 ? bsp3dnode_index | 0x80000000 : bsp3dnode_index & 0x7FFFFFFF);
+                int node_child = i == 1 ? current_node.BackChild : current_node.FrontChild;
+                plane_designators.Add(masked_plane_index);
+                if (!populate_plane_designators(ref leaves, plane_designators, node_child, masked_node_index))
+                    break;
+                plane_designators.RemoveAt(plane_designators.Count - 1);
+            }
             return true;
         }
 
