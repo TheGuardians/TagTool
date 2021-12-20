@@ -677,6 +677,7 @@
     <Compile Include="Geometry\BspCollisionGeometry\LargeCollisionGeometry.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Surface.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionBSPBuilder.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\Utils\LeafMap.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\ResizeCollisionBSP.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\SupernodeToNodeConverter.cs" />
     <Compile Include="Geometry\Jms\JmsFormat.cs" />
