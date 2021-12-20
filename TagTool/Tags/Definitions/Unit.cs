@@ -405,6 +405,7 @@ namespace TagTool.Tags.Definitions
             public StringId CameraMarkerName;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public StringId CameraSubmergedMarkerName;
+
             public Angle PitchAutoLevel;
             public Bounds<Angle> PitchRange;
             public List<UnitCameraTrack> CameraTracks;
@@ -701,10 +702,19 @@ namespace TagTool.Tags.Definitions
 
             public float PingScale; // nathan is too lazy to make pings for each seat.
             public float FlippedEvictionTime; // how much time it takes to evict a rider from a flipped vehicle
+            
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public UnitSeatAcceleration SeatAcceleration;
+            [TagField(ValidTags = new[] { "sadt" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag SeatAccelerationReference;
+
             public float AiScariness;
             public AiSeatTypeValue AiSeatType; // short
             public short BoardingSeat;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<BoardingSeatBlock> AdditionalBoardingSeats;
+
             public float ListenerInterpolationFactor; // how far to interpolate listener position from camera to occupant's head
 
             public Bounds<float> YawRateBounds; // degrees per second
@@ -754,6 +764,14 @@ namespace TagTool.Tags.Definitions
             public class UnitHudInterfaceBlock : TagStructure
 			{
                 public CachedTag UnitHudInterface;
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class BoardingSeatBlock : TagStructure
+            {
+                public short Seat;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
     }

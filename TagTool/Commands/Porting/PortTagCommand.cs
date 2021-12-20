@@ -1669,14 +1669,14 @@ namespace TagTool.Commands.Porting
                                     DragCoefficient = 0.0f,
                                     ConstantDeceleration = 0.0f,
                                     TorqueScale = 1.0f,
-                                    EngineGravityFunction = new Vehicle.AlienScoutPhysics.EngineFunctionStruct
+                                    EngineGravityFunction = new Vehicle.AnitGravityEngineFunctionStruct
                                     {// TODO
                                         ObjectFunctionDamageRegion = StringId.Invalid,
                                         AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
                                         EngineSpeedAcceleration = 0.0f,
                                         MaximumVehicleSpeed = 0.0f
                                     },
-                                    ContrailObjectFunction = new Vehicle.AlienScoutPhysics.EngineFunctionStruct
+                                    ContrailObjectFunction = new Vehicle.AnitGravityEngineFunctionStruct
                                     {// TODO
                                         ObjectFunctionDamageRegion = StringId.Invalid,
                                         AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
@@ -1921,7 +1921,7 @@ namespace TagTool.Commands.Porting
         private Vehicle.HavokVehiclePhysicsFlags ConvertHavokVehicleFlags(Vehicle.HavokVehiclePhysicsFlags flags)
         {
             if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(flags.Gen2.ToString(), out flags.Gen3))
+                if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3))
                     throw new FormatException(BlamCache.Version.ToString());
 
             return flags;
