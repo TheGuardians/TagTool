@@ -5,13 +5,16 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x4C)]
+    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x4C, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x50, MinVersion = CacheVersion.HaloReach)]
     public class Antenna : TagStructure
 	{
         public StringId AttachmentMarkerName; // the marker name where the antenna should be attached
         public CachedTag Bitmaps;
         public CachedTag Physics;
         public float SpringStrengthCoefficient; // strength of the spring (larger values make the spring stronger)
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float TexelToWorldWidthScale;
         public float FalloffPixels;
         public float CutoffPixels;
         public float PointOfBend; // [0,1]

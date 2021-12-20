@@ -565,6 +565,9 @@ namespace TagTool.Commands.Porting
                     if (!FlagIsSet(PortingFlags.Elites) && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                         return null;
                     break;
+                case "char" when BlamCache.Version == CacheVersion.HaloReach:
+                    return null;
+                    break;
 
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
