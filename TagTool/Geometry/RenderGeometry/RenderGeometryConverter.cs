@@ -505,13 +505,20 @@ namespace TagTool.Geometry
                 foreach (var mesh in geometry.Meshes)
                 {
                     mesh.Type = ConvertReachVertexType(mesh.ReachType);
+                    mesh.PrtType = PrtSHType.None;
 
-                    for(int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
+                    for (int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
                     {
                         var vertexBuffer = mesh.ResourceVertexBuffers[i];
 
                         if (vertexBuffer == null)
                             continue;
+
+                        if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt || vertexBuffer.Format == VertexBufferFormat.LinearPrt || vertexBuffer.Format == VertexBufferFormat.QuadraticPrt)
+                        {
+                            mesh.ResourceVertexBuffers[i] = null;
+                            continue;
+                        }
 
                         // skip conversion of water vertices, done right after the loop
                         if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
