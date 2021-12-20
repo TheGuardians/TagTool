@@ -38,15 +38,10 @@ namespace TagTool.Tags.Definitions
         public float SoftPingInterruptTime; // seconds
         public float HardPingThreshold; // [0,1]
         public float HardPingInterruptTime; // seconds
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        //[TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail)]
         public float HardDeathThreshold; // [0,1]
-
         public float FeignDeathThreshold; // [0,1]
-        public float FeignDeathTime; // seconds
-        public float DistanceOfEvadeAnimation; // this must be set to tell the AI how far it should expect our dive animation to move us
-        public float DistanceOfDiveAnimation;
+        public float FeignDeathTime;
+        public float DistanceOfDiveAnimation; // this must be set to tell the AI how far it should expect our dive animation to move us
         public float StunnedMovementThreshold; // [0,1] if we take this much damage in a short space of time we will play our 'stunned movement' animations
         public float FeignDeathChance; // [0,1]
         public float FeignRepeatChance; // [0,1]
