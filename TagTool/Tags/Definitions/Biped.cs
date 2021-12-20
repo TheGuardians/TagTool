@@ -9,24 +9,35 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x1D4, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x21C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x240, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x240, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x2B0, MinVersion = CacheVersion.HaloReach)]
     public class Biped : Unit
     {
         public Angle MovingTurningSpeed;
         public BipedDefinitionFlags BipedFlags;
         public Angle StationaryTurningThreshold;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown;
+
+        [TagField(ValidTags = new[] { "bdpd" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag DeathProgramSelector;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public StringId RagdollRegionName;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId AssassinationChudText;
+
         public float JumpVelocity;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<UnitTrickDefinitionBlock> Tricks;
         public float MaximumSoftLandingTime;
         public float MinimumHardLandingTime;
         public float MinimumSoftLandingVelocity;
         public float MinimumHardLandingVelocity;
         public float MaximumHardLandingVelocity;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float DeathHardLandingVelocity;
         public float StunDuration;
         public float StationaryStandingCameraHeight;
@@ -62,11 +73,16 @@ namespace TagTool.Tags.Definitions
         public Angle CameraInterpolationEnd; // looking-downward angle at which camera interpolation to fp position is complete
         public RealVector3d CameraOffset;
         public float RootOffsetCameraScale;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float RootOffsetCameraDampening;
         public float AutoaimWidth; // world units
-        public BipedLockOnFlags LockonFlags; //bitfield32
-        public float LockonDistance;
-        public short PhysicsControlNodeIndex;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public BipedLockOnFlags LockonFlags; //bitfield32
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public float LockonDistance;
+
+        public short PhysicsControlNodeIndex;
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
 
@@ -79,11 +95,17 @@ namespace TagTool.Tags.Definitions
         public short PelvisNodeIndex;
         public short HeadNodeIndex;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown2;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<BipedWallProximityBlock> WallProximityFeelers;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float HeadshotAccelerationScale; // when the biped ragdolls from a headshot it acceleartes based on this value.  0 defaults to the standard acceleration scale
         public CachedTag AreaDamageEffect;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag HealthStationRechargeEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<MovementGateBlock> MovementGates;
@@ -119,7 +141,103 @@ namespace TagTool.Tags.Definitions
         public CharacterPhysicsGroundStruct BipedGroundPhysics;
         public CharacterPhysicsFlyingStruct BipedFlyingPhysics;
 
-        [TagStructure(Size = 0x40)]
+        [TagStructure(Size = 0x20)]
+        public class UnitTrickDefinitionBlock : TagStructure
+        {
+            public StringId AnimationName;
+            public UnitTrickActivationTypeEnum ActivationType;
+            // specifies how pre-trick velocity is maintained during and after the trick
+            // only applies to vehicles
+            public UnitTrickVelocityPreservationModeEnum VelocityPreservation;
+            public UnitTrickFlags Flags;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            // sloppiness of the camera
+            // only applies to vehicles
+            public float CameraInterpolationTime; // s
+            // how long before the end of the trick we start using the below values
+            public float TrickExitTime; // s
+            // sloppiness of the camera when exiting the trick
+            // we interpolate between these values depending on how far your camera was displaced from the ideal camera
+            public Bounds<float> TrickExitCameraInterpolationTime; // s
+            // when your camera is this far from the ideal at the start of the trick, we use the maximum delay time above
+            // only for space fighter
+            public float TrickExitDisplacementReference; // wu
+            // after ending this trick, how long until I can trick again
+            // only applies to vehicles
+            public float CooldownTime; // s
+
+            public enum UnitTrickActivationTypeEnum : sbyte
+            {
+                BrakeLeft,
+                BrakeRight,
+                BrakeUp,
+                BrakeDown,
+                ThrowMovementLeft,
+                ThrowMovementRight,
+                ThrowMovementUp,
+                ThrowMovementDown,
+                ThrowLookLeft,
+                ThrowLookRight,
+                ThrowLookUp,
+                ThrowLookDown,
+                PegFlickJumpLeft,
+                PegFlickJumpRight,
+                PegFlickJumpUp,
+                PegFlickJumpDown,
+                DoubleJumpLeft,
+                DoubleJumpRight,
+                DoubleJumpUp,
+                DoubleJumpDown
+            }
+
+            public enum UnitTrickVelocityPreservationModeEnum : sbyte
+            {
+                // velocity is completely removed
+                None,
+                // velocity is relative to the object's orientation at the start of the trick (so if you're moving forward before the
+                // trick, you will be moving forward after the trick, even if that's a different direction)
+                TrickRelative,
+                // velocity is maintained in world space
+                WorldRelative
+            }
+
+            [Flags]
+            public enum UnitTrickFlags : byte
+            {
+                // as opposed to the trick camera, which is the default
+                // vehicles only
+                UseFollowingCamera = 1 << 0,
+                // allows the player to continue to move aiming vector while tricking
+                DoNotSlamPlayerControl = 1 << 1
+            }
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class BipedWallProximityBlock : TagStructure
+        {
+            public StringId MarkerName;
+            public float SearchDistance; // wu
+            public float CompressionTime; // s
+            public float ExtensionTime; // s
+            // if multiple markers share the same name, this specifies how to compose their search values
+            public BipedWallProximityCompositionMode CompositionMode;
+            // creates an object function with this name that you can use to drive an overlay animation
+            public StringId OutputFunctionName;
+
+            public enum BipedWallProximityCompositionMode : int
+            {
+                // pick the marker that has the closest obstacle
+                MostCompressed,
+                // pick the marker that has the furthest obstacle
+                LeastCompressed,
+                // average the distances from each marker
+                Average
+            }
+        }
+
+        [TagStructure(Size = 0x40, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x44, MinVersion = CacheVersion.HaloReach)]
         public class CharacterPhysicsGroundStruct : TagStructure
         {
             public Angle MaximumSlopeAngle;
@@ -138,6 +256,8 @@ namespace TagTool.Tags.Definitions
             public float ScaleAirborneReactionTime; // scale on the time for the entity to realize it is airborne
             public float ScaleGroundAdhesionVelocity; // scale on velocity with which the entity is pushed back into its ground plane
             public float GravityScale; // scale on gravity for this entity
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float AirborneAccelerationScale; // scale on airborne acceleration maximum
         }
 
         //public float AirborneAccelerationScale;
@@ -198,24 +318,87 @@ namespace TagTool.Tags.Definitions
             public float LobbingDesire; // 1= heavy arc, 0= no arc
         }
 
-        [TagStructure(Size = 0x30)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloReach)]
         public class BipedGroundFitting : TagStructure
         {
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public BipedGroundFittingFlags GroundFittingFlags;
+
             public float GroundNormalDampening; // react to slope changes (0=slow, 1= fast)
             public float RootOffsetMaxScale; // vertical drop to ground allowed (0=none, 1=full)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float RootOffsetMaxScaleMoving; // vertical drop to ground allowed (0=none, 1=full)
             public float RootOffsetDampening; // react to root changes (0=slow, 1= fast)
             public float FollowingCamScale; // root offset effect on following cam (0=none, 1=full)
             public float RootLeaningScale; // lean into slopes (0=none, 1=full)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float StanceWidthScale; // scale pill width to use as stance radius
             public Angle FootRollMax; // orient to ground slope (degrees)
             public Angle FootPitchMax; // orient to ground slope (degrees)
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootNormalDampening; // (0=slow, 1= fast)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootFittingTestDistance;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootDisplacementUpwardDampening; // (0=slow, 1= fast)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootDisplacementDownwardDampening; // (0=slow, 1= fast)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootPullThresholdDistanceIdle; // amount past the authored plane the foot can be pulled (wu)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootPullThresholdDistanceMoving; // amount past the authored plane the foot can be pulled (wu)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnMinimumRadius; // minimum radius at which foot is fit to turn radius
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnMaximumRadius; // maximum radius at which foot is fit to turn radius
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnThresholdRadius; // foot is fit to turn radius fully at minimum plus threshold and above
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnRateDampening; // (0=slow, 1=fast)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnWeightDampening; // dampening of fitting value for fit to turn radius(0=none, 1=fast)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnBlendOnTime; // time to blend on the foot turn effect (seconds)
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FootTurnBlendOffTime; // time to blend off the foot turn effect 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown2;
+
             public float PivotonfootScale; // (0=none, 1= full)
             public float PivotMinFootDelta; // vert world units to find lowest foot
             public float PivotStrideLengthScale; // leg length * this = stride length
             public float PivotThrottleScale; // pivoting slows throttle (0=none, 1= full)
             public float PivotOffsetDampening; // react to pivot changes (0=slow, 1= fast)
+
+            [Flags]
+            public enum BipedGroundFittingFlags : uint
+            {
+                FootFixupEnabled = 1 << 0,
+                RootOffsetEnabled = 1 << 1,
+                // deprecated
+                FreeFootEnabled = 1 << 2, // deprecated
+                ZLegEnabled = 1 << 3,
+                FootPullPinned = 1 << 4,
+                // deprecated
+                FootlockAdjustsRoot = 1 << 5, // deprecated
+                // slow
+                RaycastVehicles = 1 << 6,
+                // deprecated
+                FootFixupOnComposites = 1 << 7, // deprecated
+                // noramlly, we will force the feet to lock to the ground surface
+                AllowFeetBelowGrade = 1 << 8,
+                // for characters that climb walls
+                UseBipedUpDirection = 1 << 9,
+                // prevents ground marker from going below the contact point
+                SnapMarkerAboveContact = 1 << 10
+            }
         }
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown4;
 
         [Flags]
@@ -261,13 +444,16 @@ namespace TagTool.Tags.Definitions
             AlwaysLockedByHumanTargeting = 1 << 2
         }
 
-        [TagStructure(Size = 0x24)]
+        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloReach)]
         public class MovementGateBlock : TagStructure
 		{
             public float Period;
             public float ZOffset;
             public float ConstantZOffset;
             public float YOffset;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float SpeedThreshold; // world units per second
             public TagFunction DefaultFunction = new TagFunction { Data = new byte[0] };
         }
 

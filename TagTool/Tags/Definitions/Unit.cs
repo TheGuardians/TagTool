@@ -9,7 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x130, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x3A0, MinVersion = CacheVersion.HaloReach)]
     public class Unit : GameObject
     {
         public UnitFlagBits UnitFlags; // int
@@ -22,7 +23,12 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<CampaignMetagameBucket> CampaignMetagameBuckets;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<UnitScreenEffectBlock> ScreenEffects;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag IntegratedLightToggle;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public Angle CameraFieldOfView; // degrees
         public float CameraStiffness;
         public UnitCamera Camera;
@@ -33,30 +39,96 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public UnitAssassination Assassination;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public UnitSeatAcceleration SeatAcceleration;
+        [TagField(ValidTags = new[] { "sadt" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag SeatAccelerationReference;
+
         public float SoftPingThreshold; // [0,1]
         public float SoftPingInterruptTime; // seconds
         public float HardPingThreshold; // [0,1]
         public float HardPingInterruptTime; // seconds
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float SoftDeathDirectionSpeedThreshold; // moving faster than this means you will soft death in the movement direction. zero defaults to damage direction. (wu/s)
         public float HardDeathThreshold; // [0,1]
         public float FeignDeathThreshold; // [0,1]
         public float FeignDeathTime;
+
+        // The duration of the pain function. 0 defaults to 0.5
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float PainScreenDuration; // seconds|CCBBAA
+        // The time it takes to fade out a damage region that is no longer the most recent damage region to be hit
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float PainScreenRegionFadeOutDuration; // seconds|CCBBAA
+        // The threshold weight below which the focus channel must fall before we can cross fade to another region.
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float PainScreenRegionFadeOutWeightThreshold; // [0,1]
+        // The tolerance angle between next and previous damage directions, below which we randomly vary the ping direction.
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Angle PainScreenAngleTolerance; // degrees|CCBBAA
+        // The maximum random angle to vary the incoming ping direction by if it's too close to the previous ping.
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Angle PainScreenAngleRandomness; // degrees|CCBBAA
+        // The duration of the defensive function. 0 defaults to 2.0
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DefensiveScreenDuration; // seconds
+        // When receiving multiple pings, this is the min percentage of the defensive screen scrub value will fallback to.
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DefensiveScreenScrubFallbackFraction; // [0,1]
+        // ratio of airborne_arc animation to switch off falling overlay
+       
         public float DistanceOfDiveAnimation; // this must be set to tell the AI how far it should expect our dive animation to move us
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float TerminalVelocityFallRatio;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float StunnedMovementThreshold; // [0,1] if we take this much damage in a short space of time we will play our 'stunned movement' animations
+        // 1.0 prevents moving while stunned
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float StunMovementPenalty; // [0,1]
+        // 1.0 prevents turning while stunned
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float StunTurningPenalty; // [0,1]
+        // 1.0 prevents jumping while stunned
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float StunJumpingPenalty; // [0,1]
+        // all stunning damage will last for at least this long
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float MinimumStunTime; // seconds
+        // no stunning damage will last for longer than this
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float MaximumStunTime; // seconds
+
         public float FeignDeathChance; // [0,1]
         public float FeignRepeatChance; // [0,1]
         public CachedTag SpawnedTurretCharacter; // automatically created character when this unit is driven
         public Bounds<short> SpawnedActorCountBounds; // number of actors which we spawn
         public float SpawnedVelocity; // velocity at which we throw spawned actors
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId TargetAimingPivotMarkerName;
         public Angle AimingVelocityMaximum; // degrees per second
         public Angle AimingAccelerationMaximum; // degrees per second squared
         public float CasualAimingModifier; // [0,1]
         public Angle LookingVelocityMaximum; // degrees per second
         public Angle LookingAccelerationMaximum; // degrees per second squared
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ObjectVelocityMaximum; // world units per second
         public StringId RightHandNode; // where the primary weapon is attached
         public StringId LeftHandNode; // where the seconday weapon is attached (for dual-pistol modes)
         public StringId PreferredGunNode; // if found, use this gun marker
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId PreferredGrenadeMarker;  // if found, use this marker to attach live grenades to
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public GlobalMeleeClassEnum MeleeDamageClass;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Padding1;
+
         public CachedTag MeleeDamage;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag NativeMeleeOverride;
         public CachedTag BoardingMeleeDamage;
         public CachedTag BoardingMeleeResponse;
 
@@ -70,7 +142,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag FlurryMeleeDamage;
         public CachedTag ObstacleSmashMeleeDamage;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ShieldPopDamage;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -78,6 +150,12 @@ namespace TagTool.Tags.Definitions
 
         public MotionSensorBlipSizeValue MotionSensorBlipSize; // short
         public UnitItemOwnerSizeValue ItemOwnerSize; // short
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId EquipmentVariantName;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId GroundedEquipmentVariantName;
+
         public List<Posture> Postures;
         public List<HudInterface> HudInterfaces;
         public List<DialogueVariant> DialogueVariants;
@@ -86,7 +164,7 @@ namespace TagTool.Tags.Definitions
         /// If the player is in a seat in this unit then modify the motion tracker range by this amount.
         /// See base value in player globals for how this modifier is applied.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public float MotionTrackerRangeModifier; //If the player is in a seat in this unit, modify the motion tracker range by this amount. (see base value in player globals)
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -109,7 +187,13 @@ namespace TagTool.Tags.Definitions
 
         public List<UnitSeat> Seats;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float OpeningTime; // s
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ClosingTime; // s
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float EmpDisabledTime; // seconds
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         public float EmpRadius;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -117,12 +201,27 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag BoostCollisionDamage;
-
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public BoostFlagsValue BoostFlags;
         public float BoostPeakPower;
         public float BoostRisePower;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float BoostPeakTime;
         public float BoostFallPower;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float BoostDeadTime;
+        // 1, means you burn all your power in one sec.  .1 means you can boost for 10 seconds.
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float BoostPowerPerSecond;
+        // 1 means you recharge fully in 1 second.  .1 means you rechage fully in 10 seconds
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float BoostRechargeRate;
+        // how long do you have to be off the tirgger for before boost starts recharging
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float BoostRechargeDelay; // s
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public TagFunction BoostTrigger;
+
         public float LipsyncAttackWeight;
         public float LipsyncDecayWeight;
 
@@ -131,6 +230,12 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag DetachedWeapon;
+
+        [Flags]
+        public enum BoostFlagsValue : uint
+        {
+            PegsThrottle = 1 << 0
+        }
 
         [Flags]
         public enum UnitFlagBits : int
@@ -194,6 +299,12 @@ namespace TagTool.Tags.Definitions
             Loud,
             Shout,
             Quiet
+        }
+
+        public enum GlobalMeleeClassEnum : short
+        {
+            DefaultClass,
+            EliteClass
         }
 
         [TagStructure(Size = 0x8)]
@@ -264,6 +375,13 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x10)]
+        public class UnitScreenEffectBlock : TagStructure
+        {
+            [TagField(ValidTags = new[] { "sefc" })]
+            public CachedTag ScreenEffect;
+        }
+
         [Flags]
         public enum UnitCameraFlagBits : ushort
         {
@@ -274,16 +392,18 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
         public class UnitCamera : TagStructure
         {
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public UnitCameraFlagBits CameraFlags;
 
-            [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
             public byte[] Padding0;
 
             public StringId CameraMarkerName;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public StringId CameraSubmergedMarkerName;
             public Angle PitchAutoLevel;
             public Bounds<Angle> PitchRange;
@@ -295,8 +415,83 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public Angle SpringVelocity;
 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public Angle LookAcceleration; // deg/s/s
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public Angle LookDeceleration;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float LookAccSmoothingFraction;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public Angle OverrideFov;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public CameraObstructionStruct CameraObstruction;
+
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public List<UnitCameraAcceleration> CameraAcceleration;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GamepadStickInfoBlock> MoveStickOverrides;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<GamepadStickInfoBlock> LookStickOverrides;
+
+            [TagStructure(Size = 0x18)]
+            public class CameraObstructionStruct : TagStructure
+            {
+                // controls how far from the focus point the outer raycasts start.  0 == cone, 1 == cylinder
+                public float CylinderFraction;
+                // how wide of a cone to test
+                public Angle ObstructionTestAngle; // degrees
+                // how quickly the camera moves inward when it anticipates a collision
+                public float ObstructionMaxInwardAccel; // 1.0/s/s
+                // how quickly the camera returns to a normal position when its anticipated distance is further than its current
+                public float ObstructionMaxOutwardAccel; // 1.0/s/s
+                // maximum speed the camera can move
+                public float ObstructionMaxVelocity; // 1.0/s
+                // when the camera wants to start moving back out, wait this long before doing so
+                public float ObstructionReturnDelay; // s
+            }
+
+            [TagStructure(Size = 0x28)]
+            public class GamepadStickInfoBlock : TagStructure
+            {
+                public InputMappingShapeEnum InputShape;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+                // magnitude of analog input for pegged acceleration to kick in
+                public float PegThreshold01;
+                // time for a pegged look to reach maximum effect
+                public RealPoint2d PeggedTime;
+                // the maximum effect achieved over the duration of the pegged time.
+                public RealPoint2d PeggedScale;
+                // the maximum turning speed during peg
+                public Angle PegMaxAngularVelocity; // degrees per sec
+                public List<InputMappingFunctionBlock> InputMappingFunction;
+
+                public enum InputMappingShapeEnum : sbyte
+                {
+                    None,
+                    UnitCircle,
+                    UnitSquare
+                }
+
+                [TagStructure(Size = 0x14)]
+                public class InputMappingFunctionBlock : TagStructure
+                {
+                    public ScalarFunctionNamedStruct Function;
+
+                    [TagStructure(Size = 0x14)]
+                    public class ScalarFunctionNamedStruct : TagStructure
+                    {
+                        public MappingFunction Function;
+
+                        [TagStructure(Size = 0x14)]
+                        public class MappingFunction : TagStructure
+                        {
+                            public byte[] Data;
+                        }
+                    }
+                }
+            }
         }
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
@@ -306,24 +501,49 @@ namespace TagTool.Tags.Definitions
             public CachedTag CameraTrack;
         }
 
-        [TagStructure(Size = 0x4C)]
+        [TagStructure(Size = 0x4C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x70, MaxVersion = CacheVersion.HaloReach)]
         public class UnitCameraAcceleration : TagStructure
         {
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float MaximumCameraVelocityReach;
+
             public UnitCameraAxisAcceleration VelocityI;
             public UnitCameraAxisAcceleration VelocityJ;
             public UnitCameraAxisAcceleration VelocityK;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float MaximumCameraVelocity; // this preceded the UnitCameraAxisAcceleration structs. moved to match MCC and needs to be checked.
         }
 
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0x18, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
         public class UnitCameraAxisAcceleration : TagStructure
         {
+            public InputValue InputVariable;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public TagFunction Function = new TagFunction() { Data = new byte[0] };
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float K;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Scale;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Power;
+
             public float Maximum;
             public float CameraScaleAxial; // scale factor used when this acceleration component is along the axis of the forward vector of the camera
             public float CameraScalePerpendicular; // scale factor used when this acceleration component is perpendicular to the camera
+            
+            public enum InputValue : sbyte
+            {
+                LinearVelocity,
+                LinearAcceleration,
+                Yaw,
+                Pitch,
+                Roll
+            }
         }
 
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
@@ -380,7 +600,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short VariantNumber;
 
-            [TagField(Length = 2, Flags = Padding)]
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding0;
 
             public CachedTag Dialogue;
@@ -462,7 +682,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xB0, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0xE4, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xE4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x13C, MinVersion = CacheVersion.HaloReach)]
         public class UnitSeat : TagStructure
 		{
             public UnitSeatFlags Flags; // int
@@ -501,6 +722,18 @@ namespace TagTool.Tags.Definitions
             public Angle EntryMarkerConeAngle; // angle from marker forward the unit must be
             public Angle EntryMarkerFacingAngle; // angle from unit facing the marker must be
             public float MaximumRelativeVelocity;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float OpenTime; // seconds
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float CloseTime; // seconds
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId OpenFunctionName;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId OpeningFunctionName;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StringId ClosingFunctionName;
+
             public StringId InvisibleSeatRegion;
             public int RuntimeInvisibleSeatRegionIndex;
 
