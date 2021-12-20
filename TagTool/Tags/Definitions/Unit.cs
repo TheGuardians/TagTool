@@ -520,9 +520,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
         public class UnitCameraAxisAcceleration : TagStructure
         {
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public InputValue InputVariable;
-            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public TagFunction Function = new TagFunction() { Data = new byte[0] };
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
