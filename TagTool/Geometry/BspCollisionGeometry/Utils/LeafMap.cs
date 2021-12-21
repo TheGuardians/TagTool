@@ -154,7 +154,36 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public List<RealPoint3d> plane_cut_polygon(List<RealPoint3d> points, RealPlane3d plane)
         {
-            return points;
+            List<RealPoint3d> output_points = new List<RealPoint3d>();
+            RealPoint3d final_point = points[points.Count - 1];
+            float d0 = final_point.X * plane.I + final_point.Y * plane.J + final_point.Z + plane.K - plane.D;
+            for(var vertex_index = 0; vertex_index < points.Count; vertex_index++)
+            {
+                RealPoint3d current_point = points[vertex_index];
+                float d1 = current_point.X * plane.I + current_point.Y * plane.J + current_point.Z + plane.K - plane.D;
+                //are the current and final vertex on the same side of the plane?
+                if(d1 < 0 != d0 < 0)
+                {
+                    output_points.Add(vertex_plane_transform(final_point, current_point, d0, d1));
+                }
+                if(d1 >= 0)
+                {
+                    output_points.Add(current_point);
+                }
+            }
+            return output_points;
+        }
+
+        public RealPoint3d vertex_plane_transform(RealPoint3d p0, RealPoint3d p1, float d0, float d1)
+        {
+            float dratio = d0 / (d0 - d1);
+            RealPoint3d result = new RealPoint3d
+            {
+                X = (p1.X - p0.X) * dratio + p0.X,
+                Y = (p1.Y - p0.Y) * dratio + p0.Y,
+                Z = (p1.Z - p0.Z) * dratio + p0.Z,
+            };
+            return result;
         }
 
         List<RealPoint3d> surface_collect_vertices(int surface_index)
