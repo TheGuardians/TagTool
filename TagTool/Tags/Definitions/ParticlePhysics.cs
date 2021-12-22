@@ -42,7 +42,7 @@ namespace TagTool.Tags.Definitions
             public ParticleControllerFlags Flags;
             [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
-            public byte Padding0;
+            public byte[] Padding0;
             public List<ParticleControllerParameter> Parameters;
             public int RuntimeMConstantParameters;
             public int RuntimeMUsedParticleStates;
