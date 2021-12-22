@@ -428,7 +428,6 @@ namespace TagTool.Shaders.ShaderMatching
                                 break;
                             // Reach rmhg //
                             case @"self_illumination\palettized_depth_fade":
-                            case @"self_illumination\palettized_plasma_change_color":
                                 optionName = "plasma";
                                 break;
                             // Reach rmtr  //
@@ -463,16 +462,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"depth_fade\low_res":
                             case @"depth_fade\palette_shift":
                                 optionName = "on";
-                                break;
-                            case @"albedo\diffuse_modulated":
-                                optionName = "diffuse_only";
-                                break;
-                            case @"albedo\palettized_2d_plasma":
-                                optionName = "palettized";
-                                break;
-                            // Reach ltvl //
-                            case @"albedo\circular":
-                                optionName = "diffuse_only";
                                 break;
                             // MCC rmsh //
                             case @"albedo\chameleon_albedo_masked":
