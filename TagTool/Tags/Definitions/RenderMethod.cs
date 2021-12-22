@@ -164,12 +164,12 @@ namespace TagTool.Tags.Definitions
                 public sbyte TextureTransformConstantIndex;
 
                 [TagField(Flags = Padding, Length = 0x1, Platform = CachePlatform.MCC)]
-                public byte Padding0;
+                public byte[] Padding0;
 
                 public TagBlockIndex TextureTransformOverlayIndices = new TagBlockIndex();
 
                 [TagField(Flags = Padding, Length = 0x2, Platform = CachePlatform.MCC)]
-                public byte Padding1;
+                public byte[] Padding1;
 
                 public enum SamplerFilterMode : byte
                 {

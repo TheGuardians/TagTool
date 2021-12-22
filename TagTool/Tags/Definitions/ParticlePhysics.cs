@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
             public ParticleMovementType Type;
 
             [TagField(Flags = Padding, Length = 2)]
-            public byte Padding0;
+            public byte[] Padding0;
 
             public List<ParticleControllerParameter> Parameters;
             public int RuntimeMConstantParameters;

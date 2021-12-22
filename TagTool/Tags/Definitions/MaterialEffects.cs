@@ -27,8 +27,8 @@ namespace TagTool.Tags.Definitions
                 public short RuntimeMaterialIndex; // formerly GlobalMaterialIndex
                 public SweetenerModeValue SweetenerMode;
 
-                [TagField(Flags = Padding)]
-                public byte Unused;
+                [TagField(Flags = Padding, Length = 1)]
+                public byte[] Unused;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float MaxVisibilityDistance;
