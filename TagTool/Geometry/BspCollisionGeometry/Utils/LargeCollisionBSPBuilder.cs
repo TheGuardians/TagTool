@@ -226,15 +226,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             LargeSurface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
             int plane_index = surface_block.Plane;
             Plane plane_block = Bsp.Planes[surface_block.Plane & 0x7FFFFFFF];
-            int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
-            bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
-            bool plane_index_negative = (plane_index & 0x80000000) != 0;
-
-            int plane_mirror_check = 0;
-            if (!plane_index_negative)
-                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 1 : 0;
-            else
-                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 0 : 1;
+            int plane_projection_axis = plane_get_projection_coefficient(plane_block);
+            bool plane_projection_positive = plane_get_projection_sign(plane_block, plane_projection_axis);
+            int plane_mirror_check = plane_projection_positive != (plane_index < 0) ? 1 : 0;
 
             RealPoint3d intersection_point_vertex = new RealPoint3d(intersection_point.I, intersection_point.J, intersection_point.K);
             RealPoint3d intersection_vector_vertex = new RealPoint3d(intersection_vector.I, intersection_vector.J, intersection_vector.K);
@@ -532,7 +526,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return plane_matched_surface_array;
         }
 
-        public int plane_determine_axis_minimum_coefficient(Plane plane_block)
+        public int plane_get_projection_coefficient(Plane plane_block)
         {
             int minimum_coefficient;
             float plane_I = Math.Abs(plane_block.Value.I);
@@ -550,7 +544,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return minimum_coefficient;
         }
 
-        public bool check_plane_projection_parameter_greater_than_0(Plane plane_block, int projection_axis)
+        public bool plane_get_projection_sign(Plane plane_block, int projection_axis)
         {
             switch (projection_axis)
             {
@@ -801,8 +795,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         Bsp.Bsp2dReferences.Add(new LargeBsp2dReference());
                         int bsp2drefindex = Bsp.Bsp2dReferences.Count - 1;
                         Plane plane_block = Bsp.Planes[plane_index & 0x7FFFFFFF];
-                        int plane_projection_axis = plane_determine_axis_minimum_coefficient(plane_block);
-                        bool plane_projection_parameter_greater_than_0 = check_plane_projection_parameter_greater_than_0(plane_block, plane_projection_axis);
                         Bsp.Bsp2dReferences[bsp2drefindex].PlaneIndex = plane_index;
                         Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = -1;
 
@@ -811,9 +803,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         if (Bsp.Leaves[leaf_index].FirstBsp2dReference == 0xFFFFFFFF)
                             Bsp.Leaves[leaf_index].FirstBsp2dReference = (uint)bsp2drefindex;
 
-                        //not 100% sure what this is checking
-                        bool plane_index_negative = (plane_index & 0x80000000) != 0;
-                        int plane_mirror_check = plane_projection_parameter_greater_than_0 != plane_index_negative ? 1 : 0;
+                        int plane_projection_axis = plane_get_projection_coefficient(plane_block);
+                        bool plane_projection_positive = plane_get_projection_sign(plane_block, plane_projection_axis);
+                        int plane_mirror_check = plane_projection_positive != (plane_index < 0) ? 1 : 0;
 
                         int bsp2dnodeindex = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, plane_matched_surface_array);
                         Bsp.Bsp2dReferences[bsp2drefindex].Bsp2dNodeIndex = bsp2dnodeindex < 0 ? (int)(bsp2dnodeindex | 0x80000000) : bsp2dnodeindex;

@@ -10,6 +10,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
     class LeafMap
     {
         private LargeCollisionBspBlock Bsp { get; set; }
+        public class leafy_bsp
+        {
+            public int bsp_leaf_count;
+            public List<leaf> leaves;
+            public List<leaf_map_leaf> leaf_map_leaves;
+            public List<leaf_map_portal> leaf_map_portals;
+        }
         public class leaf
         {
             public int immediate_parent_3dnode;
@@ -28,11 +35,30 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public float polygon_area;
             public List<RealPoint3d> points;
         };
-        public bool setup_leafy_bsp()
-        {
-            List<leaf> leaves = new List<leaf>(Bsp.Bsp3dNodes.Count + 1);
 
-            if (!populate_plane_designators(ref leaves, new List<int>(), 0, -1))
+        public class leaf_map_portal
+        {
+            public int plane_index;
+            public int back_leaf_index;
+            public int front_leaf_index;
+            public List<RealPoint3d> vertices;
+        }
+        public class leaf_map_leaf
+        {
+            public List<leaf_face> faces;
+            public List<int> portal_indices;
+        }
+        public class leaf_face
+        {
+            public int bsp3dnode_index;
+            public List<int> vertices;
+        }
+        public bool setup_leafy_bsp(ref leafy_bsp leafybsp)
+        {
+            leafybsp.bsp_leaf_count = Bsp.Leaves.Count;
+            leafybsp.leaves = new List<leaf>(Bsp.Bsp3dNodes.Count + 1);
+
+            if (!populate_plane_designators(ref leafybsp, new List<int>(), 0, -1))
                 return false;
 
             int surface_index = 0;
@@ -44,7 +70,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     if (!surface_block.Flags.HasFlag(SurfaceFlags.TwoSided))
                     {
                         List<RealPoint3d> pointlist = surface_collect_vertices(surface_index);
-                        if (!surface_clip_to_leaves(leaves, 0, use_plane_margins, 0, pointlist, surface_index, surface_block.Plane))
+                        if (!surface_clip_to_leaves(ref leafybsp, 0, use_plane_margins, 0, pointlist, surface_index, surface_block.Plane))
                             return false;
                     }
                     if (++surface_index >= Bsp.Surfaces.Count)
@@ -52,9 +78,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
             }
 
-            for (int leaf_index = 0; leaf_index < leaves.Count; leaf_index++)
+            for (int leaf_index = 0; leaf_index < leafybsp.leaves.Count; leaf_index++)
             {
-                leaf current_leaf = leaves[leaf_index];
+                leaf current_leaf = leafybsp.leaves[leaf_index];
                 for (int use_plane_margins = 0; use_plane_margins < 2; use_plane_margins++)
                 {
                     int polygon_count = (use_plane_margins == 0) ? current_leaf.polygons.Count : current_leaf.polygons2.Count;
@@ -82,11 +108,20 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return true;
         }
 
-        public bool populate_plane_designators(ref List<leaf> leaves, List<int> plane_designators, int bsp3dnode_index, int parent_bsp3dnode_index)
+        public bool setup_leaf_map(ref leafy_bsp leafybsp)
+        {
+            if (true) //init_leaf_map
+            {
+
+            }
+            return true;
+        }
+
+        public bool populate_plane_designators(ref leafy_bsp leafybsp, List<int> plane_designators, int bsp3dnode_index, int parent_bsp3dnode_index)
         {
             if(bsp3dnode_index < 0)
             {
-                leaf current_leaf = leaves[bsp3dnode_index & 0x7FFFFFFF];
+                leaf current_leaf = leafybsp.leaves[bsp3dnode_index & 0x7FFFFFFF];
                 current_leaf.immediate_parent_3dnode = parent_bsp3dnode_index;
                 current_leaf.plane_designators = plane_designators.DeepClone();
                 return true;
@@ -99,18 +134,18 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 int masked_node_index = (int)(i == 1 ? bsp3dnode_index | 0x80000000 : bsp3dnode_index & 0x7FFFFFFF);
                 int node_child = i == 1 ? current_node.BackChild : current_node.FrontChild;
                 plane_designators.Add(masked_plane_index);
-                if (!populate_plane_designators(ref leaves, plane_designators, node_child, masked_node_index))
+                if (!populate_plane_designators(ref leafybsp, plane_designators, node_child, masked_node_index))
                     break;
                 plane_designators.RemoveAt(plane_designators.Count - 1);
             }
             return true;
         }
 
-        public bool surface_clip_to_leaves(List<leaf> leaves, int bsp3dnode_index, int use_plane_margins, int polygon_type, List<RealPoint3d> points, int surface_index, int plane_index)
+        public bool surface_clip_to_leaves(ref leafy_bsp leafybsp, int bsp3dnode_index, int use_plane_margins, int polygon_type, List<RealPoint3d> points, int surface_index, int plane_index)
         {
             if (bsp3dnode_index < 0)
             {
-                leaf current_leaf = leaves[bsp3dnode_index & 0x7FFFFFFF];
+                leaf current_leaf = leafybsp.leaves[bsp3dnode_index & 0x7FFFFFFF];
                 polygon new_polygon = new polygon 
                 { 
                     surface_index = surface_index,
@@ -130,9 +165,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 int node_side = (plane_index < 0) ? 1 : 0;
                 int other_node_side = (plane_index >= 0) ? 1 : 0;
                 //set polygon type depending on whether the surface is on the plane or the flipped plane
-                if (surface_clip_to_leaves(leaves, current_node.FrontChild, use_plane_margins, node_side + 1, points, surface_index, plane_index))
+                if (surface_clip_to_leaves(ref leafybsp, current_node.FrontChild, use_plane_margins, node_side + 1, points, surface_index, plane_index))
                 {
-                    return surface_clip_to_leaves(leaves, current_node.BackChild, use_plane_margins, other_node_side + 1, points, surface_index, plane_index);
+                    return surface_clip_to_leaves(ref leafybsp, current_node.BackChild, use_plane_margins, other_node_side + 1, points, surface_index, plane_index);
                 }
                 return false;
             }
@@ -140,7 +175,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             float margin = use_plane_margins == 0 ? 0.0f : 0.00024414062f;
             RealPlane3d front_plane = new RealPlane3d(node_plane.I, node_plane.J, node_plane.K, node_plane.D + margin);
             List<RealPoint3d> front_points = plane_cut_polygon(points, front_plane);
-            if(front_points.Count > 0 && !surface_clip_to_leaves(leaves, current_node.FrontChild, use_plane_margins, polygon_type, front_points, surface_index, plane_index))
+            if(front_points.Count > 0 && !surface_clip_to_leaves(ref leafybsp, current_node.FrontChild, use_plane_margins, polygon_type, front_points, surface_index, plane_index))
             {
                 return false;
             }
@@ -148,7 +183,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             List<RealPoint3d> back_points = plane_cut_polygon(points, back_plane);
             if (back_points.Count <= 0)
                 return true;
-            return surface_clip_to_leaves(leaves, current_node.BackChild, use_plane_margins, polygon_type, back_points, surface_index, plane_index);
+            return surface_clip_to_leaves(ref leafybsp, current_node.BackChild, use_plane_margins, polygon_type, back_points, surface_index, plane_index);
         }
 
         public List<RealPoint3d> plane_cut_polygon(List<RealPoint3d> points, RealPlane3d plane)
@@ -187,24 +222,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public float polygon_get_area(RealPlane3d plane, List<RealPoint3d> points, int plane_index)
         {
-            //initialize BSP builder class so we can borrow some already implemented functions
-            LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
-
-            int plane_projection_axis = BSPclass.plane_determine_axis_minimum_coefficient(new Plane {Value = plane});
-            bool plane_projection_parameter_greater_than_0 = BSPclass.check_plane_projection_parameter_greater_than_0(new Plane { Value = plane }, plane_projection_axis);
-            bool plane_index_negative = (plane_index & 0x80000000) != 0;
-
-            int plane_mirror_check;
-            if (!plane_index_negative)
-                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 1 : 0;
-            else
-                plane_mirror_check = plane_projection_parameter_greater_than_0 ? 0 : 1;
-            List<RealPoint2d> projected_points = new List<RealPoint2d>();
-            for (var i = 0; i < points.Count; i++)
-            {
-                RealPoint2d projected_coords = BSPclass.vertex_get_projection_relevant_coords(points[i], plane_projection_axis, plane_mirror_check);
-                projected_points.Add(projected_coords);
-            }
+            List<RealPoint2d> projected_points = polygon_project_on_plane(points, plane, plane_index);
             float area = 0.0f;
             for(var i = 0; i < projected_points.Count - 2; i++)
             {
@@ -215,6 +233,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 area = area + (v31.Y * v21.X - v31.X * v21.Y) * 0.5f;
             }
 
+            LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
+            int plane_projection_axis = BSPclass.plane_get_projection_coefficient(new Plane { Value = plane });
             float plane_coefficient = 0.0f;
             switch (plane_projection_axis)
             {
@@ -229,8 +249,26 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     break;
             }
 
-            //divide area by maximum plane coefficient
+            //divide area by absolute value of plane projection coefficient
             return area / Math.Abs(plane_coefficient);
+        }
+
+        public List<RealPoint2d> polygon_project_on_plane(List<RealPoint3d> points, RealPlane3d plane, int plane_index)
+        {
+            //initialize BSP builder class so we can borrow some already implemented functions
+            LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
+
+            int plane_projection_axis = BSPclass.plane_get_projection_coefficient(new Plane { Value = plane });
+            bool plane_projection_positive = BSPclass.plane_get_projection_sign(new Plane { Value = plane }, plane_projection_axis);
+
+            int plane_mirror_check = plane_projection_positive != (plane_index < 0) ? 1 : 0;
+            List<RealPoint2d> projected_points = new List<RealPoint2d>();
+            for (var i = 0; i < points.Count; i++)
+            {
+                RealPoint2d projected_coords = BSPclass.vertex_get_projection_relevant_coords(points[i], plane_projection_axis, plane_mirror_check);
+                projected_points.Add(projected_coords);
+            }
+            return projected_points;
         }
 
         public List<RealPoint3d> surface_collect_vertices(int surface_index)
