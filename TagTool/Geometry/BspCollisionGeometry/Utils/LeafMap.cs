@@ -112,8 +112,52 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
             if (true) //init_leaf_map
             {
-
+                foreach (var leaf_portal in leafybsp.leaf_map_portals)
+                {
+                    float leaf_portal_area = polygon_get_area(Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.vertices, leaf_portal.plane_index);
+                    float back_child_area = 0.0f;
+                    float front_child_area = 0.0f;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        bool is_back_child = i == 0;
+                        int portal_child = is_back_child ? leaf_portal.back_leaf_index : leaf_portal.front_leaf_index;
+                        leaf child_leaf = leafybsp.leaves[portal_child];
+                        if (child_leaf.polygons2.Count > 0)
+                        {
+                            foreach (var polygon in child_leaf.polygons2)
+                            {
+                                if (polygon.polygon_type > 0 && (polygon.plane_index & 0x7FFFFFFF) == leaf_portal.plane_index)
+                                {
+                                    List<RealPoint2d> portal_sliced_polygon = new List<RealPoint2d>(); //TODO
+                                    float sliced_polygon_area = polygon_get_area_internal(portal_sliced_polygon, Bsp.Planes[leaf_portal.plane_index].Value);
+                                    //greater than count and polygon type 2 or less than count and polygon type 1
+                                    if (portal_child > leafybsp.bsp_leaf_count == (polygon.polygon_type == 2))
+                                    {
+                                        if (is_back_child)
+                                            back_child_area += sliced_polygon_area;
+                                        else
+                                            front_child_area += sliced_polygon_area;
+                                    }
+                                    else
+                                    {
+                                        if (is_back_child)
+                                            back_child_area -= sliced_polygon_area;
+                                        else
+                                            front_child_area -= sliced_polygon_area;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (leaf_portal.back_leaf_index < leafybsp.bsp_leaf_count == leaf_portal.front_leaf_index < leafybsp.bsp_leaf_count &&
+                        back_child_area < 0.9f * leaf_portal_area && front_child_area < 0.9f * leaf_portal_area)
+                        continue; //TODO: call leaf map portal function here 
+                    else if (back_child_area > 0.1f * leaf_portal_area && front_child_area > 0.1f * leaf_portal_area)
+                        continue; //TODO: call leaf map portal function here 
+                }
             }
+            else
+                return false;
             return true;
         }
 
@@ -223,8 +267,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         public float polygon_get_area(RealPlane3d plane, List<RealPoint3d> points, int plane_index)
         {
             List<RealPoint2d> projected_points = polygon_project_on_plane(points, plane, plane_index);
+            return polygon_get_area_internal(projected_points, plane);
+        }
+
+        public float polygon_get_area_internal(List<RealPoint2d> projected_points, RealPlane3d plane)
+        {
             float area = 0.0f;
-            for(var i = 0; i < projected_points.Count - 2; i++)
+            for (var i = 0; i < projected_points.Count - 2; i++)
             {
                 RealPoint2d v21 = projected_points[i + 1] - projected_points[0];
                 RealPoint2d v31 = projected_points[i + 2] - projected_points[0];
