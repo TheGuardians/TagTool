@@ -11,14 +11,16 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "sky_atm_parameters", Tag = "skya", Size = 0x44, MinVersion = CacheVersion.HaloReach)]
     public class SkyAtmParameters : TagStructure
     {
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public SkyAtmFlags Flags;
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Padding;
 
         public CachedTag FogBitmap;
         public float TextureRepeatRate;
         public float DistanceBetweenSheets;
         public float DepthFadeFactor;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float ClusterSearchRadius;
         public float FalloffStartDistance;
         public float DistanceFalloffPower;
@@ -33,7 +35,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown11;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<AtmosphereProperty> AtmosphereSettings;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<AtmospherePropertyReach> AtmosphereSettingsReach;
         public List<UnderwaterBlock> UnderwaterSettings;
 
         [Flags]
@@ -88,6 +93,48 @@ namespace TagTool.Tags.Definitions
                 OverrideRealSunValues = 1 << 1,
                 PatchyFog = 1 << 2,
                 Bit3 = 1 << 3,
+            }
+        }
+
+        // probably lots of wrong fields, unused anyway
+        [TagStructure(Size = 0xAC)]
+        public class AtmospherePropertyReach : TagStructure
+        {
+            public StringId Name;
+
+            public AtmosphereFlags Flags;
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+
+            public float DistanceBias;
+            public float DepthFade;
+
+            public AtmosphereFog.FogSettings SkyFog;
+            public AtmosphereFog.FogSettings GroundFog;
+            public AtmosphereFog.FogLightSettings FogLight;
+
+            public float SheetDensity;
+            public float FullIntensityHeight;
+            public float HalfIntensityHeight;
+            public RealVector3d WindDirection;
+            public float ReferencePlaneHeight;
+
+            public CachedTag WeatherEffect;
+            public float RuntimeWeight;
+            public float RuntimeEffectWeight;
+
+            [Flags]
+            public enum AtmosphereFlags : short
+            {
+                None,
+                Bit0 = 1 << 0,
+                Bit1 = 1 << 1,
+                Bit2 = 1 << 2,
+                Bit3 = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7,
             }
         }
 

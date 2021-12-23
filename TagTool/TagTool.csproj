@@ -763,6 +763,8 @@
     <Compile Include="Shaders\ShaderMatching\TerrainSorter.cs" />
     <Compile Include="Shaders\ShaderType.cs" />
     <Compile Include="Shaders\SortingLayer.cs" />
+    <Compile Include="Tags\Definitions\AtmosphereFog.cs" />
+    <Compile Include="Tags\Definitions\AtmosphereGlobals.cs" />
     <Compile Include="Tags\Definitions\CameraShake.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
