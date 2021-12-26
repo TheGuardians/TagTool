@@ -173,10 +173,14 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
             return true;
         }
+        public void leaf_portal_designator_set_flags(ref leafy_bsp leafybsp, int leaf_portal_index)
+        {
+
+        }
         public List<RealPoint2d> portal_slice_polygon(List<RealPoint2d> polygon_points, List<RealPoint2d> leaf_portal_points)
         {
             LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
-            //generate a 2d plane from every consecutive pair of points in the portal and use it to cut away vertices from the polygon
+            //generate a 2d plane from every consecutive pair of points in the portal and use it to cut the polygon
             for(int portal_point_index = 0; portal_point_index < leaf_portal_points.Count; portal_point_index++)
             {
                 int last_portal_point_index = portal_point_index - 1;
@@ -191,6 +195,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public List<RealPoint2d> plane_cut_polygon_2d(RealPlane2d plane2d, List<RealPoint2d> polygon_points)
         {
+            float margin = 0.0001f;
             List<RealPoint2d> output_points = new List<RealPoint2d>();
             RealPoint2d final_point = polygon_points[polygon_points.Count - 1];
             float d0 = final_point.X * plane2d.I + final_point.Y * plane2d.J - plane2d.D;
@@ -201,11 +206,38 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 //are the current and final vertex on the same side of the plane?
                 if (d1 < 0 != d0 < 0)
                 {
-                    
+                    float midpoint_d = -((final_point.X - current_point.X) * plane2d.I + (final_point.Y - current_point.Y) * plane2d.J);
+                    //protect from dividing by zero
+                    double dratio = midpoint_d == 0.0f ? 0.0f : d1 / midpoint_d;
+                    //clamp to range of 0 and 1
+                    dratio = Math.Min(Math.Max(dratio, 0.0f), 1.0f);
+                    output_points.Add(new RealPoint2d
+                    {
+                        X = (float)((final_point.X - current_point.X) * dratio),
+                        Y = (float)((final_point.Y - current_point.Y) * dratio),
+                    });
+                    //make sure distances between consecutive vertices and the first vertex are > 0.0001
+                    if (output_points.Count > 1 &&
+                        (margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[0].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[0].Y) ||
+                        margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[output_points.Count - 2].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[output_points.Count - 2].Y)))
+                    {
+                        output_points.RemoveAt(output_points.Count - 1);
+                    }
                 }
                 if (d1 >= 0)
                 {
                     output_points.Add(current_point);
+                    //make sure distances between consecutive vertices and the first vertex are > 0.0001
+                    if (output_points.Count > 1 &&
+                        (margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[0].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[0].Y) ||
+                        margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[output_points.Count - 2].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[output_points.Count - 2].Y)))
+                    {
+                        output_points.RemoveAt(output_points.Count - 1);
+                    }
                 }
             }
             return output_points;
