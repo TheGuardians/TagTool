@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class SwapBlockElementCommand : BlockManipulationCommand
+    class SwapBlockElementsCommand : BlockManipulationCommand
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -15,13 +15,13 @@ namespace TagTool.Commands.Editing
         private TagStructureInfo Structure { get; set; }
         private object Owner { get; set; }
 
-        public SwapBlockElementCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
+        public SwapBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(contextStack, cache, tag, structure, owner, true,
 
-                  "SwapBlockElement",
+                  "SwapBlockElements",
                   $"Swaps a block element from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.",
 
-                  "SwapBlockElement <block name> <Element index> <Element index>",
+                  "SwapBlockElements <block name> <Element index> <Element index>",
                   $"Swaps a block element from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.")
         {
             ContextStack = contextStack;
@@ -126,8 +126,7 @@ namespace TagTool.Commands.Editing
                     $"{{...}}[{((IList)blockValue).Count}]" :
                 "null";
 
-            Console.WriteLine($"Successfully swapped index {index} of {field.Name} with index {newIndex}");
-            Console.WriteLine(valueString);
+            Console.WriteLine($"\n\tSuccessfully swapped elements {index} and {newIndex} of {field.Name}{valueString}");
 
             ContextReturn(previousContext, previousOwner, previousStructure);
 

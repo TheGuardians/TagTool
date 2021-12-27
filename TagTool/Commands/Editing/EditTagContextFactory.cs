@@ -185,7 +185,7 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new CopyBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new MoveBlockElementCommand(contextStack, cache, tag, structure, definition));
-            commandContext.AddCommand(new SwapBlockElementCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new SwapBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new ForEachCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new SaveTagChangesCommand(cache, tag, definition));
             commandContext.AddCommand(new ExportCommandsCommand(cache, definition as TagStructure));
