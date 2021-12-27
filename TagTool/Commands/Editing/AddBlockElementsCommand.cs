@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class AddBlockElementsCommand : Command
+    class AddBlockElementsCommand : BlockManipulationCommand
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -16,7 +16,7 @@ namespace TagTool.Commands.Editing
         private object Owner { get; set; }
 
         public AddBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
-            : base(true,
+            : base(contextStack, cache, tag, structure, owner, true,
 
                   "AddBlockElements",
                   $"Adds/inserts block element(s) to a specific tag block in the current {structure.Types[0].Name} definition.",
@@ -55,9 +55,7 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
@@ -68,9 +66,7 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
@@ -93,9 +89,7 @@ namespace TagTool.Commands.Editing
                 (field.FieldType.GetInterface("IList") == null))
             {
                 Console.WriteLine();
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
 
@@ -139,9 +133,7 @@ namespace TagTool.Commands.Editing
             Console.WriteLine($"Successfully added {count} {itemString} to {field.Name}: {typeString}");
             Console.WriteLine(valueString);
 
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }

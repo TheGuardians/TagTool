@@ -62,9 +62,7 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
@@ -75,9 +73,7 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
@@ -90,9 +86,7 @@ namespace TagTool.Commands.Editing
 
             if (field == null)
             {
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a field named \"{fieldName}\".");
             }
 
@@ -104,9 +98,7 @@ namespace TagTool.Commands.Editing
 
             if (fieldValue != null && fieldValue.Equals(false))
             {
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.OperationFailed, $"Field value could not be parsed for type \"{field.FieldType.ToString()}\"");
             }
 
@@ -253,9 +245,7 @@ namespace TagTool.Commands.Editing
                     $":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
                     "");
 
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }
@@ -583,6 +573,13 @@ namespace TagTool.Commands.Editing
             else if (type == typeof(RealQuaternion))
                 return 4;
             else throw new NotImplementedException();
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
     }
 }

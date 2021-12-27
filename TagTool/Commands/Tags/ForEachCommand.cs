@@ -175,7 +175,7 @@ namespace TagTool.Commands.Tags
                 foreach (var commandToExecute in commandsToExecute)
                     ContextStack.Context.GetCommand(commandToExecute[0]).Execute(commandToExecute.Skip(1).ToList());
 
-                while (ContextStack.Context != rootContext) ContextStack.Pop();
+                ContextReturn(rootContext);
 
                 if (!isConst)
                 {
@@ -186,6 +186,11 @@ namespace TagTool.Commands.Tags
 
             Console.WriteLine();
             return true;
+        }
+
+        public void ContextReturn(CommandContext previousContext)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
         }
     }
 }
