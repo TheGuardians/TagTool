@@ -10,6 +10,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
     class LeafMap
     {
         private LargeCollisionBspBlock Bsp { get; set; }
+        private List<int> leaf_map_node_stack = new List<int>();
+        private int leaf_map_node_stack_count;
         public class leafy_bsp
         {
             public int bsp_leaf_count;
@@ -111,71 +113,127 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public bool setup_leaf_map(ref leafy_bsp leafybsp)
         {
-            if (true) //init_leaf_map
+            init_leaf_map(ref leafybsp);
+            for (int leaf_portal_index = 0; leaf_portal_index < leafybsp.leaf_map_portals.Count; leaf_portal_index++)
             {
-                foreach (var leaf_portal in leafybsp.leaf_map_portals)
+                leaf_map_portal leaf_portal = leafybsp.leaf_map_portals[leaf_portal_index];
+                List<RealPoint2d> leaf_portal_points = polygon_project_on_plane(leaf_portal.vertices, Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.plane_index);
+                float leaf_portal_area = polygon_get_area(leaf_portal_points, Bsp.Planes[leaf_portal.plane_index].Value);
+                float back_child_area = 0.0f;
+                float front_child_area = 0.0f;
+                for (int i = 0; i < 2; i++)
                 {
-                    List<RealPoint2d> leaf_portal_points = polygon_project_on_plane(leaf_portal.vertices, Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.plane_index);
-                    float leaf_portal_area = polygon_get_area(leaf_portal_points, Bsp.Planes[leaf_portal.plane_index].Value);
-                    float back_child_area = 0.0f;
-                    float front_child_area = 0.0f;
-                    for (int i = 0; i < 2; i++)
+                    bool is_back_child = i == 0;
+                    int portal_child = is_back_child ? leaf_portal.back_leaf_index : leaf_portal.front_leaf_index;
+                    leaf child_leaf = leafybsp.leaves[portal_child];
+                    if (child_leaf.polygons2.Count > 0)
                     {
-                        bool is_back_child = i == 0;
-                        int portal_child = is_back_child ? leaf_portal.back_leaf_index : leaf_portal.front_leaf_index;
-                        leaf child_leaf = leafybsp.leaves[portal_child];
-                        if (child_leaf.polygons2.Count > 0)
+                        foreach (var polygon in child_leaf.polygons2)
                         {
-                            foreach (var polygon in child_leaf.polygons2)
+                            if (polygon.polygon_type > 0 && (polygon.plane_index & 0x7FFFFFFF) == leaf_portal.plane_index)
                             {
-                                if (polygon.polygon_type > 0 && (polygon.plane_index & 0x7FFFFFFF) == leaf_portal.plane_index)
+                                List<RealPoint2d> polygon_points = polygon_project_on_plane(polygon.points, Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.plane_index);
+                                List<RealPoint2d> portal_sliced_polygon = portal_slice_polygon(polygon_points, leaf_portal_points);
+                                float sliced_polygon_area = polygon_get_area(portal_sliced_polygon, Bsp.Planes[leaf_portal.plane_index].Value);
+                                //greater than count and polygon type 2 or less than count and polygon type 1
+                                if (portal_child > leafybsp.bsp_leaf_count == (polygon.polygon_type == 2))
                                 {
-                                    List<RealPoint2d> polygon_points = polygon_project_on_plane(polygon.points, Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.plane_index);
-                                    List<RealPoint2d> portal_sliced_polygon = portal_slice_polygon(polygon_points, leaf_portal_points);
-                                    float sliced_polygon_area = polygon_get_area(portal_sliced_polygon, Bsp.Planes[leaf_portal.plane_index].Value);
-                                    //greater than count and polygon type 2 or less than count and polygon type 1
-                                    if (portal_child > leafybsp.bsp_leaf_count == (polygon.polygon_type == 2))
-                                    {
-                                        if (is_back_child)
-                                            back_child_area += sliced_polygon_area;
-                                        else
-                                            front_child_area += sliced_polygon_area;
-                                    }
+                                    if (is_back_child)
+                                        back_child_area += sliced_polygon_area;
                                     else
-                                    {
-                                        if (is_back_child)
-                                            back_child_area -= sliced_polygon_area;
-                                        else
-                                            front_child_area -= sliced_polygon_area;
-                                    }
+                                        front_child_area += sliced_polygon_area;
+                                }
+                                else
+                                {
+                                    if (is_back_child)
+                                        back_child_area -= sliced_polygon_area;
+                                    else
+                                        front_child_area -= sliced_polygon_area;
                                 }
                             }
                         }
                     }
-                    if (leaf_portal.back_leaf_index < leafybsp.bsp_leaf_count == leaf_portal.front_leaf_index < leafybsp.bsp_leaf_count &&
-                        back_child_area < 0.9f * leaf_portal_area && front_child_area < 0.9f * leaf_portal_area)
-                        continue; //TODO: call leaf map portal function here 
-                    else if (back_child_area > 0.1f * leaf_portal_area && front_child_area > 0.1f * leaf_portal_area)
-                        continue; //TODO: call leaf map portal function here 
                 }
+                if (leaf_portal.back_leaf_index < leafybsp.bsp_leaf_count == leaf_portal.front_leaf_index < leafybsp.bsp_leaf_count &&
+                    back_child_area < 0.9f * leaf_portal_area && front_child_area < 0.9f * leaf_portal_area)
+                    leaf_portal_designator_set_flags(ref leafybsp, leaf_portal_index);
+                else if (back_child_area > 0.1f * leaf_portal_area && front_child_area > 0.1f * leaf_portal_area)
+                    leaf_portal_designator_set_flags(ref leafybsp, leaf_portal_index);
             }
-            else
-                return false;
             return true;
         }
 
-        public bool init_leaf_map(ref leafy_bsp leafybsp)
+        public void init_leaf_map(ref leafy_bsp leafybsp)
         {
             leafybsp.leaf_map_leaves = new List<leaf_map_leaf>(Bsp.Bsp3dNodes.Count + 1);
             if(Bsp.Bsp3dNodes.Count > 0)
             {
-
+                //should not surpass 256 in length
+                leaf_map_node_stack = new List<int>(256);
+                init_leaf_map_faces(ref leafybsp, 0);
+                init_leaf_map_portals(ref leafybsp, 0);
             }
-            return true;
+        }
+        public void init_leaf_map_faces(ref leafy_bsp leafybsp, int bsp3dnode_index)
+        {
+            LargeBsp3dNode node = Bsp.Bsp3dNodes[bsp3dnode_index];
+            for (var i = 0; i < 2; i++)
+            {
+                int node_stack_node_index = (i == 0) ? (int)(bsp3dnode_index | 0x80000000) : bsp3dnode_index;
+                int child_index = (i == 0) ? node.BackChild : node.FrontChild;
+                leaf_map_node_stack[leaf_map_node_stack_count] = node_stack_node_index;
+                leaf_map_node_stack_count++;
+                if (child_index >= 0)
+                    init_leaf_map_faces(ref leafybsp, child_index);
+                else if (child_index != -1)
+                    init_leaf_map_faces_internal(ref leafybsp, child_index);
+                leaf_map_node_stack_count--;
+            }
+        }
+        public void init_leaf_map_faces_internal(ref leafy_bsp leafybsp, int bsp3dnode_index)
+        {
+            for(int i = 0; i < leaf_map_node_stack_count; i++)
+            {
+                //move up the stack from the bottom
+                int node_stack_element = leaf_map_node_stack[leaf_map_node_stack_count - i];
+                //maximally sized face will be cut down by bsp planes
+                List<RealPoint2d> result_vertices = new List<RealPoint2d>
+                {
+                    new RealPoint2d(1536,1536), 
+                    new RealPoint2d(-1536,1536), 
+                    new RealPoint2d(-1536,-1536), 
+                    new RealPoint2d(1536,-1536)
+                };
+                if(leaf_map_node_stack_count <= 0)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+        }
+        public void init_leaf_map_portals(ref leafy_bsp leafybsp, int bsp3dnode_index)
+        {
+
         }
         public void leaf_portal_designator_set_flags(ref leafy_bsp leafybsp, int leaf_portal_index)
         {
-
+            leaf_map_portal portal = leafybsp.leaf_map_portals[leaf_portal_index];
+            for (var i = 0; i < 2; i++)
+            {
+                int child_leaf_index = (i == 0) ? portal.back_leaf_index : portal.front_leaf_index;
+                leaf_map_leaf child_leaf = leafybsp.leaf_map_leaves[child_leaf_index];
+                for (var j = 0; j < child_leaf.portal_indices.Count; j++)
+                {
+                    if (leaf_portal_index == (child_leaf.portal_indices[j] & 0x7FFFFFFF))
+                    {
+                        child_leaf.portal_indices[j] = (int)(child_leaf.portal_indices[j] | 0x80000000);
+                        break;
+                    }
+                }
+            }
         }
         public List<RealPoint2d> portal_slice_polygon(List<RealPoint2d> polygon_points, List<RealPoint2d> leaf_portal_points)
         {
