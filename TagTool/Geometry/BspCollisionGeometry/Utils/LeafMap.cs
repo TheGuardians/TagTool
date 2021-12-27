@@ -16,8 +16,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
             public int bsp_leaf_count;
             public List<leaf> leaves;
-            public List<leaf_map_leaf> leaf_map_leaves;
-            public List<leaf_map_portal> leaf_map_portals;
+            public List<leaf_map_leaf> leaf_map_leaves = new List<leaf_map_leaf>();
+            public List<leaf_map_portal> leaf_map_portals = new List<leaf_map_portal>();
         }
         public class leaf
         {
@@ -26,8 +26,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public float[,] polygon_areas = new float[2,3];
             public float[] polygon_area_sums = new float[2];
             public short[,] polygon_counts = new short[2,3];
-            public List<polygon> polygons; //cut with planes that do not include margins
-            public List<polygon> polygons2; //cut with planes that include margins
+            public List<polygon> polygons = new List<polygon>(); //cut with planes that do not include margins
+            public List<polygon> polygons2 = new List<polygon>(); //cut with planes that include margins
         };
         public class polygon
         {
@@ -35,25 +35,24 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public int plane_index;
             public int polygon_type;
             public float polygon_area;
-            public List<RealPoint3d> points;
+            public List<RealPoint3d> points = new List<RealPoint3d>();
         };
-
         public class leaf_map_portal
         {
             public int plane_index;
             public int back_leaf_index;
             public int front_leaf_index;
-            public List<RealPoint3d> vertices;
+            public List<RealPoint3d> vertices = new List<RealPoint3d>();
         }
         public class leaf_map_leaf
         {
-            public List<leaf_face> faces;
-            public List<int> portal_indices;
+            public List<leaf_face> faces = new List<leaf_face>();
+            public List<int> portal_indices = new List<int>();
         }
         public class leaf_face
         {
             public int bsp3dnode_index;
-            public List<int> vertices;
+            public List<RealPoint2d> vertices = new List<RealPoint2d>();
         }
         public bool setup_leafy_bsp(ref leafy_bsp leafybsp)
         {
@@ -170,11 +169,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 //should not surpass 256 in length
                 leaf_map_node_stack = new List<int>(256);
-                init_leaf_map_faces(ref leafybsp, 0);
+                init_leaf_map_faces_node(ref leafybsp, 0);
                 init_leaf_map_portals(ref leafybsp, 0);
             }
         }
-        public void init_leaf_map_faces(ref leafy_bsp leafybsp, int bsp3dnode_index)
+        public void init_leaf_map_faces_node(ref leafy_bsp leafybsp, int bsp3dnode_index)
         {
             LargeBsp3dNode node = Bsp.Bsp3dNodes[bsp3dnode_index];
             for (var i = 0; i < 2; i++)
@@ -184,18 +183,20 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 leaf_map_node_stack[leaf_map_node_stack_count] = node_stack_node_index;
                 leaf_map_node_stack_count++;
                 if (child_index >= 0)
-                    init_leaf_map_faces(ref leafybsp, child_index);
+                    init_leaf_map_faces_node(ref leafybsp, child_index);
                 else if (child_index != -1)
-                    init_leaf_map_faces_internal(ref leafybsp, child_index);
+                    init_leaf_map_faces_leaf(ref leafybsp, child_index);
                 leaf_map_node_stack_count--;
             }
         }
-        public void init_leaf_map_faces_internal(ref leafy_bsp leafybsp, int bsp3dnode_index)
+        public void init_leaf_map_faces_leaf(ref leafy_bsp leafybsp, int bsp3dnode_index)
         {
-            for(int i = 0; i < leaf_map_node_stack_count; i++)
+            for (int i = 0; i < leaf_map_node_stack_count; i++)
             {
                 //move up the stack from the bottom
-                int node_stack_element = leaf_map_node_stack[leaf_map_node_stack_count - i];
+                int leaf_node = leaf_map_node_stack[leaf_map_node_stack_count - i];
+                LargeBsp3dNode leaf_node_block = Bsp.Bsp3dNodes[leaf_node & 0x7FFFFFFF];
+                RealPlane3d leaf_node_plane = Bsp.Planes[leaf_node_block.Plane].Value;
                 //maximally sized face will be cut down by bsp planes
                 List<RealPoint2d> result_vertices = new List<RealPoint2d>
                 {
@@ -204,13 +205,39 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     new RealPoint2d(-1536,-1536), 
                     new RealPoint2d(1536,-1536)
                 };
-                if(leaf_map_node_stack_count <= 0)
+                int levels_up = 0;
+                while(result_vertices.Count > 0)
                 {
-
+                    int current_node = leaf_map_node_stack[leaf_map_node_stack_count - levels_up];
+                    if(current_node != leaf_node)
+                    {
+                        LargeBsp3dNode current_node_block = Bsp.Bsp3dNodes[current_node & 0x7FFFFFFF];
+                        RealPlane3d current_node_plane = Bsp.Planes[current_node_block.Plane].Value;
+                        if ((current_node & 0x80000000) != 0)
+                            current_node_plane = new RealPlane3d(-current_node_plane.I, -current_node_plane.J, -current_node_plane.K, -current_node_plane.D);
+                        RealPlane2d intersection_plane = new RealPlane2d();
+                        if (true)//planes_get_intersection_plane2d
+                        {
+                            result_vertices = plane_cut_polygon_2d(intersection_plane, result_vertices);
+                        }
+                        else
+                        {
+                            result_vertices = new List<RealPoint2d>();
+                            break;
+                        }
+                    }
+                    levels_up++;
+                    if (levels_up >= leaf_map_node_stack_count)
+                        break;
                 }
-                else
+                if(result_vertices.Count > 0)
                 {
-
+                    leaf_face new_face = new leaf_face
+                    {
+                        vertices = result_vertices.DeepClone(),
+                        bsp3dnode_index = leaf_node & 0x7FFFFFFF
+                    };
+                    leafybsp.leaf_map_leaves[bsp3dnode_index & 0x7FFFFFFF].faces.Add(new_face);
                 }
             }
         }
