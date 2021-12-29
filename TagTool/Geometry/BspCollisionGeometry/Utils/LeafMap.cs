@@ -216,12 +216,15 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         if ((current_node & 0x80000000) != 0)
                             current_node_plane = new RealPlane3d(-current_node_plane.I, -current_node_plane.J, -current_node_plane.K, -current_node_plane.D);
                         RealPlane2d intersection_plane = new RealPlane2d();
+                        //get 2d intersection plane of current node plane with leaf node plane
                         if (true)//planes_get_intersection_plane2d
                         {
+                            //use this intersection line to cut the polygon down to size
                             result_vertices = plane_cut_polygon_2d(intersection_plane, result_vertices);
                         }
                         else
                         {
+                            //if the planes dont intersect, abort
                             result_vertices = new List<RealPoint2d>();
                             break;
                         }
@@ -230,6 +233,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     if (levels_up >= leaf_map_node_stack_count)
                         break;
                 }
+                //write out remaining vertices to a new face on this leaf map leaf
                 if(result_vertices.Count > 0)
                 {
                     leaf_face new_face = new leaf_face
@@ -244,6 +248,77 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         public void init_leaf_map_portals(ref leafy_bsp leafybsp, int bsp3dnode_index)
         {
 
+        }
+        public void init_leaf_map_portals_leaf(ref leafy_bsp leafybsp, int ancestor_node_index, int bsp3dchild_index, int bsp3dnode_index, int levels_up)
+        {
+            LargeBsp3dNode bsp3dnode_block = Bsp.Bsp3dNodes[bsp3dnode_index];
+            int first_traversal_node;
+            if (ancestor_node_index == -1)
+                first_traversal_node = leaf_map_node_stack[leaf_map_node_stack_count - levels_up];
+            else
+                first_traversal_node = -1;
+
+            //subfunction which I am inlining here
+            int node_is_in_nodestack = 0;
+            int use_node_backside = 0;
+            for (var levels_up_temp = 0; levels_up_temp < leaf_map_node_stack_count; levels_up_temp++)
+            {
+                int node_stack_element = leaf_map_node_stack[leaf_map_node_stack_count - levels_up_temp];
+                int node_stack_plane = Bsp.Bsp3dNodes[node_stack_element & 0x7FFFFFFF].Plane;
+                if (node_stack_plane == bsp3dnode_block.Plane)
+                {
+                    node_is_in_nodestack = 1;
+                    use_node_backside = node_stack_element < 0 ? 1 : 0;
+                    break;
+                }                    
+            }
+
+            int v9 = 0;
+            for (var i = 0; i < 2; i++)
+            {
+                if (ancestor_node_index == -1 && i == 1 && first_traversal_node < 0)
+                    v9 = 1;
+                else
+                {
+                    v9 = 0;
+                    if (ancestor_node_index != -1)
+                    {
+                        if (node_is_in_nodestack != 0 && use_node_backside == i)
+                            continue;
+                    }
+                }
+                if (i == 0 && first_traversal_node >= 0)
+                    continue;
+                if (v9 == 1)
+                {
+                    leaf_map_leaf leaf = leafybsp.leaf_map_leaves[bsp3dchild_index & 0x7FFFFFFF];
+                    if (leaf.faces.Count <= 0)
+                        continue;
+                    //there must be one face with a matching bsp3dnode_index in this leaf
+                    int face_index = 0;
+                    for (face_index = 0; face_index < leaf.faces.Count; face_index++)
+                    {
+                        if (leaf.faces[face_index].bsp3dnode_index == bsp3dnode_index)
+                            break;
+                    }
+                    if (face_index >= leaf.faces.Count)
+                        continue;
+                }
+                
+                //LABEL 30
+                int child_index = (i == 0) ? bsp3dnode_block.BackChild : bsp3dnode_block.FrontChild;
+                if (child_index >= 0)
+                {
+                    int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
+                    init_leaf_map_portals_leaf(ref leafybsp, bsp_ancestor_index, bsp3dchild_index, child_index, levels_up - 1);
+                }
+                else if (child_index != -1 && (child_index & 0x7FFFFFFF) != bsp3dchild_index)
+                {
+                    int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
+                    //TODO implement this function properly
+                    init_leaf_map_portals_leaf(ref leafybsp, bsp_ancestor_index, bsp3dchild_index, child_index, levels_up - 1);
+                }
+            }
         }
         public void leaf_portal_designator_set_flags(ref leafy_bsp leafybsp, int leaf_portal_index)
         {
