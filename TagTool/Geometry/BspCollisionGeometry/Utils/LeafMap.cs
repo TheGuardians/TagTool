@@ -249,7 +249,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
 
         }
-        public void init_leaf_map_portals_leaf(ref leafy_bsp leafybsp, int ancestor_node_index, int bsp3dchild_index, int bsp3dnode_index, int levels_up)
+        public void init_leaf_map_portals_first_leaf(ref leafy_bsp leafybsp, int ancestor_node_index, int leaf_index, int bsp3dnode_index, int levels_up)
         {
             LargeBsp3dNode bsp3dnode_block = Bsp.Bsp3dNodes[bsp3dnode_index];
             int first_traversal_node;
@@ -291,7 +291,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     continue;
                 if (v9 == 1)
                 {
-                    leaf_map_leaf leaf = leafybsp.leaf_map_leaves[bsp3dchild_index & 0x7FFFFFFF];
+                    leaf_map_leaf leaf = leafybsp.leaf_map_leaves[leaf_index & 0x7FFFFFFF];
                     if (leaf.faces.Count <= 0)
                         continue;
                     //there must be one face with a matching bsp3dnode_index in this leaf
@@ -310,15 +310,39 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 if (child_index >= 0)
                 {
                     int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
-                    init_leaf_map_portals_leaf(ref leafybsp, bsp_ancestor_index, bsp3dchild_index, child_index, levels_up - 1);
+                    init_leaf_map_portals_first_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index, levels_up - 1);
                 }
-                else if (child_index != -1 && (child_index & 0x7FFFFFFF) != bsp3dchild_index)
+                else if (child_index != -1 && (child_index & 0x7FFFFFFF) != leaf_index)
                 {
                     int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
-                    //TODO implement this function properly
-                    init_leaf_map_portals_leaf(ref leafybsp, bsp_ancestor_index, bsp3dchild_index, child_index, levels_up - 1);
+                    init_leaf_map_portals_second_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index);
                 }
             }
+        }
+        public void init_leaf_map_portals_second_leaf(ref leafy_bsp leafybsp, int bsp3dnode_index, int leaf_index_0, int leaf_index_1)
+        {
+            leaf_map_leaf leaf0 = leafybsp.leaf_map_leaves[leaf_index_0];
+            leaf_map_leaf leaf1 = leafybsp.leaf_map_leaves[leaf_index_1];
+            //find faces on leaf with matching node index
+            //inlined subfunctions
+            leaf_face leaf_0_face = leaf0.faces.First(face => face.bsp3dnode_index == bsp3dnode_index);
+            leaf_face leaf_1_face = leaf1.faces.First(face => face.bsp3dnode_index == bsp3dnode_index);
+            //cut leaf 1 face with leaf 0 face
+            List<RealPoint2d> points = portal_slice_polygon(leaf_0_face.vertices, leaf_1_face.vertices);
+
+            leaf_map_portal new_leaf_portal = new leaf_map_portal
+            {
+                plane_index = Bsp.Bsp3dNodes[bsp3dnode_index].Plane,
+                back_leaf_index = leaf_index_0 & 0x7FFFFFFF,
+                front_leaf_index = leaf_index_1 & 0x7FFFFFFF,
+            };
+
+            //TODO: project 2d points onto plane to get 3d points
+
+
+            leafybsp.leaf_map_portals.Add(new_leaf_portal);
+            leaf0.portal_indices.Add(leafybsp.leaf_map_portals.Count - 1);
+            leaf1.portal_indices.Add(leafybsp.leaf_map_portals.Count - 1);
         }
         public void leaf_portal_designator_set_flags(ref leafy_bsp leafybsp, int leaf_portal_index)
         {
