@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class RemoveBlockElementsCommand : BlockManipulationCommand
+    class RemoveBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -16,7 +16,7 @@ namespace TagTool.Commands.Editing
         private object Owner { get; set; }
 
         public RemoveBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
-            : base(contextStack, cache, tag, structure, owner, true,
+            : base(true,
 
                   "RemoveBlockElements",
                   $"Removes block element(s) from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.",
@@ -184,6 +184,13 @@ namespace TagTool.Commands.Editing
             ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
 
     }
