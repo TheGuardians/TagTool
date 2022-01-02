@@ -10,7 +10,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
     class LeafMap
     {
         private LargeCollisionBspBlock Bsp { get; set; }
-        private List<int> leaf_map_node_stack = new List<int>();
+        private int[] leaf_map_node_stack;
         private int leaf_map_node_stack_count;
         public class leafy_bsp
         {
@@ -54,17 +54,44 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public int bsp3dnode_index;
             public List<RealPoint2d> vertices = new List<RealPoint2d>();
         }
+
+        public bool munge_collision_bsp(LargeCollisionBspBlock bsp)
+        {
+            Bsp = bsp.DeepClone();
+            leafy_bsp leafybsp = new leafy_bsp();
+            if (!setup_floating_leaves(ref leafybsp) ||
+                !setup_leafy_bsp(ref leafybsp) ||
+                !setup_leaf_map(ref leafybsp))
+                return false;
+            return true;
+        }
+
+        //a floating leaf is a leaf that was previously -1 and now has a leaf index > the leaf count
+        public bool setup_floating_leaves(ref leafy_bsp leafybsp)
+        {
+            int leaf_count = Bsp.Leaves.Count;
+            for (var i = 0; i < Bsp.Bsp3dNodes.Count; i++)
+            {
+                if (Bsp.Bsp3dNodes[i].FrontChild == -1)
+                    Bsp.Bsp3dNodes[i].FrontChild = (int)(leaf_count++ | 0x80000000);
+                if (Bsp.Bsp3dNodes[i].BackChild == -1)
+                    Bsp.Bsp3dNodes[i].BackChild = (int)(leaf_count++ | 0x80000000);
+            }
+            return true;
+        }
         public bool setup_leafy_bsp(ref leafy_bsp leafybsp)
         {
             leafybsp.bsp_leaf_count = Bsp.Leaves.Count;
             leafybsp.leaves = new List<leaf>(Bsp.Bsp3dNodes.Count + 1);
+            for (var i = 0; i < Bsp.Bsp3dNodes.Count + 1; i++)
+                leafybsp.leaves.Add(new leaf());
 
             if (!populate_plane_designators(ref leafybsp, new List<int>(), 0, -1))
                 return false;
-
-            int surface_index = 0;
+          
             for (int use_plane_margins = 0; use_plane_margins < 2; use_plane_margins++)
             {
+                int surface_index = 0;
                 while (true)
                 {
                     LargeSurface surface_block = Bsp.Surfaces[surface_index];
@@ -74,7 +101,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         if (!surface_clip_to_leaves(ref leafybsp, 0, use_plane_margins, 0, pointlist, surface_index, surface_block.Plane))
                             return false;
                     }
-                    if (++surface_index >= Bsp.Surfaces.Count)
+                    surface_index++;
+                    if (surface_index >= Bsp.Surfaces.Count)
                         break;
                 }
             }
@@ -165,10 +193,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         public void init_leaf_map(ref leafy_bsp leafybsp)
         {
             leafybsp.leaf_map_leaves = new List<leaf_map_leaf>(Bsp.Bsp3dNodes.Count + 1);
-            if(Bsp.Bsp3dNodes.Count > 0)
+            for (var i = 0; i < Bsp.Bsp3dNodes.Count + 1; i++)
+                leafybsp.leaf_map_leaves.Add(new leaf_map_leaf());
+            if (Bsp.Bsp3dNodes.Count > 0)
             {
                 //should not surpass 256 in length
-                leaf_map_node_stack = new List<int>(256);
+                leaf_map_node_stack = new int[256];
                 init_leaf_map_faces_node(ref leafybsp, 0);
                 init_leaf_map_portals(ref leafybsp, 0);
             }
@@ -385,7 +415,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 else if (child_index != -1 && (child_index & 0x7FFFFFFF) != leaf_index)
                 {
                     int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
-                    init_leaf_map_portals_second_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index);
+                    init_leaf_map_portals_second_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index & 0x7FFFFFFF);
                 }
             }
         }
