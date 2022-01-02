@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class PasteBlockElementsCommand : BlockManipulationCommand
+    class PasteBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -17,7 +17,7 @@ namespace TagTool.Commands.Editing
 
         public PasteBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner,
             bool ignoreVars = false, string examples = "")
-            : base(contextStack, cache, tag, structure, owner, true,
+            : base(true,
 
                   "PasteBlockElements",
                   $"Pastes block element(s) to a specific tag block in the current {structure.Types[0].Name} definition.",
@@ -186,6 +186,13 @@ namespace TagTool.Commands.Editing
             }
 
             return element;
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
     }
 }
