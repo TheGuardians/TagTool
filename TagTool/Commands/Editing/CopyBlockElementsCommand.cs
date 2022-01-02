@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class CopyBlockElementsCommand : Command
+    class CopyBlockElementsCommand : BlockManipulationCommand
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Editing
         public static List<object> Elements { get; set; } = null;
 
         public CopyBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
-            : base(false,
+            : base(contextStack, cache, tag, structure, owner, false,
 
                   "CopyBlockElements",
                   "Copies block elements from one tag to another.",
@@ -58,9 +58,7 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
@@ -71,9 +69,7 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
@@ -97,9 +93,7 @@ namespace TagTool.Commands.Editing
                 (!field.FieldType.IsGenericType) ||
                 (field.FieldType.GetInterface("IList") == null))
             {
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
 
@@ -124,10 +118,8 @@ namespace TagTool.Commands.Editing
             
             var itemString = index < 2 ? "element" : "elements";
             Console.WriteLine($"Successfully copied {count} {itemString}.");
-            
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }

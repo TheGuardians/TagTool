@@ -21,7 +21,7 @@ namespace TagTool.Commands
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
-            Console.SetWindowSize(150, 40);
+            Console.SetWindowSize(165, 45);
 
             // If there are extra arguments, use them to automatically execute a command
             List<string> autoexecCommand = null;
@@ -40,10 +40,33 @@ namespace TagTool.Commands
             // Get the file path from the first argument
             // If no argument is given, load tags.dat
             // legacy from older cache system where only HO caches could be loaded
-            var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
 
-            if (args.Length > 0 && !fileInfo.Exists)
+            var autoExecFile = new FileInfo(Path.Combine(TagToolDirectory, "autoexec.cmds"));
+
+            if (autoExecFile.Exists && args.Count() == 0)
+            {
+                try
+                {
+                    args = new string[] { File.ReadLines("autoexec.cmds").First() };
+
+                    args[0] = args[0].EndsWith("tags.dat") ? args[0] : 
+                        (args[0].EndsWith("\\") ? args[0] += "tags.dat" : args[0] += "\\tags.dat");
+                }
+                catch
+                {
+                    Console.WriteLine();
+                    new TagToolWarning("Your \"autoexec.cmds\" file contains no lines.");
+                }
+            }
+                
+
+            var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
+            bool defaultCacheSet = fileInfo.Exists ? true : false;
+
+            if (args.Length > 0 && !fileInfo.Exists && !autoExecFile.Exists)
                 new TagToolError(CommandError.CustomError, "Invalid path to a tag cache!");
+            else if (fileInfo.Exists)
+                defaultCacheSet = true;
 
             while (!fileInfo.Exists)
             {
@@ -107,10 +130,15 @@ namespace TagTool.Commands
                 goto end;
             }
 
-            var autoExecFile = new FileInfo(Path.Combine(TagToolDirectory, "autoexec.cmds"));
+            
             if(autoExecFile.Exists)
             {
-                foreach (var line in File.ReadAllLines(autoExecFile.FullName))
+                var autoExecLines = File.ReadAllLines(autoExecFile.FullName);
+
+                // if cache path provided at the start of autoexec.cmds, ignore it when executing
+                autoExecLines = defaultCacheSet ? autoExecLines.Skip(1).ToArray() : autoExecLines;
+
+                foreach (var line in autoExecLines)
                     commandRunner.RunCommand(line);
             }
 

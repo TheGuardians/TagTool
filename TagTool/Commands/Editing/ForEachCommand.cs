@@ -64,9 +64,7 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
@@ -77,9 +75,7 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
@@ -172,11 +168,7 @@ namespace TagTool.Commands.Editing
             {
                 for (var i = (from ?? 0); i < (to.HasValue ? to.Value + 1 : fieldValue.Count); i++)
                 {
-                    while (ContextStack.Context != previousContext)
-                        ContextStack.Pop();
-
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
 
                     if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
                             .Execute(new List<string> { $"{blockName}[{i}]" })
@@ -192,11 +184,7 @@ namespace TagTool.Commands.Editing
             }
             else
             {
-                while (ContextStack.Context != previousContext)
-                    ContextStack.Pop();
-
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
 
                 if (blockName != "" && new EditBlockCommand(ContextStack, Cache, Tag, Owner)
                     .Execute(new List<string> { $"{blockName}" })
@@ -207,11 +195,7 @@ namespace TagTool.Commands.Editing
                     ContextStack.Context.GetCommand(command[0]).Execute(command.Skip(1).ToList());
             }
 
-            while (ContextStack.Context != previousContext)
-                ContextStack.Pop();
-
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }
@@ -257,6 +241,13 @@ namespace TagTool.Commands.Editing
             }
 
             return -1;
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
     }
 }

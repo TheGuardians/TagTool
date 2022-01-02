@@ -23,11 +23,18 @@ namespace TagTool.Commands.Common
 
         private string PreprocessCommandLine(string commandLine)
         {
-            // Evaluate c# expresisons
+            // Evaluate c# expressions
 
             commandLine = ExecuteCSharpCommand.EvaluateInlineExpressions(ContextStack, commandLine);
             if (commandLine == null)
                 return null;
+
+            // Allow inline comments
+
+            if (commandLine.IndexOf('#') > 0)
+                commandLine = commandLine.Split('#')[0];
+            else
+                commandLine = commandLine.Split(new[] {"//"}, StringSplitOptions.None)[0];
 
             return commandLine;
         }
@@ -68,7 +75,7 @@ namespace TagTool.Commands.Common
                     break;
             }
 
-            if (commandArgs[0].StartsWith("#"))
+            if (commandArgs[0].StartsWith("#") || commandArgs[0].StartsWith($"//"))
                 return; // ignore comments
 
             // Handle redirection

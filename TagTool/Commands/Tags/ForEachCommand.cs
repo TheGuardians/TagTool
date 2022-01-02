@@ -21,9 +21,10 @@ namespace TagTool.Commands.Tags
                 "ForEach",
                 "Executes a command on every instance of the specified tag group.",
                 
-                "ForEach [Const] <Tag Group> [Named: <Regex>] <Command...>",
+                "ForEach [Const] <Tag Group> [<Filter> <Term>] <Command...>",
                 
-                "Executes a command on every instance of the specified tag group.")
+                "Executes a command on every instance of the specified tag group." +
+                "\nCommon Filters: \"named\", \"startingwith\", \"endingwith\", \"in_file:\", \"regex:\"")
         {
             ContextStack = contextStack;
             Cache = cache;
@@ -59,8 +60,9 @@ namespace TagTool.Commands.Tags
             var filename = "";
 
             string pattern = null;
+            string[] otherFilters = new string[] { "startingwith", "endingwith", "named", "containing"};
 
-            while (args.Count > 0 && args[0].EndsWith(":"))
+            while (args.Count > 0 && (args[0].EndsWith(":") || otherFilters.Contains(args[0])) )
             {
                 switch (args[0].ToLower())
                 {
@@ -79,6 +81,7 @@ namespace TagTool.Commands.Tags
                     case "startswith:":
                     case "starts_with:":
                     case "starting:":
+                    case "startingwith":
                     case "startingwith:":
                     case "starting_with:":
                     case "start_filter:":
@@ -89,6 +92,7 @@ namespace TagTool.Commands.Tags
 
                     case "ends:":
                     case "ending:":
+                    case "endingwith":
                     case "endingwith:":
                     case "ending_with:":
                     case "endswith:":
@@ -99,9 +103,11 @@ namespace TagTool.Commands.Tags
                         args.RemoveRange(0, 2);
                         break;
 
+                    case "named":
                     case "named:":
                     case "filter:":
                     case "contains:":
+                    case "containing":
                     case "containing:":
                         filter = args[1];
                         args.RemoveRange(0, 2);
@@ -173,9 +179,19 @@ namespace TagTool.Commands.Tags
                 Console.WriteLine();
                 Console.WriteLine($"{tagName}.{instance.Group}:");
                 foreach (var commandToExecute in commandsToExecute)
-                    ContextStack.Context.GetCommand(commandToExecute[0]).Execute(commandToExecute.Skip(1).ToList());
+                {
+                    var currentCommand = ContextStack.Context.GetCommand(commandToExecute[0]);
 
-                while (ContextStack.Context != rootContext) ContextStack.Pop();
+                    if (currentCommand != null)
+                        currentCommand.Execute(commandToExecute.Skip(1).ToList());
+                    else
+                    {
+                        ContextReturn(rootContext);
+                        return new TagToolError(CommandError.CustomError, "The command to execute could not be found... You may have made a typo.");
+                    }
+                }
+
+                ContextReturn(rootContext);
 
                 if (!isConst)
                 {
@@ -186,6 +202,11 @@ namespace TagTool.Commands.Tags
 
             Console.WriteLine();
             return true;
+        }
+
+        public void ContextReturn(CommandContext previousContext)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
         }
     }
 }

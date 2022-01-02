@@ -1163,7 +1163,7 @@ namespace TagTool.Tags.Definitions
 
             public short StablePlantedLegs;  // number of legs mantis needs planted to be considered stable.
             [TagField(Flags = Padding, Length = 0x2)]
-            public byte UnusedPadding;
+            public byte[] UnusedPadding;
 
             public float TimeWithoutPlantBuffer; // seconds
             public float NotAlongUpGravityScale; // 0-1

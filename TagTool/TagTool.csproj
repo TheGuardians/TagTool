@@ -374,8 +374,9 @@
     <Compile Include="Commands\Common\SetVariableCommand.cs" />
     <Compile Include="Commands\Decorators\ExtractModelCommand.cs" />
     <Compile Include="Commands\Decorators\DecoratorSetContextFactory.cs" />
-    <Compile Include="Commands\Editing\SwapBlockElementCommand.cs" />
+    <Compile Include="Commands\Editing\SwapBlockElementsCommand.cs" />
     <Compile Include="Commands\Editing\MoveBlockElementCommand.cs" />
+    <Compile Include="Commands\Editing\BlockManipulationCommand.cs" />
     <Compile Include="Commands\Files\CreateBlfImageCommand.cs" />
     <Compile Include="Commands\Files\ExtractBlfImageCommand.cs" />
     <Compile Include="Commands\Forge\MaximizeBudgetCommand.cs" />
@@ -629,7 +630,7 @@
     <Compile Include="Commands\Shaders\DisassembleCommand.cs" />
     <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
     <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
-    <Compile Include="Commands\Sounds\ExportSoundCommand.cs" />
+    <Compile Include="Commands\Sounds\ExtractSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
     <Compile Include="Commands\Sounds\UseAudioCacheCommand.cs" />

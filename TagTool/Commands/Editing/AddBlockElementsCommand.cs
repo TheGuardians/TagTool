@@ -55,10 +55,8 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
-                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
+                    ContextReturn(previousContext, previousOwner, previousStructure);
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context.");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -68,10 +66,8 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
-                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
+                    ContextReturn(previousContext, previousOwner, previousStructure);
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null.");
                 }
             }
 
@@ -93,9 +89,7 @@ namespace TagTool.Commands.Editing
                 (field.FieldType.GetInterface("IList") == null))
             {
                 Console.WriteLine();
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
 
@@ -139,9 +133,7 @@ namespace TagTool.Commands.Editing
             Console.WriteLine($"Successfully added {count} {itemString} to {field.Name}: {typeString}");
             Console.WriteLine(valueString);
 
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }
@@ -189,6 +181,13 @@ namespace TagTool.Commands.Editing
             }
 
             return element;
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
     }
 }

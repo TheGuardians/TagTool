@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class SwapBlockElementCommand : Command
+    class SwapBlockElementsCommand : BlockManipulationCommand
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -15,13 +15,13 @@ namespace TagTool.Commands.Editing
         private TagStructureInfo Structure { get; set; }
         private object Owner { get; set; }
 
-        public SwapBlockElementCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
-            : base(true,
+        public SwapBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
+            : base(contextStack, cache, tag, structure, owner, true,
 
-                  "SwapBlockElement",
+                  "SwapBlockElements",
                   $"Swaps a block element from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.",
 
-                  "SwapBlockElement <block name> <Element index> <Element index>",
+                  "SwapBlockElements <block name> <Element index> <Element index>",
                   $"Swaps a block element from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.")
         {
             ContextStack = contextStack;
@@ -54,9 +54,7 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
@@ -67,9 +65,7 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
@@ -79,9 +75,7 @@ namespace TagTool.Commands.Editing
 
             if ((field == null) || (!field.FieldType.IsGenericType) || (field.FieldType.GetInterface("IList") == null))
             {
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
 
@@ -103,7 +97,7 @@ namespace TagTool.Commands.Editing
             if (blockValue.Count - 1 < 0)
             {
                 new TagToolError(CommandError.OperationFailed, "TagBlock is null!");
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return true;
             }
 
@@ -132,12 +126,9 @@ namespace TagTool.Commands.Editing
                     $"{{...}}[{((IList)blockValue).Count}]" :
                 "null";
 
-            Console.WriteLine($"Successfully swapped index {index} of {field.Name} with index {newIndex}");
-            Console.WriteLine(valueString);
+            Console.WriteLine($"\n\tSuccessfully swapped elements {index} and {newIndex} of {field.Name}{valueString}");
 
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }

@@ -18,7 +18,7 @@ namespace TagTool.Commands.Sounds
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, Sound sound)
         {
             commandContext.AddCommand(new ImportSoundCommand(cache, tag, sound));
-            commandContext.AddCommand(new ExportSoundCommand(cache, tag, sound));
+            commandContext.AddCommand(new ExtractSoundCommand(cache, tag, sound));
 
             if (cache.GetType() == typeof(GameCacheGen3))
             {
