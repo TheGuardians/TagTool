@@ -217,12 +217,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             current_node_plane = new RealPlane3d(-current_node_plane.I, -current_node_plane.J, -current_node_plane.K, -current_node_plane.D);
                         RealPlane2d intersection_plane = new RealPlane2d();
                         //get 2d intersection plane of current node plane with leaf node plane
-                        if (true)//planes_get_intersection_plane2d
+                        int plane_intersection_result = planes_get_intersection_plane2d(leaf_node_plane, current_node_plane, ref intersection_plane);
+                        if (plane_intersection_result == 1)
                         {
                             //use this intersection line to cut the polygon down to size
                             result_vertices = plane_cut_polygon_2d(intersection_plane, result_vertices);
                         }
-                        else
+                        else if (plane_intersection_result == 0)
                         {
                             //if the planes dont intersect, abort
                             result_vertices = new List<RealPoint2d>();
@@ -245,9 +246,78 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
             }
         }
+
+        public int planes_get_intersection_plane2d(RealPlane3d plane_A, RealPlane3d plane_B, ref RealPlane2d plane2d)
+        {
+            LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
+            int projection_axis = BSPclass.plane_get_projection_coefficient(plane_A);
+            int projection_sign = BSPclass.plane_get_projection_sign(plane_A, projection_axis) ? 1 : 0;
+            float[] plane_A_parameters = new float[4] { plane_A.I, plane_A.J, plane_A.K, plane_A.D };
+            float[] plane_B_parameters = new float[4] { plane_B.I, plane_B.J, plane_B.K, plane_B.D };
+
+            RealPlane3d temp_plane = new RealPlane3d();
+            if(plane_B_parameters[projection_axis] == 0.0)
+            {
+                temp_plane = plane_B.DeepClone();
+            }
+            else
+            {
+                float v11 = plane_B_parameters[projection_axis] / plane_A_parameters[projection_axis];
+                temp_plane = new RealPlane3d
+                {
+                    I = plane_A.I - v11 * plane_B.I,
+                    J = plane_A.J - v11 * plane_B.J,
+                    K = plane_A.K - v11 * plane_B.K,
+                    D = plane_A.D - v11 * plane_B.D,
+                };
+            }
+            float v1 = normalize_realplane3d(ref temp_plane);
+            if(v1 == 0.0)
+            {
+                if (temp_plane.D <= 0.0)
+                    return 2;
+                else
+                    return 0;
+            }
+            else
+            {
+                //temporarily pretend the plane is a 3d point so we can pass it into existing 2d projection code
+                RealPoint3d temp_point = new RealPoint3d(temp_plane.I, temp_plane.J, temp_plane.K);
+                RealPoint2d projected_plane = BSPclass.vertex_get_projection_relevant_coords(temp_point, projection_axis, projection_sign);
+                plane2d = new RealPlane2d(projected_plane.X, projected_plane.Y, temp_plane.D / v1);
+            }
+            return 1;
+        }
+        public float normalize_realplane3d(ref RealPlane3d plane)
+        {
+            float v1 = (float)Math.Sqrt(plane.I * plane.I + plane.J * plane.J + plane.K * plane.K);
+            if (v1 == 0.0)
+                return 0.0f;
+            plane = new RealPlane3d
+            {
+                I = plane.I / v1,
+                J = plane.J / v1,
+                K = plane.K / v1,
+                D = plane.D
+            };
+            return (float)v1;
+        }
+
         public void init_leaf_map_portals(ref leafy_bsp leafybsp, int bsp3dnode_index)
         {
-
+            LargeBsp3dNode node = Bsp.Bsp3dNodes[bsp3dnode_index];
+            for (var i = 0; i < 2; i++)
+            {
+                int node_stack_node_index = (i == 0) ? (int)(bsp3dnode_index | 0x80000000) : bsp3dnode_index;
+                int child_index = (i == 0) ? node.BackChild : node.FrontChild;
+                leaf_map_node_stack[leaf_map_node_stack_count] = node_stack_node_index;
+                leaf_map_node_stack_count++;
+                if (child_index >= 0)
+                    init_leaf_map_portals(ref leafybsp, child_index);
+                else if (child_index != -1)
+                    init_leaf_map_portals_first_leaf(ref leafybsp, -1, child_index & 0x7FFFFFFF, 0, leaf_map_node_stack_count - 1);
+                leaf_map_node_stack_count--;
+            }
         }
         public void init_leaf_map_portals_first_leaf(ref leafy_bsp leafybsp, int ancestor_node_index, int leaf_index, int bsp3dnode_index, int levels_up)
         {
