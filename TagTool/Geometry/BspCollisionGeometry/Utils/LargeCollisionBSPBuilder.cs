@@ -226,8 +226,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             LargeSurface surface_block = Bsp.Surfaces[surface_index & 0x7FFFFFFF];
             int plane_index = surface_block.Plane;
             Plane plane_block = Bsp.Planes[surface_block.Plane & 0x7FFFFFFF];
-            int plane_projection_axis = plane_get_projection_coefficient(plane_block);
-            bool plane_projection_positive = plane_get_projection_sign(plane_block, plane_projection_axis);
+            int plane_projection_axis = plane_get_projection_coefficient(plane_block.Value);
+            bool plane_projection_positive = plane_get_projection_sign(plane_block.Value, plane_projection_axis);
             int plane_mirror_check = plane_projection_positive != (plane_index < 0) ? 1 : 0;
 
             RealPoint3d intersection_point_vertex = new RealPoint3d(intersection_point.I, intersection_point.J, intersection_point.K);
@@ -526,12 +526,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return plane_matched_surface_array;
         }
 
-        public int plane_get_projection_coefficient(Plane plane_block)
+        public int plane_get_projection_coefficient(RealPlane3d plane)
         {
             int minimum_coefficient;
-            float plane_I = Math.Abs(plane_block.Value.I);
-            float plane_J = Math.Abs(plane_block.Value.J);
-            float plane_K = Math.Abs(plane_block.Value.K);
+            float plane_I = Math.Abs(plane.I);
+            float plane_J = Math.Abs(plane.J);
+            float plane_K = Math.Abs(plane.K);
             if (plane_K < plane_J || plane_K < plane_I)
             {
                 if (plane_J >= plane_I)
@@ -544,16 +544,16 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return minimum_coefficient;
         }
 
-        public bool plane_get_projection_sign(Plane plane_block, int projection_axis)
+        public bool plane_get_projection_sign(RealPlane3d plane, int projection_axis)
         {
             switch (projection_axis)
             {
                 case 0: //x axis
-                    return plane_block.Value.I > 0.0f;
+                    return plane.I > 0.0f;
                 case 1: //y axis
-                    return plane_block.Value.J > 0.0f;
+                    return plane.J > 0.0f;
                 case 2: //z axis
-                    return plane_block.Value.K > 0.0f;
+                    return plane.K > 0.0f;
             }
             return false;
         }
@@ -803,8 +803,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         if (Bsp.Leaves[leaf_index].FirstBsp2dReference == 0xFFFFFFFF)
                             Bsp.Leaves[leaf_index].FirstBsp2dReference = (uint)bsp2drefindex;
 
-                        int plane_projection_axis = plane_get_projection_coefficient(plane_block);
-                        bool plane_projection_positive = plane_get_projection_sign(plane_block, plane_projection_axis);
+                        int plane_projection_axis = plane_get_projection_coefficient(plane_block.Value);
+                        bool plane_projection_positive = plane_get_projection_sign(plane_block.Value, plane_projection_axis);
                         int plane_mirror_check = plane_projection_positive != (plane_index < 0) ? 1 : 0;
 
                         int bsp2dnodeindex = create_bsp2dnodes(plane_projection_axis, plane_mirror_check, plane_matched_surface_array);
@@ -1357,32 +1357,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             RealPoint2d relevant_coords = new RealPoint2d();
             int v4 = 2 * (plane_mirror_check + 2 * plane_projection_axis);
             List<int> coordinate_list = new List<int> { 2, 1, 1, 2, 0, 2, 2, 0, 1, 0, 0, 1 };
-            int vertex_coord_A = coordinate_list[v4];
-            int vertex_coord_B = coordinate_list[v4 + 1];
-            switch (vertex_coord_A)
-            {
-                case 0:
-                    relevant_coords.X = vertex_block.X;
-                    break;
-                case 1:
-                    relevant_coords.X = vertex_block.Y;
-                    break;
-                case 2:
-                    relevant_coords.X = vertex_block.Z;
-                    break;
-            }
-            switch (vertex_coord_B)
-            {
-                case 0:
-                    relevant_coords.Y = vertex_block.X;
-                    break;
-                case 1:
-                    relevant_coords.Y = vertex_block.Y;
-                    break;
-                case 2:
-                    relevant_coords.Y = vertex_block.Z;
-                    break;
-            }
+            int vertex_coord_X_index = coordinate_list[v4];
+            int vertex_coord_Y_index = coordinate_list[v4 + 1];
+
+            float[] vertex_values = new float[3] { vertex_block.X, vertex_block.Y, vertex_block.Z };
+            relevant_coords.X = vertex_values[vertex_coord_X_index];
+            relevant_coords.Y = vertex_values[vertex_coord_Y_index];
             return relevant_coords;
         }
 

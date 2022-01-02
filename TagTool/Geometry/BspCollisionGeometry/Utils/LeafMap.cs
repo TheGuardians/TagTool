@@ -335,15 +335,71 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 plane_index = Bsp.Bsp3dNodes[bsp3dnode_index].Plane,
                 back_leaf_index = leaf_index_0 & 0x7FFFFFFF,
                 front_leaf_index = leaf_index_1 & 0x7FFFFFFF,
+                vertices = new List<RealPoint3d>()
             };
 
-            //TODO: project 2d points onto plane to get 3d points
+            //convert projected 2d points on node plane back in to 3d points and add to leaf portal
+            RealPlane3d node_plane = Bsp.Planes[Bsp.Bsp3dNodes[bsp3dnode_index].Plane].Value;
+            foreach(var point in points)
+            {
+                new_leaf_portal.vertices.Add(point2d_and_plane_to_point3d(node_plane, point));
+            }
 
-
+            //add new leaf portal to array and add corresponding leaf portal indices to both leaves
             leafybsp.leaf_map_portals.Add(new_leaf_portal);
             leaf0.portal_indices.Add(leafybsp.leaf_map_portals.Count - 1);
             leaf1.portal_indices.Add(leafybsp.leaf_map_portals.Count - 1);
+
+            //flag leaf portals that are very small
+            float area = polygon_get_area_internal(points);
+            if (area < 0.0024999999d || (Math.Sqrt(area) / polygon_get_perimeter(points)) < 0.0099999998d)
+                leaf_portal_designator_set_flags(ref leafybsp, leafybsp.leaf_map_portals.Count - 1);
         }
+
+        public RealPoint3d point2d_and_plane_to_point3d(RealPlane3d plane, RealPoint2d point)
+        {
+            LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
+            int projection_axis = BSPclass.plane_get_projection_coefficient(plane);
+            int projection_sign = BSPclass.plane_get_projection_sign(plane, projection_axis) ? 1 : 0;
+            float[] planecoords = new float[3] { plane.I, plane.J, plane.K };
+            float[] result_coords = new float[3];
+            int v4 = 2 * (projection_sign + 2 * projection_axis);
+            List<int> coordinate_list = new List<int> { 2, 1, 1, 2, 0, 2, 2, 0, 1, 0, 0, 1 };
+            int vertex_X_coord_index = coordinate_list[v4];
+            int vertex_Y_coord_index = coordinate_list[v4 + 1];
+
+            //assign X and Y coords
+            result_coords[vertex_X_coord_index] = point.X;
+            result_coords[vertex_Y_coord_index] = point.Y;
+
+            //calculate projection axis coordinate
+            //otherwise result coord at projection axis defaults to 0.0
+            if (Math.Abs(planecoords[projection_axis]) >= 0.00009999999747378752d)
+            {
+                result_coords[projection_axis] = 
+                    (plane.D - planecoords[vertex_X_coord_index] * point.X - planecoords[vertex_Y_coord_index] * point.Y) /
+                    planecoords[projection_axis];
+            }
+            return new RealPoint3d(result_coords[0], result_coords[1], result_coords[2]);
+        }
+
+        public float polygon_get_perimeter(List<RealPoint2d> projected_points)
+        {
+            //first get distance between last and first point
+            float xdiff1 = projected_points[0].X - projected_points[projected_points.Count - 1].X;
+            float ydiff1 = projected_points[0].Y - projected_points[projected_points.Count - 1].Y;
+            float perimeter = (float)Math.Sqrt(xdiff1 * xdiff1 + ydiff1 * ydiff1);
+            //then loop through remaining points and add to the sum
+            for (var i = 1; i < projected_points.Count; i++)
+            {
+                float xdiff = projected_points[i].X - projected_points[i - 1].X;
+                float ydiff = projected_points[i].Y - projected_points[i - 1].Y;
+
+                perimeter = perimeter + (float)Math.Sqrt(xdiff * xdiff + ydiff * ydiff);
+            }
+            return perimeter;
+        }
+
         public void leaf_portal_designator_set_flags(ref leafy_bsp leafybsp, int leaf_portal_index)
         {
             leaf_map_portal portal = leafybsp.leaf_map_portals[leaf_portal_index];
@@ -532,18 +588,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public float polygon_get_area(List<RealPoint2d> projected_points, RealPlane3d plane)
         {
-            float area = 0.0f;
-            for (var i = 0; i < projected_points.Count - 2; i++)
-            {
-                RealPoint2d v21 = projected_points[i + 1] - projected_points[0];
-                RealPoint2d v31 = projected_points[i + 2] - projected_points[0];
-
-                //cross product of two vectors times 0.5
-                area = area + (v31.Y * v21.X - v31.X * v21.Y) * 0.5f;
-            }
+            float area = polygon_get_area_internal(projected_points);
 
             LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
-            int plane_projection_axis = BSPclass.plane_get_projection_coefficient(new Plane { Value = plane });
+            int plane_projection_axis = BSPclass.plane_get_projection_coefficient(plane);
             float plane_coefficient = 0.0f;
             switch (plane_projection_axis)
             {
@@ -562,13 +610,27 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return area / Math.Abs(plane_coefficient);
         }
 
+        public float polygon_get_area_internal(List<RealPoint2d> projected_points)
+        {
+            float area = 0.0f;
+            for (var i = 0; i < projected_points.Count - 2; i++)
+            {
+                RealPoint2d v21 = projected_points[i + 1] - projected_points[0];
+                RealPoint2d v31 = projected_points[i + 2] - projected_points[0];
+
+                //cross product of two vectors times 0.5
+                area = area + (v31.Y * v21.X - v31.X * v21.Y) * 0.5f;
+            }
+            return Math.Abs(area);
+        }
+
         public List<RealPoint2d> polygon_project_on_plane(List<RealPoint3d> points, RealPlane3d plane, int plane_index)
         {
             //initialize BSP builder class so we can borrow some already implemented functions
             LargeCollisionBSPBuilder BSPclass = new LargeCollisionBSPBuilder();
 
-            int plane_projection_axis = BSPclass.plane_get_projection_coefficient(new Plane { Value = plane });
-            bool plane_projection_positive = BSPclass.plane_get_projection_sign(new Plane { Value = plane }, plane_projection_axis);
+            int plane_projection_axis = BSPclass.plane_get_projection_coefficient(plane);
+            bool plane_projection_positive = BSPclass.plane_get_projection_sign(plane, plane_projection_axis);
 
             int plane_mirror_check = plane_projection_positive != (plane_index < 0) ? 1 : 0;
             List<RealPoint2d> projected_points = new List<RealPoint2d>();
