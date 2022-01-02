@@ -7,7 +7,7 @@ using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
-    class CopyBlockElementsCommand : BlockManipulationCommand
+    class CopyBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
         private GameCache Cache { get; }
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Editing
         public static List<object> Elements { get; set; } = null;
 
         public CopyBlockElementsCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
-            : base(contextStack, cache, tag, structure, owner, false,
+            : base(false,
 
                   "CopyBlockElements",
                   "Copies block elements from one tag to another.",
@@ -122,6 +122,13 @@ namespace TagTool.Commands.Editing
             ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
     }
 }
