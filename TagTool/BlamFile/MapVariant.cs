@@ -1,6 +1,7 @@
 ﻿using System;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.BlamFile
 {
@@ -36,48 +37,6 @@ namespace TagTool.BlamFile
         public int[] SimulationEntities;
     }
 
-    [Flags]
-    public enum GameEngineFlags : ushort
-    {
-        Ctf = 1,
-        Slayer = 2,
-        Oddball = 4,
-        Koth = 8,
-        Sandbox = 16,
-        Vip = 32,
-        Juggernaut = 64,
-        Territories = 128,
-        Assault = 256,
-        Infection = 512
-    }
-
-    public enum GameEngineType : int
-    {
-        None,
-        Ctf,
-        Slayer,
-        Oddball,
-        Koth,
-        Sandbox,
-        Vip,
-        Juggernaut,
-        Territories,
-        Assault,
-        Infection,
-    }
-
-    public enum MapVariantGameTeam : sbyte
-    {
-        Defender,
-        Attacker,
-        Team3,
-        Team4,
-        Team5,
-        Team6,
-        Team7,
-        Team8,
-        Neutral
-    }
 
     [Flags]
     public enum PlacementFlags : short
@@ -99,11 +58,11 @@ namespace TagTool.BlamFile
     {
         public GameEngineFlags EngineFlags;
         public MultiplayerObjectFlags MultiplayerFlags;
-        public MapVariantGameTeam TeamAffiliation;
+        public MultiplayerTeamDesignator Team;
         public byte SharedStorage;
         public byte SpawnTime;
         public MultiplayerObjectType ObjectType;
-        public MultiplayerObjectBoundaryShape Shape;
+        public MultiplayerObjectBoundary Shape;
     }
 
     [TagStructure(Size = 0x54)]
@@ -142,34 +101,6 @@ namespace TagTool.BlamFile
         public sbyte Source;
     }
 
-    public enum MultiplayerObjectType : sbyte
-    {
-        Ordinary = 0x0,
-        Weapon = 0x1,
-        Grenade = 0x2,
-        Projectile = 0x3,
-        Powerup = 0x4,
-        Equipment = 0x5,
-        LightLandVehicle = 0x6,
-        HeavyLandVehicle = 0x7,
-        FlyingVehicle = 0x8,
-        Teleporter2Way = 0x9,
-        TeleporterSender = 0xA,
-        TeleporterReceiver = 0xB,
-        PlayerSpawnLocation = 0xC,
-        PlayerRespawnZone = 0xD,
-        HoldSpawnObjective = 0xE,
-        CaptureSpawnObjective = 0xF,
-        HoldDestinationObjective = 0x10,
-        CaptureDestinationObjective = 0x11,
-        HillObjective = 0x12,
-        InfectionHavenObjective = 0x13,
-        TerritoryObjective = 0x14,
-        VIPBoundaryObjective = 0x15,
-        VIPDestinationObjective = 0x16,
-        JuggernautDestinationObjective = 0x17,
-    };
-
     public enum MultiplayerObjectFlags : sbyte
     {
         Unknown = (1 << 0),
@@ -178,21 +109,14 @@ namespace TagTool.BlamFile
         Asymmetric = (1 << 3)
     }
 
-    public enum MultiplayerObjectShapeType : sbyte
-    {
-        None,
-        Sphere,
-        Cylinder,
-        Box
-    }
-
     [TagStructure(Size = 0x11)]
-    public class MultiplayerObjectBoundaryShape
+    public class MultiplayerObjectBoundary
     {
-        public MultiplayerObjectShapeType Type;
-        public float Width;
-        public float Length;
-        public float Top;
-        public float Bottom;
+        [TagField(EnumType = typeof(sbyte))]
+        public MultiplayerObjectBoundaryShape Type;
+        public float WidthRadius;
+        public float BoxLength;
+        public float PositiveHeight;
+        public float NegativeHeight;
     }
 }

@@ -6,6 +6,7 @@ using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Scripting.Compiler
 {

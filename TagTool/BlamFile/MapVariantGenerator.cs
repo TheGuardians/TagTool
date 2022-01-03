@@ -8,6 +8,7 @@ using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.Tags.Definitions.Scenario;
 
 namespace TagTool.BlamFile
@@ -241,8 +242,8 @@ namespace TagTool.BlamFile
             Vectors3dFromEulerAngles(instance.Rotation, out mapvPlacement.Forward, out mapvPlacement.Up);
 
             var multiplayerInstance = instance as IMultiplayerInstance;
-            if (multiplayerInstance != null && multiplayerInstance.Multiplayer.AttachedNameIndex != -1)
-                AttachToParent(mapvPlacement, paletteEntry.Object, multiplayerInstance.Multiplayer.AttachedNameIndex);
+            if (multiplayerInstance != null && multiplayerInstance.Multiplayer.MapVariantParent.NameIndex != -1)
+                AttachToParent(mapvPlacement, paletteEntry.Object, multiplayerInstance.Multiplayer.MapVariantParent.NameIndex);
 
             InitMultiplayerProperties(mapvPlacement.Properties, instance, obje);
 
@@ -253,7 +254,7 @@ namespace TagTool.BlamFile
                 case GameObjectTypeHalo3ODST.Equipment:
                 case GameObjectTypeHalo3ODST.Weapon:
                 case GameObjectTypeHalo3ODST.Vehicle:
-                    if (obje.MultiplayerObject[0].Type < GameObject.MultiplayerObjectBlock.MultiplayerObjectType.Teleporter2way)
+                    if (obje.MultiplayerObject[0].Type < MultiplayerObjectType.Teleporter2way)
                         mapvPlacement.PlacementFlags |= PlacementFlags.UnknownBit7;
                     break;
             }
@@ -319,47 +320,47 @@ namespace TagTool.BlamFile
 
             var objeMultiplayerProperties = obje.MultiplayerObject[0];
             properties.SpawnTime = (byte)objeMultiplayerProperties.DefaultSpawnTime;
-            properties.ObjectType = (MultiplayerObjectType)objeMultiplayerProperties.Type;
-            properties.Shape = new MultiplayerObjectBoundaryShape()
+            properties.ObjectType = objeMultiplayerProperties.Type;
+            properties.Shape = new MultiplayerObjectBoundary()
             {
-                Type = (MultiplayerObjectShapeType)objeMultiplayerProperties.BoundaryShape,
-                Bottom = objeMultiplayerProperties.BoundaryBottom,
-                Length = objeMultiplayerProperties.BoundaryBoxLength,
-                Top = objeMultiplayerProperties.BoundaryTop,
-                Width = objeMultiplayerProperties.BoundaryWidthRadius
+                Type = objeMultiplayerProperties.BoundaryShape,
+                NegativeHeight = objeMultiplayerProperties.BoundaryBottom,
+                BoxLength = objeMultiplayerProperties.BoundaryBoxLength,
+                PositiveHeight = objeMultiplayerProperties.BoundaryTop,
+                WidthRadius = objeMultiplayerProperties.BoundaryWidthRadius
             };
 
             if (objeMultiplayerProperties.EngineFlags != 0)
                 properties.EngineFlags = (GameEngineFlags)objeMultiplayerProperties.EngineFlags;
 
-            if (((scrnMultiplayerProperties.MultiplayerFlags >> 6) & 1) != 0)
-                properties.MultiplayerFlags |= MultiplayerObjectFlags.Unknown;
+            //if (((scrnMultiplayerProperties.SpawnFlags >> 6) & 1) != 0)
+            //    properties.MultiplayerFlags |= MultiplayerObjectFlags.Unknown;
 
-            else if (((scrnMultiplayerProperties.MultiplayerFlags >> 7) & 1) != 0)
-                properties.MultiplayerFlags |= MultiplayerObjectFlags.PlacedAtStart;
+            //else if (((scrnMultiplayerProperties.SpawnFlags >> 7) & 1) != 0)
+            //    properties.MultiplayerFlags |= MultiplayerObjectFlags.PlacedAtStart;
 
             properties.MultiplayerFlags = MultiplayerObjectFlags.Symmetric | MultiplayerObjectFlags.Asymmetric;
-            if (scrnMultiplayerProperties.Symmetry == MultiplayerObjectProperties.SymmetryValue.Symmetric)
+            if (scrnMultiplayerProperties.Symmetry == GameEngineSymmetry.Symmetric)
                 properties.MultiplayerFlags &= ~MultiplayerObjectFlags.Asymmetric;
-            if (scrnMultiplayerProperties.Symmetry == MultiplayerObjectProperties.SymmetryValue.Asymmetric)
+            if (scrnMultiplayerProperties.Symmetry == GameEngineSymmetry.Asymmetric)
                 properties.MultiplayerFlags &= ~MultiplayerObjectFlags.Symmetric;
 
             if (scrnMultiplayerProperties.SpawnTime != 0)
                 properties.SpawnTime = (byte)scrnMultiplayerProperties.SpawnTime;
 
-            properties.TeamAffiliation = (MapVariantGameTeam)scrnMultiplayerProperties.Team;
+            properties.Team = scrnMultiplayerProperties.Team;
 
-            if (scrnMultiplayerProperties.Shape > MultiplayerObjectProperties.ShapeValue.None)
+            if (scrnMultiplayerProperties.Shape != MultiplayerObjectBoundaryShape.None)
             {
-                properties.Shape.Type = (MultiplayerObjectShapeType)scrnMultiplayerProperties.Shape;
-                properties.Shape.Bottom = scrnMultiplayerProperties.Bottom;
-                properties.Shape.Top = scrnMultiplayerProperties.Top;
-                properties.Shape.Width = scrnMultiplayerProperties.WidthRadius;
-                properties.Shape.Length = scrnMultiplayerProperties.Depth;
+                properties.Shape.Type = scrnMultiplayerProperties.Shape;
+                properties.Shape.NegativeHeight = scrnMultiplayerProperties.BoundaryNegativeHeight;
+                properties.Shape.PositiveHeight = scrnMultiplayerProperties.BoundaryPositiveHeight;
+                properties.Shape.WidthRadius = scrnMultiplayerProperties.BoundaryWidthRadius;
+                properties.Shape.BoxLength = scrnMultiplayerProperties.BoundaryBoxLength;
             }
 
             if (scrnMultiplayerProperties.EngineFlags != 0)
-                properties.EngineFlags = (GameEngineFlags)scrnMultiplayerProperties.EngineFlags;
+                properties.EngineFlags = scrnMultiplayerProperties.EngineFlags;
 
 
             //
@@ -375,7 +376,7 @@ namespace TagTool.BlamFile
                 if(scrnMultiplayerProperties.TeleporterChannel != 0)
                     properties.SharedStorage = (byte)scrnMultiplayerProperties.TeleporterChannel;
                 else
-                    properties.SharedStorage = (byte)multiplayerInstance.Multiplayer.SpawnSequence;
+                    properties.SharedStorage = (byte)multiplayerInstance.Multiplayer.SpawnOrder;
             }
         }
 
@@ -449,15 +450,14 @@ namespace TagTool.BlamFile
                 Properties = new MapVariantPlacementProperty()
                 {
                     EngineFlags =
-                    GameEngineFlags.Ctf |
+                    GameEngineFlags.CaptureTheFlag |
                     GameEngineFlags.Slayer |
                     GameEngineFlags.Oddball |
-                    GameEngineFlags.Koth |
-                    GameEngineFlags.Sandbox |
-                    GameEngineFlags.Vip |
+                    GameEngineFlags.KingOfTheHill |
                     GameEngineFlags.Juggernaut |
                     GameEngineFlags.Territories |
                     GameEngineFlags.Assault |
+                    GameEngineFlags.Vip |
                     GameEngineFlags.Infection,
                     MultiplayerFlags = (MultiplayerObjectFlags)0xC
                 },

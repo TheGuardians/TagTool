@@ -3,6 +3,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -350,10 +351,10 @@ namespace TagTool.Tags.Definitions
         public class MultiplayerObjectBlock : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public EngineFlagsReachValue ReachEngineFlags;
+            public GameEngineFlagsReach ReachEngineFlags;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public EngineFlagsValue EngineFlags;
+            public GameEngineFlags EngineFlags;
 
             public MultiplayerObjectType Type;
             public TeleporterPassabilityFlags TeleporterPassability;
@@ -361,10 +362,10 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public MultiplayerObjectFlags Flags;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public BoundaryShapeValue BoundaryShape;
+            public MultiplayerObjectBoundaryShape BoundaryShape;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public SpawnTimerTypeValue SpawnTimerType;
+            public MultiplayerObjectBoundaryShape SpawnTimerType;
 
             [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
             public byte[] pad = new byte[1];
@@ -379,10 +380,10 @@ namespace TagTool.Tags.Definitions
             public float BoundaryTop;
             public float BoundaryBottom;
 
+            [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectBoundaryShape ReachBoundaryShape;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public BoundaryShapeValue ReachBoundaryShape;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public SpawnTimerTypeValue SpawnTimerTypeReach;
+            public MultiplayerObjectSpawnTimerType SpawnTimerTypeReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short SpawnTimeReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -402,74 +403,8 @@ namespace TagTool.Tags.Definitions
             public CachedTag SpawnedObject;
             public StringId NyiBoundaryMaterial;
 
-            [TagField(Length = (int)BoundaryShapeValue.Count)]
-            public BoundaryShader[] BoundaryShaders = new BoundaryShader[(int)BoundaryShapeValue.Count];
-
-            [Flags]
-            public enum EngineFlagsValue : ushort
-            {
-                None = 0,
-                CaptureTheFlag = 1 << 0,
-                Slayer = 1 << 1,
-                Oddball = 1 << 2,
-                KingOfTheHill = 1 << 3,
-                Juggernaut = 1 << 4,
-                Territories = 1 << 5,
-                Assault = 1 << 6,
-                Vip = 1 << 7,
-                Infection = 1 << 8,
-                TargetTraining = 1 << 9
-            }
-
-            [Flags]
-            public enum EngineFlagsReachValue : byte
-            {
-                None = 0,
-                Sandbox = 1 << 0,
-                Megalogamengine = 1 << 1,
-                Campaign = 1 << 2,
-                Survival = 1 << 3,
-                Firefight = 1 << 4
-            }
-
-            public enum MultiplayerObjectType : sbyte
-            {
-                Ordinary,
-                Weapon,
-                Grenade,
-                Projectile,
-                Powerup,
-                Equipment,
-                LightLandVehicle,
-                HeavyLandVehicle,
-                FlyingVehicle,
-                Teleporter2way,
-                TeleporterSender,
-                TeleporterReceiver,
-                PlayerSpawnLocation,
-                PlayerRespawnZone,
-                HoldSpawnLocation, // OddballSpawnLocation (only? or assault also)
-                CtfFlagSpawnLocation,
-                AssaultTargetLocation, // formerly TargetSpawnLocation. assumed only for Assault
-                CtfFlagReturnArea,
-                KothHillArea,
-                InfectionSafeArea,
-                TerritoryArea,
-                VipInfluenceArea,
-                VipDestinationZone,
-                JuggernautDestinationZone
-            }
-
-            [Flags]
-            public enum TeleporterPassabilityFlags : byte
-            {
-                None,
-                DisallowPlayers = 1 << 0,
-                AllowLightLandVehicles = 1 << 1,
-                AllowHeavyLandVehicles = 1 << 2,
-                AllowFlyingVehicles = 1 << 3,
-                AllowProjectiles = 1 << 4,
-            }
+            [TagField(Length = (int)MultiplayerObjectBoundaryShape.Count)]
+            public BoundaryShader[] BoundaryShaders = new BoundaryShader[(int)MultiplayerObjectBoundaryShape.Count];
 
             [Flags]
             public enum MultiplayerObjectFlags : ushort
@@ -493,21 +428,6 @@ namespace TagTool.Tags.Definitions
                 Bit15 = 1 << 15
             }
 
-            public enum SpawnTimerTypeValue : sbyte
-            {
-                StartsOnDeath,
-                StartsOnDisturbance
-            }
-
-            public enum BoundaryShapeValue : sbyte
-            {
-                None,
-                Sphere,
-                Cylinder,
-                Box,
-
-                Count
-            }
 
             [TagStructure(Size = 0x20)]
             public class BoundaryShader : TagStructure
