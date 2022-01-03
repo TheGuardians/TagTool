@@ -245,12 +245,15 @@ namespace TagTool.Tags
 					return TagFieldInfo.GetFieldSize(type.GenericTypeArguments[0], attr, targetVersion, cachePlatform) * 2;
 
 				case TypeCode.Object when type.IsEnum:
-					return TagFieldInfo.GetFieldSize(type.GetEnumUnderlyingType(), attr, targetVersion, cachePlatform);
+					return TagFieldInfo.GetFieldSize(attr.EnumType ?? type.GetEnumUnderlyingType(), attr, targetVersion, cachePlatform);
 
                 case TypeCode.Object when type.IsSubclassOf(typeof(TagStructure)):
                     return TagStructure.GetTagStructureInfo(type, targetVersion, cachePlatform).TotalSize;
 
-                default:
+				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(FlagBits<>):
+					return TagFieldInfo.GetFieldSize(type.GenericTypeArguments[0], attr, targetVersion, cachePlatform);
+
+				default:
 					return TagStructure.GetTagStructureInfo(type, targetVersion, cachePlatform).TotalSize;
 			}
 		}

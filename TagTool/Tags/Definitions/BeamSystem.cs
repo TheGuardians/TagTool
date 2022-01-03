@@ -3,6 +3,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -62,7 +63,7 @@ namespace TagTool.Tags.Definitions
             public int RuntimeMUsedStates;
             public int RuntimeMMaxProfileCount;
 
-            public GpuPropertyFunctionColorStruct RuntimeMGpuData;
+            public RuntimeGpuData RuntimeMGpuData;
 
             [Flags]
             public enum BeamAppearanceFlags : ushort
@@ -187,53 +188,6 @@ namespace TagTool.Tags.Definitions
                     Unknown,
                     Plus,
                     Times
-                }
-            }
-
-            [TagStructure(Size = 0x24)]
-            public class GpuPropertyFunctionColorStruct : TagStructure
-            {
-                public List<GpuPropertyBlock> RuntimeGpuPropertyBlock;
-                public List<GpuFunctionBlock> RuntimeGpuFunctionsBlock;
-                public List<GpuColorBlock> RuntimeGpuColorsBlock;
-
-                [TagStructure(Size = 0x10)]
-                public class GpuPropertyBlock : TagStructure
-                {
-                    [TagField(Length = 4)]
-                    public GpuPropertySubArray[] RuntimeGpuPropertySubArray;
-
-                    [TagStructure(Size = 0x4)]
-                    public class GpuPropertySubArray : TagStructure
-                    {
-                        public float RuntimeGpuPropertyReal;
-                    }
-                }
-
-                [TagStructure(Size = 0x40)]
-                public class GpuFunctionBlock : TagStructure
-                {
-                    [TagField(Length = 16)]
-                    public GpuFunctionSubArray[] RuntimeGpuFunctionSubArray;
-
-                    [TagStructure(Size = 0x4)]
-                    public class GpuFunctionSubArray : TagStructure
-                    {
-                        public float RuntimeGpuFunctionReal;
-                    }
-                }
-
-                [TagStructure(Size = 0x10)]
-                public class GpuColorBlock : TagStructure
-                {
-                    [TagField(Length = 4)]
-                    public GpuColorSubArray[] RuntimeGpuColorSubArray;
-
-                    [TagStructure(Size = 0x4)]
-                    public class GpuColorSubArray : TagStructure
-                    {
-                        public float RuntimeGpuColorReal;
-                    }
                 }
             }
         }
