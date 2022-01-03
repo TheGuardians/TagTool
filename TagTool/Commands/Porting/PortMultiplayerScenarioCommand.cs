@@ -16,6 +16,7 @@ using TagTool.Tags;
 using System.ComponentModel;
 using System.Text;
 using System.Reflection;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -607,8 +608,7 @@ namespace TagTool.Commands.Porting
             instance.OriginBspIndex = -1;
             instance.AllowedZoneSets = (ushort)(1u << bspIndex);
             instance.Multiplayer = new MultiplayerObjectProperties();
-            instance.Multiplayer.AttachedNameIndex = -1;
-            instance.Multiplayer.Team = MultiplayerObjectProperties.TeamValue.Neutral;
+            instance.Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
             scnr.Scenery.Add(instance);
 
             scnr.SceneryPalette.Add(new ScenarioPaletteEntry()
