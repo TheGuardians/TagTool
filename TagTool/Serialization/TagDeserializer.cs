@@ -365,28 +365,42 @@ namespace TagTool.Serialization
         private object DeserializeFlagBits(EndianReader reader, TagFieldAttribute valueInfo, Type valueType)
         {
             var enumType = valueType.GenericTypeArguments[0];
-            var value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
-            var castedValue = (uint)Convert.ChangeType(value, typeof(uint));
+            object value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+            uint castedValue = (uint)Convert.ChangeType(value, typeof(uint));
             return VersionedEnum.ImportFlags(enumType, castedValue, Version, CachePlatform);
         }
 
         private object DeserializeEnum(EndianReader reader, TagFieldAttribute valueInfo, Type valueType)
         {
+            var storageType = valueInfo.EnumType ?? valueType.GetEnumUnderlyingType();
+            object value = DeserializePrimitiveValue(reader, storageType);
+
             var enumInfo = TagEnum.GetInfo(valueType, Version, CachePlatform);
             if(enumInfo.Attribute.IsVersioned)
             {
-                object value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
-                int castedValue = (int)Convert.ChangeType(value, typeof(int));
-                return VersionedEnum.ImportValue(valueType, castedValue, Version, CachePlatform);
+                return ConvertVersionedEnumValue(valueInfo, valueType, value, enumInfo);
             }
             else
             {
-                var value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
-
                 if (valueInfo.EnumType != null)
-                    return CastEnumValue(valueType, valueInfo.EnumType, value);
-                else
-                    return value;
+                    value = CastEnumValue(valueType, valueInfo.EnumType, value);
+
+                return value;
+            }
+        }
+
+        private object ConvertVersionedEnumValue(TagFieldAttribute valueInfo, Type valueType, object value, TagEnumInfo enumInfo)
+        {
+            try
+            {
+                return VersionedEnum.ImportValue(valueType, (int)Convert.ChangeType(value, typeof(int)), Version, CachePlatform);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                new TagToolWarning($"Enum value out of range {enumInfo.Type.FullName} = {value}");
+
+                // We're unable to convert the value, nothing we can do. Cast the value as is.
+                return CastEnumValue(enumInfo.Type, valueInfo.EnumType, value);
             }
         }
 

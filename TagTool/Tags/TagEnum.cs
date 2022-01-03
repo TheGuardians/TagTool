@@ -116,15 +116,16 @@ namespace TagTool.Tags
 
             if (Attribute.IsVersioned)
             {
-                var typeCode = Type.GetTypeCode(type.GetEnumUnderlyingType());
-
-                if (typeCode != TypeCode.SByte && typeCode != TypeCode.Int16 && typeCode != TypeCode.Int32)
-                    throw new NotSupportedException("Versioned enums must have a signed underlying type.");
+                if (UnderlyingType != typeof(int))
+                    throw new NotSupportedException("Versioned enums must have an underlying type of int.");
 
                 if (IsFlags)
                     throw new NotSupportedException("C# [Flags] Enum cannot be versioned, use FlagBits<Enum> instead.");
             }
         }
+
+        public bool IsVersioned => Attribute.IsVersioned;
+
     }
 
     public class TagEnumMemberEnumerable : IEnumerable<TagEnumMemberInfo>

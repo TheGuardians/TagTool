@@ -93,33 +93,59 @@ namespace TagTool.Tags
         /// <param name="cachePlatform"></param>
         /// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
         private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform, ref uint offset)
+        {
+            ValidateEnumRequiments(field, attribute, targetVersion, cachePlatform);
+
+            var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion, cachePlatform);
+
+            if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
+                throw new InvalidOperationException();
+
+            uint align = TagFieldInfo.GetFieldAlignment(field.FieldType, attribute, targetVersion, cachePlatform);
+            if (align > 0)
+                offset = offset + (align - 1) & ~(align - 1);
+
+            var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
+            TagFieldInfos.Add(tagFieldInfo);
+            offset += fieldSize;
+        }
+        /// <summary>
+        /// Finds a <see cref="TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
+        /// </summary>
+        /// <param name="match">The <see cref="FieldInfo"/> <see cref="Predicate{T}"/> to query.</param>
+        /// <returns></returns>
+        public FieldInfo Find(Predicate<FieldInfo> match) =>
+			TagFieldInfos.Find(f => match.Invoke(f.FieldInfo))?.FieldInfo ?? null;
+
+		private static void ValidateEnumRequiments(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform)
 		{
 			if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(FlagBits<>))
 			{
-				if (attribute.EnumType == null)
-					throw new Exception("FlagBits must have the 'EnumType' TagField attribute set");
+				var enumType = field.FieldType.GenericTypeArguments[0];
+				var info = TagEnum.GetInfo(enumType, targetVersion, cachePlatform);
+
+                if (!info.IsVersioned)
+					throw new Exception("FlagBits Enum must have a 'TagEnum' attribute with IsVersioned=True");
+                
+                if (attribute.EnumType == null)
+                    throw new Exception("FlagBits Enum must have the 'EnumType' TagField attribute set");
+
+				if (!VersionedEnum.IsSufficientStorageType(info.Type, attribute.EnumType, targetVersion, cachePlatform))
+					throw new Exception($"FlagBits  enum 'EnumType' TagField attribute is not large enough to store all the members for cache version: '{targetVersion}', platform: '{cachePlatform}'");
 			}
+			else if(field.FieldType.IsEnum)
+			{
+				var info = TagEnum.GetInfo(field.FieldType, targetVersion, cachePlatform);
 
-			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion, cachePlatform);
+				if (info.IsVersioned)
+				{
+					if (attribute.EnumType == null)
+						throw new Exception("Versioned Enum must have the 'EnumType' TagField attribute set");
 
-			if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
-				throw new InvalidOperationException();
-
-			uint align = TagFieldInfo.GetFieldAlignment(field.FieldType, attribute, targetVersion, cachePlatform);
-			if (align > 0)
-				offset = offset + (align - 1) & ~(align - 1);
-
-			var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
-			TagFieldInfos.Add(tagFieldInfo);
-			offset += fieldSize;
+					if (!VersionedEnum.IsSufficientStorageType(info.Type, attribute.EnumType, targetVersion, cachePlatform))
+						throw new Exception($"Versioned Enum 'EnumType' TagField attribute is not large enough to store all the members for cache version: '{targetVersion}', platform: '{cachePlatform}'");
+				}
+			}
 		}
-
-		/// <summary>
-		/// Finds a <see cref="TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
-		/// </summary>
-		/// <param name="match">The <see cref="FieldInfo"/> <see cref="Predicate{T}"/> to query.</param>
-		/// <returns></returns>
-		public FieldInfo Find(Predicate<FieldInfo> match) =>
-			TagFieldInfos.Find(f => match.Invoke(f.FieldInfo))?.FieldInfo ?? null;
 	}
 }

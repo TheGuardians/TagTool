@@ -328,17 +328,25 @@ namespace TagTool.Serialization
         {
             var enumInfo = TagEnum.GetInfo(valueType, Version, CachePlatform);
             if (enumInfo.Attribute.IsVersioned)
+                value = ConvertVersionedEnumValue(value, valueInfo, valueType, enumInfo);
+
+            if(valueInfo.EnumType != null)
+                value = Convert.ChangeType(value, valueInfo.EnumType);
+
+            SerializePrimitiveValue(writer, value, value.GetType());
+        }
+
+        private object ConvertVersionedEnumValue(object value, TagFieldAttribute valueInfo, Type valueType, TagEnumInfo enumInfo)
+        {
+            try
             {
                 int exportedValue = VersionedEnum.ExportValue(valueType, value, Version, CachePlatform);
-                object castedValue = Convert.ChangeType(exportedValue, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
-                SerializePrimitiveValue(writer, castedValue, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+                return Convert.ChangeType(exportedValue, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
             }
-            else
+            catch (ArgumentOutOfRangeException)
             {
-                if (valueInfo.EnumType != null)
-                    value = Convert.ChangeType(value, valueInfo.EnumType);
-
-                SerializePrimitiveValue(writer, value, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+                new TagToolWarning($"Enum value out of range {enumInfo.Type.FullName} = {value}");
+                return value;
             }
         }
 

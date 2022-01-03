@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using TagTool.Cache;
 using TagTool.Common;
 
@@ -15,17 +17,38 @@ namespace TagTool.Tags
             var members = TagEnum.GetMemberEnumerable(info).Members;
             if (value == -1)
             {
-                if ((int)members[0].Value != -1)
-                    throw new ArgumentOutOfRangeException("Expected first member of versioned enum to be -1.");
+                if ((int)members[0].Value == -1)
+                    throw new ArgumentOutOfRangeException(nameof(value), "Expected first member of versioned enum to be -1.");
 
                 return members[0].Value;
             }
             else
             {
+                value += GetValueMemberStartIndex(members);
                 if (value < 0 || value >= members.Count)
                     throw new ArgumentOutOfRangeException(nameof(value), "Value was out of range of the enum members");
 
                 return members[value].Value;
+            }
+        }
+
+        public static bool IsSufficientStorageType(Type enumType, Type storageType, CacheVersion version, CachePlatform platform)
+        {
+            var members = TagEnum.GetMemberEnumerable(enumType, version, platform).Members;
+            int memberStartIndex = GetValueMemberStartIndex(members);
+            int memberCount = members.Count - memberStartIndex;
+            int bytesNeeded = (CalculateNumberOfBitsNeeded(memberCount) + 7) >> 3;
+            return bytesNeeded <= Marshal.SizeOf(storageType);
+
+            int CalculateNumberOfBitsNeeded(int n)
+            {
+                int r = 0;
+                if ((n >> 16) != 0) { r += 16; n >>= 16; }
+                if ((n >> 8) != 0) { r += 8; n >>= 8; }
+                if ((n >> 4) != 0) { r += 4; n >>= 4; }
+                if ((n >> 2) != 0) { r += 2; n >>= 2; }
+                if ((n - 1) != 0) ++r;
+                return r;
             }
         }
 
@@ -36,9 +59,11 @@ namespace TagTool.Tags
                 throw new InvalidOperationException("Cannot import to an non-versioned enum.");
 
             var members = TagEnum.GetMemberEnumerable(info).Members;
+            int startIndex = GetValueMemberStartIndex(members);
+
             for (int i = 0; i < members.Count; i++)
             {
-                if (members[i].Value.Equals(enumValue))
+                if (members[i + startIndex].Value.Equals(enumValue))
                     return i;
             }
 
@@ -54,6 +79,7 @@ namespace TagTool.Tags
             var flagBits = (IFlagBits)Activator.CreateInstance(typeof(FlagBits<>).MakeGenericType(enumType));
 
             var members = TagEnum.GetMemberEnumerable(info).Members;
+
             for (int i = 0; i < members.Count; i++)
             {
                 uint mask = 1u << i;
@@ -75,9 +101,10 @@ namespace TagTool.Tags
             var info = TagEnum.GetInfo(enumType, version, platform);
             if (!info.Attribute.IsVersioned)
                 throw new InvalidOperationException("Cannot import to an non-versioned enum.");
+    
+            var members = TagEnum.GetMemberEnumerable(info).Members;
 
             uint value = 0;
-            var members = TagEnum.GetMemberEnumerable(info).Members;
             for (int i = 0; i < members.Count; i++)
             {
                 if (flagBits.TestBit((Enum)members[i].Value))
@@ -85,6 +112,18 @@ namespace TagTool.Tags
             }
 
             return value;
+        }
+
+        // Returns the index of the first significant member
+        private static int GetValueMemberStartIndex(List<TagEnumMemberInfo> members)
+        {
+            int startIndex = 0;
+
+            // ignore 'None'
+            if ((int)members[0].Value == -1)
+                startIndex++;
+
+            return startIndex;
         }
     }
 }
