@@ -746,6 +746,7 @@
     <Compile Include="Shaders\ShaderMatching\TerrainSorter.cs" />
     <Compile Include="Shaders\ShaderType.cs" />
     <Compile Include="Shaders\SortingLayer.cs" />
+    <Compile Include="Tags\Definitions\Common\RuntimeGpu.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />
     <Compile Include="Cache\Gen1\TagDefinitionsGen1.cs" />
