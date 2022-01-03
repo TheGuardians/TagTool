@@ -100,6 +100,11 @@ namespace TagTool.Tags
         /// Used when the string written must absolutely be null terminated. For example Maxscript doesn't read fixed length strings
         /// </summary>
         public bool ForceNullTerminated = false;
+
+        /// <summary>
+        /// The underlying type of the Enum.
+        /// </summary>
+        public Type EnumType { get; set; } = null;
     }
 
     [Flags]

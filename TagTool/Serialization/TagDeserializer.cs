@@ -224,7 +224,7 @@ namespace TagTool.Serialization
 
             // enum = Enum type
             if (valueType.IsEnum)
-                return DeserializePrimitiveValue(reader, valueType.GetEnumUnderlyingType());
+                return DeserializeEnum(reader, valueInfo, valueType);
 
             // string = ASCII string
             if (valueType == typeof(string))
@@ -355,8 +355,60 @@ namespace TagTool.Serialization
             if (valueType == typeof(PlaneReference))
                 return DeserializePlaneReference(reader);
 
+            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(FlagBits<>))
+                return DeserializeFlagBits(reader, valueInfo, valueType);
+
             // Assume the value is a structure
             return DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform));
+        }
+
+        private object DeserializeFlagBits(EndianReader reader, TagFieldAttribute valueInfo, Type valueType)
+        {
+            var enumType = valueType.GenericTypeArguments[0];
+            var value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+            var castedValue = (uint)Convert.ChangeType(value, typeof(uint));
+            return VersionedEnum.ImportFlags(enumType, castedValue, Version, CachePlatform);
+        }
+
+        private object DeserializeEnum(EndianReader reader, TagFieldAttribute valueInfo, Type valueType)
+        {
+            var enumInfo = TagEnum.GetInfo(valueType, Version, CachePlatform);
+            if(enumInfo.Attribute.IsVersioned)
+            {
+                object value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+                int castedValue = (int)Convert.ChangeType(value, typeof(int));
+                return VersionedEnum.ImportValue(valueType, castedValue, Version, CachePlatform);
+            }
+            else
+            {
+                var value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+
+                if (valueInfo.EnumType != null)
+                    return CastEnumValue(valueType, valueInfo.EnumType, value);
+                else
+                    return value;
+            }
+        }
+
+        private static object CastEnumValue(Type enumType, Type valueType, object value)
+        {
+            switch(Type.GetTypeCode(valueType))
+            {
+                case TypeCode.Byte:
+                    return Enum.ToObject(enumType, (byte)value);
+                case TypeCode.UInt16:
+                    return Enum.ToObject(enumType, (ushort)value);
+                case TypeCode.UInt32:
+                    return Enum.ToObject(enumType, (uint)value);
+                case TypeCode.SByte:
+                    return Enum.ToObject(enumType, (sbyte)value);
+                case TypeCode.Int16:
+                    return Enum.ToObject(enumType, (short)value);
+                case TypeCode.Int32:
+                    return Enum.ToObject(enumType, (int)value);
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         /// <summary>

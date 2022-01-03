@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
+using TagTool.Common;
 
 namespace TagTool.Tags
 {
@@ -93,6 +94,12 @@ namespace TagTool.Tags
         /// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
         private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform, ref uint offset)
 		{
+			if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(FlagBits<>))
+			{
+				if (attribute.EnumType == null)
+					throw new Exception("FlagBits must have the 'EnumType' TagField attribute set");
+			}
+
 			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion, cachePlatform);
 
 			if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))

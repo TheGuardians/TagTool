@@ -498,6 +498,7 @@
     <Compile Include="Commands\Tags\RebuildCacheFileCommand.cs" />
     <Compile Include="Commands\Tags\Test2Command.cs" />
     <Compile Include="Commands\Video\ImportBinkFileCommand.cs" />
+    <Compile Include="Common\FlagBits.cs" />
     <Compile Include="Common\IndexBufferIndex.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RSAUtil.cs" />
@@ -1241,6 +1242,8 @@
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
     <Compile Include="Tags\TagBlockBitVector.cs" />
     <Compile Include="Tags\TagDefinitions.cs" />
+    <Compile Include="Tags\TagEnum.cs" />
+    <Compile Include="Tags\VersionedEnum.cs" />
     <Compile Include="Tags\TagFile.cs" />
     <Compile Include="Tags\TagGroup.cs" />
     <Compile Include="Tags\TagReference.cs" />

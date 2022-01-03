@@ -219,7 +219,7 @@ namespace TagTool.Serialization
             if (valueInfo != null && valueInfo.Flags.HasFlag(Pointer))
                 SerializeIndirectValue(context, tagStream, block, value, valueType);
             else if (valueType.IsEnum)
-                SerializePrimitiveValue(block.Writer, value, valueType.GetEnumUnderlyingType());
+                SerializeEnum(block.Writer, value, valueInfo, valueType);
             else if (valueType == typeof(string))
                 SerializeString(block.Writer, (string)value, valueInfo);
             else if (valueType == typeof(Tag))
@@ -305,12 +305,40 @@ namespace TagTool.Serialization
                 SerializeIndexBufferIndex(block, (IndexBufferIndex)value);
             else if (valueType == typeof(PlaneReference))
                 SerializePlaneReference(block, (PlaneReference)value);
+            else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(FlagBits<>))
+                SerializeFlagBits(block.Writer, (IFlagBits)value, valueInfo, valueType);
             else
             {
                 if (value == null)
                     value = Activator.CreateInstance(valueType);
 
                 SerializeStruct(context, tagStream, block, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform), value);
+            }
+        }
+
+        private void SerializeFlagBits(EndianWriter writer, IFlagBits value, TagFieldAttribute valueInfo, Type valueType)
+        {
+            var enumType = valueType.GenericTypeArguments[0];
+            uint exportedValue = VersionedEnum.ExportFlags(enumType, value, Version, CachePlatform);
+            object castedValue = Convert.ChangeType(exportedValue, valueInfo.EnumType);
+            SerializePrimitiveValue(writer, castedValue, valueInfo.EnumType);
+        }
+
+        private void SerializeEnum(EndianWriter writer, object value, TagFieldAttribute valueInfo, Type valueType)
+        {
+            var enumInfo = TagEnum.GetInfo(valueType, Version, CachePlatform);
+            if (enumInfo.Attribute.IsVersioned)
+            {
+                int exportedValue = VersionedEnum.ExportValue(valueType, value, Version, CachePlatform);
+                object castedValue = Convert.ChangeType(exportedValue, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+                SerializePrimitiveValue(writer, castedValue, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+            }
+            else
+            {
+                if (valueInfo.EnumType != null)
+                    value = Convert.ChangeType(value, valueInfo.EnumType);
+
+                SerializePrimitiveValue(writer, value, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
             }
         }
 
