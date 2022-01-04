@@ -413,9 +413,16 @@ namespace TagTool.Commands.Porting
                     {"objects\\vehicles\\covenant\\turrets\\shade\\shade", "objects\\vehicles\\shade\\shade"}
                 };
 		
+                Dictionary<string, string> reachEquipment = new Dictionary<string, string>()
+                {
+                    {"objects\\equipment\\hologram\\hologram", "objects\\equipment\\hologram_equipment\\hologram_equipment"},
+                    {"objects\\equipment\\active_camouflage\\active_camouflage", "objects\\equipment\\invisibility_equipment\\invisibility_equipment"}
+                };
+		
                 ReplaceObjects(scenario.SceneryPalette, reachObjectives);
                 ReplaceObjects(scenario.CratePalette, reachObjectives);
                 ReplaceObjects(scenario.VehiclePalette, reachVehicles);
+                ReplaceObjects(scenario.EquipmentPalette, reachEquipment);
 				
 				
 		CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
