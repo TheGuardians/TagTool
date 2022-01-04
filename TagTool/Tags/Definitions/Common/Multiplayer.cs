@@ -76,22 +76,6 @@ namespace TagTool.Tags.Definitions.Common
         StartsOnDisturbance
     }
 
-    [Flags]
-    public enum GameEngineFlags : ushort
-    {
-        None = 0,
-        CaptureTheFlag = 1 << 0,
-        Slayer = 1 << 1,
-        Oddball = 1 << 2,
-        KingOfTheHill = 1 << 3,
-        Juggernaut = 1 << 4,
-        Territories = 1 << 5,
-        Assault = 1 << 6,
-        Vip = 1 << 7,
-        Infection = 1 << 8,
-        TargetTraining = 1 << 9
-    }
-
     public enum GameEngineType : int
     {
         None,
@@ -106,6 +90,39 @@ namespace TagTool.Tags.Definitions.Common
         Assault,
         Infection,
     }
+
+    public enum GameEngineSubType : int
+    {
+        CaptureTheFlag,
+        Slayer,
+        Oddball,
+        KingOfTheHill,
+        Juggernaut,
+        Territories,
+        Assault,
+        Vip,
+        Infection,
+        TargetTraining,
+        All
+    }
+
+    [Flags]
+    public enum GameEngineSubTypeFlags : ushort
+    {
+        None = 0,
+        CaptureTheFlag = 1 << 0,
+        Slayer = 1 << 1,
+        Oddball = 1 << 2,
+        KingOfTheHill = 1 << 3,
+        Juggernaut = 1 << 4,
+        Territories = 1 << 5,
+        Assault = 1 << 6,
+        Vip = 1 << 7,
+        Infection = 1 << 8,
+        TargetTraining = 1 << 9,
+        All = 0x3FF
+    }
+
 
     [Flags]
     public enum GameEngineFlagsReach : byte

@@ -187,7 +187,7 @@ namespace TagTool.Commands.Scenarios
                 int scenarioDatumsOffset = 0;
                 foreach (var pair in _objectTypes)
                 {
-                    if (_mapVariant.ScenarioDatumIndices[(int)pair.Key] != scenarioDatumsOffset)
+                    if (_mapVariant.ObjectTypeStartIndex[(int)pair.Key] != scenarioDatumsOffset)
                         throw new InvalidOperationException("Cannot import map variant on a different scenario to that which it was created on");
 
                     scenarioDatumsOffset += pair.Value.Instances.Count;
@@ -202,16 +202,16 @@ namespace TagTool.Commands.Scenarios
 
             private void ImportUserPlacements()
             {
-                for (int i = 0; i < _mapVariant.Placements.Length; i++)
+                for (int i = 0; i < _mapVariant.Objects.Length; i++)
                 {
-                    var placement = _mapVariant.Placements[i];
-                    if (!placement.PlacementFlags.HasFlag(PlacementFlags.Valid) || placement.PlacementFlags.HasFlag(PlacementFlags.FromScenario))
+                    var placement = _mapVariant.Objects[i];
+                    if (!placement.Flags.HasFlag(VariantObjectPlacementFlags.OccupiedSlot) || placement.Flags.HasFlag(VariantObjectPlacementFlags.ScenarioObject))
                         continue;
 
-                    if (placement.PaletteIndex == -1)
+                    if (placement.QuotaIndex == -1)
                         continue;
 
-                    var tagPath = _blf.MapVariantTagNames.Names[placement.PaletteIndex].Name;
+                    var tagPath = _blf.MapVariantTagNames.Names[placement.QuotaIndex].Name;
                     var tag = _cache.TagCache.GetTag(tagPath);
                     var obje = _cache.Deserialize(_cacheStream, tag) as GameObject;
 
@@ -227,19 +227,19 @@ namespace TagTool.Commands.Scenarios
                     var instances = pair.Value.Instances;
                     for (int i = 0; i < instances.Count; i++)
                     {
-                        var placementIndex = _mapVariant.ScenarioDatumIndices[(int)pair.Key] + i;
-                        var placement = _mapVariant.Placements[placementIndex];
+                        var placementIndex = _mapVariant.ObjectTypeStartIndex[(int)pair.Key] + i;
+                        var placement = _mapVariant.Objects[placementIndex];
 
-                        if (!placement.PlacementFlags.HasFlag(PlacementFlags.Valid) || !placement.PlacementFlags.HasFlag(PlacementFlags.FromScenario))
+                        if (!placement.Flags.HasFlag(VariantObjectPlacementFlags.OccupiedSlot) || !placement.Flags.HasFlag(VariantObjectPlacementFlags.ScenarioObject))
                             continue;
 
-                        if (placement.PlacementFlags.HasFlag(PlacementFlags.Deleted))
+                        if (placement.Flags.HasFlag(VariantObjectPlacementFlags.ScenarioObjectRemoved))
                         {
                             DeletePlacement(pair.Key, i);
                         }
-                        else if (placement.PlacementFlags.HasFlag(PlacementFlags.Touched))
+                        else if (placement.Flags.HasFlag(VariantObjectPlacementFlags.Edited))
                         {
-                            UpdateScenarioInstanceFromPlacement(instances[i] as ScenarioInstance, _mapVariant.Placements[placementIndex]);
+                            UpdateScenarioInstanceFromPlacement(instances[i] as ScenarioInstance, _mapVariant.Objects[placementIndex]);
                         }
                     }
                 }
@@ -253,13 +253,13 @@ namespace TagTool.Commands.Scenarios
                 deletedSet.Add(index);
             }
 
-            private void UpdateScenarioInstanceFromPlacement(ScenarioInstance instance, MapVariantPlacement placement)
+            private void UpdateScenarioInstanceFromPlacement(ScenarioInstance instance, VariantObjectDatum placement)
             {
                 var multiplayerInstance = instance as IMultiplayerInstance;
 
                 // update position / rotation
 
-                if (placement.ParentScenarioObject.UniqueID != DatumHandle.None)
+                if (placement.ParentObject.UniqueID != DatumHandle.None)
                 {
                     throw new NotSupportedException("Attached placements are not supported currently.");
 
@@ -290,13 +290,13 @@ namespace TagTool.Commands.Scenarios
                 multiplayer.SpawnTime = placement.Properties.SpawnTime;
                 multiplayer.EngineFlags = placement.Properties.EngineFlags;
 
-                if (placement.Properties.Shape.Type != MultiplayerObjectBoundaryShape.None)
+                if (placement.Properties.Boundary.Type != MultiplayerObjectBoundaryShape.None)
                 {
-                    multiplayer.Shape = properties.Shape.Type;
-                    multiplayer.BoundaryWidthRadius = properties.Shape.WidthRadius;
-                    multiplayer.BoundaryBoxLength = properties.Shape.BoxLength;
-                    multiplayer.BoundaryPositiveHeight = properties.Shape.PositiveHeight;
-                    multiplayer.BoundaryNegativeHeight = properties.Shape.NegativeHeight;
+                    multiplayer.Shape = properties.Boundary.Type;
+                    multiplayer.BoundaryWidthRadius = properties.Boundary.WidthRadius;
+                    multiplayer.BoundaryBoxLength = properties.Boundary.BoxLength;
+                    multiplayer.BoundaryPositiveHeight = properties.Boundary.PositiveHeight;
+                    multiplayer.BoundaryNegativeHeight = properties.Boundary.NegativeHeight;
                 }
 
                 //if (!placement.Properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.PlacedAtStart))
@@ -305,14 +305,14 @@ namespace TagTool.Commands.Scenarios
                 //if (placement.Properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Unknown))
                 //    multiplayer.SpawnFlags |= (1 << 6);
 
-                if (properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Symmetric | MultiplayerObjectFlags.Asymmetric))
+                if (properties.Flags.HasFlag(VariantPlacementFlags.Symmetric | VariantPlacementFlags.Asymmetric))
                     multiplayer.Symmetry = GameEngineSymmetry.Ignore;
-                else if (properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Symmetric))
+                else if (properties.Flags.HasFlag(VariantPlacementFlags.Symmetric))
                     multiplayer.Symmetry = GameEngineSymmetry.Symmetric;
-                else if (properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Asymmetric))
+                else if (properties.Flags.HasFlag(VariantPlacementFlags.Asymmetric))
                     multiplayer.Symmetry = GameEngineSymmetry.Asymmetric;
 
-                switch (placement.Properties.ObjectType)
+                switch (placement.Properties.Type)
                 {
                     case MultiplayerObjectType.Weapon:
                         break;
@@ -334,7 +334,7 @@ namespace TagTool.Commands.Scenarios
                     var scenery = _cache.Deserialize(_cacheStream, tag) as Scenery;
                     var model = _cache.Deserialize(_cacheStream, scenery.Model) as Model;
                     if (model.CollisionModel != null && model.PhysicsModel == null)
-                        instance.Scale = properties.Shape.WidthRadius;
+                        instance.Scale = properties.Boundary.WidthRadius;
                 }
             }
 

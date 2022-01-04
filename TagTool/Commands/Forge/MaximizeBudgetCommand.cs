@@ -84,7 +84,7 @@ namespace TagTool.Commands.Forge
                     Name = mapFile.MapFileBlf.Scenario.Names[0].Name,
                     Description = mapFile.MapFileBlf.Scenario.Descriptions[0].Name,
                     Author = "Bungie",
-                    ContentType = 0xA,
+                    ContentType = ContentItemType.SandboxMap,
                     ContentSize = typeof(BlfMapVariant).GetSize(),
                     Timestamp = (ulong)DateTime.Now.ToFileTime(),
                     CampaignId = -1,
@@ -93,7 +93,7 @@ namespace TagTool.Commands.Forge
                     CampaignDifficulty = -1,
                     CampaignInsertionPoint = 0,
                     IsSurvival = false,
-                    MapChecksum = BlamCrc32.CrcChecksum(((CacheFileHeaderGenHaloOnline)mapFile.Header).RSASignature)
+                    GameId = 0
                 };
 
                 var generator = new MapVariantGenerator();
@@ -111,7 +111,7 @@ namespace TagTool.Commands.Forge
                 // Regenerate the map variant from the culled scenario
                 var blf = generator.Generate(cacheStream, Cache, scenario, metadata);
                 // Convert the culled scenario placements to user placements and add them to the new map variant
-                ConvertScenarioPlacements(blf.MapVariant.MapVariant, oldBlf.MapVariant.MapVariant.Palette, newUserPlacements);
+                ConvertScenarioPlacements(blf.MapVariant.MapVariant, oldBlf.MapVariant.MapVariant.Quotas, newUserPlacements);
                 // Update the tag names
                 RebuildTagNameChunk(blf);
                 // Assign the new blf chunks to the map file
@@ -123,7 +123,7 @@ namespace TagTool.Commands.Forge
                 Cache.Serialize(cacheStream, scenarioTag, scenario);
 
                 var numCulled = oldBlf.MapVariant.MapVariant.ScenarioObjectCount - blf.MapVariant.MapVariant.ScenarioObjectCount;
-                var numAvailable = blf.MapVariant.MapVariant.Placements.Length - blf.MapVariant.MapVariant.ScenarioObjectCount;
+                var numAvailable = blf.MapVariant.MapVariant.Objects.Length - blf.MapVariant.MapVariant.ScenarioObjectCount;
                 Console.WriteLine($"Culled {numCulled} placements, Availabel: {numAvailable}");
             }
         }
@@ -131,26 +131,26 @@ namespace TagTool.Commands.Forge
         private void RebuildTagNameChunk(Blf blf)
         {
             var mapVariant = blf.MapVariant.MapVariant;
-            for (int i = 0; i < mapVariant.Palette.Length; i++)
+            for (int i = 0; i < mapVariant.Quotas.Length; i++)
             {
-                if (mapVariant.Palette[i].TagIndex == -1)
+                if (mapVariant.Quotas[i].ObjectDefinitionIndex == -1)
                     continue;
 
-                var tag = Cache.TagCache.GetTag(mapVariant.Palette[i].TagIndex);
+                var tag = Cache.TagCache.GetTag(mapVariant.Quotas[i].ObjectDefinitionIndex);
                 blf.MapVariantTagNames.Names[i] = new TagName() { Name = $"{tag.Name}.{tag.Group.Tag}" };
             }
         }
 
-        private static void ConvertScenarioPlacements(MapVariant mapVariant, IList<MapVariantPaletteItem> palette, IList<MapVariantPlacement> placements)
+        private static void ConvertScenarioPlacements(MapVariant mapVariant, IList<VariantObjectQuota> palette, IList<VariantObjectDatum> placements)
         {
             foreach (var placement in placements)
             {
-                var paletteEntry = palette[placement.PaletteIndex];
+                var paletteEntry = palette[placement.QuotaIndex];
 
                 var newPaletteIndex = -1;
-                for (int i = 0; i < mapVariant.Palette.Length; i++)
+                for (int i = 0; i < mapVariant.Quotas.Length; i++)
                 {
-                    if (mapVariant.Palette[i].TagIndex == paletteEntry.TagIndex)
+                    if (mapVariant.Quotas[i].ObjectDefinitionIndex == paletteEntry.ObjectDefinitionIndex)
                     {
                         newPaletteIndex = i;
                         break;
@@ -159,30 +159,30 @@ namespace TagTool.Commands.Forge
 
                 if (newPaletteIndex == -1)
                 {
-                    newPaletteIndex = mapVariant.PaletteItemCount;
-                    mapVariant.Palette[mapVariant.PaletteItemCount++] = paletteEntry;
+                    newPaletteIndex = mapVariant.PlaceableQuotaCount;
+                    mapVariant.Quotas[mapVariant.PlaceableQuotaCount++] = paletteEntry;
                 }
 
-                placement.PaletteIndex = newPaletteIndex;
-                placement.PlacementFlags = (placement.PlacementFlags & ~PlacementFlags.FromScenario) | PlacementFlags.Touched;
-                paletteEntry.CountOnMap++;
-                paletteEntry.RuntimeMax++;
-                mapVariant.Placements[mapVariant.PlacedObjectCount++] = placement;
+                placement.QuotaIndex = newPaletteIndex;
+                placement.Flags = (placement.Flags & ~VariantObjectPlacementFlags.ScenarioObject) | VariantObjectPlacementFlags.Edited;
+                paletteEntry.PlacedOnMap++;
+                paletteEntry.MaximumCount++;
+                mapVariant.Objects[mapVariant.VariantObjectCount++] = placement;
             }
         }
 
-        private List<MapVariantPlacement> GetForgeablePlacements(MapVariant mapVariant)
+        private List<VariantObjectDatum> GetForgeablePlacements(MapVariant mapVariant)
         {
-            var newUserPlacements = new List<MapVariantPlacement>();
+            var newUserPlacements = new List<VariantObjectDatum>();
 
-            for (int i = 0; i < mapVariant.Placements.Length; i++)
+            for (int i = 0; i < mapVariant.Objects.Length; i++)
             {
-                var placement = mapVariant.Placements[i];
-                if (!placement.PlacementFlags.HasFlag(PlacementFlags.Valid))
+                var placement = mapVariant.Objects[i];
+                if (!placement.Flags.HasFlag(VariantObjectPlacementFlags.OccupiedSlot))
                     continue;
-                var paletteEntry = mapVariant.Palette[placement.PaletteIndex];
+                var paletteEntry = mapVariant.Quotas[placement.QuotaIndex];
 
-                if (ForgePalette.Contains(Cache.TagCache.GetTag(paletteEntry.TagIndex)))
+                if (ForgePalette.Contains(Cache.TagCache.GetTag(paletteEntry.ObjectDefinitionIndex)))
                     newUserPlacements.Add(placement);
             }
 
