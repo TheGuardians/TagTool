@@ -324,9 +324,9 @@ namespace TagTool.BlamFile
             properties.Shape = new MultiplayerObjectBoundary()
             {
                 Type = objeMultiplayerProperties.BoundaryShape,
-                NegativeHeight = objeMultiplayerProperties.BoundaryBottom,
+                NegativeHeight = objeMultiplayerProperties.BoundaryNegativeHeight,
                 BoxLength = objeMultiplayerProperties.BoundaryBoxLength,
-                PositiveHeight = objeMultiplayerProperties.BoundaryTop,
+                PositiveHeight = objeMultiplayerProperties.BoundaryPositiveHeight,
                 WidthRadius = objeMultiplayerProperties.BoundaryWidthRadius
             };
 

@@ -383,8 +383,8 @@ namespace TagTool.Tags.Definitions
 
             public float BoundaryWidthRadius;
             public float BoundaryBoxLength;
-            public float BoundaryTop;
-            public float BoundaryBottom;
+            public float BoundaryPositiveHeight;
+            public float BoundaryNegativeHeight;
 
             [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
             public MultiplayerObjectBoundaryShape ReachBoundaryShape;
