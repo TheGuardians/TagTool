@@ -8,6 +8,7 @@ using TagTool.Cache.HaloOnline;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.BlamFile.MapVariantGenerator;
 using static TagTool.Tags.Definitions.Scenario;
 
@@ -88,7 +89,7 @@ namespace TagTool.Commands.Forge
                     Timestamp = (ulong)DateTime.Now.ToFileTime(),
                     CampaignId = -1,
                     MapId = scenario.MapId,
-                    GameEngineType = (int)GameEngineType.None,
+                    GameEngineType = 0,
                     CampaignDifficulty = -1,
                     CampaignInsertionPoint = 0,
                     IsSurvival = false,

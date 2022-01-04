@@ -1422,11 +1422,11 @@ namespace TagTool.Commands.Porting
                 case Scenario.MultiplayerObjectProperties scnrObj:
                     if (BlamCache.Version >= CacheVersion.HaloReach)
                     {
-                        scnrObj.Team = (Scenario.MultiplayerObjectProperties.TeamValue)(scnrObj.TeamReach);
-                        scnrObj.WidthRadius = scnrObj.WidthRadiusReach;
-                        scnrObj.Depth = scnrObj.DepthReach;
-                        scnrObj.Top = scnrObj.TopReach;
-                        scnrObj.Bottom = scnrObj.BottomReach;
+                        scnrObj.BoundaryWidthRadius = scnrObj.BoundaryWidthRadiusReach;
+                        scnrObj.BoundaryBoxLength = scnrObj.BoundaryBoxLengthReach;
+                        scnrObj.BoundaryPositiveHeight = scnrObj.BoundaryPositiveHeightReach;
+                        scnrObj.BoundaryNegativeHeight = scnrObj.BoundaryNegativeHeightReach;
+                        scnrObj.RemappingPolicy = scnrObj.RemappingPolicyReach;
                     }
                     return data;
 

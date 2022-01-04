@@ -1,11 +1,12 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
+using TagTool.Audio;
+using TagTool.Tags.Definitions.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using static TagTool.Tags.Definitions.GameObject;
-using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions
 {
@@ -1126,121 +1127,52 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Length = 32, MinVersion = CacheVersion.HaloReach)]
             public string MegaloLabel;
-            public SymmetryValue Symmetry;
+            public GameEngineSymmetry Symmetry;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public ushort EngineFlags;
+            public GameEngineFlags EngineFlags;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public byte EngineFlagsReach;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public TeamValue Team;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public TeamValueReach TeamReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public ushort Unknown;
-            public sbyte SpawnSequence;
-            public sbyte RuntimeMinimum;
-            public sbyte RuntimeMaximum;
-            public byte MultiplayerFlags;
+            public GameEngineFlagsReach EngineFlagsReach;
+            [TagField(EnumType = typeof(short), MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerTeamDesignator Team;
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Unused;
+            public sbyte SpawnOrder;
+            public sbyte QuotaMinimum;
+            public sbyte QuotaMaximum;
+            public MultiplayerObjectPlacementSpawnFlags SpawnFlags;
             public short SpawnTime;
             public short AbandonTime;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float WidthRadiusReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float DepthReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float TopReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float BottomReach;
-
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte TeleporterFlags;
-            public ShapeValue Shape;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
             public MultiplayerObjectRemappingPolicy RemappingPolicy;
-
-            public sbyte TeleporterChannel;
-
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public sbyte TeleporterFlagsReach;
-
+            public float BoundaryWidthRadiusReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BoundaryBoxLengthReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BoundaryPositiveHeightReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BoundaryNegativeHeightReach;
+            public MultiplayerObjectBoundaryShape Shape;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectRemappingPolicy RemappingPolicyReach;
+            public sbyte TeleporterChannel;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public TeleporterPassabilityFlags TeleporterPassability;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId LocationName;
-
+            [TagField(Length = 1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding1;
+            public ScenarioObjectParentStruct MapVariantParent;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown14;
-
-            public short Unknown15;
-            public short AttachedNameIndex;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public StringId ParentMarker;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public StringId ConnectionMarker;
-
+            public float BoundaryWidthRadius;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown16;
+            public float BoundaryBoxLength;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown17;
+            public float BoundaryPositiveHeight;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float WidthRadius;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Depth;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Top;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Bottom;
-
+            public float BoundaryNegativeHeight;
             public float RespawnWeight;
-
-            public enum SymmetryValue : int
-            {
-                Both,
-                Symmetric,
-                Asymmetric
-            }
-
-            public enum TeamValue : short
-            {
-                Red,
-                Blue,
-                Green,
-                Orange,
-                Purple,
-                Yellow,
-                Brown,
-                Pink,
-                Neutral
-            }
-
-            public enum TeamValueReach : sbyte
-            {
-                Red,
-                Blue,
-                Green,
-                Orange,
-                Purple,
-                Yellow,
-                Brown,
-                Pink,
-                Neutral
-            }
-
-            public enum ShapeValue : sbyte
-            {
-                None,
-                Sphere,
-                Cylinder,
-                Box
-            }
-
-            public enum MultiplayerObjectRemappingPolicy : sbyte
-            {
-                NormalDefault,
-                DoNotReplace,
-                OnlyReplace
-            }
         }
 
         [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
@@ -4428,5 +4360,16 @@ namespace TagTool.Tags.Definitions
     {
         HasHardSafeVolume = 1 << 0,
         HasSoftSafeVolume = 1 << 1
+    }
+
+    [TagStructure(Size = 0xC)]
+    public class ScenarioObjectParentStruct : TagStructure
+    {
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding;
+        // if an object with this name exists, we attach to it as a child
+        public short NameIndex = -1;
+        public StringId ParentMarker;
+        public StringId ConnectionMarker;
     }
 }

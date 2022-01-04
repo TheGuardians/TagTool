@@ -7,6 +7,7 @@ using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.BlamFile.MapVariantGenerator;
 using static TagTool.Tags.Definitions.Scenario;
 using static TagTool.Tags.Definitions.Scenario.MultiplayerObjectProperties;
@@ -262,7 +263,7 @@ namespace TagTool.Commands.Scenarios
                 {
                     throw new NotSupportedException("Attached placements are not supported currently.");
 
-                    var objectName = _scenario.ObjectNames[multiplayerInstance.Multiplayer.AttachedNameIndex];
+                    var objectName = _scenario.ObjectNames[multiplayerInstance.Multiplayer.MapVariantParent.NameIndex];
                     var parentInstanceIndex = objectName.PlacementIndex;
                     var parentInstance = _objectTypes[objectName.ObjectType.Halo3ODST].Instances[objectName.PlacementIndex] as ScenarioInstance;
 
@@ -285,43 +286,43 @@ namespace TagTool.Commands.Scenarios
                 var multiplayer = multiplayerInstance.Multiplayer;
                 var properties = placement.Properties;
 
-                multiplayer.Team = (TeamValue)properties.TeamAffiliation;
+                multiplayer.Team = (MultiplayerTeamDesignator)properties.Team;
                 multiplayer.SpawnTime = placement.Properties.SpawnTime;
-                multiplayer.EngineFlags = (ushort)placement.Properties.EngineFlags;
+                multiplayer.EngineFlags = placement.Properties.EngineFlags;
 
-                if (placement.Properties.Shape.Type != MultiplayerObjectShapeType.None)
+                if (placement.Properties.Shape.Type != MultiplayerObjectBoundaryShape.None)
                 {
-                    multiplayer.Shape = (ShapeValue)properties.Shape.Type;
-                    multiplayer.WidthRadius = properties.Shape.Width;
-                    multiplayer.Depth = properties.Shape.Length;
-                    multiplayer.Top = properties.Shape.Top;
-                    multiplayer.Bottom = properties.Shape.Bottom;
+                    multiplayer.Shape = properties.Shape.Type;
+                    multiplayer.BoundaryWidthRadius = properties.Shape.WidthRadius;
+                    multiplayer.BoundaryBoxLength = properties.Shape.BoxLength;
+                    multiplayer.BoundaryPositiveHeight = properties.Shape.PositiveHeight;
+                    multiplayer.BoundaryNegativeHeight = properties.Shape.NegativeHeight;
                 }
 
-                if (!placement.Properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.PlacedAtStart))
-                    multiplayer.MultiplayerFlags |= (1 << 7);
+                //if (!placement.Properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.PlacedAtStart))
+                //    multiplayer.SpawnFlags |= (1 << 7);
 
-                if (placement.Properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Unknown))
-                    multiplayer.MultiplayerFlags |= (1 << 6);
+                //if (placement.Properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Unknown))
+                //    multiplayer.SpawnFlags |= (1 << 6);
 
                 if (properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Symmetric | MultiplayerObjectFlags.Asymmetric))
-                    multiplayer.Symmetry = SymmetryValue.Both;
+                    multiplayer.Symmetry = GameEngineSymmetry.Ignore;
                 else if (properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Symmetric))
-                    multiplayer.Symmetry = SymmetryValue.Symmetric;
+                    multiplayer.Symmetry = GameEngineSymmetry.Symmetric;
                 else if (properties.MultiplayerFlags.HasFlag(MultiplayerObjectFlags.Asymmetric))
-                    multiplayer.Symmetry = SymmetryValue.Asymmetric;
+                    multiplayer.Symmetry = GameEngineSymmetry.Asymmetric;
 
                 switch (placement.Properties.ObjectType)
                 {
                     case MultiplayerObjectType.Weapon:
                         break;
-                    case MultiplayerObjectType.Teleporter2Way:
+                    case MultiplayerObjectType.Teleporter2way:
                     case MultiplayerObjectType.TeleporterReceiver:
                     case MultiplayerObjectType.TeleporterSender:
                         multiplayer.TeleporterChannel = (sbyte)placement.Properties.SharedStorage;
                         break;
                     default:
-                        multiplayer.SpawnSequence = (sbyte)placement.Properties.SharedStorage;
+                        multiplayer.SpawnOrder = (sbyte)placement.Properties.SharedStorage;
                         break;
                 }
 
@@ -333,7 +334,7 @@ namespace TagTool.Commands.Scenarios
                     var scenery = _cache.Deserialize(_cacheStream, tag) as Scenery;
                     var model = _cache.Deserialize(_cacheStream, scenery.Model) as Model;
                     if (model.CollisionModel != null && model.PhysicsModel == null)
-                        instance.Scale = properties.Shape.Width;
+                        instance.Scale = properties.Shape.WidthRadius;
                 }
             }
 
@@ -404,8 +405,7 @@ namespace TagTool.Commands.Scenarios
 
                 var multiplayerInstance = instance as IMultiplayerInstance;
                 var multiplayer = multiplayerInstance.Multiplayer = new MultiplayerObjectProperties();
-                multiplayer.Team = MultiplayerObjectProperties.TeamValue.Neutral;
-                multiplayer.AttachedNameIndex = -1;
+                multiplayer.Team = MultiplayerTeamDesignator.Neutral;
                 _objectTypes[type].Instances.Add(instance);
 
                 return instance;
