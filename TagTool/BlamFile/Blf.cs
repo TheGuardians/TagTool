@@ -25,6 +25,7 @@ namespace TagTool.BlamFile
         public BlfEndOfFileRSA EndOfFileRSA;
         public BlfEndOfFileSHA1 EndOfFileSHA1;
         public BlfChunkEndOfFile EndOfFile;
+        public BlfAuthor Author;
         public BlfCampaign Campaign;
         public BlfScenario Scenario;
         public BlfModPackageReference ModReference;
@@ -146,6 +147,8 @@ namespace TagTool.BlamFile
                     case "flmh":
                     case "flmd":
                     case "athr":
+                        Author = deserializer.Deserialize<BlfAuthor>(dataContext);
+                        break;
                     case "ssig":
                     case "mps2":
                     case "chrt":
@@ -677,5 +680,17 @@ namespace TagTool.BlamFile
     {
         [TagField(CharSet = System.Runtime.InteropServices.CharSet.Unicode, Length = 0x40, DataAlign = 0x1)]
         public string Name;
+    }
+
+    [TagStructure(Size = 0x44, Align = 0x1)]
+    public class BlfAuthor : BlfChunkHeader
+    {
+        [TagField(Length = 16)]
+        public string Name;
+        public ulong Unknown1;
+        [TagField(Length = 28)]
+        public string Unknown2;
+        [TagField(Length = 16)]
+        public string Unknown3;
     }
 }

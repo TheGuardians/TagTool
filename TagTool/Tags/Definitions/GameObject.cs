@@ -360,7 +360,7 @@ namespace TagTool.Tags.Definitions
             public GameEngineFlagsReach ReachEngineFlags;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public GameEngineFlags EngineFlags;
+            public GameEngineSubTypeFlags EngineFlags;
 
             public MultiplayerObjectType Type;
             public TeleporterPassabilityFlags TeleporterPassability;

@@ -1130,7 +1130,7 @@ namespace TagTool.Tags.Definitions
             public string MegaloLabel;
             public GameEngineSymmetry Symmetry;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public GameEngineFlags EngineFlags;
+            public GameEngineSubTypeFlags EngineFlags;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public GameEngineFlagsReach EngineFlagsReach;
             [TagField(EnumType = typeof(short), MaxVersion = CacheVersion.HaloOnline700123)]
