@@ -90,6 +90,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new CreateCharacterType(cache));
                 context.AddCommand(new GenerateCanvasCommand(hoCache));
 
+                context.AddCommand(new ConvertMapVariantCommand(hoCache));
 
                 context.AddCommand(new UpdateMapFilesCommand(cache));
 

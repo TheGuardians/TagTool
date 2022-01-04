@@ -8,33 +8,33 @@ using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.BlamFile.Reach
 {
-    public class BlfMapVariant
+    public class ReachBlfMapVariant
     {
         public byte[] Hash;
         public int Size;
-        public MapVariant MapVariant;
+        public ReachMapVariant MapVariant;
 
         public void Decode(Stream stream)
         {
-            var reader = new MapVariantReader(stream);
+            var reader = new ReachMapVariantReader(stream);
             Decode(reader);
         }
 
-        public void Decode(MapVariantReader reader)
+        public void Decode(ReachMapVariantReader reader)
         {
             Hash = reader.ReadBytes(0x14);
             Size = (int)reader.ReadUnsigned(32);
-            MapVariant = new MapVariant();
+            MapVariant = new ReachMapVariant();
             MapVariant.Decode(reader);
         }
     }
 
-    public class MapVariant
+    public class ReachMapVariant
     {
         public const int MaxObjects = 651;
         public const int MaxQuota = 256;
 
-        public ContentItemMetadata Metadata;
+        public ReachContentItemMetadata Metadata;
         public string Name;
         public string Description;
         public int Version;
@@ -48,10 +48,16 @@ namespace TagTool.BlamFile.Reach
         public int MaxBudget;
         public int SpentBudget;
         public MegaloStringTable StringTable;
-        public List<VariantObjectDatum> Objects;
-        public List<VariantQuota> Quotas;
+        public List<ReachVariantObjectDatum> Objects;
+        public List<ReachVariantQuota> Quotas;
 
-        public void GetPaletteIndices(Scenario scenario, int quotaIndex, out int paletteIndex, out int entryIndex)
+        public Scenario.MapVariantPaletteBlock.MapVariantPaletteEntryBlock GetPaletteEntry(Scenario scenario, int quotaIndex)
+        {
+            GetPaletteIndices(scenario, quotaIndex, out int paletteIndex, out int entryIndex);
+            return scenario.MapVariantPalettes[paletteIndex].Entries[entryIndex];
+        }
+
+        public bool GetPaletteIndices(Scenario scenario, int quotaIndex, out int paletteIndex, out int entryIndex)
         {
             paletteIndex = -1;
             entryIndex = -1;
@@ -65,15 +71,16 @@ namespace TagTool.BlamFile.Reach
                 {
                     paletteIndex = i;
                     entryIndex = absoluteIndex;
-                    break;
+                    return true;
                 }
                 absoluteIndex -= palette.Entries.Count;
             }
+            return false;
         }
 
-        public void Decode(MapVariantReader reader)
+        public void Decode(ReachMapVariantReader reader)
         {
-            Metadata = new ContentItemMetadata();
+            Metadata = new ReachContentItemMetadata();
             Metadata.Decode(reader);
             Name = reader.ReadUnicodeString(128);
             Description = reader.ReadUnicodeString(128);
@@ -103,18 +110,18 @@ namespace TagTool.BlamFile.Reach
             StringTable = new MegaloStringTable();
             StringTable.Decode(reader);
 
-            Objects = new List<VariantObjectDatum>();
+            Objects = new List<ReachVariantObjectDatum>();
             for (int i = 0; i < MaxObjects; i++)
             {
-                var datum = new VariantObjectDatum();
+                var datum = new ReachVariantObjectDatum();
                 datum.Decode(reader, WorldBounds);
                 Objects.Add(datum);
             }
 
-            Quotas = new List<VariantQuota>();
+            Quotas = new List<ReachVariantQuota>();
             for (int i = 0; i < MaxQuota; i++)
             {
-                var quota = new VariantQuota();
+                var quota = new ReachVariantQuota();
                 quota.Decode(reader);
                 Quotas.Add(quota);
             }
@@ -126,7 +133,7 @@ namespace TagTool.BlamFile.Reach
         }
     }
 
-    public class VariantQuota
+    public class ReachVariantQuota
     {
         public int MinimumCount;
         public int MaximumCount;
@@ -140,7 +147,7 @@ namespace TagTool.BlamFile.Reach
         }
     }
 
-    public class VariantObjectDatum
+    public class ReachVariantObjectDatum
     {
         public ObjectPlacementFlags Flags;
         public int QuotaIndex = -1;
@@ -149,9 +156,9 @@ namespace TagTool.BlamFile.Reach
         public RealVector3d Forward;
         public RealVector3d Up;
         public int SpawnRelativeToIndex = -1;
-        public VarintMultiplayerObjectProperties MultiplayerProperties;
+        public ReachVarintMultiplayerObjectProperties Properties;
 
-        public void Decode(MapVariantReader reader, RealRectangle3d worldBounds)
+        public void Decode(ReachMapVariantReader reader, RealRectangle3d worldBounds)
         {
             if (!reader.ReadBool())
                 return;
@@ -173,8 +180,8 @@ namespace TagTool.BlamFile.Reach
 
             SpawnRelativeToIndex = (int)reader.ReadUnsigned(10) - 1;
 
-            MultiplayerProperties = new VarintMultiplayerObjectProperties();
-            MultiplayerProperties.Decode(reader);
+            Properties = new ReachVarintMultiplayerObjectProperties();
+            Properties.Decode(reader);
         }
 
         [Flags]
@@ -185,29 +192,29 @@ namespace TagTool.BlamFile.Reach
         }
     }
 
-    public class VarintMultiplayerObjectProperties
+    public class ReachVarintMultiplayerObjectProperties
     {
-        public MultiplayerObjectBoundary Boundary;
+        public ReachMultiplayerObjectBoundary Boundary;
         public int SpawnOrder;
         public int SpawnTime;
-        public MultiplayerObjectType MultiplayerType;
+        public MultiplayerObjectType Type;
         public int MegaloLabelIndex;
         public VariantPlacementFlags PlacementFlags;
-        public int Team = 8;
+        public MultiplayerTeamDesignator Team = MultiplayerTeamDesignator.Neutral;
         public int PrimaryChangeColorIndex = -1;
         public int SpareClips;
         public int TeleporterChannel;
         public TeleporterPassabilityFlags TeleporterPassability;
         public int LocationNameIndex = -1;
 
-        public void Decode(MapVariantReader reader)
+        public void Decode(ReachMapVariantReader reader)
         {
-            Boundary = new MultiplayerObjectBoundary();
+            Boundary = new ReachMultiplayerObjectBoundary();
             Boundary.Decode(reader);
 
             SpawnOrder = (int)reader.ReadUnsigned(8);
             SpawnTime = (int)reader.ReadUnsigned(8);
-            MultiplayerType = (MultiplayerObjectType)(int)reader.ReadUnsigned(5);
+            Type = (MultiplayerObjectType)(int)reader.ReadUnsigned(5);
 
             if (reader.ReadBool())
                 MegaloLabelIndex = -1;
@@ -215,27 +222,27 @@ namespace TagTool.BlamFile.Reach
                 MegaloLabelIndex = (int)reader.ReadUnsigned(8);
 
             PlacementFlags = (VariantPlacementFlags)reader.ReadUnsigned(8);
-            Team = (int)reader.ReadUnsigned(4) - 1;
+            Team = (MultiplayerTeamDesignator)((int)reader.ReadUnsigned(4) - 1);
 
             if (reader.ReadBool())
                 PrimaryChangeColorIndex = -1;
             else
                 PrimaryChangeColorIndex = (int)reader.ReadUnsigned(3);
 
-            if (MultiplayerType == MultiplayerObjectType.Weapon)
+            if (Type == MultiplayerObjectType.Weapon)
             {
                 SpareClips = (int)reader.ReadUnsigned(8);
             }
             else
             {
-                if (MultiplayerType <= MultiplayerObjectType.Device)
+                if (Type <= MultiplayerObjectType.Device)
                     return;
-                if (MultiplayerType <= MultiplayerObjectType.TeleporterReceiver)
+                if (Type <= MultiplayerObjectType.TeleporterReceiver)
                 {
                     TeleporterChannel = (int)reader.ReadUnsigned(5);
                     TeleporterPassability = (TeleporterPassabilityFlags)reader.ReadUnsigned(5);
                 }
-                if (MultiplayerType != MultiplayerObjectType.NamedLocationArea)
+                if (Type != MultiplayerObjectType.NamedLocationArea)
                     return;
 
                 LocationNameIndex = (int)reader.ReadUnsigned(8) - 1;
@@ -296,7 +303,7 @@ namespace TagTool.BlamFile.Reach
         }
     }
 
-    public class MultiplayerObjectBoundary
+    public class ReachMultiplayerObjectBoundary
     {
         public float WidthRadius;
         public float BoxLength;

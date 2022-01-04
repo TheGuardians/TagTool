@@ -14,9 +14,9 @@ namespace TagTool.BlamFile
         public short ScenarioObjectCount;
         public short VariantObjectCount;
         public short PlaceableQuotaCount;
-        public int MapId;
+        public int MapId = -1;
         public RealRectangle3d WorldBounds;
-        public GameEngineSubType RuntimeEngineSubType;
+        public GameEngineSubType RuntimeEngineSubType = GameEngineSubType.All;
         public float MaximumBudget;
         public float SpentBudget;
         public bool RuntimeShowHelpers;
@@ -44,9 +44,9 @@ namespace TagTool.BlamFile
     {
         public VariantObjectPlacementFlags Flags;
         public short RuntimeRemovalTimer;
-        public int RuntimeObjectIndex;
-        public int RuntimeEditorObjectIndex;
-        public int QuotaIndex;
+        public int RuntimeObjectIndex = -1;
+        public int RuntimeEditorObjectIndex = -1;
+        public int QuotaIndex = -1;
         public RealPoint3d Position;
         public RealVector3d Forward;
         public RealVector3d Up;
@@ -57,34 +57,34 @@ namespace TagTool.BlamFile
     [TagStructure(Size = 0x18)]
     public class VariantMultiplayerProperties : TagStructure
     {
-        public GameEngineSubTypeFlags EngineFlags;
+        public GameEngineSubTypeFlags EngineFlags = GameEngineSubTypeFlags.All;
         public VariantPlacementFlags Flags;
-        public MultiplayerTeamDesignator Team;
+        public MultiplayerTeamDesignator Team = MultiplayerTeamDesignator.Neutral;
         public byte SharedStorage; // spare clips, teleporter channel, spawn order
         public byte SpawnTime;
         public MultiplayerObjectType Type;
-        public MultiplayerObjectBoundary Boundary;
+        public MultiplayerObjectBoundary Boundary = new MultiplayerObjectBoundary();
     }
 
     [TagStructure(Size = 0xC)]
     public class VariantObjectQuota : TagStructure
     {
         [TagField(Platform = CachePlatform.Original)]
-        public int ObjectDefinitionIndex;
+        public int ObjectDefinitionIndex = -1;
         public byte MinimumCount;
         public byte MaximumCount;
         public byte PlacedOnMap;
-        public byte MaxAllowed;
-        public float Cost;
+        public byte MaxAllowed = 255;
+        public float Cost = -1.0f;
     }
 
     [TagStructure(Size = 0x8)]
     public class ObjectIdentifier : TagStructure
     {
-        public DatumHandle UniqueID;
-        public short BspIndex;
-        public sbyte Type;
-        public sbyte Source;
+        public DatumHandle UniqueID = DatumHandle.None;
+        public short BspIndex = -1;
+        public sbyte Type = -1;
+        public sbyte Source = -1;
     }
 
     [TagStructure(Size = 0x11)]

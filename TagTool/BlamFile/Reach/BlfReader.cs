@@ -12,6 +12,8 @@ namespace TagTool.BlamFile.Reach
         public Tag Tag;
         public int Version;
         public byte[] Data;
+
+        public int MajorVerson => (int)(Version >> 16);
     }
 
     public class BlfReader

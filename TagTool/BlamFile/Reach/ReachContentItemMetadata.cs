@@ -20,9 +20,9 @@ namespace TagTool.BlamFile.Reach
         }
     }
 
-    public class ContentItemMetadata
+    public class ReachContentItemMetadata
     {
-        public int Type;
+        public ContentItemType Type;
         public int Size;
         public ulong Uid;
         public ulong ParentUid;
@@ -38,7 +38,7 @@ namespace TagTool.BlamFile.Reach
 
         public void Decode(BitStream bitstream)
         {
-            Type = (int)bitstream.ReadUnsigned(4) - 1;
+            Type = (ContentItemType)((int)bitstream.ReadUnsigned(4) - 1);
             Size = (int)bitstream.ReadUnsigned(32);
             Uid = bitstream.ReadUnsigned64(64);
             ParentUid = bitstream.ReadUnsigned64(64);

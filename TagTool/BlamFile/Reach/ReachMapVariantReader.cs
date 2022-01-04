@@ -4,7 +4,7 @@ using TagTool.Common;
 
 namespace TagTool.BlamFile.Reach
 {
-    public class MapVariantReader : BitStream
+    public class ReachMapVariantReader : BitStream
     {
         private const float kWorldUnitsToInches = 10.0f * 12.0f;
         private const float kInchesToWorldUnits = 1.0f / kWorldUnitsToInches;
@@ -38,7 +38,7 @@ namespace TagTool.BlamFile.Reach
             178956970, 13376,
         };
 
-        public MapVariantReader(Stream stream) : base(stream)
+        public ReachMapVariantReader(Stream stream) : base(stream)
         {
 
         }
