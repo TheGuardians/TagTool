@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
@@ -13,7 +14,10 @@ namespace TagTool.BlamFile.Reach
 {
     public class ReachMapVariantConverter
     {
-        public static Blf Convert(Scenario sourceScenario, ReachBlfMapVariant sourceBlf)
+        public HashSet<string> ExcludedTags = new HashSet<string>();
+        public Dictionary<string, string> SubstitutedTags = new Dictionary<string, string>();
+
+        public Blf Convert(Scenario sourceScenario, ReachBlfMapVariant sourceBlf)
         {
             var sourceMapVariant = sourceBlf.MapVariant;
             var metadata = new ContentItemMetadata();
@@ -36,7 +40,7 @@ namespace TagTool.BlamFile.Reach
             return GenerateBlf(mapVariant, tagNames);
         }
 
-        private static MapVariant ConvertMapVariant(ReachMapVariant sourceMapVariant, Scenario sourceScenario, out List<string> destTagNames)
+        private MapVariant ConvertMapVariant(ReachMapVariant sourceMapVariant, Scenario sourceScenario, out List<string> destTagNames)
         {
             var result = new MapVariant();
             result.Version = 12;
@@ -66,11 +70,13 @@ namespace TagTool.BlamFile.Reach
                 if (!reachVariantObject.Flags.HasFlag(ReachVariantObjectDatum.ObjectPlacementFlags.OccupiedSlot))
                     continue;
 
-                var variantObbject = ConvertVariantObject(reachVariantObject);
-                result.Objects[result.VariantObjectCount++] = variantObbject;
-
                 var paletteEntry = sourceMapVariant.GetPaletteEntry(sourceScenario, reachVariantObject.QuotaIndex);
                 var sourceObjectTag = paletteEntry.Variants[reachVariantObject.VariantIndex].Object;
+                if (ExcludedTags.Contains($"{sourceObjectTag.Name}.{ sourceObjectTag.Group.Tag}"))
+                    continue;
+
+                var variantObbject = ConvertVariantObject(reachVariantObject);
+                result.Objects[result.VariantObjectCount++] = variantObbject;
                 var index = quotaBuilder.FindObject(sourceObjectTag);
                 var reachQuota = sourceMapVariant.Quotas[reachVariantObject.QuotaIndex];
 
@@ -86,6 +92,7 @@ namespace TagTool.BlamFile.Reach
 
                 var quota = quotaBuilder[index];
                 quota.PlacedOnMap++;
+                variantObbject.QuotaIndex = index;
             }
 
             for (int i = 0; i < quotaBuilder.Count; i++)
@@ -97,7 +104,17 @@ namespace TagTool.BlamFile.Reach
                 result.Quotas[i].MaxAllowed = (byte)quotaBuilder[i].MaxAllowed;
             }
 
-            destTagNames = quotaBuilder.Select(x => $"{x.Tag.Name}.{x.Tag.Group.Tag}").ToList();
+            destTagNames = new List<string>();
+            for(int i = 0; i < quotaBuilder.Count; i++)
+            {
+                var quota = quotaBuilder[i];
+                var name = $"{quota.Tag.Name}.{quota.Tag.Group.Tag}";
+                if (SubstitutedTags.TryGetValue(name, out string sub))
+                    name = sub;
+
+                destTagNames.Add(name);
+            }
+
             return result;
         }
 
@@ -220,6 +237,7 @@ namespace TagTool.BlamFile.Reach
         private static VariantMultiplayerProperties ConvertMultiplayerProperties(ReachVarintMultiplayerObjectProperties reachProperties)
         {
             var result = new VariantMultiplayerProperties();
+            result.EngineFlags = GameEngineSubTypeFlags.All;
             result.Flags = reachProperties.PlacementFlags.ConvertLexical<VariantPlacementFlags>();
             result.Team = reachProperties.Team;
             result.SpawnTime = (byte)reachProperties.SpawnTime;
