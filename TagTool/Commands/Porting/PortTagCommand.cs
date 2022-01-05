@@ -1399,7 +1399,7 @@ namespace TagTool.Commands.Porting
                         multiplayer.DefaultAbandonTime = multiplayer.AbandonTimeReach;
                         if (multiplayer.DefaultSpawnTime == 0) multiplayer.DefaultSpawnTime = 30;
                         if (multiplayer.DefaultAbandonTime == 0) multiplayer.DefaultAbandonTime = 30;
-                        multiplayer.ReachBoundaryShape = multiplayer.BoundaryShape;
+                        multiplayer.BoundaryShape = multiplayer.ReachBoundaryShape;
                         multiplayer.SpawnTimerType = multiplayer.SpawnTimerTypeReach.ConvertLexical<MultiplayerObjectSpawnTimerType>();
                         return multiplayer;
                     }
