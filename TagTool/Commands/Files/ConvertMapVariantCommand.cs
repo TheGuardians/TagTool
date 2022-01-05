@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using TagTool.BlamFile;
 using TagTool.BlamFile.Reach;
@@ -51,16 +52,16 @@ namespace TagTool.Commands.Files
 
             if (blfChunks.ContainsKey("mvar"))
             {
-                var chunk = blfChunks["mvar"];
-                var stream = new MemoryStream(chunk.Data);
-                if (chunk.MajorVerson == 31)
-                {
-                    convertedBlf = ConvertReachMapVariant(stream, mapsDirectory);
-                }
-                else
-                {
-                    return new TagToolError(CommandError.OperationFailed, "Unsupported Map Variant version");
-                }
+                convertedBlf = ConvertMapVariant(mapsDirectory, blfChunks["mvar"]);
+            }
+            else if (blfChunks.ContainsKey("_cmp"))
+            {
+                var decompressed = DecompressChunk(blfChunks["_cmp"]);
+                var chunk = BlfReader.ReadChunks(new MemoryStream(decompressed)).First();
+                if (chunk.Tag != "mvar")
+                    return new TagToolError(CommandError.OperationFailed, "Unsupported input file");
+
+                convertedBlf = ConvertMapVariant(mapsDirectory, chunk);
             }
             else
             {
@@ -76,6 +77,21 @@ namespace TagTool.Commands.Files
 
             Console.WriteLine("Done.");
             return true;
+        }
+
+        private Blf ConvertMapVariant(DirectoryInfo mapsDirectory, BlfChunk chunk)
+        {
+            var stream = new MemoryStream(chunk.Data);
+
+            if (chunk.MajorVerson == 31)
+            {
+                return ConvertReachMapVariant(stream, mapsDirectory);
+            }
+            else
+            {
+                new TagToolError(CommandError.OperationFailed, "Unsupported Map Variant version");
+                return null;
+            }
         }
 
         private Blf ConvertReachMapVariant(MemoryStream stream, DirectoryInfo mapsDirectory)
@@ -136,6 +152,30 @@ namespace TagTool.Commands.Files
                 return null;
             }
             return GameCache.Open(mapFile);
+        }
+
+        private static byte[] DecompressChunk(BlfChunk cmpChunk)
+        {
+            var stream = new MemoryStream(cmpChunk.Data);
+            var reader = new EndianReader(stream, EndianFormat.BigEndian);
+            var compressionType = reader.ReadSByte();
+            if (compressionType != 0)
+                throw new NotSupportedException();
+
+            var size = reader.ReadInt32();
+            reader.ReadBytes(2); // skip header
+            var compressed = reader.ReadBytes(size - 2);
+            return Decompress(compressed);
+        }
+
+        static byte[] Decompress(byte[] compressed)
+        {
+            using (var stream = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
+            {
+                var outStream = new MemoryStream();
+                stream.CopyTo(outStream);
+                return outStream.ToArray();
+            }
         }
 
         private static readonly Dictionary<int, string> MapIdToFilename = new Dictionary<int, string>()

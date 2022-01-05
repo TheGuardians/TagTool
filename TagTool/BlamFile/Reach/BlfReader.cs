@@ -21,7 +21,7 @@ namespace TagTool.BlamFile.Reach
         public static IEnumerable<BlfChunk> ReadChunks(Stream stream)
         {
             var reader = new EndianReader(stream, EndianFormat.BigEndian);
-            while (true)
+            while (!reader.EOF)
             {
                 var tag = reader.ReadTag();
                 var size = reader.ReadInt32();

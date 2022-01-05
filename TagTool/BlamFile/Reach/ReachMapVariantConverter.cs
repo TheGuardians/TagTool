@@ -61,8 +61,11 @@ namespace TagTool.BlamFile.Reach
             for (int i = 0; i < result.Quotas.Length; i++)
                 result.Quotas[i] = new VariantObjectQuota();
 
+            for (int i = 0; i < result.ScenarioObjectCount; i++)
+                result.Objects[i] = new VariantObjectDatum() { Flags = VariantObjectPlacementFlags.ScenarioObject | VariantObjectPlacementFlags.ScenarioObjectRemoved };
+               
 
-            var quotaBuilder = new VariantQuotaBuilder();
+                var quotaBuilder = new VariantQuotaBuilder();
             for (int i = 0; i < sourceMapVariant.Objects.Count; i++)
             {
                 var reachVariantObject = sourceMapVariant.Objects[i];
