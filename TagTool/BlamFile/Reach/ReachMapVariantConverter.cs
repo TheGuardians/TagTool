@@ -248,12 +248,12 @@ namespace TagTool.BlamFile.Reach
 
             switch (reachProperties.Type)
             {
-                case ReachVarintMultiplayerObjectProperties.MultiplayerObjectType.Weapon:
+                case MultiplayerObjectTypeReach.Weapon:
                     result.SharedStorage = (byte)reachProperties.SpareClips;
                     break;
-                case ReachVarintMultiplayerObjectProperties.MultiplayerObjectType.Teleporter2way:
-                case ReachVarintMultiplayerObjectProperties.MultiplayerObjectType.TeleporterReceiver:
-                case ReachVarintMultiplayerObjectProperties.MultiplayerObjectType.TeleporterSender:
+                case MultiplayerObjectTypeReach.Teleporter2way:
+                case MultiplayerObjectTypeReach.TeleporterReceiver:
+                case MultiplayerObjectTypeReach.TeleporterSender:
                     result.SharedStorage = (byte)reachProperties.TeleporterChannel;
                     break;
                 default:

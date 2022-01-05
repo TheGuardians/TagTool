@@ -197,7 +197,7 @@ namespace TagTool.BlamFile.Reach
         public ReachMultiplayerObjectBoundary Boundary;
         public int SpawnOrder;
         public int SpawnTime;
-        public MultiplayerObjectType Type;
+        public MultiplayerObjectTypeReach Type;
         public int MegaloLabelIndex;
         public VariantPlacementFlags PlacementFlags;
         public MultiplayerTeamDesignator Team = MultiplayerTeamDesignator.Neutral;
@@ -214,7 +214,7 @@ namespace TagTool.BlamFile.Reach
 
             SpawnOrder = (int)reader.ReadUnsigned(8);
             SpawnTime = (int)reader.ReadUnsigned(8);
-            Type = (MultiplayerObjectType)(int)reader.ReadUnsigned(5);
+            Type = (MultiplayerObjectTypeReach)(int)reader.ReadUnsigned(5);
 
             if (reader.ReadBool())
                 MegaloLabelIndex = -1;
@@ -229,64 +229,27 @@ namespace TagTool.BlamFile.Reach
             else
                 PrimaryChangeColorIndex = (int)reader.ReadUnsigned(3);
 
-            if (Type == MultiplayerObjectType.Weapon)
+            if (Type == MultiplayerObjectTypeReach.Weapon)
             {
                 SpareClips = (int)reader.ReadUnsigned(8);
             }
             else
             {
-                if (Type <= MultiplayerObjectType.Device)
+                if (Type <= MultiplayerObjectTypeReach.Device)
                     return;
-                if (Type <= MultiplayerObjectType.TeleporterReceiver)
+                if (Type <= MultiplayerObjectTypeReach.TeleporterReceiver)
                 {
                     TeleporterChannel = (int)reader.ReadUnsigned(5);
                     TeleporterPassability = (TeleporterPassabilityFlags)reader.ReadUnsigned(5);
                 }
-                if (Type != MultiplayerObjectType.NamedLocationArea)
+                if (Type != MultiplayerObjectTypeReach.NamedLocationArea)
                     return;
 
                 LocationNameIndex = (int)reader.ReadUnsigned(8) - 1;
             }
         }
 
-        public enum MultiplayerObjectType
-        {
-            Ordinary,
-            Weapon,
-            Grenade,
-            Projectile,
-            Powerup,
-            Equipment,
-            AmmoPack,
-            LightLandVehicle,
-            HeavyLandVehicle,
-            FlyingVehicle,
-            Turret,
-            Device,
-            Teleporter2way,
-            TeleporterSender,
-            TeleporterReceiver,
-            PlayerSpawnLocation,
-            PlayerRespawnZone,
-            SecondaryObjective,
-            PrimaryObjective,
-            NamedLocationArea,
-            DangerZone,
-            Fireteam1RespawnZone,
-            Fireteam2RespawnZone,
-            Fireteam3RespawnZone,
-            Fireteam4RespawnZone,
-            SafeVolume,
-            KillVolume,
-            CinematicCameraPosition,
-            MoshEnemySpawnLocation,
-            OrdnanceDropPoint,
-            TraitZone,
-            InitialOrdnanceDropPoint,
-            RandomOrdnanceDropPoint,
-            ObjectiveOrdnanceDropPoint,
-            PersonalOrdnanceDropPoint
-        }
+        
 
 
         [Flags]

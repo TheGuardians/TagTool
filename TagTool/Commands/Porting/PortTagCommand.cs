@@ -21,6 +21,7 @@ using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
 using TagTool.Tags.GUI;
 using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -1384,13 +1385,26 @@ namespace TagTool.Commands.Porting
                 case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
 
-				case GameObjectType gameObjectType:
+                case GameObjectType gameObjectType:
 					return ConvertGameObjectType(gameObjectType);
 
 				case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
-				case BipedPhysicsFlags bipedPhysicsFlags:
+                case GameObject.MultiplayerObjectBlock multiplayer when BlamCache.Version >= CacheVersion.HaloReach:
+                    {
+                        multiplayer.Type = multiplayer.TypeReach.ConvertLexical<MultiplayerObjectType>();
+                        multiplayer.Flags = multiplayer.FlagsReach.ConvertLexical<GameObject.MultiplayerObjectBlock.MultiplayerObjectFlags>();
+                        multiplayer.DefaultSpawnTime = multiplayer.SpawnTimeReach;
+                        multiplayer.DefaultAbandonTime = multiplayer.AbandonTimeReach;
+                        if (multiplayer.DefaultSpawnTime == 0) multiplayer.DefaultSpawnTime = 30;
+                        if (multiplayer.DefaultAbandonTime == 0) multiplayer.DefaultAbandonTime = 30;
+                        multiplayer.ReachBoundaryShape = multiplayer.BoundaryShape;
+                        multiplayer.SpawnTimerType = multiplayer.SpawnTimerTypeReach.ConvertLexical<MultiplayerObjectSpawnTimerType>();
+                        return multiplayer;
+                    }
+
+                case BipedPhysicsFlags bipedPhysicsFlags:
 					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
 				case WeaponFlags weaponFlags:

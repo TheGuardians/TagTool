@@ -70,6 +70,46 @@ namespace TagTool.Tags.Definitions.Common
         JuggernautDestinationZone
     };
 
+    public enum MultiplayerObjectTypeReach : sbyte
+    {
+        Ordinary,
+        Weapon,
+        Grenade,
+        Projectile,
+        Powerup,
+        Equipment,
+        AmmoPack,
+        LightLandVehicle,
+        HeavyLandVehicle,
+        FlyingVehicle,
+        Turret,
+        Device,
+        Teleporter2way,
+        TeleporterSender,
+        TeleporterReceiver,
+        PlayerSpawnLocation,
+        PlayerRespawnZone,
+        SecondaryObjective,
+        PrimaryObjective,
+        NamedLocationArea,
+        DangerZone,
+        Fireteam1RespawnZone,
+        Fireteam2RespawnZone,
+        Fireteam3RespawnZone,
+        Fireteam4RespawnZone,
+        SafeVolume,
+        KillVolume,
+        CinematicCameraPosition,
+        MoshEnemySpawnLocation,
+        OrdnanceDropPoint,
+        TraitZone,
+        InitialOrdnanceDropPoint,
+        RandomOrdnanceDropPoint,
+        ObjectiveOrdnanceDropPoint,
+        PersonalOrdnanceDropPoint
+    }
+
+
     public enum MultiplayerObjectSpawnTimerType : sbyte
     {
         StartsOnDeath,

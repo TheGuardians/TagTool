@@ -362,7 +362,11 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public GameEngineSubTypeFlags EngineFlags;
 
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public MultiplayerObjectType Type;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public MultiplayerObjectTypeReach TypeReach;
+
             public TeleporterPassabilityFlags TeleporterPassability;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -371,7 +375,7 @@ namespace TagTool.Tags.Definitions
             public MultiplayerObjectBoundaryShape BoundaryShape;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public MultiplayerObjectBoundaryShape SpawnTimerType;
+            public MultiplayerObjectSpawnTimerType SpawnTimerType;
 
             [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
             public byte[] pad = new byte[1];
@@ -395,7 +399,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short AbandonTimeReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public MultiplayerObjectFlags FlagsReach;
+            public MultiplayerObjectFlagsReach FlagsReach;
 
             //only the first of these exists in Reach
             public float StandardRespawnZoneWeight;
@@ -419,7 +423,30 @@ namespace TagTool.Tags.Definitions
                 OnlyVisibleInEditor = 1 << 0,
                 ValidInitialPlayerSpawn = 1 << 1,
                 FixedBoundaryOrientation = 1 << 2,
-                InheritOwningTeamColor = 1 << 3,    // CandyMonitorShouldIgnore(?)
+                CandyMonitorShouldIgnore = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7,
+                Bit8 = 1 << 8,
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15
+            }
+
+            [Flags]
+            public enum MultiplayerObjectFlagsReach : ushort
+            {
+                None,
+                OnlyVisibleInEditor = 1 << 0,
+                PhasedPhysicsInForge = 1 << 1,
+                ValidInitialPlayerSpawn = 1 << 2,
+                FixedBoundaryOrientation = 1 << 3,
+                CandyMonitorShouldIgnore = 1 << 4,
                 Bit4 = 1 << 4,
                 Bit5 = 1 << 5,
                 Bit6 = 1 << 6,
