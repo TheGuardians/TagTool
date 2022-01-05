@@ -86,6 +86,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 Console.WriteLine($"###Failed to prune node tree!");
                 return false;
             }
+
+            //LeafMap leafmapbuilder = new LeafMap();
+            //if (!leafmapbuilder.munge_collision_bsp(Bsp))
+            //    return false;
+
             if (hasErrors)
                 Errors.WriteOBJ();
 
