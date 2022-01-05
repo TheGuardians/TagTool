@@ -8,6 +8,7 @@ namespace TagTool.BlamFile.Reach
     {
         private const float kWorldUnitsToInches = 10.0f * 12.0f;
         private const float kInchesToWorldUnits = 1.0f / kWorldUnitsToInches;
+        private const float kRealPi = 3.1415927f;
 
         private static readonly int[] kUnitVectorQuantizationTable =
         {
@@ -75,34 +76,40 @@ namespace TagTool.BlamFile.Reach
             }
 
             var quantizedForwardAngle = (int)ReadUnsigned(forwardBits);
-            float forwardAngle = DequantizeReal(quantizedForwardAngle, -(float)Math.PI, (float)Math.PI, forwardBits, false, false);
-            forward = AngleToAxis(up, forwardAngle);
+
+            float forwardAngle = DequantizeReal(quantizedForwardAngle, -kRealPi, kRealPi, forwardBits, false, false);
+            forward = AngleToAxes(up, forwardAngle);
         }
 
-        private static void RotateVectorAboutAxis(RealVector3d vector, RealVector3d axis, float y, float x)
+        private static RealVector3d RotateVectorAboutAxis(RealVector3d vector, RealVector3d axis, float y, float x)
         {
-            float m = (1.0f - x) * (((vector.I * axis.I) + (vector.J * axis.J)) + (vector.K * axis.K));
-            vector.I = ((x * vector.I) + (m * axis.I)) - (y * ((vector.J * axis.K) - (vector.K * axis.J)));
-            vector.J = ((x * vector.J) + (m * axis.J)) - (y * (vector.K * axis.I) - (vector.I * axis.K));
-            vector.K = ((x * vector.K) + (m * axis.K)) - (y * (vector.I * axis.J) - (vector.J * axis.I));
+            var result = new RealVector3d();
+            float dot = ((axis.I * vector.I) + (axis.J * vector.J) + (axis.K * vector.K));    
+            result.I = (dot * (1.0f - x) * axis.I) + (vector.I * x) - (((vector.J * axis.K) - (vector.K * axis.J)) * y);
+            result.J = (dot * (1.0f - x) * axis.J) + (vector.J * x) - (((vector.K * axis.I) - (vector.I * axis.K)) * y);
+            result.K = (dot * (1.0f - x) * axis.K) + (vector.K * x) - (((vector.I * axis.J) - (vector.J * axis.I)) * y);
+            return result;
         }
 
-        private static RealVector3d AngleToAxis(RealVector3d up, float forwardAngle)
+        private static RealVector3d AngleToAxes(RealVector3d up, float forwardAngle)
         {
-            RealVector3d forwardReference;
+            RealVector3d forward;
 
             var globalForward3d = new RealVector3d(1, 0, 0);
             var globalLeft3d = new RealVector3d(0, 1, 0);
 
-            float forward_amount = RealVector3d.DotProduct(up, globalForward3d);
-            float left_amount = RealVector3d.DotProduct(up, globalLeft3d);
-            if (Math.Abs(forward_amount) >= Math.Abs(left_amount))
-                forwardReference = RealVector3d.Normalize(RealVector3d.CrossProduct(globalLeft3d, up));
+            float forwardAmount = RealVector3d.DotProduct(up, globalForward3d);
+            float leftAmount = RealVector3d.DotProduct(up, globalLeft3d);
+
+            if (Math.Abs(forwardAmount) >= Math.Abs(leftAmount))
+                forward = RealVector3d.CrossProduct(globalLeft3d, up);
             else
-                forwardReference = RealVector3d.Normalize(RealVector3d.CrossProduct(globalForward3d, up));
+                forward = RealVector3d.CrossProduct(up, globalForward3d);
+
+            // RealVector3d.CrossProduct() normalizes for whatever reason, don't re-normalize
 
             float x, y;
-            if (forwardAngle == (float)Math.PI || forwardAngle == -(float)Math.PI)
+            if (forwardAngle == kRealPi || forwardAngle == -kRealPi)
             {
                 y = 0.0f;
                 x = -1.0f;
@@ -113,8 +120,8 @@ namespace TagTool.BlamFile.Reach
                 x = (float)Math.Cos(forwardAngle);
             }
 
-            RotateVectorAboutAxis(forwardReference, up, y, x);
-            return RealVector3d.Normalize(forwardReference);
+            forward = RotateVectorAboutAxis(forward, up, y, x);
+            return RealVector3d.Normalize(forward);
         }
 
         private unsafe RealPoint3d DequantizeRealPoint3dPerAxis(int* point, RealRectangle3d bounds, int* per_axis_bit_counts)
@@ -153,25 +160,25 @@ namespace TagTool.BlamFile.Reach
                     vector.K = d;
                     vector.I = 1.0f;
                     break;
-                case 3:
-                    vector.J = c;
-                    vector.K = d;
-                    vector.I = 1.0f;
-                    break;
                 case 1:
                     vector.I = c;
                     vector.K = d;
                     vector.J = 1.0f;
                     break;
-                case 4:
-                    vector.I = c;
-                    vector.K = d;
-                    vector.J = -1.0f;
-                    break;
                 case 2:
                     vector.I = c;
                     vector.J = d;
                     vector.K = 1.0f;
+                    break;
+                case 3:
+                    vector.J = c;
+                    vector.K = d;
+                    vector.I = -1.0f;
+                    break;
+                case 4:
+                    vector.I = c;
+                    vector.K = d;
+                    vector.J = -1.0f;
                     break;
                 case 5:
                     vector.I = c;
