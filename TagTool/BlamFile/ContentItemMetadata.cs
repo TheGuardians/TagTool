@@ -26,7 +26,7 @@ namespace TagTool.BlamFile
         public int CampaignId = -1;
         public int MapId = -1;
         public GameEngineType GameEngineType;
-        public int CampaignDifficulty;
+        public int CampaignDifficulty = -1;
         public sbyte CampaignInsertionPoint = -1;
         public bool IsSurvival;
         [TagField(Flags = Padding, Length = 2)]
