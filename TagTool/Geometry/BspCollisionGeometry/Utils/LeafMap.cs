@@ -378,6 +378,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             int v9 = 0;
             for (var i = 0; i < 2; i++)
             {
+                int child_index = (i == 0) ? bsp3dnode_block.BackChild : bsp3dnode_block.FrontChild;
                 if (ancestor_node_index == -1 && i == 1 && first_traversal_node < 0)
                     v9 = 1;
                 else
@@ -385,18 +386,18 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     v9 = 0;
                     if (ancestor_node_index != -1)
                     {
-                        if (node_is_in_nodestack != 0 && use_node_backside == i)
+                        if (node_is_in_nodestack == 1 && use_node_backside == i)
                             continue;
-                        int child_index_1 = (i == 0) ? bsp3dnode_block.BackChild : bsp3dnode_block.FrontChild;
-                        if (child_index_1 >= 0)
+                        //LABEL 30
+                        if (child_index >= 0)
                         {
                             int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
-                            init_leaf_map_portals_first_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index_1, levels_up - 1);
+                            init_leaf_map_portals_first_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index, levels_up - 1);
                         }
-                        else if (child_index_1 != -1 && (child_index_1 & 0x7FFFFFFF) != leaf_index)
+                        else if (child_index != -1 && (child_index & 0x7FFFFFFF) != leaf_index)
                         {
                             int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
-                            init_leaf_map_portals_second_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index_1 & 0x7FFFFFFF);
+                            init_leaf_map_portals_second_leaf(ref leafybsp, bsp_ancestor_index, leaf_index, child_index);
                         }
                         continue;
                     }
@@ -420,7 +421,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
                 
                 //LABEL 30
-                int child_index = (i == 0) ? bsp3dnode_block.BackChild : bsp3dnode_block.FrontChild;
                 if (child_index >= 0)
                 {
                     int bsp_ancestor_index = v9 == 1 ? bsp3dnode_index : ancestor_node_index;
@@ -439,8 +439,15 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             leaf_map_leaf leaf1 = leafybsp.leaf_map_leaves[leaf_index_1 & 0x7FFFFFFF];
             //find faces on leaf with matching node index
             //inlined subfunctions
-            leaf_face leaf_0_face = leaf0.faces.First(face => face.bsp3dnode_index == bsp3dnode_index);
-            leaf_face leaf_1_face = leaf1.faces.First(face => face.bsp3dnode_index == bsp3dnode_index);
+            int leaf_0_face_index = leaf0.faces.FindIndex(face => face.bsp3dnode_index == bsp3dnode_index);
+            int leaf_1_face_index = leaf1.faces.FindIndex(face => face.bsp3dnode_index == bsp3dnode_index);
+
+            if (leaf_0_face_index == -1 || leaf_1_face_index == -1)
+                return;
+
+            leaf_face leaf_0_face = leaf0.faces[leaf_0_face_index];
+            leaf_face leaf_1_face = leaf1.faces[leaf_1_face_index];
+
             //cut leaf 1 face with leaf 0 face
             List<RealPoint2d> points = portal_slice_polygon(leaf_0_face.vertices, leaf_1_face.vertices, 0.00048828125d);
 
@@ -632,7 +639,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
             else
             {
-                return new List<RealPoint2d>();
+                return polygon_points;
             }
             return output_points;
         }
