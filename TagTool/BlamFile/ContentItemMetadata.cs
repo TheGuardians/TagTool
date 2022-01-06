@@ -23,11 +23,11 @@ namespace TagTool.BlamFile
         public ulong ContentSize;
         public ulong Timestamp;
         public int FilmDuration;
-        public int CampaignId;
-        public int MapId;
+        public int CampaignId = -1;
+        public int MapId = -1;
         public GameEngineType GameEngineType;
-        public int CampaignDifficulty;
-        public sbyte CampaignInsertionPoint;
+        public int CampaignDifficulty = -1;
+        public sbyte CampaignInsertionPoint = -1;
         public bool IsSurvival;
         [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused3 = new byte[2];
