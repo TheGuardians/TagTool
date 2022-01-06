@@ -7,13 +7,20 @@ namespace TagTool.Tags.Definitions.Common
     public class RuntimeGpuData : TagStructure
     {
         public List<RealVector4dBlock> Properties;
-        public List<RealVector4dBlock> Functions;
+        public List<GpuFunctionBlock> Functions;
         public List<RealVector4dBlock> Colors;
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x40, Align = 0x10)]
+        public class GpuFunctionBlock : TagStructure
+        {
+            [TagField(Length = 16)]
+            public RealVector4dBlock[] Elements;
+        }
+
+        [TagStructure(Size = 0x10, Align = 0x10)]
         public class RealVector4dBlock : TagStructure
         {
-            public RealVector3d Color;
+            public RealRgbColor Color;
             public float Magnitude;
         }
     }
