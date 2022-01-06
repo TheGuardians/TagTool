@@ -38,32 +38,30 @@ namespace TagTool.Common
 
         public string ReadUnicodeString(int length)
         {
-            var str = "";
+            var buffer = new StringBuilder(length);
             while (length > 0)
             {
                 ushort b = (ushort)ReadUnsigned(16);
                 if (b == 0)
                     break;
-                var c = char.ConvertFromUtf32(b);
-                str += c;
+                buffer.Append(Convert.ToChar(b));
                 length--;
             }
-            return str;
+            return buffer.ToString();
         }
 
         public string ReadString(int length)
         {
-            var str = "";
+            var buffer = new StringBuilder(length);
             while (length > 0)
             {
                 byte b = (byte)ReadUnsigned(8);
                 if (b == 0)
                     break;
-                var c = char.ConvertFromUtf32(b);
-                str += c;
+                buffer.Append(Convert.ToChar(b));
                 length--;
             }
-            return str;
+            return buffer.ToString();
         }
 
         public bool ReadBool()

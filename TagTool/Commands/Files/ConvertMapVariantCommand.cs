@@ -13,7 +13,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Files
 {
-    public class ConvertMapVariantCommand : Command
+    public class ConvertMapVariantCommand : Command 
     {
         private readonly GameCacheHaloOnlineBase Cache;
 
@@ -76,6 +76,9 @@ namespace TagTool.Commands.Files
                 convertedBlf.Write(writer);
 
             Console.WriteLine("Done.");
+            Console.WriteLine("----------------------------------------------");
+            Console.WriteLine($"Total Objects: {convertedBlf.MapVariant.MapVariant.VariantObjectCount}/640");
+            Console.WriteLine($"Total Items: {convertedBlf.MapVariant.MapVariant.PlaceableQuotaCount}/256");
             return true;
         }
 
@@ -139,6 +142,34 @@ namespace TagTool.Commands.Files
             converter.ExcludedTags.Add(@"objects\multi\boundaries\kill_volume.scen");
             converter.ExcludedTags.Add(@"objects\multi\spawning\respawn_zone.scen");
             converter.ExcludedTags.Add(@"objects\levels\forge\ff_light_flash_red\ff_light_flash_red.bloc");
+
+            converter.ExcludedMegaloLabels.Add("hh_drop_point");
+            converter.ExcludedMegaloLabels.Add("inv_cinematic");
+            converter.ExcludedMegaloLabels.Add("inv_gates");
+            converter.ExcludedMegaloLabels.Add("inv_mancannon");
+            converter.ExcludedMegaloLabels.Add("inv_no_core_zone");
+            converter.ExcludedMegaloLabels.Add("inv_obj_flag");
+            converter.ExcludedMegaloLabels.Add("inv_objective");
+            converter.ExcludedMegaloLabels.Add("inv_platform");
+            converter.ExcludedMegaloLabels.Add("inv_res_p1");
+            converter.ExcludedMegaloLabels.Add("inv_res_p2");
+            converter.ExcludedMegaloLabels.Add("inv_res_p3");
+            converter.ExcludedMegaloLabels.Add("inv_res_zone");
+            converter.ExcludedMegaloLabels.Add("inv_slayer");
+            converter.ExcludedMegaloLabels.Add("inv_slayer_drop");
+            converter.ExcludedMegaloLabels.Add("inv_slayer_res_zone");
+            converter.ExcludedMegaloLabels.Add("inv_vehicle");
+            converter.ExcludedMegaloLabels.Add("inv_weapon");
+            converter.ExcludedMegaloLabels.Add("invasion");
+            converter.ExcludedMegaloLabels.Add("invasion_slayer");
+            converter.ExcludedMegaloLabels.Add("race");
+            converter.ExcludedMegaloLabels.Add("race_flag");
+            converter.ExcludedMegaloLabels.Add("rally");
+            converter.ExcludedMegaloLabels.Add("rally_flag");
+            converter.ExcludedMegaloLabels.Add("stockpile");
+            converter.ExcludedMegaloLabels.Add("stockpile_flag");
+            converter.ExcludedMegaloLabels.Add("stp_flag");
+            converter.ExcludedMegaloLabels.Add("stp_goal");
 
             return converter.Convert(sourceScenario, sourceBlf);
         }

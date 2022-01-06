@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -14,30 +16,49 @@ namespace TagTool.BlamFile.Reach
 {
     public class ReachMapVariantConverter
     {
+        private ReachMapVariant SourceMapVariant;
+
+        public HashSet<string> ExcludedMegaloLabels = new HashSet<string>();
         public HashSet<string> ExcludedTags = new HashSet<string>();
         public Dictionary<string, string> SubstitutedTags = new Dictionary<string, string>();
 
         public Blf Convert(Scenario sourceScenario, ReachBlfMapVariant sourceBlf)
         {
-            var sourceMapVariant = sourceBlf.MapVariant;
+            SourceMapVariant = sourceBlf.MapVariant;
+
+            Console.WriteLine($"Converting Reach map variant`{SourceMapVariant.Name}`...");
+
+            var metadata = ConvertMetadata(SourceMapVariant);
+            var mapVariant = ConvertMapVariant(SourceMapVariant, sourceScenario, out List<string> tagNames);
+            mapVariant.Metadata = metadata;
+            return GenerateBlf(mapVariant, tagNames);
+        }
+
+        private ContentItemMetadata ConvertMetadata(ReachMapVariant sourceMapVariant)
+        {
             var metadata = new ContentItemMetadata();
             metadata.Name = sourceMapVariant.Name;
             metadata.Description = sourceMapVariant.Description;
-            metadata.Author = sourceMapVariant.Metadata.ModificationHistory.AuthorName;
-            if (string.IsNullOrEmpty(metadata.Author))
-                metadata.Author = sourceMapVariant.Metadata.CreationHistory.AuthorName;
             metadata.GameId = sourceMapVariant.Metadata.GameId;
             metadata.ContentType = ContentItemType.SandboxMap;
             metadata.ContentSize = typeof(BlfMapVariant).GetSize();
-            metadata.Timestamp = (ulong)DateTime.Now.ToFileTime();
             metadata.GameEngineType = GameEngineType.None;
             metadata.MapId = sourceMapVariant.MapId;
             metadata.Identifier = sourceMapVariant.Metadata.Uid;
-            metadata.UserId = sourceMapVariant.Metadata.CreationHistory.AuthorUID;
 
-            var mapVariant = ConvertMapVariant(sourceMapVariant, sourceScenario, out List<string> tagNames);
-            mapVariant.Metadata = metadata;
-            return GenerateBlf(mapVariant, tagNames);
+            if (sourceMapVariant.Metadata.ModificationHistory.Timestamp >= sourceMapVariant.Metadata.CreationHistory.Timestamp)
+                SetAuthorInfo(sourceMapVariant.Metadata.ModificationHistory);
+            else
+                SetAuthorInfo(sourceMapVariant.Metadata.CreationHistory);
+
+            void SetAuthorInfo(ContentItemHistory history)
+            {
+                metadata.Author = history.AuthorName;
+                metadata.UserId = history.AuthorUID;
+                metadata.Timestamp = (ulong)history.Timestamp.ToUnixTimeSeconds();
+            }
+
+            return metadata;
         }
 
         private MapVariant ConvertMapVariant(ReachMapVariant sourceMapVariant, Scenario sourceScenario, out List<string> destTagNames)
@@ -64,38 +85,59 @@ namespace TagTool.BlamFile.Reach
             for (int i = 0; i < result.ScenarioObjectCount; i++)
                 result.Objects[i] = new VariantObjectDatum() { Flags = VariantObjectPlacementFlags.ScenarioObject | VariantObjectPlacementFlags.ScenarioObjectRemoved };
                
-
-                var quotaBuilder = new VariantQuotaBuilder();
+            var quotaBuilder = new VariantQuotaBuilder();
             for (int i = 0; i < sourceMapVariant.Objects.Count; i++)
             {
-                var reachVariantObject = sourceMapVariant.Objects[i];
+                if (result.VariantObjectCount >= 640)
+                {
+                    new TagToolWarning($"Map variant object limit reached!");
+                    break;
+                }
 
+                var reachVariantObject = sourceMapVariant.Objects[i];
                 if (!reachVariantObject.Flags.HasFlag(ReachVariantObjectDatum.ObjectPlacementFlags.OccupiedSlot))
                     continue;
+
+                if (reachVariantObject.SpawnRelativeToIndex != -1)
+                    new TagToolWarning("Relative placement found. Not currently supported!");
+
+                var reachQuota = sourceMapVariant.Quotas[reachVariantObject.QuotaIndex];
 
                 var paletteEntry = sourceMapVariant.GetPaletteEntry(sourceScenario, reachVariantObject.QuotaIndex);
                 var sourceObjectTag = paletteEntry.Variants[reachVariantObject.VariantIndex].Object;
                 if (ExcludedTags.Contains($"{sourceObjectTag.Name}.{ sourceObjectTag.Group.Tag}"))
-                    continue;
-
-                var variantObbject = ConvertVariantObject(reachVariantObject);
-                result.Objects[result.VariantObjectCount++] = variantObbject;
-                var index = quotaBuilder.FindObject(sourceObjectTag);
-                var reachQuota = sourceMapVariant.Quotas[reachVariantObject.QuotaIndex];
-
-                if (index == -1)
                 {
-                    index = quotaBuilder.AddObject(sourceObjectTag);
-                    var newQuota = quotaBuilder[index];
+                    Console.WriteLine($"Deleted placement #{i} due to tag '{sourceObjectTag}'");
+                    continue;
+                }        
+
+                if(reachVariantObject.Properties.MegaloLabelIndex != -1)
+                {
+                    var megaloLabel = sourceMapVariant.StringTable.Strings[reachVariantObject.Properties.MegaloLabelIndex];
+                    if (ExcludedMegaloLabels.Contains(megaloLabel))
+                    {
+                        Console.WriteLine($"Deleted placement #{i} due to megalo label '{megaloLabel}'");
+                        continue;
+                    } 
+                }
+
+                var variantObject = ConvertVariantObject(reachVariantObject);
+                result.Objects[result.VariantObjectCount++] = variantObject;
+
+                var newQuotaIndex = quotaBuilder.FindObject(sourceObjectTag);
+                if (newQuotaIndex == -1)
+                {
+                    newQuotaIndex = quotaBuilder.AddObject(sourceObjectTag);
+                    var newQuota = quotaBuilder[newQuotaIndex];
                     newQuota.Tag = sourceObjectTag;
                     newQuota.MaxAllowed = paletteEntry.MaximumAllowed;
                     newQuota.MinimumCount = reachQuota.MinimumCount;
                     newQuota.MaximumCount = reachQuota.MaximumCount;
                 }
 
-                var quota = quotaBuilder[index];
+                var quota = quotaBuilder[newQuotaIndex];
                 quota.PlacedOnMap++;
-                variantObbject.QuotaIndex = index;
+                variantObject.QuotaIndex = newQuotaIndex;
             }
 
             for (int i = 0; i < quotaBuilder.Count; i++)
@@ -105,6 +147,7 @@ namespace TagTool.BlamFile.Reach
                 result.Quotas[i].MaximumCount = (byte)quotaBuilder[i].MaximumCount;
                 result.Quotas[i].PlacedOnMap = (byte)quotaBuilder[i].PlacedOnMap;
                 result.Quotas[i].MaxAllowed = (byte)quotaBuilder[i].MaxAllowed;
+                result.PlaceableQuotaCount++;
             }
 
             destTagNames = new List<string>();
@@ -113,7 +156,10 @@ namespace TagTool.BlamFile.Reach
                 var quota = quotaBuilder[i];
                 var name = $"{quota.Tag.Name}.{quota.Tag.Group.Tag}";
                 if (SubstitutedTags.TryGetValue(name, out string sub))
+                {
+                    Console.WriteLine($"Substituted {name} -> {sub}");
                     name = sub;
+                }
 
                 destTagNames.Add(name);
             }
@@ -226,7 +272,7 @@ namespace TagTool.BlamFile.Reach
         }
 
 
-        private static VariantObjectDatum ConvertVariantObject(ReachVariantObjectDatum reachObject)
+        private VariantObjectDatum ConvertVariantObject(ReachVariantObjectDatum reachObject)
         {
             var result = new VariantObjectDatum();
             result.Flags = VariantObjectPlacementFlags.OccupiedSlot | VariantObjectPlacementFlags.Edited;
@@ -237,10 +283,11 @@ namespace TagTool.BlamFile.Reach
             return result;
         }
 
-        private static VariantMultiplayerProperties ConvertMultiplayerProperties(ReachVarintMultiplayerObjectProperties reachProperties)
+        private VariantMultiplayerProperties ConvertMultiplayerProperties(ReachVarintMultiplayerObjectProperties reachProperties)
         {
             var result = new VariantMultiplayerProperties();
-            result.EngineFlags = GameEngineSubTypeFlags.All;
+
+            result.EngineFlags = DetermineEngineFlags(reachProperties.MegaloLabelIndex);
             result.Flags = reachProperties.PlacementFlags.ConvertLexical<VariantPlacementFlags>();
             result.Team = reachProperties.Team;
             result.SpawnTime = (byte)reachProperties.SpawnTime;
@@ -267,6 +314,60 @@ namespace TagTool.BlamFile.Reach
             result.Boundary.PositiveHeight = reachProperties.Boundary.PositiveHeight;
             result.Boundary.NegativeHeight = reachProperties.Boundary.NegativeHeight;
             return result;
+        }
+
+        private GameEngineSubTypeFlags DetermineEngineFlags(int megaloLabelIndex)
+        {
+            if (megaloLabelIndex == -1)
+                return GameEngineSubTypeFlags.All;
+
+            var flags = GameEngineSubTypeFlags.TargetTraining;
+
+            var label = SourceMapVariant.StringTable.Strings[megaloLabelIndex];
+            switch (label)
+            {
+                case "as_bomb":
+                case "as_goal":
+                case "as_res_zone":
+                case "as_res_zone_away":
+                case "as_spawn":
+                case "assault":
+                    flags |= GameEngineSubTypeFlags.Assault;
+                    break;
+                case "ctf":
+                case "ctf_flag_return":
+                case "ctf_res_zone":
+                case "ctf_res_zone_away":
+                    flags |= GameEngineSubTypeFlags.CaptureTheFlag;
+                    break;
+                case "inf_haven":
+                case "inf_spawn":
+                    flags |= GameEngineSubTypeFlags.Infection;
+                    break;
+                case "juggernaut":
+                    flags |= GameEngineSubTypeFlags.Juggernaut;
+                    break;
+                case "koth_hill":
+                    flags |= GameEngineSubTypeFlags.KingOfTheHill;
+                    break;
+                case "oddball_ball":
+                    flags |= GameEngineSubTypeFlags.Oddball;
+                    break;
+                case "slayer":
+                    flags |= GameEngineSubTypeFlags.Slayer;
+                    break;
+                case "terr_object":
+                case "territories":
+                    flags |= GameEngineSubTypeFlags.Territories;
+                    break;
+                case "vip":
+                    flags |= GameEngineSubTypeFlags.Vip;
+                    break;
+                default:
+                    flags |= GameEngineSubTypeFlags.All;
+                    break;
+            }
+            return flags;
         }
 
         class ObjectTypeMap
