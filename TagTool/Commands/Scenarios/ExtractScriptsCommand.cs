@@ -100,6 +100,9 @@ namespace TagTool.Commands.Scenarios
                     }
                     break;
 
+                case "Folder":
+                case "Unit":
+                case "AnimationGraph":
                 case "Object":
                 case "Device":
                 case "CutsceneCameraPoint":
@@ -137,6 +140,7 @@ namespace TagTool.Commands.Scenarios
         {
             switch (expr.Flags)
             {
+                case HsSyntaxNodeFlags.ScriptReference:
                 case HsSyntaxNodeFlags.Group:
                     WriteGroupExpression(expr, stringReader, scriptWriter);
                     break;
