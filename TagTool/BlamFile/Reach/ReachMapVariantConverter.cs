@@ -147,7 +147,7 @@ namespace TagTool.BlamFile.Reach
                 result.Quotas[i].MaximumCount = (byte)quotaBuilder[i].MaximumCount;
                 result.Quotas[i].PlacedOnMap = (byte)quotaBuilder[i].PlacedOnMap;
                 result.Quotas[i].MaxAllowed = (byte)quotaBuilder[i].MaxAllowed;
-                result.PlaceableQuotaCount++;
+                // result.PlaceableQuotaCount++;
             }
 
             destTagNames = new List<string>();
