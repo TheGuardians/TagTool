@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
@@ -15,17 +16,19 @@ namespace TagTool.Commands.Scenarios
         private GameCache Cache { get; }
         private List<string> CsvQueue1 { get; }
         private Dictionary<DatumHandle, string> Globals { get; }
+        private CachedTag Tag { get; }
 
-        public DumpScriptsCommand(GameCache cache, Scenario definition) :
+        public DumpScriptsCommand(GameCache cache, CachedTag tag, Scenario definition) :
             base(true,
                 
                 "DumpScripts",
                 "Extract a scenario or function's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.",
 
-                "DumpScripts [function name] <CSV File>",
+                "DumpScripts [function name] [CSV Filename]",
                 "Extract a scenario or function's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.")
         {
             Definition = definition;
+            Tag = tag;
             Cache = cache;
             CsvQueue1 = new List<string>();
             Globals = new Dictionary<DatumHandle, string>();
@@ -33,23 +36,34 @@ namespace TagTool.Commands.Scenarios
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 2)
-                return new TagToolError(CommandError.ArgCount);
+            string csvFileName;
+            string functionName = "";
+            string mapName = Tag.Name.Split('\\').Last();
 
-            var csvFileName = $"{Cache.Version.ToString()}_{Definition.MapId}_scripts.csv";
-            string functionname = "";
-
-            if (args.Count == 2)
-            {
-                functionname = args[0];
-                csvFileName = args[1];
-            }
-            else if (args.Count == 1)
+        switch (args.Count)
+        {
+            case 0:
+                {
+                    if (Cache.Version == CacheVersion.HaloOnlineED)
+                        csvFileName = $"ED_hsc_{Definition.MapId}_{mapName}.csv";
+                    else
+                        csvFileName = $"{Cache.Version}_hsc_{Definition.MapId}_{mapName}.csv";
+                }
+                break;
+            case 1:
                 csvFileName = args[0];
+                break;
+            case 2:
+                functionName = args[0];
+                csvFileName = args[1];
+                break;
+            default:
+                return new TagToolError(CommandError.ArgCount);
+        }
 
-            if (functionname != "")
+            if (functionName != "")
             {
-                DumpFunction(functionname);
+                DumpFunction(functionName);
             }
             else
             {
@@ -94,6 +108,7 @@ namespace TagTool.Commands.Scenarios
 
         private void CsvDumpQueueToFile(List<string> lines, string path)
         {
+            path = @"haloscript\" + path;
             var fileOut = new FileInfo(path);
 
             if (!fileOut.Directory.Exists)
@@ -209,8 +224,15 @@ namespace TagTool.Commands.Scenarios
             else if (ScriptInfo.Scripts[(Cache.Version, Cache.Platform)].ContainsKey(Definition.ScriptExpressions[index].Opcode))
                 opcodeName = ScriptInfo.Scripts[(Cache.Version, Cache.Platform)][Definition.ScriptExpressions[index].Opcode].Name;
 
-            if ((Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.ScriptReference) || (index > 0 && Definition.ScriptExpressions[index - 1].Flags == HsSyntaxNodeFlags.ScriptReference))
-                opcodeName = $"call {Definition.Scripts[Definition.ScriptExpressions[index].Opcode].ScriptName}";
+            try
+            {
+                if ((Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.ScriptReference) || (index > 0 && Definition.ScriptExpressions[index - 1].Flags == HsSyntaxNodeFlags.ScriptReference))
+                    opcodeName = $"call {Definition.Scripts[Definition.ScriptExpressions[index].Opcode].ScriptName}";
+            }
+            catch (Exception ex)
+            {
+                new TagToolError(CommandError.CustomError, "Out-of-range exception in Definition.Scripts! (?)");
+            }
 
             CsvAdd(tabs +
                    $"{index:D8}," +
