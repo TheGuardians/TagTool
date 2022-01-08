@@ -4,14 +4,28 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Shaders;
+using TagTool.Shaders.ShaderFunctions;
 using HaloShaderGenerator.Shader;
+using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 
 namespace TagTool.Commands.Shaders
 {
     public class GenerateShaderCommand : Command
     {
+        struct SDependentRenderMethodData
+        {
+            public CachedTag Tag;
+            public object Definition;
+            public ShaderFunctionHelper.AnimatedParameter[] AnimatedParameters;
+            public List<string> OrderedRealParameters;
+            public List<string> OrderedIntParameters;
+            public List<string> OrderedBoolParameters;
+            public List<string> OrderedTextures;
+        }
+
         GameCache Cache;
 
         public GenerateShaderCommand(GameCache cache) :
@@ -72,15 +86,15 @@ namespace TagTool.Commands.Shaders
                 if (rmdf.GlobalVertexShader == null || rmdf.GlobalPixelShader == null)
                     return new TagToolError(CommandError.TagInvalid, "A global shader was missing from rmdf");
 
-                List<int> options = new List<int>();
+                List<byte> options = new List<byte>();
                 for (int i = 0; i < args.Count; i++)
                 {
                     // parse options as int, if fails try finding in rmdf string
-                    if (!int.TryParse(args[i].ToLower(), out int optionInteger))
+                    if (!byte.TryParse(args[i].ToLower(), out byte optionInteger))
                     {
                         bool found = false;
 
-                        for (int j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
+                        for (byte j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
                         {
                             if (Cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[j].Name) == args[i].ToLower())
                             {
@@ -103,30 +117,7 @@ namespace TagTool.Commands.Shaders
                 while (options.Count != rmdf.Categories.Count)
                     options.Add(0);
 
-                // build tagname
-                string rmt2TagName = $"shaders\\{shaderType}_templates\\_{string.Join("_", options.ToArray())}";
-
-                // generate shader
-                switch (shaderType)
-                {
-                    case "shader":          GenerateShader(stream, options, rmt2TagName, rmdf); break;
-                    case "particle":        GenerateParticle(stream, options, rmt2TagName, rmdf); break;
-                    case "contrail":        GenerateContrail(stream, options, rmt2TagName, rmdf); break;
-                    case "beam":            GenerateBeam(stream, options, rmt2TagName, rmdf); break;
-                    case "light_volume":    GenerateLightVolume(stream, options, rmt2TagName, rmdf); break;
-                    case "decal":           GenerateDecal(stream, options, rmt2TagName, rmdf); break;
-                    case "black":           GenerateShaderBlack(stream, rmt2TagName, rmdf); break;
-                    case "halogram":        GenerateHalogram(stream, options, rmt2TagName, rmdf); break;
-                    case "custom":          GenerateCustom(stream, options, rmt2TagName, rmdf); break;
-                    case "screen":          GenerateScreen(stream, options, rmt2TagName, rmdf); break;
-                    case "zonly":           GenerateZOnly(stream, options, rmt2TagName, rmdf); break;
-                    case "water":           GenerateWater(stream, options, rmt2TagName, rmdf); break;
-                    case "terrain":         GenerateTerrain(stream, options, rmt2TagName, rmdf); break;
-                    case "foliage":         GenerateFoliage(stream, options, rmt2TagName, rmdf); break;
-                    case "cortana":         GenerateCortana(stream, options, rmt2TagName, rmdf); break;
-                }
-
-                Console.WriteLine($"Generated shader template \"{rmt2TagName}\"");
+                GenerateRenderMethodTemplate(stream, shaderType, options.ToArray(), rmdf);
             }
 
             return true;
@@ -346,330 +337,258 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        private void GenerateShader(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
+        private void GenerateRenderMethodTemplate(Stream stream, string shaderType, byte[] options, RenderMethodDefinition rmdf)
         {
-            Albedo albedo = (Albedo)options[0];
-            Bump_Mapping bumpMapping = (Bump_Mapping)options[1];
-            Alpha_Test alphaTest = (Alpha_Test)options[2];
-            Specular_Mask specularMask = (Specular_Mask)options[3];
-            Material_Model materialModel = (Material_Model)options[4];
-            Environment_Mapping environmentMapping = (Environment_Mapping)options[5];
-            Self_Illumination selfIllumination = (Self_Illumination)options[6];
-            Blend_Mode blendMode = (Blend_Mode)options[7];
-            Parallax parallax = (Parallax)options[8];
-            Misc misc = (Misc)options[9];
-            HaloShaderGenerator.Shared.Distortion distortion = (HaloShaderGenerator.Shared.Distortion)options[10];
+            string rmt2Name = $"shaders\\{shaderType}_templates\\_{string.Join("_", options)}";
 
-            var generator = new ShaderGenerator(albedo, bumpMapping, alphaTest, specularMask, materialModel, environmentMapping, selfIllumination, blendMode, parallax, misc, distortion);
+            // Collect dependent render methods, store arguments
+
+            List<SDependentRenderMethodData> dependentRenderMethods = new List<SDependentRenderMethodData>();
+
+            if (Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+            {
+                var origRmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
+                var dependents = (Cache as GameCacheHaloOnlineBase).TagCacheGenHO.NonNull().Where(t => ((Cache.HaloOnline.CachedTagHaloOnline)t).Dependencies.Contains(rmt2Tag.Index));
+
+                foreach (var dependent in dependents)
+                {
+                    object definition = null;
+                    
+                    if (dependent.IsInGroup("rm  "))
+                    { 
+                        definition = Cache.Deserialize(stream, dependent);
+                    }
+                    else
+                    {
+                        switch (dependent.Group.Tag.ToString())
+                        {
+                            case "prt3":
+                                var prt3 = Cache.Deserialize<Particle>(stream, dependent);
+                                definition = prt3.RenderMethod;
+                                break;
+                            //case "decs":
+                            //    break;
+                            //case "beam":
+                            //    break;
+                            //case "ltvl":
+                            //    break;
+                            //case "cntl":
+                            //    break;
+                        }
+                    }
+
+                    var renderMethod = (RenderMethod)definition;
+                    if (definition == null)
+                        continue;
+
+                    var animatedParams = ShaderFunctionHelper.GetAnimatedParameters(Cache, renderMethod, origRmt2);
+
+                    SDependentRenderMethodData dpData = new SDependentRenderMethodData
+                    {
+                        Tag = dependent,
+                        Definition = definition,
+                        AnimatedParameters = animatedParams.ToArray(),
+                        OrderedRealParameters = new List<string>(),
+                        OrderedIntParameters = new List<string>(),
+                        OrderedBoolParameters = new List<string>(),
+                        OrderedTextures = new List<string>()
+                    };
+
+                    foreach (var realP in origRmt2.RealParameterNames)
+                        dpData.OrderedRealParameters.Add(Cache.StringTable.GetString(realP.Name));
+                    foreach (var intP in origRmt2.IntegerParameterNames)
+                        dpData.OrderedIntParameters.Add(Cache.StringTable.GetString(intP.Name));
+                    foreach (var boolP in origRmt2.BooleanParameterNames)
+                        dpData.OrderedBoolParameters.Add(Cache.StringTable.GetString(boolP.Name));
+                    foreach (var textureP in origRmt2.TextureParameterNames)
+                        dpData.OrderedTextures.Add(Cache.StringTable.GetString(textureP.Name));
+
+                    dependentRenderMethods.Add(dpData);
+                }
+            }
+
+            // Generate template
+
+            var generator = GetShaderGenerator(shaderType, options, true);
 
             var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
 
             var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
 
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+            if (rmt2Tag == null)
                 rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
 
             Cache.Serialize(stream, rmt2Tag, rmt2);
             Cache.SaveStrings();
             (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateParticle(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Particle.Albedo albedo = (HaloShaderGenerator.Particle.Albedo)options[0];
-            HaloShaderGenerator.Particle.Blend_Mode blend_mode = (HaloShaderGenerator.Particle.Blend_Mode)options[1];
-            HaloShaderGenerator.Particle.Specialized_Rendering specialized_rendering = (HaloShaderGenerator.Particle.Specialized_Rendering)options[2];
-            HaloShaderGenerator.Particle.Lighting lighting = (HaloShaderGenerator.Particle.Lighting)options[3];
-            HaloShaderGenerator.Particle.Render_Targets render_targets = (HaloShaderGenerator.Particle.Render_Targets)options[4];
-            HaloShaderGenerator.Particle.Depth_Fade depth_fade = (HaloShaderGenerator.Particle.Depth_Fade)options[5];
-            HaloShaderGenerator.Particle.Black_Point black_point = (HaloShaderGenerator.Particle.Black_Point)options[6];
-            HaloShaderGenerator.Particle.Fog fog = (HaloShaderGenerator.Particle.Fog)options[7];
-            HaloShaderGenerator.Particle.Frame_Blend frame_blend = (HaloShaderGenerator.Particle.Frame_Blend)options[8];
-            HaloShaderGenerator.Particle.Self_Illumination self_Illumination = (HaloShaderGenerator.Particle.Self_Illumination)options[9];
 
-            var generator = new HaloShaderGenerator.Particle.ParticleGenerator(albedo, blend_mode, specialized_rendering, lighting, render_targets, depth_fade, black_point, fog, frame_blend, self_Illumination, true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateContrail(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Contrail.Albedo albedo = (HaloShaderGenerator.Contrail.Albedo)options[0];
-            HaloShaderGenerator.Contrail.Blend_Mode blend_mode = (HaloShaderGenerator.Contrail.Blend_Mode)options[1];
-            HaloShaderGenerator.Contrail.Black_Point black_point = (HaloShaderGenerator.Contrail.Black_Point)options[2];
-            HaloShaderGenerator.Contrail.Fog fog = (HaloShaderGenerator.Contrail.Fog)options[3];
-
-            var generator = new HaloShaderGenerator.Contrail.ContrailGenerator(albedo, blend_mode, black_point, fog, true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateBeam(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Beam.Albedo albedo = (HaloShaderGenerator.Beam.Albedo)options[0];
-            HaloShaderGenerator.Beam.Blend_Mode blend_mode = (HaloShaderGenerator.Beam.Blend_Mode)options[1];
-            HaloShaderGenerator.Beam.Black_Point black_point = (HaloShaderGenerator.Beam.Black_Point)options[2];
-            HaloShaderGenerator.Beam.Fog fog = (HaloShaderGenerator.Beam.Fog)options[3];
-
-            var generator = new HaloShaderGenerator.Beam.BeamGenerator(albedo, blend_mode, black_point, fog, true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateLightVolume(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.LightVolume.Albedo albedo = (HaloShaderGenerator.LightVolume.Albedo)options[0];
-            HaloShaderGenerator.LightVolume.Blend_Mode blend_mode = (HaloShaderGenerator.LightVolume.Blend_Mode)options[1];
-            HaloShaderGenerator.LightVolume.Fog fog = (HaloShaderGenerator.LightVolume.Fog)options[2];
-
-            var generator = new HaloShaderGenerator.LightVolume.LightVolumeGenerator(albedo, blend_mode, fog, true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateDecal(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Decal.Albedo albedo = (HaloShaderGenerator.Decal.Albedo)options[0];
-            HaloShaderGenerator.Decal.Blend_Mode blend_mode = (HaloShaderGenerator.Decal.Blend_Mode)options[1];
-            HaloShaderGenerator.Decal.Render_Pass render_pass = (HaloShaderGenerator.Decal.Render_Pass)options[2];
-            HaloShaderGenerator.Decal.Specular specular = (HaloShaderGenerator.Decal.Specular)options[3];
-            HaloShaderGenerator.Decal.Bump_Mapping bump_mapping = (HaloShaderGenerator.Decal.Bump_Mapping)options[4];
-            HaloShaderGenerator.Decal.Tinting tinting = (HaloShaderGenerator.Decal.Tinting)options[5];
-
-            var generator = new HaloShaderGenerator.Decal.DecalGenerator(albedo, blend_mode, render_pass, specular, bump_mapping, tinting, true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateShaderBlack(Stream stream, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            var generator = new HaloShaderGenerator.Black.ShaderBlackGenerator();
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateHalogram(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Halogram.Albedo albedo = (HaloShaderGenerator.Halogram.Albedo)options[0];
-            HaloShaderGenerator.Halogram.Self_Illumination self_illumination = (HaloShaderGenerator.Halogram.Self_Illumination)options[1];
-            HaloShaderGenerator.Halogram.Blend_Mode blend_mode = (HaloShaderGenerator.Halogram.Blend_Mode)options[2];
-            HaloShaderGenerator.Halogram.Misc misc = (HaloShaderGenerator.Halogram.Misc)options[3];
-            HaloShaderGenerator.Halogram.Warp warp = (HaloShaderGenerator.Halogram.Warp)options[4];
-            HaloShaderGenerator.Halogram.Overlay overlay = (HaloShaderGenerator.Halogram.Overlay)options[5];
-            HaloShaderGenerator.Halogram.Edge_Fade edge_fade = (HaloShaderGenerator.Halogram.Edge_Fade)options[6];
-
-            var generator = new HaloShaderGenerator.Halogram.HalogramGenerator(albedo, self_illumination, blend_mode, misc, warp, overlay, edge_fade, true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateCustom(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Custom.Albedo albedo = (HaloShaderGenerator.Custom.Albedo)options[0];
-            HaloShaderGenerator.Custom.Bump_Mapping bumpMapping = (HaloShaderGenerator.Custom.Bump_Mapping)options[1];
-            HaloShaderGenerator.Custom.Alpha_Test alphaTest = (HaloShaderGenerator.Custom.Alpha_Test)options[2];
-            HaloShaderGenerator.Custom.Specular_Mask specularMask = (HaloShaderGenerator.Custom.Specular_Mask)options[3];
-            HaloShaderGenerator.Custom.Material_Model materialModel = (HaloShaderGenerator.Custom.Material_Model)options[4];
-            HaloShaderGenerator.Custom.Environment_Mapping environmentMapping = (HaloShaderGenerator.Custom.Environment_Mapping)options[5];
-            HaloShaderGenerator.Custom.Self_Illumination selfIllumination = (HaloShaderGenerator.Custom.Self_Illumination)options[6];
-            HaloShaderGenerator.Custom.Blend_Mode blendMode = (HaloShaderGenerator.Custom.Blend_Mode)options[7];
-            HaloShaderGenerator.Custom.Parallax parallax = (HaloShaderGenerator.Custom.Parallax)options[8];
-            HaloShaderGenerator.Custom.Misc misc = (HaloShaderGenerator.Custom.Misc)options[9];
-
-            var generator = new HaloShaderGenerator.Custom.CustomGenerator(albedo, bumpMapping, alphaTest, specularMask, materialModel, environmentMapping, selfIllumination, blendMode, parallax, misc);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateScreen(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.Screen.Warp warp = (HaloShaderGenerator.Screen.Warp)options[0];
-            HaloShaderGenerator.Screen.Base _base = (HaloShaderGenerator.Screen.Base)options[1];
-            HaloShaderGenerator.Screen.Overlay_A overlay_a = (HaloShaderGenerator.Screen.Overlay_A)options[2];
-            HaloShaderGenerator.Screen.Overlay_B overlay_b = (HaloShaderGenerator.Screen.Overlay_B)options[3];
-            HaloShaderGenerator.Screen.Blend_Mode blend_mode = (HaloShaderGenerator.Screen.Blend_Mode)options[4];
-
-            var generator = new HaloShaderGenerator.Screen.ScreenGenerator(warp, _base, overlay_a, overlay_b, blend_mode);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateZOnly(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            HaloShaderGenerator.ZOnly.Test test = (HaloShaderGenerator.ZOnly.Test)options[0];
-
-            var generator = new HaloShaderGenerator.ZOnly.ZOnlyGenerator(test);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateWater(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            var generator = new HaloShaderGenerator.Water.WaterGenerator(options.Select(x => (byte)x).ToArray(), true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateFoliage(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            var generator = new HaloShaderGenerator.Foliage.FoliageGenerator(options.Select(x => (byte)x).ToArray(), true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateTerrain(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            var generator = new HaloShaderGenerator.Terrain.TerrainGenerator(options.Select(x => (byte)x).ToArray(), true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
-        }
-
-        private void GenerateCortana(Stream stream, List<int> options, string rmt2Name, RenderMethodDefinition rmdf)
-        {
-            var generator = new HaloShaderGenerator.Cortana.CortanaGenerator(options.Select(x => (byte)x).ToArray(), true);
-
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
-
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
-
-            if (!Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
-
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+            Console.WriteLine($"Generated shader template \"{rmt2Name}\"");
+
+            // Fixup render method parameters
+
+            foreach (var dependent in dependentRenderMethods)
+            {
+                var postprocess = (dependent.Definition as RenderMethod).ShaderProperties[0];
+
+                List<TextureConstant> reorderedTextureConstants = new List<TextureConstant>();
+                foreach (var textureName in rmt2.TextureParameterNames)
+                {
+                    int origIndex = dependent.OrderedTextures.IndexOf(Cache.StringTable.GetString(textureName.Name));
+                    reorderedTextureConstants.Add(postprocess.TextureConstants[origIndex]);
+                }
+                postprocess.TextureConstants = reorderedTextureConstants;
+
+                List<RealConstant> reorderedRealConstants = new List<RealConstant>();
+                foreach (var realName in rmt2.RealParameterNames)
+                {
+                    int origIndex = dependent.OrderedRealParameters.IndexOf(Cache.StringTable.GetString(realName.Name));
+                    reorderedRealConstants.Add(postprocess.RealConstants[origIndex]);
+                }
+                postprocess.RealConstants = reorderedRealConstants;
+
+                List<uint> reorderedIntConstants = new List<uint>();
+                foreach (var intName in rmt2.IntegerParameterNames)
+                {
+                    int origIndex = dependent.OrderedIntParameters.IndexOf(Cache.StringTable.GetString(intName.Name));
+                    reorderedIntConstants.Add(postprocess.IntegerConstants[origIndex]);
+                }
+                postprocess.IntegerConstants = reorderedIntConstants;
+
+                uint reorderedBoolConstants = 0;
+                for (int i = 0; i < rmt2.BooleanParameterNames.Count; i++)
+                {
+                    int origIndex = dependent.OrderedBoolParameters.IndexOf(Cache.StringTable.GetString(rmt2.BooleanParameterNames[i].Name));
+                    reorderedBoolConstants |= ((postprocess.BooleanConstants >> origIndex) & 1) == 1 ? 1u << i : 0;
+                }
+                postprocess.BooleanConstants = reorderedBoolConstants;
+
+                var textureAnimatedParams = dependent.AnimatedParameters.Where(x => x.Type == ShaderFunctionHelper.ParameterType.Texture);
+                var realAnimatedParams = dependent.AnimatedParameters.Where(x => x.Type == ShaderFunctionHelper.ParameterType.Real);
+                var intAnimatedParams = dependent.AnimatedParameters.Where(x => x.Type == ShaderFunctionHelper.ParameterType.Int);
+                var boolAnimatedParams = dependent.AnimatedParameters.Where(x => x.Type == ShaderFunctionHelper.ParameterType.Bool);
+
+                postprocess.RoutingInfo.Clear();
+                var routingInfo = postprocess.RoutingInfo;
+
+                foreach (var pass in postprocess.Passes)
+                {
+                    pass.RealPixel.Integer = 0;
+                    pass.RealVertex.Integer = 0;
+                    pass.Texture.Integer = 0;
+                }
+
+                for (int k = 0; k < postprocess.EntryPoints.Count; k++)
+                {
+                    var entry = postprocess.EntryPoints[k];
+                    var rmt2Entry = rmt2.EntryPoints[k];
+
+                    for (int i = entry.Offset; i < entry.Offset + entry.Count; i++)
+                    {
+                        var pass = postprocess.Passes[i];
+                        var rmt2Pass = rmt2.Passes[rmt2Entry.Offset + (i - entry.Offset)];
+
+                        // Texture
+
+                        int usageOffset = rmt2Pass.Values[(int)ParameterUsage.Texture].Offset;
+                        int usageCount = rmt2Pass.Values[(int)ParameterUsage.Texture].Count;
+
+                        pass.Texture.Offset = (ushort)routingInfo.Count;
+                        for (int j = usageOffset; j < usageOffset + usageCount; j++)
+                        {
+                            var rmt2RoutingInfo = rmt2.RoutingInfo[j];
+
+                            string paramName = Cache.StringTable.GetString(rmt2.TextureParameterNames[rmt2RoutingInfo.SourceIndex].Name);
+
+                            foreach (var animatedParam in textureAnimatedParams)
+                            {
+                                if (animatedParam.Name == paramName)
+                                {
+                                    var newBlock = new RenderMethodRoutingInfoBlock 
+                                    { 
+                                        SourceIndex = rmt2RoutingInfo.SourceIndex, 
+                                        FunctionIndex = (byte)animatedParam.FunctionIndex,
+                                        RegisterIndex = (short)rmt2RoutingInfo.DestinationIndex
+                                    };
+
+                                    routingInfo.Add(newBlock);
+                                    pass.Texture.Count++;
+                                    break;
+                                }
+                            }
+                        }
+                        pass.Texture.Offset = pass.Texture.Count == 0 ? (ushort)0 : pass.Texture.Offset;
+
+                        // Real PS
+
+                        usageOffset = rmt2Pass.Values[(int)ParameterUsage.PS_Real].Offset;
+                        usageCount = rmt2Pass.Values[(int)ParameterUsage.PS_Real].Count;
+
+                        pass.RealPixel.Offset = (ushort)routingInfo.Count;
+                        for (int j = usageOffset; j < usageOffset + usageCount; j++)
+                        {
+                            var rmt2RoutingInfo = rmt2.RoutingInfo[j];
+
+                            string paramName = Cache.StringTable.GetString(rmt2.RealParameterNames[rmt2RoutingInfo.SourceIndex].Name);
+
+                            foreach (var animatedParam in realAnimatedParams)
+                            {
+                                if (animatedParam.Name == paramName)
+                                {
+                                    var newBlock = new RenderMethodRoutingInfoBlock
+                                    {
+                                        SourceIndex = rmt2RoutingInfo.SourceIndex,
+                                        FunctionIndex = (byte)animatedParam.FunctionIndex,
+                                        RegisterIndex = (short)rmt2RoutingInfo.DestinationIndex
+                                    };
+
+                                    routingInfo.Add(newBlock);
+                                    pass.RealPixel.Count++;
+                                    break;
+                                }
+                            }
+                        }
+                        pass.RealPixel.Offset = pass.RealPixel.Count == 0 ? (ushort)0 : pass.RealPixel.Offset;
+
+                        // Real VS
+
+                        usageOffset = rmt2Pass.Values[(int)ParameterUsage.VS_Real].Offset;
+                        usageCount = rmt2Pass.Values[(int)ParameterUsage.VS_Real].Count;
+
+                        pass.RealVertex.Offset = (ushort)routingInfo.Count;
+                        for (int j = usageOffset; j < usageOffset + usageCount; j++)
+                        {
+                            var rmt2RoutingInfo = rmt2.RoutingInfo[j];
+
+                            string paramName = Cache.StringTable.GetString(rmt2.RealParameterNames[rmt2RoutingInfo.SourceIndex].Name);
+
+                            foreach (var animatedParam in realAnimatedParams)
+                            {
+                                if (animatedParam.Name == paramName)
+                                {
+                                    var newBlock = new RenderMethodRoutingInfoBlock
+                                    {
+                                        SourceIndex = rmt2RoutingInfo.SourceIndex,
+                                        FunctionIndex = (byte)animatedParam.FunctionIndex,
+                                        RegisterIndex = (short)rmt2RoutingInfo.DestinationIndex
+                                    };
+
+                                    routingInfo.Add(newBlock);
+                                    pass.RealVertex.Count++;
+                                    break;
+                                }
+                            }
+                        }
+                        pass.RealVertex.Offset = pass.RealVertex.Count == 0 ? (ushort)0 : pass.RealVertex.Offset;
+                    }
+                }
+
+
+                Cache.Serialize(stream, dependent.Tag, dependent.Definition);
+            }
+
+            if (dependentRenderMethods.Count > 0)
+                Console.WriteLine($"Corrected {dependentRenderMethods.Count} render method{(dependentRenderMethods.Count > 1 ? "s" : "")}");
         }
     }
 }

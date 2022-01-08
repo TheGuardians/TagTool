@@ -22,6 +22,33 @@ namespace TagTool.Shaders.ShaderFunctions
             public ParameterType Type;
             public int FunctionIndex;
             public RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType FunctionType;
+
+            public int GetTemplateSourceIndex(GameCache cache, RenderMethodTemplate rmt2)
+            {
+                List<RenderMethodTemplate.ShaderArgument> block = null;
+
+                switch (Type)
+                {
+                    case ParameterType.Real:
+                        block = rmt2.RealParameterNames;
+                        break;
+                    case ParameterType.Int:
+                        block = rmt2.IntegerParameterNames;
+                        break;
+                    case ParameterType.Bool:
+                        block = rmt2.BooleanParameterNames;
+                        break;
+                    case ParameterType.Texture:
+                        block = rmt2.TextureParameterNames;
+                        break;
+                }
+
+                for (int i = 0; i < block.Count; i++)
+                    if (cache.StringTable.GetString(block[i].Name) == Name)
+                        return i;
+
+                return -1;
+            }
         }
 
         /// <summary>
