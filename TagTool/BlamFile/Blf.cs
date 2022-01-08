@@ -137,11 +137,6 @@ namespace TagTool.BlamFile
                         JpegImage = reader.ReadBytes(MapImage.JpegSize);
                         break;
 
-                    case "":
-                        if (Version == CacheVersion.HaloReach && Scenario != null)
-                            reader.SeekTo(reader.Position + 13272);
-                        break;
-
                     case "scnd":
                     case "scnc":
                     case "flmh":
@@ -355,19 +350,19 @@ namespace TagTool.BlamFile
             if (!ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
                 return;
 
-            Scenario.InsertionsODST = new BlfScenarioInsertion[9];
-
+            var insertions = new BlfScenarioInsertion[9];
             for(int i = 0; i < 9; i++)
             {
                 BlfScenarioInsertion ins;
                 if( i < 4)
-                    ins = Scenario.InsertionsH3[i];
+                    ins = Scenario.Insertions[i];
                 else
                 {
                     ins = new BlfScenarioInsertion();
                 }
-                Scenario.InsertionsODST[i] = ins;
+                insertions[i] = ins;
             }
+            Scenario.Insertions = insertions;
             Scenario.Length = 0x98C0;
         }
 
@@ -376,30 +371,34 @@ namespace TagTool.BlamFile
             if (!ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
                 return;
 
-            Scenario.InsertionsODST = new BlfScenarioInsertion[9];
+            var insertions = new BlfScenarioInsertion[9];
 
             for (int i = 0; i < 9; i++)
             {
                 BlfScenarioInsertion ins;
                 if (i < 9)
-                    ins = Scenario.InsertionsReach[i];
+                    ins = Scenario.Insertions[i];
                 else
                     ins = new BlfScenarioInsertion();
 
-                Scenario.InsertionsODST[i] = ins;
+                insertions[i] = ins;
             }
-            //int mapFlagShift = (int)Scenario.MapFlags;
-            //Scenario.MapFlags = (BlfScenarioFlags)(mapFlagShift >> 1);
+
+            if(Scenario.MapFlags.HasFlag(BlfScenarioFlags.IsMultiplayer))
+            {
+                for (int i = 0; i < 11; i++)
+                    Scenario.GameEngineTeamCounts[i] = 8;
+            }
+
+            Scenario.Insertions = insertions;
+            Scenario.Length = 0x98C0;
             Scenario.MajorVersion = 3;
             Scenario.MinorVersion = 1;
-            Scenario.InsertionsReach = null;
-            Scenario.Pad = 0;
-            Scenario.Length = 0x98C0;
         }
     }
 
     [Flags]
-    public enum BlfFileContentFlags : int
+    public enum BlfFileContentFlags : uint
     {
         None = 0,
         StartOfFile = 1 << 0,
@@ -415,7 +414,7 @@ namespace TagTool.BlamFile
     }
 
     [Flags]
-    public enum BlfScenarioFlags : int
+    public enum BlfScenarioFlags : uint
     {
         Unknown0 = 0,
         Unknown1 = 1 << 0,
@@ -431,9 +430,6 @@ namespace TagTool.BlamFile
         IsFirefight = 1 << 10,
         IsCinematic = 1 << 11,
         IsForgeOnly = 1 << 12,
-        Unknown13 = 1 << 13,
-        Unknown14 = 1 << 14,
-        Unknown15 = 1 << 15
     }
 
     public enum BlfAuthenticationType : byte
@@ -492,8 +488,8 @@ namespace TagTool.BlamFile
     }
 
     [TagStructure(Size = 0x4D44, Align = 0x1, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Size = 0x98B4, Align = 0x1, MinVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0xCC98, Align = 0x1, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x98B4, Align = 0x1, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0xCC8C, Align = 0x1, MinVersion = CacheVersion.HaloReach)]
     public class BlfScenario : BlfChunkHeader
     {
         public int MapId;
@@ -512,48 +508,74 @@ namespace TagTool.BlamFile
         public string MapName;
 
         public int MapIndex;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public int GuiSelectableItemType;
-        public byte UnknownTeamCount1;
-        public byte UnknownTeamCount2;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte Unknown1;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte Unknown2;
 
         [TagField(Length = 0xB)]
         public byte[] GameEngineTeamCounts;
 
-        public byte Unknown;
+        public byte Unknown3;
 
-        public short Pad;
-        public int Unknown2;
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Unused1;
+
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] Unused2;
+
+        [TagField(Length = 64, MinVersion = CacheVersion.HaloReach)]
+        public uint[] MultiplayerObjects; // bit vector
 
         [TagField(Length = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
-        public BlfScenarioInsertion[] InsertionsH3;
-
-        [TagField(Length = 0x9, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public BlfScenarioInsertion[] InsertionsODST;
-
+        [TagField(Length = 0x9, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagField(Length = 0xC, MinVersion = CacheVersion.HaloReach)]
-        public BlfScenarioInsertion[] InsertionsReach;
+        public BlfScenarioInsertion[] Insertions;
+
+        [TagField(Length = 0x10, MinVersion = CacheVersion.HaloReach)]
+        public string DefaultAuthor;
     }
 
     [TagStructure(Size = 0xF08, Align = 0x1, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Size = 0xF10, Align = 0x1, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0xF10, Align = 0x1, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0xF88, Align = 0x1, MinVersion = CacheVersion.HaloReach)]
     public class BlfScenarioInsertion
     {
-        public byte Visible;
-        public byte Used;
-        public short ZoneSetIndex;
-        public int Unknown;
+        public bool Valid;
+        public FlagsValue Flags;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public int Unknown2;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public int Unknown3;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public short ZoneSetIndex;
+        [TagField(Length = 2, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Padding1;
+
+        [TagField(Length = 128, MinVersion = CacheVersion.HaloReach)]
+        public string ZoneSetName;
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        public int FlashbackMapId; // mombasa streets
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        public int SurvivalIndex; // not entirely sure what this is, but it's used in rich presence
+
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] Unused;
 
         [TagField(Length = 0xC)]
         public NameUnicode32[] Names;
 
         [TagField(Length = 0xC)]
         public NameUnicode128[] Descriptions;
+
+        public enum FlagsValue : byte
+        {
+            SurvivalBit = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            HasFlashbackBit = 1 << 3
+        }
     }
 
     enum BlfModPackageReferenceVersion : short

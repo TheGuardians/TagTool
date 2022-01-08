@@ -549,8 +549,8 @@ namespace TagTool.Commands.Scenarios
 
             scnrBlf.MapName = scenarioName;
             scnrBlf.ImageName = $"m_{scenarioName}";
-            scnrBlf.UnknownTeamCount1 = 2;
-            scnrBlf.UnknownTeamCount2 = 6;
+            scnrBlf.Unknown1 = 2;
+            scnrBlf.Unknown2 = 6;
             scnrBlf.GameEngineTeamCounts = new byte[11] { 00, 02, 08, 08, 08, 08, 08, 08, 04, 02, 08 };
 
             scnrBlf.MapFlags = BlfScenarioFlags.GeneratesFilm | BlfScenarioFlags.IsMainmenu | BlfScenarioFlags.IsDlc;
