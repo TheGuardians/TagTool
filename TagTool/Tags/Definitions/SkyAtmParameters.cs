@@ -44,6 +44,7 @@ namespace TagTool.Tags.Definitions
         [Flags]
         public enum SkyAtmFlags : ushort
         {
+            None,
             LockEffectsToNearestCluster = 1 << 0
         }
 

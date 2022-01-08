@@ -361,7 +361,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown108;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock3> Unknown109;
-        public List<FogBlock> Fog;
+        public List<StructureBspAtmospherePaletteBlock> Atmosphere;
         public List<ScenarioStructureBsp.CameraEffect> CameraFx;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -448,7 +448,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag SkyParameters;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public CachedTag FogParameters;
+        public CachedTag AtmosphereGlobals;
 
         public CachedTag GlobalLighting;
         public CachedTag Lightmap;
@@ -3320,14 +3320,17 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
-        public class FogBlock : TagStructure
-		{
+        public class StructureBspAtmospherePaletteBlock : TagStructure
+        {
             [TagField(Flags = Label)]
             public StringId Name;
-            public short Unknown;
-            public short Unknown2;
+
+            public short AtmosphereSettingIndex;
+            [TagField(Flags = Padding, Length = 0x2)]
+            public byte[] Padding0;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public CachedTag Fog;
+            public CachedTag AtmosphereFog;
         }
 
         [TagStructure(Size = 0x14)]

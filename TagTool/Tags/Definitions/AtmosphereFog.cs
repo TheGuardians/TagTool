@@ -29,10 +29,10 @@ namespace TagTool.Tags.Definitions
         public enum AtmosphereFogFlags : ushort
         {
             None,
-            Bit0 = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3,
+            SkyFogEnabled = 1 << 0,
+            GroundFogEnabled = 1 << 1,
+            FogLightEnabled = 1 << 2,
+            PatchyFogEnabled = 1 << 3,
             Bit4 = 1 << 4,
             Bit5 = 1 << 5,
             Bit6 = 1 << 6,
