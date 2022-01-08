@@ -538,6 +538,10 @@ namespace TagTool.Commands.Porting
                     skya.AtmosphereSettings = new List<SkyAtmParameters.AtmosphereProperty>();
                     skya.UnderwaterSettings = new List<SkyAtmParameters.UnderwaterBlock>();
 
+                    List<string> convertedWaterFog = new List<string>();
+
+                    // Convert atmosphere globals
+
                     if (scnr.AtmosphereGlobals != null)
                     {
                         var atgf = BlamCache.Deserialize<AtmosphereGlobals>(blamCacheStream, scnr.AtmosphereGlobals);
@@ -561,8 +565,42 @@ namespace TagTool.Commands.Porting
                             };
 
                             skya.UnderwaterSettings.Add(unwt);
+
+                            convertedWaterFog.Add(CacheContext.StringTable.GetString(unwt.Name));
                         }
                     }
+
+                    // Convert underwater fog
+
+                    foreach (var sDesign in scnr.StructureDesigns)
+                    {
+                        if (sDesign.StructureDesign != null)
+                        {
+                            var blamSddt = BlamCache.Deserialize<StructureDesign>(blamCacheStream, BlamCache.TagCache.GetTag<StructureDesign>(sDesign.StructureDesign.Name));
+
+                            foreach (var waterInstance in blamSddt.WaterInstances)
+                            {
+                                var waterNameId = (StringId)ConvertData(cacheStream, blamCacheStream, resourceStreams, blamSddt.WaterGroups[waterInstance.WaterNameIndex].Name, null, null);
+                                var waterName = CacheContext.StringTable.GetString(waterNameId);
+
+                                if (!convertedWaterFog.Contains(waterName))
+                                {
+                                    var unwt = new SkyAtmParameters.UnderwaterBlock
+                                    {
+                                        Name = waterNameId,
+                                        Murkiness = waterInstance.FogMurkiness,
+                                        FogColor = waterInstance.FogColor
+                                    };
+
+                                    skya.UnderwaterSettings.Add(unwt);
+
+                                    convertedWaterFog.Add(waterName);
+                                }
+                            }
+                        }
+                    }
+
+                    // Convert atmospheres
 
                     foreach (var atmospherePalette in scnr.Atmosphere)
                     {
