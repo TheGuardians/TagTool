@@ -7,6 +7,7 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace TagTool.Commands.Scenarios
 {
@@ -22,7 +23,7 @@ namespace TagTool.Commands.Scenarios
                   "ExtractScripts",
                   "Extracts all scripts in the current scenario tag to a file.",
 
-                  "ExtractScripts <Output File>",
+                  "ExtractScripts [Output Filename]",
 
                   "Extracts all scripts in the current scenario tag to a file.")
         {
@@ -162,10 +163,27 @@ namespace TagTool.Commands.Scenarios
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
-                return new TagToolError(CommandError.ArgCount);
+            FileInfo scriptFile;
+            string mapName = Tag.Name.Split('\\').Last();
 
-            var scriptFile = new FileInfo(args[0]);
+            switch (args.Count)
+            {
+                case 0:
+                    {
+                        if (Cache.Version == CacheVersion.HaloOnlineED)
+                            scriptFile = new FileInfo($"haloscript\\ED_decomp_{Definition.MapId}_{mapName}.csv");
+                        else
+                            scriptFile = new FileInfo($"haloscript\\{Cache.Version}_decomp_{Definition.MapId}_{mapName}.csv");
+                    }
+                    break;
+                case 1:
+                    scriptFile = new FileInfo(args[0]);
+                    break;
+                default:
+                    return new TagToolError(CommandError.ArgCount);
+            }
+
+            System.IO.Directory.CreateDirectory("haloscript");
 
             using (var scriptFileStream = scriptFile.Create())
             using (var scriptWriter = new StreamWriter(scriptFileStream))
@@ -219,6 +237,7 @@ namespace TagTool.Commands.Scenarios
                 }
             }
 
+            Console.WriteLine($"\nDecompiled script extracted to \"{scriptFile.FullName}\"");
             return true;
         }
 
