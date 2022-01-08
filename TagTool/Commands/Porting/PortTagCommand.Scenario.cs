@@ -459,6 +459,22 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version >= CacheVersion.HaloReach && Flags.HasFlag(PortingFlags.Recursive))
             {
+                // convert structure design
+
+                if (scnr.StructureDesigns.Count > 0)
+                {
+                    if (scnr.StructureDesigns.Count > 1)
+                    {
+                        new TagToolWarning("Multiple structure designs currently not supported.");
+                    }
+                    else
+                    {
+                        var sddtTag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, scnr.StructureDesigns[0].StructureDesign);
+                        for (int i = 0; i < scnr.StructureBsps.Count; i++)
+                            scnr.StructureBsps[i].Design = sddtTag;
+                    }
+                }
+
                 var lightmap = CacheContext.Deserialize<ScenarioLightmap>(cacheStream, scnr.Lightmap);
 
                 for (int i = 0; i < scnr.StructureBsps.Count; i++)
