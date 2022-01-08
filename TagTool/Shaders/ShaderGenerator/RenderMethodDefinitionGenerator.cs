@@ -73,6 +73,44 @@ namespace TagTool.Shaders.ShaderGenerator
                 }
                 cache.SaveStrings();
 
+                // update glps category dependencies
+                var glps = cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+
+                for (int i = 0; i < rmdf.EntryPoints.Count; i++)
+                {
+                    foreach (var pass in rmdf.EntryPoints[i].Passes)
+                    {
+                        if (!pass.Flags.HasFlag(EntryPointBlock.PassBlock.PassFlags.HasSharedPixelShader))
+                            continue;
+
+                        for (int j = 0; j < pass.CategoryDependencies.Count; j++)
+                        {
+                            var categoryOptionCount = rmdf.Categories[pass.CategoryDependencies[j].Category].ShaderOptions.Count;
+
+                            foreach (var dep in glps.EntryPoints[(int)rmdf.EntryPoints[i].EntryPoint].CategoryDependency)
+                            {
+                                if (dep.DefinitionCategoryIndex == pass.CategoryDependencies[j].Category)
+                                {
+                                    if (dep.OptionDependency.Count != categoryOptionCount)
+                                    {
+                                        glps = ShaderGenerator.GenerateSharedPixelShader(cache, generator);
+
+                                        if (!cache.TagCache.TryGetTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders", out var glpsTag))
+                                            glpsTag = cache.TagCache.AllocateTag<GlobalPixelShader>($"shaders\\{shaderType.ToLower()}_shared_pixel_shaders");
+                                        cache.Serialize(stream, glpsTag, glps);
+
+                                        // no need to keep looping
+                                        cache.Serialize(stream, rmdfTag, rmdf);
+                                        return true;
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 cache.Serialize(stream, rmdfTag, rmdf);
             }
 
