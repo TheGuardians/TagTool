@@ -107,7 +107,10 @@ namespace TagTool.Commands.Files
                         using(var tagStream = Cache.OpenCacheRead())
                         {
                             var scnr = Cache.Deserialize<Scenario>(tagStream, scenario);
-                            map = MapFile.GenerateMapFile(Cache.Version, scnr, scenario, mapInfo);
+
+                            var mapBuilder = new MapFileBuilder(Cache.Version);
+                            mapBuilder.MapInfo = mapInfo.Scenario;
+                            map = mapBuilder.Build(scenario, scnr);
                         }
                         
                     }
@@ -177,7 +180,11 @@ namespace TagTool.Commands.Files
 
                     var tagStream = Cache.OpenCacheRead();
                     var scnr = Cache.Deserialize<Scenario>(tagStream, scenario);
-                    map = MapFile.GenerateMapFile(Cache.Version, scnr,  scenario, mapInfo);
+
+                    var mapBuilder = new MapFileBuilder(Cache.Version);
+                    mapBuilder.MapInfo = mapInfo?.Scenario;
+                    map = mapBuilder.Build(scenario, scnr);
+
                     var mapStream = new MemoryStream();
                     var writer = new EndianWriter(mapStream, leaveOpen: true);
                     map.Write(writer);
