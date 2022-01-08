@@ -783,6 +783,19 @@ namespace TagTool.Commands.Porting
             List<string> AnimatedPixelParameters = new List<string>();
             List<string> AnimatedVertexParameters = new List<string>();
 
+            // Some weird shit. Some rm have random functions in them?
+            // Can seem to identify them by the "unique_id" input scalar
+            List<int> invalidFunctionIndices = new List<int>();
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                for (int i = 0; i < finalRm.ShaderProperties[0].Functions.Count; i++)
+                {
+                    if (CacheContext.StringTable.GetString(finalRm.ShaderProperties[0].Functions[i].InputName) == "unique_id" &&
+                        !invalidFunctionIndices.Contains(i))
+                        invalidFunctionIndices.Add(i);
+                }
+            }
+
             // Collect used registers in the RenderMethod
             for (int i = 0; i < finalRm.ShaderProperties[0].EntryPoints.Count; i++)
             {
@@ -804,6 +817,10 @@ namespace TagTool.Commands.Porting
                     for (int k = parameterTable.Texture.Offset; k < (parameterTable.Texture.Offset + parameterTable.Texture.Count); k++)
                     {
                         var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
+
+                        if (invalidFunctionIndices.Contains(parameter.FunctionIndex))
+                            continue;
+
                         RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Sampler, parameter.FunctionIndex, parameter.SourceIndex);
                         if (!externalSamplers[entryPoint].Contains(registerId))
                         {
@@ -820,6 +837,10 @@ namespace TagTool.Commands.Porting
                     for (int k = parameterTable.RealPixel.Offset; k < (parameterTable.RealPixel.Offset + parameterTable.RealPixel.Count); k++)
                     {
                         var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
+
+                        if (invalidFunctionIndices.Contains(parameter.FunctionIndex))
+                            continue;
+
                         RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
                         if (!externalPixelConstants[entryPoint].Contains(registerId))
                         {
@@ -836,6 +857,10 @@ namespace TagTool.Commands.Porting
                     for (int k = parameterTable.RealVertex.Offset; k < (parameterTable.RealVertex.Offset + parameterTable.RealVertex.Count); k++)
                     {
                         var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
+
+                        if (invalidFunctionIndices.Contains(parameter.FunctionIndex))
+                            continue;
+
                         RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
                         if (!externalVertexConstants[entryPoint].Contains(registerId))
                         {
