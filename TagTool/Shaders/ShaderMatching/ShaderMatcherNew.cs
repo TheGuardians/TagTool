@@ -439,10 +439,6 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "none";
                                 break;
                             // Reach rmfl //
-                            case @"albedo\simple":
-                                optionName = "default";
-                                break;
-                            case @"alpha_test\from_albedo_alpha":
                             case @"alpha_test\from_texture":
                                 optionName = "simple";
                                 break;
