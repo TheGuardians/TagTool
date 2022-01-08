@@ -271,6 +271,7 @@
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\Utils\BitmapUtilsPC.cs" />
     <Compile Include="Bitmaps\XboxGraphics.cs" />
+    <Compile Include="BlamFile\MapFileBuilder.cs" />
     <Compile Include="BlamFile\MapVariantGenerator.cs" />
     <Compile Include="BlamFile\Reach\BlfReader.cs" />
     <Compile Include="BlamFile\Reach\ReachContentItemMetadata.cs" />

@@ -492,72 +492,12 @@ namespace TagTool.Commands.Porting
         void GenerateMapFile(Stream cacheStream, GameCache cache, CachedTag scenarioTag, string mapName, string mapDescription)
         {
             var scenarioName = Path.GetFileName(scenarioTag.Name);
-
-            MapFile map = new MapFile();
-            var header = new CacheFileHeaderGenHaloOnline();
-
             var scnr = cache.Deserialize<Scenario>(cacheStream, scenarioTag);
 
-            map.CachePlatform = cache.Platform;
-            map.Version = cache.Version;
-            map.EndianFormat = EndianFormat.LittleEndian;
-            map.MapVersion = CacheFileVersion.HaloOnline;
-
-            header.HeaderSignature = new Tag("head");
-            header.FooterSignature = new Tag("foot");
-            header.FileVersion = map.MapVersion;
-            header.Build = CacheVersionDetection.GetBuildName(cache.Version, cache.Platform);
-
-            switch (scnr.MapType)
-            {
-                case ScenarioMapType.MainMenu:
-                    header.CacheType = CacheFileType.MainMenu;
-                    break;
-                case ScenarioMapType.SinglePlayer:
-                    header.CacheType = CacheFileType.Campaign;
-                    break;
-                case ScenarioMapType.Multiplayer:
-                    header.CacheType = CacheFileType.Multiplayer;
-                    break;
-            }
-            header.SharedCacheType = CacheFileSharedType.None;
-
-            header.MapId = scnr.MapId;
-            header.ScenarioTagIndex = scenarioTag.Index;
-            header.Name = scenarioTag.Name.Split('\\').Last();
-            header.ScenarioPath = scenarioTag.Name;
-
-            map.Header = header;
-
-            header.FileLength = 0x3390;
-
-            map.MapFileBlf = new Blf(cache.Version, cache.Platform);
-            map.MapFileBlf.StartOfFile = new BlfChunkStartOfFile() { Signature = "_blf", Length = 0x30, MajorVersion = 1, MinorVersion = 2, ByteOrderMarker = -2, };
-            map.MapFileBlf.Scenario = new BlfScenario() { Signature = "levl", Length = 0x98C0, MajorVersion = 3, MinorVersion = 1 };
-            map.MapFileBlf.EndOfFile = new BlfChunkEndOfFile() { Signature = "_eof", Length = 0x11, MajorVersion = 1, MinorVersion = 2 };
-
-            var scnrBlf = map.MapFileBlf.Scenario;
-            scnrBlf.MapId = scnr.MapId;
-            scnrBlf.Names = new NameUnicode32[12];
-            for (int i = 0; i < scnrBlf.Names.Length; i++)
-                scnrBlf.Names[i] = new NameUnicode32() { Name = "" };
-
-            scnrBlf.Descriptions = new NameUnicode128[12];
-            for (int i = 0; i < scnrBlf.Descriptions.Length; i++)
-                scnrBlf.Descriptions[i] = new NameUnicode128() { Name = "" };
-
-            scnrBlf.Names[0] = new NameUnicode32() { Name = mapName };
-            scnrBlf.Descriptions[0] = new NameUnicode128() { Name = mapDescription };
-
-            scnrBlf.MapName = scenarioName;
-            scnrBlf.ImageName = $"m_{scenarioName}";
-            scnrBlf.Unknown1 = 2;
-            scnrBlf.Unknown2 = 6;
-            scnrBlf.GameEngineTeamCounts = new byte[11] { 00, 02, 08, 08, 08, 08, 08, 08, 04, 02, 08 };
-
-            scnrBlf.MapFlags = BlfScenarioFlags.GeneratesFilm | BlfScenarioFlags.IsMainmenu | BlfScenarioFlags.IsDlc;
-
-            map.MapFileBlf.ContentFlags |= BlfFileContentFlags.StartOfFile | BlfFileContentFlags.Scenario | BlfFileContentFlags.EndOfFile;
+            var mapBuilder = new MapFileBuilder(cache.Version);
+            mapBuilder.MapName = mapName;
+            mapBuilder.MapDescription = mapDescription;
+            MapFile map = mapBuilder.Build(scenarioTag, scnr);
 
             if (cache is GameCacheModPackage)
             {
@@ -566,7 +506,7 @@ namespace TagTool.Commands.Porting
                 map.Write(writer);
 
                 var modPackCache = cache as GameCacheModPackage;
-                modPackCache.AddMapFile(mapStream, header.MapId);
+                modPackCache.AddMapFile(mapStream, scnr.MapId);
             }
             else
             {
