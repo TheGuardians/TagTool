@@ -165,15 +165,16 @@ namespace TagTool.Commands.Scenarios
         {
             FileInfo scriptFile;
             string mapName = Tag.Name.Split('\\').Last();
+            string fileName = $"_{Definition.MapId}_{mapName}.hsc";
 
             switch (args.Count)
             {
                 case 0:
                     {
                         if (Cache.Version == CacheVersion.HaloOnlineED)
-                            scriptFile = new FileInfo($"haloscript\\ED_decomp_{Definition.MapId}_{mapName}.csv");
+                            scriptFile = new FileInfo($"haloscript\\ED" + fileName);
                         else
-                            scriptFile = new FileInfo($"haloscript\\{Cache.Version}_decomp_{Definition.MapId}_{mapName}.csv");
+                            scriptFile = new FileInfo($"haloscript\\{Cache.Version}" + fileName);
                     }
                     break;
                 case 1:
