@@ -36,18 +36,18 @@ namespace TagTool.Commands.Scenarios
 
         public override object Execute(List<string> args)
         {
-            string csvFileName;
             string functionName = "";
             string mapName = Tag.Name.Split('\\').Last();
+            string csvFileName = $"_{Definition.MapId}_{mapName}_compiled.csv";
 
         switch (args.Count)
         {
             case 0:
                 {
                     if (Cache.Version == CacheVersion.HaloOnlineED)
-                        csvFileName = $"ED_hsc_{Definition.MapId}_{mapName}.csv";
+                        csvFileName = "ED" + csvFileName;
                     else
-                        csvFileName = $"{Cache.Version}_hsc_{Definition.MapId}_{mapName}.csv";
+                        csvFileName = $"{Cache.Version}" + csvFileName;
                 }
                 break;
             case 1:
