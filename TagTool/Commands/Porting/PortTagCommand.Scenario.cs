@@ -28,9 +28,9 @@ namespace TagTool.Commands.Porting
             foreach(var zoneset in scnr.ZoneSets)
             {
                 // cex_ff_halo references bsps that don't exist, remove them
-                zoneset.LoadedBsps &= (Scenario.BspFlags)(scnr.StructureBsps.Count >= 32 ? uint.MaxValue : ~(-1u << scnr.StructureBsps.Count));
+                zoneset.Bsps &= (Scenario.BspFlags)(scnr.StructureBsps.Count >= 32 ? uint.MaxValue : ~(-1u << scnr.StructureBsps.Count));
                 if (scnr.BspAtlas == null || scnr.BspAtlas.Count == 0)
-                    zoneset.BspAtlasIndex = -1;
+                    zoneset.HintPreviousZoneSet = -1;
             }
                
 

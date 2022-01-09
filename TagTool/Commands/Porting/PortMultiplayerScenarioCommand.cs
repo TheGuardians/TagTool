@@ -177,7 +177,7 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("-----------------------------------------");
                 for (int i = 0; i < 32; i++)
                 {
-                    if ((zoneSet.LoadedBsps & (BspFlags)(1u << i)) != 0)
+                    if ((zoneSet.Bsps & (BspFlags)(1u << i)) != 0)
                     {
                         // map the bsps by name for easy lookup
                         structureBspsByName.Add(blamScnr.StructureBsps[i].StructureBsp.Name, i);
@@ -216,7 +216,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 if (desiredBspMask == 0)
-                    desiredBspMask = blamScnr.ZoneSets[zoneSetIndex].LoadedBsps;
+                    desiredBspMask = blamScnr.ZoneSets[zoneSetIndex].Bsps;
 
                 // perform the conversion
                 Convert(cacheStream, CacheContext, blamStream, BlamCache, scenarioPath, mapId, blamScnr, blamScnrTag, zoneSetIndex, (uint)desiredBspMask, conversionFlags, portingFlags);
@@ -755,20 +755,20 @@ namespace TagTool.Commands.Porting
             private void ConvertZoneSet()
             {
                 var zoneSet = Scenario.ZoneSets[ZoneSetIndex];
-                var zoneSetPvs = Scenario.ZoneSetPvs[zoneSet.PotentiallyVisibleSetIndex];
+                var zoneSetPvs = Scenario.ZoneSetPvs[zoneSet.PvsIndex];
 
                 uint newBspPvsMask = CreateBspPvsMask((uint)zoneSetPvs.StructureBspMask);
                 zoneSetPvs.StructureBspMask = (BspFlags)NewBspMask;
                 RemoveBlockElementsNotInMask(zoneSetPvs.BspChecksums, newBspPvsMask);
-                RemoveBlockElementsNotInMask(zoneSetPvs.StructureBspPotentiallyVisibleSets, newBspPvsMask);
-                RemoveBlockElementsNotInMask(zoneSetPvs.PortalToDeviceMappings, newBspPvsMask);
-                for (int i = 0; i < zoneSetPvs.StructureBspPotentiallyVisibleSets.Count; i++)
+                RemoveBlockElementsNotInMask(zoneSetPvs.StructureBspPvs, newBspPvsMask);
+                RemoveBlockElementsNotInMask(zoneSetPvs.PortaldeviceMapping, newBspPvsMask);
+                for (int i = 0; i < zoneSetPvs.StructureBspPvs.Count; i++)
                 {
-                    var pvs = zoneSetPvs.StructureBspPotentiallyVisibleSets[i];
-                    for (int clusterIndex = 0; clusterIndex < pvs.Clusters.Count; clusterIndex++)
+                    var pvs = zoneSetPvs.StructureBspPvs[i];
+                    for (int clusterIndex = 0; clusterIndex < pvs.ClusterPvs.Count; clusterIndex++)
                     {
-                        RemoveBlockElementsNotInMask(pvs.Clusters[clusterIndex].BitVectors, newBspPvsMask);
-                        RemoveBlockElementsNotInMask(pvs.ClustersDoorsClosed[clusterIndex].BitVectors, newBspPvsMask);
+                        RemoveBlockElementsNotInMask(pvs.ClusterPvs[clusterIndex].ClusterPvsBitVectors, newBspPvsMask);
+                        RemoveBlockElementsNotInMask(pvs.ClusterPvsDoorsClosed[clusterIndex].ClusterPvsBitVectors, newBspPvsMask);
                         RemoveBlockElementsNotInMask(pvs.ClusterMappings[clusterIndex].Clusters, newBspPvsMask);
                     }
                 }
@@ -778,13 +778,13 @@ namespace TagTool.Commands.Porting
                     new ZoneSet()
                     {
                         Name = zoneSet.Name,
-                        BspAtlasIndex = -1,
-                        PotentiallyVisibleSetIndex = 0,
-                        LoadedBsps = (BspFlags)NewBspMask
+                        HintPreviousZoneSet = -1,
+                        PvsIndex = 0,
+                        Bsps = (BspFlags)NewBspMask
                     }
                 };
 
-                var zoneSetAudibility = Scenario.ZoneSetAudibility[zoneSet.ScenarioBspAudibilityIndex];
+                var zoneSetAudibility = Scenario.ZoneSetAudibility[zoneSet.AudibilityIndex];
                 RemoveBlockElementsNotInMask(zoneSetAudibility.BspClusterToRoomBoundsMappings, newBspPvsMask);
                 RemoveBlockElementsNotInMask(zoneSetAudibility.GamePortalToDoorOccluderMappings, newBspPvsMask);
                 Scenario.ZoneSetAudibility = new List<ZoneSetAudibilityBlock>() { zoneSetAudibility };

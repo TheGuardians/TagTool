@@ -687,10 +687,17 @@ namespace TagTool.Tags.Definitions
         public class ZoneSetPvsBlock : TagStructure
 		{
             public BspFlags StructureBspMask;
-            public int Version;
+            public short Version;
+            public ZoneSetPvsFlags Flags;
             public List<BspChecksum> BspChecksums;
-            public List<StructureBspPotentiallyVisibleSet> StructureBspPotentiallyVisibleSets;
-            public List<PortalToDeviceMapping> PortalToDeviceMappings;
+            public List<BspPvsBlock> StructureBspPvs;
+            public List<PortalDeviceMappingBlock> PortaldeviceMapping;
+
+            [Flags]
+            public enum ZoneSetPvsFlags : ushort
+            {
+                EmptyDebugPvs = 1 << 0
+            }
 
             [TagStructure(Size = 0x4)]
             public class BspChecksum : TagStructure
@@ -700,83 +707,33 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x54, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach)]
-            public class StructureBspPotentiallyVisibleSet : TagStructure
+            public class BspPvsBlock : TagStructure
 			{
-                public List<Cluster> Clusters;
-                public List<Cluster> ClustersDoorsClosed;
-                public List<Sky> ClusterSkies;
-                public List<Sky> ClusterVisibleSkies;
+                public List<ClusterPvsBlock> ClusterPvs;
+                public List<ClusterPvsBlock> ClusterPvsDoorsClosed;
+                public List<SkyIndicesBlock> AttachedSkyIndices;
+                public List<SkyIndicesBlock> VisibleSkyIndices;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public List<UnknownBlock> Unknown;
-                public List<UnknownBlock> Unknown2;
+                public List<BitVectorDword> MutipleSkiesVisibleBitvector;
+                public List<BitVectorDword> ClusterAudioBitvector;
                 public List<BspSeamClusterMapping> ClusterMappings;
 
                 [TagStructure(Size = 0xC)]
-                public class Cluster : TagStructure
+                public class ClusterPvsBlock : TagStructure
 				{
-                    public List<BitVector> BitVectors;
+                    public List<CluserPvsBitVectorBlock> ClusterPvsBitVectors;
 
                     [TagStructure(Size = 0xC)]
-                    public class BitVector : TagStructure
+                    public class CluserPvsBitVectorBlock : TagStructure
 					{
-                        public List<Bit> Bits;
-
-                        [TagStructure(Size = 0x4)]
-                        public class Bit : TagStructure
-						{
-                            public AllowFlags Allow;
-
-                            [Flags]
-                            public enum AllowFlags : int
-                            {
-                                None = 0,
-                                Bit0 = 1 << 0,
-                                Bit1 = 1 << 1,
-                                Bit2 = 1 << 2,
-                                Bit3 = 1 << 3,
-                                Bit4 = 1 << 4,
-                                Effects = 1 << 5,
-                                Bit6 = 1 << 6,
-                                Bit7 = 1 << 7,
-                                Bit8 = 1 << 8,
-                                Bit9 = 1 << 9,
-                                Bit10 = 1 << 10,
-                                Bit11 = 1 << 11,
-                                Bit12 = 1 << 12,
-                                Bit13 = 1 << 13,
-                                Bit14 = 1 << 14,
-                                Bit15 = 1 << 15,
-                                FiringEffects = 1 << 16,
-                                Bit17 = 1 << 17,
-                                Bit18 = 1 << 18,
-                                Bit19 = 1 << 19,
-                                Bit20 = 1 << 20,
-                                Bit21 = 1 << 21,
-                                Bit22 = 1 << 22,
-                                Bit23 = 1 << 23,
-                                Bit24 = 1 << 24,
-                                Bit25 = 1 << 25,
-                                Bit26 = 1 << 26,
-                                Bit27 = 1 << 27,
-                                Bit28 = 1 << 28,
-                                Bit29 = 1 << 29,
-                                Bit30 = 1 << 30,
-                                Bit31 = 1 << 31
-                            }
-                        }
+                        public List<BitVectorDword> Bits;
                     }
                 }
 
                 [TagStructure(Size = 0x1)]
-                public class Sky : TagStructure
+                public class SkyIndicesBlock : TagStructure
 				{
                     public sbyte SkyIndex;
-                }
-
-                [TagStructure(Size = 0x4)]
-                public class UnknownBlock : TagStructure
-				{
-                    public uint Unknown;
                 }
 
                 [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -804,11 +761,14 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x18)]
-            public class PortalToDeviceMapping : TagStructure
+            [TagStructure(Size = 0x18, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+            public class PortalDeviceMappingBlock : TagStructure
 			{
                 public List<DevicePortalAssociation> DevicePortalAssociations;
-                public List<GamePortalToPortalMapping> GamePortalToPortalMappings;
+                public List<GamePortalToPortalMapping> GamePortalToPortalMap;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<OccludingPortalToPortalMapping> OccludingPortalToPortalMap;
 
                 [TagStructure(Size = 0xC)]
                 public class DevicePortalAssociation : TagStructure
@@ -825,6 +785,56 @@ namespace TagTool.Tags.Definitions
                 public class GamePortalToPortalMapping : TagStructure
 				{
                     public short PortalIndex;
+                }
+
+                [TagStructure(Size = 0x2)]
+                public class OccludingPortalToPortalMapping : TagStructure
+                {
+                    public short PortalIndex;
+                }
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class BitVectorDword : TagStructure
+            {
+                public DwordBits Bits;
+
+                [Flags]
+                public enum DwordBits : int
+                {
+                    None = 0,
+                    Bit0 = 1 << 0,
+                    Bit1 = 1 << 1,
+                    Bit2 = 1 << 2,
+                    Bit3 = 1 << 3,
+                    Bit4 = 1 << 4,
+                    Bit5 = 1 << 5,
+                    Bit6 = 1 << 6,
+                    Bit7 = 1 << 7,
+                    Bit8 = 1 << 8,
+                    Bit9 = 1 << 9,
+                    Bit10 = 1 << 10,
+                    Bit11 = 1 << 11,
+                    Bit12 = 1 << 12,
+                    Bit13 = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15,
+                    Bit16 = 1 << 16,
+                    Bit17 = 1 << 17,
+                    Bit18 = 1 << 18,
+                    Bit19 = 1 << 19,
+                    Bit20 = 1 << 20,
+                    Bit21 = 1 << 21,
+                    Bit22 = 1 << 22,
+                    Bit23 = 1 << 23,
+                    Bit24 = 1 << 24,
+                    Bit25 = 1 << 25,
+                    Bit26 = 1 << 26,
+                    Bit27 = 1 << 27,
+                    Bit28 = 1 << 28,
+                    Bit29 = 1 << 29,
+                    Bit30 = 1 << 30,
+                    Bit31 = 1 << 31
                 }
             }
         }
@@ -843,10 +853,10 @@ namespace TagTool.Tags.Definitions
         public class ZoneSetAudibilityBlock : TagStructure
 		{
             public int DoorPortalCount;
-            public int UniqueClusterCount;
-            public Bounds<float> ClusterDistanceBounds;
+            public int RoomCount;
+            public Bounds<float> RoomDistanceBounds;
             public List<EncodedDoorPa> EncodedDoorPas;
-            public List<RoomDoorPortalEncodedPa> ClusterDoorPortalEncodedPas;
+            public List<RoomDoorPortalEncodedPa> RoomDoorPortalEncodedPas;
             public List<AiDeafeningPa> AiDeafeningPas;
             public List<RoomDistance> RoomDistances;
             public List<GamePortalToDoorOccluderMapping> GamePortalToDoorOccluderMappings;
@@ -899,41 +909,41 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum ZoneSetFlags : int
+        public enum ZoneFlags : int
         {
             None = 0,
-            Set0 = 1 << 0,
-            Set1 = 1 << 1,
-            Set2 = 1 << 2,
-            Set3 = 1 << 3,
-            Set4 = 1 << 4,
-            Set5 = 1 << 5,
-            Set6 = 1 << 6,
-            Set7 = 1 << 7,
-            Set8 = 1 << 8,
-            Set9 = 1 << 9,
-            Set10 = 1 << 10,
-            Set11 = 1 << 11,
-            Set12 = 1 << 12,
-            Set13 = 1 << 13,
-            Set14 = 1 << 14,
-            Set15 = 1 << 15,
-            Set16 = 1 << 16,
-            Set17 = 1 << 17,
-            Set18 = 1 << 18,
-            Set19 = 1 << 19,
-            Set20 = 1 << 20,
-            Set21 = 1 << 21,
-            Set22 = 1 << 22,
-            Set23 = 1 << 23,
-            Set24 = 1 << 24,
-            Set25 = 1 << 25,
-            Set26 = 1 << 26,
-            Set27 = 1 << 27,
-            Set28 = 1 << 28,
-            Set29 = 1 << 29,
-            Set30 = 1 << 30,
-            Set31 = 1 << 31
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7,
+            Bit8 = 1 << 8,
+            Bit9 = 1 << 9,
+            Bit10 = 1 << 10,
+            Bit11 = 1 << 11,
+            Bit12 = 1 << 12,
+            Bit13 = 1 << 13,
+            Bit14 = 1 << 14,
+            Bit15 = 1 << 15,
+            Bit16 = 1 << 16,
+            Bit17 = 1 << 17,
+            Bit18 = 1 << 18,
+            Bit19 = 1 << 19,
+            Bit20 = 1 << 20,
+            Bit21 = 1 << 21,
+            Bit22 = 1 << 22,
+            Bit23 = 1 << 23,
+            Bit24 = 1 << 24,
+            Bit25 = 1 << 25,
+            Bit26 = 1 << 26,
+            Bit27 = 1 << 27,
+            Bit28 = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            Bit31 = 1 << 31
         }
 
         [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -944,16 +954,59 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             [TagField(Length = 256, MinVersion = CacheVersion.HaloReach)]
             public string NameString;
-            public int PotentiallyVisibleSetIndex;
+            public int PvsIndex;
+            public ZoneSetFlags Flags;
+            public BspFlags Bsps;
 
-            // TODO fix for reach
-            public int ImportLoadedBsps;
-            public BspFlags LoadedBsps;
-            public ZoneSetFlags LoadedDesignerZoneSets;
-            public ZoneSetFlags UnloadedDesignerZoneSets;
-            public ZoneSetFlags LoadedCinematicZoneSets;
-            public int BspAtlasIndex;
-            public int ScenarioBspAudibilityIndex;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ZoneFlags StructureDesignZones;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public BspFlags RuntimeBsps;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ZoneFlags RuntimeStructureDesignZones;
+
+            public ZoneFlags RequiredDesignerZones;
+            public ZoneFlags ForbiddenDesignerZones;
+            public ZoneFlags CinematicZones;
+            public int HintPreviousZoneSet;
+            public int AudibilityIndex;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<PlanarFogZoneSetVisibilityBlock> PlanarFogVisibility;
+
+            [Flags]
+            public enum ZoneSetFlags : uint
+            {
+                None = 0,
+                BeginLoadingNextLevel = 1 << 0,
+                DebugPurposesOnly = 1 << 1,
+                InteralZoneSet = 1 << 2
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class PlanarFogZoneSetVisibilityBlock : TagStructure
+            {
+                public List<PlanarFogStructureVisibilityBlock> StructureVisiblity;
+
+                [TagStructure(Size = 0xC)]
+                public class PlanarFogStructureVisibilityBlock : TagStructure
+                {
+                    public List<PlanarFogClusterVisibilityBlock> ClusterVisiblity;
+
+                    [TagStructure(Size = 0xC)]
+                    public class PlanarFogClusterVisibilityBlock : TagStructure
+                    {
+                        public List<PlanarFogReferenceBlock> AttachedFogs;
+
+                        [TagStructure(Size = 0x4)]
+                        public class PlanarFogReferenceBlock : TagStructure
+                        {
+                            public short StructureDesignIndex;
+                            public short FogIndex;
+                        }
+                    }
+                }
+            }
         }
 
         [TagStructure(Size = 0xC)]

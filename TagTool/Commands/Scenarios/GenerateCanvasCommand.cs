@@ -297,10 +297,10 @@ namespace TagTool.Commands.Scenarios
             scnr.ZoneSets = new List<ZoneSet>() {
                         new ZoneSet() {
                         Name = Cache.StringTable.GetStringId("default"),
-                        PotentiallyVisibleSetIndex = 0,
-                        ImportLoadedBsps = 0,
-                        LoadedBsps = BspFlags.Bsp0,
-                        ScenarioBspAudibilityIndex = -1
+                        PvsIndex = 0,
+                        Flags = ZoneSet.ZoneSetFlags.None,
+                        Bsps = BspFlags.Bsp0,
+                        AudibilityIndex = -1
                     }
                 };
 
@@ -316,53 +316,49 @@ namespace TagTool.Commands.Scenarios
                     new ZoneSetPvsBlock()
                     {
                         StructureBspMask = BspFlags.Bsp0,
-                        StructureBspPotentiallyVisibleSets = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet>() {
-                           new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet() {
-                               Clusters = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster>() {
-                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster() {
-                                       BitVectors = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector>() {
-                                           new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector() {
-                                               Bits = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit>() {
-                                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit () {
-                                                        Allow = ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit.AllowFlags.Bit0
-                                                   }
+                        StructureBspPvs = new List<ZoneSetPvsBlock.BspPvsBlock>() {
+                           new ZoneSetPvsBlock.BspPvsBlock() {
+                               ClusterPvs = new List<ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock>() {
+                                   new ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock() {
+                                       ClusterPvsBitVectors = new List<ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>() {
+                                           new ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock() {
+                                               Bits = new List<ZoneSetPvsBlock.BitVectorDword>() {
+                                                   new ZoneSetPvsBlock.BitVectorDword() { Bits = ZoneSetPvsBlock.BitVectorDword.DwordBits.Bit0 }
                                                }
                                            }
                                         }
                                     }
                                 },
-                               ClustersDoorsClosed = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster>() {
-                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster() {
-                                       BitVectors = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector>() {
-                                           new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector() {
-                                               Bits = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit>() {
-                                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit () {
-                                                        Allow = ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit.AllowFlags.Bit0
-                                                   }
+                               ClusterPvsDoorsClosed = new List<ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock>() {
+                                   new ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock() {
+                                       ClusterPvsBitVectors = new List<ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>() {
+                                           new ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock() {
+                                               Bits = new List<ZoneSetPvsBlock.BitVectorDword>() {
+                                                   new ZoneSetPvsBlock.BitVectorDword() { Bits = ZoneSetPvsBlock.BitVectorDword.DwordBits.Bit0 }
                                                }
                                            }
                                         }
                                     }
                                 },
-                               ClusterSkies = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky>() {
-                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky()  {
+                               AttachedSkyIndices = new List<ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock>() {
+                                   new ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock()  {
                                        SkyIndex = 0
                                    }
                                },
-                               ClusterVisibleSkies = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky>()  {
-                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky() {
+                               VisibleSkyIndices = new List<ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock>()  {
+                                   new ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock() {
                                        SkyIndex = 0
                                    }
                                },
-                               Unknown2 = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock>() {
-                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock() {
-                                       Unknown = 0
+                               ClusterAudioBitvector = new List<ZoneSetPvsBlock.BitVectorDword>() {
+                                   new ZoneSetPvsBlock.BitVectorDword() {
+                                       Bits =  ZoneSetPvsBlock.BitVectorDword.DwordBits.None
                                    }
                                },
-                               ClusterMappings = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping>() {
-                                   new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping() {
-                                       Clusters = new List<ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping.ClusterReference>() {
-                                           new ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping.ClusterReference() {
+                               ClusterMappings = new List<ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping>() {
+                                   new ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping() {
+                                       Clusters = new List<ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping.ClusterReference>() {
+                                           new ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping.ClusterReference() {
                                                ClusterIndex = 0
                                            }
                                        }
@@ -370,10 +366,10 @@ namespace TagTool.Commands.Scenarios
                                }
                            },
                         },
-                        PortalToDeviceMappings = new List<ZoneSetPvsBlock.PortalToDeviceMapping>() {
-                            new ZoneSetPvsBlock.PortalToDeviceMapping() {
-                                DevicePortalAssociations = new List<ZoneSetPvsBlock.PortalToDeviceMapping.DevicePortalAssociation>(),
-                                GamePortalToPortalMappings = new List<ZoneSetPvsBlock.PortalToDeviceMapping.GamePortalToPortalMapping>()
+                        PortaldeviceMapping = new List<ZoneSetPvsBlock.PortalDeviceMappingBlock>() {
+                            new ZoneSetPvsBlock.PortalDeviceMappingBlock() {
+                                DevicePortalAssociations = new List<ZoneSetPvsBlock.PortalDeviceMappingBlock.DevicePortalAssociation>(),
+                                GamePortalToPortalMap = new List<ZoneSetPvsBlock.PortalDeviceMappingBlock.GamePortalToPortalMapping>()
                             }
                         }
                     }
