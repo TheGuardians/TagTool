@@ -648,20 +648,20 @@ namespace TagTool.Commands.Porting
                                 atmosphereSettings.SunAngleYaw = 0.0f;
 
                                 // Test for direction
-                                if (scnr.SkyReferences.Count > 0 && scnr.SkyReferences[0].SkyObject != null)
-                                {
-                                    var skyObje = CacheContext.Deserialize<GameObject>(cacheStream, scnr.SkyReferences[0].SkyObject);
-                                    var hlmt = CacheContext.Deserialize<Model>(cacheStream, skyObje.Model);
-                                    var mode = CacheContext.Deserialize<RenderModel>(cacheStream, hlmt.RenderModel);
-
-                                    if (mode.LightgenLights.Count > 0)
-                                    {
-                                        var direction = mode.LightgenLights.Last().Direction;
-
-                                        atmosphereSettings.SunAnglePitch = (float)(Math.Acos(direction.K) / Math.PI) * 180.0f;
-                                        atmosphereSettings.SunAngleYaw = (float)(Math.Asin(direction.J / Math.Sin(atmosphereSettings.SunAnglePitch)) / Math.PI) * 180.0f;
-                                    }
-                                }
+                                //if (scnr.SkyReferences.Count > 0 && scnr.SkyReferences[0].SkyObject != null)
+                                //{
+                                //    var skyObje = CacheContext.Deserialize<GameObject>(cacheStream, scnr.SkyReferences[0].SkyObject);
+                                //    var hlmt = CacheContext.Deserialize<Model>(cacheStream, skyObje.Model);
+                                //    var mode = CacheContext.Deserialize<RenderModel>(cacheStream, hlmt.RenderModel);
+                                //
+                                //    if (mode.LightgenLights.Count > 0)
+                                //    {
+                                //        var direction = mode.LightgenLights.Last().Direction;
+                                //
+                                //        atmosphereSettings.SunAnglePitch = (float)(Math.Acos(direction.K) / Math.PI) * 180.0f;
+                                //        atmosphereSettings.SunAngleYaw = (float)(Math.Asin(direction.J / Math.Sin(atmosphereSettings.SunAnglePitch)) / Math.PI) * 180.0f;
+                                //    }
+                                //}
 
                                 atmosphereSettings.SeaLevel = fogSettings.BaseHeight; // WU, lowest height of scenario
                                 atmosphereSettings.RayleignHeightScale = fogSettings.FogHeight; // WU, height above sea where atmo 30% thick
