@@ -396,6 +396,20 @@ namespace TagTool.Shaders.ShaderMatching
                         int portingOptionIndex = srcRmt2Descriptor.Options[j];
                         string optionName = PortingCache.StringTable.GetString(portingRmdfDefinition.Categories[j].ShaderOptions[portingOptionIndex].Name);
 
+                        // these are perfect option matches
+                        // do not touch unless verified
+                        if (srcRmt2Descriptor.Type == "shader")
+                        {
+                            if (methodName == "self_illumination" && optionName == "change_color")
+                                optionName = "illum_change_color";
+                        }
+                        if (methodName == "misc" && optionName == "default")
+                            optionName = "always_calc_albedo";
+                        if (methodName == "alpha_test" && optionName == "from_texture")
+                            optionName = "simple";
+                        if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
+                            optionName = "cook_torrance";
+
                         // TODO: fill this switch, Reach shadergen might take some time...
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
                         switch ($"{methodName}\\{optionName}")
@@ -411,25 +425,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"specular_mask\specular_mask_mult_diffuse":
                                 optionName = "specular_mask_from_texture";
                                 break;
-                            case @"self_illumination\change_color":
-                                optionName = "self_illum_times_diffuse";
-                                break;
-                            case @"self_illumination\change_color_detail":
-                                optionName = "illum_detail";
-                                break;
-                            case @"self_illumination\multilayer_additive":
-                                optionName = "simple";
-                                break;
-                            case @"self_illumination\palettized_plasma":
-                                optionName = "plasma";
-                                break;
-                            case @"misc\default":
-                                optionName = "always_calc_albedo";
-                                break;
-                            // Reach rmhg //
-                            case @"self_illumination\palettized_depth_fade":
-                                optionName = "plasma";
-                                break;
                             // Reach rmtr  //
                             case @"blending\distance_blend_base":
                                 optionName = "morph";
@@ -439,9 +434,6 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "none";
                                 break;
                             // Reach rmfl //
-                            case @"alpha_test\from_texture":
-                                optionName = "simple";
-                                break;
                             case @"material_model\flat":
                             case @"material_model\specular":
                             case @"material_model\translucent":
@@ -463,7 +455,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"albedo\chameleon_albedo_masked":
                                 optionName = "chameleon_masked";
                                 break;
-                            case @"material_model\cook_torrance_rim_fresnel":
                             case @"material_model\cook_torrance_pbr_maps":
                                 optionName = "cook_torrance";
                                 break;
