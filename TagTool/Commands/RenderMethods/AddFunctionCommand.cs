@@ -111,7 +111,7 @@ namespace TagTool.Commands.RenderMethods
 
                 animatedParameters.Add(newParameter);
 
-                if (!ShaderFunctionHelper.BuildAnimatedParameters(Cache, stream, Definition, template, animatedParameters))
+                if (!ShaderFunctionHelper.BuildAnimatedParameters(Cache, Definition, template, animatedParameters))
                     return new TagToolError(CommandError.CustomError, "Failed to build animated parameters.");
             }
 

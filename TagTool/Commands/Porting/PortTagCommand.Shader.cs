@@ -8,6 +8,7 @@ using TagTool.Shaders;
 using TagTool.Shaders.ShaderMatching;
 using System;
 using System.Linq;
+using TagTool.Shaders.ShaderFunctions;
 using static TagTool.Tags.Definitions.RenderMethod;
 using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 
@@ -119,7 +120,7 @@ namespace TagTool.Commands.Porting
             if (shaderProperty.Template == null)
                 return null;
 
-            return ConvertRenderMethod(cacheStream, blamCacheStream, definition, blamShaderProperty.Template, blamTag.Name);
+            return ConvertRenderMethod(cacheStream, blamCacheStream, definition, blamDefinition, blamShaderProperty.Template, blamTag);
         }
 
         private CachedTag GetDefaultShader(Tag groupTag, CachedTag edTag)
@@ -184,7 +185,7 @@ namespace TagTool.Commands.Porting
             return Matcher.FindClosestTemplate(blamRmt2, BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, blamRmt2), FlagIsSet(PortingFlags.GenerateShaders));
         }
 
-        private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, CachedTag blamRmt2, string blamTagName)
+        private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethod blamRm, CachedTag blamRmt2, CachedTag blamTag)
         {
             var bmMaps = new List<string>();
             var bmRealConstants = new List<string>();
@@ -342,12 +343,12 @@ namespace TagTool.Commands.Porting
 
             // in these shaders alphatesting acts differently than in h3. disabling\enabling SW alpha testing works for now
             // TODO: fix properly
-            if (blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights" ||
-                blamTagName == @"objects\levels\dlc\lockout\shaders\celltower_lights_blue" ||
-                blamTagName == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
+            if (blamTag.Name == @"objects\levels\dlc\lockout\shaders\celltower_lights" ||
+                blamTag.Name == @"objects\levels\dlc\lockout\shaders\celltower_lights_blue" ||
+                blamTag.Name == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
                 newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.EnableAlphaTest;
-            if (blamTagName == @"levels\atlas\sc110\shaders\tree_leaves_acacia" ||
-                (blamTagName == @"levels\solo\030_outskirts\shaders\outtree_leaf" && BlamCache.Version == CacheVersion.Halo3ODST)) // might be in h3 too, remove version if so
+            if (blamTag.Name == @"levels\atlas\sc110\shaders\tree_leaves_acacia" ||
+                (blamTag.Name == @"levels\solo\030_outskirts\shaders\outtree_leaf" && BlamCache.Version == CacheVersion.Halo3ODST)) // might be in h3 too, remove version if so
                 newShaderProperty.Flags |= RenderMethodPostprocessFlags.EnableAlphaTest;
 
             // apply post option->options fixups
@@ -400,7 +401,9 @@ namespace TagTool.Commands.Porting
             if (finalRm.ShaderProperties[0].Functions.Count > 0)
             {
                 if (BlamCache.Version >= CacheVersion.HaloReach && !EffectRenderMethodTypes.Contains(blamRmt2Descriptor.Type)) // Reach doesnt always store register info :(
-                    RebuildRenderMethodAnimationsFromRmt2(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance);
+                {
+                    RebuildRenderMethodAnimationsFromRmt2(finalRm, blamRm, edRmt2, bmRmt2);
+                }
                 else
                     RebuildRenderMethodAnimations(cacheStream, blamCacheStream, finalRm, edRmt2, bmRmt2, rmdfInstance, blamRmt2Descriptor.Options, edRmt2Descriptor.Options);
             }
@@ -770,228 +773,13 @@ namespace TagTool.Commands.Porting
         }
 
         /// <summary>
-        /// Not as thorough as RebuildRenderMethodAnimations(), however should work for most templated Halo Reach shaders.
+        /// Same as RebuildRenderMethodAnimations(), however matches parameters via rmt2 instead of register info.
         /// </summary>
-        private void RebuildRenderMethodAnimationsFromRmt2(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, CachedTag rmdfTag)
+        private void RebuildRenderMethodAnimationsFromRmt2(RenderMethod finalRm, RenderMethod blamRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {
-            Dictionary<EntryPointReach, List<RegisterID>> externalSamplers = new Dictionary<EntryPointReach, List<RegisterID>>();
-            Dictionary<EntryPointReach, List<RegisterID>> externalPixelConstants = new Dictionary<EntryPointReach, List<RegisterID>>();
-            Dictionary<EntryPointReach, List<RegisterID>> externalVertexConstants = new Dictionary<EntryPointReach, List<RegisterID>>();
+            var animatedParameters = ShaderFunctionHelper.GetAnimatedParameters(BlamCache, blamRm, bmRmt2);
 
-            // FORMAT: "name\\function" eg. "diffuse_coefficient\\0" "base_map\\1"
-            List<string> AnimatedTextureParameters = new List<string>();
-            List<string> AnimatedPixelParameters = new List<string>();
-            List<string> AnimatedVertexParameters = new List<string>();
-
-            // Collect used registers in the RenderMethod
-            for (int i = 0; i < finalRm.ShaderProperties[0].EntryPoints.Count; i++)
-            {
-                if ((((int)bmRmt2.ValidEntryPointsReach >> i) & 1) == 0)
-                    continue;
-
-                var entryPointBlock = finalRm.ShaderProperties[0].EntryPoints[i];
-                EntryPointReach entryPoint = (EntryPointReach)i;
-
-                externalSamplers[entryPoint] = new List<RegisterID>();
-                externalPixelConstants[entryPoint] = new List<RegisterID>();
-                externalVertexConstants[entryPoint] = new List<RegisterID>();
-
-                for (int j = entryPointBlock.Offset; j < (entryPointBlock.Offset + entryPointBlock.Count); j++)
-                {
-                    var parameterTable = finalRm.ShaderProperties[0].Passes[j];
-
-                    // sampler
-                    for (int k = parameterTable.Texture.Offset; k < (parameterTable.Texture.Offset + parameterTable.Texture.Count); k++)
-                    {
-                        var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
-                        RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Sampler, parameter.FunctionIndex, parameter.SourceIndex);
-                        if (!externalSamplers[entryPoint].Contains(registerId))
-                        {
-                            externalSamplers[entryPoint].Add(registerId);
-
-                            string animatedParameter = $"{BlamCache.StringTable.GetString(bmRmt2.TextureParameterNames[parameter.SourceIndex].Name)}\\{parameter.FunctionIndex}";
-
-                            if (!AnimatedTextureParameters.Contains(animatedParameter))
-                                AnimatedTextureParameters.Add(animatedParameter);
-                        }
-                    }
-
-                    // pixel
-                    for (int k = parameterTable.RealPixel.Offset; k < (parameterTable.RealPixel.Offset + parameterTable.RealPixel.Count); k++)
-                    {
-                        var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
-                        RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
-                        if (!externalPixelConstants[entryPoint].Contains(registerId))
-                        {
-                            externalPixelConstants[entryPoint].Add(registerId);
-
-                            string animatedParameter = $"{BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[parameter.SourceIndex].Name)}\\{parameter.FunctionIndex}";
-
-                            if (!AnimatedPixelParameters.Contains(animatedParameter))
-                                AnimatedPixelParameters.Add(animatedParameter);
-                        }
-                    }
-
-                    // vertex
-                    for (int k = parameterTable.RealVertex.Offset; k < (parameterTable.RealVertex.Offset + parameterTable.RealVertex.Count); k++)
-                    {
-                        var parameter = finalRm.ShaderProperties[0].RoutingInfo[k];
-                        RegisterID registerId = new RegisterID(parameter.RegisterIndex, ShaderParameter.RType.Vector, parameter.FunctionIndex, parameter.SourceIndex);
-                        if (!externalVertexConstants[entryPoint].Contains(registerId))
-                        {
-                            externalVertexConstants[entryPoint].Add(registerId);
-
-                            string animatedParameter = $"{BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[parameter.SourceIndex].Name)}\\{parameter.FunctionIndex}";
-
-                            if (!AnimatedVertexParameters.Contains(animatedParameter))
-                                AnimatedVertexParameters.Add(animatedParameter);
-                        }
-                    }
-                }
-            }
-
-            // Now (hopefully) all animated parameters are collected, we can rebuild them as MS23 always stores register info
-
-            // store source indices for base cache in dictionary for fast lookup
-            Dictionary<string, byte> TextureConstantMapping = new Dictionary<string, byte>();
-            Dictionary<string, byte> RealConstantMapping = new Dictionary<string, byte>();
-            for (byte i = 0; i < edRmt2.TextureParameterNames.Count; i++)
-                TextureConstantMapping.Add(CacheContext.StringTable.GetString(edRmt2.TextureParameterNames[i].Name), i);
-            for (byte i = 0; i < edRmt2.RealParameterNames.Count; i++)
-                RealConstantMapping.Add(CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name), i);
-
-            var pixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
-            var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfTag);
-            var glvs = CacheContext.Deserialize<GlobalVertexShader>(cacheStream, rmdf.GlobalVertexShader);
-
-            finalRm.ShaderProperties[0].EntryPoints.Clear();
-            finalRm.ShaderProperties[0].Passes.Clear();
-            finalRm.ShaderProperties[0].RoutingInfo.Clear();
-
-            while (finalRm.ShaderProperties[0].EntryPoints.Count < edRmt2.EntryPoints.Count)
-                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
-
-            foreach (EntryPoint entryPoint in Enum.GetValues(typeof(EntryPoint)))
-            {
-                if ((((int)edRmt2.ValidEntryPoints >> (int)entryPoint) & 1) == 0)
-                    continue;
-
-                var table = new RenderMethodPostprocessPassBlock();
-
-                int entryIndex = (int)entryPoint;
-
-                if (entryIndex >= pixl.EntryPointShaders.Count)
-                    break; // prob in glps, todo
-
-                int shaderIndex = pixl.EntryPointShaders[entryIndex].Offset;
-                int shaderCount = pixl.EntryPointShaders[entryIndex].Count;
-                int vertexShaderIndex = glvs.VertexTypes[(ushort)rmdf.VertexTypes[0].VertexType].EntryPoints[entryIndex].ShaderIndex;
-                if (shaderCount <= 0 || shaderIndex >= pixl.Shaders.Count || vertexShaderIndex <= 0)
-                    continue;
-
-                // texture
-                if (AnimatedTextureParameters.Count > 0)
-                {
-                    table.Texture.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
-                    foreach (var textureParameter in AnimatedTextureParameters)
-                    {
-                        string[] parts = textureParameter.Split('\\');
-
-                        foreach (var pcParameter in pixl.Shaders[shaderIndex].GetConstantTable(CacheContext.Version, CacheContext.Platform).Constants)
-                        {
-                            if (pcParameter.RegisterType == ShaderParameter.RType.Sampler && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
-                            {
-                                var parameterBlock = new RenderMethodRoutingInfoBlock
-                                {
-                                    RegisterIndex = (short)pcParameter.RegisterIndex,
-                                    SourceIndex = TextureConstantMapping[parts[0]],
-                                    FunctionIndex = byte.Parse(parts[1])
-                                };
-
-                                finalRm.ShaderProperties[0].RoutingInfo.Add(parameterBlock);
-                                break;
-                            }
-                        }
-                    }
-                    if (table.Texture.Offset == finalRm.ShaderProperties[0].RoutingInfo.Count)
-                        table.Texture.Integer = 0;
-                    else
-                        table.Texture.Count = (ushort)(finalRm.ShaderProperties[0].RoutingInfo.Count - table.Texture.Offset);
-                }
-
-                // real pixel
-                if (AnimatedPixelParameters.Count > 0)
-                {
-                    table.RealPixel.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
-                    foreach (var pixelParameter in AnimatedPixelParameters)
-                    {
-                        string[] parts = pixelParameter.Split('\\');
-
-                        string registerName = parts[0];
-                        if (TextureConstantMapping.Keys.Contains(parts[0]))
-                            registerName += "_xform"; // fixup
-
-                        foreach (var pcParameter in pixl.Shaders[shaderIndex].PCConstantTable.Constants)
-                        {
-                            if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == registerName)
-                            {
-                                var parameterBlock = new RenderMethodRoutingInfoBlock
-                                {
-                                    RegisterIndex = (short)pcParameter.RegisterIndex,
-                                    SourceIndex = RealConstantMapping[parts[0]],
-                                    FunctionIndex = byte.Parse(parts[1])
-                                };
-
-                                finalRm.ShaderProperties[0].RoutingInfo.Add(parameterBlock);
-                                break;
-                            }
-                        }
-                    }
-                    if (table.RealPixel.Offset == finalRm.ShaderProperties[0].RoutingInfo.Count)
-                        table.RealPixel.Integer = 0;
-                    else
-                        table.RealPixel.Count = (ushort)(finalRm.ShaderProperties[0].RoutingInfo.Count - table.RealPixel.Offset);
-                }
-
-                // real vertex
-                if (AnimatedVertexParameters.Count > 0)
-                {
-                    table.RealVertex.Offset = (ushort)finalRm.ShaderProperties[0].RoutingInfo.Count;
-                    foreach (var vertexParameter in AnimatedVertexParameters)
-                    {
-                        string[] parts = vertexParameter.Split('\\');
-
-                        foreach (var pcParameter in glvs.Shaders[vertexShaderIndex].PCConstantTable.Constants)
-                        {
-                            if (pcParameter.RegisterType == ShaderParameter.RType.Vector && CacheContext.StringTable.GetString(pcParameter.ParameterName) == parts[0])
-                            {
-                                var parameterBlock = new RenderMethodRoutingInfoBlock
-                                {
-                                    RegisterIndex = (short)pcParameter.RegisterIndex,
-                                    SourceIndex = RealConstantMapping[parts[0]],
-                                    FunctionIndex = byte.Parse(parts[1])
-                                };
-
-                                finalRm.ShaderProperties[0].RoutingInfo.Add(parameterBlock);
-                                break;
-                            }
-                        }
-                    }
-                    if (table.RealVertex.Offset == finalRm.ShaderProperties[0].RoutingInfo.Count)
-                        table.RealVertex.Integer = 0;
-                    else
-                        table.RealVertex.Count = (ushort)(finalRm.ShaderProperties[0].RoutingInfo.Count - table.RealVertex.Offset);
-                }
-
-                // TODO: support building parameter table for each shader in entry point. this should be ok for now though
-                if (AnimatedVertexParameters.Count > 0 || AnimatedPixelParameters.Count > 0 || AnimatedTextureParameters.Count > 0)
-                {
-                    finalRm.ShaderProperties[0].EntryPoints[entryIndex].Offset = (ushort)finalRm.ShaderProperties[0].Passes.Count;
-                    finalRm.ShaderProperties[0].EntryPoints[entryIndex].Count = 1;
-                }
-
-                finalRm.ShaderProperties[0].Passes.Add(table);
-            }
+            ShaderFunctionHelper.BuildAnimatedParameters(CacheContext, finalRm, edRmt2, animatedParameters);
         }
 
         private TextureConstant GetDefaultTextureConstant(string parameter, ShaderMatcherNew.Rmt2Descriptor rmt2Descriptor, Dictionary<StringId, CachedTag> optionBitmaps)

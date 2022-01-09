@@ -174,7 +174,7 @@ namespace TagTool.Shaders.ShaderFunctions
         /// <summary>
         /// Builds a list of animated parameters into a RenderMethod.
         /// </summary>
-        static public bool BuildAnimatedParameters(GameCache cache, Stream stream, RenderMethod renderMethod, RenderMethodTemplate template, List<AnimatedParameter> animatedParameters)
+        static public bool BuildAnimatedParameters(GameCache cache, RenderMethod renderMethod, RenderMethodTemplate template, List<AnimatedParameter> animatedParameters)
         {
             var properties = renderMethod.ShaderProperties[0];
             uint validEntries = EntryPointHelper.GetEntryMask(cache.Version, template);
