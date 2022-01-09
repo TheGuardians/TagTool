@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using System.IO;
 using TagTool.Tags;
@@ -12,10 +13,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
     class LargeCollisionBSPBuilder
     {
-        private LargeCollisionBspBlock Bsp { get; set; }
+        public LargeCollisionBspBlock Bsp { get; set; }
         private bool debug = false;
         private int original_surface_count = 0;
-        private List<int> surface_addendums = new List<int>();
+        public List<int> surface_addendums = new List<int>();
         //error geometry 
         private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
         private bool hasErrors = false;
@@ -88,8 +89,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
 
             //LeafMap leafmapbuilder = new LeafMap();
-            //if (!leafmapbuilder.munge_collision_bsp(Bsp))
-            //    return false;
+            //if (!leafmapbuilder.munge_collision_bsp(this))
+            //{
+            //    new TagToolWarning("Failed to build leaf map!");
+            //}
 
             if (hasErrors)
                 Errors.WriteOBJ();
