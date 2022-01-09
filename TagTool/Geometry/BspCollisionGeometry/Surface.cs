@@ -8,27 +8,31 @@ using TagTool.Tags;
 
 namespace TagTool.Geometry.BspCollisionGeometry
 {
-    /// <summary>
-    /// Represents a list of planes that forms a relatively flat surface. Used in lighting code.
-    /// </summary>
     [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-    public class SurfacesPlanes : TagStructure
+    public class StructureSurface : TagStructure
     {
         [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-        public ushort PlaneIndexOld;
+        public ushort FirstSurfaceToTriangleMappingIndexOld;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-        public int PlaneIndexNew;
+        public int FirstSurfaceToTriangleMappingIndex;
 
         [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-        public short PlaneCountOld;
+        public short SurfaceToTriangleMappingCountOld;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-        public int PlaneCountNew;
+        public int SurfaceToTriangleMappingCount;
+    }
+
+    [TagStructure(Size = 0x8)]
+    public class LargeStructureSurface : TagStructure
+    {
+        public int FirstSurfaceToTriangleMappingIndex;
+        public int SurfaceToTriangleMappingCount;
     }
 
     [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
@@ -42,15 +46,15 @@ namespace TagTool.Geometry.BspCollisionGeometry
     public class EdgeToSeamMapping : TagStructure
     {
         public short SeamIndex;  //used in the structure seam global
-        public short SeamIdentifierIndexEdgeMappingIndex;
+        public short SeamEdgeIndex;
     }
 
-    public struct PlaneReference
+    public struct StructureSurfaceToTriangleMapping
     {
         public int TriangleIndex;
         public int ClusterIndex;
 
-        public PlaneReference(int triangleIndex = -1, int clusterIndex = -1)
+        public StructureSurfaceToTriangleMapping(int triangleIndex = -1, int clusterIndex = -1)
         {
             TriangleIndex = triangleIndex;
             ClusterIndex = clusterIndex;

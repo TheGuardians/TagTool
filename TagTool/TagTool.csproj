@@ -778,6 +778,7 @@
     <Compile Include="Tags\Definitions\AtmosphereGlobals.cs" />
     <Compile Include="Tags\Definitions\CameraShake.cs" />
     <Compile Include="Tags\Definitions\Common\Multiplayer.cs" />
+    <Compile Include="Tags\Definitions\Common\NullBlock.cs" />
     <Compile Include="Tags\Definitions\Common\RuntimeGpu.cs" />
     <Compile Include="Tags\Definitions\Common\Structure.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />

@@ -486,7 +486,7 @@ namespace TagTool.Commands.Porting
                    
 
                     // Reach doesn't have the camera fx block in sbsp anymore, move it back
-                    sbsp.CameraEffects = scnr.CameraFx;
+                    sbsp.CameraFxPalette = scnr.CameraFx;
 
 
                     // Rebuild reach instanced geometry instance per pixel data

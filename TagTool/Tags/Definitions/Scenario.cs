@@ -345,7 +345,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown101;
         public uint Unknown102;
 
-        public List<ScenarioStructureBsp.BackgroundSoundEnvironmentPaletteBlock> BackgroundSoundEnvironmentPalette;
+        public List<ScenarioStructureBsp.AcousticsPaletteBlock> BackgroundSoundEnvironmentPalette;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown103;
@@ -362,7 +362,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock3> Unknown109;
         public List<StructureBspAtmospherePaletteBlock> Atmosphere;
-        public List<ScenarioStructureBsp.CameraEffect> CameraFx;
+        public List<ScenarioStructureBsp.StructureBspCameraFxPaletteBlock> CameraFx;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<ScenarioWeatherPaletteBlock> WeatherPalette;

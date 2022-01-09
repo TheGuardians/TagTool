@@ -48,6 +48,12 @@ namespace TagTool.Pathfinding
         public TagBlock<Door> Doors;
     }
 
+    [TagStructure(Size = 0x1)]
+    public class StructureBspPathfindingEdgesBlock : TagStructure
+    {
+        public sbyte Midpoint;
+    }
+
     [TagStructure(Size = 0x8)]
     public class Sector : TagStructure
     {

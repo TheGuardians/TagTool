@@ -352,7 +352,7 @@ namespace TagTool.Serialization
             if (valueType == typeof(IndexBufferIndex))
                 return DeserializeIndexBufferIndex(reader);
 
-            if (valueType == typeof(PlaneReference))
+            if (valueType == typeof(StructureSurfaceToTriangleMapping))
                 return DeserializePlaneReference(reader);
 
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(FlagBits<>))
@@ -725,13 +725,13 @@ namespace TagTool.Serialization
             if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
             {
                 var value = reader.ReadUInt32();
-                return new PlaneReference((int)(value >> 12), (int)(value & 0xFFF));
+                return new StructureSurfaceToTriangleMapping((int)(value >> 12), (int)(value & 0xFFF));
             }
             else
             {
                 ushort triangleIndex = reader.ReadUInt16();
                 ushort clusterIndex = reader.ReadUInt16();
-                return new PlaneReference(triangleIndex, clusterIndex);
+                return new StructureSurfaceToTriangleMapping(triangleIndex, clusterIndex);
             }
         }
 

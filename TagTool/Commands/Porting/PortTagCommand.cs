@@ -314,7 +314,7 @@ namespace TagTool.Commands.Porting
 
                 foreach(var cluster in sbsp.Clusters)
                 {
-                    cluster.RuntimeDecalEntryCount = 0;
+                    cluster.RuntimeDecalCount = 0;
                     cluster.RuntimeDecalStartIndex = -1;
                 }
             }

@@ -252,22 +252,22 @@ namespace TagTool.Commands.Scenarios
                 BoundsX = sbsp.WorldBoundsX,
                 BoundsY = sbsp.WorldBoundsY,
                 BoundsZ = sbsp.WorldBoundsZ,
-                ScenarioSkyIndex = -1,
-                CameraEffectIndex = -1,
+                AtmosphereIndex = -1,
+                CameraFxIndex = -1,
                 BackgroundSoundEnvironmentIndex = -1,
-                SoundClustersAIndex = 0,
+                AcousticsSoundClusterIndex = 0,
                 Unknown3 = -1,
                 Unknown4 = -1,
                 Unknown5 = -1,
                 RuntimeDecalStartIndex = -1,
                 MeshIndex = 0,
             });
-            sbsp.UnknownSoundClustersA = new List<ScenarioStructureBsp.UnknownSoundClustersBlock>() {
-                    new ScenarioStructureBsp.UnknownSoundClustersBlock() {
-                        BackgroundSoundEnvironmentIndex = -1,
+            sbsp.AcousticsSoundClusters = new List<ScenarioStructureBsp.StructureBspSoundClusterBlock>() {
+                    new ScenarioStructureBsp.StructureBspSoundClusterBlock() {
+                        PaletteIndex = -1,
                     }
                 };
-            sbsp.CollisionMoppCodes = new List<TagHkpMoppCode>() {
+            sbsp.Physics.CollisionMoppCodes = new List<TagHkpMoppCode>() {
                     new TagHkpMoppCode() {
                         ArrayBase = new HkArrayBase() {
                             Size = 1,
@@ -277,13 +277,13 @@ namespace TagTool.Commands.Scenarios
                     }
                 };
 
-            sbsp.CollisionWorldBoundsLower = new RealPoint3d(sbsp.WorldBoundsX.Lower, sbsp.WorldBoundsY.Lower, sbsp.WorldBoundsZ.Lower);
-            sbsp.CollisionWorldBoundsUpper = new RealPoint3d(sbsp.WorldBoundsX.Upper, sbsp.WorldBoundsY.Upper, sbsp.WorldBoundsZ.Upper);
+            sbsp.Physics.MoppBoundsMin = new RealPoint3d(sbsp.WorldBoundsX.Lower, sbsp.WorldBoundsY.Lower, sbsp.WorldBoundsZ.Lower);
+            sbsp.Physics.MoppBoundsMax = new RealPoint3d(sbsp.WorldBoundsX.Upper, sbsp.WorldBoundsY.Upper, sbsp.WorldBoundsZ.Upper);
             sbsp.Geometry = CreateEmptyRenderGeometry(Cache);
             sbsp.CollisionMaterials = new List<ScenarioStructureBsp.CollisionMaterial>() { new ScenarioStructureBsp.CollisionMaterial() { SeamMappingIndex = -1, RuntimeGlobalMaterialIndex = 0 } };
             sbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CreateStructureBspTagResources(CreateEmptyCollisionGeometry(CacheAddressType.Data)));
             sbsp.PathfindingResource = Cache.ResourceCache.CreateStructureBspCacheFileResource(CreateStructureBspCacheFileTagResources());
-            sbsp.Unknown86 = 1; // use CollisionBspResource
+            sbsp.UseResourceItems = 1; // use CollisionBspResource
             return sbsp;
         }
 
@@ -391,9 +391,9 @@ namespace TagTool.Commands.Scenarios
         private StructureBspCacheFileTagResources CreateStructureBspCacheFileTagResources()
         {
             var definition = new StructureBspCacheFileTagResources();
-            definition.Planes = new TagBlock<PlaneReference>(CacheAddressType.Data);
-            definition.SurfacePlanes = new TagBlock<SurfacesPlanes>(CacheAddressType.Data);
-            definition.EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data) { new EdgeToSeamMapping() { SeamIndex = -1, SeamIdentifierIndexEdgeMappingIndex = -1 } };
+            definition.Planes = new TagBlock<StructureSurfaceToTriangleMapping>(CacheAddressType.Data);
+            definition.SurfacePlanes = new TagBlock<StructureSurface>(CacheAddressType.Data);
+            definition.EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data) { new EdgeToSeamMapping() { SeamIndex = -1, SeamEdgeIndex = -1 } };
             definition.PathfindingData = new TagBlock<Pathfinding.ResourcePathfinding>(CacheAddressType.Data);
             return definition;
         }

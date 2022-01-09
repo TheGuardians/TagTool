@@ -34,8 +34,8 @@ namespace TagTool.Commands.Porting
                 {
                     foreach(var surfacePlane in instance.SurfacePlanes)
                     {
-                        surfacePlane.PlaneCountNew = surfacePlane.PlaneCountOld;
-                        surfacePlane.PlaneIndexNew = surfacePlane.PlaneIndexOld;
+                        surfacePlane.SurfaceToTriangleMappingCount = surfacePlane.SurfaceToTriangleMappingCountOld;
+                        surfacePlane.FirstSurfaceToTriangleMappingIndex = surfacePlane.FirstSurfaceToTriangleMappingIndexOld;
                     }
 
                     foreach(var mopps in instance.CollisionMoppCodes)

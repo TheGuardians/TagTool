@@ -303,8 +303,8 @@ namespace TagTool.Serialization
                 SerializePlatformSignedValue(block, (PlatformSignedValue)value);
             else if (valueType == typeof(IndexBufferIndex))
                 SerializeIndexBufferIndex(block, (IndexBufferIndex)value);
-            else if (valueType == typeof(PlaneReference))
-                SerializePlaneReference(block, (PlaneReference)value);
+            else if (valueType == typeof(StructureSurfaceToTriangleMapping))
+                SerializePlaneReference(block, (StructureSurfaceToTriangleMapping)value);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(FlagBits<>))
                 SerializeFlagBits(block.Writer, (IFlagBits)value, valueInfo, valueType);
             else
@@ -838,7 +838,7 @@ namespace TagTool.Serialization
             }
         }
 
-        private void SerializePlaneReference(IDataBlock block, PlaneReference val)
+        private void SerializePlaneReference(IDataBlock block, StructureSurfaceToTriangleMapping val)
         {
             if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
             {

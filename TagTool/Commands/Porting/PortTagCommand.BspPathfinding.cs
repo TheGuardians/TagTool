@@ -44,9 +44,9 @@ namespace TagTool.Commands.Porting
             {
                 resourceDefinition = new StructureBspCacheFileTagResources()
                 {
-                    SurfacePlanes = new TagBlock<SurfacesPlanes>(CacheAddressType.Data, bsp.SurfacePlanes),
-                    Planes = new TagBlock<PlaneReference>(CacheAddressType.Data, bsp.Planes),
-                    EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data, bsp.EdgeToSeams),
+                    SurfacePlanes = new TagBlock<StructureSurface>(CacheAddressType.Data, bsp.StructureSurfaces),
+                    Planes = new TagBlock<StructureSurfaceToTriangleMapping>(CacheAddressType.Data, bsp.StructureSurfaceToTriangleMapping),
+                    EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data, bsp.EdgeToSeamEdge),
                     PathfindingData = new TagBlock<ResourcePathfinding>(CacheAddressType.Definition)
                 };
                 foreach(var pathfinding in bsp.PathfindingData)
@@ -70,8 +70,8 @@ namespace TagTool.Commands.Porting
                 // fix surface planes
                 foreach(var surfacePlane in resourceDefinition.SurfacePlanes)
                 {
-                    surfacePlane.PlaneCountNew = surfacePlane.PlaneCountOld;
-                    surfacePlane.PlaneIndexNew = surfacePlane.PlaneIndexOld;
+                    surfacePlane.SurfaceToTriangleMappingCount = surfacePlane.SurfaceToTriangleMappingCountOld;
+                    surfacePlane.FirstSurfaceToTriangleMappingIndex = surfacePlane.FirstSurfaceToTriangleMappingIndexOld;
                 }
             }
 
@@ -131,9 +131,9 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version < CacheVersion.Halo3ODST)
             {
-                bsp.SurfacePlanes.Clear();
-                bsp.Planes.Clear();
-                bsp.EdgeToSeams.Clear();
+                bsp.StructureSurfaces.Clear();
+                bsp.StructureSurfaceToTriangleMapping.Clear();
+                bsp.EdgeToSeamEdge.Clear();
                 bsp.PathfindingData.Clear();
             }
 

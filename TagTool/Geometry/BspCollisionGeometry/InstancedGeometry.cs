@@ -41,8 +41,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
 
         [TagField(Platform = CachePlatform.MCC)]
         public TagBlock<SmallSurfacesPlanes> SmallSurfacesPlanes;
-        public TagBlock<SurfacesPlanes> SurfacePlanes;
-        public TagBlock<PlaneReference> Planes;
+        public TagBlock<StructureSurface> SurfacePlanes;
+        public TagBlock<StructureSurfaceToTriangleMapping> Planes;
 
         public short MeshIndex;
         public short CompressionIndex;

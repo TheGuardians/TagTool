@@ -74,7 +74,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 }
             }
 
-            var moppData = Definition.CollisionMoppCodes[0];
+            var moppData = Definition.Physics.CollisionMoppCodes[0];
             moppData.ArrayBase.Size = (uint)newMoppData.Count;
             moppData.ArrayBase.CapacityAndFlags = moppData.ArrayBase.Size + HkArrayFlags.DONT_DEALLOCATE_FLAG; // works since they are bytes
             moppData.Data = new TagBlock<byte>(CacheAddressType.Memory, newMoppData);
@@ -82,7 +82,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
         private void ExportMopps(string file)
         {
-            var moppData = Definition.CollisionMoppCodes[0];
+            var moppData = Definition.Physics.CollisionMoppCodes[0];
             using (var writer = new EndianWriter(File.Create(file), EndianFormat.LittleEndian))
             {
                 for(int i = 0; i< moppData.Data.Count; i++)
@@ -98,7 +98,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             using (var fileWriter = new StreamWriter(fileStream))
             {
 
-                var moppData = Definition.CollisionMoppCodes[0].Data;
+                var moppData = Definition.Physics.CollisionMoppCodes[0].Data;
                 var print = true;
                 for (var i = 0; i < moppData.Count; i++)
                 {

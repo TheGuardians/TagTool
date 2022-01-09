@@ -70,7 +70,7 @@ namespace TagTool.Commands.Porting
 
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
             sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, instance);
-            sbsp.Unknown86 = 1;
+            sbsp.UseResourceItems = 1;
 
             //
             // Set compatibility flag for H3 mopps for the engine to perform some fixups just in time
@@ -218,10 +218,10 @@ namespace TagTool.Commands.Porting
             if (sbsp.InstancedGeometryInstances == null)
                 return;
 
-            if (sbsp.CollisionMoppCodes.Count == 0)
+            if (sbsp.Physics.CollisionMoppCodes.Count == 0)
                 return;
 
-            var data = sbsp.CollisionMoppCodes[0].Data;
+            var data = sbsp.Physics.CollisionMoppCodes[0].Data;
             for (int i = 0; i < data.Count; i++)
             {
                 switch (data[i])

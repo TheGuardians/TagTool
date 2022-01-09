@@ -33,23 +33,28 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Property> Properties;
 
-        public int Unknown;
+        public int ImportedMaterialIndex;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ReachUnknown0;
+        public float LightmapResolutionScale;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ReachUnknown1;
-        [TagField(MinVersion = CacheVersion.HaloReach, Length = 4)]
-        public byte[] ReachUnknown2 = new byte[4];
+        public ArgbColor LightmapAdditiveTransparencyColor;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ReachUnknown3;
+        public ArgbColor LightmapTraslucencyTintColor;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ReachUnknown4;
+        public float LightmapAnalyticalLightAbsorb;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float LightmapNormalLightAbsorb;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte LightmapFlags;
 
         public sbyte BreakableSurfaceIndex;
-        public sbyte Unknown2;
-        public sbyte Unknown3;
-        public sbyte Unknown4;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short LightmapChartGroupIndex;
+
+        [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding1;
 
         [TagStructure(Size = 0x14)]
         public class Skin : TagStructure

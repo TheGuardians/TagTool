@@ -10,8 +10,8 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "structure_bsp_cache_file_tag_resources", Size = 0xC4, MinVersion = CacheVersion.HaloReach)]
     public class StructureBspCacheFileTagResources : TagStructure
 	{
-        public TagBlock<SurfacesPlanes> SurfacePlanes;
-        public TagBlock<PlaneReference> Planes;
+        public TagBlock<StructureSurface> SurfacePlanes;
+        public TagBlock<StructureSurfaceToTriangleMapping> Planes;
         public TagBlock<EdgeToSeamMapping> EdgeToSeams;
         public TagBlock<ResourcePathfinding> PathfindingData;
 
