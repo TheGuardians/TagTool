@@ -5,20 +5,33 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "decorator_set", Tag = "dctr", Size = 0x80)]
+    [TagStructure(Name = "decorator_set", Tag = "dctr", Size = 0x80, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "decorator_set", Tag = "dctr", Size = 0x100, MinVersion = CacheVersion.HaloReach)]
     public class DecoratorSet : TagStructure
 	{
-        public CachedTag RenderModel;
+        [TagField(ValidTags = new[] { "mode" })]
+        public CachedTag RenderModel; // Base
+        [TagField(ValidTags = new[] { "mode" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Lod2;
+        [TagField(ValidTags = new[] { "mode" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Lod3;
+        [TagField(ValidTags = new[] { "mode" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Lod4;
+
         public List<StringId> RenderModelInstanceNames;
         public int ValidRenderModelInstanceNameCount;
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag Texture;
 
         public DecoratorFlags RenderFlags;
-        public DecoratorShader RenderShader;
-        public LightSamplingPatternValue LightSamplingPattern;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 0x1)]
-        public byte[] Padding;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public DecoratorShader RenderShader;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public DecoratorShaderReach RenderShaderReach;
+
+        public LightSamplingPatternValue LightSamplingPattern;
+        public byte Version;
 
         public RealRgbColor TranslucencyABC;
         public float Translucency; // [0-1]
@@ -34,9 +47,11 @@ namespace TagTool.Tags.Definitions
         public byte[] Padding1; // the above 2 fields and these 8 bytes are supplied directly to shaders as a 4d vector.
 
         public DecoratorLodTransition LodSettings;
+
         public List<GlobalDecoratorType> DecoratorTypes;
 
-        [TagStructure(Size = 0x5C)]
+        [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)] // verify
         public class GlobalDecoratorType : TagStructure
         {
             public int Index;
@@ -57,6 +72,12 @@ namespace TagTool.Tags.Definitions
             public float HoverMax; // [-1.0 - 1.0]
             public float MinimumDistanceBetweenDecorators; // world units
 
+            // verify these
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float PlacementWeight; // [0.0 - 1.0]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float PostprocessedWeight;
+
             [Flags]
             public enum DecoratorTypeFlagsDefinition : uint
             {
@@ -73,17 +94,28 @@ namespace TagTool.Tags.Definitions
         {
             RenderTwoSided = 1 << 0, // takes twice as long to light
             DontSampleLightThroughGeometry = 1 << 1,
-            EnabledViaPreferences = 1 << 2 // unchecked will render regardless of detail quality
+            EnabledViaPreferences = 1 << 2, // unchecked will render regardless of detail quality
         }
 
-        public enum DecoratorShader : byte
+        public enum DecoratorShader : sbyte
         {
-            WindDynamicLights,
-            StillDynamicLights,
-            StillNoLights,
-            StillSunLightOnly,
-            WavyDynamicLights,
-            ShadedDynamicLights
+            WindDynamicLights,                   // rasterizer\shaders\decorator_default
+            StillDynamicLights,                  // rasterizer\shaders\decorator_no_wind
+            StillNoLights,                       // rasterizer\shaders\decorator_static
+            StillSunLightOnly,                   // rasterizer\shaders\decorator_sun   
+            WavyDynamicLights,                   // rasterizer\shaders\decorator_wavy
+            ShadedDynamicLights                  // rasterizer\shaders\decorator_shaded
+        }
+
+        public enum DecoratorShaderReach : sbyte
+        {
+            BillboardWindDynamicLights,           // rasterizer\shaders\decorator_wind_billboard
+            BillboardDynamicLights,               // rasterizer\shaders\decorator_static_billboard
+            SolidMeshDynamicLights,               // rasterizer\shaders\decorator_mesh
+            SolidMesh,                            // rasterizer\shaders\decorator_far_object
+            UnderwaterDynamicLights,              // rasterizer\shaders\decorator_underwater
+            VolumetricBillboardDynamicLights,     // rasterizer\shaders\decorator_volume
+            VolumetricBillboardWindDynamicLights  // rasterizer\shaders\decorator_wind_volume
         }
 
         public enum LightSamplingPatternValue : byte
@@ -92,7 +124,8 @@ namespace TagTool.Tags.Definitions
             Hanging
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class DecoratorLodTransition : TagStructure
         {
             public float BeginFadeDistance; // decorators will start to fade at this distance
@@ -102,6 +135,26 @@ namespace TagTool.Tags.Definitions
                                         // this determines how much ground each batch covers.
                                         // Should be small if you expect to have very dense decorators,
                                         // and large if you expect them to be sparse
+
+            [TagField(MinVersion = CacheVersion .HaloReach)]
+            public float Unknown1;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float Unknown3;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int MaxValidLod;
+            [TagField(Length = 4, MinVersion = CacheVersion.HaloReach)]
+            public LodFunctionStruct[] TransitionFunctions;
+        }
+
+        [TagStructure(Size =  0x10)]
+        public class LodFunctionStruct : TagStructure
+        {
+            public float StartPoint;
+            public float EndPoint;
+            public float Scale;
+            public float Offset;
         }
     }
 }

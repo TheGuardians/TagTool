@@ -876,6 +876,10 @@ namespace TagTool.Commands.Porting
                     blamDefinition = ConvertDamageResponseDefinition(blamCacheStream, damageResponse);
                     break;
 
+                case DecoratorSet decoratorSet when BlamCache.Version >= CacheVersion.HaloReach:
+                    blamDefinition = ConvertDecoratorSetReach(decoratorSet);
+                    break;
+
                 case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
 					break;
@@ -1330,6 +1334,36 @@ namespace TagTool.Commands.Porting
             }
 
             return effe;
+        }
+
+        private static object ConvertDecoratorSetReach(DecoratorSet decoratorSet)
+        {
+            switch (decoratorSet.RenderShaderReach)
+            {
+                case DecoratorSet.DecoratorShaderReach.BillboardWindDynamicLights:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.WindDynamicLights; // default
+                    break;
+                case DecoratorSet.DecoratorShaderReach.BillboardDynamicLights:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.StillDynamicLights; // no_wind
+                    break;
+                case DecoratorSet.DecoratorShaderReach.SolidMeshDynamicLights:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.StillDynamicLights; // no_wind
+                    break;
+                case DecoratorSet.DecoratorShaderReach.SolidMesh:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.StillSunLightOnly; // sun
+                    break;
+                case DecoratorSet.DecoratorShaderReach.UnderwaterDynamicLights:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.WavyDynamicLights; // wavy
+                    break;
+                case DecoratorSet.DecoratorShaderReach.VolumetricBillboardDynamicLights:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.ShadedDynamicLights; //shaded
+                    break;
+                case DecoratorSet.DecoratorShaderReach.VolumetricBillboardWindDynamicLights:
+                    decoratorSet.RenderShader = DecoratorSet.DecoratorShader.WindDynamicLights; // unsupported: default + shaded
+                    break;
+            }
+
+            return decoratorSet;
         }
 
         public object ConvertData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
