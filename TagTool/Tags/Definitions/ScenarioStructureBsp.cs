@@ -402,49 +402,19 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x78)]
-        public class UnknownBlock2 : TagStructure
-        {
-            [TagField(Length = 32)]
-            public string Name;
-
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-
-            public uint Unknown5;
-
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-
-            public uint Unknown18;
-            public uint Unknown19;
-            public uint Unknown20;
-
-            public uint Unknown21;
-
-            public uint Unknown22;
-        }
-
-        [TagStructure(Size = 0x8)]
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
         public class StructureBspAtmospherePaletteBlock : TagStructure
         {
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
+
             public short AtmosphereSettingIndex;
-            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
+            public byte[] Padding0;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public CachedTag AtmosphereFog;
         }
 
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]

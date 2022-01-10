@@ -483,10 +483,12 @@ namespace TagTool.Commands.Porting
                         continue;
 
                     var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[i].StructureBsp);
-                   
 
-                    // Reach doesn't have the camera fx block in sbsp anymore, move it back
+
+                    // Reach doesn't have these blocks in sbsp anymore, move it back
                     sbsp.CameraFxPalette = scnr.CameraFx;
+                    sbsp.AtmospherePalette = scnr.Atmosphere;
+                    sbsp.AcousticsPalette = scnr.BackgroundSoundEnvironmentPalette;
 
 
                     // Rebuild reach instanced geometry instance per pixel data

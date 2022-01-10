@@ -361,7 +361,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown108;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<UnknownBlock3> Unknown109;
-        public List<StructureBspAtmospherePaletteBlock> Atmosphere;
+        public List<ScenarioStructureBsp.StructureBspAtmospherePaletteBlock> Atmosphere;
         public List<ScenarioStructureBsp.StructureBspCameraFxPaletteBlock> CameraFx;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
