@@ -204,7 +204,7 @@ namespace TagTool.Tags.Definitions
         public List<TransparentPlane> TransparentPlanes;
         public List<NullBlock> DebugInfo;
 
-        public StructurePhysics Physics;
+        public StructurePhysics Physics = new StructurePhysics();
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<NullBlock> Audability;
