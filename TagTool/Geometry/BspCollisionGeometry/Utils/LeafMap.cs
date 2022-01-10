@@ -76,6 +76,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     {                       
                         if(bsp_leaf.polygon_counts[1,0] > 0) //polygons2 type 0
                         {
+                            new TagToolWarning("Fixing phantom leaf!");
                             int new_leaf_index = -1;
                             if (reconstruct_bsp_leaf(bsp_leaf, ref new_leaf_index))
                             {
@@ -144,22 +145,22 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             max_area = polygon.polygon_area;
                             plane_index = polygon.plane_index & 0x7FFFFFFF;
                         }
-                    }
-                    leaf new_leaf = new leaf();
+                    }                  
                     LargeBsp3dNode new_node = new LargeBsp3dNode { Plane = plane_index };
-                    for(int i = 0; i < 2; i++)
+                    Bsp.Bsp3dNodes.Add(new_node);
+                    new_leaf_index = Bsp.Bsp3dNodes.Count - 1;
+                    for (int i = 0; i < 2; i++)
                     {
                         int child_index = -1;
+                        leaf new_leaf = new leaf();
                         if (!bsp3d_split_manual(bsp_leaf, i, plane_index, ref new_leaf) ||
                             !reconstruct_bsp_leaf(new_leaf, ref child_index))
                             return false;
                         if (i == 0)
-                            new_node.BackChild = child_index;
+                            Bsp.Bsp3dNodes[new_leaf_index].BackChild = child_index;
                         else
-                            new_node.FrontChild = child_index;
-                    }
-                    Bsp.Bsp3dNodes.Add(new_node);
-                    new_leaf_index = Bsp.Bsp3dNodes.Count - 1;
+                            Bsp.Bsp3dNodes[new_leaf_index].FrontChild = child_index;
+                    }                
                     break;
                 case 2:
                     //build surface array from polygons, build leaves in the usual fashion
@@ -189,7 +190,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
             for(var use_plane_margins = 0; use_plane_margins < 2; use_plane_margins++)
             {
-                List<polygon> polygonlist = use_plane_margins == 0 ? bsp_leaf.polygons : bsp_leaf.polygons2;
+                RealPlane3d plane_block = Bsp.Planes[plane_index].Value;
+                if (use_plane_margins == 1)
+                    plane_block.D += split_side == 1 ? -0.00024414062f : 0.00024414062f;
+                List <polygon> polygonlist = use_plane_margins == 0 ? bsp_leaf.polygons : bsp_leaf.polygons2;
                 foreach(var polygon in polygonlist)
                 {
                     List<RealPoint3d> polygon_points = new List<RealPoint3d>();
@@ -201,34 +205,35 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     }
                     else
                     {
-                        polygon_points = plane_cut_polygon(polygon.points, Bsp.Planes[polygon.plane_index].Value);
+                        polygon_points = plane_cut_polygon(polygon.points, plane_block);
                         polygon_type = polygon.polygon_type;
                     }
                     if (polygon_points.Count <= 0)
                         continue;
 
-                    RealPlane3d plane_block = Bsp.Planes[polygon.plane_index & 0x7FFFFFFF].Value;
-                    List<RealPoint2d> polygon_points2d = polygon_project_on_plane(polygon_points, plane_block, polygon.plane_index);
-                    float polygon_area = polygon_get_area(polygon_points2d, plane_block);
+                    RealPlane3d polygon_plane = Bsp.Planes[polygon.plane_index & 0x7FFFFFFF].Value;
+                    List<RealPoint2d> polygon_points2d = polygon_project_on_plane(polygon_points, polygon_plane, polygon.plane_index);
+                    float polygon_area = polygon_get_area(polygon_points2d, polygon_plane);
 
                     polygon new_polygon = new polygon
                     {
                         polygon_type = polygon_type,
                         points = polygon_points,
                         polygon_area = polygon_area,
-                        surface_index = polygon.surface_index
+                        surface_index = polygon.surface_index,
+                        plane_index = polygon.plane_index
                     };
 
                     if (use_plane_margins == 0)
                     {
-                        new_leaf.polygons.Add(polygon);
+                        new_leaf.polygons.Add(new_polygon);
                         new_leaf.polygon_counts[0, polygon_type]++;
                         new_leaf.polygon_areas_by_type[0, polygon_type] += polygon_area;
                         new_leaf.polygon_area_sums[0] += polygon_area;
                     }
                     else
                     {
-                        new_leaf.polygons2.Add(polygon);
+                        new_leaf.polygons2.Add(new_polygon);
                         new_leaf.polygon_counts[1, polygon_type]++;
                         new_leaf.polygon_areas_by_type[1, polygon_type] += polygon_area;
                         new_leaf.polygon_area_sums[1] += polygon_area;
@@ -247,17 +252,21 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 foreach (int portal_index in map_leaf.portal_indices)
                 {
-                    leaf_map_portal leaf_portal = leafybsp.leaf_map_portals[portal_index & 0x7FFFFFFF];
-                    int portal_other_leaf_index = leaf_portal.back_leaf_index == leaf_index ? leaf_portal.front_leaf_index : leaf_portal.back_leaf_index;
-                    leaf other_leaf = leafybsp.leaves[portal_other_leaf_index];
-
-                    if (other_leaf.polygon_area_sums[0] > bsp_leaf.polygon_area_sums[0] && //polygons1 area sum mismatch
-                        (bsp_leaf.polygon_counts[1, 0] > 0 || //polygons2 type 0 count > 0
-                        portal_other_leaf_index >= leafybsp.bsp_leaf_count && //other leaf was previously -1
-                        leaf_portal_area_mismatch_count(leafybsp, portal_other_leaf_index) == 0)) //
+                    //portal must not be flagged
+                    if(portal_index >= 0)
                     {
-                        mismatching_leaf_portal_count++;
-                    }
+                        leaf_map_portal leaf_portal = leafybsp.leaf_map_portals[portal_index & 0x7FFFFFFF];
+                        int portal_other_leaf_index = leaf_portal.back_leaf_index == leaf_index ? leaf_portal.front_leaf_index : leaf_portal.back_leaf_index;
+                        leaf other_leaf = leafybsp.leaves[portal_other_leaf_index];
+
+                        if (other_leaf.polygon_area_sums[0] > bsp_leaf.polygon_area_sums[0] && //polygons1 area sum mismatch
+                            (bsp_leaf.polygon_counts[1, 0] > 0 || //polygons2 type 0 count > 0
+                            portal_other_leaf_index >= leafybsp.bsp_leaf_count && //other leaf was previously -1
+                            leaf_portal_area_mismatch_count(leafybsp, portal_other_leaf_index) == 0)) //
+                        {
+                            mismatching_leaf_portal_count++;
+                        }
+                    }                  
                 }
             }
             return mismatching_leaf_portal_count;
@@ -324,11 +333,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             ++current_leaf.polygon_counts[use_plane_margins, current_polygon.polygon_type];
                         }
                     }
+                    int leaf_is_solid = leaf_index < leafybsp.bsp_leaf_count ? 1 : 0;
                     float polygon_type_areas_sum = current_leaf.polygon_areas_by_type[use_plane_margins, 0] + current_leaf.polygon_areas_by_type[use_plane_margins, 1] + current_leaf.polygon_areas_by_type[use_plane_margins, 2];
                     if (polygon_type_areas_sum <= 0.0)
                         current_leaf.polygon_area_sums[use_plane_margins] = 0.0f;
                     else
-                        current_leaf.polygon_area_sums[use_plane_margins] = current_leaf.polygon_areas_by_type[use_plane_margins, 1] / polygon_type_areas_sum; //add (leaf_index < leafy_bsp->bsp_leaf_count)
+                        current_leaf.polygon_area_sums[use_plane_margins] = current_leaf.polygon_areas_by_type[use_plane_margins, 1 + leaf_is_solid] / polygon_type_areas_sum;
                 }
             }
 
