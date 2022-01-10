@@ -205,7 +205,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     }
                     else
                     {
-                        polygon_points = plane_cut_polygon(polygon.points, plane_block);
+                        polygon_points = plane_cut_polygon(polygon.points, plane_block, split_side == 1);
                         polygon_type = polygon.polygon_type;
                     }
                     if (polygon_points.Count <= 0)
@@ -792,35 +792,35 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 if (point_greater_than_margin)
                 {
-                    int last_point_index = polygon_points.Count - 1;
+                    int previous_point_index = polygon_points.Count - 1;
                     for (var i = 0; i < polygon_points.Count; i++)
                     {
                         if (plane_d_list[i] != 0)
                         {
                             RealPoint2d current_point = polygon_points[i];
-                            RealPoint2d last_point = polygon_points[last_point_index];
-                            if (plane_d_list[i] == 1 && plane_d_list[last_point_index] == 0)
+                            RealPoint2d previous_point = polygon_points[previous_point_index];
+                            if (plane_d_list[i] == 1 && plane_d_list[previous_point_index] == 0)
                             {
-                                RealPoint2d vector = current_point - last_point;
+                                RealPoint2d vector = current_point - previous_point;
                                 float dot_product = vector.X * plane2d.I + vector.Y * plane2d.J;
                                 if (dot_product < -0.000099999997 || dot_product > 0.000099999997)
                                 {
-                                    float d1 = last_point.X * plane2d.I + last_point.Y * plane2d.J - plane2d.D;
+                                    float d1 = previous_point.X * plane2d.I + previous_point.Y * plane2d.J - plane2d.D;
                                     float dratio = d1 / dot_product;
                                     output_points.Add(new RealPoint2d
                                     {
-                                        X = (float)(last_point.X - vector.X * dratio),
-                                        Y = (float)(last_point.Y - vector.Y * dratio),
+                                        X = (float)(previous_point.X - vector.X * dratio),
+                                        Y = (float)(previous_point.Y - vector.Y * dratio),
                                     });
                                 }
                             }
                             output_points.Add(current_point);
                         }
-                        else if(plane_d_list[last_point_index] == 1)
+                        else if(plane_d_list[previous_point_index] == 1)
                         {
                             RealPoint2d current_point = polygon_points[i];
-                            RealPoint2d last_point = polygon_points[last_point_index];
-                            RealPoint2d vector = current_point - last_point;
+                            RealPoint2d previous_point = polygon_points[previous_point_index];
+                            RealPoint2d vector = current_point - previous_point;
                             float dot_product = vector.X * plane2d.I + vector.Y * plane2d.J;
                             if(dot_product < -0.000099999997 || dot_product > 0.000099999997)
                             {
@@ -833,7 +833,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                                 });
                             }
                         }
-                        last_point_index = i;
+                        previous_point_index = i;
                     }
                 }
                 else
@@ -863,7 +863,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 int plane_index = current_node.Plane;
                 int masked_plane_index = (int)(i == 1 ? plane_index & 0x7FFFFFFF : plane_index | 0x80000000);
                 int masked_node_index = (int)(i == 1 ? bsp3dnode_index | 0x80000000 : bsp3dnode_index & 0x7FFFFFFF);
-                int node_child = i == 1 ? current_node.BackChild : current_node.FrontChild;
+                int node_child = i == 1 ? current_node.FrontChild : current_node.BackChild;
                 plane_designators.Add(masked_plane_index);
                 if (!populate_plane_designators(ref leafybsp, plane_designators, node_child, masked_node_index))
                     break;
@@ -896,45 +896,47 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 int node_side = (plane_index < 0) ? 1 : 0;
                 int other_node_side = (plane_index >= 0) ? 1 : 0;
                 //set polygon type depending on whether the surface is on the plane or the flipped plane
-                if (surface_clip_to_leaves(ref leafybsp, current_node.FrontChild, use_plane_margins, node_side + 1, points, surface_index, plane_index))
+                if (surface_clip_to_leaves(ref leafybsp, current_node.BackChild, use_plane_margins, node_side + 1, points, surface_index, plane_index))
                 {
-                    return surface_clip_to_leaves(ref leafybsp, current_node.BackChild, use_plane_margins, other_node_side + 1, points, surface_index, plane_index);
+                    return surface_clip_to_leaves(ref leafybsp, current_node.FrontChild, use_plane_margins, other_node_side + 1, points, surface_index, plane_index);
                 }
                 return false;
             }
             RealPlane3d node_plane = Bsp.Planes[current_node.Plane].Value;
             float margin = use_plane_margins == 0 ? 0.0f : 0.00024414062f;
             RealPlane3d front_plane = new RealPlane3d(node_plane.I, node_plane.J, node_plane.K, node_plane.D + margin);
-            List<RealPoint3d> front_points = plane_cut_polygon(points, front_plane);
-            if(front_points.Count > 0 && !surface_clip_to_leaves(ref leafybsp, current_node.FrontChild, use_plane_margins, polygon_type, front_points, surface_index, plane_index))
+            List<RealPoint3d> back_points = plane_cut_polygon(points, front_plane, false);
+            if(back_points.Count > 0 && !surface_clip_to_leaves(ref leafybsp, current_node.BackChild, use_plane_margins, polygon_type, back_points, surface_index, plane_index))
             {
                 return false;
             }
             RealPlane3d back_plane = new RealPlane3d(node_plane.I, node_plane.J, node_plane.K, node_plane.D - margin);
-            List<RealPoint3d> back_points = plane_cut_polygon(points, back_plane);
-            if (back_points.Count <= 0)
+            List<RealPoint3d> front_points = plane_cut_polygon(points, back_plane, true);
+            if (front_points.Count <= 0)
                 return true;
-            return surface_clip_to_leaves(ref leafybsp, current_node.BackChild, use_plane_margins, polygon_type, back_points, surface_index, plane_index);
+            return surface_clip_to_leaves(ref leafybsp, current_node.FrontChild, use_plane_margins, polygon_type, front_points, surface_index, plane_index);
         }
 
-        public List<RealPoint3d> plane_cut_polygon(List<RealPoint3d> points, RealPlane3d plane)
+        public List<RealPoint3d> plane_cut_polygon(List<RealPoint3d> points, RealPlane3d plane, bool plane_side)
         {
             List<RealPoint3d> output_points = new List<RealPoint3d>();
-            RealPoint3d final_point = points[points.Count - 1];
-            float d0 = final_point.X * plane.I + final_point.Y * plane.J + final_point.Z + plane.K - plane.D;
+            RealPoint3d previous_point = points[points.Count - 1];
+            float d0 = previous_point.X * plane.I + previous_point.Y * plane.J + previous_point.Z * plane.K - plane.D;
             for(var vertex_index = 0; vertex_index < points.Count; vertex_index++)
             {
                 RealPoint3d current_point = points[vertex_index];
-                float d1 = current_point.X * plane.I + current_point.Y * plane.J + current_point.Z + plane.K - plane.D;
+                float d1 = current_point.X * plane.I + current_point.Y * plane.J + current_point.Z * plane.K - plane.D;
                 //are the current and final vertex on the same side of the plane?
-                if(d1 < 0 != d0 < 0)
+                if(d1 >= 0 != d0 >= 0)
                 {
-                    output_points.Add(vertex_plane_transform(final_point, current_point, d0, d1));
+                    output_points.Add(vertex_plane_transform(previous_point, current_point, d0, d1));
                 }
-                if(d1 >= 0)
+                if(d1 >= 0 == plane_side)
                 {
                     output_points.Add(current_point);
                 }
+                previous_point = current_point;
+                d0 = d1;
             }
             return output_points;
         }
