@@ -357,7 +357,7 @@ namespace TagTool.Commands.Porting
                                                         continue;
 
                                                     if (entry2.Item2 == link.LeftSector || entry2.Item2 == link.RightSector)
-                                                        taskArea.ConnectivityBitVector[0] |= 1 << areaIndex;
+                                                        taskArea.ConnectivityBitVector |= 1 << areaIndex;
                                                 }
                                             }
                                         }
@@ -382,7 +382,7 @@ namespace TagTool.Commands.Porting
                                                         continue;
 
                                                     if (entry2.Item2 == link.LeftSector || entry2.Item2 == link.RightSector)
-                                                        taskArea.ConnectivityBitVector[0] |= 1 << areaIndex;
+                                                        taskArea.ConnectivityBitVector |= 1 << areaIndex;
                                                 }
                                             }
                                         }

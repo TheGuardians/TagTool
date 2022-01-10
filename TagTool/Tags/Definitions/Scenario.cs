@@ -4179,9 +4179,11 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public Angle Yaw;
 
-                    [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Length = 1)]
-                    [TagField(MinVersion = CacheVersion.HaloReach, Length = 4)]
-                    public int[] ConnectivityBitVector;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+                    public int ConnectivityBitVector;
+
+                    [TagField(Length = 4, MinVersion = CacheVersion.HaloReach)]
+                    public int[] ConnectivityBitVectorReach;
                 }
 
                 [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3Retail)]
