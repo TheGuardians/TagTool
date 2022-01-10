@@ -505,7 +505,8 @@ namespace TagTool.Geometry
                 foreach (var mesh in geometry.Meshes)
                 {
                     mesh.Type = ConvertReachVertexType(mesh.ReachType);
-                    mesh.PrtType = PrtSHType.None;
+                    if(mesh.PrtType != PrtSHType.Ambient)
+                        mesh.PrtType = PrtSHType.None;
 
                     for (int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
                     {
@@ -514,7 +515,11 @@ namespace TagTool.Geometry
                         if (vertexBuffer == null)
                             continue;
 
-                        if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt || vertexBuffer.Format == VertexBufferFormat.LinearPrt || vertexBuffer.Format == VertexBufferFormat.QuadraticPrt)
+                        // Gen3 order 0 coefficients are stored in ints but should be read as bytes, 1 per vertex in the original buffer
+                        if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt)
+                            vertexBuffer.Count = mesh.ResourceVertexBuffers[0].Count;
+
+                        if (vertexBuffer.Format == VertexBufferFormat.LinearPrt || vertexBuffer.Format == VertexBufferFormat.QuadraticPrt)
                         {
                             mesh.ResourceVertexBuffers[i] = null;
                             continue;
