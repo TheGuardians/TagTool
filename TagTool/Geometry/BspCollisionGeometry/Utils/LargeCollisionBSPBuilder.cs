@@ -73,7 +73,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             else
             {
                 Console.WriteLine($"###Failed to build collision bsp!");
-                if (hasErrors)
+                if (hasErrors && debug)
                     Errors.WriteOBJ();
                 return false;
             }
@@ -94,7 +94,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             //    new TagToolWarning("Failed to build leaf map!");
             //}
 
-            if (hasErrors)
+            if (hasErrors && debug)
                 Errors.WriteOBJ();
 
             bsp = Bsp.DeepClone();

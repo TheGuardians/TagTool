@@ -15,6 +15,8 @@ using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Common;
 using TagTool.Geometry.BspCollisionGeometry.Utils;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace TagTool.Commands.Porting
 {
@@ -59,9 +61,14 @@ namespace TagTool.Commands.Porting
                 for (int i = 0; i < resourceDefinition.LargeCollisionBsps.Count; i++)
                     resourceDefinition.LargeCollisionBsps[i] = ConvertLargeCollisionBsp(resourceDefinition.LargeCollisionBsps[i]);
 
-                for(int i = 0; i < resourceDefinition.InstancedGeometry.Count; i++)
+                int atomicNumProcessed = 0;
+                Parallel.For(0, resourceDefinition.InstancedGeometry.Count, i =>
                 {
-                    Console.WriteLine($"Converting instanced geometry collision {i+1}/{resourceDefinition.InstancedGeometry.Count}...");
+                    int numProcessed = Interlocked.Increment(ref atomicNumProcessed);
+                    float percentComplete = numProcessed * 100.0f / resourceDefinition.InstancedGeometry.Count;
+                    Console.WriteLine($"Converting instanced geometry collision [{i}] {numProcessed}/{resourceDefinition.InstancedGeometry.Count} ({percentComplete:0.0}%)...");
+
+                    // be careful what you do here, it must be thread safe!
 
                     var instancedGeometry = resourceDefinition.InstancedGeometry[i];
                     var convertedCollisionBsp = ConvertCollisionBsp(instancedGeometry.CollisionInfo);
@@ -72,12 +79,12 @@ namespace TagTool.Commands.Porting
                             instancedGeometry.RenderBsp[j] = ConvertCollisionBsp(instancedGeometry.RenderBsp[j]);
                     }
 
-                    if(instancedGeometry.CollisionMoppCodes == null || instancedGeometry.CollisionMoppCodes.Count == 0)
+                    if (instancedGeometry.CollisionMoppCodes == null || instancedGeometry.CollisionMoppCodes.Count == 0)
                     {
                         if (instancedGeometry.CollisionInfo.Surfaces.Count > 0 && instancedGeometry.Polyhedra.Count > 0)
                         {
                             var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
-                            if(moppCode == null)
+                            if (moppCode == null)
                                 new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
 
                             moppCode.Data.AddressType = CacheAddressType.Data;
@@ -87,7 +94,7 @@ namespace TagTool.Commands.Porting
                     }
 
                     instancedGeometry.CollisionInfo = convertedCollisionBsp;
-                }
+                });
             }
 
             bsp.CollisionBspResource = CacheContext.ResourceCache.CreateStructureBspResource(resourceDefinition);
