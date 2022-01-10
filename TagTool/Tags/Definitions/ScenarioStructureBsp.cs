@@ -787,8 +787,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
         public class Marker : TagStructure
         {
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public StructureMarkerTypeEnum MarkerType;
-            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 
             [TagField(Length = 32, Flags = TagFieldFlags.Label)]
