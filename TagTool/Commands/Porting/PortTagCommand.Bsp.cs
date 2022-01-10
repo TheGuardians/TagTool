@@ -318,10 +318,10 @@ namespace TagTool.Commands.Porting
                 if (type == 3)
                 {
                     int instanceIndex = key & 0xffff;
-                    var instance = sbsp.InstancedGeometryInstances[instanceIndex];
                     if (instanceIndex < 0 || instanceIndex >= sbsp.InstancedGeometryInstances.Count)
                         return -1;
 
+                    var instance = sbsp.InstancedGeometryInstances[instanceIndex];
                     if (instance.BspPhysics.Count > 0 && instance.BspPhysicsReach[0].PoopShape.Count > 0)
                         return (2 << 29) | instanceIndex;
                 }
