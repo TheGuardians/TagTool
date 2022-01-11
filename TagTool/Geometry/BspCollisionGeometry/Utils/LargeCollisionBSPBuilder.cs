@@ -20,6 +20,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         //error geometry 
         private ErrorGeometryBuilder Errors = new ErrorGeometryBuilder();
         private bool hasErrors = false;
+        public bool useleafmap = false;
 
         public bool generate_bsp(ref LargeCollisionBspBlock bsp, bool debug_arg = false)
         {
@@ -88,11 +89,16 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 return false;
             }
 
-            //LeafMap leafmapbuilder = new LeafMap();
-            //if (!leafmapbuilder.munge_collision_bsp(this))
-            //{
-            //    new TagToolWarning("Failed to build leaf map!");
-            //}
+            if (useleafmap)
+            {
+                LeafMap leafmapbuilder = new LeafMap();
+                LargeCollisionBspBlock bsp_copy = Bsp.DeepClone();
+                if (!leafmapbuilder.munge_collision_bsp(this))
+                {
+                    new TagToolWarning("Failed to build leaf map!");
+                    Bsp = bsp_copy;
+                }
+            }
 
             if (hasErrors && debug)
                 Errors.WriteOBJ();

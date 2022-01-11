@@ -112,6 +112,9 @@ namespace TagTool.Commands.Porting
 
                 var largebsp = resizer.GrowCollisionBsp(bsp);
 
+                if (PortingOptions.Current.CollisionLeafMapping)
+                    largebuilder.useleafmap = true;
+
                 if (PortingOptions.Current.ReachSuperNodeConversion)
                 {
                     largebsp = supernodeconverter.Convert(largebsp);
@@ -141,6 +144,10 @@ namespace TagTool.Commands.Porting
             if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
                 var supernodeconverter = new SupernodeToNodeConverter();
+                var largebuilder = new LargeCollisionBSPBuilder();
+
+                if (PortingOptions.Current.CollisionLeafMapping)
+                    largebuilder.useleafmap = true;
 
                 if (PortingOptions.Current.ReachSuperNodeConversion)
                 {
@@ -148,7 +155,7 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    if (!new LargeCollisionBSPBuilder().generate_bsp(ref bsp, true))
+                    if (!largebuilder.generate_bsp(ref bsp, true))
                         new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
                 }
             }
