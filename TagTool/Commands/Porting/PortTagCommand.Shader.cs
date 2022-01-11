@@ -389,6 +389,36 @@ namespace TagTool.Commands.Porting
                     }
                 }
             }
+            else if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                finalRm.ShaderProperties[0].QueryableProperties = new short[8];
+
+                for (int i = 0; i < finalRm.ShaderProperties[0].QueryableProperties.Length; i++)
+                {
+                    if (finalRm.ShaderProperties[0].QueryablePropertiesReach[i] == -1)
+                    {
+                        finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
+                        continue;
+                    }
+
+                    switch (i)
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 5:
+                            finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edMaps.IndexOf(bmMaps[finalRm.ShaderProperties[0].QueryablePropertiesReach[i]]);
+                            break;
+                        case 4:
+                            finalRm.ShaderProperties[0].QueryableProperties[i] = (short)edRealConstants.IndexOf(bmRealConstants[finalRm.ShaderProperties[0].QueryablePropertiesReach[i]]);
+                            break;
+                        default:
+                            finalRm.ShaderProperties[0].QueryableProperties[i] = -1;
+                            break;
+                    }
+                }
+            }
 
             // fixup xform arguments;
             foreach (var tex in finalRm.ShaderProperties[0].TextureConstants)
