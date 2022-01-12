@@ -3,7 +3,7 @@ using TagTool.Tags;
 
 namespace TagTool.Ai
 {
-    [TagStructure(Size = 0x18, Align = 0x10)]
+    [TagStructure(Size = 0x18)]
     public class CharacterScarabProperties : TagStructure
 	{
         public float FightingMinDistance; // When target within this distance, the scarab will back up (world units)
