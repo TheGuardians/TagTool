@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections;
 using TagTool.Common;
+using TagTool.Commands.Common;
 
 namespace TagTool.Tags
 {
@@ -82,6 +83,12 @@ namespace TagTool.Tags
                     }
 				}
 			}
+
+#if DEBUG
+			uint expectedSize = TagStructure.GetStructureSize(Info.Types[0], Info.Version, Info.CachePlatform);
+			if (offset != expectedSize)
+				new TagToolWarning($"TagStructure size incorrect for '{Info.Types[0].FullName}', Version: '{Info.Version}'. Expected: 0x{expectedSize:X}, Got: 0x{offset:X}");
+#endif
 		}
 
         /// <summary>
@@ -94,7 +101,7 @@ namespace TagTool.Tags
         /// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
         private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform, ref uint offset)
         {
-            ValidateEnumRequiments(field, attribute, targetVersion, cachePlatform);
+			ValidateField(field, attribute, targetVersion, cachePlatform);
 
             var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion, cachePlatform);
 
@@ -116,6 +123,21 @@ namespace TagTool.Tags
         /// <returns></returns>
         public FieldInfo Find(Predicate<FieldInfo> match) =>
 			TagFieldInfos.Find(f => match.Invoke(f.FieldInfo))?.FieldInfo ?? null;
+
+		private static void ValidateField(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform)
+        {
+#if DEBUG
+			if(attribute.Flags.HasFlag(TagFieldFlags.Padding))
+            {
+				if (field.FieldType != typeof(byte[]))
+					new Exception("Padding fields must be of type Byte[]");
+            }
+            else
+            {
+				ValidateEnumRequiments(field, attribute, targetVersion, cachePlatform);
+			}
+#endif
+		}
 
 		private static void ValidateEnumRequiments(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform)
 		{

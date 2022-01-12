@@ -28,6 +28,10 @@ namespace TagTool.Commands.Common
         {
             lock (Mutex)
             {
+                // if we're not at the start of the line, insert a new one to avoid ugliness with Console.Write()
+                if (Console.CursorLeft > 0)
+                    Console.WriteLine();
+
                 Console.ForegroundColor = ConsoleColor.Red;
 
                 if (cmdError != CommandError.None)
