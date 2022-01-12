@@ -73,8 +73,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 {
                     leaf bsp_leaf = leafybsp.leaves[leaf_index];
                     if (leaf_portal_area_mismatch_count(leafybsp, leaf_index) > 0)
-                    {                       
-                        if(bsp_leaf.polygon_counts[1,0] > 0) //polygons2 type 0
+                    {
+                        if (bsp_leaf.polygon_counts[1,0] > 0) //polygons2 type 0
                         {
                             new TagToolWarning("Fixing phantom leaf!");
                             int new_leaf_index = -1;
@@ -366,8 +366,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         {
                             if (polygon.polygon_type > 0 && (polygon.plane_index & 0x7FFFFFFF) == leaf_portal.plane_index)
                             {
-                                List<RealPoint2d> polygon_points = polygon_project_on_plane(polygon.points, Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.plane_index);
-                                List<RealPoint2d> portal_sliced_polygon = portal_slice_polygon(polygon_points, leaf_portal_points, 0.000099999997d);
+                                //use the whole surface for finding the area, cut it with the portal only
+                                List<RealPoint3d> surface_points = surface_collect_vertices(polygon.surface_index);
+                                List<RealPoint2d> polygon_points_2d = polygon_project_on_plane(surface_points, Bsp.Planes[leaf_portal.plane_index].Value, leaf_portal.plane_index);
+                                List<RealPoint2d> portal_sliced_polygon = portal_slice_polygon(polygon_points_2d, leaf_portal_points, 0.000099999997d);
                                 float sliced_polygon_area = polygon_get_area(portal_sliced_polygon, Bsp.Planes[leaf_portal.plane_index].Value);
                                 //greater than count and polygon type 2 or less than count and polygon type 1
                                 if (portal_child < leafybsp.bsp_leaf_count == (polygon.polygon_type == 2))
@@ -389,9 +391,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     }
                 }
                 if (leaf_portal.back_leaf_index < leafybsp.bsp_leaf_count == leaf_portal.front_leaf_index < leafybsp.bsp_leaf_count &&
-                    back_child_area < 0.9f * leaf_portal_area && front_child_area < 0.9f * leaf_portal_area)
+                    back_child_area < 0.89999998d * leaf_portal_area && front_child_area < 0.89999998d * leaf_portal_area)
                     leaf_portal_designator_set_flags(ref leafybsp, leaf_portal_index);
-                else if (back_child_area > 0.1f * leaf_portal_area && front_child_area > 0.1f * leaf_portal_area)
+                else if (back_child_area > 0.1d * leaf_portal_area && front_child_area > 0.1d * leaf_portal_area)
                     leaf_portal_designator_set_flags(ref leafybsp, leaf_portal_index);
             }
             return true;
@@ -772,7 +774,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             for (var i = 0; i < polygon_points.Count; i++)
             {
                 RealPoint2d current_point = polygon_points[i];
-                double d = current_point.X * plane2d.I + current_point.Y * plane2d.J - plane2d.D;
+                double d = point_get_plane_distance_2d(current_point, plane2d);
                 if (d <= margin)
                 {
                     if (d >= -margin)
@@ -805,11 +807,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             RealPoint2d previous_point = polygon_points[previous_point_index];
                             if (plane_d_list[i] == 1 && plane_d_list[previous_point_index] == 0)
                             {
-                                RealPoint2d vector = current_point - previous_point;
-                                double dot_product = vector.X * plane2d.I + vector.Y * plane2d.J;
+                                RealPoint2d vector = previous_point - current_point;
+                                double dot_product = point_plane_dot_product_2d(vector, plane2d);
                                 if (dot_product < -0.000099999997 || dot_product > 0.000099999997)
                                 {
-                                    double d1 = previous_point.X * plane2d.I + previous_point.Y * plane2d.J - plane2d.D;
+                                    double d1 = point_get_plane_distance_2d(previous_point, plane2d);
                                     double dratio = d1 / dot_product;
                                     output_points.Add(new RealPoint2d
                                     {
@@ -825,10 +827,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             RealPoint2d current_point = polygon_points[i];
                             RealPoint2d previous_point = polygon_points[previous_point_index];
                             RealPoint2d vector = current_point - previous_point;
-                            double dot_product = vector.X * plane2d.I + vector.Y * plane2d.J;
+                            double dot_product = point_plane_dot_product_2d(vector, plane2d);
                             if(dot_product < -0.000099999997 || dot_product > 0.000099999997)
                             {
-                                double d1 = current_point.X * plane2d.I + current_point.Y * plane2d.J - plane2d.D;
+                                double d1 = point_get_plane_distance_2d(current_point, plane2d);
                                 double dratio = d1 / dot_product;
                                 output_points.Add(new RealPoint2d
                                 {
@@ -854,6 +856,25 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 return new List<RealPoint2d>();
 
             return output_points;
+        }
+
+        public double point_get_plane_distance_2d(RealPoint2d point, RealPlane2d plane)
+        {
+            //precision requires this function to use identical order of operations as the compiled version
+            //point.X * plane.I + point.Y * plane.J - plane.D
+            return point_plane_dot_product_2d(point, plane) - plane.D;
+        }
+
+        public double point_plane_dot_product_2d(RealPoint2d point, RealPlane2d plane)
+        {
+            //precision requires this function to use identical order of operations as the compiled version
+            //point.X * plane.I + point.Y * plane.J
+            double Y = point.Y;
+            double YJ = Y * plane.J;
+            double I = plane.I;
+            double XI = I * point.X;
+            double XIYJ = XI + YJ;
+            return XIYJ;
         }
 
         public bool populate_plane_designators(ref leafy_bsp leafybsp, List<int> plane_designators, int bsp3dnode_index, int parent_bsp3dnode_index)
@@ -929,11 +950,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
             List<RealPoint3d> output_points = new List<RealPoint3d>();
             RealPoint3d previous_point = points[points.Count - 1];
-            double d0 = previous_point.X * plane.I + previous_point.Y * plane.J + previous_point.Z * plane.K - plane.D;
+            double d0 = point_get_plane_distance(previous_point, plane);
             for(var vertex_index = 0; vertex_index < points.Count; vertex_index++)
             {
                 RealPoint3d current_point = points[vertex_index];
-                double d1 = current_point.X * plane.I + current_point.Y * plane.J + current_point.Z * plane.K - plane.D;
+                double d1 = point_get_plane_distance(current_point, plane);
                 //are the current and final vertex on the same side of the plane?
                 if(d1 >= 0 != d0 >= 0)
                 {
@@ -949,15 +970,54 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return output_points;
         }
 
+        public double point_get_plane_distance(RealPoint3d point, RealPlane3d plane)
+        {
+            //precision requires this function to use identical order of operations as the compiled version
+            //point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D
+            double Z = point.Z;
+            double ZK = Z * plane.K;
+            double Y = point.Y;
+            double YJ = Y * plane.J;
+            double YJZK = YJ + ZK;
+            double I = plane.I;
+            double XI = I * point.X;
+            double XIYJZK = XI + YJZK;
+            return XIYJZK - plane.D;
+        }
+
         public RealPoint3d vertex_shift_to_plane(RealPoint3d p0, RealPoint3d p1, double d0, double d1)
         {
-            double dratio = d0 / (d0 - d1);
-            RealPoint3d result = new RealPoint3d
-            {
-                X = (float)((p1.X - p0.X) * dratio + p0.X),
-                Y = (float)((p1.Y - p0.Y) * dratio + p0.Y),
-                Z = (float)((p1.Z - p0.Z) * dratio + p0.Z),
-            };
+            //precision requires this function to use identical order of operations as the compiled version
+            /*
+                double dratio = d0 / (d0 - d1);
+                RealPoint3d result = new RealPoint3d
+                {
+                    X = (float)((p1.X - p0.X) * dratio + p0.X),
+                    Y = (float)((p1.Y - p0.Y) * dratio + p0.Y),
+                    Z = (float)((p1.Z - p0.Z) * dratio + p0.Z),
+                };
+            */
+            RealPoint3d result = new RealPoint3d();
+            double X1 = p1.X;
+            double Xdiff = X1 - p0.X;
+            double Y1 = p1.Y;
+            double Ydiff = Y1 - p0.Y;
+            double Z1 = p1.Z;
+            float Zdiff = (float)(Z1 - p0.Z); //value is stored as float temporarily
+
+            double Ddiff = d0 - d1;
+            float Ddiv = (float)(d0 / Ddiff);
+
+            double Xmul = Xdiff * Ddiv;
+            result.X = (float)(Xmul + p0.X);
+
+            double Ddiv2 = Ddiv;
+            double Ymul = Ydiff * Ddiv2;
+            result.Y = (float)(Ymul + p0.Y);
+
+            double Zdiff2 = Zdiff;
+            double Zmul = Zdiff2 * Ddiv2;
+            result.Z = (float)(Zmul + p0.Z);
             return result;
         }
 
