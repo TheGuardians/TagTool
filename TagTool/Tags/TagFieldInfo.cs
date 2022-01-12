@@ -154,6 +154,9 @@ namespace TagTool.Tags
             if (attr.Flags.HasFlag(Runtime))
                 return 0;
 
+			if(type.IsEnum)
+				return TagFieldInfo.GetFieldSize(attr.EnumType ?? type.GetEnumUnderlyingType(), attr, targetVersion, cachePlatform);
+
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
@@ -235,17 +238,16 @@ namespace TagTool.Tags
                 case TypeCode.Object when type == typeof(DatumHandle):
                     return sizeof(uint);
 
-				case TypeCode.String:
+				case TypeCode.String when attr.CharSet == System.Runtime.InteropServices.CharSet.Ansi:
 					return (uint)attr.Length;
+				case TypeCode.String when attr.CharSet == System.Runtime.InteropServices.CharSet.Unicode:
+					return (uint)attr.Length * 2;
 
 				case TypeCode.Object when type.IsArray && attr.Length != 0:
 					return TagFieldInfo.GetFieldSize(type.GetElementType(), attr, targetVersion, cachePlatform) * (uint)attr.Length;
 
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Bounds<>):
 					return TagFieldInfo.GetFieldSize(type.GenericTypeArguments[0], attr, targetVersion, cachePlatform) * 2;
-
-				case TypeCode.Object when type.IsEnum:
-					return TagFieldInfo.GetFieldSize(attr.EnumType ?? type.GetEnumUnderlyingType(), attr, targetVersion, cachePlatform);
 
                 case TypeCode.Object when type.IsSubclassOf(typeof(TagStructure)):
                     return TagStructure.GetTagStructureInfo(type, targetVersion, cachePlatform).TotalSize;
