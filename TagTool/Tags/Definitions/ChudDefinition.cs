@@ -1585,6 +1585,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(Length = 3, Flags = Padding)]
                 public byte[] Padding2;
 
+                [TagField(MinVersion = CacheVersion.HaloReach)]
                 public Rectangle2d ClipBounds;
 
                 [Flags]
