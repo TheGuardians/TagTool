@@ -287,11 +287,7 @@ namespace TagTool.Tags.Definitions
             public int HighResPixelsOffsetOffset;
             public int HighResPixelsSize;
             public int HardwareFormat;
-
-            [TagField(Length = 4, Flags = Padding)]
-            public byte[] Padding4;
-
-            public long RuntimeTagBaseAddress;
+            public PlatformUnsignedValue RuntimeTagBaseAddress;
         }
 
         public enum BitmapUsageFormatShort : short
