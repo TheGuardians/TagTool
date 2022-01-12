@@ -32,6 +32,7 @@ namespace TagTool.Ai
         public SpatialRelationEnum SpeakerSubjectPosition;
         public SpatialRelationEnum SpeakerCausePosition;
         public DialogueConditionFlags Conditions;
+        [TagField(EnumType = typeof(short))]
         public SpatialRelationEnum SpacialRelation;
         public DamageEnum DamageType;
         public ActorTypeEnum SubjectActorType;
