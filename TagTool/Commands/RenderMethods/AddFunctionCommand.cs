@@ -96,20 +96,18 @@ namespace TagTool.Commands.RenderMethods
                 if (functionIndex < properties.Functions.Count)
                     functionType = properties.Functions[functionIndex].Type;
 
-                if (ShaderFunctionHelper.AnimatedParameterExists(animatedParameters, parameterName, parameterType, functionType))
-                    new TagToolWarning("The specified parameter is already being animated.");
-
                 ShaderFunctionHelper.AnimatedParameter newParameter = new ShaderFunctionHelper.AnimatedParameter
                 {
-                    FunctionIndex = functionIndex,
                     Name = parameterName,
-                    FunctionType = RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType.Value,
-                    Type = parameterType
+                    Type = parameterType,
+                    FunctionIndex = functionIndex,
+                    FunctionType = functionType
                 };
 
-                // Rebuild into render method
-
-                animatedParameters.Add(newParameter);
+                if (animatedParameters.Contains(newParameter))
+                    new TagToolWarning("The specified parameter is already being animated.");
+                else
+                    animatedParameters.Add(newParameter);
 
                 if (!ShaderFunctionHelper.BuildAnimatedParameters(Cache, Definition, template, animatedParameters))
                     return new TagToolError(CommandError.CustomError, "Failed to build animated parameters.");

@@ -49,18 +49,18 @@ namespace TagTool.Shaders.ShaderFunctions
 
                 return -1;
             }
-        }
 
-        /// <summary>
-        /// Returns true if an animated parameter with the supplied information exists in the list.
-        /// </summary>
-        static public bool AnimatedParameterExists(List<AnimatedParameter> animatedParameters, string name, ParameterType type, RenderMethod.RenderMethodAnimatedParameterBlock.FunctionType functionType)
-        {
-            foreach (var parameter in animatedParameters)
-                if (parameter.Name == name && parameter.Type == type && parameter.FunctionType == functionType)
-                    return true;
+            public override bool Equals(object obj)
+            {
+                AnimatedParameter aP = (AnimatedParameter)obj;
+                return Name == aP.Name && Type == aP.Type && FunctionIndex == aP.FunctionIndex && FunctionType == aP.FunctionType;
+            }
 
-            return false;
+            public override int GetHashCode() => (Name, Type, FunctionIndex, FunctionType).GetHashCode();
+
+            public static bool operator ==(AnimatedParameter lhs, AnimatedParameter rhs) => lhs.Equals(rhs);
+
+            public static bool operator !=(AnimatedParameter lhs, AnimatedParameter rhs) => !lhs.Equals(rhs);
         }
 
         /// <summary>
@@ -102,16 +102,16 @@ namespace TagTool.Shaders.ShaderFunctions
                             {
                                 string name = cache.StringTable.GetString(template.TextureParameterNames[parameter.SourceIndex].Name);
 
-                                if (!AnimatedParameterExists(result, name, ParameterType.Texture, properties.Functions[parameter.FunctionIndex].Type))
+                                AnimatedParameter animatedParameter = new AnimatedParameter
                                 {
-                                    AnimatedParameter animatedParameter = new AnimatedParameter
-                                    {
-                                        Name = name,
-                                        Type = ParameterType.Texture,
-                                        FunctionIndex = parameter.FunctionIndex,
-                                        FunctionType = properties.Functions[parameter.FunctionIndex].Type
-                                    };
-                                    
+                                    Name = name,
+                                    Type = ParameterType.Texture,
+                                    FunctionIndex = parameter.FunctionIndex,
+                                    FunctionType = properties.Functions[parameter.FunctionIndex].Type
+                                };
+
+                                if (!result.Contains(animatedParameter))
+                                {
                                     result.Add(animatedParameter);
                                 }
                             }
@@ -126,16 +126,16 @@ namespace TagTool.Shaders.ShaderFunctions
                             {
                                 string name = cache.StringTable.GetString(template.RealParameterNames[parameter.SourceIndex].Name);
 
-                                if (!AnimatedParameterExists(result, name, ParameterType.Real, properties.Functions[parameter.FunctionIndex].Type))
+                                AnimatedParameter animatedParameter = new AnimatedParameter
                                 {
-                                    AnimatedParameter animatedParameter = new AnimatedParameter
-                                    {
-                                        Name = name,
-                                        Type = ParameterType.Real,
-                                        FunctionIndex = parameter.FunctionIndex,
-                                        FunctionType = properties.Functions[parameter.FunctionIndex].Type
-                                    };
+                                    Name = name,
+                                    Type = ParameterType.Real,
+                                    FunctionIndex = parameter.FunctionIndex,
+                                    FunctionType = properties.Functions[parameter.FunctionIndex].Type
+                                };
 
+                                if (!result.Contains(animatedParameter))
+                                {
                                     result.Add(animatedParameter);
                                 }
                             }
@@ -150,16 +150,16 @@ namespace TagTool.Shaders.ShaderFunctions
                             {
                                 string name = cache.StringTable.GetString(template.RealParameterNames[parameter.SourceIndex].Name);
 
-                                if (!AnimatedParameterExists(result, name, ParameterType.Real, properties.Functions[parameter.FunctionIndex].Type))
+                                AnimatedParameter animatedParameter = new AnimatedParameter
                                 {
-                                    AnimatedParameter animatedParameter = new AnimatedParameter
-                                    {
-                                        Name = name,
-                                        Type = ParameterType.Real,
-                                        FunctionIndex = parameter.FunctionIndex,
-                                        FunctionType = properties.Functions[parameter.FunctionIndex].Type
-                                    };
+                                    Name = name,
+                                    Type = ParameterType.Real,
+                                    FunctionIndex = parameter.FunctionIndex,
+                                    FunctionType = properties.Functions[parameter.FunctionIndex].Type
+                                };
 
+                                if (!result.Contains(animatedParameter))
+                                {
                                     result.Add(animatedParameter);
                                 }
                             }
