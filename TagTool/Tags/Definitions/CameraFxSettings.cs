@@ -227,14 +227,11 @@ namespace TagTool.Tags.Definitions
             public float Unknown10;
         }
 
-        [TagStructure(Size = 0x24)]
+        [TagStructure(Size = 0x2C)]
         public class GodraysPropertiesBlock : TagStructure
         {
+            [TagField(EnumType = typeof(uint))]
             public FlagsValue Flags;
-
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused = new byte[2];
-
             public float Radius;
             public float AngleBias;
             public RealRgbColor Color;
