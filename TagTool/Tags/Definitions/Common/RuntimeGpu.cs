@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Common
         public List<GpuFunctionBlock> Functions;
         public List<RealVector4dBlock> Colors;
 
-        [TagStructure(Size = 0x40, Align = 0x10)]
+        [TagStructure(Size = 0x100, Align = 0x10)]
         public class GpuFunctionBlock : TagStructure
         {
             [TagField(Length = 16)]
