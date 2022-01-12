@@ -343,6 +343,10 @@ namespace TagTool.Commands.Porting
                     // set the new buffer index
                     staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
                 }
+                else
+                {
+                    staticPerVertexLighting.VertexBufferIndex = -1;
+                }
             }
             
             Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
