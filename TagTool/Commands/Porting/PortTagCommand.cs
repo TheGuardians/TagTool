@@ -398,8 +398,8 @@ namespace TagTool.Commands.Porting
                     {"objects\\multi\\models\\mp_circle\\mp_circle", "objects\\multi\\oddball\\oddball_ball_spawn_point"},
                     {"objects\\multi\\archive\\vip\\vip_boundary", "objects\\multi\\vip\\vip_destination_static"}
                 };
-		
-		Dictionary<string, string> reachVehicles = new Dictionary<string, string>()
+
+                Dictionary<string, string> reachVehicles = new Dictionary<string, string>()
                 {
                     {"objects\\vehicles\\human\\warthog\\warthog", "objects\\vehicles\\warthog\\warthog"},
                     {"objects\\vehicles\\human\\mongoose\\mongoose", "objects\\vehicles\\mongoose\\mongoose"},
@@ -423,11 +423,11 @@ namespace TagTool.Commands.Porting
                 ReplaceObjects(scenario.CratePalette, reachObjectives);
                 ReplaceObjects(scenario.VehiclePalette, reachVehicles);
                 ReplaceObjects(scenario.EquipmentPalette, reachEquipment);
-				
-				
-		CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
+
+
+                CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
                 CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
-		CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
+                CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
                 CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
                 CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
 
@@ -513,6 +513,8 @@ namespace TagTool.Commands.Porting
                     if (replacements.TryGetValue(name, out string result))
                         block.Object.Name = result;
                     else if (name.Contains("zone") || name.Contains("ca_temp"))
+                        block.Object = null;
+                    else if (name.Contains("initial_spawn_point") && FlagIsSet(PortingFlags.ReachMisc)) // keeps me sane
                         block.Object = null;
                 }
         }
