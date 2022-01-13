@@ -61,6 +61,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<int> Unused;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<GlobalSelfTrackBlock> SelfTrack;
+
         [Flags]
         public enum ScenarioLightmapBspFlags : ushort
         {
@@ -141,6 +144,19 @@ namespace TagTool.Tags.Definitions
         public class NullBlock : TagStructure
         {
         }
+
+        [TagStructure(Size = 0x240)]
+        public class GlobalSelfTrackBlock : TagStructure
+        {
+            [TagField(Length = 32)]
+            public string Time;
+            [TagField(Length = 32)]
+            public string Machine;
+            [TagField(Length = 256)]
+            public string Version;
+            [TagField(Length = 256)]
+            public string Command;
+        }
     }
 
     [TagStructure(Size = 0x48, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -203,4 +219,5 @@ namespace TagTool.Tags.Definitions
         public ushort[] VmfTerms;
         public uint AnalyticalLightIndex;
     }
+
 }

@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 {
 	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x18C, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
 	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
 	{
@@ -824,7 +824,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Padding1;
         }
 
-        [TagStructure(Size = 0x80, Align = 0x10)]
+        [TagStructure(Size = 0x78, Align = 0x10)]
         public class HingeConstraint : TagStructure
 		{
             public StringId Name;
@@ -923,8 +923,8 @@ namespace TagTool.Tags.Definitions
             public Bounds<Angle> LimitAngleBounds;
         }
 
-        [TagStructure(Size = 0x30, Align = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x60, Align = 0x10, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x2C, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x58, Align = 0x10, Platform = CachePlatform.MCC)]
         public class Phantom : TagStructure
 		{
             public HavokShapeBaseNoRadius ShapeBase;

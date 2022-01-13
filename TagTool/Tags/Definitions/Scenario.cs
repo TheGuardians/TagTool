@@ -1920,9 +1920,12 @@ namespace TagTool.Tags.Definitions
             public List<AcousticSectorPointBlock> Points;
             public RealPlane3d TopPlane;
             public RealPlane3d BottomPlane;
+
             [TagField(MinVersion = CacheVersion.Halo4)]
-            public AcousticpaletteFlags Flags; 
+            public AcousticpaletteFlags Flags;
+            [TagField(MinVersion = CacheVersion.Halo4)]
             public float OcclusionValue;
+
             public short Acoustics;
             public short EditorFolder;
             public float Height;
@@ -2516,6 +2519,9 @@ namespace TagTool.Tags.Definitions
 
             public List<FiringPosition> FiringPositions;
             public List<Area> Areas;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint Unknown;
 
             [Flags]
             public enum ZoneFlagsOld : int

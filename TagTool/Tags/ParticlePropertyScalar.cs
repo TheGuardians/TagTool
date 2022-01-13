@@ -18,12 +18,15 @@ namespace TagTool.Tags
         [TagField(MaxVersion = Cache.CacheVersion.HaloOnline700123)]
         public EditablePropertiesFlags RuntimeMFlags;
         [TagField(Flags = Padding, Length = 3, MaxVersion = Cache.CacheVersion.HaloOnline700123)]
-        public byte[] Unused = new byte[3];
+        public byte[] Padding1 = new byte[3];
 
         [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
         public ushort RuntimeMFlagsReach;
         [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
         public ForceFlagsValue ForceFlags;
+
+        [TagField(Length = 0x1, Flags = TagFieldFlags.Padding, MinVersion = Cache.CacheVersion.HaloReach)]
+        public byte[] Padding2;
 
         public enum ParticleStates : byte
         {

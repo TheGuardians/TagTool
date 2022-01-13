@@ -171,7 +171,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
         public class AiProperty : TagStructure
 		{

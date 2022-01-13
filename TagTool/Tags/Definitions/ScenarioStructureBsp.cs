@@ -602,6 +602,10 @@ namespace TagTool.Tags.Definitions
 
             public List<Seam> SeamIndices;
             public List<DecoratorGrid> DecoratorGrids;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<CheapLightMarkerRefBlock> CheapLightMarkerRefs;
+
             public List<PvsBoundObjectIdentifiersBlock> PvsBoundObjectIdentifiers;
             public List<PvsBoundObjectReferencesBlock> PvsBoundObjectReferences;
             public List<StructureClusterCubemap> ClusterCubemaps;
@@ -715,6 +719,14 @@ namespace TagTool.Tags.Definitions
                     public RealPoint3d ReferencePoint;
                     public int PointIndex;
                 }
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class CheapLightMarkerRefBlock : TagStructure
+            {
+                public short CheapLightReferenceReference;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
             }
         }
 

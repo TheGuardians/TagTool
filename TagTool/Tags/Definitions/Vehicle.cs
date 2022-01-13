@@ -9,7 +9,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x114, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x140, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x148, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x148, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x17C, MinVersion = CacheVersion.HaloReach)]
     public class Vehicle : Unit
     {
         public VehicleFlagBits VehicleFlags; // int
@@ -862,7 +863,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xCC)]
+        [TagStructure(Size = 0xA8)]
         public class RevenantPhysics : TagStructure
         {
             public HumanTankPhysics TankPhysics;

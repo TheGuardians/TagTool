@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using TagTool.Shaders;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -44,16 +45,18 @@ namespace TagTool.Tags.Definitions
             public ArgbColor DefaultColor;
             public float DefaultBitmapScale;
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown16;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown17;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown18;
-            [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
-            public uint Unknown19;
-            [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
-            public uint Unknown20;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public UiAndUsageFlags UsageFlags;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public FunctionTypeEnum ForceFunctionType;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ColorGraphTypeEnum ForceFunctionColorCount;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float SuggestedRealMin;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float SuggestedRealMax;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int TicksFromMinToMax;
 
             public byte[] HelpText;
 
@@ -89,6 +92,39 @@ namespace TagTool.Tags.Definitions
                 BlackBorder,
                 MirrorOnce,
                 MirrorOnceBorder
+            }
+
+            [Flags]
+            public enum UiAndUsageFlags : uint
+            {
+                UseForceFunctionType = 1 << 0,
+                UseForceFunctionColorCount = 1 << 1,
+                ParameterInvisibleInUi = 1 << 2,
+                LockFunctionValue = 1 << 3
+            }
+
+            public enum FunctionTypeEnum : short
+            {
+                Identity,
+                Constant,
+                Transition,
+                Periodic,
+                Linear,
+                LinearKey,
+                MultiLinearKey,
+                Spline,
+                MultiSpline,
+                Exponent,
+                Spline2
+            }
+
+            public enum ColorGraphTypeEnum : short
+            {
+                Scalar,
+                Constant,
+                _2Color,
+                _3Color,
+                _4Color
             }
         }
     }

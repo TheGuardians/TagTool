@@ -141,6 +141,19 @@ namespace TagTool.Tags.Definitions
         public CharacterPhysicsGroundStruct BipedGroundPhysics;
         public CharacterPhysicsFlyingStruct BipedFlyingPhysics;
 
+        public List<ContactPoint> ContactPoints; // these are the points where the biped touches the ground
+        public CachedTag ReanimationCharacter; // when the flood reanimate this guy, he turns into a ...
+        public CachedTag ReanimationMorphMuffins; // the kind of muffins I create to cover my horrible transformation
+        public CachedTag DeathSpawnCharacter; // when I die, out of the ashes of my death crawls a ...
+        public short DeathSpawnCount;
+
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
+
+        public BipedLeapingDataStruct BipedLeapingData;
+        public BipedGroundFitting BipedGroundFittingData;
+
+
         [TagStructure(Size = 0x20)]
         public class UnitTrickDefinitionBlock : TagStructure
         {
@@ -285,17 +298,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        public List<ContactPoint> ContactPoints; // these are the points where the biped touches the ground
-        public CachedTag ReanimationCharacter; // when the flood reanimate this guy, he turns into a ...
-        public CachedTag ReanimationMorphMuffins; // the kind of muffins I create to cover my horrible transformation
-        public CachedTag DeathSpawnCharacter; // when I die, out of the ashes of my death crawls a ...
-        public short DeathSpawnCount;
 
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
-
-        public BipedLeapingDataStruct BipedLeapingData;
-        public BipedGroundFitting BipedGroundFittingData;
 
         [TagStructure(Size = 0x30)]
         public class BipedLeapingDataStruct : TagStructure
@@ -319,7 +322,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
         public class BipedGroundFitting : TagStructure
         {
             [TagField(MinVersion = CacheVersion.HaloReach)]

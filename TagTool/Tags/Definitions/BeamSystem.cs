@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "beam_system", Tag = "beam", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "beam_system", Tag = "beam", Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "beam_system", Tag = "beam", Size = 0x18, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "beam_system", Tag = "beam", Size = 0xC, MinVersion = CacheVersion.HaloReach)]
     public class BeamSystem : TagStructure
 	{
         public List<BeamDefinitionBlock> Beams;
