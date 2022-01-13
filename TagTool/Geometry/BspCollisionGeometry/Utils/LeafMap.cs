@@ -177,6 +177,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         }
                     }
                     Bsp_Builder.build_leaves(ref surface_array, ref new_leaf_index);
+                    new_leaf_index = (int)(new_leaf_index | 0x80000000);
                     break;
                 case 3:
                     //nothing to do
@@ -683,7 +684,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             leaf1.portal_indices.Add(leafybsp.leaf_map_portals.Count - 1);
 
             //flag leaf portals that are very small
-            float area = polygon_get_area_internal(points);
+            double area = polygon_get_area_internal(points);
             double area_perimeter_ratio = Math.Sqrt(area) / polygon_get_perimeter(points);
             if (area < 0.0024999999d || area_perimeter_ratio < 0.0099999998d)
                 leaf_portal_designator_set_flags(ref leafybsp, leafybsp.leaf_map_portals.Count - 1);
@@ -765,6 +766,78 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
             return polygon_points;
         }
+        public List<RealPoint2d> plane_cut_polygon_2d(RealPlane2d plane2d, List<RealPoint2d> polygon_points, double margin)
+        {
+            List<RealPoint2d> output_points = new List<RealPoint2d>();
+            RealPoint2d previous_point = polygon_points[polygon_points.Count - 1];
+            double d0 = point_plane_dot_product_2d(previous_point, plane2d);
+
+            bool vertex_d_greater_than_margin = false;
+            bool vertex_d_less_than_negative_margin = false;
+
+            for (var vertex_index = 0; vertex_index < polygon_points.Count; vertex_index++)
+            {
+                RealPoint2d current_point = polygon_points[vertex_index];
+                double d1 = point_get_plane_distance_2d(current_point, plane2d);
+
+                if (d1 > margin)
+                    vertex_d_greater_than_margin = true;
+                if (d1 < -margin)
+                    vertex_d_less_than_negative_margin = true;
+
+                //are the current and final vertex on the same side of the plane?
+                if (d1 >= 0 != d0 >= 0)
+                {
+                    RealPoint2d vector = previous_point - current_point;
+                    double midpoint_d = point_plane_dot_product_2d(vector, plane2d);
+                    //protect from dividing by zero
+                    double dratio = midpoint_d == 0.0f ? 0.0f : -d1 / midpoint_d;
+                    //clamp to range of 0 and 1
+                    dratio = Math.Min(Math.Max(dratio, 0.0d), 1.0d);
+                    output_points.Add(new RealPoint2d
+                    {
+                        X = (float)(vector.X * dratio + current_point.X),
+                        Y = (float)(vector.Y * dratio + current_point.Y),
+                    });
+                    //make sure distances between consecutive vertices and the first vertex are > 0.0001
+                    if (output_points.Count > 1 &&
+                        (margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[0].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[0].Y) ||
+                        margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[output_points.Count - 2].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[output_points.Count - 2].Y)))
+                    {
+                        output_points.RemoveAt(output_points.Count - 1);
+                    }
+                }
+                if (d1 >= 0)
+                {
+                    output_points.Add(current_point);
+                    //make sure distances between consecutive vertices and the first vertex are > 0.0001
+                    if (output_points.Count > 1 &&
+                        (margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[0].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[0].Y) ||
+                        margin > Math.Abs(output_points[output_points.Count - 1].X - output_points[output_points.Count - 2].X) &&
+                        margin > Math.Abs(output_points[output_points.Count - 1].Y - output_points[output_points.Count - 2].Y)))
+                    {
+                        output_points.RemoveAt(output_points.Count - 1);
+                    }
+                }
+                d0 = d1;
+                previous_point = current_point;
+            }
+
+            if (output_points.Count < 3)
+                return new List<RealPoint2d>();
+            if (vertex_d_greater_than_margin)
+            {
+                if (!vertex_d_less_than_negative_margin)
+                    return polygon_points;
+                else
+                    return output_points;
+            }
+            else
+                return new List<RealPoint2d>();
+        }
 
         public List<RealPoint2d> plane_cut_polygon_2d_new(RealPlane2d plane2d, List<RealPoint2d> polygon_points, double margin)
         {
@@ -809,15 +882,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             {
                                 RealPoint2d vector = previous_point - current_point;
                                 double dot_product = point_plane_dot_product_2d(vector, plane2d);
-                                if (dot_product < -0.000099999997 || dot_product > 0.000099999997)
+                                if (dot_product < -margin || dot_product > margin)
                                 {
                                     double d1 = point_get_plane_distance_2d(previous_point, plane2d);
                                     double dratio = d1 / dot_product;
-                                    output_points.Add(new RealPoint2d
-                                    {
-                                        X = (float)(previous_point.X - vector.X * dratio),
-                                        Y = (float)(previous_point.Y - vector.Y * dratio),
-                                    });
+                                    output_points.Add(vertex_shift_to_plane_2d(previous_point, vector, dratio));
                                 }
                             }
                             output_points.Add(current_point);
@@ -828,15 +897,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             RealPoint2d previous_point = polygon_points[previous_point_index];
                             RealPoint2d vector = current_point - previous_point;
                             double dot_product = point_plane_dot_product_2d(vector, plane2d);
-                            if(dot_product < -0.000099999997 || dot_product > 0.000099999997)
+                            if(dot_product < -margin || dot_product > margin)
                             {
                                 double d1 = point_get_plane_distance_2d(current_point, plane2d);
                                 double dratio = d1 / dot_product;
-                                output_points.Add(new RealPoint2d
-                                {
-                                    X = (float)(current_point.X - vector.X * dratio),
-                                    Y = (float)(current_point.Y - vector.Y * dratio),
-                                });
+                                output_points.Add(vertex_shift_to_plane_2d(current_point, vector, dratio));
                             }
                         }
                         previous_point_index = i;
@@ -875,6 +940,24 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             double XI = I * point.X;
             double XIYJ = XI + YJ;
             return XIYJ;
+        }
+
+        public RealPoint2d vertex_shift_to_plane_2d(RealPoint2d p0, RealPoint2d p1, double dratio)
+        {
+            //precision requires this function to use identical order of operations as the compiled version
+            /*
+                X = (float)(current_point.X - vector.X * dratio),
+                Y = (float)(current_point.Y - vector.Y * dratio),
+            */
+            double p1x = p1.X;
+            double p1xD = p1x * dratio;
+            double xresult = p0.X - p1xD;
+
+            double p1y = p1.Y;
+            double p1yD = p1y * dratio;
+            double yresult = p0.Y - p1yD;
+
+            return new RealPoint2d((float)xresult, (float)yresult);
         }
 
         public bool populate_plane_designators(ref leafy_bsp leafybsp, List<int> plane_designators, int bsp3dnode_index, int parent_bsp3dnode_index)
@@ -1023,8 +1106,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public float polygon_get_area(List<RealPoint2d> projected_points, RealPlane3d plane)
         {
-            float area = polygon_get_area_internal(projected_points);
-            if (area == 0.0f)
+            double area = polygon_get_area_internal(projected_points);
+            if (area == 0.0)
                 return 0.0f;
 
             int plane_projection_axis = Bsp_Builder.plane_get_projection_coefficient(plane);
@@ -1043,10 +1126,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
 
             //divide area by absolute value of plane projection coefficient
-            return area / Math.Abs(plane_coefficient);
+            return (float)(area / Math.Abs(plane_coefficient));
         }
 
-        public float polygon_get_area_internal(List<RealPoint2d> projected_points)
+        public double polygon_get_area_internal(List<RealPoint2d> projected_points)
         {
             double area = 0.0f;
             for (var i = 0; i < projected_points.Count - 2; i++)
@@ -1055,9 +1138,20 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 RealPoint2d v31 = projected_points[i + 2] - projected_points[0];
 
                 //cross product of two vectors times 0.5
-                area = area + (v31.Y * v21.X - v31.X * v21.Y) * 0.5f;
+                area = area + point_point_cross_product_2d(v31, v21) * 0.5d;
             }
-            return (float)Math.Abs(area);
+            return Math.Abs(area);
+        }
+        public double point_point_cross_product_2d(RealPoint2d pointA, RealPoint2d pointB)
+        {
+            //precision requires this function to use identical order of operations as the compiled version
+            //pointA.Y * pointB.X - pointA.X * pointB.Y
+            double Ya = pointA.Y;
+            double YX = Ya * pointB.X;
+            double Xa = pointA.X;
+            double XY = Xa * pointB.Y;
+            double XIYJ = YX - XY;
+            return XIYJ;
         }
 
         public List<RealPoint2d> polygon_project_on_plane(List<RealPoint3d> points, RealPlane3d plane, int plane_index)
