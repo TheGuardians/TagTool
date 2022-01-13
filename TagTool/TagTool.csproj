@@ -361,7 +361,7 @@
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\MathHelper.cs" />
-    <Compile Include="Common\ObjectIdentifier.cs" />
+    <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />
     <Compile Include="Common\SphericalHarmonics.cs" />

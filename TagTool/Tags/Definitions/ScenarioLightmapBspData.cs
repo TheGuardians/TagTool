@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
 using System;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -169,7 +170,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
     public class SceneryLightProbe : TagStructure
     {
-        public ObjectIdentifier ObjectId;
+        public ScenarioObjectIdentifier ObjectId;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public HalfRGBLightProbe LightProbe;
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -179,7 +180,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x2C)]
     public class MachineLightProbes : TagStructure
     {
-        public ObjectIdentifier ObjectId;
+        public ScenarioObjectIdentifier ObjectId;
         public RealRectangle3d Bounds;
         public List<MachineLightProbe> LightProbes;
 
