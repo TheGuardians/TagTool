@@ -226,6 +226,7 @@ namespace TagTool.Tags
 					return 0x10;
 
 				case TypeCode.Object when attr.Length == 0 && type == typeof(byte[]) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Beta, CacheVersion.Unknown):
+				case TypeCode.Object when type == typeof(TagData):
 					return 0x14;
 
                 case TypeCode.Object when type == typeof(RealBoundingBox):
