@@ -1,7 +1,7 @@
 using System;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags.GUI;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -37,6 +37,22 @@ namespace TagTool.Tags.Definitions
             ReplaceWithWhite = 1 << 10,
             ReplaceWithBlack = 1 << 11
         }
+
+        //[Flags]
+        //public enum GuiBitmapFlags : int
+        //{
+        //    DoNotApplyOldContentUpscaling = 1 << 0,
+        //    OverrideTemplateFlags = 1 << 1,
+        //    EnableAnimationDebugging = 1 << 2,
+        //    ScaleToFitBounds = 1 << 3,
+        //    RenderAsScreenBlur = 1 << 4,
+        //    RenderAsPlayerEmblem = 1 << 5,
+        //    SpriteFromExportedInteger = 1 << 6,
+        //    SequenceFromExportedInteger = 1 << 7,
+        //    AttachShaderToExportedInteger = 1 << 8,
+        //    AllowListItemToOverrideAnimationSkin = 1 << 9,
+        //    Clickable = 1 << 10
+        //}
 
         public enum BlendMethodValue : short
         {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags.GUI;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -15,50 +15,7 @@ namespace TagTool.Tags.Definitions
         public List<CameraSettingsBlock> CameraSettings;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown2;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown4;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown5;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown6;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float FOV = 25.0f;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown8;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> ZoomFunction;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementLeft;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementRight;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementUp;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementDown;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown14;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown15;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort ZoomIn;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort ZoomOut;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort RotateLeft;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort RotateRight;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown20;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown21;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<TexCam> TextureCameraSections;
+        public ModelWidgetData ModelData;
 
         [Flags]
         public enum ModelWidgetFlags : int
@@ -67,6 +24,46 @@ namespace TagTool.Tags.Definitions
             OverrideTemplateFlags = 1 << 1,
             EnableAnimationDebugging = 1 << 2,
             UNUSED = 1 << 3
+        }
+
+        [TagStructure(Size = 0x4C, MinVersion = CacheVersion.Halo3ODST)]
+        public class ModelWidgetData : TagStructure
+        {
+            public uint Unknown4;
+            public uint Unknown5;
+            public uint Unknown6;
+            public uint Unknown7;
+            public uint Unknown8;
+            public float FOV;
+            public uint Unknown10;
+            public List<ZoomFunctionBlock> ZoomFunction;
+            public GamepadButtonDefinition MovementLeft;
+            public GamepadButtonDefinition MovementRight;
+            public GamepadButtonDefinition MovementUp;
+            public GamepadButtonDefinition MovementDown;
+            public GamepadButtonDefinition Unknown16;
+            public GamepadButtonDefinition Unknown17;
+            public GamepadButtonDefinition ZoomIn;
+            public GamepadButtonDefinition ZoomOut;
+            public GamepadButtonDefinition RotateLeft;
+            public GamepadButtonDefinition RotateRight;
+            public GamepadButtonDefinition Unknown22;
+            public GamepadButtonDefinition Unknown23;
+            public List<TexCamBlock> TextureCameraSections;
+
+            [TagStructure(Size = 0x14)]
+            public class TexCamBlock : TagStructure
+            {
+                public StringId Name;
+                public Bounds<float> BoundsX;
+                public Bounds<float> BoundsY;
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class ZoomFunctionBlock : TagStructure
+            {
+                public TagFunction Function;
+            }
         }
 
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
@@ -138,6 +135,35 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public Bounds<float> XBounds;   
             public Bounds<float> YBounds;
+        }
+
+        public enum GamepadButtonDefinition : short
+        {
+            LeftTrigger,
+            RightTrigger,
+            DpadUp,
+            DpadDown,
+            DpadLeft,
+            DpadRight,
+            Start,
+            Back,
+            LeftThumb,
+            RightThumb,
+            ButtonA,
+            ButtonB,
+            ButtonX,
+            ButtonY,
+            LeftBumper,
+            RightBumper,
+            LeftStickLeft,
+            LeftStickRight,
+            LeftStickUp,
+            LeftStickDown,
+            RightStickLeft,
+            RightStickRight,
+            RightStickUp,
+            RightStickDown,
+            Unknown
         }
     }
 }

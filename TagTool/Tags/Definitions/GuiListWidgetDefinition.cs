@@ -1,8 +1,8 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
-using TagTool.Tags.GUI;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {

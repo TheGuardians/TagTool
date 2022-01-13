@@ -709,7 +709,6 @@
     <Compile Include="Geometry\Utils\GeometryToObjectConverter.cs" />
     <Compile Include="Geometry\Utils\MeshOptimizer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="GUI\GuiWidgets.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
     <Compile Include="Havok\HavokMoppGenerator.cs" />
@@ -778,12 +777,13 @@
     <Compile Include="Tags\Definitions\AtmosphereFog.cs" />
     <Compile Include="Tags\Definitions\AtmosphereGlobals.cs" />
     <Compile Include="Tags\Definitions\CameraShake.cs" />
+    <Compile Include="Tags\Definitions\Common\GuiWidgets.cs" />
     <Compile Include="Tags\Definitions\Common\Multiplayer.cs" />
     <Compile Include="Tags\Definitions\Common\NullBlock.cs" />
     <Compile Include="Tags\Definitions\Common\RuntimeGpu.cs" />
     <Compile Include="Tags\Definitions\Common\Structure.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
-    <Compile Include="GUI\GuiDefinition.cs" />
+    <Compile Include="Tags\Definitions\Common\GuiDefinition.cs" />
     <Compile Include="Cache\Gen1\TagDefinitionsGen1.cs" />
     <Compile Include="Cache\Gen2\TagDefinitionsGen2.cs" />
     <Compile Include="Cache\Gen3\TagDefinitionsGen3.cs" />

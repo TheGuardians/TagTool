@@ -19,7 +19,6 @@ using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Gen3;
 using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
-using TagTool.Tags.GUI;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags.Definitions.Common;
 
@@ -1492,13 +1491,13 @@ namespace TagTool.Commands.Porting
                     switch (BlamCache.Version)
                     {
                         case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_H3);
+                            textWidget.Definition.CustomFont = GetEquivalentValue(textWidget.Definition.CustomFont, textWidget.Definition.CustomFont_H3);
                             break;
                         case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
-                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_H3MCC);
+                            textWidget.Definition.CustomFont = GetEquivalentValue(textWidget.Definition.CustomFont, textWidget.Definition.CustomFont_H3MCC);
                             break;
                         case CacheVersion.Halo3ODST:
-                            textWidget.CustomFont = GetEquivalentValue(textWidget.CustomFont, textWidget.CustomFont_ODST);
+                            textWidget.Definition.CustomFont = GetEquivalentValue(textWidget.Definition.CustomFont, textWidget.Definition.CustomFont_ODST);
                             break;
                     }
                     return textWidget;

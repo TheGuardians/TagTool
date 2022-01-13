@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
-using TagTool.Tags.GUI;
-using TagTool.Tags.Definitions;
-using TagTool.IO;
 using TagTool.Commands.Common;
+using TagTool.IO;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Commands.GUI
 {
@@ -63,15 +63,15 @@ namespace TagTool.Commands.GUI
                                 GuiSkinDefinition skn3tag = (GuiSkinDefinition)Definition;
                                 foreach(var textwidget in skn3tag.TextWidgets)
                                 {
-                                    textwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.GuiRenderBlock, scalefactor);
+                                    textwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 foreach (var bitmapwidget in skn3tag.BitmapWidgets)
                                 {
-                                    bitmapwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.GuiRenderBlock, scalefactor);
+                                    bitmapwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 foreach (var modelwidget in skn3tag.ModelWidgets)
                                 {
-                                    modelwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.GuiRenderBlock, scalefactor);
+                                    modelwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 Cache.Serialize(cacheStream, tag, skn3tag);
                                 break;
@@ -83,23 +83,23 @@ namespace TagTool.Commands.GUI
                                     groupwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(groupwidget.Definition.GuiRenderBlock, scalefactor);
                                     foreach (var textwidget in groupwidget.Definition.TextWidgets)
                                     {
-                                        textwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.GuiRenderBlock, scalefactor);
+                                        textwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.Definition.GuiRenderBlock, scalefactor);
                                     }
                                     foreach (var bitmapwidget in groupwidget.Definition.BitmapWidgets)
                                     {
-                                        bitmapwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.GuiRenderBlock, scalefactor);
+                                        bitmapwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.Definition.GuiRenderBlock, scalefactor);
                                     }
                                     foreach (var listwidget in groupwidget.Definition.ListWidgets)
                                     {
-                                        listwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidget.GuiRenderBlock, scalefactor);
-                                        foreach (var listwidgetitem in listwidget.ListWidgetItems)
+                                        listwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidget.Definition.GuiRenderBlock, scalefactor);
+                                        foreach (var listwidgetitem in listwidget.Definition.Items)
                                         {
                                             listwidgetitem.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidgetitem.GuiRenderBlock, scalefactor);
                                         }
                                     }
                                     foreach (var modelwidget in groupwidget.Definition.ModelWidgets)
                                     {
-                                        modelwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.GuiRenderBlock, scalefactor);
+                                        modelwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.Definition.GuiRenderBlock, scalefactor);
                                     }
                                 }
                                 Cache.Serialize(cacheStream, tag, scn3tag);
@@ -109,11 +109,11 @@ namespace TagTool.Commands.GUI
                                 bkeytag.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bkeytag.GuiRenderBlock, scalefactor);
                                 foreach (var textwidget in bkeytag.TextWidgets)
                                 {
-                                    textwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.GuiRenderBlock, scalefactor);
+                                    textwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 foreach (var bitmapwidget in bkeytag.BitmapWidgets)
                                 {
-                                    bitmapwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.GuiRenderBlock, scalefactor);
+                                    bitmapwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 Cache.Serialize(cacheStream, tag, bkeytag);
                                 break;
@@ -131,23 +131,23 @@ namespace TagTool.Commands.GUI
                                 gruptag.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(gruptag.GuiRenderBlock, scalefactor);
                                 foreach (var textwidget in gruptag.TextWidgets)
                                 {
-                                    textwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.GuiRenderBlock, scalefactor);
+                                    textwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(textwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 foreach (var bitmapwidget in gruptag.BitmapWidgets)
                                 {
-                                    bitmapwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.GuiRenderBlock, scalefactor);
+                                    bitmapwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(bitmapwidget.Definition.GuiRenderBlock, scalefactor);
                                 }
                                 foreach (var listwidget in gruptag.ListWidgets)
                                 {
-                                    listwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidget.GuiRenderBlock, scalefactor);
-                                    foreach (var listwidgetitem in listwidget.ListWidgetItems)
+                                    listwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidget.Definition.GuiRenderBlock, scalefactor);
+                                    foreach (var listwidgetitem in listwidget.Definition.Items)
                                     {
                                         listwidgetitem.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(listwidgetitem.GuiRenderBlock, scalefactor);
                                     }
                                 }
                                 foreach (var modelwidget in gruptag.ModelWidgets)
                                 {
-                                    modelwidget.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.GuiRenderBlock, scalefactor);
+                                    modelwidget.Definition.GuiRenderBlock = (GuiDefinition)RescaleGUIDef(modelwidget.Definition.GuiRenderBlock, scalefactor);
                                 }                              
                                 Cache.Serialize(cacheStream, tag, gruptag);
                                 break;
