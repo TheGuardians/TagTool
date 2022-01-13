@@ -1319,7 +1319,7 @@ namespace TagTool.Tags.Definitions
             PerVertex,
         }
 
-        [TagStructure]
+        [TagStructure(Size = 0x4)]
         public class PathfindingReference : TagStructure
         {
             public short BspIndex;
@@ -1600,7 +1600,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown12;
             public List<PathfindingReference> PathfindingReferences;
 
-            [TagStructure]
+            [TagStructure(Size = 0x4)]
             public class PathfindingReference : TagStructure
 			{
                 public short BspIndex;

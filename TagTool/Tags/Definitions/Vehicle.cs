@@ -254,28 +254,28 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public Halo2Bits Halo2;
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
             public Halo3Bits Halo3;
 
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public ReachBits Reach;
 
             [Flags]
-            public enum Halo2Bits : int
+            public enum Halo2Bits : uint
             {
                 None,
                 Invalid = 1 << 0
             }
 
             [Flags]
-            public enum Halo3Bits : int
+            public enum Halo3Bits : uint
             {
                 None,
                 Invalid = 1 << 0
             }
 
             [Flags]
-            public enum ReachBits : int
+            public enum ReachBits : uint
             {
                 None,
                 HasSuspension = 1 << 0,
@@ -603,6 +603,7 @@ namespace TagTool.Tags.Definitions
 
             public Bounds<float> PropellerRotationSpeed;
 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float LandingTime;  // how long we must maintain the landing state in order to land
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float TakeoffTime; // how long it takes to leave the landed state

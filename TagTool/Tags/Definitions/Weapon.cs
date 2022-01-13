@@ -339,7 +339,7 @@ namespace TagTool.Tags.Definitions
             {
                 // 0 for max
                 public short Rounds;
-                [TagField(Length = 1, Flags = TagFieldFlags.Padding)]
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
                 [TagField(ValidTags = new[] { "eqip" })]
                 public CachedTag Equipment;

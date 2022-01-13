@@ -375,7 +375,7 @@ namespace TagTool.Tags.Definitions
             public List<Node> Nodes;
             public List<Constraint> Constraints;
 
-            [TagStructure(Size = 0x2, Align = 0x8)]
+            [TagStructure(Size = 0x2)]
             public class Node : TagStructure
 			{
                 public short NodeIndex;
@@ -824,7 +824,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Padding1;
         }
 
-        [TagStructure(Size = 0x78, Align = 0x10)]
+        [TagStructure(Size = 0x80, Align = 0x10)]
         public class HingeConstraint : TagStructure
 		{
             public StringId Name;
@@ -923,8 +923,8 @@ namespace TagTool.Tags.Definitions
             public Bounds<Angle> LimitAngleBounds;
         }
 
-        [TagStructure(Size = 0x2C, Align = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x58, Align = 0x10, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x30, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x60, Align = 0x10, Platform = CachePlatform.MCC)]
         public class Phantom : TagStructure
 		{
             public HavokShapeBaseNoRadius ShapeBase;

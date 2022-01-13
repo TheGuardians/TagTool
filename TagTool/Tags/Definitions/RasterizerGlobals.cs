@@ -38,6 +38,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public MotionBlurParametersBlock MotionBlurParameters;
 
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public uint Unknown1;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public uint Unknown2;
+
         [TagStructure(Size = 0x14)]
         public class DefaultBitmap : TagStructure
 		{

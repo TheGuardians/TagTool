@@ -13,10 +13,10 @@ namespace TagTool.Cache.Resources
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public MapTypeHalo3RetailValue MapTypeHalo3Retail;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public MapTypeHalo3OdstValue MapTypeHalo3Odst;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public MapSubTypeHalo3OdstValue MapSubTypeHalo3Odst;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]

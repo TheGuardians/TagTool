@@ -64,7 +64,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public int RightChild;
     }
 
-    [TagStructure(Size = 0x10, Align = 0x10)]
+    [TagStructure(Size = 0x10)]
     public class LargeSurface : TagStructure
     {
         public int Plane;
@@ -87,7 +87,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public int RightSurface;
     }
 
-    [TagStructure(Size = 0x14, Align = 0x8)]
+    [TagStructure(Size = 0x14)]
     public class LargeVertex : TagStructure
     {
         public RealPoint3d Point;
