@@ -209,7 +209,7 @@ namespace TagTool.Tags.Definitions
                 public List<StanceAnimation> StanceAnimations;
                 public List<MoveAnimation> MoveAnimations;
 
-                [TagStructure]
+                [TagStructure(Size = 0x34)]
                 public class StanceAnimation : TagStructure
 				{
                     [TagField(Flags = Label, Length = 32)]
@@ -221,7 +221,7 @@ namespace TagTool.Tags.Definitions
                     public float Unknown;
                 }
 
-                [TagStructure]
+                [TagStructure(Size = 0x50)]
                 public class MoveAnimation : TagStructure
 				{
                     [TagField(Flags = Label, Length = 32)]

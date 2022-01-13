@@ -425,7 +425,7 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown7;
             }
 
-            [TagStructure]
+            [TagStructure(Size = 4)]
             public class LookFunctionBlock : TagStructure
 			{
                 public float Scale;
