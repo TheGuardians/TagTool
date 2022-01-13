@@ -10,9 +10,9 @@ using TagTool.Tags;
 
 namespace TagTool.Geometry.BspCollisionGeometry
 {
-    [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-    [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-    [TagStructure(Size = 0x40, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0x38, Align = 0x10, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x48, Align = 0x10, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x40, Align = 0x10, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class CollisionGeometryShape : HkpShapeCollection
     {
         [TagField(Align = 16)]
