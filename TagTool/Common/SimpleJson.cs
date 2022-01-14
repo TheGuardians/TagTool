@@ -710,7 +710,6 @@ namespace SimpleJSON
             get { return m_Dict.Count; }
         }
 
-
         public override void Add(string aKey, JSONNode aItem)
         {
             if (!string.IsNullOrEmpty(aKey))
@@ -793,6 +792,12 @@ namespace SimpleJSON
             result += "\n" + aPrefix + "}";
             return result;
         }
+
+        public Dictionary<string, JSONNode> ToDictionary()
+        {
+            return m_Dict;
+        }
+
         public override void Serialize(System.IO.BinaryWriter aWriter)
         {
             aWriter.Write((byte)JSONBinaryTag.Class);
