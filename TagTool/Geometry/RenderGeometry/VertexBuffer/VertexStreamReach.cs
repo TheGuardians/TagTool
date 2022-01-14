@@ -285,9 +285,11 @@ namespace TagTool.Geometry
         public TinyPositionVertex ReadTinyPositionVertex()
         {
             return new TinyPositionVertex
-            {   
-                Position = Stream.ReadShort4N().IJK,
-                // TODO: check the W component
+            {
+                Position = Stream.ReadUShort3N(),
+                Variant = Stream.ReadUShort(),
+                Normal = Stream.ReadSByte4N(),
+                Color = Stream.ReadColor()
             };
         }
 
@@ -535,7 +537,7 @@ namespace TagTool.Geometry
                     return 0x10;
                 
                 case VertexBufferFormat.TinyPosition:
-                    return 0x8;
+                    return 0x10;
 
                 case VertexBufferFormat.StaticPerVertexColor:
                     return 0xC;

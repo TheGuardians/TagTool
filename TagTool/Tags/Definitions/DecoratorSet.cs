@@ -128,28 +128,36 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class DecoratorLodTransition : TagStructure
         {
-            public float BeginFadeDistance; // decorators will start to fade at this distance
-            public float FinishFadeDistance; // decorators will fade completely and be culled at this distance
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float StartFade; // decorators will start to fade at this distance
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float EndFade; // decorators will fade completely and be culled at this distance
+
             public float EarlyCull; // cull vertices this percentage sooner than end fade [0-1]
             public float CullBlockSize; // decorators are grouped into blocks to be culled in large batches
                                         // this determines how much ground each batch covers.
                                         // Should be small if you expect to have very dense decorators,
                                         // and large if you expect them to be sparse
 
-            [TagField(MinVersion = CacheVersion .HaloReach)]
-            public float Unknown1;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown2;
+            public float DecimationSpeed;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown3;
+            public float DecimationStartDistance;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float DecimateTo;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float DecimationStart;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float DecimationEnd;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int MaxValidLod;
             [TagField(Length = 4, MinVersion = CacheVersion.HaloReach)]
-            public LodFunctionStruct[] TransitionFunctions;
+            public ReachLodTransition[] TransitionsReach;
         }
 
-        [TagStructure(Size =  0x10)]
-        public class LodFunctionStruct : TagStructure
+        [TagStructure(Size = 0x10)]
+        public class ReachLodTransition : TagStructure
         {
             public float StartPoint;
             public float EndPoint;

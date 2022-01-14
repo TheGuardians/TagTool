@@ -666,7 +666,7 @@ namespace TagTool.Tags.Definitions
                 public RealPoint3d BoundingSphereOffset;
 
                 [TagField(Platform = CachePlatform.MCC)]
-                public List<short> Unknown1;
+                public List<short> ModelStartIndex;
 
                 [TagField(Flags = TagFieldFlags.Runtime)]
                 public List<TinyPositionVertex> Vertices;

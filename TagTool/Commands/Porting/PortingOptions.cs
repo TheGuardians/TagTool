@@ -18,6 +18,9 @@ namespace TagTool.Commands.Porting
         [Description("Enable experimental super node conversion")]
         public bool ReachSuperNodeConversion = false;
 
+        [Description("Enable reach decorator porting (WIP)")]
+        public bool ReachDecorators = false;
+
         [Description("Enable experimental collision leaf mapping")]
         public bool CollisionLeafMapping = false;
 

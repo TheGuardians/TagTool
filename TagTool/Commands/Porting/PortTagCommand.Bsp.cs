@@ -31,28 +31,42 @@ namespace TagTool.Commands.Porting
                 foreach (var grid in cluster.DecoratorGrids)
                 {
                     var buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
-                    var offset = grid.VertexBufferOffset;              
-
-                    grid.Vertices = new List<TinyPositionVertex>();
-                    using (var stream = new MemoryStream(buffer.Data.Data))
+                        
+                    if(BlamCache.Version == CacheVersion.HaloReach)
                     {
-                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
-                        stream.Position = offset;
-
-                        for(int i = 0; i < grid.Amount; i++)
-                            grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
-                    }
-
-                    if (grid.Amount == 0)
+                        grid.HaloOnlineInfo = new ScenarioStructureBsp.Cluster.DecoratorGrid.HaloOnlineDecoratorInfo()
+                        {
+                            PaletteIndex = grid.Gen3Info.PaletteIndex,
+                            Variant = 0,
+                            VertexBufferIndex = grid.Gen3Info.VertexBufferIndex
+                        };
+                        grid.GridSize *= 1.0f / ushort.MaxValue;
                         newDecoratorGrids.Add(grid);
+                    }
                     else
                     {
-                        // Get the new grids
-                        var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
+                        var offset = grid.VertexBufferOffset;
+                        grid.Vertices = new List<TinyPositionVertex>();
+                        using (var stream = new MemoryStream(buffer.Data.Data))
+                        {
+                            var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
+                            stream.Position = offset;
 
-                        // Add all to list
-                        foreach (var newGrid in newGrids)
-                            newDecoratorGrids.Add(newGrid);
+                            for (int i = 0; i < grid.Amount; i++)
+                                grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
+                        }
+
+                        if (grid.Amount == 0)
+                            newDecoratorGrids.Add(grid);
+                        else
+                        {
+                            // Get the new grids
+                            var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
+
+                            // Add all to list
+                            foreach (var newGrid in newGrids)
+                                newDecoratorGrids.Add(newGrid);
+                        }
                     }
                 }
                 cluster.DecoratorGrids = newDecoratorGrids;

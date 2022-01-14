@@ -305,12 +305,13 @@ namespace TagTool.Commands.Porting
         {
             if(definition is ScenarioStructureBsp sbsp)
             {
-                sbsp.Decorators.Clear();
-                foreach(var cluster in sbsp.Clusters)
+                if (!PortingOptions.Current.ReachDecorators)
                 {
-                    cluster.DecoratorGrids.Clear();
+                    sbsp.Decorators.Clear();
+                    foreach (var cluster in sbsp.Clusters)
+                        cluster.DecoratorGrids.Clear();
                 }
-
+                
                 foreach(var cluster in sbsp.Clusters)
                 {
                     cluster.RuntimeDecalCount = 0;
@@ -1371,6 +1372,9 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
+            int lodIndex = 0;
+            decoratorSet.LodSettings.StartFade = decoratorSet.LodSettings.TransitionsReach[lodIndex].StartPoint;
+            decoratorSet.LodSettings.EndFade = decoratorSet.LodSettings.TransitionsReach[lodIndex].EndPoint;           
             return decoratorSet;
         }
 
