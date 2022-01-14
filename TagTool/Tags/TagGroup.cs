@@ -72,6 +72,9 @@ namespace TagTool.Tags
 
         public bool Equals(TagGroup other)
         {
+            if (other == null)
+                return false;
+
             return Tag == other.Tag && ParentTag == other.ParentTag && GrandParentTag == other.GrandParentTag;
         }
 
@@ -82,7 +85,7 @@ namespace TagTool.Tags
 
         public static bool operator ==(TagGroup lhs, TagGroup rhs)
         {
-            return lhs.Equals(rhs);
+            return EqualityComparer<TagGroup>.Default.Equals(lhs, rhs);
         }
 
         public static bool operator !=(TagGroup lhs, TagGroup rhs)

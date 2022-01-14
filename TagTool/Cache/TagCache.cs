@@ -38,13 +38,25 @@ namespace TagTool.Cache
         public IEnumerable<CachedTag> FindAllInGroup(Tag groupTag) =>
             NonNull().Where(t => t.IsInGroup(groupTag));
 
+        public CachedTag FindFirstInGroup(Tag groupTag) =>
+            NonNull().FirstOrDefault(t => t.IsInGroup(groupTag));
+
+        public IEnumerable<CachedTag> FindAllInGroup<T>() where T : TagStructure
+        {
+            TagGroup group = TagDefinitions.GetTagDefinitionGroupTag(typeof(T));
+            return group == null ? null : FindAllInGroup(group.Tag);
+        }
+
+        public CachedTag FindFirstInGroup<T>() where T : TagStructure
+        {
+            TagGroup group = TagDefinitions.GetTagDefinitionGroupTag(typeof(T));
+            return group == null ? null : FindFirstInGroup(group.Tag);
+        }
+
         public IEnumerable<CachedTag> NonNull() =>
             TagTable.Where(t =>
                 (t != null) &&
                 (t.DefinitionOffset >= 0));
-
-        public CachedTag FindFirstInGroup(Tag groupTag) =>
-            NonNull().FirstOrDefault(t => t.IsInGroup(groupTag));
 
         public bool TryAllocateTag(out CachedTag result, Type type, string name = null)
         {

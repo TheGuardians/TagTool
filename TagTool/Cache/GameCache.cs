@@ -36,6 +36,8 @@ namespace TagTool.Cache
         public abstract object Deserialize(Stream stream, CachedTag instance);
         public abstract T Deserialize<T>(Stream stream, CachedTag instance);
 
+        public static GameCache Open(string filePath) => Open(new FileInfo(filePath));
+
         public static GameCache Open(FileInfo file)
         {
             MapFile map = new MapFile();
