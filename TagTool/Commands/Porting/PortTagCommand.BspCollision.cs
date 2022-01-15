@@ -57,6 +57,8 @@ namespace TagTool.Commands.Porting
 
                 if (PortingOptions.Current.CollisionLeafMapping)
                 {
+                    if (resourceDefinition.LargeCollisionBsps == null)
+                        resourceDefinition.LargeCollisionBsps = new TagBlock<LargeCollisionBspBlock>();
                     for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
                     {
                         ResizeCollisionBSP resizer = new ResizeCollisionBSP();
@@ -167,7 +169,7 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    if (!largebuilder.generate_bsp(ref bsp))
+                    if (!largebuilder.generate_bsp(ref bsp, false))
                         new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
                 }
             }

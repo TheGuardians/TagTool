@@ -78,14 +78,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     Errors.WriteOBJ();
                 return false;
             }
+
             if (!verify_collision_bsp())
             {
                 Console.WriteLine($"###Failed to verify collision bsp!");
-                return false;
-            }
-            if (!prune_node_tree())
-            {
-                Console.WriteLine($"###Failed to prune node tree!");
                 return false;
             }
 
@@ -98,6 +94,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     new TagToolWarning("Failed to build leaf map!");
                     Bsp = bsp_copy;
                 }
+            }
+
+            if (!prune_node_tree())
+            {
+                Console.WriteLine($"###Failed to prune node tree!");
+                return false;
             }
 
             if (hasErrors && debug)

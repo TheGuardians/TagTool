@@ -116,6 +116,15 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     }
                 }
             }
+            //fix leaves
+            foreach(var node in Bsp.Bsp3dNodes)
+            {
+                if (node.BackChild < 0 && (node.BackChild & 0x7FFFFFFF) >= Bsp.Leaves.Count)
+                    node.BackChild = -1;
+                if (node.FrontChild < 0 && (node.FrontChild & 0x7FFFFFFF) >= Bsp.Leaves.Count)
+                    node.FrontChild = -1;
+            }
+
             return true;
         }
 
