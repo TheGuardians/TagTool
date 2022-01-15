@@ -18,7 +18,7 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused1;
 
         [TagStructure(Size = 0x17C, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x1C8, Align = 0x8, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x1C8, MinVersion = CacheVersion.HaloReach)]
         public class LightVolumeDefinitionBlock : TagStructure
 		{
             public StringId LightVolumeName;
@@ -35,19 +35,19 @@ namespace TagTool.Tags.Definitions
             public float BrightnessRatio;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int Unknown1;
+            public LightVolumeFlags Flags;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown2;
+            public float LodInDistance;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown3;
+            public float LodFeatherInDelta;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown4;
+            public float InverseLodFeatherIn;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown5;
+            public float LodOutDistance;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown6;
+            public float LodFeatherOutDelta;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown7;
+            public float InverseLodFeatherOut;
 
             public LightVolumePropertyReal Length;
             public LightVolumePropertyReal Offset;
@@ -61,6 +61,22 @@ namespace TagTool.Tags.Definitions
             public int RuntimeMUsedStates;
             public int RuntimeMMaxProfileCount;
             public RuntimeGpuData RuntimeMGpuData;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<LightVolumePrecompiledVertBlock> PrecompiledVertices;
+
+            [Flags]
+            public enum LightVolumeFlags : uint
+            {
+                // if not checked, the following flags do not matter, nor do LOD parameters below
+                LodEnabled = 1 << 0,
+                LodAlways10 = 1 << 1,
+                LodSameInSplitscreen = 1 << 2,
+                DisablePrecompiledProfiles = 1 << 3,
+                ForcePrecompileProfiles = 1 << 4,
+                CanBeLowRes = 1 << 5,
+                Precompiled = 1 << 6
+            }
 
             [TagStructure(Size = 0x20)]
             public class LightVolumePropertyReal : TagStructure
@@ -130,6 +146,15 @@ namespace TagTool.Tags.Definitions
                     Plus,
                     Times
                 }
+            }
+
+            [TagStructure(Size = 0x8)]
+            public class LightVolumePrecompiledVertBlock : TagStructure
+            {
+                public ushort R;
+                public ushort G;
+                public ushort B;
+                public ushort Thickness;
             }
         }
     }
