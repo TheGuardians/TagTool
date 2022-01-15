@@ -55,13 +55,20 @@ namespace TagTool.Commands.Porting
 
                 Console.WriteLine($"Converting cluster collision...");
 
-                for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
+                if (PortingOptions.Current.CollisionLeafMapping)
                 {
-                    ResizeCollisionBSP resizer = new ResizeCollisionBSP();
-                    LargeCollisionBspBlock largeblock = resizer.GrowCollisionBsp(resourceDefinition.CollisionBsps[i]);
-                    resourceDefinition.LargeCollisionBsps.Add(largeblock);
+                    for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
+                    {
+                        ResizeCollisionBSP resizer = new ResizeCollisionBSP();
+                        LargeCollisionBspBlock largeblock = resizer.GrowCollisionBsp(resourceDefinition.CollisionBsps[i]);
+                        resourceDefinition.LargeCollisionBsps.Add(largeblock);
+                        resourceDefinition.LargeCollisionBsps.AddressType = CacheAddressType.Data;
+                    }
+                    resourceDefinition.CollisionBsps.Clear();
                 }
-                resourceDefinition.CollisionBsps = null;
+
+                for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
+                    resourceDefinition.CollisionBsps[i] = ConvertCollisionBsp(resourceDefinition.CollisionBsps[i]);
 
                 for (int i = 0; i < resourceDefinition.LargeCollisionBsps.Count; i++)
                     resourceDefinition.LargeCollisionBsps[i] = ConvertLargeCollisionBsp(resourceDefinition.LargeCollisionBsps[i]);
