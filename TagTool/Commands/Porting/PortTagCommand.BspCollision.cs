@@ -56,7 +56,12 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine($"Converting cluster collision...");
 
                 for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
-                    resourceDefinition.CollisionBsps[i] = ConvertCollisionBsp(resourceDefinition.CollisionBsps[i]);
+                {
+                    ResizeCollisionBSP resizer = new ResizeCollisionBSP();
+                    LargeCollisionBspBlock largeblock = resizer.GrowCollisionBsp(resourceDefinition.CollisionBsps[i]);
+                    resourceDefinition.LargeCollisionBsps.Add(largeblock);
+                }
+                resourceDefinition.CollisionBsps = null;
 
                 for (int i = 0; i < resourceDefinition.LargeCollisionBsps.Count; i++)
                     resourceDefinition.LargeCollisionBsps[i] = ConvertLargeCollisionBsp(resourceDefinition.LargeCollisionBsps[i]);
@@ -155,7 +160,7 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    if (!largebuilder.generate_bsp(ref bsp, true))
+                    if (!largebuilder.generate_bsp(ref bsp))
                         new TagToolError(CommandError.CustomError, "Failed to generate large collision bsp!");
                 }
             }
