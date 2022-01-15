@@ -64,7 +64,7 @@ namespace TagTool.Commands.Porting
                         ResizeCollisionBSP resizer = new ResizeCollisionBSP();
                         LargeCollisionBspBlock largeblock = resizer.GrowCollisionBsp(resourceDefinition.CollisionBsps[i]);
                         resourceDefinition.LargeCollisionBsps.Add(largeblock);
-                        resourceDefinition.LargeCollisionBsps.AddressType = CacheAddressType.Data;
+                        resourceDefinition.LargeCollisionBsps.AddressType = CacheAddressType.Definition;
                     }
                     resourceDefinition.CollisionBsps.Clear();
                 }
