@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
-    class LeafMap
+    public class LeafMap
     {
         private LargeCollisionBspBlock Bsp { get; set; }
         public LargeCollisionBSPBuilder Bsp_Builder { get; set; }
@@ -76,7 +76,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     {
                         if (bsp_leaf.polygon_counts[1,0] > 0) //polygons2 type 0
                         {
-                            //new TagToolWarning("Fixing phantom leaf!");
+                            new TagToolWarning("Fixing phantom leaf!");
                             int new_leaf_index = -1;
                             if (reconstruct_bsp_leaf(bsp_leaf, ref new_leaf_index))
                             {
@@ -905,7 +905,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                             RealPoint2d previous_point = polygon_points[previous_point_index];
                             RealPoint2d vector = current_point - previous_point;
                             double dot_product = point_plane_dot_product_2d(vector, plane2d);
-                            if(dot_product < -margin || dot_product > margin)
+                            if (dot_product < -margin || dot_product > margin)
                             {
                                 double d1 = point_get_plane_distance_2d(current_point, plane2d);
                                 double dratio = d1 / dot_product;
@@ -926,17 +926,16 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
 
             //trim any points that are too close together
-            int prev_index = output_points.Count - 1;
-            for(var i = 0; i < output_points.Count; i++)
+            for(var i = 1; i < output_points.Count; i++)
             {
-                if (margin > Math.Abs(output_points[i].X - output_points[prev_index].X) &&
-                    margin > Math.Abs(output_points[i].X - output_points[prev_index].X))
+                if (margin > Math.Abs(output_points[i].X - output_points[i - 1].X) &&
+                    margin > Math.Abs(output_points[i].Y - output_points[i - 1].Y) ||
+                    margin > Math.Abs(output_points[i].X - output_points[0].X) &&
+                    margin > Math.Abs(output_points[i].Y - output_points[0].Y))
                 {
                     output_points.RemoveAt(i);
-                    prev_index = output_points.Count - 1;
-                    i = 0;
+                    i = 1;
                 }
-                prev_index = i;
             }
 
             if (output_points.Count < 3)

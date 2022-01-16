@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
-    class ResizeCollisionBSP
+    public class ResizeCollisionBSP
     {
         public LargeCollisionBspBlock GrowCollisionBsp(CollisionGeometry bsp)
         {

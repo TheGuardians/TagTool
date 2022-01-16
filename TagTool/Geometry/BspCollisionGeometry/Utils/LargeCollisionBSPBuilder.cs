@@ -11,7 +11,7 @@ using TagTool.Tags;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
-    class LargeCollisionBSPBuilder
+    public class LargeCollisionBSPBuilder
     {
         public LargeCollisionBspBlock Bsp { get; set; }
         private bool debug = false;
@@ -24,7 +24,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public bool generate_bsp(ref LargeCollisionBspBlock bsp, bool debug_arg = false)
         {
-            Bsp = bsp;
+            Bsp = bsp.DeepClone();
 
             Errors = new ErrorGeometryBuilder();
             hasErrors = false;
@@ -379,7 +379,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         RealPoint3d Point1 = new RealPoint3d();
                         if (surfaces_check_if_intersecting_internal(surface_index, second_surface_index, ref Point0, ref Point1))
                         {
-                            if (!warning_posted)
+                            if (!warning_posted && debug)
                             {
                                 Console.WriteLine("### ERROR found intersecting surfaces");
                                 warning_posted = true;
