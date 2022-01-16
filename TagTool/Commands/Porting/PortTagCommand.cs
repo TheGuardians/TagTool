@@ -343,41 +343,34 @@ namespace TagTool.Commands.Porting
                 //scenario.CratePalette.Clear();
                 scenario.Giants.Clear();
                 scenario.GiantPalette.Clear();
-                scenario.EffectScenery.Clear();
-                scenario.EffectSceneryPalette.Clear();
-                scenario.SoundScenery.Clear();
-                scenario.SoundSceneryPalette.Clear();
+                //scenario.EffectScenery.Clear();
+                //scenario.EffectSceneryPalette.Clear();
+                //scenario.SoundScenery.Clear();
+                //scenario.SoundSceneryPalette.Clear();
 
                 scenario.Flocks.Clear();
                 scenario.FlockPalette.Clear();
                 scenario.Creatures.Clear();
                 scenario.CreaturePalette.Clear();
 
-                scenario.LightVolumes.Clear();
-                scenario.LightVolumePalette.Clear();
-
-                scenario.DecalPalette.Clear();
-                scenario.Decals.Clear();
+                //scenario.LightVolumes.Clear();
+                //scenario.LightVolumePalette.Clear();
+                //scenario.DecalPalette.Clear();
+                //scenario.Decals.Clear();
 
                 scenario.Squads.Clear();
                 scenario.SquadPatrols.Clear();
                 scenario.SquadGroups.Clear();
                 scenario.AiObjectives.Clear();
                 scenario.AiPathfindingData.Clear();
+                scenario.Scripts.Clear();
+                scenario.ScriptStrings = null;
 
                 scenario.CharacterPalette.Clear();
                 scenario.UnitSeatsMapping.Clear();
                 scenario.MissionScenes.Clear();
 
-                scenario.LightmapAirprobes.Clear();
-
-                //scenario.Atmosphere.Clear();
-                //scenario.CameraFx.Clear();
                 scenario.SkyParameters = null; // unused in reach, we will create a new one
-
-                //scenario.DefaultCameraFx = null;
-                scenario.DefaultScreenFx = null;
-                scenario.GlobalLighting = null;
                 scenario.PerformanceThrottles = null;
                 scenario.GamePerformanceThrottles = null;
 
@@ -1817,7 +1810,7 @@ namespace TagTool.Commands.Porting
                 var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
 
                 if(tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
-                    newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, newValue);
+                    newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, tagFieldInfo, newValue);
 
                 tagFieldInfo.SetValue(data, newValue);
             }
@@ -1825,15 +1818,17 @@ namespace TagTool.Commands.Porting
             return UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);
 		}
 
-        private object ConvertGlobalMaterialTypeField(Stream cacheStream, Stream blamCacheStream, object value)
+        private object ConvertGlobalMaterialTypeField(Stream cacheStream, Stream blamCacheStream, TagFieldInfo fieldinfo, object value)
         {
             // only enabled for reach, however it might be worth using for h3 and odst as a fallback
-
             if (BlamCache.Version < CacheVersion.HaloReach)
                 return value;
 
             var globals = DeserializeTagCached<Globals>(CacheContext, cacheStream, CacheContext.TagCache.FindFirstInGroup<Globals>());
             var blamGlobals = DeserializeTagCached<Globals>(BlamCache, blamCacheStream, BlamCache.TagCache.FindFirstInGroup<Globals>());
+
+            var materials = globals.Materials;
+            var blamMaterials = BlamCache.Version >= CacheVersion.HaloReach ? blamGlobals.AlternateMaterials : blamGlobals.Materials;
             return ConvertInteral(value);
 
             object ConvertInteral(object val)
@@ -1842,11 +1837,21 @@ namespace TagTool.Commands.Porting
                 {
                     case StringId stringId:
                         if (stringId != StringId.Invalid)
-                            val = globals.Materials[FindMatchingMatrial(CacheContext.StringTable.GetString(stringId))].Name;
+                            val = materials[FindMatchingMaterial(CacheContext.StringTable.GetString(stringId))].Name;
                         break;
                     case short index:
                         if (index != -1)
-                            val = FindMatchingMatrial(BlamCache.StringTable.GetString(blamGlobals.Materials[index].Name));
+                        {
+                            if (index < 0 || index >= blamMaterials.Count)
+                            {
+                                index = 0;
+                                new TagToolWarning($"Global material type was out of range for '{fieldinfo.DeclaringType.FullName}.{fieldinfo.Name}', value: {index}");
+                            }
+                            else
+                            {
+                                val = FindMatchingMaterial(BlamCache.StringTable.GetString(blamMaterials[index].Name));
+                            }
+                        }
                         break;
                     case short[] indices:
                         for (int i = 0; i < indices.Length; i++)
@@ -1860,27 +1865,43 @@ namespace TagTool.Commands.Porting
                 return val;
             }
 
-            short FindMatchingMatrial(string name)
+            short FindMatchingMaterial(string name)
             {
-                // search for the name in the destination globals
-                var dstIndex = (short)globals.Materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
-                if (dstIndex != -1)
-                    return dstIndex;
+                var origianlName = name;
 
-                // we couldn't find it, take off the last segment e.g tough_organic_wood -> tough_organic
-                string[] nameParts = name.Split('_');
-                if (nameParts.Length == 1)
+                // we don't have wet materials
+                if (name.StartsWith("wet_"))
+                    name = name.Substring(4);
+
+                // search for the name in the destination materials
+                var matchIndex = (short)materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
+                if (matchIndex != -1)
+                {
+                    if(name != origianlName)
+                        new TagToolWarning($"Failed to find global material type '{origianlName}', using '{name}' instead");
+
+                    return matchIndex;
+                }
+                    
+                // we couldn't find it, find the index in the source materials
+                var blamIndex = blamMaterials.FindIndex(x => BlamCache.StringTable.GetString(x.Name) == origianlName);
+                if (blamIndex == -1)
+                    return -1;
+
+                // if it has a parent search for its name
+                StringId parentName = blamMaterials[blamIndex].ParentName;
+                if (parentName == StringId.Invalid)
                     return -1;
 
                 // recurse
-                short matchIndex = FindMatchingMatrial(string.Join("_", nameParts, 0, nameParts.Length - 1));
+                matchIndex = FindMatchingMaterial(BlamCache.StringTable.GetString(parentName));
 
-                // if we still can't find anything after removing all segments, use default_material
+                // if we still can't find anything after walking up the hierarchy, use 'default_material'
                 if (matchIndex == -1)
                     matchIndex = 0;
 
-                var matchName = CacheContext.StringTable.GetString(globals.Materials[matchIndex].Name);
-                new TagToolWarning($"Failed to find global material type '{name}', using '{matchName}' instead"); 
+                name = CacheContext.StringTable.GetString(materials[matchIndex].Name);
+                new TagToolWarning($"Failed to find global material type '{origianlName}', using '{name}' instead");
                 return matchIndex;
             }
         }
