@@ -31,6 +31,7 @@ namespace TagTool.Commands.Porting
 		private RenderGeometryConverter GeometryConverter { get; }
 
 		private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
+        private Dictionary<CachedTag, object> CachedTagData = new Dictionary<CachedTag, object>();
 
         private Dictionary<int, CachedTag> PortedTags = new Dictionary<int, CachedTag>();
         private Dictionary<uint, StringId> PortedStringIds = new Dictionary<uint, StringId>();
@@ -84,6 +85,7 @@ namespace TagTool.Commands.Porting
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;
 
             InitializeSoundConverter();
+            CachedTagData.Clear();
 
             /*
             if(CacheContext is GameCacheModPackage)
@@ -1801,10 +1803,12 @@ namespace TagTool.Commands.Porting
                     continue;
 
                 // skip the field if no conversion is needed
-                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
-                tagFieldInfo.FieldType == typeof(string))
-                    continue;
-
+                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) || tagFieldInfo.FieldType == typeof(string))
+                {
+                    if(!tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                        continue;
+                }
+                   
                 var oldValue = tagFieldInfo.GetValue(data);
                 if (oldValue is null)
                     continue;
@@ -1823,43 +1827,38 @@ namespace TagTool.Commands.Porting
 
         private object ConvertGlobalMaterialTypeField(Stream cacheStream, Stream blamCacheStream, object value)
         {
-            // TODO: It'd be better to cache this stuff rather than deserializing and searching every time
             // only enabled for reach, however it might be worth using for h3 and odst as a fallback
 
             if (BlamCache.Version < CacheVersion.HaloReach)
                 return value;
 
-            var globals = CacheContext.Deserialize<Globals>(cacheStream, CacheContext.TagCache.FindFirstInGroup<Globals>());
-            var blamGlobals = BlamCache.Deserialize<Globals>(blamCacheStream, BlamCache.TagCache.FindFirstInGroup<Globals>());
+            var globals = DeserializeTagCached<Globals>(CacheContext, cacheStream, CacheContext.TagCache.FindFirstInGroup<Globals>());
+            var blamGlobals = DeserializeTagCached<Globals>(BlamCache, blamCacheStream, BlamCache.TagCache.FindFirstInGroup<Globals>());
+            return ConvertInteral(value);
 
-            switch (value)
+            object ConvertInteral(object val)
             {
-                case StringId stringId:
-                    if (stringId != StringId.Invalid)
-                    {
-                        var name = CacheContext.StringTable.GetString(stringId);
-                        short materialIndex = FindMatchingMatrial(name);
-                        value = globals.Materials[materialIndex].Name;
-                    }
-                    break;
-                case short index:
-                    if (index != -1)
-                    {
-                        var name = BlamCache.StringTable.GetString(blamGlobals.Materials[index].Name);
-                        value = FindMatchingMatrial(name);
-                    }
-                    break;
-                case StringId[] stringIds:
-                    for (int i = 0; i < stringIds.Length; i++)
-                        stringIds[i] = (StringId)ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, stringIds[i]);
-                    break;
-                case short[] indices:
-                    for (int i = 0; i < indices.Length; i++)
-                        indices[i] = (short)ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, indices[i]);
-                    break;
+                switch (val)
+                {
+                    case StringId stringId:
+                        if (stringId != StringId.Invalid)
+                            val = globals.Materials[FindMatchingMatrial(CacheContext.StringTable.GetString(stringId))].Name;
+                        break;
+                    case short index:
+                        if (index != -1)
+                            val = FindMatchingMatrial(BlamCache.StringTable.GetString(blamGlobals.Materials[index].Name));
+                        break;
+                    case short[] indices:
+                        for (int i = 0; i < indices.Length; i++)
+                            indices[i] = (short)ConvertInteral(indices[i]);
+                        break;
+                    case StringId[] stringIds:
+                        for (int i = 0; i < stringIds.Length; i++)
+                            stringIds[i] = (StringId)ConvertInteral(stringIds[i]);
+                        break;
+                }
+                return val;
             }
-
-            return value;
 
             short FindMatchingMatrial(string name)
             {
@@ -2171,6 +2170,18 @@ namespace TagTool.Commands.Porting
             }
 
             return result;
+        }
+
+        private T DeserializeTagCached<T>(GameCache cache, Stream stream, CachedTag tag)
+        {
+            return (T)DeserializeTagCached(cache, stream, tag);
+        }
+
+        private object DeserializeTagCached(GameCache cache, Stream stream, CachedTag tag)
+        {
+            if (!CachedTagData.TryGetValue(tag, out object value))
+                CachedTagData.Add(tag, value = cache.Deserialize(stream, tag));
+            return value;
         }
     }
 }
