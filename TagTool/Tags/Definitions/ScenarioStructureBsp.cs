@@ -319,6 +319,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = TagFieldFlags.Label, MinVersion = CacheVersion.Halo3Retail)]
             public CachedTag RenderMethod;
 
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short RuntimeGlobalMaterialIndex;
             public short ConveyorSurfaceIndex;
 

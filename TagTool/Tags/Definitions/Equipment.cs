@@ -280,6 +280,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x80, MinVersion = CacheVersion.HaloReach)]
         public class InvincibilityBlock : TagStructure
 		{
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId InvincibilityMaterial;
             public short InvincibilityMaterialType;
             public short Unused1;
@@ -371,6 +372,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28)]
         public class TankModeBlock : TagStructure
 		{
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId NewPlayerMaterial;
             public uint Unknown;
             public float Duration;

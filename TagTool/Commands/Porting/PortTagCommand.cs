@@ -1050,13 +1050,6 @@ namespace TagTool.Commands.Porting
                     {
                         if(hlmt.NewDamageInfo == null || hlmt.NewDamageInfo.Count == 0)
                             hlmt.NewDamageInfo = new List<Model.GlobalDamageInfoBlock>() { ConvertDamageInfoReach(hlmt.OmahaDamageInfo) };
-
-                        foreach (var material in hlmt.Materials)
-                        {
-                            string name = CacheContext.StringTable.GetString(material.MaterialName);
-                            material.GlobalMaterialIndex = (short)ConvertReachMaterial(CacheContext, cacheStream, BlamCache, blamCacheStream, ref name, material.GlobalMaterialIndex);
-                            material.MaterialName = CacheContext.StringTable.GetStringId(name);
-                        }
                     }
                     break;
               
@@ -1143,14 +1136,6 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case ScenarioStructureBsp sbsp:
-                    if (BlamCache.Version >= CacheVersion.HaloReach)
-                    {
-                        foreach (var material in sbsp.CollisionMaterials)
-                        {
-                            string name = "default_material";
-                            material.RuntimeGlobalMaterialIndex = (short)ConvertReachMaterial(CacheContext, cacheStream, BlamCache, blamCacheStream, ref name, material.RuntimeGlobalMaterialIndex);
-                        }
-                    }
                     blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag, resourceStreams);
 					break;
 
@@ -1826,13 +1811,82 @@ namespace TagTool.Commands.Porting
 
                 // convert the field
                 var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
+
+                if(tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                    newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, newValue);
+
                 tagFieldInfo.SetValue(data, newValue);
             }
 
             return UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);
 		}
 
-		private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags flags)
+        private object ConvertGlobalMaterialTypeField(Stream cacheStream, Stream blamCacheStream, object value)
+        {
+            // TODO: It'd be better to cache this stuff rather than deserializing and searching every time
+            // only enabled for reach, however it might be worth using for h3 and odst as a fallback
+
+            if (BlamCache.Version < CacheVersion.HaloReach)
+                return value;
+
+            var globals = CacheContext.Deserialize<Globals>(cacheStream, CacheContext.TagCache.FindFirstInGroup<Globals>());
+            var blamGlobals = BlamCache.Deserialize<Globals>(blamCacheStream, BlamCache.TagCache.FindFirstInGroup<Globals>());
+
+            switch (value)
+            {
+                case StringId stringId:
+                    if (stringId != StringId.Invalid)
+                    {
+                        var name = CacheContext.StringTable.GetString(stringId);
+                        short materialIndex = FindMatchingMatrial(name);
+                        value = globals.Materials[materialIndex].Name;
+                    }
+                    break;
+                case short index:
+                    if (index != -1)
+                    {
+                        var name = BlamCache.StringTable.GetString(blamGlobals.Materials[index].Name);
+                        value = FindMatchingMatrial(name);
+                    }
+                    break;
+                case StringId[] stringIds:
+                    for (int i = 0; i < stringIds.Length; i++)
+                        stringIds[i] = (StringId)ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, stringIds[i]);
+                    break;
+                case short[] indices:
+                    for (int i = 0; i < indices.Length; i++)
+                        indices[i] = (short)ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, indices[i]);
+                    break;
+            }
+
+            return value;
+
+            short FindMatchingMatrial(string name)
+            {
+                // search for the name in the destination globals
+                var dstIndex = (short)globals.Materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
+                if (dstIndex != -1)
+                    return dstIndex;
+
+                // we couldn't find it, take off the last segment e.g tough_organic_wood -> tough_organic
+                string[] nameParts = name.Split('_');
+                if (nameParts.Length == 1)
+                    return -1;
+
+                // recurse
+                short matchIndex = FindMatchingMatrial(string.Join("_", nameParts, 0, nameParts.Length - 1));
+
+                // if we still can't find anything after removing all segments, use default_material
+                if (matchIndex == -1)
+                    matchIndex = 0;
+
+                var matchName = CacheContext.StringTable.GetString(globals.Materials[matchIndex].Name);
+                new TagToolWarning($"Failed to find global material type '{name}', using '{matchName}' instead"); 
+                return matchIndex;
+            }
+        }
+
+        private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags flags)
 		{
             switch (BlamCache.Version)
             {

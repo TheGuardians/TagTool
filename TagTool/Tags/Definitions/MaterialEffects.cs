@@ -23,7 +23,9 @@ namespace TagTool.Tags.Definitions
 			{
                 public CachedTag Effect;
                 public CachedTag Sound;
+                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
                 public StringId MaterialName;
+                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
                 public short RuntimeMaterialIndex; // formerly GlobalMaterialIndex
                 public SweetenerModeValue SweetenerMode;
 
@@ -46,7 +48,9 @@ namespace TagTool.Tags.Definitions
             {
                 public CachedTag Effect;
                 public CachedTag Sound;
+                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
                 public StringId MaterialName;
+                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
                 public short RuntimeMaterialIndex;
 
                 [TagField(Length = 2, Flags = Padding)]

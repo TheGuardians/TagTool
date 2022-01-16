@@ -156,8 +156,9 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 
-            [TagField(Flags = Label)]
+            [TagField(Flags = TagFieldFlags.GlobalMaterial | TagFieldFlags.Label)]
             public StringId MaterialName;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short RuntimeMaterialIndex;
 
             [TagField(Flags = Padding, Length = 2)]
@@ -226,6 +227,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34)]
         public class ProjectileMaterialResponseBlockNew : TagStructure
         {
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId MaterialName;
             public short RuntimeMaterialIndex;
             public MaterialPossibleResponseFlags ResponseFlags;

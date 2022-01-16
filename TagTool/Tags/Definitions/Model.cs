@@ -350,7 +350,9 @@ namespace TagTool.Tags.Definitions
             public short DamageSectionIndex;
             public short RuntimeCollisionMaterialIndex;
             public short RuntimeDamagerMaterialIndex;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId MaterialName;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short GlobalMaterialIndex;
 
             [TagField(Flags = Padding, Length = 2)]
@@ -400,6 +402,7 @@ namespace TagTool.Tags.Definitions
             public FlagsValue Flags;
             public float MaxVitality;
 
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId GlobalIndirectMaterialName;
             public short IndirectDamageSection;
             public short ShieldedStateDamageSection;
@@ -414,6 +417,7 @@ namespace TagTool.Tags.Definitions
             public List<DamageConstraint> DamageConstraints;
             public List<Node> Nodes;
 
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short RuntimeIndirectMaterialIndex;
             [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] pad1 = new byte[2];
@@ -453,6 +457,7 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
                 public FlagsValue Flags;
                 public float VitalityPercentage;
+                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
                 public StringId ShieldMaterialName;
 
                 public float StunTime;
@@ -481,6 +486,7 @@ namespace TagTool.Tags.Definitions
                 public float RuntimeRechargeVelocity;
                 public float RuntimeOverchargeVelocity;
                 public short RuntimeResurrectionRestoredRegionIndex;
+                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
                 public short RuntimeGlobalShieldMaterialType;
 
                 [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
@@ -727,6 +733,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// Absorbes AOE or child damage
             /// </summary>
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId GlobalIndirectMaterialName;
 
             /// <summary>
@@ -755,6 +762,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Unused6 = new byte[64];
 
             public float MaxShieldVitality;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId GlobalShieldMaterialName;
             public float ShieldMinStunDamage;
             public float ShieldStunTime;
@@ -771,7 +779,9 @@ namespace TagTool.Tags.Definitions
             public CachedTag ShieldRechargingEffect;
             public List<DamageSection> DamageSections;
             public List<Node> Nodes;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short GlobalShieldMaterialIndex;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short GlobalIndirectMaterialIndex;
             public float RuntimeShieldRechargeVelocity;
 

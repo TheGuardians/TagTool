@@ -970,7 +970,9 @@ namespace TagTool.Tags.Definitions
             public float EBrakeMovingFrictionVelocityDiff;
             [TagField(Length = 20, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padding2;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId CollisionMaterialName;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short CollisionGlobalMaterialIndex;
             // -------- friction point destruction data
             public ModelStateDestroyedValue ModelStateDestroyed;

@@ -7,6 +7,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "shader_screen", Tag = "rmss", Size = 0x8)]
     public class ShaderScreen : RenderMethod
     {
+        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public StringId Material;
         public byte Layer;
         public byte SortingOrder;

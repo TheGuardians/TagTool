@@ -395,12 +395,16 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x1C)]
         public class NodeEdge : TagStructure
 		{
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short NodeAGlobalMaterialIndex;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short NodeBGlobalMaterialIndex;
             public short NodeA;
             public short NodeB;
             public List<Constraint> Constraints;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId NodeAMaterial;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId NodeBMaterial;
 
             [TagStructure(Size = 0x24)]
@@ -595,6 +599,7 @@ namespace TagTool.Tags.Definitions
             public byte Flags;
             [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 3)]
             public byte[] Pad4 = new byte[3];
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public StringId MaterialName;
             public short PhantomType;
             public byte ProxyCollisionGroup;
@@ -647,6 +652,7 @@ namespace TagTool.Tags.Definitions
             public byte MaterialIndexReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public MaterialFlags MaterialFlags;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short RuntimeMaterialType;
             public float RelativeMassScale;
             public float Friction;

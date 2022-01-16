@@ -131,9 +131,13 @@ namespace TagTool.Tags.Definitions
         public float HeightCrouching;
         public float Radius;
         public float Mass;
+        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public StringId LivingMaterialName; // collision material used when character is alive
+        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public StringId DeadMaterialName; // collision material used when character is dead
+        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public short LivingGlobalMaterialIndex;
+        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public short DeadGlobalMaterialIndex;
         public List<PhysicsModel.Sphere> DeadSphereShapes;
         public List<PhysicsModel.Pill> PillShapes;

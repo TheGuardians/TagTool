@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 using TagTool.Cache;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -16,7 +15,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The flags of the field.
         /// </summary>
-        public TagFieldFlags Flags { get; set; } = None;
+        public TagFieldFlags Flags { get; set; } = TagFieldFlags.None;
 
         /// <summary>
         /// The minimum cache version the tag field is present in.
@@ -119,6 +118,7 @@ namespace TagTool.Tags
         Relative = 1 << 5,
         Fraction = 1 << 6,
         Resource = 1 << 7,
+        GlobalMaterial = 1 << 8
     }
 
     public enum TagFieldCompression
