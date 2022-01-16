@@ -54,11 +54,12 @@ namespace TagTool.Geometry
 
         public DecoratorVertex ReadDecoratorVertex()
         {
+            var position = Stream.ReadUShort4N();
             var vertex = new DecoratorVertex
             {
-                Position = Stream.ReadUShort4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = new RealQuaternion(Stream.ReadDHen3N(), 1.0f)
+                Normal = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f)
             };
             return vertex;
         }
@@ -70,23 +71,25 @@ namespace TagTool.Geometry
 
         public RigidVertex ReadReachRigidVertex()
         {
+            var position = Stream.ReadUDec4N();
             return new RigidVertex
             {
-                Position = Stream.ReadUDec4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
         }
 
         public SkinnedVertex ReadReachSkinnedVertex()
         {
+            var position = Stream.ReadUDec4N();
             return new SkinnedVertex
             {
-                Position = Stream.ReadUDec4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
@@ -94,42 +97,45 @@ namespace TagTool.Geometry
 
         public FlatRigidVertex ReadFlatRigidVertex()
         {
+            var position = Stream.ReadUShort4N();
             var vertex = new FlatRigidVertex
             {
-                Position = Stream.ReadUShort4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK);
+            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
             return vertex;
         }
 
         public FlatSkinnedVertex ReadFlatSkinnedVertex()
         {
+            var position = Stream.ReadUShort4N();
             var vertex = new FlatSkinnedVertex
             {
-                Position = Stream.ReadUShort4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK);
+            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
             return vertex;
         }
 
         public FlatWorldVertex ReadFlatWorldVertex()
         {
+            var position = Stream.ReadFloat4();
             var vertex = new FlatWorldVertex
             {
-                Position = Stream.ReadFloat4(),
+                Position = position,
                 Texcoord = Stream.ReadFloat16_2(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK);
+            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
             return vertex;
         }
 
@@ -202,14 +208,15 @@ namespace TagTool.Geometry
 
         public RigidVertex ReadRigidVertex()
         {
+            var position = Stream.ReadUShort4N();
             var vertex = new RigidVertex
             {
-                Position = Stream.ReadUShort4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK);
+            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
             return vertex;
         }
 
@@ -241,16 +248,17 @@ namespace TagTool.Geometry
 
         public SkinnedVertex ReadSkinnedVertex()
         {
+            var position = Stream.ReadUShort4N();
             var vertex = new SkinnedVertex
             {
-                Position = Stream.ReadUShort4N(),
+                Position = position,
                 Texcoord = Stream.ReadUShort2N(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK);
+            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
             return vertex;
         }
 
@@ -310,14 +318,15 @@ namespace TagTool.Geometry
 
         public WorldVertex ReadWorldVertex()
         {
+            var position = Stream.ReadFloat4();
             var vertex = new WorldVertex
             {
-                Position = Stream.ReadFloat4(),
+                Position = position,
                 Texcoord = Stream.ReadFloat16_2(),
                 Normal = Stream.ReadDHen3N(),
-                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK);
+            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
             return vertex;
         }
 
