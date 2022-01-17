@@ -38,8 +38,8 @@ namespace TagTool.Geometry
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
 
-                            if(inVersion == CacheVersion.HaloReach)
-                                v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                            if (inVersion == CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             else
                                 v.Binormal = ConvertVectorSpace(v.Binormal);
 
@@ -54,7 +54,7 @@ namespace TagTool.Geometry
                             v.Tangent = ConvertVectorSpace(v.Tangent);
 
                             if (inVersion == CacheVersion.HaloReach)
-                                v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                                v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             else
                                 v.Binormal = ConvertVectorSpace(v.Binormal);
 
@@ -69,7 +69,7 @@ namespace TagTool.Geometry
                             v.Tangent = ConvertVectorSpace(v.Tangent);
 
                             if (inVersion == CacheVersion.HaloReach)
-                                v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                                v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             else
                                 v.Binormal = ConvertVectorSpace(v.Binormal);
 
@@ -158,7 +158,7 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                            v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             outVertexStream.WriteRigidVertex(v);
                         });
                         vertexBuffer.Format = VertexBufferFormat.Rigid;
@@ -169,7 +169,7 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = GenerateReachBinormals(v.Texcoord, v.Normal, v.Tangent.IJK);
+                            v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             outVertexStream.WriteSkinnedVertex(v);
                         });
                         vertexBuffer.Format = VertexBufferFormat.Skinned;
@@ -283,9 +283,14 @@ namespace TagTool.Geometry
             return new RealVector3d(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))).ToArray());
         }
 
-        public static RealVector3d GenerateReachBinormals(RealVector2d uv, RealVector3d tangent, RealVector3d normal)
+        public static RealVector3d GenerateReachBinormalsNoSign(RealVector2d uv, RealVector3d tangent, RealVector3d normal)
         {
             return Math.Sign(uv.I - 0.5) * RealVector3d.CrossProduct(normal, tangent);
+        }
+
+        public static RealVector3d GenerateReachBinormals(RealVector3d normal, RealVector3d tangent, float sign)
+        {
+            return RealVector3d.CrossProductNoNorm(normal, tangent);// * sign;
         }
     }
 }

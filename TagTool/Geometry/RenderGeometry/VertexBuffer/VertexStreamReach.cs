@@ -105,7 +105,7 @@ namespace TagTool.Geometry
                 Normal = Stream.ReadDHen3N(),
                 Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
+            //vertex.Binormal = RealVector3d.CrossProductNoNorm(vertex.Normal, vertex.Tangent.IJK);// * vertex.Tangent.W;
             return vertex;
         }
 
@@ -121,7 +121,7 @@ namespace TagTool.Geometry
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
+            //vertex.Binormal = RealVector3d.CrossProductNoNorm(vertex.Normal, vertex.Tangent.IJK);// * vertex.Tangent.W;
             return vertex;
         }
 
@@ -135,7 +135,7 @@ namespace TagTool.Geometry
                 Normal = Stream.ReadDHen3N(),
                 Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
+            //vertex.Binormal = RealVector3d.CrossProductNoNorm(vertex.Normal, vertex.Tangent.IJK);// * vertex.Tangent.W;
             return vertex;
         }
 
@@ -216,7 +216,7 @@ namespace TagTool.Geometry
                 Normal = Stream.ReadDHen3N(),
                 Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
+            //vertex.Binormal = RealVector3d.CrossProductNoNorm(vertex.Normal, vertex.Tangent.IJK);// * vertex.Tangent.W;
             return vertex;
         }
 
@@ -258,7 +258,7 @@ namespace TagTool.Geometry
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
+            //vertex.Binormal = RealVector3d.CrossProductNoNorm(vertex.Normal, vertex.Tangent.IJK);// * vertex.Tangent.W;
             return vertex;
         }
 
@@ -326,7 +326,7 @@ namespace TagTool.Geometry
                 Normal = Stream.ReadDHen3N(),
                 Tangent = new RealQuaternion(Stream.ReadDHen3N(), position.W * 2.0f - 1.0f),
             };
-            vertex.Binormal = RealVector3d.CrossProduct(vertex.Normal, vertex.Tangent.IJK) * vertex.Tangent.W;
+            //vertex.Binormal = RealVector3d.CrossProductNoNorm(vertex.Normal, vertex.Tangent.IJK);// * vertex.Tangent.W;
             return vertex;
         }
 

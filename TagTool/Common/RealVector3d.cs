@@ -78,6 +78,9 @@ namespace TagTool.Common
         public static RealVector3d operator /(float a, RealVector3d b) =>
             new RealVector3d(a / b.I, a / b.J, a / b.K);
 
+        public static RealVector3d operator %(RealVector3d a, float b) =>
+            new RealVector3d(a.I % b, a.J % b, a.K % b);
+
         public override int GetHashCode() =>
             13 * 17 + I.GetHashCode()
                * 17 + J.GetHashCode()
@@ -126,6 +129,16 @@ namespace TagTool.Common
                 K = a.I * b.J - a.J * b.I
             };
             return Normalize(result);
+        }
+
+        public static RealVector3d CrossProductNoNorm(RealVector3d a, RealVector3d b)
+        {
+            return new RealVector3d()
+            {
+                I = a.J * b.K - a.K * b.J,
+                J = a.K * b.I - a.I * b.K,
+                K = a.I * b.J - a.J * b.I
+            };
         }
 
         public static float DotProduct(RealVector3d a, RealVector3d b)
