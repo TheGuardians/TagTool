@@ -15,24 +15,46 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 		public LargeCollisionBspBlock Convert(LargeCollisionBspBlock bsp)
 		{
 			Bsp = bsp;
-			TagBlock<LargeBsp3dNode> nodelist = new TagBlock<LargeBsp3dNode>();
+			List<LargeBsp3dNode> nodelist = new List<LargeBsp3dNode>();
 			buildsupernode(0, 0, nodelist);
-			Bsp.Bsp3dNodes = nodelist;
+            List<LargeBsp3dNode> oldnodes = Bsp.Bsp3dNodes.Elements.DeepClone();
+            //fixup old nodes 
+            foreach(var node in oldnodes)
+            {
+                if (node.BackChild > 0)
+                    node.BackChild += nodelist.Count;
+                if (node.FrontChild > 0)
+                    node.FrontChild += nodelist.Count;
+            }
+            //fixup new nodes
+            foreach (var node in nodelist)
+            {
+                if ((node.BackChild & 0x40000000) != 0 && node.BackChild != -1)
+                    node.BackChild = (int)(node.BackChild & 0xBFFFFFFF) + nodelist.Count;
+                if ((node.FrontChild & 0x40000000) != 0 && node.FrontChild != -1)
+                    node.FrontChild = (int)(node.FrontChild & 0xBFFFFFFF) + nodelist.Count;
+            }
+            nodelist.AddRange(oldnodes);
+            Bsp.Bsp3dNodes.Elements = nodelist;
             prune_node_tree();
 			return Bsp;
 		}
 
-		public int buildsupernode(int supernode_index, int index, TagBlock<LargeBsp3dNode> nodelist)
+        //a child with NO & 0xC0000000 is a supernode child
+        //a child with & 0x80000000 is a LEAF
+        //a child with & 0x40000000 is a regular node
+		public int buildsupernode(int supernode_index, int index, List<LargeBsp3dNode> nodelist)
         {
 			if(index > 14) //is a child
             {
 				int child = Bsp.Bsp3dSupernodes[supernode_index].ChildIndices[index - 15];
                 if (child == 0)
                     return -1;
-                else if ((child & 0xC0000000) != 0)
-                    return buildnode((int)(child & 0xBFFFFFFF), nodelist);
-                else
+                if((int)(child & 0xC0000000) == 0)
                     return buildsupernode(child, 0, nodelist);
+                if (child == -1)
+                    return -1;
+                return child;
 			}
 			LargeBsp3dNode newnode = new LargeBsp3dNode();
 			Plane newplane = generate_new_node_plane(Bsp.Bsp3dSupernodes[supernode_index], index);
@@ -40,44 +62,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			newnode.Plane = Bsp.Planes.Count - 1;
 			nodelist.Add(newnode);
 			int newnode_index = nodelist.Count - 1;
-            nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
-            nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
-            if (nodelist[newnode_index].BackChild == -1)
-            {
-                int result = nodelist[newnode_index].FrontChild;
-                nodelist[newnode_index].FrontChild = -1;
-                return result;
-            }          
-            if (nodelist[newnode_index].FrontChild == -1)
-            {
-                int result = nodelist[newnode_index].BackChild;
-                nodelist[newnode_index].BackChild = -1;
-                return result;
-            }
+            nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
+            nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
             return newnode_index;
 		}
-
-		public int buildnode(int index, TagBlock<LargeBsp3dNode> nodelist)
-        {
-			//make sure this isn't actually a leaf
-			if (BSP_TEST_FLAG(index))
-				return index;
-			var node = Bsp.Bsp3dNodes[index].DeepClone();
-            nodelist.Add(node);
-            int newnode_index = nodelist.Count - 1;
-            if (!BSP_TEST_FLAG(node.FrontChild))
-				nodelist[newnode_index].FrontChild = buildnode(node.FrontChild, nodelist);
-			if (!BSP_TEST_FLAG(node.BackChild))
-                nodelist[newnode_index].BackChild = buildnode(node.BackChild, nodelist);
-			return newnode_index;			
-		}
-
-		public bool BSP_TEST_FLAG(int index)
-        {
-			if (((index >> 31) & 1) == 1)
-				return true;
-			return false;
-        }
 
 		public Plane generate_new_node_plane(Bsp3dSupernode supernode, int plane_index)
 		{
