@@ -290,7 +290,7 @@ namespace TagTool.Geometry
 
         public static RealVector3d GenerateReachBinormals(RealVector3d normal, RealVector3d tangent, float sign)
         {
-            return RealVector3d.CrossProductNoNorm(normal, tangent);// * sign;
+            return RealVector3d.CrossProductNoNorm(normal, tangent) * sign;
         }
     }
 }

@@ -62,10 +62,10 @@ namespace TagTool.Geometry
         void WriteLinearPrtData(LinearPrtData v);
         QuadraticPrtData ReadQuadraticPrtData();
         void WriteQuadraticPrtData(QuadraticPrtData v);
-        Unknown1A ReadUnknown1A();
-        void WriteUnknown1A(Unknown1A v);
-        Unknown1B ReadUnknown1B();
-        void WriteUnknown1B(Unknown1B v);
+        WaterTriangleIndices ReadWaterTriangleIndices();
+        void WriteWaterTriangleIndices(WaterTriangleIndices v);
+        WaterTesselatedParameters ReadWaterTesselatedParameters();
+        void WriteWaterTesselatedParameters(WaterTesselatedParameters v);
         WorldWaterVertex ReadWorldWaterVertex();
         void WriteWorldWaterVertex(WorldWaterVertex v);
     }

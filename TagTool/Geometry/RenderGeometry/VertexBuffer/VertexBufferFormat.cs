@@ -31,8 +31,8 @@ namespace TagTool.Geometry
         Unknown17,            // Size = 0x4
         Decorator,            // Size = 0x20
         ParticleModel,        // Size = 0x20
-        Unknown1A,            // Size = 0xC
-        Unknown1B,            // Size = 0x24
+        WaterTriangleIndices,            // Size = 0xC
+        TesselatedWaterParameters,            // Size = 0x18
         Unknown1C,            // Size = 0x80
         Unused1D,             // Invalid
         World2,               // Size = 0x38 (1.235640+ only)

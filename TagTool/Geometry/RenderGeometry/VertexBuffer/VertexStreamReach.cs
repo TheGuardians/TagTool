@@ -475,7 +475,7 @@ namespace TagTool.Geometry
             throw new NotImplementedException();
         }
 
-        public Unknown1A ReadUnknown1A()
+        public WaterTriangleIndices ReadWaterTriangleIndices()
         {
             var buffer = Stream.ReadUShort6();
             ushort[] vertices = new ushort[3];
@@ -486,29 +486,29 @@ namespace TagTool.Geometry
                 vertices[i] = buffer[2 * i];
                 indices[i] = buffer[2 * i + 1];
             }
-            return new Unknown1A
+            return new WaterTriangleIndices
             {
-                Vertices = vertices,
-                Indices = indices
+                MeshIndices = vertices,
+                WaterIndices = indices
                 
             };
         }
 
-        public void WriteUnknown1A(Unknown1A v)
+        public void WriteWaterTriangleIndices(WaterTriangleIndices v)
         {
             throw new NotImplementedException();
         }
 
-        public Unknown1B ReadUnknown1B()
+        public WaterTesselatedParameters ReadWaterTesselatedParameters()
         {
-            return new Unknown1B
+            return new WaterTesselatedParameters
             {
-                Unknown1 = Stream.ReadUShortN(),
-                Unknown2 = Stream.ReadUShortN(),
+                LocalInfo = new RealVector2d(15.0f, 0.9f), // placeholder, TODO: figure out conversion
+                BaseTex = Stream.ReadFloat16_2()
             };
         }
 
-        public void WriteUnknown1B(Unknown1B v)
+        public void WriteWaterTesselatedParameters(WaterTesselatedParameters v)
         {
             throw new NotImplementedException();
         }
@@ -559,8 +559,8 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.StaticPerPixel:
                 case VertexBufferFormat.StaticPerVertex:
                 
-                case VertexBufferFormat.Unknown1A:
-                case VertexBufferFormat.Unknown1B:
+                case VertexBufferFormat.WaterTriangleIndices:
+                case VertexBufferFormat.TesselatedWaterParameters:
                     return -1;
             }
         }

@@ -148,7 +148,7 @@ namespace TagTool.Geometry
                             vertexBuffer.Count = mesh.ResourceVertexBuffers[0].Count;
 
                         // skip conversion of water vertices, done right after the loop
-                        if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
+                        if (vertexBuffer.Format == VertexBufferFormat.WaterTriangleIndices || vertexBuffer.Format == VertexBufferFormat.TesselatedWaterParameters)
                             continue;
                         if (SourceCache.Platform == CachePlatform.MCC && vertexBuffer.Format == VertexBufferFormat.Unknown1C)
                             continue;
@@ -207,17 +207,18 @@ namespace TagTool.Geometry
             for (int j = 0; j < mesh.Parts.Count(); j++)
             {
                 var part = mesh.Parts[j];
+                bool perVertexLighting = part.FlagsReach.HasFlag(Part.PartFlagsReach.PerVertexLightmapPart);
                 if (part.FlagsNew.HasFlag(Part.PartFlagsNew.IsWaterSurface) || part.FlagsReach.HasFlag(Part.PartFlagsReach.IsWaterSurface))
-                    waterData.PartData.Add(new Tuple<int, int>(part.FirstIndex, part.IndexCount));
+                    waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndex, part.IndexCount, perVertexLighting));
             }
 
             if (waterData.PartData.Count > 1)
                 waterData.Sort();
 
-            // read all world vertices, unknown1A and unknown1B into lists.
+            // read all vertices into lists.
             List<WorldVertex> worldVertices = new List<WorldVertex>();
-            List<Unknown1B> h3WaterParameters = new List<Unknown1B>();
-            List<Unknown1A> h3WaterIndices = new List<Unknown1A>();
+            List<WaterTesselatedParameters> h3WaterParameters = new List<WaterTesselatedParameters>();
+            List<WaterTriangleIndices> h3WaterIndices = new List<WaterTriangleIndices>();
             List<StaticPerPixelData> staticPerPixel = new List<StaticPerPixelData>();
 
             using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[0].Data.Data))
@@ -230,13 +231,13 @@ namespace TagTool.Geometry
             {
                 var vertexStream = VertexStreamFactory.Create(SourceCache.Version, SourceCache.Platform, stream);
                 for (int v = 0; v < mesh.ResourceVertexBuffers[6].Count; v++)
-                    h3WaterIndices.Add(vertexStream.ReadUnknown1A());
+                    h3WaterIndices.Add(vertexStream.ReadWaterTriangleIndices());
             }
             using (var stream = new MemoryStream(mesh.ResourceVertexBuffers[7].Data.Data))
             {
                 var vertexStream = VertexStreamFactory.Create(SourceCache.Version, SourceCache.Platform, stream);
                 for (int v = 0; v < mesh.ResourceVertexBuffers[7].Count; v++)
-                    h3WaterParameters.Add(vertexStream.ReadUnknown1B());
+                    h3WaterParameters.Add(vertexStream.ReadWaterTesselatedParameters());
             }
 
             if (mesh.ResourceVertexBuffers[1] != null)
@@ -249,7 +250,7 @@ namespace TagTool.Geometry
                 }
             }
 
-            // create vertex buffer for Unknown1A -> World
+            // create vertex buffer for WaterTriangleIndices -> World
             VertexBufferDefinition waterVertices = new VertexBufferDefinition
             {
                 Count = indexCount,
@@ -259,11 +260,11 @@ namespace TagTool.Geometry
 
             };
 
-            // create vertex buffer for Unknown1B
+            // create vertex buffer for TesselatedWaterParameters
             VertexBufferDefinition waterParameters = new VertexBufferDefinition
             {
                 Count = indexCount,
-                Format = VertexBufferFormat.Unknown1B,
+                Format = VertexBufferFormat.TesselatedWaterParameters,
                 Data = new TagData(),
                 VertexSize = 0x24   // wrong size, this is 0x18 on file, padded with zeroes.
             };
@@ -278,11 +279,11 @@ namespace TagTool.Geometry
                 VertexBufferConverter.DebugFill(outputWorldWaterStream, waterVertices.VertexSize * waterVertices.Count);
                 VertexBufferConverter.Fill(outputWaterParametersStream, waterParameters.VertexSize * waterParameters.Count);
 
-                var unknown1ABaseIndex = 0; // unknown1A are not separated into parts, if a mesh has multiple parts we need to get the right unknown1As
+                var triangleBaseIndex = 0; // WaterTriangleIndices are not separated into parts, if a mesh has multiple parts we need to get the right WaterTriangleIndices
 
                 for (int k = 0; k < waterData.PartData.Count(); k++)
                 {
-                    Tuple<int, int> currentPartData = waterData.PartData[k];
+                    Tuple<int, int, bool> currentPartData = waterData.PartData[k];
 
                     //seek to the right location in the buffer
                     outputWorldWaterStream.Position = 0x34 * currentPartData.Item1;
@@ -290,17 +291,17 @@ namespace TagTool.Geometry
 
                     for (int v = 0; v < currentPartData.Item2; v += 3)
                     {
-                        var unknown1A = h3WaterIndices[(v / 3) + unknown1ABaseIndex];
+                        var triangleIndices = h3WaterIndices[(v / 3) + triangleBaseIndex];
                         for (int j = 0; j < 3; j++)
                         {
-                            var worldVertex = worldVertices[unknown1A.Vertices[j]];
-                            var unknown1B = h3WaterParameters[unknown1A.Indices[j]];
+                            var worldVertex = worldVertices[triangleIndices.MeshIndices[j]];
+                            var tesselatedParameters = h3WaterParameters[triangleIndices.WaterIndices[j]];
 
                             StaticPerPixelData spp;
-                            if (SourceCache.Version == CacheVersion.HaloReach)
-                                spp = new StaticPerPixelData() { Texcoord = new RealVector2d(0, 0) }; // TODO
+                            if (SourceCache.Version == CacheVersion.HaloReach && !currentPartData.Item3)
+                                spp = new StaticPerPixelData() { Texcoord = new RealVector2d(0, 0) };
                             else
-                                spp = staticPerPixel[unknown1A.Vertices[j]];
+                                spp = staticPerPixel[triangleIndices.MeshIndices[j]];
 
                             var worldWaterVertex = new WorldWaterVertex()
                             {
@@ -312,13 +313,11 @@ namespace TagTool.Geometry
                                 StaticPerPixel = spp.Texcoord
                             };
 
-                            // conversion should happen here
-
                             outWorldVertexStream.WriteWorldWaterVertex(worldWaterVertex);
-                            outWaterParameterVertexStream.WriteUnknown1B(unknown1B);
+                            outWaterParameterVertexStream.WriteWaterTesselatedParameters(tesselatedParameters);
                         }
                     }
-                    unknown1ABaseIndex += currentPartData.Item2 / 3;    // tells next part we read those indices already
+                    triangleBaseIndex += currentPartData.Item2 / 3;    // tells next part we read those indices already
                 }
                 waterVertices.Data.Data = outputWorldWaterStream.ToArray();
                 waterParameters.Data.Data = outputWaterParametersStream.ToArray();
@@ -526,7 +525,7 @@ namespace TagTool.Geometry
                         }
 
                         // skip conversion of water vertices, done right after the loop
-                        if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
+                        if (vertexBuffer.Format == VertexBufferFormat.WaterTriangleIndices || vertexBuffer.Format == VertexBufferFormat.TesselatedWaterParameters)
                             continue;
  
                         if (SourceCache.Platform == CachePlatform.MCC && vertexBuffer.Format == VertexBufferFormat.Unknown1C)
@@ -576,12 +575,12 @@ namespace TagTool.Geometry
 
         private class WaterConversionData
         {
-            // offset, count of vertices to write
-            public List<Tuple<int, int>> PartData;
+            // offset, count of vertices to write, per vertex lighting
+            public List<Tuple<int, int, bool>> PartData;
 
             public WaterConversionData()
             {
-                PartData = new List<Tuple<int, int>>();
+                PartData = new List<Tuple<int, int, bool>>();
             }
 
             public void Sort()

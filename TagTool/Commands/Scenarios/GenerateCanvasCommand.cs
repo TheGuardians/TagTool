@@ -603,12 +603,11 @@ namespace TagTool.Commands.Scenarios
             return geometry;
         }
 
-        private static Unknown1B[] GenerateWaterParams(ushort[] indices, float tessellation, float opacity)
+        private static WaterTesselatedParameters[] GenerateWaterParams(ushort[] indices, float tessellation, float opacity)
         {
-            return indices.Select(x => new Unknown1B() 
+            return indices.Select(x => new WaterTesselatedParameters() 
             {
-                Unknown1 = tessellation,
-                Unknown2 = opacity,
+                LocalInfo = new RealVector2d(tessellation, opacity)
             }).ToArray();
         }
 
@@ -731,18 +730,18 @@ namespace TagTool.Commands.Scenarios
             }
         }
 
-        void WriteUnknown1BVertices(VertexBufferDefinition def, Unknown1B[] vertices)
+        void WriteUnknown1BVertices(VertexBufferDefinition def, WaterTesselatedParameters[] vertices)
         {
             using (var outputStream = new MemoryStream())
             {
                 var vertexBufferStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, CachePlatform.Original, outputStream);
 
                 foreach (var vertex in vertices)
-                    vertexBufferStream.WriteUnknown1B(vertex);
+                    vertexBufferStream.WriteWaterTesselatedParameters(vertex);
 
                 def.Data = new TagData(outputStream.ToArray());
                 def.Count = vertices.Length;
-                def.Format = VertexBufferFormat.Unknown1B;
+                def.Format = VertexBufferFormat.TesselatedWaterParameters;
                 def.VertexSize = 0x24;
             }
         }

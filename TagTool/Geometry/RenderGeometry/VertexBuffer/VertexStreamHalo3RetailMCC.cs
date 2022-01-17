@@ -465,7 +465,7 @@ namespace TagTool.Geometry
             throw new NotImplementedException();
         }
 
-        public Unknown1A ReadUnknown1A()
+        public WaterTriangleIndices ReadWaterTriangleIndices()
         {
             var buffer = Stream.ReadUShort6();
             ushort[] vertices = new ushort[3];
@@ -476,36 +476,31 @@ namespace TagTool.Geometry
                 vertices[i] = buffer[2 * i];
                 indices[i] = buffer[2 * i + 1];
             }
-            return new Unknown1A
+            return new WaterTriangleIndices
             {
-                Vertices = vertices,
-                Indices = indices
+                MeshIndices = vertices,
+                WaterIndices = indices
                 
             };
         }
 
-        public void WriteUnknown1A(Unknown1A v)
+        public void WriteWaterTriangleIndices(WaterTriangleIndices v)
         {
             throw new NotImplementedException();
         }
 
-        public Unknown1B ReadUnknown1B()
+        public WaterTesselatedParameters ReadWaterTesselatedParameters()
         {
-            return new Unknown1B
+            return new WaterTesselatedParameters
             {
-                Unknown1 = Stream.ReadFloat1(),
-                Unknown2 = Stream.ReadFloat1(),
-                Unknown3 = Stream.ReadFloat1(),
-                Unknown4 = Stream.ReadFloat1(),
-                Unknown5 = Stream.ReadFloat1(),
-                Unknown6 = Stream.ReadFloat1(),
-                Unknown7 = Stream.ReadFloat1(),
-                Unknown8 = Stream.ReadFloat1(),
-                Unknown9 = Stream.ReadFloat1(),
+                LocalInfo = Stream.ReadFloat2(),
+                LocalInfoPadd = Stream.ReadFloat4().I,
+                BaseTex = Stream.ReadFloat2(),
+                BaseTexPadd = Stream.ReadFloat1(),
             };
         }
 
-        public void WriteUnknown1B(Unknown1B v)
+        public void WriteWaterTesselatedParameters(WaterTesselatedParameters v)
         {
             throw new NotImplementedException();
         }
@@ -549,9 +544,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
                     return 0x2c;
-                case VertexBufferFormat.Unknown1A:
+                case VertexBufferFormat.WaterTriangleIndices:
                     return 0xC;
-                case VertexBufferFormat.Unknown1B:
+                case VertexBufferFormat.TesselatedWaterParameters:
                     return 0x24;
                 default:
                     return -1;

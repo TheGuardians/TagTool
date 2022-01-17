@@ -603,8 +603,8 @@ namespace TagTool.Geometry
             { VertexBufferFormat.Unknown17, 0x4 },
             { VertexBufferFormat.Decorator, 0x20 },
             { VertexBufferFormat.ParticleModel, 0x20 },
-            { VertexBufferFormat.Unknown1A, 0xC },
-            { VertexBufferFormat.Unknown1B, 0x24 },
+            { VertexBufferFormat.WaterTriangleIndices, 0xC },
+            { VertexBufferFormat.TesselatedWaterParameters, 0x24 },
             { VertexBufferFormat.Unknown1C, 0x80 },
             { VertexBufferFormat.Unused1D, 0 },
         };

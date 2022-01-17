@@ -583,7 +583,7 @@ namespace TagTool.Geometry
             _stream.WriteFloat3(v.SHCoefficients3);
         }
 
-        public Unknown1A ReadUnknown1A()
+        public WaterTriangleIndices ReadWaterTriangleIndices()
         {
             var buffer = _stream.ReadUShort6();
             ushort[] vertices = new ushort[3];
@@ -594,50 +594,40 @@ namespace TagTool.Geometry
                 vertices[i] = buffer[2 * i];
                 indices[i] = buffer[2 * i + 1];
             }
-            return new Unknown1A
+            return new WaterTriangleIndices
             {
-                Vertices = vertices,
-                Indices = indices
+                MeshIndices = vertices,
+                WaterIndices = indices
 
             };
         }
 
-        public void WriteUnknown1A(Unknown1A v)
+        public void WriteWaterTriangleIndices(WaterTriangleIndices v)
         {
             for (int i = 0; i < 3; i += 2)
             {
-                _stream.WriteUShort(v.Vertices[i]);
-                _stream.WriteUShort(v.Indices[i]);
+                _stream.WriteUShort(v.MeshIndices[i]);
+                _stream.WriteUShort(v.WaterIndices[i]);
             }
         }
 
-        public Unknown1B ReadUnknown1B()
+        public WaterTesselatedParameters ReadWaterTesselatedParameters()
         {
-            return new Unknown1B
+            return new WaterTesselatedParameters
             {
-                Unknown1 = _stream.ReadFloat1(),
-                Unknown2 = _stream.ReadFloat1(),
-                Unknown3 = _stream.ReadFloat1(),
-                Unknown4 = _stream.ReadFloat1(),
-                Unknown5 = _stream.ReadFloat1(),
-                Unknown6 = _stream.ReadFloat1(),
-                Unknown7 = _stream.ReadFloat1(),
-                Unknown8 = _stream.ReadFloat1(),
-                Unknown9 = _stream.ReadFloat1(),
+                LocalInfo = _stream.ReadFloat2(),
+                LocalInfoPadd = _stream.ReadFloat1(),
+                BaseTex = _stream.ReadFloat2(),
+                BaseTexPadd = _stream.ReadFloat1(),
             };
         }
 
-        public void WriteUnknown1B(Unknown1B v)
+        public void WriteWaterTesselatedParameters(WaterTesselatedParameters v)
         {
-            _stream.WriteFloat1(v.Unknown1);
-            _stream.WriteFloat1(v.Unknown2);
-            _stream.WriteFloat1(v.Unknown3);
-            _stream.WriteFloat1(v.Unknown4);
-            _stream.WriteFloat1(v.Unknown5);
-            _stream.WriteFloat1(v.Unknown6);
-            _stream.WriteFloat1(v.Unknown7);
-            _stream.WriteFloat1(v.Unknown8);
-            _stream.WriteFloat1(v.Unknown9);
+            _stream.WriteFloat2(v.LocalInfo);
+            _stream.WriteFloat1(v.LocalInfoPadd);
+            _stream.WriteFloat2(v.BaseTex);
+            _stream.WriteFloat1(v.BaseTexPadd);
         }
 
         public WorldWaterVertex ReadWorldWaterVertex()
@@ -686,9 +676,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
                     return 0x38;
-                case VertexBufferFormat.Unknown1A:
+                case VertexBufferFormat.WaterTriangleIndices:
                     return 0xC;
-                case VertexBufferFormat.Unknown1B:
+                case VertexBufferFormat.TesselatedWaterParameters:
                     return 0x24;
                 default:
                     return -1;
