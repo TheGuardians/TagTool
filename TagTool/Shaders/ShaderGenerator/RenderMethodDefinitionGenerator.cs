@@ -59,12 +59,17 @@ namespace TagTool.Shaders.ShaderGenerator
                 bool autoMacro = rmdf.Flags.HasFlag(RenderMethodDefinitionFlags.UseAutomaticMacros);
 
                 // make sure all categories exist
+                int categoriesAdded = 0;
                 for (uint i = (uint)rmdf.Categories.Count; i < generator.GetMethodCount(); i++)
                 {
                     var categoryBlock = BuildCategory(cache, stream, i, generator, shaderType, autoMacro);
                     rmdf.Categories.Add(categoryBlock);
+                    categoriesAdded++;
                 }
                 cache.SaveStrings();
+
+                if (categoriesAdded > 0)
+                    AdjustTemplateTagNames(cache as GameCacheHaloOnlineBase, shaderType, categoriesAdded, rmdf.Categories.Count);
 
                 // update
                 for (uint i = 0; i < generator.GetMethodCount(); i++)
@@ -355,6 +360,29 @@ namespace TagTool.Shaders.ShaderGenerator
             }
 
             return input;
+        }
+
+        private static void AdjustTemplateTagNames(GameCacheHaloOnlineBase cache, string shaderType, int categoriesAdded, int totalCategories)
+        {
+            string appendage = string.Concat(Enumerable.Repeat("_0", categoriesAdded));
+
+            foreach (var tag in cache.TagCache.NonNull())
+            {
+                if (tag.Group.Tag != "rmt2" || tag.Name.StartsWith("ms30\\"))
+                    continue;
+
+                var parts = tag.Name.Split('\\');
+
+                int nameCategories = parts[2].Remove(0, 1).Split('_').Length;
+                if (nameCategories >= totalCategories)
+                    continue;
+
+                string templateType = parts[1].Replace("_templates", "");
+                if (templateType == shaderType)
+                    tag.Name += appendage;
+            }
+
+            cache.SaveTagNames();
         }
     }
 }
