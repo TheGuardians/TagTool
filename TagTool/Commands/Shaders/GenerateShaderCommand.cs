@@ -435,7 +435,10 @@ namespace TagTool.Commands.Shaders
                 foreach (var textureName in rmt2.TextureParameterNames)
                 {
                     int origIndex = dependent.OrderedTextures.IndexOf(Cache.StringTable.GetString(textureName.Name));
-                    reorderedTextureConstants.Add(postprocess.TextureConstants[origIndex]);
+                    if (origIndex != -1)
+                        reorderedTextureConstants.Add(postprocess.TextureConstants[origIndex]);
+                    else
+                        reorderedTextureConstants.Add(new TextureConstant());
                 }
                 postprocess.TextureConstants = reorderedTextureConstants;
 
@@ -443,7 +446,10 @@ namespace TagTool.Commands.Shaders
                 foreach (var realName in rmt2.RealParameterNames)
                 {
                     int origIndex = dependent.OrderedRealParameters.IndexOf(Cache.StringTable.GetString(realName.Name));
-                    reorderedRealConstants.Add(postprocess.RealConstants[origIndex]);
+                    if (origIndex != -1)
+                        reorderedRealConstants.Add(postprocess.RealConstants[origIndex]);
+                    else
+                        reorderedRealConstants.Add(new RealConstant());
                 }
                 postprocess.RealConstants = reorderedRealConstants;
 
@@ -451,7 +457,10 @@ namespace TagTool.Commands.Shaders
                 foreach (var intName in rmt2.IntegerParameterNames)
                 {
                     int origIndex = dependent.OrderedIntParameters.IndexOf(Cache.StringTable.GetString(intName.Name));
-                    reorderedIntConstants.Add(postprocess.IntegerConstants[origIndex]);
+                    if (origIndex != -1)
+                        reorderedIntConstants.Add(postprocess.IntegerConstants[origIndex]);
+                    else
+                        reorderedIntConstants.Add(new uint());
                 }
                 postprocess.IntegerConstants = reorderedIntConstants;
 
@@ -459,7 +468,8 @@ namespace TagTool.Commands.Shaders
                 for (int i = 0; i < rmt2.BooleanParameterNames.Count; i++)
                 {
                     int origIndex = dependent.OrderedBoolParameters.IndexOf(Cache.StringTable.GetString(rmt2.BooleanParameterNames[i].Name));
-                    reorderedBoolConstants |= ((postprocess.BooleanConstants >> origIndex) & 1) == 1 ? 1u << i : 0;
+                    if (origIndex != -1)
+                        reorderedBoolConstants |= ((postprocess.BooleanConstants >> origIndex) & 1) == 1 ? 1u << i : 0;
                 }
                 postprocess.BooleanConstants = reorderedBoolConstants;
 
