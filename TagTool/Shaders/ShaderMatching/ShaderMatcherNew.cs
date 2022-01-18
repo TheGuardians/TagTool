@@ -388,6 +388,12 @@ namespace TagTool.Shaders.ShaderMatching
 
                     string methodName = BaseCache.StringTable.GetString(baseRmdfDefinition.Categories[i].Name);
 
+                    if (methodName == "reach_compatibility")
+                    {
+                        newOptions.Add(PortingCache.Version == CacheVersion.HaloReach ? (byte)1 : (byte)0);
+                        continue;
+                    }
+
                     for (int j = 0; j < portingRmdfDefinition.Categories.Count; j++)
                     {
                         if (methodName != PortingCache.StringTable.GetString(portingRmdfDefinition.Categories[j].Name))
@@ -428,10 +434,6 @@ namespace TagTool.Shaders.ShaderMatching
                             // Reach rmtr  //
                             case @"blending\distance_blend_base":
                                 optionName = "morph";
-                                break;
-                            // Reach rmw  //
-                            case @"bankalpha\from_shape_texture_alpha":
-                                optionName = "none";
                                 break;
                             // Reach rmfl //
                             case @"material_model\flat":
