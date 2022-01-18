@@ -49,7 +49,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
 				int child = Bsp.Bsp3dSupernodes[supernode_index].ChildIndices[index - 15];
                 if (child == 0)
-                    return -1;
+                    return 0;
                 if((int)(child & 0xC0000000) == 0)
                     return buildsupernode(child, 0, nodelist);
                 if (child == -1)
@@ -64,6 +64,22 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			int newnode_index = nodelist.Count - 1;
             nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
             nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
+
+            if (nodelist[newnode_index].BackChild == 0)
+            {
+                int result = nodelist[newnode_index].FrontChild;
+                nodelist[newnode_index].FrontChild = -1;
+                nodelist[newnode_index].BackChild = -1;
+                return result;
+            }
+            if (nodelist[newnode_index].FrontChild == 0)
+            {
+                int result = nodelist[newnode_index].BackChild;
+                nodelist[newnode_index].BackChild = -1;
+                nodelist[newnode_index].FrontChild = -1;
+                return result;
+            }
+
             return newnode_index;
 		}
 

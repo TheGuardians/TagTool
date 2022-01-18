@@ -111,7 +111,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
     }
 
     [TagStructure(Size = 0x80)]
-    public class Bsp3dSupernode
+    public class Bsp3dSupernode : TagStructure
     {
         [TagField(Length = 15)]
         public float[] PlaneValues = new float[15];
