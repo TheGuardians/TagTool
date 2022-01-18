@@ -729,10 +729,10 @@ namespace TagTool.Bitmaps
 
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.ReachDxnMonoAlpha:
-                case BitmapFormat.Dxt5a:
                 case BitmapFormat.AY8:
                     return BitmapFormat.A8Y8;
 
+                case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt5aAlpha:
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.ReachDxt3aAlpha:
@@ -763,7 +763,7 @@ namespace TagTool.Bitmaps
             // fix enum from reach
             if (version == CacheVersion.HaloReach) 
             {
-                if (format >= (BitmapFormat)38)
+                if (format >= (BitmapFormat)36)
                     format -= 5;
             }
 
