@@ -362,6 +362,7 @@
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\MathHelper.cs" />
+    <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />

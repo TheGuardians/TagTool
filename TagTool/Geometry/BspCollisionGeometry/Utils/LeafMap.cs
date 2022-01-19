@@ -10,7 +10,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
     public class LeafMap
     {
-        private LargeCollisionBspBlock Bsp { get; set; }
+        public LargeCollisionBspBlock Bsp { get; set; }
         public LargeCollisionBSPBuilder Bsp_Builder { get; set; }
         private int[] leaf_map_node_stack;
         private int leaf_map_node_stack_count;

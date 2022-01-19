@@ -14,8 +14,14 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 		public LargeCollisionBspBlock Bsp { get; set; }
 		public LargeCollisionBspBlock Convert(LargeCollisionBspBlock bsp)
 		{
-			Bsp = bsp;
-			List<LargeBsp3dNode> nodelist = new List<LargeBsp3dNode>();
+			Bsp = bsp.DeepClone();
+
+            //first fixup surface plane indices
+            foreach (var surface in Bsp.Surfaces)
+                if (surface.Flags.HasFlag(SurfaceFlags.PlaneNegated))
+                    surface.Plane = (int)(surface.Plane | 0x80000000);
+
+                List<LargeBsp3dNode> nodelist = new List<LargeBsp3dNode>();
 			buildsupernode(0, 0, nodelist);
             List<LargeBsp3dNode> oldnodes = Bsp.Bsp3dNodes.Elements.DeepClone();
             //fixup old nodes 
@@ -37,6 +43,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             nodelist.AddRange(oldnodes);
             Bsp.Bsp3dNodes.Elements = nodelist;
             prune_node_tree();
+
+            VerifyBsp3d verifier = new VerifyBsp3d();
+            verifier.Bsp = Bsp.DeepClone();
+            verifier.OldBsp = bsp.DeepClone();
+            if (!verifier.verify_bsp3d_points())
+                Console.WriteLine("BSP Failed to Verify!");
+
 			return Bsp;
 		}
 

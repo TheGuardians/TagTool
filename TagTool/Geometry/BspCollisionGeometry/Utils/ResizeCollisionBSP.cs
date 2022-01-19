@@ -16,12 +16,17 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             newbsp.Bsp3dNodes = new TagBlock<LargeBsp3dNode>();
             foreach(var bsp3dnode in bsp.Bsp3dNodes)
             {
-                newbsp.Bsp3dNodes.Add(new LargeBsp3dNode
+                LargeBsp3dNode newnode = new LargeBsp3dNode
                 {
-                    BackChild = (int)((bsp3dnode.BackChild & 0x800000) > 0 ? bsp3dnode.BackChild & 0x7FFFFF | 0x80000000 : bsp3dnode.BackChild),
-                    FrontChild = (int)((bsp3dnode.FrontChild & 0x800000) > 0 ? bsp3dnode.FrontChild & 0x7FFFFF | 0x80000000 : bsp3dnode.FrontChild),
+                    BackChild = (int)((bsp3dnode.BackChild & 0x800000) != 0 ? bsp3dnode.BackChild & 0x7FFFFF | 0x80000000 : bsp3dnode.BackChild),
+                    FrontChild = (int)((bsp3dnode.FrontChild & 0x800000) != 0 ? bsp3dnode.FrontChild & 0x7FFFFF | 0x80000000 : bsp3dnode.FrontChild),
                     Plane = bsp3dnode.Plane
-                });
+                };
+                if (bsp3dnode.BackChild == 0x00FFFFFF)
+                    newnode.BackChild = -1;
+                if (bsp3dnode.FrontChild == 0x00FFFFFF)
+                    newnode.FrontChild = -1;
+                newbsp.Bsp3dNodes.Add(newnode);
             }
 
             //these are unchanged
@@ -34,8 +39,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 newbsp.Bsp2dReferences.Add(new LargeBsp2dReference
                 {
-                    PlaneIndex = (int)((bsp2dreference.PlaneIndex & 0x8000) > 0 ? bsp2dreference.PlaneIndex & 0x7FFF | 0x80000000 : bsp2dreference.PlaneIndex),
-                    Bsp2dNodeIndex = (int)((bsp2dreference.Bsp2dNodeIndex & 0x8000) > 0 ? bsp2dreference.Bsp2dNodeIndex & 0x7FFF | 0x80000000 : bsp2dreference.Bsp2dNodeIndex)
+                    PlaneIndex = (int)((bsp2dreference.PlaneIndex & 0x8000) != 0 ? bsp2dreference.PlaneIndex & 0x7FFF | 0x80000000 : bsp2dreference.PlaneIndex),
+                    Bsp2dNodeIndex = (int)((bsp2dreference.Bsp2dNodeIndex & 0x8000) != 0 ? bsp2dreference.Bsp2dNodeIndex & 0x7FFF | 0x80000000 : bsp2dreference.Bsp2dNodeIndex)
                 });
             }
 
@@ -45,8 +50,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 newbsp.Bsp2dNodes.Add(new LargeBsp2dNode
                 {
                     Plane = bsp2dnode.Plane.DeepClone(),
-                    LeftChild = (int)((bsp2dnode.LeftChild & 0x8000) > 0 ? (int)bsp2dnode.LeftChild & 0x7FFF | 0x80000000 : bsp2dnode.LeftChild),
-                    RightChild = (int)((bsp2dnode.RightChild & 0x8000) > 0 ? (int)bsp2dnode.RightChild & 0x7FFF | 0x80000000 : bsp2dnode.RightChild),
+                    LeftChild = (int)((bsp2dnode.LeftChild & 0x8000) != 0 ? (int)bsp2dnode.LeftChild & 0x7FFF | 0x80000000 : bsp2dnode.LeftChild),
+                    RightChild = (int)((bsp2dnode.RightChild & 0x8000) != 0 ? (int)bsp2dnode.RightChild & 0x7FFF | 0x80000000 : bsp2dnode.RightChild),
                 });
             }
 
@@ -55,7 +60,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 newbsp.Surfaces.Add(new LargeSurface
                 {
-                    Plane = (int)((surface.Plane & 0x8000) > 0 ? (int)surface.Plane & 0x7FFF | 0x80000000 : surface.Plane),
+                    Plane = (int)((surface.Plane & 0x8000) != 0 ? (int)surface.Plane & 0x7FFF | 0x80000000 : surface.Plane),
                     FirstEdge = surface.FirstEdge,
                     Material = surface.MaterialIndex,
                     BreakableSurfaceSet = surface.BreakableSurfaceSet,
@@ -100,8 +105,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 newbsp.Bsp3dNodes.Add(new Bsp3dNode
                 {
-                    BackChild = (int)((bsp3dnode.BackChild & 0x80000000) > 0 ? bsp3dnode.BackChild | 0x800000 : bsp3dnode.BackChild),
-                    FrontChild = (int)((bsp3dnode.FrontChild & 0x80000000) > 0 ? bsp3dnode.FrontChild | 0x800000 : bsp3dnode.FrontChild),
+                    BackChild = (int)((bsp3dnode.BackChild & 0x80000000) != 0 ? bsp3dnode.BackChild | 0x800000 : bsp3dnode.BackChild),
+                    FrontChild = (int)((bsp3dnode.FrontChild & 0x80000000) != 0 ? bsp3dnode.FrontChild | 0x800000 : bsp3dnode.FrontChild),
                     Plane = bsp3dnode.Plane
                 });
             }
@@ -116,8 +121,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 newbsp.Bsp2dReferences.Add(new Bsp2dReference
                 {
-                    PlaneIndex = (short)((bsp2dreference.PlaneIndex & 0x80000000) > 0 ? bsp2dreference.PlaneIndex | 0x8000 : bsp2dreference.PlaneIndex),
-                    Bsp2dNodeIndex = (short)((bsp2dreference.Bsp2dNodeIndex & 0x80000000) > 0 ? bsp2dreference.Bsp2dNodeIndex | 0x8000 : bsp2dreference.Bsp2dNodeIndex)
+                    PlaneIndex = (short)((bsp2dreference.PlaneIndex & 0x80000000) != 0 ? bsp2dreference.PlaneIndex | 0x8000 : bsp2dreference.PlaneIndex),
+                    Bsp2dNodeIndex = (short)((bsp2dreference.Bsp2dNodeIndex & 0x80000000) != 0 ? bsp2dreference.Bsp2dNodeIndex | 0x8000 : bsp2dreference.Bsp2dNodeIndex)
                 });
             }
 
@@ -127,8 +132,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 newbsp.Bsp2dNodes.Add(new Bsp2dNode
                 {
                     Plane = bsp2dnode.Plane.DeepClone(),
-                    LeftChild = (short)((bsp2dnode.LeftChild & 0x80000000) > 0 ? (int)bsp2dnode.LeftChild | 0x8000 : bsp2dnode.LeftChild),
-                    RightChild = (short)((bsp2dnode.RightChild & 0x80000000) > 0 ? (int)bsp2dnode.RightChild | 0x8000 : bsp2dnode.RightChild),
+                    LeftChild = (short)((bsp2dnode.LeftChild & 0x80000000) != 0 ? (int)bsp2dnode.LeftChild | 0x8000 : bsp2dnode.LeftChild),
+                    RightChild = (short)((bsp2dnode.RightChild & 0x80000000) != 0 ? (int)bsp2dnode.RightChild | 0x8000 : bsp2dnode.RightChild),
                 });
             }
 
@@ -137,7 +142,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 newbsp.Surfaces.Add(new Surface
                 {
-                    Plane = (ushort)((surface.Plane & 0x80000000) > 0 ? (int)surface.Plane | 0x8000 : surface.Plane),
+                    Plane = (ushort)((surface.Plane & 0x80000000) != 0 ? (int)surface.Plane | 0x8000 : surface.Plane),
                     FirstEdge = (ushort)surface.FirstEdge,
                     MaterialIndex = surface.Material,
                     BreakableSurfaceSet = surface.BreakableSurfaceSet,
