@@ -122,7 +122,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
-        [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class ExplicitShader : TagStructure
 		{

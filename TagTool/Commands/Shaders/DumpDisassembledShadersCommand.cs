@@ -35,7 +35,7 @@ namespace TagTool.Commands.Shaders
 
         public override object Execute(List<string> args)
         {
-            if (Cache.GetType() == typeof(GameCacheGen3) && UseXSDCommand.XSDFileInfo == null)
+            if (Cache.Platform != CachePlatform.MCC && Cache.GetType() == typeof(GameCacheGen3) && UseXSDCommand.XSDFileInfo == null)
                 return new TagToolError(CommandError.CustomError, "You must use the \"UseXSD\" command first!");
 
             if (args.Count > 0)
@@ -63,7 +63,7 @@ namespace TagTool.Commands.Shaders
 
         private void DisassembleCacheShaders(GameCache cache)
         {
-            IsXbox = CacheVersionDetection.GetGeneration(cache.Version) != CacheGeneration.HaloOnline;
+            IsXbox = CacheVersionDetection.GetGeneration(cache.Version) != CacheGeneration.HaloOnline && cache.Platform != CachePlatform.MCC;
 
             Type entryPointEnum = typeof(EntryPoint);
             if (cache.Version >= CacheVersion.HaloReach)
@@ -435,7 +435,7 @@ namespace TagTool.Commands.Shaders
             }
             else
             {
-                return DisassembleHaloOnlineShader(definition, shaderIndex, path);
+                return DisassemblePCShader(definition, shaderIndex, path);
             }
 
             return null;
@@ -732,7 +732,7 @@ namespace TagTool.Commands.Shaders
             return result;
         }
 
-        private string DisassembleHaloOnlineShader(object definition, int shaderIndex, string filename)
+        private string DisassemblePCShader(object definition, int shaderIndex, string filename)
         {
             string disassembly = null;
 
