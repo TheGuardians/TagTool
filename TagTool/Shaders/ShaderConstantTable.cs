@@ -10,9 +10,9 @@ namespace TagTool.Shaders
     {
         public List<ShaderParameter> Constants;
         [TagField(Platform = CachePlatform.MCC)]
-        public uint Unknown1;
+        public uint ParameterBufferSize;
         [TagField(Platform = CachePlatform.MCC)]
-        public uint Unknown2;
+        public uint ExternParameterBufferSize;
         public ShaderType ShaderType;
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x3)]
         public byte[] Padding0;

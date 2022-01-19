@@ -79,7 +79,8 @@ namespace TagTool.Tags.Definitions
             public ushort Integer;
         }
 
-        [TagStructure(Size = 0x1C)]
+        [TagStructure(Size = 0x1C, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x20, Align = 0x8, Platform = CachePlatform.MCC)]
         public class PassBlock : TagStructure
 		{
             [TagField(Length = (int)ParameterUsage.Count)]
