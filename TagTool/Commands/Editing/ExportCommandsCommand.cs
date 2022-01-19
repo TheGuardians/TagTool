@@ -151,7 +151,7 @@ namespace TagTool.Commands.Editing
                     else if (fieldName.Contains(".TextureConstants[") && fieldName.EndsWith("].Bitmap"))
                     	break;
                     else
-                        commands.Add($"SetField {fieldName} {FormatValue(data)}");
+                        commands.Add($"SetField {fieldName} {(FormatValue(data).Equals("\"\"") ? "null" : FormatValue(data))}");
                     break;
             }
         }

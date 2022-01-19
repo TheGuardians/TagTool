@@ -5,7 +5,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xC0)]
+    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xE0)]
     public class ForgeGlobalsDefinition : TagStructure
     {
         [TagField(ValidTags = new[] { "rm  " })]
@@ -35,6 +35,12 @@ namespace TagTool.Tags.Definitions
         public List<PaletteItem> Palette;
         public List<WeatherEffect> WeatherEffects;
         public List<Sky> Skies;
+
+        [TagField(ValidTags = new[] { "obje" })]
+        public CachedTag FxObject;
+
+        [TagField(ValidTags = new[] { "obje" })]
+        public CachedTag FxLight;
 
         [TagStructure(Size = 0x30)]
         public class ReForgeMaterial : TagStructure

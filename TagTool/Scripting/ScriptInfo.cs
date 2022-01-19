@@ -14996,6 +14996,7 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.String),
                 },
+                [0x6A8] = new ScriptInfo(HsType.HaloOnlineValue.Short, "lobby_size"),
             },
             [(CacheVersion.Halo3Retail, CachePlatform.MCC)] = new Dictionary<int, ScriptInfo>
             {
