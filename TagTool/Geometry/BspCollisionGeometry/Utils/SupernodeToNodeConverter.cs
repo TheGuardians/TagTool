@@ -44,6 +44,16 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             Bsp.Bsp3dNodes.Elements = nodelist;
             prune_node_tree();
 
+            LargeCollisionBSPBuilder Bsp_Builder = new LargeCollisionBSPBuilder();
+            Bsp_Builder.Bsp = Bsp;
+            LeafMap leafmapbuilder = new LeafMap();
+            LargeCollisionBspBlock bsp_copy = Bsp.DeepClone();
+            if (!leafmapbuilder.munge_collision_bsp(Bsp_Builder))
+            {
+                new TagToolWarning("Failed to build leaf map!");
+                Bsp = bsp_copy;
+            }
+
             VerifyBsp3d verifier = new VerifyBsp3d();
             verifier.Bsp = Bsp.DeepClone();
             verifier.OldBsp = bsp.DeepClone();
