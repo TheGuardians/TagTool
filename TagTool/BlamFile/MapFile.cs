@@ -181,8 +181,20 @@ namespace TagTool.BlamFile
 
             if (mapVersion == CacheFileVersion.HaloMCCUniversal)
             {
-                // force it to h3 for now as that is the only one supported
-                cacheVersion = CacheVersion.Halo3Retail;
+                reader.SeekTo(0xC);
+                var engineVersion = (CacheFileHeaderMCC.HaloEngineVersion)reader.ReadSByte();
+                switch(engineVersion)
+                {
+                    case CacheFileHeaderMCC.HaloEngineVersion.Halo3:
+                        cacheVersion = CacheVersion.Halo3Retail;
+                        break;
+                    case CacheFileHeaderMCC.HaloEngineVersion.HaloReach:
+                        cacheVersion = CacheVersion.HaloReach;
+                        break;
+                    default:
+                        throw new NotSupportedException("Unsupported engine version");
+                        break;
+                }
                 cachePlatform = CachePlatform.MCC;
             }
             else

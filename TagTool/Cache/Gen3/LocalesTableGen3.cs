@@ -23,7 +23,7 @@ namespace TagTool.Cache.Gen3
                 case CacheVersion.Halo3ODST:
                     localesKey = "";
                     break;
-                case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach when baseMapFile.CachePlatform == CachePlatform.Original:
                     localesKey = "BungieHaloReach!";
                     break;
             }

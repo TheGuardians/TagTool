@@ -47,13 +47,20 @@ namespace TagTool.Cache
         {
             var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
 
-            if (Version == CacheVersion.Halo3Beta)
-                return address - (headerGen3.VirtualBaseAddress.Get32BitValue() - headerGen3.GetTagMemoryHeader().MemoryBufferOffset);
+            ulong tagDataSectionOffset = headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection);
 
+            if(Platform == CachePlatform.MCC)
+            {
+                ulong bucketOffset = 0;
+                if (Version == CacheVersion.HaloReach)
+                    bucketOffset = address >> 28 << 28;
 
-            var unpackedAddress = Platform == CachePlatform.MCC ? (((ulong)address << 2) ) : address;
-
-            return (uint)(unpackedAddress - (headerGen3.VirtualBaseAddress.Value - headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
+                return (uint)((address << 2) - headerGen3.VirtualBaseAddress.Value + tagDataSectionOffset + bucketOffset);
+            }
+            else
+            {
+                return (uint)(address - headerGen3.VirtualBaseAddress.Value + tagDataSectionOffset);
+            }
         }
 
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();

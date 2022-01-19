@@ -5,8 +5,8 @@
     /// </summary>
     public class StringIdResolverHaloReachMCC : StringIdResolver
     {
-        private static readonly int[] SetOffsets = { 0x173C, 0x4C9, 0xB2E, 0xC07, 0xC71, 0xD4A, 0xD70, 0xD75, 0x1434, 0x15A4, 0x15B8, 0x161A, 0x1632, 0x1632, 0x163F, 0x1668, 0x16C9 };
-        private const int SetMin = 0x4C9;   // Mininum index that goes in a set
+        private static readonly int[] SetOffsets = { 0x1746, 0x4CA, 0xB2F, 0xC08, 0xC72, 0xD4B, 0xD73, 0xD78, 0x1438, 0x15AA, 0x15C1, 0x1623, 0x1623, 0x163B, 0x1648, 0x1671, 0x16D3 };
+        private const int SetMin = 0x4CA;   // Mininum index that goes in a set
         private const int SetMax = 0x1FFFF; // Maximum index that goes in a set
 
         public StringIdResolverHaloReachMCC()

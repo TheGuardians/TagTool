@@ -358,6 +358,7 @@
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
     <Compile Include="Commands\Porting\NameBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Damage.cs" />
+    <Compile Include="Commands\Strings\VerifyStringsCommand.cs" />
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\MathHelper.cs" />

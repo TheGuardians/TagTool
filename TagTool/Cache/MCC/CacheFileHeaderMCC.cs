@@ -4,59 +4,65 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.MCC
 {
-    [TagStructure(Size = 0x4000)]
+    [TagStructure(Size = 0x4000, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
     public class CacheFileHeaderMCC : CacheFileHeader
     {
         public Tag HeaderSignature;
         public CacheFileVersion FileVersion;
         public uint FileLength;
         public HaloEngineVersion EngineVersion;
-        [TagField(Align = 4)]
+        public sbyte PlatformType; // Xbox One = 1, PC = 2
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public TagMemoryHeader TagMemoryHeader;
         public CacheFileType CacheType;
         public CacheFileSharedType SharedCacheType;
-        public uint CacheFlags;
+        public ushort CacheFlags;
+        public byte ValidSharedFileMask;
+        public byte Unused1;
         public TagNameHeader TagNamesHeader;
         public StringIDHeaderMCC StringIdsHeader;
-        public uint Unknown17;
-        public uint Unknown18;
-        public uint Unknown19;
-        public uint Unknown20;
-        [TagField(Length = 7)]
-        public ulong[] Timestamps;
-        public uint Unknown22;
-        public uint Unknown23;
-        public uint Unknown24;
-        public uint Unknown25;
-        public uint Unknown26;
-        public uint Unknown27;
+        public int Language;
+        public int MinorVersion;
+        public ulong Timestamp;
+        [TagField(Length = 4)]
+        public ulong[] SharedFileTimestamps;
+        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
+        public byte[] Unused2;
+        [TagField(Length = 32)]
+        public byte[] CreatorId;
         [TagField(Length = 32)]
         public string Build;
         [TagField(Length = 32)]
         public string Name;
         [TagField(Length = 256)]
-        public string SourceFile;
-        [TagField(Length = 256)]
         public string ScenarioPath;
+        [TagField(Length = 256)]
+        public string SourceFile;
         public PlatformUnsignedValue VirtualBaseAddress;
         public PlatformUnsignedValue TagTableHeaderOffset;
-        public uint Unknown28;
-        public uint Unknown29;
-        public uint Unknown30;
-        public uint Unknown31;
+        [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+        public byte[] Unused3;
         [TagField(Length = (int)CacheFilePartitionType.Count)]
         public CacheFilePartition[] Partitions = new CacheFilePartition[(int)CacheFilePartitionType.Count];
-        public uint Unknown32;
-        public uint Unknown33;
-        [TagField(Length = 0x44)]
-        public byte[] Unknown34;
-        [TagField(Length = 0x20)]
-        public byte[] Unknown35;
+        public uint Checksum;
+        public uint ContentHashMask;
+        public ulong SecuritySalt;
+        [TagField(Length = 0x14)]
+        public byte[] ContentHash1;
+        [TagField(Length = 0x14)]
+        public byte[] ContentHash2;
+        [TagField(Length = 0x14)]
+        public byte[] ContentHash3;
+        [TagField(Length = 0x20, MaxVersion = CacheVersion.Halo3Retail)]
+        public byte[] RSAKeyBlobHash;
         [TagField(Length = 0x100)]
-        public byte[] Unknown36;
+        public byte[] RSASignature;
         public CacheFileSectionTable SectionTable;
-        [TagField(Length = 0x3B00)]
-        public byte[] Unknown37;
+        [TagField(Length = 0x3B00, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 0x9B20, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Unknown1;
         public Tag FooterSiganture;
 
         public override string GetBuild() => Build;
@@ -90,13 +96,15 @@ namespace TagTool.Cache.MCC
 
         public override ulong GetTagTableHeaderOffset() => throw new NotImplementedException();
 
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
         public class StringIDHeaderMCC
         {
             public int Count;
             public uint BufferOffset;
             public int BufferSize;
             public uint IndicesOffset;
+            public int NamespacesCount;
+            public uint NamespacesOffset;
         }
 
         public enum HaloEngineVersion : sbyte

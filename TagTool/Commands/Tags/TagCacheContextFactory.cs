@@ -140,6 +140,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new UseShaderCacheCommand());
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
             context.AddCommand(new DiffTagCommand(cache, cache));
+            context.AddCommand(new VerifyStringsCommand(cache));
         }
     }
 }

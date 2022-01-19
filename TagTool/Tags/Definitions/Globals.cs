@@ -127,10 +127,6 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "gmeg" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag MedalGlobals;
 
-        // TODO: proper alignment in serialization
-        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, Flags = Padding, Length = 4)]
-        public byte[] Padding4;
-
         [TagField(Length = 12)]
         public LanguagePack[] LanguagePacks = new LanguagePack[12];
 

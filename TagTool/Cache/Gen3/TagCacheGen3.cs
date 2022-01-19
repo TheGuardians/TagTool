@@ -213,10 +213,15 @@ namespace TagTool.Cache.Gen3
 
                 uint offset;
 
-                if(platform == CachePlatform.MCC)
+                if (platform == CachePlatform.MCC)
                 {
                     ulong tagAddress = reader.ReadUInt32();
-                    offset = (uint)((tagAddress << 2) - tagDataSectionOffset);
+
+                    ulong bucketOffset = 0;
+                    if(Version == CacheVersion.HaloReach)
+                        bucketOffset = tagAddress >> 28 << 28;
+
+                    offset = (uint)(((tagAddress << 2) - tagDataSectionOffset) + bucketOffset);
                 }
                 else
                 {
