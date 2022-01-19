@@ -11,21 +11,21 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
     class SupernodeToNodeConverter
     {
-		public LargeCollisionBspBlock Bsp { get; set; }
-		public LargeCollisionBspBlock Convert(LargeCollisionBspBlock bsp)
-		{
-			Bsp = bsp.DeepClone();
+        public LargeCollisionBspBlock Bsp { get; set; }
+        public LargeCollisionBspBlock Convert(LargeCollisionBspBlock bsp)
+        {
+            Bsp = bsp.DeepClone();
 
             //first fixup surface plane indices
             foreach (var surface in Bsp.Surfaces)
                 if (surface.Flags.HasFlag(SurfaceFlags.PlaneNegated))
                     surface.Plane = (int)(surface.Plane | 0x80000000);
 
-                List<LargeBsp3dNode> nodelist = new List<LargeBsp3dNode>();
-			buildsupernode(0, 0, nodelist);
+            List<LargeBsp3dNode> nodelist = new List<LargeBsp3dNode>();
+            buildsupernode(0, 0, nodelist);
             List<LargeBsp3dNode> oldnodes = Bsp.Bsp3dNodes.Elements.DeepClone();
             //fixup old nodes 
-            foreach(var node in oldnodes)
+            foreach (var node in oldnodes)
             {
                 if (node.BackChild > 0)
                     node.BackChild += nodelist.Count;
@@ -50,31 +50,36 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             if (!verifier.verify_bsp3d_points())
                 Console.WriteLine("BSP Failed to Verify!");
 
-			return Bsp;
-		}
+            return Bsp;
+        }
 
         //a child with NO & 0xC0000000 is a supernode child
         //a child with & 0x80000000 is a LEAF
         //a child with & 0x40000000 is a regular node
-		public int buildsupernode(int supernode_index, int index, List<LargeBsp3dNode> nodelist)
+        public int buildsupernode(int supernode_index, int index, List<LargeBsp3dNode> nodelist)
         {
-			if(index > 14) //is a child
+            if (index > 14) //is a child
             {
-				int child = Bsp.Bsp3dSupernodes[supernode_index].ChildIndices[index - 15];
+                int child = Bsp.Bsp3dSupernodes[supernode_index].ChildIndices[index - 15];
                 if (child == 0)
                     return 0;
-                if((int)(child & 0xC0000000) == 0)
+                if ((int)(child & 0xC0000000) == 0)
                     return buildsupernode(child, 0, nodelist);
                 if (child == -1)
                     return -1;
                 return child;
-			}
-			LargeBsp3dNode newnode = new LargeBsp3dNode();
-			Plane newplane = generate_new_node_plane(Bsp.Bsp3dSupernodes[supernode_index], index);
-			Bsp.Planes.Add(newplane);
-			newnode.Plane = Bsp.Planes.Count - 1;
-			nodelist.Add(newnode);
-			int newnode_index = nodelist.Count - 1;
+            }
+            LargeBsp3dNode newnode = new LargeBsp3dNode();
+            Plane newplane = generate_new_node_plane(Bsp.Bsp3dSupernodes[supernode_index], index);
+            int new_plane_index = Bsp.Planes.Elements.FindIndex(p => p == newplane);
+            if (new_plane_index == -1)
+            {
+                Bsp.Planes.Add(newplane);
+                new_plane_index = Bsp.Planes.Count - 1;
+            }
+            newnode.Plane = new_plane_index;
+            nodelist.Add(newnode);
+            int newnode_index = nodelist.Count - 1;
             nodelist[newnode_index].BackChild = buildsupernode(supernode_index, 2 * index + 1, nodelist);
             nodelist[newnode_index].FrontChild = buildsupernode(supernode_index, 2 * index + 2, nodelist);
 
@@ -94,35 +99,35 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
 
             return newnode_index;
-		}
+        }
 
-		public Plane generate_new_node_plane(Bsp3dSupernode supernode, int plane_index)
-		{
-			if(plane_index > 14)
-				new TagToolError(CommandError.OperationFailed, "Plane index cannot exceed 14!");
-			int axis = (supernode.PlaneDimensions >> (2 * plane_index)) & 3;
-			if (axis > 2)
-				new TagToolError(CommandError.OperationFailed, "Node plane axis cannot exceed 2!");
-			Plane plane = new Plane();
-			RealPlane3d planevalue = new RealPlane3d();
-			switch (axis)
-			{
-				case 0:
-					planevalue.I = 1.0f;
-					planevalue.D = (float)supernode.PlaneValues[plane_index];
-					break;
-				case 1:
-					planevalue.J = 1.0f;
-					planevalue.D = (float)supernode.PlaneValues[plane_index];
-					break;
-				case 2:
-					planevalue.K = 1.0f;
-					planevalue.D = (float)supernode.PlaneValues[plane_index];
-					break;
-			}
-			plane.Value = planevalue;
-			return plane;
-		}
+        public Plane generate_new_node_plane(Bsp3dSupernode supernode, int plane_index)
+        {
+            if (plane_index > 14)
+                new TagToolError(CommandError.OperationFailed, "Plane index cannot exceed 14!");
+            int axis = (supernode.PlaneDimensions >> (2 * plane_index)) & 3;
+            if (axis > 2)
+                new TagToolError(CommandError.OperationFailed, "Node plane axis cannot exceed 2!");
+            Plane plane = new Plane();
+            RealPlane3d planevalue = new RealPlane3d();
+            switch (axis)
+            {
+                case 0:
+                    planevalue.I = 1.0f;
+                    planevalue.D = (float)supernode.PlaneValues[plane_index];
+                    break;
+                case 1:
+                    planevalue.J = 1.0f;
+                    planevalue.D = (float)supernode.PlaneValues[plane_index];
+                    break;
+                case 2:
+                    planevalue.K = 1.0f;
+                    planevalue.D = (float)supernode.PlaneValues[plane_index];
+                    break;
+            }
+            plane.Value = planevalue;
+            return plane;
+        }
 
         public bool prune_node_tree()
         {
