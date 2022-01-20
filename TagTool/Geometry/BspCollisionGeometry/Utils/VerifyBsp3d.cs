@@ -36,6 +36,54 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			return result;
         }
 
+		public bool verify_bsp3d_points_random()
+        {
+			bool result = true;
+			Random rng = new Random();
+			float[,] bsp_bounds = bsp_get_bounds();
+			for(var i = 0; i < 10000; i++)
+            {
+				RealPoint3d test_point = new RealPoint3d
+				{
+					X = (float)rng.NextDouble() * (bsp_bounds[0, 1] - bsp_bounds[0, 0]) + bsp_bounds[0, 0],
+					Y = (float)rng.NextDouble() * (bsp_bounds[1, 1] - bsp_bounds[1, 0]) + bsp_bounds[1, 0],
+					Z = (float)rng.NextDouble() * (bsp_bounds[2, 1] - bsp_bounds[2, 0]) + bsp_bounds[2, 0]
+				};
+				List<int> oldnodestack = new List<int>();
+				List<int> newnodestack = new List<int>();
+				int leaf_result_old = supernode_test_point(test_point, OldBsp, ref oldnodestack);
+				int leaf_result_new = node_test_point(0, test_point, Bsp, ref newnodestack);
+				if (leaf_result_old != leaf_result_new)
+				{
+					result = false;
+				}
+			}
+			return result;
+        }
+
+		public float[,] bsp_get_bounds()
+        {
+			float[,] result = new float[3,2];
+			foreach(var vertex in Bsp.Vertices)
+            {
+				if (vertex.Point.X < result[0, 0])
+					result[0, 0] = vertex.Point.X;
+				if (vertex.Point.X > result[0, 1])
+					result[0, 1] = vertex.Point.X;
+
+				if (vertex.Point.Y < result[1, 0])
+					result[1, 0] = vertex.Point.Y;
+				if (vertex.Point.Y > result[1, 1])
+					result[1, 1] = vertex.Point.Y;
+
+				if (vertex.Point.Z < result[2, 0])
+					result[2, 0] = vertex.Point.Z;
+				if (vertex.Point.Z > result[2, 1])
+					result[2, 1] = vertex.Point.Z;
+			}
+			return result;
+        }
+
 		public bool verify_bsp3d()
 		{
 			Bsp_Builder = new LargeCollisionBSPBuilder();

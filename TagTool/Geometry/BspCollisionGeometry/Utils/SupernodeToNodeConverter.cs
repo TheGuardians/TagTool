@@ -61,7 +61,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             VerifyBsp3d verifier = new VerifyBsp3d();
             verifier.Bsp = Bsp.DeepClone();
             verifier.OldBsp = bsp.DeepClone();
-            if (!verifier.verify_bsp3d_points())
+            if (!verifier.verify_bsp3d_points_random())
                 Console.WriteLine("BSP Failed to Verify!");
 
             return Bsp;
