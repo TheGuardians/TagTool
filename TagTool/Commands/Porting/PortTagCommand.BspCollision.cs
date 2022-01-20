@@ -127,7 +127,10 @@ namespace TagTool.Commands.Porting
                 var largebsp = resizer.GrowCollisionBsp(bsp);
 
                 if (PortingOptions.Current.CollisionLeafMapping)
+                {
                     largebuilder.useleafmap = true;
+                    supernodeconverter.useleafmap = true;
+                }
 
                 if (PortingOptions.Current.ReachSuperNodeConversion)
                 {
@@ -161,7 +164,10 @@ namespace TagTool.Commands.Porting
                 var largebuilder = new LargeCollisionBSPBuilder();
 
                 if (PortingOptions.Current.CollisionLeafMapping)
+                {
                     largebuilder.useleafmap = true;
+                    supernodeconverter.useleafmap = true;
+                }
 
                 if (PortingOptions.Current.ReachSuperNodeConversion)
                 {
