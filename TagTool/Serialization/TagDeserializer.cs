@@ -581,7 +581,7 @@ namespace TagTool.Serialization
             if (result != null && valueInfo != null && valueInfo.ValidTags != null)
             {
                 if(!valueInfo.ValidTags.Any(x => result.IsInGroup(x)))
-                    new TagToolWarning($"Invalid group for tag reference: {result.Group.Tag}");
+                    new TagToolWarning($"Tag reference with invalid group found during deserialization: {result.Name}.{result.Group.Tag}");
             }
 
             return result;
