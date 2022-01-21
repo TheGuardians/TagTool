@@ -264,7 +264,7 @@ namespace TagTool.Tags.Definitions
             public List<LoopingSound> LoopingSounds;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public List<EventBlock> UnknownEvents;
+            public List<EventBlock> EarnWpEvents;
 
             public List<EventBlock> GeneralEvents;
             public List<EventBlock> FlavorEvents;
@@ -343,36 +343,37 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public GameEngineGeneralEventH3 Event_H3;
 
-                [TagField(Flags = Label, MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(Flags = Label, MinVersion = CacheVersion.Halo3ODST)]
                 public StringId Event;
 
                 [TagField(Length = 256, MinVersion = CacheVersion.HaloOnline498295)]
-                public string Unknown_;
+                public string Unknown1;
 
                 public AudienceValue Audience;
                 public short DisplayPriority;
-
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public short SubPriority;
-
                 public EventResponseContext DisplayContext;
 
-                public short Unused;
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.Halo3Retail)]
+                public byte[] Padding0;
 
                 public StringId DisplayString;
                 public StringId MedalAward;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public uint Unknown3;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public uint Unknown4;
+                public short EarnedWp; // earned wp/exp
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloOnlineED)]
+                public byte[] Padding1;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float SurvivalDisplayTime; // seconds
 
                 public EventInputEnum RequiredField;
                 public EventInputEnum ExcludedAudience;
                 public EventInputEnum SplitscreenSuppression;
 
                 [TagField(Length = 2, Flags = Padding)]
-                public byte[] Padding1;
+                public byte[] Padding2;
 
                 public StringId PrimaryString;
                 public int PrimaryStringDuration;
@@ -381,7 +382,7 @@ namespace TagTool.Tags.Definitions
                 public SoundResponseFlags SoundFlags;
 
                 [TagField(Length = 2, Flags = Padding)]
-                public byte[] Padding2;
+                public byte[] Padding3;
 
                 public CachedTag EnglishSound;
                 public CachedTag JapaneseSound;
@@ -419,7 +420,7 @@ namespace TagTool.Tags.Definitions
                     Assault,
                     Infection,
                     Survival,
-                    Unknown,
+                    EarnWp, // HO
                 }
 
                 public enum GameEngineGeneralEventH3 : short
@@ -499,7 +500,9 @@ namespace TagTool.Tags.Definitions
                     Self,
                     Friendly,
                     Enemy,
-                    Neutral
+                    Neutral,
+                    Unknown4, // HO
+                    Unknown5  // HO
                 }
 
                 public enum EventInputEnum : short
