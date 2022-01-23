@@ -102,6 +102,8 @@ namespace TagTool.Commands.Common
                 }
 
                 Console.ResetColor();
+
+                Program.ErrorCount += 1;
             }
         }
     }

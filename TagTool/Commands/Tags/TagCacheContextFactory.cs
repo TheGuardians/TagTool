@@ -61,6 +61,8 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new CreateBlfImageCommand());
             context.AddCommand(new DumpDisassembledShadersCommand(cache));
             context.AddCommand(new FindValueCommand(cache));
+            context.AddCommand(new BeginScriptCommand(contextStack));
+            context.AddCommand(new EndScriptCommand());
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)

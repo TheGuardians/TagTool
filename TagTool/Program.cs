@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,8 +14,10 @@ namespace TagTool.Commands
 {
     public static class Program
     {
-        public static string TagToolDirectory = System.IO.Path.GetDirectoryName(
-            System.Reflection.Assembly.GetExecutingAssembly().Location);
+        public static string TagToolDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public static readonly Stopwatch _stopWatch = new Stopwatch();
+        public static int ErrorCount = 0;
+        public static int WarningCount = 0;
 
         static void Main(string[] args)
         {

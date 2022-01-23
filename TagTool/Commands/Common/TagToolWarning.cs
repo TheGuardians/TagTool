@@ -21,6 +21,8 @@ namespace TagTool.Commands.Common
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("WARNING: " + customMessage);
                 Console.ResetColor();
+
+                Program.WarningCount += 1;
             }
         }
     }
